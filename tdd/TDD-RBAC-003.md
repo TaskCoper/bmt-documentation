@@ -95,6 +95,8 @@ Bảng `Assignment` không có khóa ngoại tới khách hàng hay dự án. Th
 
 Giá phải trả là database không tự bảo đảm `ResourceId` trỏ tới một bản ghi có thật, vì không có khóa ngoại nào để kiểm. Việc kiểm tài nguyên tồn tại phải nằm ở handler, và nếu một dự án bị xóa thì dòng phân công trở thành mồ côi mà database không báo. Chấp nhận đánh đổi này vì hai lý do: module dự án và module khách hàng chưa tồn tại nên chưa có bảng nào để trỏ tới, và yêu cầu nghiệp vụ nói rõ cơ chế phải mở cho loại tài nguyên tương lai.
 
+Việc kiểm tài nguyên tồn tại vì vậy cũng chưa làm được: handler hiện chỉ kiểm `ResourceType` thuộc tập giá trị đã biết và nhận mọi `ResourceId` hợp lệ. Xem [nợ kỹ thuật](../debt/assignment-resource-check.md) để biết hệ quả và cách trả.
+
 Nếu sau này chỉ còn đúng hai loại tài nguyên cố định và cả hai đều có bảng, có thể đổi sang hai cột khóa ngoại riêng cho chặt hơn. Mốc để xem lại chưa được xác định.
 
 ### Hiệu lực theo thời gian thay vì xóa dòng
@@ -153,7 +155,7 @@ Cách tính này đặt ở handler thu hồi vai trò, mô tả trong [TDD-RBAC
 
 **Notes**:
 - Chặng kiểm phân công đặt trong handler chứ không thành một pipeline behavior của MediatR, vì tài nguyên đích thường phải đọc từ database mới biết. Ví dụ `supervision.complete` nhận vào mã gói giám sát, còn điều kiện phân công lại xét trên dự án gắn với gói đó; một behavior chạy trước handler không có sẵn thông tin này mà không tự đi truy vấn thêm.
-- `IAssignmentAuthorizer` và `IResourceHierarchyReader` khai báo ở `src/bmt-be.application/abstractions/`, hiện thực ở persistence. Đây là thành phần dự kiến, chưa có trong mã nguồn.
+- `IAssignmentAuthorizer` và `IResourceHierarchyReader` khai báo ở `src/bmt-be.application/abstractions/`. Đã triển khai ngày 23/09/2026: `AssignmentAuthorizer` nằm ở `src/bmt-be.application/services/`. `IResourceHierarchyReader` hiện chỉ có bản tạm `UnavailableResourceHierarchyReader` ném lỗi khi bị gọi, vì module dự án chưa tồn tại; module đó ra đời thì thay bản tạm này.
 - `TDD-SUB-003` đang khai báo một đầu đọc phân công riêng cho dự án. Khi cập nhật tài liệu đó, đầu đọc riêng nên thay bằng `IAssignmentAuthorizer` để chỉ còn một nguồn sự thật về việc ai phụ trách gì.
 - Danh sách tài nguyên chưa có người phụ trách, theo `STORY-RBAC-003/ALT-04`, cần liệt kê được toàn bộ khách hàng và dự án rồi trừ đi những cái đang có phân công. Module khách hàng và module dự án chưa tồn tại nên **endpoint này chưa triển khai được**; hợp đồng đã mô tả ở Internal API để bên gọi biết trước hình dạng.
 
@@ -182,7 +184,7 @@ sequenceDiagram
     else Hop le
         AH->>PG: Dat EffectiveToUtc cho dong cu
         AH->>PG: Chen dong moi cho nguoi nhan cung moc thoi gian
-        AH->>AU: RecordAsync AssignmentEnded va AssignmentCreated
+        AH->>AU: RecordAsync AssignmentTransferred
         Note over AH,PG: Ba buoc tren cung mot transaction
         AH-->>AD: 200 {oldAssignmentId, newAssignmentId}
     end
@@ -348,7 +350,7 @@ Sau bước này, khách hàng K không còn ai phụ trách ở mức khách h�
 
 ## Internal API
 
-Hợp đồng đề xuất, chưa có trong mã nguồn.
+Đã triển khai ngày 23/09/2026, trừ `GET /assignments/unassigned`.
 
 ### Endpoints
 
@@ -431,4 +433,6 @@ Response 200:
 
 ## Change Log
 
+- 2026-09-23: Sửa Sequence Diagram cho khớp bảng BR-RBAC-012: chuyển giao ghi một dòng nhật ký `AssignmentTransferred` với người cũ ở `BeforeJson` và người mới ở `AfterJson`, thay vì hai dòng `AssignmentEnded` và `AssignmentCreated`. Hai dòng sẽ làm hành động `AssignmentTransferred` trong bảng không bao giờ được dùng.
+- 2026-09-23: Đã triển khai bốn endpoint phân công, `IAssignmentAuthorizer` và khóa dòng khi chuyển giao. `IResourceHierarchyReader` mới có bản tạm ném lỗi, và việc kiểm tài nguyên tồn tại được ghi thành nợ kỹ thuật. `GET /assignments/unassigned` vẫn chưa triển khai được.
 - 2026-09-20: Bỏ nhắc tới trạng thái `PendingActivation` theo quyết định bỏ luồng mời qua email ở [TDD-RBAC-002](TDD-RBAC-002.md). Cơ chế phân công và chuyển giao không đổi.
