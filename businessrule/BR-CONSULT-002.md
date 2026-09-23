@@ -10,14 +10,11 @@
 - Trước khi bàn giao, đối chiếu nội dung với nguồn, kiểm tra cấu trúc, giá trị cho phép, giới hạn độ dài và tính nhất quán của mã/tham chiếu. Báo rõ phần chưa đủ thông tin; không tuyên bố đã chạy test hoặc import khi chưa thực hiện.
 -->
 
-<!-- Mỗi file chứa một test, đúng một dòng dữ liệu và 13 cột theo thứ tự bên dưới.
-Thay ST-001 ở heading và Test ID, STORY-001 bằng mã Story cần kiểm thử.
-Trong ô bảng: xuống dòng bằng <br>, dấu | viết thành \|. Steps gồm các bước đánh số.
-Loại: Main / ALT / EXC / NFR / Integration boundary; ghép nhiều loại bằng dấu /.
-Suite: SMOKE / REGRESSION / FULL. Priority: P0 / P1 / P2 / P3.
-TEST_LINKS là nguồn liên kết khi import; cột Trace to chỉ để đọc. Giữ hai nơi nhất quán.
-Owner là tên hiển thị; phê duyệt thực hiện sau import.
-Steps và Expected result phải bám Flow, AC và Business Rule của Story có thật. Test data là dữ liệu kiểm thử minh hoạ; không tự thêm hành vi nghiệp vụ hoặc ghi Pass/đã chạy nếu chưa có bằng chứng thực thi.
+<!-- Thay mã BR-001 và nội dung ví dụ; giữ nguyên heading và nhãn in đậm.
+Effective Date dùng YYYY-MM-DD hoặc để trống. Status: Draft / Active / Deprecated.
+Statement, When, Then và Except phải phản ánh đúng chính sách nguồn; không tự đặt công thức, ngưỡng, thời hạn hay ngoại lệ. Chỉ để Except trống khi đã xác định không có ngoại lệ; thiếu thông tin thì hỏi lại.
+Version và phê duyệt do hệ thống quản lý. Owner là tên nghiệp vụ; gán tài khoản trên giao diện.
+Liên kết Story và các trường quản trị bổ sung trên giao diện sau import.
 BẮT BUỘC KHI HOÀN THIỆN MẪU: phải có cả Reviewer và Approver, mỗi tên 1–200 ký tự sau khi bỏ khoảng trắng đầu/cuối. Không xoá hai dòng metadata, để trống, dùng tên bịa hoặc giữ placeholder rồi coi là hoàn tất.
 Nếu chưa biết người review hoặc người phê duyệt, phải hỏi người dùng và báo tài liệu chưa đủ thông tin; không tự lấy Author/Owner làm người thay thế. Tên trong file không tự gán tài khoản hoặc xác nhận đã duyệt; gán thành viên trên giao diện sau import.
 Đây là yêu cầu hoàn thiện mẫu; backend hiện vẫn nhận file cũ thiếu hai trường để tương thích.
@@ -28,27 +25,49 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Chỉ nhập đè tài liệu cùng loại đang Draft, chưa có phiên bản và chưa lưu trữ. Import thay toàn bộ nội dung bản nháp, vì vậy phải giữ lại nội dung hợp lệ ngoài phần được yêu cầu sửa.
 - Không dùng Status trong Markdown hoặc tên Approver để tự xác nhận phê duyệt; import không cấp quyền hay gán tài khoản từ tên. Chạy Kiểm tra file và xử lý lỗi/cảnh báo trước khi nhập.
 - Giới hạn độ dài bên dưới tính theo string.Length của .NET (đơn vị UTF-16); không tự cắt ngắn dữ kiện quan trọng để vượt validation, hãy viết lại có căn cứ hoặc hỏi người dùng.
-- Bảng phải có header, dòng phân cách và đúng một dòng dữ liệu, đủ 13 cột theo thứ tự mẫu. Reviewer/Approver là hai bullet trước bảng, không thêm thành cột. Test ID trong bảng phải nhất quán với heading; mã tài liệu import lấy từ heading.
-- Story tối đa 100 ký tự và được dùng làm tiêu đề tài liệu; Owner tối đa 200. Trạng thái parser nhận: Draft / Approved; đây không phải kết quả chạy test hoặc quyền phê duyệt.
-- Giữ Loại: Main / ALT / EXC / NFR / Integration boundary, có thể ghép bằng dấu /; Suite: SMOKE / REGRESSION / FULL; Priority: P0 / P1 / P2 / P3. Không dùng số ngoài dải Priority 0–3.
-- Steps là các bước đánh số trong một ô, tách bằng <br>; không xuống dòng vật lý trong ô, dấu | trong nội dung phải viết \|. TEST_LINKS mới là nguồn liên kết import; cột Trace to chỉ hiển thị, hai nơi phải nhất quán.
-- Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
+- Name tối đa 300 ký tự (được dùng làm tiêu đề tài liệu); Category tối đa 200; Owner tối đa 200; Source tối đa 500.
+- Effective Date: dùng ngày hợp lệ YYYY-MM-DD hoặc để trống khi chưa xác định; ngày không đọc được sẽ bị để trống kèm cảnh báo. Không tự đặt ngày hiệu lực.
+ĐỐI CHIẾU FORM BUSINESS RULE (src/features/business-rules/validations.ts; form có thể chặt hơn import):
+- Form yêu cầu Name, Category, Statement, When, Then, Source và Owner có nội dung; Except và Notes được phép trống. Liên kết Story đã khai báo không được rỗng.
+- Form còn kiểm tra Version và Effective Date không rỗng; với file nhập mới, vẫn để Version trống theo hợp đồng import vì hệ thống quản lý phiên bản. Thiếu ngày hiệu lực thì hỏi lại, không bịa để thoả form.
 -->
 
-# ST-SUB-051
+# BR-CONSULT-002
 
-## System Test
+## Rule Info
 
+- **Name**: Điều kiện gửi và thông tin liên lạc
+- **Category**: Tư vấn kiến trúc sư
+- **Status**: Draft
+- **Version**:
+- **Effective Date**:
+- **Owner**: [Chưa xác định]
 - **Reviewer**: [Chưa xác định]
 - **Approver**: [Chưa xác định]
+- **Source**: Người dùng xác nhận trong hội thoại nghiên cứu tính năng tư vấn KTS ngày 2026-09-23. Người dùng đã chốt bộ US/BR trong hội thoại.
 
-| Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SUB-051 | STORY-SUB-001 | Main | REGRESSION | P1 | Tài khoản có kỳ còn hiệu lực, đủ quyền tra cứu, 20 lượt tra cứu; có phiên bản V1 của mẫu A truy cập được và chưa từng mở, không có thao tác sử dụng lượt khác. | 1. Xác nhận dùng một lượt và mở chi tiết phiên bản V1 của mẫu A thành công và kiểm tra lượt.<br>2. Đóng chi tiết, chủ động mở lại đúng V1 của A thành công.<br>3. Kiểm tra lượt sau lần mở thứ hai. | 20 lượt là dữ liệu thử. Không mô phỏng lỗi, tải lại trang hoặc yêu cầu mạng gửi lặp. | Sau lần đầu còn 19 lượt tra cứu; sau lần thứ hai vẫn còn 19. Cùng phiên bản V1 chỉ tính một lượt và có một dòng lịch sử. Lượt tạo mới không đổi. | STORY-SUB-001/AC-031<br>BR-SUB-017/Then<br>BR-LIB-003/Then | Kiểm tra tra cứu theo tài khoản và phiên bản; tìm kiếm không tính lượt. Lỗi không trả được nội dung không mất lượt theo BR-SUB-017. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
+## Statement
 
-## TEST_LINKS
+Mọi khách đã đăng nhập được gửi yêu cầu tư vấn miễn phí, độc lập với gói dịch vụ.
 
-- STORY-SUB-001/AC-031
-- BR-SUB-017/Then
+## When
 
-- BR-LIB-003/Then
+Khách chuẩn bị hoặc gửi yêu cầu tư vấn.
+
+## Then
+
+1. Phải đăng nhập để gửi yêu cầu. Không yêu cầu mua gói và không trừ lượt của gói.
+2. Số liên lạc mặc định lấy từ tài khoản; khách được thay số cho riêng yêu cầu đang gửi.
+3. Nếu tài khoản chưa có số điện thoại, khách phải nhập số liên lạc trước khi gửi. Không tiếp nhận yêu cầu thiếu số liên lạc.
+4. Thay số trên yêu cầu không cập nhật số trong tài khoản.
+5. Nội dung cần tư vấn không bắt buộc; được gửi yêu cầu khi để trống.
+
+## Except
+
+Không có ngoại lệ cho điều kiện đăng nhập hoặc yêu cầu phải có số liên lạc.
+
+## Notes
+
+STORY-CONSULT-002. Định dạng số điện thoại và giới hạn độ dài sẽ được làm rõ khi thiết kế validation; không tự thêm OTP hoặc yêu cầu xác minh số.
+
+Nội dung nghiệp vụ của bộ US/BR đã được người dùng chốt trong hội thoại. Metadata người phụ trách tài liệu chưa xác định; không suy ra phê duyệt trên hệ thống quản lý tài liệu.

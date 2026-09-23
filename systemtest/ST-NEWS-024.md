@@ -35,20 +35,19 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# ST-SUB-051
+# ST-NEWS-024
 
 ## System Test
 
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SUB-051 | STORY-SUB-001 | Main | REGRESSION | P1 | Tài khoản có kỳ còn hiệu lực, đủ quyền tra cứu, 20 lượt tra cứu; có phiên bản V1 của mẫu A truy cập được và chưa từng mở, không có thao tác sử dụng lượt khác. | 1. Xác nhận dùng một lượt và mở chi tiết phiên bản V1 của mẫu A thành công và kiểm tra lượt.<br>2. Đóng chi tiết, chủ động mở lại đúng V1 của A thành công.<br>3. Kiểm tra lượt sau lần mở thứ hai. | 20 lượt là dữ liệu thử. Không mô phỏng lỗi, tải lại trang hoặc yêu cầu mạng gửi lặp. | Sau lần đầu còn 19 lượt tra cứu; sau lần thứ hai vẫn còn 19. Cùng phiên bản V1 chỉ tính một lượt và có một dòng lịch sử. Lượt tạo mới không đổi. | STORY-SUB-001/AC-031<br>BR-SUB-017/Then<br>BR-LIB-003/Then | Kiểm tra tra cứu theo tài khoản và phiên bản; tìm kiếm không tính lượt. Lỗi không trả được nội dung không mất lượt theo BR-SUB-017. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
+| ST-NEWS-024 | STORY-NEWS-003 | Main | REGRESSION | P1 | Môi trường thử có chức năng Tin tức và cloud thử nghiệm khi cần; A có quyền quản lý trừ tác nhân nêu riêng; được kiểm dữ liệu lưu. Mỗi biến thể dùng dữ liệu độc lập. | 1. Lọc nhánh, duyệt tất cả trang.<br>2. Gộp ID kết quả và đối chiếu tập S+2 bài. | S là kích thước trang được cấu hình; có S+2 bài công bố trong nhánh, một số gắn nhiều danh mục; ngày công bố khác nhau. Dữ liệu minh họa, không phải mặc định sản phẩm. | Không lặp hoặc thiếu bài do nhiều danh mục; thứ tự đúng ngày công bố; tổng số nếu hiển thị tính bài duy nhất. S là cấu hình môi trường, không tự đặt giới hạn nghiệp vụ. | STORY-NEWS-003/AC-002<br>STORY-NEWS-003/AC-003<br>BR-NEWS-003/Then | Phân trang sau loại trùng. Đặc tả chưa thực thi; API và fixture cụ thể bổ sung sau TDD. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- STORY-SUB-001/AC-031
-- BR-SUB-017/Then
-
-- BR-LIB-003/Then
+- STORY-NEWS-003/AC-002
+- STORY-NEWS-003/AC-003
+- BR-NEWS-003/Then

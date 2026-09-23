@@ -35,7 +35,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# ST-SUB-051
+# ST-CONSULT-006
 
 ## System Test
 
@@ -44,11 +44,9 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SUB-051 | STORY-SUB-001 | Main | REGRESSION | P1 | Tài khoản có kỳ còn hiệu lực, đủ quyền tra cứu, 20 lượt tra cứu; có phiên bản V1 của mẫu A truy cập được và chưa từng mở, không có thao tác sử dụng lượt khác. | 1. Xác nhận dùng một lượt và mở chi tiết phiên bản V1 của mẫu A thành công và kiểm tra lượt.<br>2. Đóng chi tiết, chủ động mở lại đúng V1 của A thành công.<br>3. Kiểm tra lượt sau lần mở thứ hai. | 20 lượt là dữ liệu thử. Không mô phỏng lỗi, tải lại trang hoặc yêu cầu mạng gửi lặp. | Sau lần đầu còn 19 lượt tra cứu; sau lần thứ hai vẫn còn 19. Cùng phiên bản V1 chỉ tính một lượt và có một dòng lịch sử. Lượt tạo mới không đổi. | STORY-SUB-001/AC-031<br>BR-SUB-017/Then<br>BR-LIB-003/Then | Kiểm tra tra cứu theo tài khoản và phiên bản; tìm kiếm không tính lượt. Lỗi không trả được nội dung không mất lượt theo BR-SUB-017. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
+| ST-CONSULT-006 | STORY-CONSULT-001 | Main | REGRESSION | P1 | Môi trường thử đã triển khai tính năng, có frontend, API, database và tài khoản thử với quyền tương ứng. Có thể đọc dữ liệu đã lưu; chỉ dùng dữ liệu và email thử. | 1. Tạo hồ sơ hợp lệ chọn Ẩn<br>2. Tạo hồ sơ khác chọn Hiện<br>3. Kiểm tra danh sách khách và dữ liệu quản trị | Hai hồ sơ đủ bảy nhóm thông tin; dữ liệu minh họa, không phải cấu hình sản phẩm. | Hệ thống tạo hồ sơ trực tiếp. Người tạo chọn Ẩn/Hiện ngay khi tạo, không yêu cầu người khác phê duyệt. Cả hai tạo trực tiếp; chỉ hồ sơ Hiện xuất hiện cho khách chọn; không có bước duyệt. | STORY-CONSULT-001/AC-006<br>BR-CONSULT-001/Then | Đặc tả chưa thực thi; đối chiếu hành vi với dữ liệu thực lưu và nguồn đã chốt. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- STORY-SUB-001/AC-031
-- BR-SUB-017/Then
-
-- BR-LIB-003/Then
+- STORY-CONSULT-001/AC-006
+- BR-CONSULT-001/Then

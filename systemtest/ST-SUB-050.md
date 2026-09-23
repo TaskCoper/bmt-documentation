@@ -44,7 +44,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SUB-050 | STORY-SUB-001 | Main | REGRESSION | P1 | Tài khoản có kỳ còn hiệu lực, đủ quyền tra cứu, 20 lượt tra cứu; có mẫu A truy cập được, không có thao tác sử dụng lượt khác. | 1. Ghi nhận số lượt.<br>2. Tìm kiếm mẫu và xem danh sách kết quả, chưa mở chi tiết.<br>3. Kiểm tra các loại lượt. | 20 lượt là dữ liệu thử. Không mô phỏng lỗi, tải lại trang hoặc yêu cầu mạng gửi lặp. | Vẫn còn 20 lượt tra cứu, không có lượt giữ/trừ từ tìm kiếm hoặc xem danh sách. Lượt tạo mới không đổi. | STORY-SUB-001/AC-030<br>BR-SUB-017/Then | Kiểm tra đơn vị tra cứu là mỗi lần mở chi tiết, không phải tìm kiếm. Lỗi không trả được nội dung không mất lượt theo BR-SUB-017. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
+| ST-SUB-050 | STORY-SUB-001 | Main | REGRESSION | P1 | Tài khoản có kỳ còn hiệu lực, đủ quyền tra cứu, 20 lượt tra cứu; có mẫu A truy cập được, không có thao tác sử dụng lượt khác. | 1. Ghi nhận số lượt.<br>2. Tìm kiếm mẫu và xem danh sách kết quả, chưa mở chi tiết.<br>3. Kiểm tra các loại lượt. | 20 lượt là dữ liệu thử. Không mô phỏng lỗi, tải lại trang hoặc yêu cầu mạng gửi lặp. | Vẫn còn 20 lượt tra cứu, không có lượt giữ/trừ từ tìm kiếm hoặc xem danh sách. Lượt tạo mới không đổi. | STORY-SUB-001/AC-030<br>BR-SUB-017/Then | Kiểm tra tra cứu theo tài khoản và phiên bản; tìm kiếm không tính lượt. Lỗi không trả được nội dung không mất lượt theo BR-SUB-017. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

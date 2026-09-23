@@ -10,14 +10,11 @@
 - Trước khi bàn giao, đối chiếu nội dung với nguồn, kiểm tra cấu trúc, giá trị cho phép, giới hạn độ dài và tính nhất quán của mã/tham chiếu. Báo rõ phần chưa đủ thông tin; không tuyên bố đã chạy test hoặc import khi chưa thực hiện.
 -->
 
-<!-- Mỗi file chứa một test, đúng một dòng dữ liệu và 13 cột theo thứ tự bên dưới.
-Thay ST-001 ở heading và Test ID, STORY-001 bằng mã Story cần kiểm thử.
-Trong ô bảng: xuống dòng bằng <br>, dấu | viết thành \|. Steps gồm các bước đánh số.
-Loại: Main / ALT / EXC / NFR / Integration boundary; ghép nhiều loại bằng dấu /.
-Suite: SMOKE / REGRESSION / FULL. Priority: P0 / P1 / P2 / P3.
-TEST_LINKS là nguồn liên kết khi import; cột Trace to chỉ để đọc. Giữ hai nơi nhất quán.
-Owner là tên hiển thị; phê duyệt thực hiện sau import.
-Steps và Expected result phải bám Flow, AC và Business Rule của Story có thật. Test data là dữ liệu kiểm thử minh hoạ; không tự thêm hành vi nghiệp vụ hoặc ghi Pass/đã chạy nếu chưa có bằng chứng thực thi.
+<!-- Thay mã BR-001 và nội dung ví dụ; giữ nguyên heading và nhãn in đậm.
+Effective Date dùng YYYY-MM-DD hoặc để trống. Status: Draft / Active / Deprecated.
+Statement, When, Then và Except phải phản ánh đúng chính sách nguồn; không tự đặt công thức, ngưỡng, thời hạn hay ngoại lệ. Chỉ để Except trống khi đã xác định không có ngoại lệ; thiếu thông tin thì hỏi lại.
+Version và phê duyệt do hệ thống quản lý. Owner là tên nghiệp vụ; gán tài khoản trên giao diện.
+Liên kết Story và các trường quản trị bổ sung trên giao diện sau import.
 BẮT BUỘC KHI HOÀN THIỆN MẪU: phải có cả Reviewer và Approver, mỗi tên 1–200 ký tự sau khi bỏ khoảng trắng đầu/cuối. Không xoá hai dòng metadata, để trống, dùng tên bịa hoặc giữ placeholder rồi coi là hoàn tất.
 Nếu chưa biết người review hoặc người phê duyệt, phải hỏi người dùng và báo tài liệu chưa đủ thông tin; không tự lấy Author/Owner làm người thay thế. Tên trong file không tự gán tài khoản hoặc xác nhận đã duyệt; gán thành viên trên giao diện sau import.
 Đây là yêu cầu hoàn thiện mẫu; backend hiện vẫn nhận file cũ thiếu hai trường để tương thích.
@@ -28,27 +25,51 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Chỉ nhập đè tài liệu cùng loại đang Draft, chưa có phiên bản và chưa lưu trữ. Import thay toàn bộ nội dung bản nháp, vì vậy phải giữ lại nội dung hợp lệ ngoài phần được yêu cầu sửa.
 - Không dùng Status trong Markdown hoặc tên Approver để tự xác nhận phê duyệt; import không cấp quyền hay gán tài khoản từ tên. Chạy Kiểm tra file và xử lý lỗi/cảnh báo trước khi nhập.
 - Giới hạn độ dài bên dưới tính theo string.Length của .NET (đơn vị UTF-16); không tự cắt ngắn dữ kiện quan trọng để vượt validation, hãy viết lại có căn cứ hoặc hỏi người dùng.
-- Bảng phải có header, dòng phân cách và đúng một dòng dữ liệu, đủ 13 cột theo thứ tự mẫu. Reviewer/Approver là hai bullet trước bảng, không thêm thành cột. Test ID trong bảng phải nhất quán với heading; mã tài liệu import lấy từ heading.
-- Story tối đa 100 ký tự và được dùng làm tiêu đề tài liệu; Owner tối đa 200. Trạng thái parser nhận: Draft / Approved; đây không phải kết quả chạy test hoặc quyền phê duyệt.
-- Giữ Loại: Main / ALT / EXC / NFR / Integration boundary, có thể ghép bằng dấu /; Suite: SMOKE / REGRESSION / FULL; Priority: P0 / P1 / P2 / P3. Không dùng số ngoài dải Priority 0–3.
-- Steps là các bước đánh số trong một ô, tách bằng <br>; không xuống dòng vật lý trong ô, dấu | trong nội dung phải viết \|. TEST_LINKS mới là nguồn liên kết import; cột Trace to chỉ hiển thị, hai nơi phải nhất quán.
-- Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
+- Name tối đa 300 ký tự (được dùng làm tiêu đề tài liệu); Category tối đa 200; Owner tối đa 200; Source tối đa 500.
+- Effective Date: dùng ngày hợp lệ YYYY-MM-DD hoặc để trống khi chưa xác định; ngày không đọc được sẽ bị để trống kèm cảnh báo. Không tự đặt ngày hiệu lực.
+ĐỐI CHIẾU FORM BUSINESS RULE (src/features/business-rules/validations.ts; form có thể chặt hơn import):
+- Form yêu cầu Name, Category, Statement, When, Then, Source và Owner có nội dung; Except và Notes được phép trống. Liên kết Story đã khai báo không được rỗng.
+- Form còn kiểm tra Version và Effective Date không rỗng; với file nhập mới, vẫn để Version trống theo hợp đồng import vì hệ thống quản lý phiên bản. Thiếu ngày hiệu lực thì hỏi lại, không bịa để thoả form.
 -->
 
-# ST-SUB-051
+# BR-NEWS-002
 
-## System Test
+## Rule Info
 
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Name**: Cây danh mục riêng của Tin tức
+- **Category**: Tin tức
+- **Status**: Draft
+- **Version**:
+- **Effective Date**:
+- **Owner**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
+- **Source**: Các quyết định người dùng xác nhận trong hội thoại chuẩn bị nghiệp vụ Tin tức của Cẩm nang BMT.
 
-| Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SUB-051 | STORY-SUB-001 | Main | REGRESSION | P1 | Tài khoản có kỳ còn hiệu lực, đủ quyền tra cứu, 20 lượt tra cứu; có phiên bản V1 của mẫu A truy cập được và chưa từng mở, không có thao tác sử dụng lượt khác. | 1. Xác nhận dùng một lượt và mở chi tiết phiên bản V1 của mẫu A thành công và kiểm tra lượt.<br>2. Đóng chi tiết, chủ động mở lại đúng V1 của A thành công.<br>3. Kiểm tra lượt sau lần mở thứ hai. | 20 lượt là dữ liệu thử. Không mô phỏng lỗi, tải lại trang hoặc yêu cầu mạng gửi lặp. | Sau lần đầu còn 19 lượt tra cứu; sau lần thứ hai vẫn còn 19. Cùng phiên bản V1 chỉ tính một lượt và có một dòng lịch sử. Lượt tạo mới không đổi. | STORY-SUB-001/AC-031<br>BR-SUB-017/Then<br>BR-LIB-003/Then | Kiểm tra tra cứu theo tài khoản và phiên bản; tìm kiếm không tính lượt. Lỗi không trả được nội dung không mất lượt theo BR-SUB-017. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
+## Statement
 
-## TEST_LINKS
+Tin tức có cây danh mục riêng, không giới hạn số cấp và không dùng chung danh mục loại công trình.
 
-- STORY-SUB-001/AC-031
-- BR-SUB-017/Then
+## When
 
-- BR-LIB-003/Then
+Người quản lý tạo, đổi tên, sắp xếp, chuyển cha, xóa danh mục hoặc gắn danh mục cho bài.
+
+## Then
+
+1. Danh mục có tên bắt buộc; bỏ khoảng trắng đầu và cuối. Tên không được trùng trong cùng một cấp cha, không phân biệt hoa/thường. Các danh mục gốc được xét chung một cấp; khác cha được trùng tên.
+2. Cho tạo danh mục gốc và danh mục con; không đặt giới hạn nghiệp vụ về số cấp.
+3. Cho đổi tên, đổi thứ tự và chuyển danh mục sang cha khác. Việc chuyển cha phải tiếp tục đáp ứng quy tắc tên không trùng tại cha mới.
+4. Không cho đặt chính danh mục hoặc bất kỳ danh mục con nào của nó làm cha, để cây không tạo vòng lặp.
+5. Đổi tên hoặc chuyển cha không làm mất liên kết bài với danh mục đã chọn. Kết quả lọc tin sử dụng cây danh mục sau thay đổi.
+6. Chỉ cho xóa danh mục khi không còn danh mục con và không được bài nào sử dụng, kể cả bài nháp hoặc đã ẩn. Muốn xóa phải chuyển hoặc gỡ liên kết bài và chuyển hoặc xóa danh mục con trước; bài công bố vẫn phải còn ít nhất một danh mục.
+7. Gắn danh mục tại bất kỳ cấp nào; không tự buộc người quản lý gắn cả chuỗi cha. Không có danh mục chính cho bài.
+
+## Except
+
+
+
+## Notes
+
+Ví dụ: “Nhà phố → Thiết kế” và “Biệt thự → Thiết kế” được cùng tồn tại. Hai danh mục “ Sơn ” và “sơn” dưới cùng cha bị coi là trùng tên.
+
+Owner và ngày hiệu lực chưa xác định. Người dùng đã chốt bộ US/BR Tin tức trong hội thoại. Status Draft vẫn giữ theo quy trình tài liệu; xác nhận này không thay cho phê duyệt trên hệ thống hoặc kết quả kiểm thử.

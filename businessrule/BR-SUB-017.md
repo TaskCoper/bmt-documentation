@@ -44,7 +44,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Owner**: [Chưa xác định]
 - **Reviewer**: [Chưa xác định]
 - **Approver**: [Chưa xác định]
-- **Source**: Người dùng chốt chỉ có lượt tạo mới và tra cứu, bỏ chỉnh sửa sau Gen AI. Đã thành công muốn phương án khác phải tạo dự án mới; thất bại được thử lại cùng dự án, kiểm tra lại quyền/lượt. Mỗi lần trả chi tiết mẫu tính 1 lượt, lỗi không mất lượt. Khách chưa đăng nhập hoặc chưa có gói vẫn được tìm kiếm/xem danh sách, không mất lượt; mở chi tiết cần đăng nhập, gói còn hiệu lực, quyền tra cứu và lượt sẵn dùng.
+- **Source**: Người dùng chốt chỉ có lượt tạo mới và tra cứu, bỏ chỉnh sửa sau Gen AI. Đã thành công muốn phương án khác phải tạo dự án mới; thất bại được thử lại cùng dự án, kiểm tra lại quyền/lượt. Tra cứu tính một lượt cho lần mở thành công đầu tiên của từng phiên bản; xem lại miễn lượt theo BR-LIB-003. Khách chưa đăng nhập hoặc chưa có gói vẫn được tìm kiếm/xem danh sách, không mất lượt; mở chi tiết cần đăng nhập, gói còn hiệu lực, quyền tra cứu và lượt sẵn dùng.
 
 ## Statement
 
@@ -58,13 +58,13 @@ Khách tìm kiếm/xem mẫu, Admin cấu hình quyền lợi của gói hoặc 
 
 1. Theo dõi riêng lượt tạo mới và lượt tra cứu. Sử dụng một loại không thay đổi số dư loại còn lại và không tự lấy lượt loại khác dùng thay khi hết lượt.
 2. Tạo mới giữ 1 lượt khi yêu cầu hợp lệ được tiếp nhận, thành công mới tính đã dùng; lỗi/quá thời gian giải phóng lượt theo BR-SUB-003 và BR-SUB-016. Một lần Gen AI trả bộ kết quả cùng lúc; không có thao tác hoặc loại lượt tạo 3D riêng. Theo phạm vi mới nhất, cấu hình 3D chỉ hiển thị, chưa điều khiển kết quả AI.
-3. Khách được tìm kiếm và xem danh sách mẫu kể cả khi chưa đăng nhập hoặc chưa có gói; không yêu cầu tài khoản, quyền tra cứu hay lượt để thực hiện hai thao tác này, không giữ hoặc trừ lượt. Mở chi tiết mẫu phải đăng nhập, có gói còn hiệu lực, quyền tra cứu và ít nhất một lượt sẵn dùng nếu hạn mức hữu hạn; quyền không giới hạn theo BR-SUB-005. Không trả nội dung chi tiết khi thiếu điều kiện, kể cả yêu cầu gửi trực tiếp. Mỗi lần trả được nội dung chi tiết một mẫu tính 1 lượt tra cứu. Lỗi không tải được nội dung thì không tính đã dùng, giải phóng lượt tạm giữ nếu có.
+3. Khách được tìm kiếm và xem danh sách mẫu không cần đăng nhập hoặc gói, không tính lượt. Mở lần đầu từng phiên bản phải đăng nhập, có gói còn hiệu lực, quyền tra cứu và lượt sẵn dùng hoặc không giới hạn theo BR-SUB-005; cần xác nhận trước khi dùng lượt. Ghi nhận đúng một lượt và quyền xem theo tài khoản/phiên bản khi thành công. Xem lại phiên bản đã mở không tính lượt, kể cả hết hạn gói, hết lượt hoặc không còn quyền tra cứu trong gói. Ảnh và tệp đính kèm được xem/tải theo cùng quyền này. Chi tiết theo BR-LIB-003; công bố phiên bản mới theo BR-LIB-002.
 4. Danh mục quyền lợi không có lượt chỉnh sửa; Admin không thể cấu hình hoặc công bố hạn mức chỉnh sửa. Không hiển thị số dư chỉnh sửa cho khách và không xây luồng Gen AI chỉnh sửa kết quả.
 5. Sau khi một dự án đã Gen AI thành công và có kết quả, muốn phương án khác khách phải tạo dự án mới, nhập thông tin rồi Gen AI. Từ chối yêu cầu Gen AI thêm phương án trên dự án đã thành công, kể cả gửi trực tiếp. Không sửa hoặc thay thế kết quả của dự án cũ. Dự án mới tiếp tục dùng hạn mức chung của tài khoản, không được cấp hạn mức riêng.
 6. Nếu Gen AI đã thất bại và chưa có kết quả thành công, khách được chủ động thử lại trên cùng dự án, giữ thông tin đã nhập. Mỗi yêu cầu thử lại kiểm tra subscription còn hiệu lực, quyền và lượt sẵn dùng tại thời điểm tiếp nhận; đủ điều kiện thì giữ 1 lượt tạo mới theo BR-SUB-003. Không tự thử lại, không tạo dự án mới bắt buộc và không bỏ qua kiểm tra quyền vì yêu cầu trước từng hợp lệ.
 7. Giá trị hạn mức thực tế do Admin nhập sau; các số trong test chỉ là ví dụ. Quyền dạng lượt đưa vào gói phải có hạn mức ít nhất 1 hoặc không giới hạn theo [BR-SUB-005](BR-SUB-005.md); không cho nhập 0.
 
-8. Khi hệ thống đã ghi nhận một lần mở chi tiết mẫu thành công nhưng đường truyền bị ngắt trước khi khách nhận phản hồi, giữ một lượt đã tính. Gửi lại cùng lần mở trả lại kết quả đã ghi nhận và không trừ thêm lượt. Lần mở mới, kể cả cùng mẫu, vẫn tính lượt riêng. Lỗi tải hoặc chuẩn bị nội dung trước khi ghi nhận thành công không tính lượt.
+8. Khi hệ thống đã ghi nhận một lần mở chi tiết mẫu thành công nhưng đường truyền bị ngắt trước khi khách nhận phản hồi, giữ một lượt đã tính. Gửi lại cùng lần mở trả lại kết quả đã ghi nhận và không trừ thêm lượt. Mở lại cùng phiên bản, kể cả dùng yêu cầu mới, không tính thêm lượt. Phiên bản mới chưa từng mở mới cần tính lượt theo BR-LIB-003. Lỗi tải hoặc chuẩn bị nội dung trước khi ghi nhận thành công không tính lượt.
 
 ## Except
 
@@ -80,3 +80,5 @@ Chế độ không giới hạn vẫn theo BR-SUB-005. Bỏ lượt chỉnh sử
 - [ST-SUB-059](../systemtest/ST-SUB-059.md) kiểm tra muốn phương án khác phải tạo dự án mới. Quy tắc này xét dự án đã có kết quả thành công. Khi thất bại chưa có kết quả, được thử lại cùng dự án; [ST-SUB-060](../systemtest/ST-SUB-060.md) và [ST-SUB-061](../systemtest/ST-SUB-061.md) kiểm tra thử lại hợp lệ và từ chối khi không còn đủ điều kiện.
 - [ST-SUB-077](../systemtest/ST-SUB-077.md) kiểm tra khách đã đăng nhập chưa có gói được tìm kiếm/xem danh sách nhưng không được mở chi tiết. Không tự cấp gói miễn phí hoặc lượt từ việc xem danh sách. Người dùng đã xác nhận khách chưa đăng nhập cũng được tìm kiếm/xem danh sách. Khi mở chi tiết, yêu cầu đăng nhập trước rồi kiểm tra gói, quyền và lượt; chưa đăng nhập thì không trả nội dung chi tiết. [ST-SUB-078](../systemtest/ST-SUB-078.md) kiểm tra ranh giới này.
 - Bản nháp chưa đủ metadata; test chưa chạy.
+
+- Cập nhật nghiệp vụ thư viện ngày 23/09/2026: [BR-LIB-003](BR-LIB-003.md) thay cách tính mỗi lần mở. ST-SUB-051 và phần tra cứu của TDD-SUB-002 cần cập nhật sau khi chốt bộ US/BR mới; chưa dùng nội dung cũ để nghiệm thu xem lại.

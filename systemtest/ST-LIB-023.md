@@ -35,20 +35,18 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# ST-SUB-051
+# ST-LIB-023
 
 ## System Test
 
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SUB-051 | STORY-SUB-001 | Main | REGRESSION | P1 | Tài khoản có kỳ còn hiệu lực, đủ quyền tra cứu, 20 lượt tra cứu; có phiên bản V1 của mẫu A truy cập được và chưa từng mở, không có thao tác sử dụng lượt khác. | 1. Xác nhận dùng một lượt và mở chi tiết phiên bản V1 của mẫu A thành công và kiểm tra lượt.<br>2. Đóng chi tiết, chủ động mở lại đúng V1 của A thành công.<br>3. Kiểm tra lượt sau lần mở thứ hai. | 20 lượt là dữ liệu thử. Không mô phỏng lỗi, tải lại trang hoặc yêu cầu mạng gửi lặp. | Sau lần đầu còn 19 lượt tra cứu; sau lần thứ hai vẫn còn 19. Cùng phiên bản V1 chỉ tính một lượt và có một dòng lịch sử. Lượt tạo mới không đổi. | STORY-SUB-001/AC-031<br>BR-SUB-017/Then<br>BR-LIB-003/Then | Kiểm tra tra cứu theo tài khoản và phiên bản; tìm kiếm không tính lượt. Lỗi không trả được nội dung không mất lượt theo BR-SUB-017. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
+| ST-LIB-023 | STORY-LIB-003 | Integration boundary | REGRESSION | P1 | C đủ điều kiện, chưa xem V1; điều phối được hai yêu cầu đồng thời. Môi trường thử có chức năng tương ứng; đọc lại được dữ liệu và lượt khi ca cần. | 1. Gửi hai yêu cầu mở V1 đã xác nhận đồng thời.<br>2. Đợi cả hai kết thúc, mở lại V1.<br>3. Đọc số dư và lịch sử; lặp với chỉ một lượt còn lại. | Chạy riêng với 20 lượt và 1 lượt. Đây là dữ liệu thử, không phải mặc định sản phẩm. | Tổng lượt đã dùng tăng đúng một, lịch sử chỉ một dòng V1; sau xử lý mở lại được miễn lượt. Không yêu cầu mã phản hồi riêng cho yêu cầu thua cạnh tranh khi TDD chưa chốt. | STORY-LIB-003/AC-005<br>BR-LIB-003/Then | Mở đồng thời cùng phiên bản. Đặc tả chưa thực thi; API/fixture kỹ thuật bổ sung sau TDD. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- STORY-SUB-001/AC-031
-- BR-SUB-017/Then
-
+- STORY-LIB-003/AC-005
 - BR-LIB-003/Then

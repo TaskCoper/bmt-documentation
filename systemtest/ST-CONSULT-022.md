@@ -35,7 +35,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# ST-SUB-051
+# ST-CONSULT-022
 
 ## System Test
 
@@ -44,11 +44,9 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SUB-051 | STORY-SUB-001 | Main | REGRESSION | P1 | Tài khoản có kỳ còn hiệu lực, đủ quyền tra cứu, 20 lượt tra cứu; có phiên bản V1 của mẫu A truy cập được và chưa từng mở, không có thao tác sử dụng lượt khác. | 1. Xác nhận dùng một lượt và mở chi tiết phiên bản V1 của mẫu A thành công và kiểm tra lượt.<br>2. Đóng chi tiết, chủ động mở lại đúng V1 của A thành công.<br>3. Kiểm tra lượt sau lần mở thứ hai. | 20 lượt là dữ liệu thử. Không mô phỏng lỗi, tải lại trang hoặc yêu cầu mạng gửi lặp. | Sau lần đầu còn 19 lượt tra cứu; sau lần thứ hai vẫn còn 19. Cùng phiên bản V1 chỉ tính một lượt và có một dòng lịch sử. Lượt tạo mới không đổi. | STORY-SUB-001/AC-031<br>BR-SUB-017/Then<br>BR-LIB-003/Then | Kiểm tra tra cứu theo tài khoản và phiên bản; tìm kiếm không tính lượt. Lỗi không trả được nội dung không mất lượt theo BR-SUB-017. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
+| ST-CONSULT-022 | STORY-CONSULT-002 | Main | REGRESSION | P1 | Môi trường thử đã triển khai tính năng, có frontend, API, database và tài khoản thử với quyền tương ứng. Có thể đọc dữ liệu đã lưu; chỉ dùng dữ liệu và email thử. | 1. Đặt múi giờ trình duyệt khác Việt Nam<br>2. Chọn 09:00 một ngày tương lai trên form UTC+7 và gửi<br>3. Kiểm tra email, chi tiết admin và thời điểm lưu | Trình duyệt UTC hoặc America/New_York; giờ chọn 09:00 Việt Nam; dữ liệu minh họa, không phải cấu hình sản phẩm. | Các nơi này dùng thống nhất giờ Việt Nam (UTC+7). Không làm thay đổi thời điểm khách đã chọn do múi giờ máy đang sử dụng. Form, email, admin đều biểu diễn cùng 09:00 UTC+7; không dịch theo múi giờ máy khách. | STORY-CONSULT-002/AC-012<br>BR-CONSULT-003/Then | Đặc tả chưa thực thi; đối chiếu hành vi với dữ liệu thực lưu và nguồn đã chốt. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- STORY-SUB-001/AC-031
-- BR-SUB-017/Then
-
-- BR-LIB-003/Then
+- STORY-CONSULT-002/AC-012
+- BR-CONSULT-003/Then

@@ -35,7 +35,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# ST-SUB-051
+# ST-CONSULT-008
 
 ## System Test
 
@@ -44,11 +44,9 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SUB-051 | STORY-SUB-001 | Main | REGRESSION | P1 | Tài khoản có kỳ còn hiệu lực, đủ quyền tra cứu, 20 lượt tra cứu; có phiên bản V1 của mẫu A truy cập được và chưa từng mở, không có thao tác sử dụng lượt khác. | 1. Xác nhận dùng một lượt và mở chi tiết phiên bản V1 của mẫu A thành công và kiểm tra lượt.<br>2. Đóng chi tiết, chủ động mở lại đúng V1 của A thành công.<br>3. Kiểm tra lượt sau lần mở thứ hai. | 20 lượt là dữ liệu thử. Không mô phỏng lỗi, tải lại trang hoặc yêu cầu mạng gửi lặp. | Sau lần đầu còn 19 lượt tra cứu; sau lần thứ hai vẫn còn 19. Cùng phiên bản V1 chỉ tính một lượt và có một dòng lịch sử. Lượt tạo mới không đổi. | STORY-SUB-001/AC-031<br>BR-SUB-017/Then<br>BR-LIB-003/Then | Kiểm tra tra cứu theo tài khoản và phiên bản; tìm kiếm không tính lượt. Lỗi không trả được nội dung không mất lượt theo BR-SUB-017. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
+| ST-CONSULT-008 | STORY-CONSULT-001 | EXC | REGRESSION | P1 | Môi trường thử đã triển khai tính năng, có frontend, API, database và tài khoản thử với quyền tương ứng. Có thể đọc dữ liệu đã lưu; chỉ dùng dữ liệu và email thử. | 1. Lần lượt bỏ từng nhóm thông tin khi tạo và khi sửa hồ sơ<br>2. Gửi trực tiếp tới backend cho mỗi biến thể<br>3. Bổ sung đủ thông tin rồi lưu lại | 7 biến thể: thiếu ảnh, họ tên, chức danh, category rỗng, số năm, số công trình, giới thiệu; các trường khác hợp lệ; dữ liệu minh họa, không phải cấu hình sản phẩm. | Hệ thống từ chối lưu và chỉ rõ phần còn thiếu. Khi đủ thông tin hợp lệ, hồ sơ được lưu trực tiếp, không qua phê duyệt. Mỗi biến thể bị từ chối; không tạo hồ sơ hoặc ghi thay đổi thiếu dữ liệu. Không coi số 0 là thiếu nếu chưa có quy tắc cấm 0. | STORY-CONSULT-001/AC-008<br>BR-CONSULT-001/Then | Đặc tả chưa thực thi; đối chiếu hành vi với dữ liệu thực lưu và nguồn đã chốt. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- STORY-SUB-001/AC-031
-- BR-SUB-017/Then
-
-- BR-LIB-003/Then
+- STORY-CONSULT-001/AC-008
+- BR-CONSULT-001/Then

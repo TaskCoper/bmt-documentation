@@ -58,6 +58,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Conditions
 
+Quy tắc tra cứu cập nhật ngày 23/09/2026 theo STORY-LIB-003 và BR-LIB-003: điều kiện gói/quyền/lượt chỉ áp dụng cho phiên bản chưa từng mở. Phiên bản đã mở được xem lại khi đăng nhập đúng tài khoản, kể cả gói hết hạn. Các mô tả chặn chi tiết dưới đây phải được đọc cùng ngoại lệ này.
+
 ### Preconditions
 
 - Tìm kiếm/xem danh sách mẫu không yêu cầu đăng nhập hoặc có subscription. Mở chi tiết mẫu và các thao tác trên dự án yêu cầu đăng nhập. Việc bắt đầu thao tác cần quyền subscription yêu cầu gói còn hiệu lực và đáp ứng quyền/lượt tương ứng; tác vụ đã bắt đầu hợp lệ có thể hoàn thành sau khi hết hạn, luồng xem dữ liệu cũ áp dụng cả sau khi hết hạn.
@@ -75,7 +77,7 @@ Khách tìm kiếm/xem danh sách mẫu; tài khoản đã đăng nhập xem d�
 1. Người dùng thực hiện một thao tác sử dụng quyền lợi trong dự án thuộc tài khoản. Đợt này quản lý riêng hai loại lượt tạo thiết kế mới và tra cứu mẫu; không tự lấy lượt loại khác để dùng thay khi một loại đã hết.
 2. Hệ thống xác định quyền lợi và hạn mức theo nhóm dịch vụ: thiết kế dùng chung theo tài khoản, giám sát chỉ dùng cho công trình đã gắn.
 3. Với yêu cầu tạo thiết kế có hạn mức hữu hạn, hệ thống giữ trước một lượt từ hạn mức chung khi tiếp nhận xử lý; lượt đang giữ không thể dùng cho yêu cầu khác.
-4. Một lần Gen AI trả toàn bộ bộ kết quả cùng lúc; phối cảnh 3D là một phần trong đó theo quyền gói, không có thao tác tạo hoặc tính lượt riêng. Với tạo mới, khi AI tạo đủ kết quả, hệ thống đã lưu và khách có thể mở xem thì chuyển lượt giữ của đúng loại thành đã dùng, không trừ thêm lần nữa. Không chờ khách mở hoặc duyệt; khách không hài lòng không tự được hoàn lượt. Với tra cứu mẫu, tìm kiếm và xem danh sách không dùng lượt; mỗi lần hệ thống trả được nội dung chi tiết một mẫu tính 1 lượt tra cứu. Lỗi không tải được nội dung thì không mất lượt; giải phóng lượt tạm giữ nếu có.
+4. Một lần Gen AI trả toàn bộ bộ kết quả cùng lúc; phối cảnh 3D là một phần trong đó theo quyền gói, không có thao tác tạo hoặc tính lượt riêng. Với tạo mới, khi AI tạo đủ kết quả, hệ thống đã lưu và khách có thể mở xem thì chuyển lượt giữ của đúng loại thành đã dùng, không trừ thêm lần nữa. Không chờ khách mở hoặc duyệt; khách không hài lòng không tự được hoàn lượt. Với tra cứu mẫu, tìm kiếm và xem danh sách không dùng lượt; lần mở thành công đầu tiên của từng phiên bản tính 1 lượt tra cứu; xem lại miễn lượt theo BR-LIB-003. Lỗi không tải được nội dung thì không mất lượt; giải phóng lượt tạm giữ nếu có.
 5. Với quyền lợi thiết kế, các dự án khác của cùng tài khoản dùng số lượt còn lại này; không được cấp thêm một hạn mức riêng chỉ vì là dự án khác.
 
 ### Alternative Flow
@@ -179,7 +181,7 @@ Khách đã đăng nhập nhưng chưa có gói muốn tìm kiếm và xem danh 
 
 1. Hệ thống cho tìm kiếm và trả danh sách mẫu, không yêu cầu gói, quyền tra cứu hoặc lượt.
 2. Không tự cấp gói hay giữ/trừ lượt; không yêu cầu tạo dự án trước khi tìm kiếm.
-3. Nếu khách yêu cầu mở chi tiết mẫu, hệ thống kiểm tra gói, quyền và lượt; khách chưa có gói bị từ chối, không trả nội dung chi tiết.
+3. Nếu khách yêu cầu mở phiên bản chưa từng xem, hệ thống kiểm tra gói, quyền và lượt; thiếu điều kiện thì từ chối. Phiên bản đã mở thành công được xem lại theo BR-LIB-003.
 
 #### ALT-13
 
@@ -187,7 +189,7 @@ Khách chưa đăng nhập muốn tìm kiếm hoặc xem danh sách mẫu.
 
 1. Hệ thống cho tìm kiếm và trả danh sách mà không bắt đăng nhập, tạo tài khoản, dự án hoặc nhận gói.
 2. Khi khách chọn mở chi tiết mẫu, yêu cầu đăng nhập; không trả nội dung chi tiết khi chưa đăng nhập, kể cả yêu cầu gửi trực tiếp.
-3. Sau đăng nhập, vẫn kiểm tra gói còn hiệu lực, quyền tra cứu và lượt sẵn dùng hoặc không giới hạn trước khi cho mở chi tiết.
+3. Sau đăng nhập, nếu phiên bản đã mở thành công thì cho xem lại miễn lượt; nếu chưa mở thì kiểm tra gói còn hiệu lực, quyền tra cứu và lượt sẵn dùng hoặc không giới hạn theo BR-LIB-003.
 
 #### ALT-14
 
@@ -532,7 +534,7 @@ Khách đang chờ hạ gói nhưng muốn chỉ đổi chu kỳ trong cùng gó
 
 - **Given**: Tài khoản có kỳ còn hiệu lực, đủ quyền tra cứu, 20 lượt tra cứu và không có thao tác sử dụng lượt khác.
 - **When**: Khách mở chi tiết mẫu A thành công, đóng lại rồi chủ động mở chi tiết A thành công lần nữa.
-- **Then**: Lần đầu còn 19 lượt tra cứu, lần thứ hai còn 18; mỗi lần mở chi tiết tính 1 lượt, không cấp quyền xem lại miễn lượt chỉ vì mẫu đã từng mở.
+- **Then**: Lần đầu còn 19 lượt tra cứu, lần thứ hai vẫn còn 19 khi mở cùng phiên bản; quyền xem được ghi nhận theo tài khoản và phiên bản theo BR-LIB-003.
 - **And**: Lượt tạo mới không thay đổi. Ca này không xác định cách tính khi tải lỗi, tải lại trang hoặc hệ thống tự gửi lại yêu cầu.
 
 #### AC-032
@@ -851,7 +853,7 @@ Khách đang chờ hạ gói nhưng muốn chỉ đổi chu kỳ trong cùng gó
 - **Given**: Khách đủ điều kiện tra cứu; hệ thống đã ghi nhận lần mở K thành công và tính 1 lượt, nhưng phản hồi bị mất do ngắt mạng.
 - **When**: Khách gửi lại cùng lần mở K.
 - **Then**: Trả lại kết quả của K, giữ đúng 1 lượt đã tính và không trừ thêm. Không coi retry truyền mạng là lần mở mới.
-- **And**: Chủ động mở lại mẫu bằng lần mở mới tính lượt mới nếu đủ điều kiện. Lỗi tải/chuẩn bị nội dung trước khi ghi nhận thành công không tính lượt. Không cho tài khoản khác dùng K để lấy nội dung hoặc thao tác với số dư.
+- **And**: Chủ động mở lại cùng phiên bản không tính thêm lượt; mở phiên bản mới chưa từng xem cần đủ điều kiện và tính một lượt. Lỗi tải/chuẩn bị nội dung trước khi ghi nhận thành công không tính lượt. Không cho tài khoản khác dùng K để lấy nội dung hoặc thao tác với số dư.
 
 ## References
 
@@ -860,6 +862,8 @@ Khách đang chờ hạ gói nhưng muốn chỉ đổi chu kỳ trong cùng gó
 - [TDD-SUB-002](../tdd/TDD-SUB-002.md): Thiết kế kỹ thuật bản nháp; Reviewer/Approver Tân Trần.
 
 ### Rules
+
+- BR-LIB-003: Quyền xem lại theo tài khoản và phiên bản; thay quy tắc tính lượt mỗi lần mở.
 
 - BR-SUB-013/Then: Ngừng bán chặn yêu cầu mới và giữ gói đã cấp; giao dịch đang xử lý thiết kế sau.
 
@@ -910,4 +914,4 @@ Khách đang chờ hạ gói nhưng muốn chỉ đổi chu kỳ trong cùng gó
 - Khách hàng hủy tác vụ tạo thiết kế đang chạy: chưa hỗ trợ trong đợt này; không bổ sung nút hoặc API hủy dành cho khách hàng. Việc đóng trang không phải yêu cầu hủy tác vụ.
 
 - Tích hợp thanh toán, luồng tài khoản nhận gói và gia hạn thuộc giai đoạn sau.
-- Bản nháp này chưa quy định giá bán cụ thể hoặc cách cấp/gia hạn. Tra cứu thuộc phạm vi hiện tại: mỗi lần trả được nội dung chi tiết mẫu tính 1 lượt, lỗi không tải được nội dung thì không mất lượt; tìm kiếm và xem danh sách không dùng lượt. Không hỗ trợ nhiều subscription thiết kế cùng tài khoản hoặc nhiều gói giám sát cùng công trình đồng thời có hiệu lực.
+- Bản nháp này chưa quy định giá bán cụ thể hoặc cách cấp/gia hạn. Tra cứu thuộc phạm vi hiện tại: lần mở thành công đầu tiên của từng phiên bản tính một lượt, xem lại miễn lượt theo BR-LIB-003; lỗi trước ghi nhận thành công không mất lượt; tìm kiếm và xem danh sách không dùng lượt. Không hỗ trợ nhiều subscription thiết kế cùng tài khoản hoặc nhiều gói giám sát cùng công trình đồng thời có hiệu lực.
