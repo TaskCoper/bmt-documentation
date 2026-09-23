@@ -1,0 +1,296 @@
+<!-- HƯỚNG DẪN CHO AI KHI ĐIỀN HOẶC CHỈNH SỬA MẪU
+- Đọc toàn bộ mẫu, các comment hướng dẫn và tài liệu nguồn được cung cấp trước khi viết. Tuân thủ các quy tắc nghiệp vụ, điều kiện, ngoại lệ và giới hạn đã được xác nhận.
+- Không bịa, tự chế hoặc suy đoán thành sự thật: yêu cầu, quy tắc, số liệu, API, schema, mã lỗi, nguồn tham khảo, người phụ trách và kết quả kiểm thử phải có căn cứ. Nội dung ví dụ trong mẫu không phải dữ kiện của dự án.
+- Khi thiếu thông tin hoặc các nguồn mâu thuẫn, hỏi người dùng để làm rõ; giữ nguyên placeholder ở phần chưa xác định. Không tự chọn đáp án, lấp chỗ trống hay tuyên bố tài liệu đã hoàn tất.
+- Chỉ thay nội dung cần điền hoặc được yêu cầu sửa. Không tự mở rộng phạm vi, sửa nghĩa quy tắc, bỏ điều kiện/ngoại lệ, xoá hay ghi đè nội dung hợp lệ đã có.
+- Giữ nguyên tên, cấp và thứ tự heading, nhãn in đậm, tiền tố bullet, cấu trúc danh sách, tên/thứ tự/số cột bảng và cú pháp code fence. Không dịch, đổi tên, gộp hoặc thêm mục ngoài cấu trúc mẫu.
+- Chỉ lặp khối luồng, AC hoặc API theo đúng khuôn khi có căn cứ; chỉ bỏ phần tuỳ chọn khi hướng dẫn riêng của mẫu cho phép và đã xác định không áp dụng.
+- Mã tham chiếu và section phải trỏ tới tài liệu có thật đã được cung cấp hoặc kiểm chứng. Không giữ mã ví dụ như tham chiếu thật và không tự tạo tài liệu liên quan để hợp thức hoá liên kết.
+- Giữ các comment hướng dẫn trong file. Xuất Markdown UTF-8, mỗi file một tài liệu; không bọc toàn bộ file trong code fence, không chèn lời dẫn hay giải thích ngoài mẫu.
+- Trước khi bàn giao, đối chiếu nội dung với nguồn, kiểm tra cấu trúc, giá trị cho phép, giới hạn độ dài và tính nhất quán của mã/tham chiếu. Báo rõ phần chưa đủ thông tin; không tuyên bố đã chạy test hoặc import khi chưa thực hiện.
+-->
+
+<!-- Thay mã TDD-001 và nội dung ví dụ; giữ nguyên heading và nhãn in đậm.
+Sơ đồ dùng mermaid, plantuml hoặc URL. Giữ heading Architecture, Sequence Diagram, Activity Diagram, State Diagram, Data Model.
+Ví dụ API phải có heading trùng METHOD /path trong Endpoints. Xoá phần API/sơ đồ không dùng.
+Version, Updated At và Change Log do lịch sử phiên bản quản lý, để trống khi nhập mới.
+Author/Reviewer là tên hiển thị; gán tài khoản, phê duyệt, giả định và câu hỏi mở trên giao diện sau import.
+Thiết kế phải truy vết về Story và Business Rule được cung cấp. Phân biệt thiết kế đề xuất với implementation đã kiểm chứng; không mô tả API/schema/sơ đồ ví dụ như hệ thống thật hoặc tự quyết định nghiệp vụ còn thiếu.
+BẮT BUỘC KHI HOÀN THIỆN MẪU: phải có cả Reviewer và Approver, mỗi tên 1–200 ký tự sau khi bỏ khoảng trắng đầu/cuối. Không xoá hai dòng metadata, để trống, dùng tên bịa hoặc giữ placeholder rồi coi là hoàn tất.
+Nếu chưa biết người review hoặc người phê duyệt, phải hỏi người dùng và báo tài liệu chưa đủ thông tin; không tự lấy Author/Owner làm người thay thế. Tên trong file không tự gán tài khoản hoặc xác nhận đã duyệt; gán thành viên trên giao diện sau import.
+Đây là yêu cầu hoàn thiện mẫu; backend hiện vẫn nhận file cũ thiếu hai trường để tương thích.
+
+VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownParser và ImportService):
+- Mỗi file .md UTF-8 không rỗng chỉ có một heading cấp 1 chứa mã tài liệu dài 1–100 ký tự. Mã không được trùng trong cùng lần nhập hoặc thuộc loại tài liệu khác đã tồn tại.
+- Không dùng tên README.md hoặc sitemap.md vì importer bỏ qua. Giao diện nhận .md/.zip, tối đa 2.000 file, tổng file tải lên 31 MiB; API giới hạn request 32 MiB và tổng nội dung đọc/giải nén 64 MiB.
+- Chỉ nhập đè tài liệu cùng loại đang Draft, chưa có phiên bản và chưa lưu trữ. Import thay toàn bộ nội dung bản nháp, vì vậy phải giữ lại nội dung hợp lệ ngoài phần được yêu cầu sửa.
+- Không dùng Status trong Markdown hoặc tên Approver để tự xác nhận phê duyệt; import không cấp quyền hay gán tài khoản từ tên. Chạy Kiểm tra file và xử lý lỗi/cảnh báo trước khi nhập.
+- Giới hạn độ dài bên dưới tính theo string.Length của .NET (đơn vị UTF-16); không tự cắt ngắn dữ kiện quan trọng để vượt validation, hãy viết lại có căn cứ hoặc hỏi người dùng.
+- Feature tối đa 300 ký tự và được dùng làm tiêu đề tài liệu. Status được parser nhận: Draft / In Review / Approved / Deprecated; tài liệu nhập mới vẫn có trạng thái phê duyệt Draft.
+- Endpoint: đường dẫn tối đa 500 ký tự; tên/mô tả endpoint được lưu trong Name tối đa 300. HTTP method: GET / POST / PUT / PATCH / DELETE / HEAD / OPTIONS.
+- Error Codes: mã tối đa 100 ký tự, không trùng trong tài liệu; giữ dạng - **CODE** (400): mô tả. HTTP status trong Error Codes và Response phải là số nguyên đọc được bằng Int32; không tự đặt status khác hợp đồng API.
+- URL sơ đồ tối đa 1.000 ký tự. Mục sơ đồ được sử dụng phải có khối mermaid/plantuml hoặc URL theo mẫu; không để một mục sơ đồ rỗng. Nhãn mục được tách từ bullet như tên External API Fields tối đa 300 ký tự.
+- Heading Examples phải khớp METHOD /path ở Endpoints. Giữ các nhãn Request:, Response 200: (thay mã theo contract) và Error Response: để parser tách đúng dữ liệu.
+- Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
+ĐỐI CHIẾU FORM TDD (src/features/tdds/validations.ts; form có thể chặt hơn import):
+- Điền Feature, Author, Reviewer, Problem và ít nhất một Goal; các Goal/Non-goal/Notes đã thêm không được rỗng. API đã khai báo phải có endpoint và mô tả/mục đích; Fields phải có tên và ý nghĩa; Error Codes phải có mã, HTTP status và điều kiện.
+- Form còn kiểm tra Version, Updated At và nội dung Change Log khi khai báo; với file nhập mới, giữ các trường lịch sử này trống theo hợp đồng import, không tự tạo dữ liệu lịch sử.
+-->
+
+# TDD-PAY-002
+
+## Document Info
+
+- **Feature**: Tra cứu quản trị người mua, gói đã mua, đơn và giao dịch
+- **Author**: Codex
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
+- **Status**: Draft
+- **Version**:
+- **Updated At**:
+
+## Context & Goals
+
+### Problem
+
+STORY-PAY-002 cần Admin và nhân viên có quyền tra cứu riêng xem ai mua gói nào, các đơn và từng khoản chuyển. Dữ liệu gồm cả giao dịch chưa khớp đơn, đơn hết hạn/hủy, gói bị hủy hoặc bị thay thế. Không thể chỉ lấy CurrentPeriodId hoặc join bắt buộc transaction→order vì sẽ làm mất lịch sử và giao dịch chưa khớp.
+
+Module quản trị này chưa có trong mã nguồn. Thiết kế dùng projection trực tiếp từ các bảng ở TDD-PAY-001, TDD-SUB-004/005, không thêm database báo cáo hoặc copy trạng thái sang bảng tổng hợp khác.
+
+### Goals
+
+- Danh sách và chi tiết truy được khách–gói–đơn–giao dịch đúng, không làm mất gói chưa gán hoặc lần mua bị thay thế trước kích hoạt.
+- Kiểm quyền ở server cho mọi query; quyền xem độc lập với sửa dự án/hủy/restore.
+- Giao dịch chưa khớp hiện “Chưa xác định đơn”; không đoán người mua và không có thao tác gán tay.
+- Phân trang ổn định, không N+1, phân biệt tổng tiền thực nhận và tiền đủ điều kiện.
+
+### Non-goals
+
+- Hoàn tiền/ghi nhận hoàn tiền; sửa giao dịch; gán thủ công; xác nhận thủ công cấp gói; báo cáo doanh thu hoặc xuất file.
+- Đọc toàn bộ lịch sử ngân hàng ngoài các giao dịch connection SePay đã tiếp nhận. Không tuyên bố đây là sao kê đầy đủ khi webhook cấu hình sai hoặc bỏ lỡ giao dịch.
+
+## Architecture
+
+**Giải thích các kỹ thuật truy vấn**
+
+| Kỹ thuật | Cách dùng trong màn hình quản trị | Ví dụ và giới hạn |
+| --- | --- | --- |
+| Projection / Select DTO | Chỉ chọn các cột cần hiển thị từ bảng gốc. | Trả số tiền, thời gian, liên kết; không trả toàn bộ connection hoặc secret. DTO không phải bảng mới. |
+| Left join — giữ dòng dù thiếu liên kết | Lấy BankTransaction làm gốc, ghép Order nếu có. | T3 không khớp đơn vẫn xuất hiện với buyerId=null; inner join sẽ loại T3. |
+| AsNoTracking — đọc không theo dõi thay đổi entity | Read store không giữ entity để cập nhật; query không gọi SaveChanges. | Giảm phần quản lý entity khi chỉ đọc. Đây không phải cơ chế phân quyền; vẫn phải kiểm quyền server. |
+| Phân trang trên tập gốc, sort có khóa phụ | Đếm/lấy đơn trước khi đọc các collection; sắp thời gian rồi Id. | Hai khoản chuyển của O1 không thành hai đơn; cùng giây vẫn có thứ tự xác định. Giao dịch mới giữa hai lần gọi có thể làm dịch trang. |
+| Tránh N+1 và tích nhân khi join | N+1 là mỗi dòng lại gọi thêm query; nhiều nhánh collection join có thể nhân số dòng. Dùng các query theo tập ID và giới hạn collection. | Trang 10 đơn không tự phát sinh 10 lần đọc giao dịch; hai khoản chuyển và ba event không bị hiểu thành sáu giao dịch. |
+| RepeatableRead khi cần phản hồi nhất quán | Count và items có thể đọc cùng ảnh dữ liệu trong một read transaction. | Tránh totalCount ở một thời điểm và items ở thời điểm khác trong cùng phản hồi. Không giữ ảnh dữ liệu đó cho tất cả các trang ở các request sau. |
+| Trạng thái tính khi đọc, quyền kiểm mỗi request | Dùng dữ liệu lifecycle/hạn và quyền hiện hành để dựng phản hồi. | Đọc gói hết hạn không ghi trạng thái vào DB hoặc chạy lại cấp gói; thu hồi quyền ảnh hưởng request tiếp theo. |
+
+
+| Thành phần dự kiến | Trách nhiệm |
+| --- | --- |
+| CommerceAdminApi ở presentation/apis/payment/ | Route read-only danh sách/chi tiết; verified-session và CommerceRead policy. |
+| AdminOrdersQueryHandler / AdminTransactionsQueryHandler / AdminPurchasesQueryHandler | Kiểm quyền hiện hành, validate filter/page, gọi projection. |
+| Policy `commerce.read` | Gắn ở endpoint, kiểm claim `perm` trong access token theo [TDD-RBAC-001](TDD-RBAC-001.md#architecture). Vai trò Admin có mã `commerce.read` trong danh sách quyền của nó nên Admin xem được; không có đường tắt bỏ qua kiểm quyền chỉ vì là Admin. Không nhận quyền qua query string hoặc header tự khai. |
+| ICommerceReadStore, EF implementation ở persistence/payments/ | AsNoTracking + Select DTO; left join nullable order/target; count/items theo cùng filter. |
+| CommerceStatusProjector | Suy trạng thái hiệu lực từ clock, lifecycle và fulfillment, không viết dữ liệu trong GET. |
+
+```mermaid
+flowchart LR
+    A[Admin hoặc nhân viên có quyền] --> API[CommerceAdminApi]
+    API --> P[CommerceReadAuthorization]
+    P --> H[Query handlers]
+    H --> S[EF read projections]
+    S --> DB[(Đơn, giao dịch, fulfillment, gói và audit)]
+```
+
+**Notes**:
+
+- `RequireAuthorization` phải bao gồm default verified-session policy; policy named chỉ RequireRole(Admin) hiện có chưa đủ để thay thế điều kiện phiên. Policy theo mã quyền và cách phát hành claim `perm` được định nghĩa ở [TDD-RBAC-001](TDD-RBAC-001.md#architecture).
+- Toàn bộ query read-only, không hiện thực ITransactionalRequest để tránh transaction ghi không cần thiết. Nếu cần count/items nhất quán trong một phản hồi thì dùng read transaction RepeatableRead qua read store, không chạy SaveChanges. Không đưa query này qua cache toàn cục khi chưa có invalidation quyền/dữ liệu.
+- API mặc định theo PagedResult hiện có: pageIndex 1, pageSize 10, tối đa 100. Chuẩn hóa giá trị <=0 về mặc định theo lớp hiện có; chặn offset tràn số trước query. Sort cố định (thời điểm DESC, Id DESC); không nhận tên cột SQL từ client. Giữa các trang có thể có giao dịch mới; nếu cần snapshot xuyên nhiều lần gọi sẽ bổ sung sau, không tự hứa không dịch trang.
+- Bộ lọc đề xuất: customerId, planId, kind, state, orderId, paymentCode và khoảng UTC from/to; transaction có thêm matchState. Các lọc exact id/code và thời gian áp dụng server-side. Chưa triển khai tìm nội dung tùy ý với contains không index; không lấy toàn bộ dữ liệu về rồi lọc.
+- Từ gói sang đơn dùng PaymentFulfillment.OrderId; từ đơn sang transaction dùng BankTransaction.OrderId. Không join bằng số tiền hoặc tên gói. PaymentOrder giữ snapshot giá/revision; thông tin tài khoản khách là hiện tại trừ khi có snapshot danh tính đã được thiết kế riêng.
+- `purchaseId` dùng OrderId của lần mua đã hoàn tất; `packageId` nullable nếu SupersededBeforeActivation, để vẫn hiển thị lần mua mà không bịa DesignPeriod/quota. Mọi dòng gồm kind, buyerId, buyerDisplayName, planId, revisionId, planNameAtPurchase, paidAtUtc, fulfillmentAtUtc, disposition, current effective state; projectId NULL được phép cho giám sát chưa gán.
+- Transaction DTO có id nội bộ, providerTransactionId, occurredAtUtc, receivedAtUtc, amountVnd, direction, code, content, referenceCode, matchState, processingState, orderId/buyerId/packageId nullable. Không trả raw body, signature, secret, accumulated hoặc toàn bộ cấu hình bank connection. Chỉ người có quyền xem nội dung chuyển khoản.
+- Đơn DTO tách receivedAmountVnd, eligibleAmountVnd, remainingAmountVnd và extraReceivedAmountVnd. Khoản muộn vẫn trong danh sách transaction, không cộng vào eligible. Khoản trùng webhook chỉ một transaction. Khi xử lý cấp gói đang retry, hiển thị processingState và fulfillment chưa có, không báo khách chưa trả tiền chỉ vì grant chưa hoàn tất.
+- Chi tiết nhiều collection dùng các query riêng có giới hạn, không Include nhiều nhánh tạo tích Descartes. Count không tính sau join one-to-many làm nhân số đơn/gói. Không dùng GET để đánh dấu đã hoàn tiền, sửa trạng thái hoặc chạy lại cấp gói.
+- Thời điểm đủ tiền có thể được bổ sung bằng webhook muộn. Nếu thay đổi thứ tự của hai gói đã cấp, theo quyết định mới giữ gói hiện hành và gắn OrderingDiscrepancy cho tra cứu; nhân viên xử lý ngoài hệ thống, không có nút tự sửa gói từ query.
+
+## Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    actor U as Người tra cứu
+    participant A as API
+    participant P as Permission reader
+    participant Q as Read store
+    participant D as PostgreSQL
+    U->>A: GET danh sách hoặc chi tiết
+    A->>P: Kiểm verified và Admin hoặc commerce.read
+    alt Không có quyền
+      P-->>A: Denied
+      A-->>U: 401 hoặc 403, không dữ liệu
+    else Có quyền
+      A->>Q: Filter/page đã validate
+      Q->>D: Projection và left joins có giới hạn
+      D-->>Q: Gói/đơn/giao dịch đúng liên kết
+      Q-->>A: DTO không chứa secret
+      A-->>U: Result với dữ liệu và phân trang
+    end
+```
+
+## Activity Diagram
+
+```mermaid
+flowchart TD
+    A[GET quản trị] --> B{Có phiên và quyền xem?}
+    B -->|Không| X[Từ chối]
+    B -->|Có| C[Validate filter và page]
+    C --> D{Query giao dịch?}
+    D -->|Có| E[Left join đơn, giữ dòng chưa khớp]
+    D -->|Không| F[Đọc order hoặc fulfillment và target nullable]
+    E --> G[Project DTO, tính effective state]
+    F --> G
+    G --> H[Trả dữ liệu; không ghi thay đổi]
+```
+
+## State Diagram
+
+Sơ đồ mô tả phiên tra cứu, không tạo thêm trạng thái nghiệp vụ của đơn/gói.
+
+```mermaid
+stateDiagram-v2
+    [*] --> CheckingAccess
+    CheckingAccess --> Denied: Thiếu phiên hoặc quyền
+    CheckingAccess --> Querying: Admin hoặc nhân viên có commerce.read
+    Querying --> Displayed: Có dữ liệu
+    Querying --> Empty: Không có kết quả trong bộ lọc
+    Displayed --> CheckingAccess: Yêu cầu tra cứu tiếp theo
+    Empty --> CheckingAccess: Đổi bộ lọc
+    Denied --> [*]
+```
+
+## Data Model
+
+**Ý nghĩa dữ liệu nguồn và kết quả đọc**
+
+Module này không tạo thêm bảng. Một projection là kết quả chọn/ghép cột để trả cho màn hình, không phải bản ghi được lưu riêng. Schema và ví dụ bản ghi gốc nằm trong [TDD-PAY-001](TDD-PAY-001.md#data-model), [TDD-SUB-004](TDD-SUB-004.md#data-model) và [TDD-SUB-005](TDD-SUB-005.md#data-model).
+
+| Bảng nguồn | Ý nghĩa một dòng | Dùng để trả thông tin gì? |
+| --- | --- | --- |
+| User | Một tài khoản khách hoặc nhân viên. | Người mua hiện tại hoặc người thực hiện thao tác. Không suy khách từ nội dung chuyển khoản chưa khớp. |
+| PaymentOrder / PlanRevision | Một đơn mua và bản quyền lợi đã chốt cho đơn. | Ai đặt gói nào, giá tại lúc mua, trạng thái đơn; không lấy giá mới từ danh mục hiện hành. |
+| BankTransaction | Một giao dịch ngân hàng đã được hệ thống tiếp nhận. | Từng khoản chuyển, thời điểm, số tiền, tình trạng khớp/xử lý, kể cả không có OrderId. |
+| PaymentFulfillment | Một kết quả cấp quyền của lần mua. | Lịch sử mua thành công; có thể không có packageId nếu SupersededBeforeActivation. |
+| DesignPeriod / SupervisionGrant / Project | Một kỳ thiết kế, một gói giám sát đã cấp và dự án liên quan nếu có. | Hiệu lực hiện tại, hạn/lượt, dự án đã gán; vắng dự án không làm mất lần mua. |
+| PaymentEvent / SupervisionAssignmentEvent / PackageLifecycleEvent | Một mốc thanh toán, một lần gán/sửa và một lần hủy/restore. | Ghép lịch sử để giải thích quá trình sử dụng, không thêm trạng thái “đã hoàn tiền”. |
+| UserRole / RolePermission | Một lần một người giữ một vai trò, và một mã quyền thuộc vai trò đó. | Bảng dùng lại, định nghĩa ở [TDD-RBAC-001](TDD-RBAC-001.md#data-model). Thay cho `StaffAccessProfile` và `StaffPermission` của bản trước. Chúng quyết định request hiện tại có được đọc các dữ liệu trên không, nhưng ở đường chạy thực tế thì quyền đọc từ claim `perm` trong access token chứ không truy vấn lại hai bảng này. Không trả hồ sơ quyền trong DTO giao dịch. |
+
+**Mẫu dữ liệu nguồn → dữ liệu màn hình**
+
+Các ID dưới đây là bí danh UUID, dữ liệu giả định. Cột “Kết quả đọc” chỉ minh họa các trường DTO liên quan, không được insert thành bảng mới.
+
+| Dữ liệu thực lưu ở bảng nguồn | Kết quả đọc cho quản trị | Vì sao cần phân biệt? |
+| --- | --- | --- |
+| O1.PriceVnd=2000000; O1.ReceivedAmountVnd=2100000; O1.EligibleAmountVnd=2100000; O1.RevisionId=R1; R1 là bản quyền lợi cũ | Một dòng đơn O1: priceVnd="2000000", receivedAmountVnd="2100000", eligibleAmountVnd="2100000" | Gói trong danh mục có giá mới cũng không đổi giá O1. Một đơn có hai khoản chuyển vẫn đếm một đơn. |
+| T1.OrderId=O1, AmountVnd=500000; T2.OrderId=O1, AmountVnd=1600000 | Hai dòng giao dịch T1/T2, cùng orderId=O1 và buyerId=U1 | Đếm giao dịch riêng với đếm đơn; không cộng thêm lần nữa vì join ra hai dòng. |
+| T3.OrderId=NULL; MatchState=Unmatched; AmountVnd=300000 | orderId=null; buyerId=null; packageId=null; matchLabel="Chưa xác định đơn" | Không có liên kết thì giữ null. Inner join sẽ làm mất T3 khỏi màn hình. |
+| Fulfillment O4: Kind=Design; Disposition=SupersededBeforeActivation; DesignPeriodId=NULL; SupervisionGrantId=NULL | purchaseId=O4; packageId=null; disposition=SupersededBeforeActivation | Vẫn có lần mua được ghi nhận dù không tạo kỳ hiệu lực. |
+| Fulfillment O5 trỏ G5; G5.State=Unassigned; G5.ProjectId=NULL; còn hạn gán | purchaseId=O5; packageId=G5; projectId=null; effectiveState=Unassigned | Khách đã mua gói giám sát nhưng chưa dùng cho dự án nào. |
+| O6.PaidAtUtc được hiệu chỉnh; O6.OrderingDiscrepancy=true; fulfillment vẫn giữ AppliedPaidAtUtc cũ | Chi tiết đơn có dấu lệch thứ tự và lịch sử thay đổi; gói hiện hành giữ nguyên | Tra cứu giúp nhân viên hiểu lý do xử lý bên ngoài, không kích hoạt sửa gói khi mở màn hình. |
+
+NULL biểu diễn “không có liên kết”, không phải lỗi hệ thống hoặc số tiền bằng 0. EffectiveState được tính từ dữ liệu hiện tại và đồng hồ server; nếu chưa triển khai cache thì không lưu thêm một bản trạng thái để tự đồng bộ.
+
+
+Không thêm bảng nghiệp vụ mới. Các DTO không phải nguồn dữ liệu thứ hai và không được cập nhật trực tiếp.
+
+| Projection | Nguồn và quan hệ | Lưu ý |
+| --- | --- | --- |
+| AdminOrderSummary/Detail | PaymentOrder → User, PlanRevision; nullable Fulfillment | Tất cả trạng thái đơn; không đọc giá hiện hành từ Plan.PublishedRevisionId. |
+| AdminPurchaseSummary/Detail | PaymentFulfillment → PaymentOrder → User; left join DesignPeriod/SupervisionGrant | Mua trước đến muộn có thể không có target; giám sát chưa gán không bị loại. |
+| AdminTransactionSummary/Detail | BankTransaction left join PaymentOrder và Fulfillment | Unmatched có buyer/order/package NULL; không dùng inner join. |
+| PackageHistory | PaymentEvent, SupervisionAssignmentEvent, PackageLifecycleEvent | Ghép theo định danh/loại, không suy trạng thái hoàn tiền. |
+
+```mermaid
+erDiagram
+    User ||--o{ PaymentOrder : buyer
+    PaymentOrder o|--o{ BankTransaction : may_match
+    PaymentOrder ||--o| PaymentFulfillment : purchase
+    PaymentFulfillment o|--o| DesignPeriod : optional_design
+    PaymentFulfillment o|--o| SupervisionGrant : optional_supervision
+    Project o|--o{ SupervisionGrant : optional_project
+```
+
+**Notes**:
+
+- Dùng index đã định nghĩa tại TDD-PAY-001/SUB-004/005. Bổ sung Order(PlanId,CreatedAtUtc DESC,Id), Fulfillment(CompletedAtUtc DESC,OrderId) nếu workload danh sách cần; đo EXPLAIN trước khi chốt thêm index, không khẳng định đã đo performance.
+- Đếm và phân trang trên tập gốc trước khi lấy collection giao dịch/audit. Một order có ba giao dịch vẫn là một order, không ba dòng order. Giao dịch dùng (OccurredAtUtc DESC,Id DESC) để thứ tự ổn định khi cùng giây.
+- Dữ liệu VNĐ trả chuỗi nguyên như TDD-PAY-001. DateTimeOffset trả ISO 8601 UTC, UI hiển thị giờ Việt Nam; nội dung chuyển khoản phải render text, không render HTML.
+- Query xuyên khách là chủ ý của quyền quản trị; query khách ở TDD-PAY-001 luôn có account predicate. Không dùng cùng handler rồi bật cờ `ignoreOwnership=true` từ client.
+- Nguồn quyền nhân viên chưa có dữ liệu provision trong repo; không coi danh sách tên vai trò là chứng minh quyền. Kiểm quyền ở mỗi request để thu hồi có hiệu lực ở request tiếp theo.
+
+## Internal API
+
+### Endpoints
+
+Tất cả route dưới đây là read-only, verified session và Admin hoặc nhân viên có commerce.read. DTO dùng Result<T>/PagedResult<T> hiện có, không bọc một success envelope khác.
+
+- **GET** `/api/v1/admin/payment-orders` — Lọc customerId/planId/kind/state/paymentCode/fromUtc/toUtc, pageIndex/pageSize; trả một dòng mỗi đơn.
+- **GET** `/api/v1/admin/payment-orders/{orderId}` — Snapshot, tổng thực nhận/hợp lệ, fulfillment, OrderingDiscrepancy và liên kết trang transaction/audit. Collection lớn lấy riêng, không nhét vô hạn vào detail.
+- **GET** `/api/v1/admin/bank-transactions` — Lọc orderId/matchState/fromUtc/toUtc/providerTransactionId; Unmatched không cần customerId. Nếu lọc customerId thì chỉ các transaction đã khớp khách đó.
+- **GET** `/api/v1/admin/bank-transactions/{transactionId}` — Thông tin giao dịch đã chuẩn hóa và liên kết nullable; không có thao tác gán tay.
+- **GET** `/api/v1/admin/package-purchases` — Lọc customerId/planId/kind/disposition/effectiveState, phân trang; nguồn Fulfillment+Order, gồm lịch sử bị thay thế và giám sát chưa gán.
+- **GET** `/api/v1/admin/package-purchases/{orderId}` — Chi tiết lần mua, target nullable, hạn/lượt/dự án nếu có; trả liên kết history.
+- **GET** `/api/v1/admin/package-purchases/{orderId}/history` — Audit tạo/cấp, gán/sửa, hủy/restore, sắp AtUtc DESC,Id DESC có page; không tạo lịch sử hoàn tiền.
+
+### Examples
+
+#### GET /api/v1/admin/bank-transactions
+
+```
+Request:
+GET /api/v1/admin/bank-transactions?matchState=Unmatched&pageIndex=1&pageSize=10
+
+Response 200:
+{"value":{"items":[{"id":"99999999-9999-9999-9999-999999999999","providerTransactionId":92704,"occurredAtUtc":"2026-09-19T03:14:00Z","amountVnd":"2000000","direction":"in","content":"NO MATCH","matchState":"Unmatched","matchLabel":"Chưa xác định đơn","orderId":null,"buyerId":null,"packageId":null}],"pageIndex":1,"pageSize":10,"totalCount":1,"hasNextPage":false,"hasPreviousPage":false},"isSuccess":true,"isFailure":false,"error":{"code":"","message":""}}
+
+Error Response:
+{"title":"Forbidden","code":"AccessForbidden","status":403,"detail":"Không có quyền tra cứu thanh toán.","messageCode":"AccessForbidden","errors":null}
+```
+
+Payload minh họa trích trường chính; DTO chi tiết gồm code/referenceCode/receivedAtUtc/processingState theo Architecture. Không trả raw webhook hoặc secret.
+
+### Error Codes
+
+- **Unauthorized** (401): chưa đăng nhập hoặc phiên không hợp lệ.
+- **AccessForbidden** (403): thiếu quyền tra cứu hoặc phiên không đạt policy.
+- **CommerceRecordNotFound** (404): id không tồn tại sau khi kiểm quyền.
+- **CommerceQueryInvalid** (422): filter enum/UUID/time range không hợp lệ hoặc offset tràn; không tự dùng raw SQL từ filter.
+
+## References
+
+### User Stories
+
+- STORY-PAY-002
+
+### Business Rules
+
+- BR-PAY-005/Then
+- BR-PAY-001/Then
+- BR-PAY-002/Then
+- BR-PAY-004/Then
+- BR-SUB-023/Then
+- BR-SUB-024/Then
+- BR-SUB-025/Then
+
+### Use Cases
+
+- STORY-PAY-002/Main Flow
+
+### Others
+
+- [Nguồn đơn/giao dịch](TDD-PAY-001.md), [giám sát](TDD-SUB-004.md), [quyền riêng/lifecycle](TDD-SUB-005.md).
+- [PagedResult](../../bmt-be/src/bmt-be.contract/abstractions/shared/PagedResult.cs), [Result](../../bmt-be/src/bmt-be.contract/abstractions/shared/Result.cs), [JwtExtensions](../../bmt-be/src/bmt-be.api/dependencyInjection/extensions/JwtExtensions.cs).
+- [Bảng truy vết kiểm thử](../discovery/payment-technical-design.md); ST-PAY-047–054. Không có External API: tra cứu từ dữ liệu nội bộ, không gọi SePay ở mỗi lần mở màn hình.
+
+## Change Log
+
+- 2026-09-20: Đổi nguồn quyền tra cứu từ `StaffAccessProfile`/`StaffPermission` sang policy theo mã quyền của [TDD-RBAC-001](TDD-RBAC-001.md). Mã `commerce.read` giữ nguyên tên; Admin xem được vì vai trò Admin chứa mã này, không phải vì có đường tắt theo vai trò. Nghiệp vụ tra cứu quản trị không đổi.
