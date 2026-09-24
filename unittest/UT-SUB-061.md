@@ -33,7 +33,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# UT-SUB-052
+# UT-SUB-061
 
 ## Unit Test
 
@@ -42,10 +42,11 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-052 | Subscription / Supervision | CompleteSupervisionGrantCommandHandler (dự kiến trong TDD-SUB-006) | Branch | REGRESSION | P0 | Actor là nhân viên Staff, Active, không có vai trò admin; IsDirectlyAssignedAsync(actor, Project, PR1) trả true. G1 Assigned trên PR1, Version=2. | CompleteSupervisionGrantCommand(G1, 2, k1) | Thành công, G1 chuyển Completed. IsDirectlyAssignedAsync được gọi đúng một lần với ResourceType=Project và ResourceId=PR1. | STORY-SUB-003/AC-006<br>BR-SUB-011/Then<br>TDD-SUB-006/Architecture | Kiểm nhánh nghiệp vụ bằng EF InMemory và mock IAssignmentAuthorizer; không chứng minh CHECK, partial index hay khóa PostgreSQL. | [Chưa phân công] | Draft |
+| UT-SUB-061 | Subscription / Supervision | AssignmentAuthorizer.IsDirectlyAssignedAsync (dự kiến trong TDD-SUB-006) | Branch | REGRESSION | P0 | Staff S không có vai trò admin. Fake IAssignmentRowLocker.LockActiveForShareAsync trả false cho (S, Project, PR1) vì S chỉ có phân công Customer K sở hữu PR1. IResourceHierarchyReader là mock ghi lại lời gọi. | IsDirectlyAssignedAsync(S, Project, PR1, now) | Trả false. IResourceHierarchyReader không được gọi lần nào. | STORY-SUB-003/AC-016<br>BR-RBAC-013/Except<br>BR-SUB-011/Then<br>TDD-SUB-006/Architecture | Phân công mức khách hàng không có hiệu lực cho hoàn thành/mở lại; hàm không đi nhánh kế thừa. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 
-- STORY-SUB-003/AC-006
+- STORY-SUB-003/AC-016
+- BR-RBAC-013/Except
 - BR-SUB-011/Then
 - TDD-SUB-006/Architecture

@@ -33,7 +33,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# UT-SUB-052
+# UT-SUB-060
 
 ## Unit Test
 
@@ -42,10 +42,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-052 | Subscription / Supervision | CompleteSupervisionGrantCommandHandler (dự kiến trong TDD-SUB-006) | Branch | REGRESSION | P0 | Actor là nhân viên Staff, Active, không có vai trò admin; IsDirectlyAssignedAsync(actor, Project, PR1) trả true. G1 Assigned trên PR1, Version=2. | CompleteSupervisionGrantCommand(G1, 2, k1) | Thành công, G1 chuyển Completed. IsDirectlyAssignedAsync được gọi đúng một lần với ResourceType=Project và ResourceId=PR1. | STORY-SUB-003/AC-006<br>BR-SUB-011/Then<br>TDD-SUB-006/Architecture | Kiểm nhánh nghiệp vụ bằng EF InMemory và mock IAssignmentAuthorizer; không chứng minh CHECK, partial index hay khóa PostgreSQL. | [Chưa phân công] | Draft |
+| UT-SUB-060 | Subscription / Supervision | SupervisionPolicy (dự kiến trong TDD-SUB-006).EnsureCanReopen | Branch | REGRESSION | P1 | Không cần mock. Grant Version=3, lần lượt State=Assigned, Unassigned, CanceledByStaff. | EnsureCanReopen(grant, expectedVersion=3, 'Lý do', projectHeldByAnother=false) | Cả ba ném ConflictException với MessageCode=PackageStateConflict. Với State=Completed thì không ném. | STORY-SUB-003/AC-010<br>BR-SUB-012/Then<br>TDD-SUB-006/Architecture | Chỉ gói đã hoàn thành mới được mở lại. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 
-- STORY-SUB-003/AC-006
-- BR-SUB-011/Then
+- STORY-SUB-003/AC-010
+- BR-SUB-012/Then
 - TDD-SUB-006/Architecture

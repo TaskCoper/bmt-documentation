@@ -44,9 +44,9 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SUB-116 | STORY-SUB-003 | Integration boundary | FULL | P0 | PostgreSQL thật; đã tích hợp Project/assignment; dùng chung khóa project | 1. Commit rút phân công trước khi handler lấy khóa<br>2. Nhân viên cũ hoàn tất<br>3. Kiểm tra grant | Dữ liệu minh họa được tạo riêng cho mỗi ca; Rút phân công tranh thao tác hoàn tất | Từ chối nhân viên cũ; grant và lịch sử không đổi; không dùng kết quả phân quyền đã cache trước khóa. | BR-SUB-012/Then<br>TDD-SUB-003/Data Model | Kiểm chứng transaction/đường truyền thật; không thay bằng EF InMemory. | [Chưa phân công] | Draft |
+| ST-SUB-116 | STORY-SUB-003 | Integration boundary | FULL | P0 | PostgreSQL thật; đã có dữ liệu phân công; gói G1 đã gán dự án A; nhân viên có quyền supervision.complete đang được phân công trực tiếp A. | 1. Commit việc gỡ phân công dự án A của nhân viên trước khi handler hoàn thành lấy khóa.<br>2. Nhân viên cũ gửi yêu cầu hoàn thành G1.<br>3. Kiểm tra G1 và lịch sử. | Dữ liệu minh họa được tạo riêng cho mỗi ca; gỡ phân công tranh với thao tác hoàn thành. | Nhân viên cũ bị từ chối; G1 và lịch sử không đổi; không dùng kết quả kiểm phân công đã đọc trước khi lấy khóa. | STORY-SUB-003/AC-008<br>BR-SUB-011/Then | Kiểm chứng transaction/đường truyền thật; không thay bằng EF InMemory. Cập nhật 24/09/2026 theo vòng đời mới. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 
-- BR-SUB-012/Then
-- TDD-SUB-003/Data Model
+- STORY-SUB-003/AC-008
+- BR-SUB-011/Then

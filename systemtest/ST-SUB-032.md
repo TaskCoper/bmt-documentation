@@ -45,10 +45,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SUB-032 | STORY-SUB-003 | EXC | REGRESSION | P1 | Dự án A có gói cũ S1 đã hoàn thành và gói S2 đang thực hiện. Người thao tác có quyền. | 1. Yêu cầu mở lại S1 với lý do có nội dung.<br>2. Kiểm tra kết quả và trạng thái S1/S2. | Dữ liệu thử; không thiết lập lịch hoặc số dư lượt giám sát. API và cách phân công sẽ bổ sung trong TDD. | Từ chối mở lại S1; S1 vẫn đã hoàn thành, S2 vẫn đang thực hiện. Không tự đóng S2. | STORY-SUB-003/AC-010<br>BR-SUB-012/Statement<br>BR-SUB-006/Statement | Kiểm tra mở lại gói có kiểm soát quyền, lý do và giới hạn theo dự án. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
+| ST-SUB-032 | STORY-SUB-003 | EXC / Integration boundary | FULL | P1 | PostgreSQL thật. Gói S1 đã hoàn thành trên dự án A. Khách có gói S2 hợp lệ. | 1. Ghi trực tiếp vào database một thay đổi đưa S2 sang đã gán trên dự án A, bỏ qua kiểm tra của ứng dụng.<br>2. Kiểm tra database từ chối thay đổi.<br>3. Yêu cầu mở lại S1 với lý do có nội dung và kiểm tra kết quả. | Dữ liệu thử tạo riêng cho ca này; không thiết lập lịch hoặc số dư lượt giám sát. | Database từ chối vì A đã có gói giữ chỗ; S2 giữ nguyên. Vì A không thể có gói khác giữ chỗ, mở lại S1 thành công và A vẫn chỉ có một gói giữ chỗ. Không tự đóng hay đổi gói khác. | STORY-SUB-003/AC-010<br>BR-SUB-012/Except<br>BR-SUB-006/Statement | Theo vòng đời mới, gói đã hoàn thành giữ chỗ nên nhánh mở lại khi dự án có gói khác chỉ xảy ra nếu dữ liệu sai; ca này kiểm ràng buộc database chặn trạng thái đó. Cập nhật 24/09/2026 theo vòng đời mới của gói giám sát. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-SUB-003/AC-010
-- BR-SUB-012/Statement
+- BR-SUB-012/Except
 - BR-SUB-006/Statement

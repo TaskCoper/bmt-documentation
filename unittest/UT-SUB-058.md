@@ -42,9 +42,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-058 | Subscription / Entitlement | ReopenSupervisionHandler (dự kiến trong TDD) | Error | REGRESSION | P0 | Grant version=4 | ExpectedVersion=3 | Trả xung đột; không sửa trạng thái. | BR-SUB-012/Then<br>TDD-SUB-003/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. | [Chưa phân công] | Draft |
+| UT-SUB-058 | Subscription / Supervision | ReopenSupervisionGrantCommandHandler (dự kiến trong TDD-SUB-006) | Error | REGRESSION | P0 | Actor Admin. G1 Completed, Version=4. | ReopenSupervisionGrantCommand(G1, expectedVersion=3, 'Lý do', k1) | Ném ConflictException với MessageCode=PackageVersionConflict. G1 giữ Completed, Version=4; không có event hay receipt mới. | STORY-SUB-003/AC-010<br>BR-SUB-012/Then<br>TDD-SUB-006/Architecture | Kiểm nhánh nghiệp vụ bằng EF InMemory và mock IAssignmentAuthorizer; không chứng minh CHECK, partial index hay khóa PostgreSQL. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 
+- STORY-SUB-003/AC-010
 - BR-SUB-012/Then
-- TDD-SUB-003/Architecture
+- TDD-SUB-006/Architecture

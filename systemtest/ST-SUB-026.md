@@ -45,9 +45,9 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SUB-026 | STORY-SUB-003 | Main | REGRESSION | P1 | Khách có gói giám sát dự án A đang thực hiện; dự án A đã xong. Có thêm gói dự án B và subscription thiết kế để đối chiếu. Chuẩn bị tài khoản Admin và nhân viên được phân công phụ trách dự án A; không có phân công riêng cho gói giám sát. | 1. Chọn đúng khách hàng, dự án A và gói.<br>2. Bấm Hoàn thành gói giám sát.<br>3. Kiểm tra trạng thái, liên kết khách hàng/dự án và các gói khác.<br>4. Chạy với Admin và nhân viên phụ trách trên hai bộ dữ liệu gói đang thực hiện riêng. | Dữ liệu thử; không tạo dữ liệu lịch hoặc số dư lượt giám sát. Cách thao tác cụ thể bổ sung trong TDD. | Chỉ gói A được ghi nhận đã hoàn thành; B và subscription thiết kế không đổi. Không yêu cầu lịch, số lượt đã dùng hoặc còn lại. | STORY-SUB-003/AC-006<br>BR-SUB-011/Statement | Kiểm tra phần giám sát tối giản được chốt lại. Đặc tả nháp, chưa thực thi. | [Chưa xác định] | Draft |
+| ST-SUB-026 | STORY-SUB-003 | Main | REGRESSION | P1 | Khách có gói giám sát G1 đã gán dự án A; dự án A đã xong. Có thêm gói đã gán dự án B và subscription thiết kế để đối chiếu. Chuẩn bị Admin có quyền supervision.complete (không phân công) và nhân viên có quyền supervision.complete được phân công trực tiếp dự án A. | 1. Chọn đúng khách hàng, dự án A và G1.<br>2. Bấm Hoàn thành gói giám sát, không nhập lý do.<br>3. Kiểm tra trạng thái G1, liên kết khách hàng/dự án, lịch sử thao tác và các gói khác.<br>4. Chạy với Admin và nhân viên trên hai bộ dữ liệu riêng. | Dữ liệu thử; không tạo dữ liệu lịch hoặc số dư lượt giám sát. API cụ thể bổ sung trong TDD. | G1 chuyển sang đã hoàn thành, vẫn gắn khách hàng và dự án A, vẫn giữ chỗ trên A. Lịch sử ghi người thao tác và thời điểm. Gói dự án B và subscription thiết kế không đổi; không yêu cầu lịch hay số lượt. | STORY-SUB-003/AC-006<br>BR-SUB-011/Then | Cập nhật 24/09/2026 theo vòng đời mới của gói giám sát. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-SUB-003/AC-006
-- BR-SUB-011/Statement
+- BR-SUB-011/Then

@@ -123,6 +123,7 @@ flowchart LR
 
 - Chỉ nguồn CanceledByStaff. Thiết kế đã ClosedAt/Superseded do mua mới không được restore, kể cả gói mua sau bị hủy.
 - Thiết kế: now<ScheduledEndsAtUtc, chưa bị một lần mua mới thay thế, không có kỳ hiệu lực khác. Khóa account/subscription và đặt về Active cùng CurrentPeriodId; giữ hạn cũ, quota và counters hiện tại. Không nạp lại counters từ snapshot lúc hủy vì tác vụ cũ có thể đã hoàn tất trong thời gian bị hủy.
+- Giám sát: trạng thái đích lấy từ `FromState` của sự kiện hủy mà `CancelEventId` trỏ tới. Gói `Completed` bị hủy thì khôi phục về `Completed`, cùng điều kiện dự án chưa có gói khác giữ chỗ ([TDD-SUB-006](TDD-SUB-006.md#data-model)).
 - Giám sát chưa từng gán: now<AssignmentDeadlineUtc, restore Unassigned. Đã gán: FirstAssignedAt đúng hạn và project chưa có Assigned grant khác, restore Assigned dù đã qua một năm. Không tự sửa project để né xung đột.
 - Đổi gói khi kỳ hiện tại bị nhân viên hủy vẫn là lần mua mới: fulfillment đánh dấu kỳ cũ Superseded nếu bị thay thế, không giữ đường restore vào nó. `CanceledByStaff` cần có lịch sử, không ghi đè mất việc từng bị hủy.
 - Hệ thống không tự quay về gói trước khi hủy gói mới. Sửa thứ tự do thông tin giao dịch đến muộn không dùng endpoint restore.
@@ -249,6 +250,7 @@ erDiagram
 
 **Notes**:
 
+- [TDD-SUB-006](TDD-SUB-006.md#data-model) dùng lại `PackageLifecycleEvent` cho hoàn thành và mở lại gói giám sát: thêm `Action` `Complete`/`Reopen`, chỉ cho `PackageKind = Supervision`, và cho `Reason` NULL riêng với `Complete`.
 - Tất cả FK lịch sử RESTRICT; index `(AccountId,AtUtc DESC,Id)` và theo từng target phục vụ tra cứu. `Reason` là cột bắt buộc ở cả hủy và khôi phục, khác `SupervisionAssignmentEvent` nơi lần gán đầu được để trống. CancelEventId tham chiếu event Cancel đúng target bằng kiểm tra transaction; để DEFERRABLE hoặc lưu event trước set pointer, không mở transaction lồng.
 - `LifecycleState=Superseded` cần ClosedAtUtc NOT NULL. Active/CanceledByStaff không có ClosedAtUtc do thay thế. Period đã hết hạn có thể còn trạng thái lưu Active nhưng effective state là Expired; restore luôn kiểm clock trực tiếp.
 - Kỳ chỉ dùng khi đúng CurrentPeriodId, LifecycleState Active và trong [StartsAt,ScheduledEndsAt). Partial unique nếu bổ sung cờ current phải được update nguyên tử; con trỏ chung dưới khóa là nguồn xác định hiện hành, không dùng unique với NOW().

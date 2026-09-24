@@ -42,9 +42,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-055 | Subscription / Entitlement | ReopenSupervisionHandler (dự kiến trong TDD) | Boundary | REGRESSION | P0 | Grant Completed; Admin hợp lệ | Reason chỉ chứa khoảng trắng | Từ chối; không mở lại. | BR-SUB-012/Then<br>TDD-SUB-003/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. | [Chưa phân công] | Draft |
+| UT-SUB-055 | Subscription / Supervision | ReopenSupervisionGrantCommandValidator (dự kiến trong TDD-SUB-006) | Boundary | REGRESSION | P0 | Không cần mock. | ReopenSupervisionGrantCommand với reason lần lượt: null, chuỗi rỗng, chỉ khoảng trắng/tab, 2.001 ký tự; so với reason 1 ký tự và 2.000 ký tự. | Bốn trường hợp đầu không hợp lệ, lỗi có ErrorCode=PackageMutationInvalid. Reason 1 và 2.000 ký tự hợp lệ. | STORY-SUB-003/AC-010<br>BR-SUB-012/Then<br>TDD-SUB-006/Internal API | Kiểm biên độ dài và nội dung lý do mở lại ở validator. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 
+- STORY-SUB-003/AC-010
 - BR-SUB-012/Then
-- TDD-SUB-003/Architecture
+- TDD-SUB-006/Internal API

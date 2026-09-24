@@ -45,9 +45,9 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SUB-029 | STORY-SUB-003 | Main | REGRESSION | P1 | Gói A đã hoàn thành, dự án chưa có gói khác đang thực hiện. Có Admin và nhân viên được phân công phụ trách dự án A; không có phân công riêng cho gói. | 1. Với từng vai trò, chuẩn bị bộ dữ liệu riêng.<br>2. Mở lại gói với lý do Bấm hoàn thành nhầm.<br>3. Kiểm tra trạng thái, lý do được lưu, liên kết và các gói khác. | Dữ liệu thử; không thiết lập lịch hoặc số dư lượt giám sát. API và cách phân công sẽ bổ sung trong TDD. | Gói về đang thực hiện, lưu lý do; không đổi gói khác, khách hàng/dự án và không tạo lịch hoặc lượt. | STORY-SUB-003/AC-009<br>BR-SUB-012/Statement | Kiểm tra mở lại gói có kiểm soát quyền, lý do và giới hạn theo dự án. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
+| ST-SUB-029 | STORY-SUB-003 | Main | REGRESSION | P1 | Gói G1 đã hoàn thành trên dự án A; A không có gói khác giữ chỗ. Có Admin có quyền supervision.complete và nhân viên có quyền này được phân công trực tiếp dự án A. | 1. Với từng người thao tác, chuẩn bị bộ dữ liệu riêng.<br>2. Mở lại G1 với lý do Bấm hoàn thành nhầm.<br>3. Kiểm tra trạng thái, dự án, hạn gán, mốc gán đầu, lý do được lưu và các gói khác. | Dữ liệu thử; không tạo dữ liệu lịch hoặc số dư lượt giám sát. API cụ thể bổ sung trong TDD. | G1 về trạng thái đã gán trên đúng dự án A, lý do được lưu. Hạn gán, mốc gán đầu, quyền lợi và chủ gói không đổi; không tạo lịch hoặc lượt. | STORY-SUB-003/AC-009<br>BR-SUB-012/Then | Cập nhật 24/09/2026 theo vòng đời mới của gói giám sát. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-SUB-003/AC-009
-- BR-SUB-012/Statement
+- BR-SUB-012/Then

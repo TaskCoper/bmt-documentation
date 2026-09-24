@@ -42,9 +42,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-053 | Subscription / Entitlement | CompleteSupervisionHandler (dự kiến trong TDD) | Error | REGRESSION | P0 | Actor từng được phân công nhưng đã bị rút | Hoàn tất | Từ chối; trạng thái và lịch sử không đổi. | BR-SUB-012/Then<br>TDD-SUB-003/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. | [Chưa phân công] | Draft |
+| UT-SUB-053 | Subscription / Supervision | CompleteSupervisionGrantCommandHandler (dự kiến trong TDD-SUB-006) | Error | REGRESSION | P0 | Actor là nhân viên Staff, Active; IsDirectlyAssignedAsync trả false (phân công PR1 đã kết thúc). G1 Assigned trên PR1. | CompleteSupervisionGrantCommand(G1, 2, k1) | Ném NotPermissionException với MessageCode=ProjectNotAssignedToActor. G1 giữ Assigned, Version=2; không có event hay receipt mới. | STORY-SUB-003/AC-008<br>BR-SUB-011/Then<br>TDD-SUB-006/Architecture | Kiểm nhánh nghiệp vụ bằng EF InMemory và mock IAssignmentAuthorizer; không chứng minh CHECK, partial index hay khóa PostgreSQL. Tranh chấp với việc gỡ phân công đang diễn ra kiểm bằng ST-SUB-116. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 
-- BR-SUB-012/Then
-- TDD-SUB-003/Architecture
+- STORY-SUB-003/AC-008
+- BR-SUB-011/Then
+- TDD-SUB-006/Architecture

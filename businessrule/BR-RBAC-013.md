@@ -68,6 +68,8 @@ Người có quyền `assignment.manage` tạo, chuyển giao hoặc gỡ một 
 
 Admin thao tác được trên gói giám sát mà không cần phân công dự án, theo [BR-SUB-011](BR-SUB-011.md) và [BR-SUB-012](BR-SUB-012.md).
 
+Điểm 3 không áp dụng cho hoàn thành và mở lại gói giám sát: nhân viên phải được phân công trực tiếp dự án; phân công mức khách hàng không đủ. Người dùng xác nhận ngày 24/09/2026, xem [BR-SUB-011](BR-SUB-011.md).
+
 ## Notes
 
 - **Điểm 4 là nội dung suy ra từ nguyên tắc quyền cộng dồn, chưa được xác nhận riêng.** Cần người dùng chốt trước khi viết System Test cho nhánh này.

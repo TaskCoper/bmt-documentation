@@ -42,9 +42,11 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-056 | Subscription / Entitlement | ReopenSupervisionHandler (dự kiến trong TDD) | Error | REGRESSION | P0 | Công trình đang có grant khác InProgress | Mở lại grant cũ với lý do | Từ chối; giữ tối đa một grant InProgress. | BR-SUB-006/Then<br>TDD-SUB-003/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. | [Chưa phân công] | Draft |
+| UT-SUB-056 | Subscription / Supervision | ReopenSupervisionGrantCommandHandler (dự kiến trong TDD-SUB-006) | Error | REGRESSION | P0 | Actor Admin; IsDirectlyAssignedAsync trả true. G1 Completed trên PR1, Version=5. Có grant G2 cùng PR1 với State=Assigned (dữ liệu dựng thẳng trong InMemory, bỏ qua index). | ReopenSupervisionGrantCommand(G1, 5, 'Bấm hoàn thành nhầm', k1) | Ném ConflictException với MessageCode=AnotherPackageActive. G1 giữ Completed, Version=5; G2 không đổi; không có event mới. Lặp lại khi G2 State=Completed cho cùng kết quả. | STORY-SUB-003/AC-010<br>BR-SUB-012/Except<br>BR-SUB-006/Statement<br>TDD-SUB-006/Data Model | Kiểm nhánh nghiệp vụ bằng EF InMemory và mock IAssignmentAuthorizer; không chứng minh CHECK, partial index hay khóa PostgreSQL. Việc database chặn trạng thái này kiểm bằng ST-SUB-032. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 
-- BR-SUB-006/Then
-- TDD-SUB-003/Architecture
+- STORY-SUB-003/AC-010
+- BR-SUB-012/Except
+- BR-SUB-006/Statement
+- TDD-SUB-006/Data Model

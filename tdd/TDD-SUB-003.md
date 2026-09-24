@@ -53,6 +53,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ### Problem
 
+**Cập nhật 24/09/2026:** Hoàn thành và mở lại vẫn thuộc phạm vi. Thiết kế hiện hành của hai thao tác này là [TDD-SUB-006](TDD-SUB-006.md): trạng thái `Completed` nằm trên vòng đời `Unassigned`/`Assigned`/`CanceledByStaff`, và nhân viên phải được phân công trực tiếp dự án. Không dùng Architecture, sơ đồ, Internal API hay Data Model của tài liệu này để triển khai.
+
 **Cập nhật hợp đồng khi bổ sung thanh toán:** TDD-SUB-004 thay mô hình luôn bắt buộc ProjectId bằng gói chưa gán, hạn gán một năm và sửa liên kết có quyền riêng. TDD-SUB-005 bổ sung hủy/restore, khác hoàn thành/mở lại. Không áp dụng cấm sửa ProjectId hoặc thiếu hạn gán của schema cũ cho luồng mới. Các API hoàn thành/mở lại lịch sử không tự trở thành chức năng quản lý khảo sát của đợt này. Xem [bàn giao thiết kế mới](../discovery/payment-technical-design.md). Các phần còn lại giữ làm nguồn thiết kế; nội dung bị thay phải đọc theo TDD mới trước khi triển khai.
 
 Tài liệu này thiết kế cách lưu và quản lý trạng thái của gói giám sát đã cấp cho một công trình theo STORY-SUB-003. Gói không tự hết hạn. Admin hoặc nhân viên đang được phân công phụ trách công trình được hoàn tất hoặc mở lại gói; mở lại phải có lý do.

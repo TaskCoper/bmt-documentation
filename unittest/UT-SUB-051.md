@@ -42,9 +42,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-051 | Subscription / Entitlement | CompleteSupervisionHandler (dự kiến trong TDD) | Happy | REGRESSION | P0 | Actor là Admin hợp lệ; grant InProgress | Hoàn tất với version hiện tại | Chuyển Completed; ghi lịch sử; không thay subscription thiết kế. | BR-SUB-012/Then<br>TDD-SUB-003/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. | [Chưa phân công] | Draft |
+| UT-SUB-051 | Subscription / Supervision | CompleteSupervisionGrantCommandHandler (dự kiến trong TDD-SUB-006) | Happy | REGRESSION | P0 | Actor là Admin (Staff, Active); IAssignmentAuthorizer.IsDirectlyAssignedAsync trả true. Grant G1 State=Assigned, ProjectId=PR1, FirstAssignedAtUtc có giá trị, Version=2. | CompleteSupervisionGrantCommand(G1, expectedVersion=2, key=k1) | Result thành công, LifecycleState=Completed, Version=3, WasAlreadyApplied=false. G1: State=Completed, Version=3; ProjectId, FirstAssignedAtUtc, AssignmentDeadlineUtc không đổi. Thêm đúng một PackageLifecycleEvent Action=Complete, FromState=Assigned, ToState=Completed, Reason=NULL, PackageVersion=3 và một receipt Operation=CompleteSupervision. | STORY-SUB-003/AC-006<br>BR-SUB-011/Then<br>TDD-SUB-006/Architecture | Kiểm nhánh nghiệp vụ bằng EF InMemory và mock IAssignmentAuthorizer; không chứng minh CHECK, partial index hay khóa PostgreSQL. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 
-- BR-SUB-012/Then
-- TDD-SUB-003/Architecture
+- STORY-SUB-003/AC-006
+- BR-SUB-011/Then
+- TDD-SUB-006/Architecture

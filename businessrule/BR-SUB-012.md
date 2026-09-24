@@ -43,11 +43,13 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Version**:
 - **Effective Date**:
 - **Owner**: [Chưa xác định]
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 - **Source**: Người dùng chọn Admin và nhân viên phụ trách đều được mở lại gói giám sát đã hoàn thành, bắt buộc ghi lý do. Ràng buộc một gói đang thực hiện trên mỗi dự án đã được chốt trước đó.
 
 ## Statement
+
+**Cập nhật 24/09/2026:** Mở lại dùng chung quyền `supervision.complete` với hoàn thành, cùng cách kiểm phân công trực tiếp dự án ở [BR-SUB-011](BR-SUB-011.md). Mở lại đưa gói về đã gán trên đúng dự án cũ.
 
 **Phân biệt với thanh toán 19/09/2026:** Mở lại gói đã hoàn thành trong tài liệu này khác với khôi phục gói do nhân viên hủy. Khôi phục sau hủy dùng quyền riêng, điều kiện hạn và xung đột theo [BR-SUB-025](BR-SUB-025.md); không tự dùng quyền Admin/nhân viên phụ trách của luồng cũ thay thế quyền riêng đã chốt.
 
@@ -59,9 +61,9 @@ Người thao tác gửi yêu cầu mở lại gói giám sát đã hoàn thành
 
 ## Then
 
-1. Dùng phân công hiện tại ở dự án gắn với gói, không dùng phân công riêng theo gói. Kiểm tra người thao tác là Admin hoặc nhân viên đang phụ trách dự án đó. Khách hàng và nhân viên không phụ trách không có quyền mở lại.
+1. Dùng phân công hiện tại ở dự án gắn với gói, không dùng phân công riêng theo gói. Người thao tác phải có quyền `supervision.complete`; Admin có quyền này thì không cần phân công, nhân viên có quyền này phải được phân công trực tiếp dự án đó. Phân công mức khách hàng không tính. Khách hàng và nhân viên không phụ trách không có quyền mở lại.
 2. Yêu cầu lý do có nội dung; không chấp nhận thiếu lý do, chuỗi rỗng hoặc chỉ có khoảng trắng.
-3. Nếu dự án chưa có gói giám sát khác đang thực hiện, chuyển gói được chọn về đang thực hiện và lưu lý do mở lại.
+3. Nếu dự án chưa có gói giám sát khác giữ chỗ, chuyển gói được chọn về đã gán trên đúng dự án cũ và lưu lý do mở lại. Không đổi hạn gán lần đầu hoặc mốc gán đầu.
 4. Giữ nguyên quyền lợi đã cấp theo [BR-SUB-004](BR-SUB-004.md) và liên kết khách hàng/dự án; không tự đổi gói khác hoặc subscription thiết kế. Không tạo chu kỳ, lịch hẹn, hạn mức hoặc giao dịch lượt giám sát.
 
 ## Except

@@ -43,13 +43,15 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Version**:
 - **Effective Date**:
 - **Owner**: [Chưa xác định]
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 - **Source**: Người dùng xác nhận: thiết kế có một subscription đang hiệu lực trên tài khoản; giám sát có một subscription đang hiệu lực cho mỗi công trình, các công trình được dùng gói riêng cùng lúc.
 
 ## Statement
 
 **Cập nhật 19/09/2026:** Khách được sở hữu nhiều gói giám sát chưa gán dự án. Giới hạn một gói áp dụng khi gán/khôi phục hiệu lực trên một dự án, không chặn mua nhiều gói chưa gán. Hạn gán lần đầu và sửa liên kết theo [BR-SUB-022](BR-SUB-022.md), [BR-SUB-023](BR-SUB-023.md); hủy/khôi phục theo [BR-SUB-024](BR-SUB-024.md), [BR-SUB-025](BR-SUB-025.md).
+
+**Cập nhật 24/09/2026:** Với giám sát, gói có hiệu lực trên công trình là gói giữ chỗ: đã gán hoặc đã hoàn thành. Gói đã hoàn thành vẫn giữ chỗ nên công trình không nhận được gói khác cho tới khi gói đó bị hủy. Gói chưa gán hoặc đang bị hủy không giữ chỗ.
 
 Tại cùng một thời điểm, tài khoản có tối đa một subscription thiết kế đang hiệu lực. Mỗi công trình có tối đa một gói giám sát đang hiệu lực. Một tài khoản có thể dùng gói thiết kế đồng thời với nhiều gói giám sát cho các công trình khác nhau.
 

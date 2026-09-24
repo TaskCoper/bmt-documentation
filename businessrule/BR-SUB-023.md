@@ -56,13 +56,15 @@ Có yêu cầu đổi dự án của gói giám sát đã gán.
 
 ## Then
 
-1. Từ chối khách tự gỡ hoặc tự đổi; hướng dẫn liên hệ nhân viên. Nhân viên thiếu quyền riêng cũng không được sửa.
+1. Từ chối khách tự gỡ hoặc tự đổi; hướng dẫn liên hệ nhân viên. Nhân viên thiếu quyền riêng cũng không được sửa. Người sửa phải là tài khoản nhân viên đang hoạt động; tài khoản khách có quyền riêng, chẳng hạn do bị gán nhầm vai trò, vẫn bị từ chối.
 2. Nhân viên có quyền phải nhập lý do có nội dung. Dự án đích thuộc cùng khách hàng và chưa có gói giám sát khác đang hiệu lực.
 3. Sửa liên kết sang dự án đích; không tạo gói mới, không thu tiền lần nữa, không đổi chủ gói hoặc quyền lợi đã mua.
 4. Gói từng gán đúng hạn vẫn được sửa sau một năm từ lúc mua. Không làm mới hạn gán ban đầu hoặc dùng thao tác sửa để cứu gói chưa từng gán đã hết hạn.
 5. Không kiểm tra điều kiện đã/chưa khảo sát hoặc giám sát, vì hệ thống chưa quản lý những hoạt động đó.
 
 ## Except
+
+Không sửa dự án của gói đã hoàn thành; phải mở lại gói trước theo [BR-SUB-012](BR-SUB-012.md). Không sửa gói khác sang dự án đang có gói đã hoàn thành, vì gói đó vẫn giữ chỗ.
 
 Chưa xác nhận quyền nhân viên gỡ gói về trạng thái chưa gán hoặc sửa liên kết của gói đang bị hủy. Không suy ra các thao tác này từ quyền sửa dự án.
 

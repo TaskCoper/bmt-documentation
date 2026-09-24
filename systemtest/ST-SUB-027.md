@@ -45,9 +45,9 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SUB-027 | STORY-SUB-003 | Main | REGRESSION | P1 | Gói giám sát dự án A đang thực hiện, chưa có thao tác hoàn thành. | 1. Ghi nhận gói không có chu kỳ hoặc ngày hết hạn.<br>2. Đưa thời gian kiểm thử qua một tháng, rồi một năm.<br>3. Kiểm tra trạng thái và không có kỳ/hạn mức mới được tạo. | Dữ liệu thử; không tạo dữ liệu lịch hoặc số dư lượt giám sát. Cách thao tác cụ thể bổ sung trong TDD. | Gói vẫn đang thực hiện; không tự hết hạn, hoàn thành, tạo kỳ hoặc làm mới lượt do thời gian. | STORY-SUB-003/AC-007<br>BR-SUB-011/Statement | Kiểm tra phần giám sát tối giản được chốt lại. Đặc tả nháp, chưa thực thi. | [Chưa xác định] | Draft |
+| ST-SUB-027 | STORY-SUB-003 | Main | REGRESSION | P1 | Gói giám sát G1 đã gán dự án A đúng hạn, chưa có thao tác hoàn thành. | 1. Ghi nhận gói không có chu kỳ; mốc hạn gán chỉ áp dụng cho lần gán đầu.<br>2. Đưa thời gian kiểm thử qua một tháng, rồi qua một năm tính từ lúc cấp.<br>3. Kiểm tra trạng thái và không có kỳ/hạn mức mới được tạo. | Dữ liệu thử; không tạo dữ liệu lịch hoặc số dư lượt giám sát. API cụ thể bổ sung trong TDD. | G1 vẫn ở trạng thái đã gán; không tự hết hạn, hoàn thành, tạo kỳ hoặc làm mới lượt do thời gian. | STORY-SUB-003/AC-007<br>BR-SUB-011/Then | Cập nhật 24/09/2026 theo vòng đời mới của gói giám sát. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-SUB-003/AC-007
-- BR-SUB-011/Statement
+- BR-SUB-011/Then

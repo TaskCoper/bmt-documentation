@@ -41,13 +41,13 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 ## Metadata
 
 - **Story**: Là người có quyền quản lý gói giám sát, tôi muốn ghi nhận gói của đúng khách hàng và dự án là đã hoàn thành khi dự án xong.
-- **Context**: Phạm vi hiện tại chỉ quản lý gói theo dự án và nút hoàn thành, không có chu kỳ hay ngày hết hạn. Lịch và lượt vận hành offline. AC-004/AC-005 là nội dung đã HOÃN, không thuộc nghiệm thu đợt này; xem nợ nghiệp vụ. Admin và nhân viên được phân công phụ trách dự án được bấm hoàn thành hoặc mở lại; không phân công riêng theo gói; khách hàng và nhân viên không phụ trách không được bấm. Gói giám sát gắn với một công trình, không chia lượt sang công trình khác. Một lượt kiểm tra thực tế là một buổi kỹ sư đến kiểm tra tại công trình. Quyền lợi thiết kế vẫn dùng chung theo tài khoản. Mỗi công trình có tối đa một gói giám sát đang thực hiện; các công trình khác nhau của tài khoản được dùng gói riêng cùng lúc.
+- **Context**: Phạm vi hiện tại chỉ quản lý gói theo dự án và nút hoàn thành, không có chu kỳ hay ngày hết hạn. Lịch và lượt vận hành offline. AC-004/AC-005 là nội dung đã HOÃN, không thuộc nghiệm thu đợt này; xem nợ nghiệp vụ. Người bấm hoàn thành hoặc mở lại phải có quyền `supervision.complete`. Admin có quyền này thì không cần phân công; nhân viên có quyền này phải đang được phân công trực tiếp dự án, phân công ở mức khách hàng không tính. Không phân công riêng theo gói; khách hàng và nhân viên không phụ trách không được bấm. Gói giám sát gắn với một công trình, không chia lượt sang công trình khác. Một lượt kiểm tra thực tế là một buổi kỹ sư đến kiểm tra tại công trình. Quyền lợi thiết kế vẫn dùng chung theo tài khoản. Mỗi công trình có tối đa một gói giám sát giữ chỗ, tức là đang gán hoặc đã hoàn thành; các công trình khác nhau của tài khoản được dùng gói riêng cùng lúc.
 - **Sprint**:
 - **Priority**:
 - **Status**: Todo
 - **Creator**: [Chưa xác định]
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 - **Assignee**:
   - Backend: [Chưa xác định]
   - QA: [Chưa xác định]
@@ -65,15 +65,17 @@ Người có quyền mở gói của khách hàng theo dự án hoặc bấm Ho�
 
 ## Flow
 
-**Cập nhật phạm vi 19/09/2026:** [STORY-SUB-004](STORY-SUB-004.md) bổ sung mua trước/gán sau, hạn gán lần đầu một năm và quyền nhân viên sửa dự án; thay các mô tả cũ cấm mọi chuyển dự án. [STORY-SUB-005](STORY-SUB-005.md) quy định hủy/khôi phục bằng quyền riêng. Các bước hoàn thành/mở lại dưới đây là thiết kế lịch sử riêng, không phải quản lý khảo sát/giám sát hoặc hủy/khôi phục. AC-007 chỉ áp dụng gói đã gán đúng hạn, không áp dụng gói chưa từng gán.
+**Cập nhật phạm vi 19/09/2026:** [STORY-SUB-004](STORY-SUB-004.md) bổ sung mua trước/gán sau, hạn gán lần đầu một năm và quyền nhân viên sửa dự án; thay các mô tả cũ cấm mọi chuyển dự án. [STORY-SUB-005](STORY-SUB-005.md) quy định hủy/khôi phục bằng quyền riêng. AC-007 chỉ áp dụng gói đã gán đúng hạn, không áp dụng gói chưa từng gán.
+
+**Cập nhật phạm vi 24/09/2026:** Hoàn thành và mở lại vẫn thuộc phạm vi, áp dụng trên vòng đời mới của STORY-SUB-004/005. "Đang thực hiện" trong Story này nghĩa là gói đã gán dự án. Chỉ gói đã gán mới được hoàn thành; mở lại đưa gói về đã gán trên đúng dự án cũ. Gói đã hoàn thành vẫn giữ chỗ trên dự án, không được sửa dự án, được hủy và khi khôi phục thì về lại đã hoàn thành. Hoàn thành/mở lại vẫn khác hủy/khôi phục và không quản lý hoạt động khảo sát/giám sát.
 
 ### Main Flow
 
 1. Xác định gói giám sát và công trình được gắn.
 2. Đối chiếu công trình yêu cầu với công trình được gắn.
-3. Admin hoặc nhân viên phụ trách chọn đúng khách hàng, dự án và gói đang thực hiện; hệ thống kiểm tra quyền của người thao tác theo phân công hiện tại của dự án, hoặc quyền Admin.
+3. Admin hoặc nhân viên phụ trách chọn đúng khách hàng, dự án và gói đã gán dự án đó. Hệ thống kiểm tra người thao tác có quyền `supervision.complete`; với nhân viên, kiểm tra thêm phân công hiện tại trực tiếp trên dự án.
 4. Khi dự án đã xong, người có quyền bấm Hoàn thành gói giám sát.
-5. Hệ thống ghi nhận gói được chọn đã hoàn thành; không thay đổi gói của dự án khác hoặc subscription thiết kế. Không yêu cầu dữ liệu lượt hoặc lịch offline.
+5. Hệ thống ghi nhận gói được chọn đã hoàn thành, không bắt nhập lý do và lưu người thao tác cùng thời điểm. Gói vẫn gắn với dự án và vẫn giữ chỗ trên dự án đó. Không thay đổi gói của dự án khác hoặc subscription thiết kế; không yêu cầu dữ liệu lượt hoặc lịch offline.
 
 ### Alternative Flow
 
@@ -97,7 +99,14 @@ Admin hoặc nhân viên phụ trách mở lại gói đã hoàn thành do thao 
 1. Chọn đúng khách hàng, dự án và gói đã hoàn thành.
 2. Nhập lý do mở lại.
 3. Hệ thống kiểm tra quyền, lý do và dự án không có gói giám sát khác đang thực hiện.
-4. Chuyển gói về đang thực hiện và lưu lý do; giữ nguyên các gói khác, không tạo lịch hoặc lượt giám sát.
+4. Chuyển gói về đã gán trên đúng dự án cũ và lưu lý do; không đổi hạn gán, quyền lợi hay chủ gói. Giữ nguyên các gói khác, không tạo lịch hoặc lượt giám sát.
+
+#### ALT-04
+
+Nhân viên có quyền hủy gói đã hoàn thành, sau đó khôi phục.
+
+1. Hủy theo STORY-SUB-005; gói nhả chỗ trên dự án để dự án có thể nhận gói khác.
+2. Khi khôi phục, nếu dự án chưa có gói khác giữ chỗ, gói về lại trạng thái đã hoàn thành trên đúng dự án cũ.
 
 ### Exception Flow
 
@@ -128,6 +137,37 @@ Yêu cầu mở lại thiếu quyền, thiếu lý do hoặc dự án đã có g
 
 1. Hệ thống từ chối yêu cầu; lý do rỗng hoặc chỉ có khoảng trắng được xem là thiếu lý do.
 2. Giữ nguyên trạng thái gói được chọn và các gói khác.
+
+#### EXC-05
+
+Yêu cầu hoàn thành gói chưa gán dự án hoặc gói đang bị hủy.
+
+1. Hệ thống từ chối; gói giữ nguyên trạng thái.
+
+#### EXC-06
+
+Yêu cầu gán hoặc sửa một gói khác sang dự án đang có gói đã hoàn thành.
+
+1. Hệ thống từ chối vì gói đã hoàn thành vẫn giữ chỗ trên dự án.
+2. Muốn giám sát tiếp dự án đó thì mở lại gói đã hoàn thành.
+
+#### EXC-07
+
+Nhân viên có quyền sửa dự án yêu cầu sửa dự án của gói đã hoàn thành.
+
+1. Hệ thống từ chối; phải mở lại gói trước rồi mới sửa dự án.
+
+#### EXC-08
+
+Nhân viên có quyền `supervision.complete` nhưng chỉ được phân công ở mức khách hàng, không được phân công trực tiếp dự án, yêu cầu hoàn thành hoặc mở lại gói.
+
+1. Hệ thống từ chối; phân công mức khách hàng không có hiệu lực xuống dự án cho thao tác này.
+
+#### EXC-09
+
+Khôi phục gói đã hoàn thành bị hủy khi dự án đã có gói khác giữ chỗ.
+
+1. Hệ thống từ chối; không tự hủy gói khác và không tự chuyển gói sang dự án khác.
 
 ## Acceptance Criteria
 
@@ -172,9 +212,9 @@ Yêu cầu mở lại thiếu quyền, thiếu lý do hoặc dự án đã có g
 
 #### AC-006
 
-- **Given**: Khách hàng có gói giám sát đang thực hiện gắn với dự án A đã xong; người thao tác là Admin hoặc nhân viên phụ trách dự án A.
+- **Given**: Khách hàng có gói giám sát đã gán dự án A và dự án đã xong; người thao tác là Admin có quyền `supervision.complete`, hoặc nhân viên có quyền này và được phân công trực tiếp dự án A.
 - **When**: Người đó chọn đúng khách hàng, dự án A và bấm Hoàn thành gói giám sát.
-- **Then**: Chỉ gói của A được ghi nhận đã hoàn thành, vẫn gắn với đúng khách hàng và A.
+- **Then**: Chỉ gói của A được ghi nhận đã hoàn thành, vẫn gắn với đúng khách hàng và dự án A, đồng thời vẫn giữ chỗ trên A; không bắt nhập lý do.
 - **And**: Không thay đổi gói của dự án khác hoặc subscription thiết kế; không yêu cầu dữ liệu lịch hay lượt đang vận hành offline.
 
 #### AC-007
@@ -186,16 +226,16 @@ Yêu cầu mở lại thiếu quyền, thiếu lý do hoặc dự án đã có g
 
 #### AC-008
 
-- **Given**: Gói giám sát đang thực hiện; người thao tác là khách hàng hoặc nhân viên không phụ trách dự án đó.
+- **Given**: Gói giám sát đã gán dự án A; người thao tác là khách hàng, nhân viên không phụ trách A, hoặc Admin không có quyền `supervision.complete`.
 - **When**: Người đó gửi yêu cầu hoàn thành gói, kể cả qua API trực tiếp.
 - **Then**: Hệ thống từ chối vì không có quyền.
 - **And**: Trạng thái gói và liên kết khách hàng/dự án không thay đổi.
 
 #### AC-009
 
-- **Given**: Gói giám sát đã hoàn thành; dự án không có gói giám sát khác đang thực hiện; người thao tác là Admin hoặc nhân viên phụ trách dự án.
+- **Given**: Gói giám sát đã hoàn thành trên dự án A; A không có gói giám sát khác giữ chỗ; người thao tác là Admin có quyền `supervision.complete`, hoặc nhân viên có quyền này và được phân công trực tiếp dự án A.
 - **When**: Người đó mở lại gói và nhập lý do có nội dung.
-- **Then**: Gói chuyển về đang thực hiện, lý do mở lại được lưu.
+- **Then**: Gói chuyển về đã gán trên dự án A, lý do mở lại được lưu; hạn gán và quyền lợi không đổi.
 - **And**: Liên kết khách hàng/dự án và các gói khác giữ nguyên; không tạo lịch hoặc giao dịch lượt giám sát.
 
 #### AC-010
@@ -205,11 +245,61 @@ Yêu cầu mở lại thiếu quyền, thiếu lý do hoặc dự án đã có g
 - **Then**: Yêu cầu bị từ chối.
 - **And**: Gói được chọn và các gói khác giữ nguyên trạng thái; không tự đóng gói khác để mở lại gói cũ.
 
+#### AC-011
+
+- **Given**: Gói giám sát chưa gán dự án, hoặc đang bị nhân viên hủy.
+- **When**: Người có quyền gửi yêu cầu hoàn thành gói.
+- **Then**: Yêu cầu bị từ chối.
+- **And**: Gói giữ nguyên trạng thái.
+
+#### AC-012
+
+- **Given**: Gói G1 đã hoàn thành trên dự án A; khách có gói G2 chưa gán.
+- **When**: Khách gán G2 vào A, hoặc nhân viên sửa dự án của một gói khác sang A.
+- **Then**: Yêu cầu bị từ chối vì G1 vẫn giữ chỗ trên A.
+- **And**: G1 và G2 giữ nguyên trạng thái và liên kết.
+
+#### AC-013
+
+- **Given**: Gói G1 đã hoàn thành trên dự án A; nhân viên có quyền sửa dự án.
+- **When**: Nhân viên yêu cầu sửa dự án của G1 sang dự án B.
+- **Then**: Yêu cầu bị từ chối; phải mở lại G1 trước.
+- **And**: G1 vẫn đã hoàn thành trên A.
+
+#### AC-014
+
+- **Given**: Gói G1 đã hoàn thành trên dự án A; nhân viên có quyền hủy và khôi phục.
+- **When**: Nhân viên hủy G1, rồi khôi phục G1 khi A chưa có gói khác giữ chỗ.
+- **Then**: Sau khi hủy, A được nhận gói giám sát khác; sau khi khôi phục, G1 về lại đã hoàn thành trên A.
+- **And**: Hạn gán, quyền lợi và lịch sử của G1 được giữ nguyên.
+
+#### AC-015
+
+- **Given**: Gói G1 đã hoàn thành trên dự án A và bị hủy; sau đó gói G2 được gán vào A.
+- **When**: Nhân viên khôi phục G1.
+- **Then**: Yêu cầu bị từ chối.
+- **And**: G1 vẫn bị hủy, G2 vẫn gắn A; không tự hủy G2 hoặc chuyển G1 sang dự án khác.
+
+#### AC-016
+
+- **Given**: Gói giám sát đã gán dự án A của khách K; nhân viên có quyền `supervision.complete`, được phân công khách hàng K nhưng không được phân công trực tiếp A.
+- **When**: Nhân viên đó yêu cầu hoàn thành hoặc mở lại gói.
+- **Then**: Yêu cầu bị từ chối vì không phụ trách trực tiếp dự án A.
+- **And**: Gói giữ nguyên trạng thái.
+
+#### AC-017
+
+- **Given**: Khách có một gói giám sát đã hoàn thành.
+- **When**: Khách xem danh sách hoặc chi tiết gói giám sát của mình.
+- **Then**: Gói hiện trạng thái đã hoàn thành cùng dự án đã gắn.
+- **And**: Khách không được hoàn thành hoặc mở lại gói, kể cả khi gửi yêu cầu trực tiếp.
+
 ## References
 
 ### TDDs
 
 - [TDD-SUB-003](../tdd/TDD-SUB-003.md): Thiết kế kỹ thuật bản nháp; Reviewer/Approver Tân Trần.
+- [TDD-SUB-006](../tdd/TDD-SUB-006.md): Thiết kế hoàn thành và mở lại trên vòng đời gán dự án; thay phần hoàn thành/mở lại của TDD-SUB-003.
 
 ### Rules
 
@@ -221,9 +311,19 @@ Yêu cầu mở lại thiếu quyền, thiếu lý do hoặc dự án đã có g
 
 - BR-SUB-012/Statement: Mở lại gói cần đúng quyền, có lý do và không chồng gói đang thực hiện.
 
+- BR-SUB-023/Then: Không sửa dự án của gói đã hoàn thành.
+
+- BR-SUB-024/Then: Hủy gói đã hoàn thành và nhả chỗ trên dự án.
+
+- BR-SUB-025/Then: Khôi phục gói đã hoàn thành về lại trạng thái đã hoàn thành.
+
+- BR-RBAC-013/Except: Phân công mức khách hàng không có hiệu lực cho hoàn thành và mở lại gói giám sát.
+
 ### Dependencies
 
 - STORY-SUB-001: Quy tắc subscription và quyền lợi thiết kế dùng chung.
+- STORY-SUB-004: Gán gói và sửa dự án.
+- STORY-SUB-005: Hủy và khôi phục gói.
 
 ## Non-Functional
 

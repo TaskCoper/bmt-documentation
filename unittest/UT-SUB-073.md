@@ -33,7 +33,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# UT-SUB-052
+# UT-SUB-073
 
 ## Unit Test
 
@@ -42,10 +42,9 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-052 | Subscription / Supervision | CompleteSupervisionGrantCommandHandler (dự kiến trong TDD-SUB-006) | Branch | REGRESSION | P0 | Actor là nhân viên Staff, Active, không có vai trò admin; IsDirectlyAssignedAsync(actor, Project, PR1) trả true. G1 Assigned trên PR1, Version=2. | CompleteSupervisionGrantCommand(G1, 2, k1) | Thành công, G1 chuyển Completed. IsDirectlyAssignedAsync được gọi đúng một lần với ResourceType=Project và ResourceId=PR1. | STORY-SUB-003/AC-006<br>BR-SUB-011/Then<br>TDD-SUB-006/Architecture | Kiểm nhánh nghiệp vụ bằng EF InMemory và mock IAssignmentAuthorizer; không chứng minh CHECK, partial index hay khóa PostgreSQL. | [Chưa phân công] | Draft |
+| UT-SUB-073 | Subscription / Supervision | CompleteSupervisionGrantCommandValidator (dự kiến trong TDD-SUB-006) | Boundary | REGRESSION | P2 | Không cần mock. | CompleteSupervisionGrantCommand với: expectedVersion=0; RequestKey rỗng; RequestKey 101 ký tự; so với expectedVersion=1 và key 100 ký tự. | Ba trường hợp đầu không hợp lệ với ErrorCode=PackageMutationInvalid; trường hợp cuối hợp lệ. | STORY-SUB-003/AC-006<br>TDD-SUB-006/Internal API | Kiểm đầu vào của lệnh hoàn thành. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 
 - STORY-SUB-003/AC-006
-- BR-SUB-011/Then
-- TDD-SUB-006/Architecture
+- TDD-SUB-006/Internal API

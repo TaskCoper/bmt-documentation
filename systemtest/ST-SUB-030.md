@@ -45,9 +45,9 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SUB-030 | STORY-SUB-003 | EXC | REGRESSION | P1 | Gói đã hoàn thành, người thao tác có quyền, dự án chưa có gói khác đang thực hiện. | 1. Gửi yêu cầu mở lại lần lượt không có lý do, lý do rỗng và chỉ có khoảng trắng.<br>2. Kiểm tra từng yêu cầu và trạng thái gói. | Dữ liệu thử; không thiết lập lịch hoặc số dư lượt giám sát. API và cách phân công sẽ bổ sung trong TDD. | Cả ba trường hợp bị từ chối; gói vẫn đã hoàn thành. | STORY-SUB-003/AC-010<br>BR-SUB-012/Statement | Kiểm tra mở lại gói có kiểm soát quyền, lý do và giới hạn theo dự án. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
+| ST-SUB-030 | STORY-SUB-003 | EXC | REGRESSION | P1 | Gói G1 đã hoàn thành trên dự án A; người thao tác có quyền và phân công hợp lệ; A không có gói khác giữ chỗ. | 1. Gửi yêu cầu mở lại lần lượt không có lý do, lý do rỗng và lý do chỉ có khoảng trắng.<br>2. Kiểm tra từng yêu cầu và trạng thái G1. | Dữ liệu thử; không tạo dữ liệu lịch hoặc số dư lượt giám sát. API cụ thể bổ sung trong TDD. | Cả ba trường hợp bị từ chối; G1 vẫn đã hoàn thành; không có dòng lịch sử mới. | STORY-SUB-003/AC-010<br>BR-SUB-012/Then | Cập nhật 24/09/2026 theo vòng đời mới của gói giám sát. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-SUB-003/AC-010
-- BR-SUB-012/Statement
+- BR-SUB-012/Then

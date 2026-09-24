@@ -105,9 +105,9 @@ Ví dụ PublishPlanHandler kiểm và công bố gói, còn GetPublishedPlansHa
 
 PlanRevision cùng RevisionBenefit, PlanOffer và OfferQuota lưu một bản cấu hình đầy đủ. Sau công bố, không sửa hoặc xóa bản đó. Kỳ mua tham chiếu phiên bản đã chốt, thay vì luôn đọc cấu hình đang bán mới nhất.
 
-Ví dụ R1 có 5 lượt và khách A đã mua. Admin tạo R2 có 10 lượt thì A vẫn dùng R1; khách mua R2 nhận cấu hình mới. `DesignPeriod` thuộc [TDD-SUB-002](TDD-SUB-002.md#data-model), còn `SupervisionGrant` thuộc [TDD-SUB-003](TDD-SUB-003.md#data-model); cả hai tham chiếu PlanRevision được định nghĩa trong TDD này.
+Ví dụ R1 có 5 lượt và khách A đã mua. Admin tạo R2 có 10 lượt thì A vẫn dùng R1; khách mua R2 nhận cấu hình mới. `DesignPeriod` thuộc [TDD-SUB-002](TDD-SUB-002.md#data-model), còn `SupervisionGrant` thuộc [TDD-SUB-004](TDD-SUB-004.md#data-model); cả hai tham chiếu PlanRevision được định nghĩa trong TDD này.
 
-Kiểm tra trước SaveChanges phải chặn sửa/xóa bản Published và dữ liệu cấu hình con. Không dùng SQL trực tiếp để bỏ qua kiểm tra. Đây là bảo vệ trong đường ghi ứng dụng, không tự ngăn tài khoản quản trị database sửa dữ liệu trực tiếp.
+Kiểm tra trước SaveChanges phải chặn sửa/xóa bản Published và thêm/sửa/xóa dữ liệu cấu hình con (`PlanOffer`, `RevisionBenefit`, `OfferQuota`). `ApplicationDbContext` kiểm tra trạng thái đã lưu trong database cho cả `SaveChanges` và `SaveChangesAsync`; không tin giá trị State do bên gọi vừa gán. `PlanConfigurationStore.ReplaceConfigurationAsync` cũng phải đi qua kiểm tra này khi thay cấu hình bản nháp. Không dùng SQL trực tiếp để bỏ qua kiểm tra. Đây là bảo vệ trong đường ghi ứng dụng, không tự ngăn tài khoản quản trị database sửa dữ liệu trực tiếp.
 
 **3. Bản nháp và con trỏ công bố — draft/publish**:
 
@@ -187,7 +187,7 @@ flowchart LR
 - Trả Boolean cả true/false, không tự chọn UI ẩn hàng false hay hiển thị dấu gạch: quyết định trình bày còn mở, DTO bảo toàn giá trị.
 - Mô tả lưu dưới dạng văn bản thuần; frontend phải mã hóa ký tự khi hiển thị để không thực thi mã HTML/script. Giới hạn kỹ thuật đề xuất: tên 200, mã 100, mô tả 4.000 ký tự. Đầu vào quá dài bị từ chối, không âm thầm cắt ngắn. Đây là giới hạn API đề xuất, chưa phải cam kết sản phẩm đã duyệt.
 - API quản trị dùng `.RequireAuthorization()` cho chính sách xác thực mặc định, cộng policy theo mã quyền quản lý gói dịch vụ thay vì `RequireRole(Admin)` của bản trước. Lý do đổi: cột `User.Role` kiểu chuỗi đã bị bỏ theo [TDD-RBAC-001](TDD-RBAC-001.md#data-model), và một người nay giữ được nhiều vai trò nên kiểm theo vai trò không còn là cách đúng. Mã quyền cho việc cấu hình gói chưa được đặt tên; nó nằm ngoài chín mã khởi tạo và sẽ bổ sung vào danh mục `Permission` khi thiết kế phần quản trị gói. Handler kiểm tra thêm User chưa bị xóa. Không lấy tài khoản/vai trò do client tự khai trong nội dung yêu cầu làm căn cứ.
-- Không dùng lớp Entity có cơ chế xóa mềm cho bản công bố và dữ liệu theo dõi lượt. Trước `SaveChanges`, phải kiểm tra và từ chối sửa/xóa phiên bản Published hoặc cấu hình con của nó. Thay đổi gói bằng bản nháp mới; không dùng `ExecuteUpdate` hoặc SQL trực tiếp để bỏ qua kiểm tra. Kiểm thử tích hợp trên PostgreSQL phải kiểm chứng đường ghi này. Kiểm tra trong ứng dụng không ngăn được quản trị viên sửa SQL trực tiếp, nên quyền ghi database phải quản lý riêng. Cơ chế bảo vệ chưa được triển khai.
+- Không dùng lớp Entity có cơ chế xóa mềm cho bản công bố và dữ liệu theo dõi lượt. Trước `SaveChanges`, phải kiểm tra và từ chối sửa/xóa phiên bản Published hoặc cấu hình con của nó. Thay đổi gói bằng bản nháp mới; không dùng `ExecuteUpdate` hoặc SQL trực tiếp để bỏ qua kiểm tra. Kiểm thử tích hợp trên PostgreSQL phải kiểm chứng đường ghi này. Kiểm tra trong ứng dụng không ngăn được quản trị viên sửa SQL trực tiếp, nên quyền ghi database phải quản lý riêng. Cơ chế bảo vệ nằm tại `ApplicationDbContext.SaveChanges`/`SaveChangesAsync`; các đường ghi cấu hình vẫn phải lấy khóa Plan trong transaction theo quy trình ở trên.
 
 ## Sequence Diagram
 

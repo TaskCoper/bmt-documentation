@@ -45,9 +45,9 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SUB-031 | STORY-SUB-003 | EXC | REGRESSION | P1 | Gói dự án A đã hoàn thành. Có tài khoản khách hàng và nhân viên chỉ được phân công phụ trách dự án B, không phụ trách A. | 1. Với từng tài khoản, gửi trực tiếp yêu cầu mở lại A kèm lý do có nội dung.<br>2. Kiểm tra bị từ chối và trạng thái không đổi. | Dữ liệu thử; không thiết lập lịch hoặc số dư lượt giám sát. API và cách phân công sẽ bổ sung trong TDD. | Khách hàng và nhân viên không phụ trách đều không mở lại được gói, dù có lý do. | STORY-SUB-003/AC-010<br>BR-SUB-012/Statement | Kiểm tra mở lại gói có kiểm soát quyền, lý do và giới hạn theo dự án. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
+| ST-SUB-031 | STORY-SUB-003 | EXC | REGRESSION | P1 | Gói G1 đã hoàn thành trên dự án A. Có khách hàng sở hữu A, nhân viên có quyền supervision.complete nhưng chỉ được phân công dự án B, và Admin không có quyền supervision.complete. | 1. Với từng tài khoản, gửi trực tiếp yêu cầu mở lại G1 kèm lý do có nội dung.<br>2. Kiểm tra bị từ chối và trạng thái không đổi. | Dữ liệu thử; không tạo dữ liệu lịch hoặc số dư lượt giám sát. API cụ thể bổ sung trong TDD. | Cả ba tài khoản đều không mở lại được G1 dù có lý do; G1 vẫn đã hoàn thành. | STORY-SUB-003/AC-010<br>BR-SUB-012/Then | Cập nhật 24/09/2026 theo vòng đời mới của gói giám sát. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-SUB-003/AC-010
-- BR-SUB-012/Statement
+- BR-SUB-012/Then

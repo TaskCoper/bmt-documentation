@@ -42,9 +42,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-054 | Subscription / Entitlement | CompleteSupervisionHandler (dự kiến trong TDD) | Error | REGRESSION | P0 | Actor chỉ là chủ công trình, không Admin/nhân viên được phân công | Hoàn tất | Từ chối quyền; quyền sở hữu không thay quyền nhân viên. | BR-SUB-012/Then<br>TDD-SUB-003/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. | [Chưa phân công] | Draft |
+| UT-SUB-054 | Subscription / Supervision | CompleteSupervisionGrantCommandHandler (dự kiến trong TDD-SUB-006) | Error | REGRESSION | P0 | Actor là tài khoản AccountKind=Customer (chủ công trình) nhưng token có claim supervision.complete. G1 Assigned trên PR1. | CompleteSupervisionGrantCommand(G1, 2, k1) | Ném NotPermissionException với MessageCode=PermissionNotHeldByActor trước khi đọc gói và trước khi gọi IAssignmentAuthorizer. G1 không đổi; không khóa tài khoản. | STORY-SUB-003/AC-008<br>BR-SUB-011/Then<br>TDD-SUB-006/Architecture | Kiểm nhánh nghiệp vụ bằng EF InMemory và mock IAssignmentAuthorizer; không chứng minh CHECK, partial index hay khóa PostgreSQL. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 
-- BR-SUB-012/Then
-- TDD-SUB-003/Architecture
+- STORY-SUB-003/AC-008
+- BR-SUB-011/Then
+- TDD-SUB-006/Architecture

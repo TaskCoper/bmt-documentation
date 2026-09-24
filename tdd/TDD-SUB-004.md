@@ -209,7 +209,7 @@ Dùng lại và điều chỉnh SupervisionGrant của TDD-SUB-003; không tạo
 
 | Bảng | Trường và ràng buộc dự kiến |
 | --- | --- |
-| SupervisionGrant | Id uuid PK; AccountId uuid NN FK User; RevisionId uuid NN FK PlanRevision; Kind varchar(16) NN CHECK='Supervision'; ProjectId uuid NULL; State varchar(24) NN =Unassigned/Assigned/CanceledByStaff; GrantedAtUtc timestamptz NN; AssignmentDeadlineUtc timestamptz NN; FirstAssignedAtUtc timestamptz NULL; Version bigint NN; CancelEventId uuid NULL; UNIQUE(AccountId,Id), FK(RevisionId,Kind) -> UNIQUE(Id,Kind) của PlanRevision. Enum State chỉ có ba giá trị trên. TDD-SUB-003 đã bị thay hoàn toàn nên không thêm một trạng thái hoàn thành cũ vào enum; cách xử lý dữ liệu cũ nếu có xem phần Notes. |
+| SupervisionGrant | Id uuid PK; AccountId uuid NN FK User; RevisionId uuid NN FK PlanRevision; Kind varchar(16) NN CHECK='Supervision'; ProjectId uuid NULL; State varchar(24) NN =Unassigned/Assigned/CanceledByStaff; GrantedAtUtc timestamptz NN; AssignmentDeadlineUtc timestamptz NN; FirstAssignedAtUtc timestamptz NULL; Version bigint NN; CancelEventId uuid NULL; UNIQUE(AccountId,Id), FK(RevisionId,Kind) -> UNIQUE(Id,Kind) của PlanRevision. Enum State chỉ có ba giá trị trên; [TDD-SUB-006](TDD-SUB-006.md#data-model) thêm `Completed` và mở rộng partial unique index sang `Assigned`/`Completed`. Cách xử lý dữ liệu theo schema cũ của TDD-SUB-003, nếu có, xem phần Notes. |
 | SupervisionAssignmentEvent | Id uuid PK; GrantId uuid NN FK; ActorId uuid NN FK User; OldProjectId uuid NULL; NewProjectId uuid NN; AtUtc timestamptz NN; Reason text NULL chỉ khi first assignment; GrantVersion bigint NN; ReceiptId uuid NN UNIQUE FK PackageMutationReceipt. CHECK reason có nội dung nếu OldProjectId không NULL; UNIQUE(GrantId,GrantVersion). |
 | PackageMutationReceipt | Schema dùng chung ở TDD-SUB-005; kết quả thao tác gán/sửa không phải giao dịch tiền. |
 
@@ -246,7 +246,7 @@ erDiagram
 
 - **GET** `/api/v1/me/supervision-grants` — Verified session; chỉ gói của chính khách, gồm chưa gán/quá hạn/bị hủy. PageIndex/PageSize theo PagedResult, sort GrantedAtUtc DESC,Id DESC.
 - **GET** `/api/v1/me/supervision-grants/{grantId}` — Đọc gói thuộc khách, revision, projectId, firstAssignedAtUtc, assignmentDeadlineUtc, effectiveState và version.
-- **POST** `/api/v1/me/supervision-grants/{grantId}/assign` — `{projectId,expectedVersion}`, header Idempotency-Key; chỉ gán lần đầu.
+- **POST** `/api/v1/me/supervision-grants/{grantId}/assign` — `{projectId,expectedVersion}`, header Idempotency-Key; chỉ gán lần đầu. Phản hồi gồm `grantId`, `projectId`, `state`, `version`, `eventId` (dòng lịch sử vừa ghi) và `wasAlreadyApplied` (true khi trả lại kết quả của lần gửi trước). Muốn biết `firstAssignedAtUtc` và `assignmentDeadlineUtc`, client gọi GET chi tiết gói.
 - **POST** `/api/v1/admin/supervision-grants/{grantId}/reassign` — `{projectId,expectedVersion,reason}`, header Idempotency-Key; verified session + staff permission supervision.reassign. Prefix admin không đồng nghĩa chỉ role Admin, nhân viên được phân quyền dùng được.
 
 ### Examples
@@ -259,7 +259,7 @@ Idempotency-Key: 793753ea-0520-4a60-ab2f-dfdbec33c2ba
 {"projectId":"33333333-3333-3333-3333-333333333333","expectedVersion":1}
 
 Response 200:
-{"value":{"grantId":"44444444-4444-4444-4444-444444444444","projectId":"33333333-3333-3333-3333-333333333333","state":"Assigned","firstAssignedAtUtc":"2026-10-01T03:00:00Z","assignmentDeadlineUtc":"2027-09-19T03:00:00Z","version":2},"isSuccess":true,"isFailure":false,"error":{"code":"","message":""}}
+{"value":{"grantId":"44444444-4444-4444-4444-444444444444","projectId":"33333333-3333-3333-3333-333333333333","state":"Assigned","version":2,"eventId":"66666666-6666-6666-6666-666666666666","wasAlreadyApplied":false},"isSuccess":true,"isFailure":false,"error":{"code":"","message":""}}
 
 Error Response:
 {"title":"Conflict","code":"ProjectAlreadyHasSupervision","status":409,"detail":"Dự án đã có gói giám sát đang hiệu lực.","messageCode":"ProjectAlreadyHasSupervision","errors":null}
@@ -273,7 +273,7 @@ Idempotency-Key: 721c5b01-74eb-4ad4-be04-1168e3bb4044
 {"projectId":"55555555-5555-5555-5555-555555555555","expectedVersion":2,"reason":"Sửa dự án đã gán nhầm"}
 
 Response 200:
-{"value":{"grantId":"44444444-4444-4444-4444-444444444444","projectId":"55555555-5555-5555-5555-555555555555","state":"Assigned","version":3},"isSuccess":true,"isFailure":false,"error":{"code":"","message":""}}
+{"value":{"grantId":"44444444-4444-4444-4444-444444444444","projectId":"55555555-5555-5555-5555-555555555555","state":"Assigned","version":3,"eventId":"77777777-7777-7777-7777-777777777777","wasAlreadyApplied":false},"isSuccess":true,"isFailure":false,"error":{"code":"","message":""}}
 
 Error Response:
 {"title":"Forbidden","code":"AccessForbidden","status":403,"detail":"Không có quyền sửa dự án của gói.","messageCode":"AccessForbidden","errors":null}
@@ -292,7 +292,7 @@ Error Response:
 - **NoProjectChange** (409): dự án đích trùng dự án cũ khi sửa.
 - **IdempotencyConflict** (409): cùng key khác nội dung.
 - **AssignmentInputInvalid** (422): thiếu projectId, expectedVersion hoặc lý do sửa có nội dung.
-- **ProjectIntegrationUnavailable** (503): chưa có nguồn ownership/locking thật; không gán dựa trên dữ liệu tự khai.
+- **ProjectModuleUnavailable** (503): chưa có nguồn ownership/locking thật; không gán dựa trên dữ liệu tự khai.
 
 ## References
 
@@ -319,4 +319,5 @@ Error Response:
 
 ## Change Log
 
+- 2026-09-24: Cập nhật Internal API cho khớp code: mã lỗi 503 đổi thành `ProjectModuleUnavailable`; ví dụ phản hồi gán và sửa dự án thêm `eventId`, `wasAlreadyApplied` và bỏ hai mốc thời gian (đọc qua GET chi tiết gói). Nghiệp vụ không đổi.
 - 2026-09-20: Đổi nguồn quyền từ `IStaffPermissionReader` sang policy theo mã quyền của [TDD-RBAC-001](TDD-RBAC-001.md). Mã `supervision.reassign` giữ nguyên tên và nghiệp vụ sửa liên kết gói – dự án không đổi.

@@ -42,9 +42,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-057 | Subscription / Entitlement | ReopenSupervisionHandler (dự kiến trong TDD) | Happy | REGRESSION | P0 | Completed; không grant khác InProgress; người gọi hợp lệ | Lý do hợp lệ và version hiện tại | Chuyển InProgress; giữ revision và công trình cũ; lưu lý do/lịch sử. | BR-SUB-012/Then<br>TDD-SUB-003/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. | [Chưa phân công] | Draft |
+| UT-SUB-057 | Subscription / Supervision | ReopenSupervisionGrantCommandHandler (dự kiến trong TDD-SUB-006) | Happy | REGRESSION | P0 | Actor là nhân viên có phân công trực tiếp PR1. G1 Completed trên PR1, FirstAssignedAtUtc và AssignmentDeadlineUtc có giá trị, Version=5. PR1 không có grant khác giữ chỗ. | ReopenSupervisionGrantCommand(G1, 5, '  Bấm hoàn thành nhầm  ', k1) | Thành công, LifecycleState=Assigned, Version=6. G1: State=Assigned, ProjectId=PR1; FirstAssignedAtUtc, AssignmentDeadlineUtc, RevisionId, AccountId không đổi. Event Action=Reopen, FromState=Completed, ToState=Assigned, Reason='Bấm hoàn thành nhầm' (đã bỏ khoảng trắng đầu/cuối), PackageVersion=6; receipt Operation=ReopenSupervision. | STORY-SUB-003/AC-009<br>BR-SUB-012/Then<br>TDD-SUB-006/Architecture | Kiểm nhánh nghiệp vụ bằng EF InMemory và mock IAssignmentAuthorizer; không chứng minh CHECK, partial index hay khóa PostgreSQL. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 
+- STORY-SUB-003/AC-009
 - BR-SUB-012/Then
-- TDD-SUB-003/Architecture
+- TDD-SUB-006/Architecture

@@ -44,9 +44,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SUB-115 | STORY-SUB-003 | Integration boundary | FULL | P0 | PostgreSQL thật; hai grant Completed; Admin hợp lệ | 1. Mở lại đồng thời hai grant<br>2. Kiểm tra partial unique index và lịch sử | Dữ liệu minh họa được tạo riêng cho mỗi ca; Hai lần mở lại trên cùng công trình | Tối đa một grant InProgress; lần thua trả xung đột; không ghi lịch sử mở lại cho lần thất bại. | BR-SUB-006/Then<br>TDD-SUB-003/Data Model | Kiểm chứng transaction/đường truyền thật; không thay bằng EF InMemory. | [Chưa phân công] | Draft |
+| ST-SUB-115 | STORY-SUB-003 | Integration boundary | FULL | P0 | PostgreSQL thật; gói G1 đã gán dự án A ở version 2; một người có quyền hoàn thành và một nhân viên có quyền hủy gói. | 1. Gửi đồng thời yêu cầu hoàn thành G1 và yêu cầu hủy G1, cả hai với expectedVersion=2.<br>2. Kiểm tra trạng thái, version và lịch sử của G1. | Dữ liệu minh họa được tạo riêng cho mỗi ca; hai thao tác khác nhau tranh cùng một gói. | Chỉ một yêu cầu thành công; yêu cầu còn lại bị từ chối vì xung đột version. Chỉ có một dòng lịch sử cho lần thành công; không có trạng thái pha trộn. | STORY-SUB-003/AC-006<br>BR-SUB-011/Then<br>BR-SUB-024/Then | Kiểm chứng transaction và khóa thật; không thay bằng EF InMemory. Cập nhật 24/09/2026: thay ca mở lại đồng thời hai gói đã hoàn thành, vì gói đã hoàn thành giữ chỗ nên trạng thái đó không còn xảy ra. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 
-- BR-SUB-006/Then
-- TDD-SUB-003/Data Model
+- STORY-SUB-003/AC-006
+- BR-SUB-011/Then
+- BR-SUB-024/Then
