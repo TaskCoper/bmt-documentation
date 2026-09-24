@@ -126,7 +126,7 @@ Thiết kế này mô phỏng đúng bốn bước đó cho việc đổi mật 
 1. Cột `User.MustChangePassword` đặt `true` khi tạo tài khoản nhân viên.
 2. Khi phát hành token, nếu cột này còn `true` thì thêm claim `MustChangePassword` với giá trị `true`.
 3. `DefaultPolicy` thêm một điều kiện từ chối token mang claim đó, viết cùng kiểu với điều kiện `IsForgotPassword` đang có.
-4. Nhân viên gọi `change_password`. Handler đặt `MustChangePassword = false`, sinh `SecurityStamp` mới, rồi hủy toàn bộ phiên.
+4. Nhân viên gọi `change_password`. Handler đặt `MustChangePassword = false`, sinh `SecurityStamp` mới và ghi `StaffFirstPasswordChanged` cùng transaction; sau commit mới hủy toàn bộ phiên. Nhật ký chỉ ghi cờ trước/sau, người thao tác, tài khoản và thời điểm, không chứa mật khẩu hay bản băm. Chỉ ghi sự kiện này khi tài khoản Staff đang có `MustChangePassword = true`, kể cả khi đổi qua luồng quên mật khẩu; những lần đổi sau không ghi lặp sự kiện lần đầu.
 
 Ví dụ: anh Sơn nhận mật khẩu từ chị Lan, đăng nhập thành công lúc 10:00 và nhận token mang claim `MustChangePassword`. Anh gọi API hủy gói — bị `DefaultPolicy` từ chối dù vai trò của anh có `package.cancel`. Anh đổi mật khẩu lúc 10:02, phiên bị hủy, đăng nhập lại lúc 10:03 và nhận token không còn claim đó. Từ lúc này anh hủy gói được.
 
@@ -147,6 +147,8 @@ Hai bước Redis nằm **sau** commit chứ không nằm trong transaction, vì
 Đặt sau commit tạo ra một cửa sổ rất ngắn giữa lúc commit và lúc xóa khóa Redis, trong đó một yêu cầu có thể đọc được dấu phiên cũ còn trong Redis và được chấp nhận. Chấp nhận cửa sổ này vì nó tính bằng mili giây và nó nghiêng về phía an toàn hơn so với chiều ngược lại. Nếu bước Redis lỗi, ghi log mức cảnh báo và vẫn trả thành công; khóa Redis sẽ tự hết TTL bằng hạn access token, sau đó lần đọc kế tiếp nạp lại dấu phiên mới từ `User`, nên hệ thống tự về đúng trạng thái.
 
 `RevokeAllForUserAsync` đã có sẵn trong `src/bmt-be.application/abstractions/ISessionTokenStore.cs` và chú thích của nó ghi rõ dành cho "(future) admin kick". Thiết kế này dùng lại đúng hàm đó, không thêm cơ chế phiên mới.
+
+Khi làm mới token, `GetTokenQueryHandler` đối chiếu UserId và dấu phiên của access token lưu cùng refresh token với tài khoản và `SecurityStamp` hiện tại trong database. Thiếu hoặc sai dấu phiên thì thu hồi refresh token và trả `InvalidRefreshToken`, kể cả khi Redis chưa dọn xong phiên cũ. Sau khi dựng lại claim quyền, dấu phiên mới phải vẫn khớp dấu phiên cũ; nếu dấu đã đổi giữa hai lần đọc thì từ chối, không cấp dấu mới cho phiên đã bị thu hồi.
 
 Buộc đăng xuất chạy đúng ba bước trên nhưng không đổi `Status`. Mở khóa đặt `Status = 'Active'` và **không** sinh dấu phiên mới, vì các phiên cũ đã bị hủy từ lúc khóa; người đó phải đăng nhập lại.
 

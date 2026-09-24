@@ -314,7 +314,7 @@ Một dòng là **một lần thao tác liên quan tới vai trò, quyền hoặ
 |---|---|---|---|
 | `Id` | uuid | PK | |
 | `ActorUserId` | uuid | FK `User(Id)`, NOT NULL | Người thao tác |
-| `Action` | varchar(64) | NOT NULL | `RoleCreated`, `RoleUpdated`, `RoleDeleted`, `RoleGranted`, `RoleRevoked`, `StaffInvited`, `StaffActivated`, `StaffLocked`, `StaffUnlocked`, `StaffForceLoggedOut`, `AssignmentCreated`, `AssignmentTransferred`, `AssignmentEnded` |
+| `Action` | varchar(64) | NOT NULL | `RoleCreated`, `RoleUpdated`, `RoleDeleted`, `RoleGranted`, `RoleRevoked`, `StaffInvited`, `StaffActivated`, `StaffFirstPasswordChanged`, `StaffLocked`, `StaffUnlocked`, `StaffForceLoggedOut`, `AssignmentCreated`, `AssignmentTransferred`, `AssignmentEnded` |
 | `TargetType` | varchar(32) | NOT NULL | `Role`, `User` hoặc `Assignment` |
 | `TargetId` | uuid | NULL | NULL khi đối tượng chưa kịp tạo, ví dụ tạo vai trò bị từ chối |
 | `TargetLabel` | varchar(200) | NOT NULL | Ảnh chụp tên đối tượng lúc thao tác. Nhờ cột này, nhật ký vẫn đọc được tên vai trò sau khi vai trò bị xóa, đúng `STORY-RBAC-001/AC-006` |
