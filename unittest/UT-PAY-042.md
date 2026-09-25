@@ -42,10 +42,11 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-042 | Supervision | SupervisionAssignmentPolicy (dự kiến) | Error | REGRESSION | P1 | Gói U1, công trình U2. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Gán lần đầu hoặc reassign. | Từ chối cả hai, không đổi chủ gói hoặc công trình. | STORY-SUB-004/AC-009<br>STORY-SUB-004/AC-010<br>TDD-SUB-004/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
+| UT-PAY-042 | Supervision | AssignSupervisionGrantCommandHandler (dự kiến) | Error | REGRESSION | P1 | Gói G1 của U1 State=Unassigned, còn hạn, Version=1. Fake IConstructionSiteOwnershipReader: LockOwnerAccountIdAsync(CS9) trả U2 (công trình của khách khác); LockOwnerAccountIdAsync(CSX) trả null (không có hoặc đã xóa). Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | U1 gán G1 vào CS9; rồi gán G1 vào CSX. | Cả hai ném NotFoundException với MessageCode=ConstructionSiteNotFound (404), cùng một mã để không lộ công trình của người khác. G1 giữ Unassigned, ConstructionSiteId=NULL, Version=1; không ghi biên nhận; không khóa hay đọc dòng gói sau khi cổng đọc trả kết quả không hợp lệ. | STORY-SUB-004/AC-010<br>STORY-SUB-004/EXC-06<br>TDD-SUB-004/Architecture<br>TDD-SUB-004/Internal API | Sở hữu công trình lấy từ cổng đọc bảng thật, không tin dữ liệu client. Ca gán sang công trình khác qua đổi công trình đã bỏ ngày 25/09/2026. Khóa ngoại ghép chặn ở database kiểm bằng integration/ST; chưa thực thi. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- STORY-SUB-004/AC-009
 - STORY-SUB-004/AC-010
+- STORY-SUB-004/EXC-06
 - TDD-SUB-004/Architecture
+- TDD-SUB-004/Internal API

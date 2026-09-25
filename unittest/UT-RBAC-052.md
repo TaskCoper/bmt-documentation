@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-052 | Assignment | AssignmentAuthorizer.IsDirectlyAssignedAsync | Boundary | REGRESSION | P1 | Hàm đã có; chuyển sang loại ConstructionSite là thay đổi dự kiến theo TDD-RBAC-003. Dòng phân công của nhân viên A trên công trình P đã có EffectiveToUtc, tức đã kết thúc; P không có dòng đang hiệu lực nào khác. | staffUserId là A, resourceType là ConstructionSite, resourceId là P, thời điểm sau mốc kết thúc. | Trả về không đạt; phép kiểm chỉ xét các dòng có EffectiveToUtc còn trống. Dòng đã kết thúc vẫn tra cứu được nhưng không cấp quyền. | BR-RBAC-013/Then<br>STORY-RBAC-003/Non-Functional | Phân công hết hiệu lực không được tiếp tục cấp quyền; kiểm đúng cận thời gian. | [Chưa xác định] | Draft |
+| UT-RBAC-052 | Assignment | AssignmentAuthorizer.IsDirectlyAssignedAsync | Boundary | REGRESSION | P1 | Hàm đã có; chuyển sang loại SupervisionGrant là thay đổi dự kiến theo TDD-RBAC-003. Dòng phân công của nhân viên A trên gói G đã có EffectiveToUtc, tức đã kết thúc; G không có dòng đang hiệu lực nào khác. | staffUserId là A, resourceType là SupervisionGrant, resourceId là G, thời điểm sau mốc kết thúc. | Trả về không đạt; phép kiểm chỉ xét các dòng có EffectiveToUtc còn trống. Dòng đã kết thúc vẫn tra cứu được nhưng không cấp quyền. | BR-RBAC-013/Then<br>STORY-RBAC-003/Non-Functional | Phân công hết hiệu lực không được tiếp tục cấp quyền; kiểm đúng cận thời gian. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

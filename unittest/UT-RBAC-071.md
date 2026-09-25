@@ -42,10 +42,11 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-071 | Assignment | CreateAssignmentCommandHandler.Handle | Error | REGRESSION | P1 | Handler đã có; kiểm quyền người nhận và loại ConstructionSite là thay đổi dự kiến theo TDD-RBAC-003. Công trình P có dòng đang hiệu lực asg-1 của nhân viên A. Nhân viên C và A đều Active, có supervision.complete. | Lần lượt giao P cho C và giao P cho chính A. | Cả hai lần ném ngoại lệ ánh xạ 409 với mã ResourceAlreadyAssigned, kèm currentAssignmentId bằng asg-1. Không tạo dòng Assignment thứ hai; asg-1 giữ nguyên. Không ghi dòng nhật ký từ chối nào vào AccessAuditLog, vì đây là lỗi nghiệp vụ, không phải rào chắn quyền (BR-RBAC-011 khoản 4, BR-RBAC-012 khoản 2). | BR-RBAC-013/Then<br>STORY-RBAC-003/AC-004<br>STORY-RBAC-003/EXC-05 | Lớp kiểm trong handler cho mã lỗi rõ nghĩa và hướng sang chuyển giao; ca song song do index chặn, kiểm ở ST-RBAC-055. Không khẳng định có hay không ghi nhật ký từ chối vì điểm này chưa chốt. | [Chưa xác định] | Draft |
+| UT-RBAC-071 | Assignment | CreateAssignmentCommandHandler.Handle | Error | REGRESSION | P1 | Handler đã có; kiểm trạng thái gói, kiểm quyền người nhận và loại SupervisionGrant là thay đổi dự kiến theo TDD-RBAC-003. Gói G đang Assigned và có dòng đang hiệu lực asg-1 của nhân viên A. Nhân viên C và A đều Active, có supervision.complete. | Lần lượt giao G cho C và giao G cho chính A. | Cả hai lần ném ngoại lệ ánh xạ 409 với mã ResourceAlreadyAssigned, kèm currentAssignmentId bằng asg-1. Không tạo dòng Assignment thứ hai; asg-1 giữ nguyên. Không ghi dòng nhật ký từ chối nào vào AccessAuditLog, vì đây là lỗi nghiệp vụ, không phải rào chắn quyền (BR-RBAC-011 khoản 4, BR-RBAC-012 khoản 2). | BR-RBAC-013/Then<br>STORY-RBAC-003/AC-004<br>STORY-RBAC-003/EXC-05<br>BR-RBAC-012/Notes | Lớp kiểm trong handler cho mã lỗi rõ nghĩa và hướng sang chuyển giao; ca song song do index chặn, kiểm ở ST-RBAC-055. Không ghi nhật ký từ chối theo xác nhận của người dùng ngày 25/09/2026 (BR-RBAC-012/Notes). | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - BR-RBAC-013/Then
 - STORY-RBAC-003/AC-004
 - STORY-RBAC-003/EXC-05
+- BR-RBAC-012/Notes

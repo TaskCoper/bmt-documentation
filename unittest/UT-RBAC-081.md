@@ -42,10 +42,12 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-081 | Assignment | Tính trạng thái danh sách công trình cần chia lại (dự kiến) | Branch | REGRESSION | P1 | Unit dự kiến theo TDD-RBAC-003, chờ đặc tả Công trình để có danh sách công trình. Dữ liệu vào: công trình P1, P2, P3; P1 có phân công đang hiệu lực của Nam đang Locked, P2 không có phân công đang hiệu lực, P3 có phân công của Mai đang Active. | Tính danh sách cần chia lại; rồi tính lại sau khi Nam được mở khóa. | Lần đầu trả P2 với trạng thái Unassigned và P1 với trạng thái AssigneeLocked kèm assignmentId và staffUserId của Nam; không có P3. Sau khi Nam được mở khóa, chỉ còn P2. Không ghi cột hay bảng nào. | BR-RBAC-013/Then<br>BR-RBAC-008/Then<br>STORY-RBAC-003/AC-010 | Trạng thái được tính khi đọc từ Assignment và User.Status, không lưu cờ. | [Chưa xác định] | Draft |
+| UT-RBAC-081 | Assignment | NeedsReassignmentStatusResolver — tính trạng thái danh sách gói cần chia lại (dự kiến) | Branch | REGRESSION | P1 | Unit dự kiến theo TDD-RBAC-003; bảng gói giám sát đã có nên danh sách làm được. Dữ liệu vào là các dòng gói kèm phân công đang hiệu lực và trạng thái người phụ trách: G1 Assigned, phân công của Nam đang Locked; G2 Assigned, không có phân công đang hiệu lực; G3 Assigned, phân công của Mai đang Active; G4 Completed, phân công của Nam; G5 CanceledByStaff, không có phân công; G6 Unassigned. | Tính danh sách cần chia lại; rồi tính lại sau khi Nam được mở khóa. | Lần đầu trả G2 với trạng thái NoAssignee, assignmentId và staffUserId để trống, và G1 với trạng thái AssigneeLocked kèm assignmentId và staffUserId của Nam; không có G3, G4, G5, G6. Sau khi Nam được mở khóa chỉ còn G2. Không dùng giá trị Unassigned cho trạng thái danh sách và không ghi cột hay bảng nào. | BR-RBAC-013/Then<br>BR-RBAC-008/Then<br>STORY-RBAC-003/AC-010<br>STORY-RBAC-003/AC-011<br>TDD-RBAC-003/Architecture | Trạng thái tính khi đọc từ State của gói, Assignment và User.Status, không lưu cờ; gói đã hoàn thành, đang bị hủy hoặc chưa gán không vào danh sách. Câu SQL thật (LEFT JOIN, index) kiểm bằng integration với PostgreSQL và ST-RBAC-054, ST-RBAC-058. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - BR-RBAC-013/Then
 - BR-RBAC-008/Then
 - STORY-RBAC-003/AC-010
+- STORY-RBAC-003/AC-011
+- TDD-RBAC-003/Architecture

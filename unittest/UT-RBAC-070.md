@@ -42,10 +42,11 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-070 | Assignment | TransferAssignmentCommandHandler.Handle | Error | REGRESSION | P1 | Handler đã có; kiểm quyền người nhận là thay đổi dự kiến theo TDD-RBAC-003. Dòng phân công đang hiệu lực của A trên công trình R. Người nhận D là nhân viên Active nhưng không có supervision.complete. | assignmentId của dòng đó và toStaffUserId là D. | Ném ngoại lệ ánh xạ 422 với mã AssigneeLacksPermission. Dòng của A không bị đặt EffectiveToUtc, không tạo dòng mới cho D và không ghi nhật ký AssignmentTransferred. Không ghi dòng nhật ký từ chối nào vào AccessAuditLog, vì đây là lỗi nghiệp vụ, không phải rào chắn quyền (BR-RBAC-011 khoản 4, BR-RBAC-012 khoản 2). | STORY-RBAC-003/AC-009<br>STORY-RBAC-003/EXC-06<br>BR-RBAC-013/Then | Khi chuyển giao, phân công của người đang phụ trách phải giữ nguyên nếu người nhận không đạt. Không khẳng định có hay không ghi nhật ký từ chối vì điểm này chưa chốt. | [Chưa xác định] | Draft |
+| UT-RBAC-070 | Assignment | TransferAssignmentCommandHandler.Handle | Error | REGRESSION | P1 | Handler đã có; kiểm trạng thái gói và kiểm quyền người nhận là thay đổi dự kiến theo TDD-RBAC-003. Dòng phân công đang hiệu lực của A trên gói GR; cổng khóa dòng gói trả State bằng Assigned cho GR. Người nhận D là nhân viên Active nhưng không có supervision.complete. | assignmentId của dòng đó và toStaffUserId là D. | Ném ngoại lệ ánh xạ 422 với mã AssigneeLacksPermission. Dòng của A không bị đặt EffectiveToUtc, không tạo dòng mới cho D và không ghi nhật ký AssignmentTransferred. Không ghi dòng nhật ký từ chối nào vào AccessAuditLog, vì đây là lỗi nghiệp vụ, không phải rào chắn quyền (BR-RBAC-011 khoản 4, BR-RBAC-012 khoản 2). | STORY-RBAC-003/AC-009<br>STORY-RBAC-003/EXC-06<br>BR-RBAC-013/Then<br>BR-RBAC-012/Notes | Khi chuyển giao, phân công của người đang phụ trách phải giữ nguyên nếu người nhận không đạt. Không ghi nhật ký từ chối theo xác nhận của người dùng ngày 25/09/2026 (BR-RBAC-012/Notes). | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-RBAC-003/AC-009
 - STORY-RBAC-003/EXC-06
 - BR-RBAC-013/Then
+- BR-RBAC-012/Notes

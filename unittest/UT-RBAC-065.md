@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-065 | Staff | RevokeRoleCommandHandler.Handle | Branch | REGRESSION | P1 | Handler đã có. Nhân viên giữ hai vai trò: vai trò giám sát có supervision.complete và vai trò tra cứu chỉ có commerce.read; đang phụ trách 2 công trình. Mock bộ đếm phân công để xác minh không bị gọi. | Yêu cầu thu hồi vai trò tra cứu chỉ có commerce.read. | Không ném ngoại lệ; xóa dòng UserRole của vai trò tra cứu và ghi nhật ký RoleRevoked. Bộ đếm phân công không được gọi; hai phân công giữ nguyên. | BR-RBAC-007/Notes<br>STORY-RBAC-002/ALT-02<br>TDD-RBAC-002/Architecture | Thu hồi vai trò không mang supervision.complete không bị chặn, dù người đó đang phụ trách công trình. | [Chưa xác định] | Draft |
+| UT-RBAC-065 | Staff | RevokeRoleCommandHandler.Handle | Branch | REGRESSION | P1 | Handler đã có. Nhân viên giữ hai vai trò: vai trò giám sát có supervision.complete và vai trò tra cứu chỉ có commerce.read; đang phụ trách 2 gói giám sát. Mock bộ đếm phân công để xác minh không bị gọi. | Yêu cầu thu hồi vai trò tra cứu chỉ có commerce.read. | Không ném ngoại lệ; xóa dòng UserRole của vai trò tra cứu và ghi nhật ký RoleRevoked. Bộ đếm phân công không được gọi; hai phân công giữ nguyên. | BR-RBAC-007/Notes<br>STORY-RBAC-002/ALT-02<br>TDD-RBAC-002/Architecture | Thu hồi vai trò không mang supervision.complete không bị chặn, dù người đó đang phụ trách gói giám sát. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

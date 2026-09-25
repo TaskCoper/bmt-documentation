@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-079 | Role | UpdateRoleCommandHandler.Handle | Happy | REGRESSION | P2 | Handler đã có; kiểm tra này là thay đổi dự kiến theo TDD-RBAC-001. Vai trò R có supervision.complete, do hai người giữ; cả hai không còn phụ trách công trình nào sau khi đã chuyển giao. | Bỏ supervision.complete khỏi R. | Không ném ngoại lệ; xóa dòng RolePermission của supervision.complete và ghi nhật ký RoleUpdated. SecurityStamp của người giữ vai trò không đổi. | STORY-RBAC-001/AC-008<br>BR-RBAC-007/Then<br>BR-RBAC-009/Then | Đối chứng cho ca bị chặn: hết công trình thì bỏ quyền được. | [Chưa xác định] | Draft |
+| UT-RBAC-079 | Role | UpdateRoleCommandHandler.Handle | Happy | REGRESSION | P2 | Handler đã có; kiểm tra này là thay đổi dự kiến theo TDD-RBAC-001. Vai trò R có supervision.complete, do hai người giữ; cả hai không còn phụ trách gói giám sát nào sau khi các gói đã được chuyển giao hoặc gỡ phân công. | Bỏ supervision.complete khỏi R. | Không ném ngoại lệ; xóa dòng RolePermission của supervision.complete và ghi nhật ký RoleUpdated. SecurityStamp của người giữ vai trò không đổi. | STORY-RBAC-001/AC-008<br>BR-RBAC-007/Then<br>BR-RBAC-009/Then | Đối chứng cho ca bị chặn: hết gói phụ trách thì bỏ quyền được. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

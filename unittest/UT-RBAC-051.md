@@ -37,7 +37,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Unit Test
 
-**Đã rút khỏi nghiệm thu hiện tại: hàm IsAssignedAsync và bước kế thừa từ khách hàng xuống dự án đã bị bỏ theo BR-RBAC-013 khoản 3 và TDD-RBAC-003 ngày 25/09/2026. Loại tài nguyên khác ConstructionSite nay bị validator chặn, xem UT-RBAC-068. Nội dung bên dưới chỉ để tra cứu. Không tái sử dụng mã này.**
+**Đã rút khỏi nghiệm thu hiện tại: hàm IsAssignedAsync và bước kế thừa từ khách hàng xuống dự án đã bị bỏ theo BR-RBAC-013 khoản 3 và TDD-RBAC-003 ngày 25/09/2026. Loại tài nguyên khác SupervisionGrant nay bị validator chặn, xem UT-RBAC-068. Nội dung bên dưới chỉ để tra cứu. Không tái sử dụng mã này.**
 
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần

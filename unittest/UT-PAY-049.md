@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-049 | Lifecycle | Truy vấn gộp quyền từ vai trò khi phát hành token (dự kiến) | Branch | REGRESSION | P1 | Tài khoản nhân viên đang hoạt động, giữ một vai trò mà RolePermission chỉ có commerce.read. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Kiểm bộ quyền gộp được có chứa package.cancel, package.restore, supervision.reassign không. | Không có cả ba mã; token chỉ mang claim perm là commerce.read, nên ba thao tác ghi đều bị policy từ chối. Không dùng quyền xem làm quyền ghi. | STORY-PAY-002/AC-007<br>TDD-RBAC-001/Architecture<br>TDD-SUB-005/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
+| UT-PAY-049 | Lifecycle | Truy vấn gộp quyền từ vai trò khi phát hành token (dự kiến) | Branch | REGRESSION | P1 | Tài khoản nhân viên đang hoạt động, giữ một vai trò mà RolePermission chỉ có commerce.read. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Kiểm bộ quyền gộp được có chứa package.cancel, package.restore không. | Không có hai mã; token chỉ mang claim perm là commerce.read, nên hủy và khôi phục đều bị policy từ chối. Không dùng quyền xem làm quyền ghi. Danh mục không còn mã supervision.reassign (đã bỏ ngày 25/09/2026). | STORY-PAY-002/AC-007<br>TDD-RBAC-001/Architecture<br>TDD-SUB-005/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

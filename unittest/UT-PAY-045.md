@@ -37,6 +37,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Unit Test
 
+**Đã rút khỏi nghiệm thu hiện tại: ca kiểm lý do bắt buộc của ReassignSupervisionValidator. Ngày 25/09/2026 người dùng bỏ việc đổi công trình của gói đã gán nên không còn lệnh đổi và trường lý do (BR-SUB-009, BR-SUB-023 đã bỏ). Không tái sử dụng mã này.**
+
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
 

@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-062 | Subscription / Supervision | AssignmentAuthorizer.IsDirectlyAssignedAsync (dự kiến trong TDD-SUB-006) | Branch | REGRESSION | P1 | User A giữ vai trò hệ thống mã admin, không có dòng Assignment nào. Fake IAssignmentRowLocker ghi lại lời gọi. | IsDirectlyAssignedAsync(A, ConstructionSite, CS1, now) | Trả true mà không gọi LockActiveForShareAsync. | BR-RBAC-013/Except<br>BR-SUB-011/Then<br>TDD-SUB-006/Architecture | Người giữ vai trò mã admin được miễn phân công công trình; nhận diện theo mã vai trò. Cập nhật 25/09/2026: dùng tên công trình dự kiến theo TDD-SUB-004/006 (code hiện còn ProjectId). | [Chưa phân công] | Draft |
+| UT-SUB-062 | Subscription / Supervision | AssignmentAuthorizer.IsDirectlyAssignedAsync (dự kiến trong TDD-SUB-006) | Branch | REGRESSION | P1 | User A giữ vai trò hệ thống mã admin, không có dòng Assignment nào. Fake IAssignmentRowLocker ghi lại lời gọi. | IsDirectlyAssignedAsync(A, SupervisionGrant, G1, now) | Trả true mà không gọi LockActiveForShareAsync. | BR-RBAC-013/Except<br>BR-SUB-011/Then<br>TDD-SUB-006/Architecture | Người giữ vai trò mã admin được miễn phân công gói; nhận diện theo mã vai trò. Cập nhật lần 2 ngày 25/09/2026: phân công theo gói (ResourceType=SupervisionGrant, ResourceId=mã gói) theo TDD-RBAC-003/006; cột công trình dùng tên dự kiến (code hiện còn ProjectId). | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 

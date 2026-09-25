@@ -37,6 +37,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Unit Test
 
+**Đã rút khỏi nghiệm thu hiện tại: ca kiểm ReassignSupervisionGrantHandler đổi công trình sau một năm. Ngày 25/09/2026 người dùng bỏ việc đổi công trình của gói đã gán, kể cả nhân viên (BR-SUB-009, BR-SUB-023 đã bỏ). Yêu cầu gán lại gói đã gán bị từ chối kiểm ở UT-PAY-044. Không tái sử dụng mã này.**
+
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
 

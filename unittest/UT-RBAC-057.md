@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-057 | Assignment | TransferAssignmentCommandHandler.Handle | Error | REGRESSION | P2 | Handler đã có. Dòng phân công đang hiệu lực thuộc về nhân viên A trên công trình P. | assignmentId của dòng đó và toStaffUserId cũng là A. | Ném ngoại lệ ánh xạ 409 với mã DuplicateAssignment. Dòng phân công hiện tại không bị đóng và không tạo dòng mới. | STORY-RBAC-003/EXC-03 | Chuyển giao vòng về chính người đang phụ trách sẽ làm gãy lịch sử mà không đem lại thay đổi nào. | [Chưa xác định] | Draft |
+| UT-RBAC-057 | Assignment | TransferAssignmentCommandHandler.Handle | Error | REGRESSION | P2 | Handler đã có. Dòng phân công đang hiệu lực thuộc về nhân viên A trên gói G; gói G đang Assigned. | assignmentId của dòng đó và toStaffUserId cũng là A. | Ném ngoại lệ ánh xạ 409 với mã DuplicateAssignment. Dòng phân công hiện tại không bị đóng và không tạo dòng mới. | STORY-RBAC-003/EXC-03 | Chuyển giao vòng về chính người đang phụ trách sẽ làm gãy lịch sử mà không đem lại thay đổi nào. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

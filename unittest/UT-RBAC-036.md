@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-036 | Staff | RevokeRoleCommandHandler.Handle | Branch | REGRESSION | P1 | Handler đã có. Nhân viên giữ hai vai trò cùng chứa supervision.complete và đang phụ trách 2 công trình. Mock bộ đếm phân công để xác minh không bị gọi. | Yêu cầu thu hồi một trong hai vai trò đó. | Không ném ngoại lệ; xóa dòng UserRole của vai trò bị thu hồi và ghi nhật ký RoleRevoked. Bộ đếm phân công không được gọi vì quyền còn lại vẫn có supervision.complete; hai phân công giữ nguyên. | BR-RBAC-007/Then<br>STORY-RBAC-002/AC-011<br>STORY-RBAC-002/ALT-02 | Điều kiện chặn xét theo quyền còn lại sau khi gỡ, không xét số phân công một cách thô. | [Chưa xác định] | Draft |
+| UT-RBAC-036 | Staff | RevokeRoleCommandHandler.Handle | Branch | REGRESSION | P1 | Handler đã có. Nhân viên giữ hai vai trò cùng chứa supervision.complete và đang phụ trách 2 gói giám sát. Mock bộ đếm phân công để xác minh không bị gọi. | Yêu cầu thu hồi một trong hai vai trò đó. | Không ném ngoại lệ; xóa dòng UserRole của vai trò bị thu hồi và ghi nhật ký RoleRevoked. Bộ đếm phân công không được gọi vì quyền còn lại vẫn có supervision.complete; hai phân công giữ nguyên. | BR-RBAC-007/Then<br>STORY-RBAC-002/AC-011<br>STORY-RBAC-002/ALT-02 | Điều kiện chặn xét theo quyền còn lại sau khi gỡ, không xét số phân công một cách thô. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

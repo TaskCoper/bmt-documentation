@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-048 | Supervision | AssignmentReceiptPolicy (dự kiến) | Determinism | REGRESSION | P1 | Gán K đã thành công; FirstAssignedAt và version đã lưu. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Retry K cùng body sau khi mất phản hồi. | Trả receipt cũ, không tạo audit/lần gán mới hoặc làm mới hạn. | TDD-SUB-004/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
+| UT-PAY-048 | Supervision | AssignmentReceiptPolicy (dự kiến) | Determinism | REGRESSION | P1 | Gán K đã thành công; FirstAssignedAt và version đã lưu. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Retry K cùng body sau khi mất phản hồi. | Trả kết quả đã lưu trong biên nhận với wasAlreadyApplied=true; không tạo biên nhận mới, không gán lần hai, không đổi FirstAssignedAtUtc hay làm mới hạn. | TDD-SUB-004/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

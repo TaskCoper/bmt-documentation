@@ -42,10 +42,12 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-044 | Supervision | ReassignSupervisionGrantHandler (dự kiến) | Error | REGRESSION | P1 | Actor là khách hoặc nhân viên thiếu supervision.reassign. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Gửi sửa/gỡ công trình trực tiếp. | AccessForbidden hoặc không có route gỡ; grant giữ nguyên. | STORY-SUB-004/AC-005<br>STORY-SUB-004/AC-008<br>TDD-SUB-004/Internal API | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
+| UT-PAY-044 | Supervision | AssignSupervisionGrantCommandHandler (dự kiến) | Error | REGRESSION | P1 | Khách U1 có CS1, CS2 (LockOwnerAccountIdAsync trả U1 cho cả hai); CS2 chưa có gói. Lần lượt: G1 State=Assigned trên CS1; G1 State=Completed trên CS1; G1 State=CanceledByStaff, từng gán CS1. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Với mỗi trạng thái, U1 gửi gán G1 vào CS2 với expectedVersion đúng và key mới. | Cả ba ném ConflictException với MessageCode=GrantStateConflict (409). G1 giữ nguyên State, ConstructionSiteId=CS1, FirstAssignedAtUtc và Version; không ghi biên nhận. Không có route hay tham số nào để gỡ hoặc đổi công trình. | STORY-SUB-004/AC-005<br>STORY-SUB-004/EXC-03<br>BR-SUB-009/Except<br>TDD-SUB-004/Internal API<br>TDD-SUB-004/State Diagram | Gói đã gắn công trình thì không đổi được, kể cả gói đã hoàn thành hay đang bị hủy (BR-SUB-009). Route reassign cũ đã bỏ, việc routing trả 404 kiểm ở ST-PAY-071; chưa thực thi. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-SUB-004/AC-005
-- STORY-SUB-004/AC-008
+- STORY-SUB-004/EXC-03
+- BR-SUB-009/Except
 - TDD-SUB-004/Internal API
+- TDD-SUB-004/State Diagram

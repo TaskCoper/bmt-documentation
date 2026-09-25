@@ -42,9 +42,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-040 | Supervision | AssignSupervisionGrantHandler (dự kiến) | Happy | REGRESSION | P1 | Grant còn hạn, chưa gán; công trình cùng owner chưa có grant. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Gán đúng version/key. | Assigned, set firstAssignedAt một lần, audit/receipt; không gọi tạo đơn/thanh toán. | STORY-SUB-004/AC-001<br>TDD-SUB-004/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
+| UT-PAY-040 | Supervision | AssignSupervisionGrantCommandHandler (dự kiến) | Happy | REGRESSION | P1 | Gói G1 của U1 State=Unassigned, Version=1, còn hạn gán. Fake IConstructionSiteOwnershipReader.LockOwnerAccountIdAsync(CS1) trả U1; CS1 chưa có gói giữ chỗ. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Khách U1 gán G1 vào CS1 với expectedVersion=1, key K1. | G1: State=Assigned, ConstructionSiteId=CS1, FirstAssignedAtUtc=now (ghi một lần), Version=2. Ghi đúng một PackageMutationReceipt Operation=Assign. Không ghi bảng sự kiện gán (SupervisionAssignmentEvent đã bỏ); phản hồi có grantId, constructionSiteId, state, version, wasAlreadyApplied=false và không có eventId. Không gọi tạo đơn hay thanh toán. | STORY-SUB-004/AC-001<br>TDD-SUB-004/Architecture<br>TDD-SUB-004/Data Model | Gán lần đầu chỉ ghi gói và biên nhận theo TDD-SUB-004 sau ngày 25/09/2026; chưa thực thi. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-SUB-004/AC-001
 - TDD-SUB-004/Architecture
+- TDD-SUB-004/Data Model

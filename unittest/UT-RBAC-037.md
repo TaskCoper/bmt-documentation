@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-037 | Staff | RevokeRoleCommandHandler.Handle | Happy | REGRESSION | P2 | Handler đã có. Nhân viên không phụ trách công trình nào; vai trò bị thu hồi là nguồn duy nhất của supervision.complete. | UserId và RoleId hợp lệ. | Xóa dòng UserRole tương ứng và sinh bản ghi nhật ký RoleRevoked. SecurityStamp của người đó không đổi và không gọi RevokeAllForUserAsync. | BR-RBAC-007/Then<br>BR-RBAC-009/Then<br>BR-RBAC-012/Then | Thu hồi vai trò là thao tác thường, chịu độ trễ theo hạn token chứ không cắt phiên. | [Chưa xác định] | Draft |
+| UT-RBAC-037 | Staff | RevokeRoleCommandHandler.Handle | Happy | REGRESSION | P2 | Handler đã có. Nhân viên không phụ trách gói giám sát nào; vai trò bị thu hồi là nguồn duy nhất của supervision.complete. | UserId và RoleId hợp lệ. | Xóa dòng UserRole tương ứng và sinh bản ghi nhật ký RoleRevoked. SecurityStamp của người đó không đổi và không gọi RevokeAllForUserAsync. | BR-RBAC-007/Then<br>BR-RBAC-009/Then<br>BR-RBAC-012/Then | Thu hồi vai trò là thao tác thường, chịu độ trễ theo hạn token chứ không cắt phiên. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

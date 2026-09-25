@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-068 | Assignment | CreateAssignmentCommandValidator | Error | REGRESSION | P1 | Validator đã có; tập giá trị chỉ còn ConstructionSite là thay đổi dự kiến theo TDD-RBAC-003. | resourceType lần lượt là Customer, Project, Lead và ConstructionSite; các trường khác hợp lệ. | Customer, Project và Lead bị từ chối với mã ResourceTypeUnknown, dừng ở pipeline validation và trả 422, không tới handler. ConstructionSite qua validator. | BR-RBAC-013/Then<br>TDD-RBAC-003/Internal API | Đợt này chỉ có một loại tài nguyên là công trình; loại cũ và loại chưa mở phải bị chặn ở đầu vào. | [Chưa xác định] | Draft |
+| UT-RBAC-068 | Assignment | CreateAssignmentCommandValidator | Error | REGRESSION | P1 | Validator đã có; tập giá trị chỉ còn SupervisionGrant là thay đổi dự kiến theo TDD-RBAC-003. | resourceType lần lượt là Customer, Project, ConstructionSite, Lead và SupervisionGrant; các trường khác hợp lệ. | Customer, Project, ConstructionSite và Lead bị từ chối với mã ResourceTypeUnknown, dừng ở pipeline validation và trả 422, không tới handler. SupervisionGrant qua validator. | BR-RBAC-013/Then<br>TDD-RBAC-003/Internal API | Đợt này chỉ có một loại tài nguyên là gói giám sát; loại cũ, kể cả ConstructionSite của bản thiết kế trước, và loại chưa mở phải bị chặn ở đầu vào. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

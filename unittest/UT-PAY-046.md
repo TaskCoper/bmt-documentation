@@ -42,8 +42,9 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-046 | Supervision | ReassignSupervisionGrantHandler (dự kiến) | Error | REGRESSION | P1 | Grant version3; request version2. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Sửa với key mới. | GrantVersionConflict, không sửa công trình/audit; không tự dùng version3 để retry. | TDD-SUB-004/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
+| UT-PAY-046 | Supervision | AssignSupervisionGrantCommandHandler (dự kiến) | Error | REGRESSION | P1 | Gói G1 của U1 State=Unassigned, Version=3 (đã qua hủy và khôi phục), còn hạn; LockOwnerAccountIdAsync(CS1) trả U1. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | U1 gán G1 vào CS1 với expectedVersion=2, key mới. | Ném ConflictException với MessageCode=GrantVersionConflict (409). G1 giữ Unassigned, Version=3; không ghi biên nhận; handler không tự dùng Version=3 để thử lại. | TDD-SUB-004/Architecture<br>TDD-SUB-004/Internal API | Chuyển từ ca đổi công trình (đã bỏ ngày 25/09/2026) sang luồng gán: khách xem bản cũ thì phải đọc lại trước khi gán; chưa thực thi. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - TDD-SUB-004/Architecture
+- TDD-SUB-004/Internal API

@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-077 | Role | UpdateRoleCommandHandler.Handle | Branch | REGRESSION | P1 | Handler đã có; kiểm tra này là thay đổi dự kiến theo TDD-RBAC-001. Vai trò R có supervision.complete, do E và B giữ. E đang Locked, chỉ có supervision.complete từ R và còn 1 công trình. B còn supervision.complete từ vai trò khác và có 2 công trình. | Bỏ supervision.complete khỏi R. | Ném ngoại lệ 409 StaffHasActiveAssignments với affectedStaff chỉ gồm E, số công trình bằng 1. B không bị liệt kê vì vẫn còn quyền từ vai trò khác. Danh sách quyền của R giữ nguyên. | BR-RBAC-007/Then<br>STORY-RBAC-001/EXC-06 | Khoản 6 xét cả tài khoản đang bị khóa và chỉ xét quyền còn lại sau thay đổi. | [Chưa xác định] | Draft |
+| UT-RBAC-077 | Role | UpdateRoleCommandHandler.Handle | Branch | REGRESSION | P1 | Handler đã có; kiểm tra này là thay đổi dự kiến theo TDD-RBAC-001. Vai trò R có supervision.complete, do E và B giữ. E đang Locked, chỉ có supervision.complete từ R và còn phụ trách 1 gói giám sát. B còn supervision.complete từ vai trò khác và phụ trách 2 gói. | Bỏ supervision.complete khỏi R. | Ném ngoại lệ 409 StaffHasActiveAssignments với affectedStaff chỉ gồm E, số gói bằng 1. B không bị liệt kê vì vẫn còn quyền từ vai trò khác. Danh sách quyền của R giữ nguyên. | BR-RBAC-007/Then<br>STORY-RBAC-001/EXC-06 | Khoản 6 xét cả tài khoản đang bị khóa và chỉ xét quyền còn lại sau thay đổi. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
