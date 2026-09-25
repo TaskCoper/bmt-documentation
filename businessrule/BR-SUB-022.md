@@ -65,7 +65,7 @@ Gói giám sát đã được cấp hoặc khách yêu cầu gán lần đầu c
 
 ## Except
 
-Gói bị nhân viên hủy không được sử dụng khi chưa khôi phục hợp lệ. Hạn gán lần đầu không phải chu kỳ giám sát. Đổi công trình sau lần gán đúng hạn theo BR-SUB-023.
+Gói bị nhân viên hủy không được sử dụng khi chưa khôi phục hợp lệ. Hạn gán lần đầu không phải chu kỳ giám sát. Gói đã gán thì không đổi công trình theo BR-SUB-009.
 
 ## Notes
 

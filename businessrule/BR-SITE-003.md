@@ -32,45 +32,46 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Form còn kiểm tra Version và Effective Date không rỗng; với file nhập mới, vẫn để Version trống theo hợp đồng import vì hệ thống quản lý phiên bản. Thiếu ngày hiệu lực thì hỏi lại, không bịa để thoả form.
 -->
 
-# BR-SUB-024
+# BR-SITE-003
 
 ## Rule Info
 
-- **Name**: Nhân viên có quyền riêng được hủy hiệu lực cả hai loại gói.
-- **Category**: Thanh toán và gói dịch vụ
+- **Name**: Khách hàng xem công trình của mình; nhân viên xem công trình theo quyền phân công hoặc theo gói đang phụ trách.
+- **Category**: Công trình
 - **Status**: Draft
 - **Version**:
 - **Effective Date**:
 - **Owner**: [Chưa xác định]
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
-- **Source**: Các quyết định người dùng xác nhận trong hội thoại thiết kế thanh toán ngày 19/09/2026; xem discovery/payment-packages.md. Quyết định mới nhất được ưu tiên khi thay thế phương án trước đó.
+- **Source**: Người dùng xác nhận trong hội thoại chuẩn bị nghiệp vụ Công trình ngày 25/09/2026: nhân viên xem theo quyền đang có, không thêm mã quyền; khách thấy gói kèm trạng thái, chưa thấy nhân viên phụ trách; nhân viên phụ trách theo từng gói.
 
 ## Statement
 
-Nhân viên có quyền riêng được hủy hiệu lực gói thiết kế hoặc giám sát, bắt buộc nhập lý do. Hủy có hiệu lực ngay và giữ lịch sử.
+Khách hàng chỉ xem công trình của chính mình. Admin và nhân viên có quyền `assignment.manage` xem mọi công trình. Nhân viên có quyền `supervision.complete` chỉ xem công trình của những gói giám sát đang được phân công cho mình. Các tài khoản khác không xem được công trình.
 
 ## When
 
-Nhân viên yêu cầu hủy một gói đã cấp.
+Có yêu cầu xem danh sách hoặc chi tiết công trình.
 
 ## Then
 
-1. Kiểm tra quyền riêng và lý do; không mặc định mọi nhân viên được hủy. Thiếu quyền hoặc lý do thì từ chối, giữ nguyên gói.
-2. Cho phép hủy gói giám sát chưa gán, đã gán hoặc đã hoàn thành, cũng như gói thiết kế. Gói bị hủy không còn cấp quyền sử dụng mới.
-3. Hủy gói giám sát đã gán hoặc đã hoàn thành thì công trình được nhận gói giám sát khác; giữ lịch sử gói, trạng thái trước khi hủy và thao tác hủy.
-4. Hệ thống không chuyển tiền, không đánh dấu đã hoàn tiền và không tự cấp lại gói từ quyết định hoàn tiền bên ngoài.
-5. Nếu khảo sát sau mua thấy công trình không phù hợp, nhân viên xử lý hoàn tiền/bù trừ bên ngoài và hủy hiệu lực gói trong hệ thống.
-6. Hủy gói thiết kế mới không tự khôi phục gói cũ đã bị lần mua mới thay thế.
-7. Hủy gói giám sát không gỡ phân công của gói; nhân viên đang phụ trách vẫn giữ phân công theo [BR-RBAC-013](BR-RBAC-013.md) khoản 9 (người dùng xác nhận ngày 25/09/2026). Gói mới gắn vào cùng công trình sau đó cần phân công riêng.
+1. Khách hàng chỉ thấy công trình thuộc tài khoản của mình. Mỗi công trình hiện tên, địa chỉ và các gói giám sát đã gắn, kèm trạng thái gói: đã gán, đã hoàn thành hoặc đang bị hủy. Khách không thấy tên nhân viên phụ trách gói.
+2. Admin và nhân viên có quyền `assignment.manage` xem mọi công trình của mọi khách hàng. Mỗi công trình hiện tên, địa chỉ, khách hàng sở hữu và các gói giám sát đã gắn, kèm trạng thái gói.
+3. Nhân viên có quyền `supervision.complete` mà không có `assignment.manage` chỉ xem công trình của những gói giám sát đang được phân công cho mình tại thời điểm xem, với cùng thông tin như khoản 2. Khi phân công kết thúc hoặc được chuyển giao, nhân viên mất quyền xem công trình đó ngay. Gói đang bị hủy mà phân công vẫn còn hiệu lực thì nhân viên vẫn xem được.
+4. Nhân viên có nhiều quyền thì xem theo phạm vi rộng nhất trong các quyền đó.
+5. Tài khoản nhân viên không có quyền `assignment.manage` hay `supervision.complete` thì không xem được danh sách hoặc chi tiết công trình.
+6. Các quyền trong quy tắc này chỉ cho xem. Không quyền nào cho nhân viên tạo, sửa hoặc xóa công trình; xem [BR-SITE-002](BR-SITE-002.md).
+7. Yêu cầu ngoài phạm vi bị từ chối và không tiết lộ tên, địa chỉ hay gói của công trình, theo [BR-RBAC-011](BR-RBAC-011.md).
 
 ## Except
 
-Tác vụ AI đã bắt đầu hợp lệ trước khi hủy được tiếp tục theo quyền và lượt đã giữ. Chỉ chặn tác vụ mới. Thành công/lỗi/timeout vẫn quyết toán vào kỳ cũ; không cấp hoặc cộng lượt vào kỳ khác.
+Nhân viên có quyền `commerce.read` thấy tên công trình gắn với gói khi tra cứu gói đã mua theo [BR-PAY-005](BR-PAY-005.md), nhưng không xem được danh sách hoặc chi tiết công trình của khách bằng quyền này.
 
 ## Notes
 
-Hủy hiệu lực gói khác với hủy đơn chưa nhận tiền. Việc hoàn tiền không cần API hoặc màn hình xác nhận hoàn tiền trong phạm vi này.
-
-- Bản nháp nghiệp vụ, chưa triển khai hoặc chạy kiểm thử. Tên Reviewer/Approver lấy theo xác nhận cho các bản nháp mới trong discovery/subscription-entitlements.md; không phải bằng chứng phê duyệt. Owner và ngày hiệu lực chưa được phân công/xác nhận.
-- [Tổng hợp quyết định và bảng truy vết](../discovery/payment-packages.md).
+- Không thêm mã quyền riêng để xem công trình. Danh mục quyền còn 13 mã sau khi bỏ `supervision.reassign` theo quyết định ngày 25/09/2026.
+- Nhân viên được phân công theo từng gói giám sát, không theo công trình; xem [BR-RBAC-013](BR-RBAC-013.md). Vì gói gắn cố định với một công trình, người phụ trách gói xem được công trình của gói đó.
+- Khoản 3 là phạm vi xem đi theo phân công. [BR-RBAC-010](BR-RBAC-010.md) khoản 1 cho quyền xem không đòi phân công; `supervision.complete` là quyền thao tác, không phải quyền xem, nên phạm vi đọc công trình của người giữ quyền này giới hạn theo gói được phân công.
+- Ví dụ: N phụ trách G1 gắn công trình A; G3 gắn B do N2 phụ trách. N thấy A, không thấy B. Nếu G1 được chuyển giao cho N2 lúc 10:00 thì từ 10:00 N không xem được A.
+- Bản nháp nghiệp vụ, chưa triển khai hoặc chạy kiểm thử. Reviewer và Approver lấy theo xác nhận đang dùng cho các bản nháp mới, không phải bằng chứng đã phê duyệt. Owner và ngày hiệu lực chưa xác định.

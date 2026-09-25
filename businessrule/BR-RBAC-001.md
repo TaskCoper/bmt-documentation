@@ -69,5 +69,5 @@ Không có ngoại lệ. Vai trò Admin cũng nhận quyền qua chính danh sá
 ## Notes
 
 - Quy tắc này thay mô hình gán quyền thẳng cho từng người đang mô tả trong [TDD-SUB-005](../tdd/TDD-SUB-005.md#data-model), [TDD-SUB-004](../tdd/TDD-SUB-004.md) và [TDD-PAY-002](../tdd/TDD-PAY-002.md). Bốn mã quyền đã đặt tên ở các tài liệu đó giữ nguyên, chỉ đổi chỗ gắn quyền từ người sang vai trò. Ba TDD này cần cập nhật ở bước thiết kế kỹ thuật.
-- Chín mã quyền khởi tạo và nguồn của từng mã liệt kê trong [STORY-RBAC-001](../userstory/STORY-RBAC-001.md#conditions). Ngày 25/09/2026, người dùng xác nhận bổ sung năm quyền cho chức năng quản trị, mỗi chức năng một quyền; danh sách ở cùng mục của STORY-RBAC-001, tên mã đặt ở bước thiết kế kỹ thuật.
+- Tám mã quyền khởi tạo (mã `supervision.reassign` đã bỏ ngày 25/09/2026) và nguồn của từng mã liệt kê trong [STORY-RBAC-001](../userstory/STORY-RBAC-001.md#conditions). Ngày 25/09/2026, người dùng xác nhận bổ sung năm quyền cho chức năng quản trị, mỗi chức năng một quyền; danh sách ở cùng mục của STORY-RBAC-001, tên mã đặt ở bước thiết kế kỹ thuật.
 - Bản nháp nghiệp vụ, chưa triển khai hoặc chạy kiểm thử. Reviewer và Approver lấy theo xác nhận đang dùng cho các bản nháp mới, không phải bằng chứng đã phê duyệt. Owner và ngày hiệu lực chưa xác định.

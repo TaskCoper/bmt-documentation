@@ -39,8 +39,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Metadata
 
-- **Story**: Là khách hàng, tôi muốn gán gói giám sát đã mua cho công trình của mình; khi gán nhầm, nhân viên có quyền sửa giúp.
-- **Context**: Tách việc mua/cấp gói khỏi gán công trình. Gói chưa gán có hạn một năm; đã gán đúng hạn tiếp tục phục vụ sau mốc này. Chỉ quản lý liên kết gói–công trình, chưa quản lý hoạt động khảo sát/giám sát.
+- **Story**: Là khách hàng, tôi muốn gán gói giám sát đã mua cho công trình của mình để gói phục vụ đúng công trình đó.
+- **Context**: Tách việc mua/cấp gói khỏi gán công trình. Gói chưa gán có hạn một năm; đã gán đúng hạn tiếp tục phục vụ sau mốc này. Chỉ quản lý liên kết gói–công trình, chưa quản lý hoạt động khảo sát/giám sát. Theo quyết định người dùng xác nhận ngày 25/09/2026, gói đã gắn vào một công trình thì không đổi sang công trình khác, kể cả nhân viên và Admin; quyền `supervision.reassign` và BR-SUB-023 đã bỏ.
 - **Sprint**:
 - **Priority**:
 - **Status**: Todo
@@ -55,12 +55,11 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ### Preconditions
 
-- Khách có gói giám sát đã cấp và có công trình của mình. Công trình là thực thể riêng, khác với bản dự toán; khách tự tạo công trình miễn phí, không cần gói thiết kế (người dùng xác nhận ngày 25/09/2026). Story và BR tạo, quản lý công trình chưa được soạn và sẽ chuẩn bị riêng.
-- Quyền riêng của nhân viên theo STORY-RBAC-001. Chưa coi nguồn dữ liệu công trình và quyền này đã triển khai.
+- Khách có gói giám sát đã cấp và có công trình của mình. Công trình là thực thể riêng, khác với bản dự toán; khách tự tạo công trình miễn phí theo STORY-SITE-001. Chưa coi nguồn dữ liệu công trình đã triển khai.
 
 ### Trigger
 
-Khách yêu cầu gán lần đầu hoặc nhân viên có quyền yêu cầu đổi công trình đã gán.
+Khách yêu cầu gán gói chưa gán cho một công trình của mình.
 
 ## Flow
 
@@ -83,6 +82,8 @@ Gán đúng hạn vẫn phục vụ sau một năm.
 3. Không tự kết thúc hoặc đòi mua lại vì đã qua một năm từ lúc cấp.
 
 #### ALT-02
+
+**Không nghiệm thu trong phạm vi hiện tại:** người dùng xác nhận ngày 25/09/2026 bỏ việc đổi công trình của gói đã gán, kể cả nhân viên; xem EXC-07. Nội dung giữ để tra lịch sử.
 
 Đổi công trình sau một năm.
 
@@ -113,10 +114,12 @@ Chặn công trình đã có gói.
 Khách không tự gỡ hoặc đổi.
 
 1. Khách gửi yêu cầu gỡ gói hoặc đổi sang B, kể cả yêu cầu trực tiếp.
-2. Từ chối và hướng dẫn liên hệ nhân viên.
+2. Từ chối; gói đã gắn thì không gỡ hoặc đổi công trình được.
 3. Gói vẫn gắn với A, không tạo thêm gói.
 
 #### EXC-04
+
+**Không nghiệm thu trong phạm vi hiện tại:** thay bằng EXC-07 vì đã bỏ việc đổi công trình theo quyết định ngày 25/09/2026. Nội dung giữ để tra lịch sử.
 
 Từ chối sửa thiếu quyền hoặc lý do.
 
@@ -125,6 +128,8 @@ Từ chối sửa thiếu quyền hoặc lý do.
 3. Liên kết gói không thay đổi.
 
 #### EXC-05
+
+**Không nghiệm thu trong phạm vi hiện tại:** thay bằng EXC-07 vì đã bỏ việc đổi công trình theo quyết định ngày 25/09/2026. Nội dung giữ để tra lịch sử.
 
 Từ chối đổi sang công trình khác khách hoặc đã có gói.
 
@@ -139,6 +144,14 @@ Không gán lần đầu sang công trình người khác.
 1. U1 yêu cầu gán gói cho B.
 2. Từ chối vì không cùng chủ sở hữu.
 3. Gói vẫn chưa gán, giữ hạn ban đầu.
+
+#### EXC-07
+
+Không ai đổi được công trình của gói đã gán.
+
+1. Admin hoặc nhân viên có bất kỳ quyền nào yêu cầu đổi gói đang gắn A sang công trình B của cùng khách, kể cả có lý do và gửi trực tiếp tới API.
+2. Từ chối theo BR-SUB-009; hệ thống không có thao tác đổi công trình.
+3. Gói vẫn gắn A; trạng thái, hạn và lịch sử gói giữ nguyên.
 
 ## Acceptance Criteria
 
@@ -174,10 +187,12 @@ Không gán lần đầu sang công trình người khác.
 
 - **Given**: Gói đã gán cho A; B là công trình khác của cùng khách.
 - **When**: Khách gửi yêu cầu gỡ gói hoặc đổi sang B, kể cả yêu cầu trực tiếp.
-- **Then**: Từ chối và hướng dẫn liên hệ nhân viên.
+- **Then**: Từ chối; gói đã gắn thì không gỡ hoặc đổi công trình được.
 - **And**: Gói vẫn gắn với A, không tạo thêm gói.
 
 #### AC-006
+
+**Không nghiệm thu trong phạm vi hiện tại:** người dùng xác nhận ngày 25/09/2026 bỏ việc đổi công trình của gói đã gán, kể cả nhân viên; thay bằng AC-013. Nội dung giữ để tra lịch sử.
 
 - **Given**: Nhân viên có quyền riêng; gói đã gán A; B cùng khách và chưa có gói hiệu lực.
 - **When**: Nhân viên đổi sang B với lý do “Gán nhầm công trình”.
@@ -186,6 +201,8 @@ Không gán lần đầu sang công trình người khác.
 
 #### AC-007
 
+**Không nghiệm thu trong phạm vi hiện tại:** người dùng xác nhận ngày 25/09/2026 bỏ việc đổi công trình của gói đã gán, kể cả nhân viên; thay bằng AC-013. Nội dung giữ để tra lịch sử.
+
 - **Given**: Gói cấp 01/10/2026, gán A đúng hạn; B cùng khách chưa có gói.
 - **When**: Ngày 02/10/2027 nhân viên có quyền đổi sang B và nhập lý do.
 - **Then**: Cho đổi công trình.
@@ -193,12 +210,16 @@ Không gán lần đầu sang công trình người khác.
 
 #### AC-008
 
+**Không nghiệm thu trong phạm vi hiện tại:** người dùng xác nhận ngày 25/09/2026 bỏ việc đổi công trình của gói đã gán, kể cả nhân viên; thay bằng AC-013. Nội dung giữ để tra lịch sử.
+
 - **Given**: Gói đang gán A; công trình B đủ điều kiện.
 - **When**: Nhân viên thiếu quyền thử sửa; nhân viên có quyền thử sửa với lý do trống.
 - **Then**: Cả hai yêu cầu đều bị từ chối.
 - **And**: Liên kết gói không thay đổi.
 
 #### AC-009
+
+**Không nghiệm thu trong phạm vi hiện tại:** người dùng xác nhận ngày 25/09/2026 bỏ việc đổi công trình của gói đã gán, kể cả nhân viên; thay bằng AC-013. Nội dung giữ để tra lịch sử.
 
 - **Given**: Gói thuộc khách U1 gán A; B thuộc U2, C thuộc U1 nhưng đã có gói hiệu lực.
 - **When**: Nhân viên có quyền và lý do lần lượt thử đổi sang B và C.
@@ -226,6 +247,13 @@ Không gán lần đầu sang công trình người khác.
 - **Then**: Từ chối vì đã đến hạn.
 - **And**: Gói đã gán đúng hạn trước đó vẫn tiếp tục phục vụ sau mốc này.
 
+#### AC-013
+
+- **Given**: Gói của khách U1 đang gắn công trình A; công trình B của U1 chưa có gói.
+- **When**: Admin và nhân viên có đủ các quyền lần lượt yêu cầu đổi gói sang B, có lý do “Gán nhầm công trình”, kể cả gửi trực tiếp tới API.
+- **Then**: Cả hai yêu cầu bị từ chối.
+- **And**: Gói vẫn gắn A với trạng thái, hạn và lịch sử như cũ; B vẫn chưa có gói.
+
 ## References
 
 ### TDDs
@@ -235,7 +263,7 @@ Không gán lần đầu sang công trình người khác.
 ### Rules
 
 - BR-SUB-022/Then
-- BR-SUB-023/Then
+- BR-SUB-009/Then
 - BR-SUB-006/Then
 
 ### Dependencies
@@ -249,5 +277,5 @@ Không gán lần đầu sang công trình người khác.
 
 ## Out of Scope
 
-- Quản lý khảo sát, tiến độ giám sát, lịch và lượt kiểm tra; khách tự gỡ/đổi công trình; nhân viên gỡ về chưa gán hoặc chuyển gói sang khách khác; tạo và quản lý công trình (chuẩn bị ở phiên riêng).
+- Quản lý khảo sát, tiến độ giám sát, lịch và lượt kiểm tra; gỡ hoặc đổi công trình của gói đã gán, kể cả nhân viên và Admin; chuyển gói sang khách khác. Tạo và quản lý công trình thuộc STORY-SITE-001.
 - Chưa triển khai, chạy test hoặc phê duyệt tài liệu. Sprint, Priority, Creator và người thực hiện chưa được phân công; không lấy ví dụ trong template làm giá trị thật.

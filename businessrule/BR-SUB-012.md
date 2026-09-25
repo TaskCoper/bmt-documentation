@@ -49,11 +49,11 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Statement
 
-**Cập nhật 24/09/2026:** Mở lại dùng chung quyền `supervision.complete` với hoàn thành, cùng cách kiểm phân công trực tiếp công trình ở [BR-SUB-011](BR-SUB-011.md). Mở lại đưa gói về đã gán trên đúng công trình cũ.
+**Cập nhật 24/09/2026:** Mở lại dùng chung quyền `supervision.complete` với hoàn thành, cùng cách kiểm phân công gói ở [BR-SUB-011](BR-SUB-011.md). Mở lại đưa gói về đã gán trên đúng công trình cũ.
 
 **Phân biệt với thanh toán 19/09/2026:** Mở lại gói đã hoàn thành trong tài liệu này khác với khôi phục gói do nhân viên hủy. Khôi phục sau hủy dùng quyền riêng, điều kiện hạn và xung đột theo [BR-SUB-025](BR-SUB-025.md); không tự dùng quyền Admin/nhân viên phụ trách của luồng cũ thay thế quyền riêng đã chốt.
 
-Admin hoặc nhân viên phụ trách công trình được mở lại gói giám sát đã hoàn thành để sửa thao tác nhầm. Người thao tác phải nhập lý do. Việc mở lại không được làm công trình có hai gói giám sát đang thực hiện.
+Admin hoặc nhân viên phụ trách gói được mở lại gói giám sát đã hoàn thành để sửa thao tác nhầm. Người thao tác phải nhập lý do. Việc mở lại không được làm công trình có hai gói giám sát đang thực hiện.
 
 ## When
 
@@ -61,7 +61,7 @@ Người thao tác gửi yêu cầu mở lại gói giám sát đã hoàn thành
 
 ## Then
 
-1. Dùng phân công hiện tại ở công trình gắn với gói, không dùng phân công riêng theo gói. Người thao tác phải có quyền `supervision.complete`; Admin có quyền này thì không cần phân công, nhân viên có quyền này phải được phân công công trình đó; đợt này không có phân công mức khách hàng theo [BR-RBAC-013](BR-RBAC-013.md). Khách hàng và nhân viên không phụ trách không có quyền mở lại.
+1. Dùng phân công hiện tại của gói. Người thao tác phải có quyền `supervision.complete`; Admin có quyền này thì không cần phân công, nhân viên có quyền này phải được phân công gói đó theo [BR-RBAC-013](BR-RBAC-013.md). Khách hàng và nhân viên không phụ trách không có quyền mở lại.
 2. Yêu cầu lý do có nội dung; không chấp nhận thiếu lý do, chuỗi rỗng hoặc chỉ có khoảng trắng.
 3. Nếu công trình chưa có gói giám sát khác giữ chỗ, chuyển gói được chọn về đã gán trên đúng công trình cũ và lưu lý do mở lại. Không đổi hạn gán lần đầu hoặc mốc gán đầu.
 4. Giữ nguyên quyền lợi đã cấp theo [BR-SUB-004](BR-SUB-004.md) và liên kết khách hàng/công trình; không tự đổi gói khác hoặc subscription thiết kế. Không tạo chu kỳ, lịch hẹn, hạn mức hoặc giao dịch lượt giám sát.

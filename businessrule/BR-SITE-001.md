@@ -32,45 +32,45 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Form còn kiểm tra Version và Effective Date không rỗng; với file nhập mới, vẫn để Version trống theo hợp đồng import vì hệ thống quản lý phiên bản. Thiếu ngày hiệu lực thì hỏi lại, không bịa để thoả form.
 -->
 
-# BR-SUB-024
+# BR-SITE-001
 
 ## Rule Info
 
-- **Name**: Nhân viên có quyền riêng được hủy hiệu lực cả hai loại gói.
-- **Category**: Thanh toán và gói dịch vụ
+- **Name**: Công trình có tên và địa chỉ bắt buộc; tên không trùng giữa các công trình của cùng một khách hàng.
+- **Category**: Công trình
 - **Status**: Draft
 - **Version**:
 - **Effective Date**:
 - **Owner**: [Chưa xác định]
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
-- **Source**: Các quyết định người dùng xác nhận trong hội thoại thiết kế thanh toán ngày 19/09/2026; xem discovery/payment-packages.md. Quyết định mới nhất được ưu tiên khi thay thế phương án trước đó.
+- **Source**: Người dùng xác nhận trong hội thoại chuẩn bị nghiệp vụ Công trình ngày 25/09/2026: công trình có tên và địa chỉ, cả hai bắt buộc; tên tối đa 200, địa chỉ tối đa 500 ký tự; không cho trùng tên trong cùng khách; không giới hạn số công trình; tạo miễn phí.
 
 ## Statement
 
-Nhân viên có quyền riêng được hủy hiệu lực gói thiết kế hoặc giám sát, bắt buộc nhập lý do. Hủy có hiệu lực ngay và giữ lịch sử.
+Mỗi công trình có hai thông tin bắt buộc là tên và địa chỉ. Tên công trình không được trùng với công trình khác của cùng một khách hàng; khách hàng khác nhau được đặt trùng tên.
 
 ## When
 
-Nhân viên yêu cầu hủy một gói đã cấp.
+Khách hàng tạo công trình, hoặc sửa tên hay địa chỉ của công trình.
 
 ## Then
 
-1. Kiểm tra quyền riêng và lý do; không mặc định mọi nhân viên được hủy. Thiếu quyền hoặc lý do thì từ chối, giữ nguyên gói.
-2. Cho phép hủy gói giám sát chưa gán, đã gán hoặc đã hoàn thành, cũng như gói thiết kế. Gói bị hủy không còn cấp quyền sử dụng mới.
-3. Hủy gói giám sát đã gán hoặc đã hoàn thành thì công trình được nhận gói giám sát khác; giữ lịch sử gói, trạng thái trước khi hủy và thao tác hủy.
-4. Hệ thống không chuyển tiền, không đánh dấu đã hoàn tiền và không tự cấp lại gói từ quyết định hoàn tiền bên ngoài.
-5. Nếu khảo sát sau mua thấy công trình không phù hợp, nhân viên xử lý hoàn tiền/bù trừ bên ngoài và hủy hiệu lực gói trong hệ thống.
-6. Hủy gói thiết kế mới không tự khôi phục gói cũ đã bị lần mua mới thay thế.
-7. Hủy gói giám sát không gỡ phân công của gói; nhân viên đang phụ trách vẫn giữ phân công theo [BR-RBAC-013](BR-RBAC-013.md) khoản 9 (người dùng xác nhận ngày 25/09/2026). Gói mới gắn vào cùng công trình sau đó cần phân công riêng.
+1. Bỏ khoảng trắng đầu và cuối của tên và địa chỉ trước khi kiểm tra và lưu.
+2. Sau bước 1, tên và địa chỉ đều phải có nội dung. Tên tối đa 200 ký tự, địa chỉ tối đa 500 ký tự. Giá trị vượt giới hạn bị từ chối, không tự cắt ngắn.
+3. Địa chỉ là một ô chữ tự do. Không tách tỉnh/thành, quận/huyện, phường/xã và không đối chiếu với danh mục địa giới hành chính.
+4. Tên không được trùng với tên của công trình khác thuộc cùng khách hàng. So sánh sau bước 1 và không phân biệt chữ hoa, chữ thường. Khi sửa, chỉ so với các công trình khác, không so với chính công trình đang sửa.
+5. Không giới hạn số công trình của một khách hàng. Tạo công trình không thu phí và không cần gói thiết kế hay gói giám sát.
+6. Yêu cầu bị từ chối không tạo công trình và không thay đổi thông tin đã lưu.
 
 ## Except
 
-Tác vụ AI đã bắt đầu hợp lệ trước khi hủy được tiếp tục theo quyền và lượt đã giữ. Chỉ chặn tác vụ mới. Thành công/lỗi/timeout vẫn quyết toán vào kỳ cũ; không cấp hoặc cộng lượt vào kỳ khác.
+Không có ngoại lệ. Công trình đã bị xóa theo [BR-SITE-002](BR-SITE-002.md) không còn được tính khi kiểm tra trùng tên.
 
 ## Notes
 
-Hủy hiệu lực gói khác với hủy đơn chưa nhận tiền. Việc hoàn tiền không cần API hoặc màn hình xác nhận hoàn tiền trong phạm vi này.
-
-- Bản nháp nghiệp vụ, chưa triển khai hoặc chạy kiểm thử. Tên Reviewer/Approver lấy theo xác nhận cho các bản nháp mới trong discovery/subscription-entitlements.md; không phải bằng chứng phê duyệt. Owner và ngày hiệu lực chưa được phân công/xác nhận.
-- [Tổng hợp quyết định và bảng truy vết](../discovery/payment-packages.md).
+- Ví dụ: U1 có “Nhà Phố”. U1 tạo “ nhà phố ” bị từ chối. U2 tạo “Nhà phố” được. U1 đổi chính công trình “nhà phố” thành “Nhà Phố” được.
+- Chỉ bỏ khoảng trắng đầu và cuối; khoảng trắng ở giữa được giữ nguyên, nên “Nhà  phố” (hai dấu cách) và “Nhà phố” là hai tên khác nhau. Chữ có dấu và không dấu cũng là khác nhau, ví dụ “Nhà phố” và “Nha pho”.
+- Giới hạn 200 ký tự cho tên theo cách đang dùng cho tên trong BMT, ví dụ [BR-NEWS-002](BR-NEWS-002.md) khoản 1 và [BR-PROJ-004](BR-PROJ-004.md) khoản 17.
+- Công trình là thực thể riêng, khác với bản dự toán. Quyền tạo, sửa, xóa theo [BR-SITE-002](BR-SITE-002.md); quyền xem theo [BR-SITE-003](BR-SITE-003.md).
+- Bản nháp nghiệp vụ, chưa triển khai hoặc chạy kiểm thử. Reviewer và Approver lấy theo xác nhận đang dùng cho các bản nháp mới, không phải bằng chứng đã phê duyệt. Owner và ngày hiệu lực chưa xác định.

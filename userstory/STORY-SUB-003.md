@@ -41,7 +41,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 ## Metadata
 
 - **Story**: Là người có quyền quản lý gói giám sát, tôi muốn ghi nhận gói của đúng khách hàng và công trình là đã hoàn thành khi công trình xong.
-- **Context**: Phạm vi hiện tại chỉ quản lý gói theo công trình và nút hoàn thành, không có chu kỳ hay ngày hết hạn. Lịch và lượt vận hành offline. AC-004/AC-005 là nội dung đã HOÃN, không thuộc nghiệm thu đợt này; xem nợ nghiệp vụ. Người bấm hoàn thành hoặc mở lại phải có quyền `supervision.complete`. Admin có quyền này thì không cần phân công; nhân viên có quyền này phải đang được phân công công trình đó; đợt này không có phân công mức khách hàng theo BR-RBAC-013. Không phân công riêng theo gói; khách hàng và nhân viên không phụ trách không được bấm. Gói giám sát gắn với một công trình, không chia lượt sang công trình khác. Một lượt kiểm tra thực tế là một buổi kỹ sư đến kiểm tra tại công trình. Quyền lợi thiết kế vẫn dùng chung theo tài khoản. Mỗi công trình có tối đa một gói giám sát giữ chỗ, tức là đang gán hoặc đã hoàn thành; các công trình khác nhau của tài khoản được dùng gói riêng cùng lúc.
+- **Context**: Phạm vi hiện tại chỉ quản lý gói theo công trình và nút hoàn thành, không có chu kỳ hay ngày hết hạn. Lịch và lượt vận hành offline. AC-004/AC-005 là nội dung đã HOÃN, không thuộc nghiệm thu đợt này; xem nợ nghiệp vụ. Người bấm hoàn thành hoặc mở lại phải có quyền `supervision.complete`. Admin có quyền này thì không cần phân công; nhân viên có quyền này phải đang được phân công gói đó theo BR-RBAC-013; đợt này phân công theo từng gói giám sát, không theo khách hàng hay công trình; khách hàng và nhân viên không phụ trách không được bấm. Gói giám sát gắn với một công trình, không chia lượt sang công trình khác. Một lượt kiểm tra thực tế là một buổi kỹ sư đến kiểm tra tại công trình. Quyền lợi thiết kế vẫn dùng chung theo tài khoản. Mỗi công trình có tối đa một gói giám sát giữ chỗ, tức là đang gán hoặc đã hoàn thành; các công trình khác nhau của tài khoản được dùng gói riêng cùng lúc.
 - **Sprint**:
 - **Priority**:
 - **Status**: Todo
@@ -69,11 +69,13 @@ Người có quyền mở gói của khách hàng theo công trình hoặc bấm
 
 **Cập nhật phạm vi 24/09/2026:** Hoàn thành và mở lại vẫn thuộc phạm vi, áp dụng trên vòng đời mới của STORY-SUB-004/005. "Đang thực hiện" trong Story này nghĩa là gói đã gán công trình. Chỉ gói đã gán mới được hoàn thành; mở lại đưa gói về đã gán trên đúng công trình cũ. Gói đã hoàn thành vẫn giữ chỗ trên công trình, không được đổi công trình, được hủy và khi khôi phục thì về lại đã hoàn thành. Hoàn thành/mở lại vẫn khác hủy/khôi phục và không quản lý hoạt động khảo sát/giám sát.
 
+**Cập nhật phạm vi 25/09/2026:** Người dùng xác nhận gói đã gắn công trình thì không đổi sang công trình khác, kể cả nhân viên và Admin; phần đổi công trình của STORY-SUB-004 và BR-SUB-023 đã bỏ. Nhân viên phụ trách theo từng gói giám sát theo BR-RBAC-013, không theo công trình.
+
 ### Main Flow
 
 1. Xác định gói giám sát và công trình được gắn.
 2. Đối chiếu công trình yêu cầu với công trình được gắn.
-3. Admin hoặc nhân viên phụ trách chọn đúng khách hàng, công trình và gói đã gán công trình đó. Hệ thống kiểm tra người thao tác có quyền `supervision.complete`; với nhân viên, kiểm tra thêm người đó đang được phân công công trình này.
+3. Admin hoặc nhân viên phụ trách chọn đúng khách hàng, công trình và gói đã gán công trình đó. Hệ thống kiểm tra người thao tác có quyền `supervision.complete`; với nhân viên, kiểm tra thêm người đó đang được phân công gói này.
 4. Khi công trình đã xong, người có quyền bấm Hoàn thành gói giám sát.
 5. Hệ thống ghi nhận gói được chọn đã hoàn thành, không bắt nhập lý do và lưu người thao tác cùng thời điểm. Gói vẫn gắn với công trình và vẫn giữ chỗ trên công trình đó. Không thay đổi gói của công trình khác hoặc subscription thiết kế; không yêu cầu dữ liệu lượt hoặc lịch offline.
 
@@ -83,7 +85,7 @@ Người có quyền mở gói của khách hàng theo công trình hoặc bấm
 
 Khách muốn dùng gói giám sát đã gắn với công trình A cho công trình khác.
 
-1. Khách không tự gỡ/đổi gói sang công trình khác; yêu cầu sử dụng sai công trình xử lý theo EXC-01. Nhân viên có quyền riêng được đổi công trình theo STORY-SUB-004, phải có lý do và không vi phạm giới hạn gói hiệu lực.
+1. Khách không tự gỡ/đổi gói sang công trình khác; yêu cầu sử dụng sai công trình xử lý theo EXC-01. Nhân viên và Admin cũng không đổi được công trình của gói theo BR-SUB-009.
 
 #### ALT-02
 
@@ -146,16 +148,16 @@ Yêu cầu hoàn thành gói chưa gán công trình hoặc gói đang bị hủ
 
 #### EXC-06
 
-Yêu cầu gán hoặc sửa một gói khác sang công trình đang có gói đã hoàn thành.
+Yêu cầu gán một gói khác vào công trình đang có gói đã hoàn thành.
 
 1. Hệ thống từ chối vì gói đã hoàn thành vẫn giữ chỗ trên công trình.
 2. Muốn giám sát tiếp công trình đó thì mở lại gói đã hoàn thành.
 
 #### EXC-07
 
-Nhân viên có quyền đổi công trình yêu cầu đổi công trình của gói đã hoàn thành.
+Admin hoặc nhân viên yêu cầu đổi công trình của gói đã hoàn thành.
 
-1. Hệ thống từ chối; phải mở lại gói trước rồi mới đổi công trình.
+1. Hệ thống từ chối như với mọi gói đã gắn công trình, theo BR-SUB-009. Mở lại gói cũng không cho đổi công trình.
 
 #### EXC-09
 
@@ -206,7 +208,7 @@ Khôi phục gói đã hoàn thành bị hủy khi công trình đã có gói kh
 
 #### AC-006
 
-- **Given**: Khách hàng có gói giám sát đã gán công trình A và công trình đã xong; người thao tác là Admin có quyền `supervision.complete`, hoặc nhân viên có quyền này và được phân công trực tiếp công trình A.
+- **Given**: Khách hàng có gói giám sát đã gán công trình A và công trình đã xong; người thao tác là Admin có quyền `supervision.complete`, hoặc nhân viên có quyền này và được phân công gói này.
 - **When**: Người đó chọn đúng khách hàng, công trình A và bấm Hoàn thành gói giám sát.
 - **Then**: Chỉ gói của A được ghi nhận đã hoàn thành, vẫn gắn với đúng khách hàng và công trình A, đồng thời vẫn giữ chỗ trên A; không bắt nhập lý do.
 - **And**: Không thay đổi gói của công trình khác hoặc subscription thiết kế; không yêu cầu dữ liệu lịch hay lượt đang vận hành offline.
@@ -220,14 +222,14 @@ Khôi phục gói đã hoàn thành bị hủy khi công trình đã có gói kh
 
 #### AC-008
 
-- **Given**: Gói giám sát đã gán công trình A; người thao tác là khách hàng hoặc nhân viên không phụ trách A.
+- **Given**: Gói giám sát đã gán công trình A; người thao tác là khách hàng hoặc nhân viên không phụ trách gói này.
 - **When**: Người đó gửi yêu cầu hoàn thành gói, kể cả qua API trực tiếp.
 - **Then**: Hệ thống từ chối vì không có quyền.
 - **And**: Trạng thái gói và liên kết khách hàng/công trình không thay đổi.
 
 #### AC-009
 
-- **Given**: Gói giám sát đã hoàn thành trên công trình A; A không có gói giám sát khác giữ chỗ; người thao tác là Admin có quyền `supervision.complete`, hoặc nhân viên có quyền này và được phân công trực tiếp công trình A.
+- **Given**: Gói giám sát đã hoàn thành trên công trình A; A không có gói giám sát khác giữ chỗ; người thao tác là Admin có quyền `supervision.complete`, hoặc nhân viên có quyền này và được phân công gói này.
 - **When**: Người đó mở lại gói và nhập lý do có nội dung.
 - **Then**: Gói chuyển về đã gán trên công trình A, lý do mở lại được lưu; hạn gán và quyền lợi không đổi.
 - **And**: Liên kết khách hàng/công trình và các gói khác giữ nguyên; không tạo lịch hoặc giao dịch lượt giám sát.
@@ -249,16 +251,16 @@ Khôi phục gói đã hoàn thành bị hủy khi công trình đã có gói kh
 #### AC-012
 
 - **Given**: Gói G1 đã hoàn thành trên công trình A; khách có gói G2 chưa gán.
-- **When**: Khách gán G2 vào A, hoặc nhân viên đổi công trình của một gói khác sang A.
+- **When**: Khách gán G2 vào A.
 - **Then**: Yêu cầu bị từ chối vì G1 vẫn giữ chỗ trên A.
 - **And**: G1 và G2 giữ nguyên trạng thái và liên kết.
 
 #### AC-013
 
-- **Given**: Gói G1 đã hoàn thành trên công trình A; nhân viên có quyền đổi công trình.
-- **When**: Nhân viên yêu cầu đổi công trình của G1 sang công trình B.
-- **Then**: Yêu cầu bị từ chối; phải mở lại G1 trước.
-- **And**: G1 vẫn đã hoàn thành trên A.
+- **Given**: Gói G1 đã hoàn thành trên công trình A; công trình B của cùng khách chưa có gói.
+- **When**: Admin hoặc nhân viên yêu cầu đổi công trình của G1 sang B, kể cả sau khi mở lại G1.
+- **Then**: Yêu cầu bị từ chối vì gói đã gắn công trình thì không đổi công trình.
+- **And**: G1 vẫn gắn A với trạng thái như trước yêu cầu.
 
 #### AC-014
 
@@ -281,12 +283,19 @@ Khôi phục gói đã hoàn thành bị hủy khi công trình đã có gói kh
 - **Then**: Gói hiện trạng thái đã hoàn thành cùng công trình đã gắn.
 - **And**: Khách không được hoàn thành hoặc mở lại gói, kể cả khi gửi yêu cầu trực tiếp.
 
+#### AC-018
+
+- **Given**: Nhân viên N có quyền `supervision.complete` và phụ trách gói G1 trên công trình A; G1 bị hủy, N vẫn phụ trách G1; sau đó khách gắn gói G2 vào A.
+- **When**: N yêu cầu hoàn thành G2 khi chưa được phân công G2.
+- **Then**: Yêu cầu bị từ chối vì N không phụ trách G2; phân công theo gói, không theo công trình.
+- **And**: G2 giữ trạng thái đã gán; sau khi người quản trị phân công G2 cho N, N hoàn thành được G2.
+
 ## References
 
 ### TDDs
 
 - [TDD-SUB-003](../tdd/TDD-SUB-003.md): Thiết kế cũ đã bị thay, chỉ giữ để tra cứu; không dùng để triển khai. Phần gán/đổi công trình thay bằng TDD-SUB-004, hủy/khôi phục thay bằng TDD-SUB-005, hoàn thành/mở lại thay bằng TDD-SUB-006.
-- [TDD-SUB-004](../tdd/TDD-SUB-004.md): Gán gói và đổi công trình; gói đã hoàn thành vẫn giữ chỗ và không được đổi công trình (AC-012, AC-013).
+- [TDD-SUB-004](../tdd/TDD-SUB-004.md): Gán gói vào công trình; gói đã gắn không đổi công trình, gói đã hoàn thành vẫn giữ chỗ (AC-012, AC-013).
 - [TDD-SUB-005](../tdd/TDD-SUB-005.md): Hủy gói đã hoàn thành và khôi phục về lại đã hoàn thành (AC-014, AC-015).
 - [TDD-SUB-006](../tdd/TDD-SUB-006.md): Thiết kế hoàn thành và mở lại trên vòng đời gán công trình; thay phần hoàn thành/mở lại của TDD-SUB-003.
 
@@ -300,18 +309,18 @@ Khôi phục gói đã hoàn thành bị hủy khi công trình đã có gói kh
 
 - BR-SUB-012/Statement: Mở lại gói cần đúng quyền, có lý do và không chồng gói đang thực hiện.
 
-- BR-SUB-023/Then: Không đổi công trình của gói đã hoàn thành.
+- BR-SUB-009/Except: Không ai đổi được công trình của gói đã gắn, kể cả gói đã hoàn thành.
 
 - BR-SUB-024/Then: Hủy gói đã hoàn thành và nhả chỗ trên công trình.
 
 - BR-SUB-025/Then: Khôi phục gói đã hoàn thành về lại trạng thái đã hoàn thành.
 
-- BR-RBAC-013/Then: Chỉ phân công theo công trình, mỗi công trình một nhân viên phụ trách.
+- BR-RBAC-013/Then: Phân công theo từng gói giám sát, mỗi gói một nhân viên phụ trách.
 
 ### Dependencies
 
 - STORY-SUB-001: Quy tắc subscription và quyền lợi thiết kế dùng chung.
-- STORY-SUB-004: Gán gói và đổi công trình.
+- STORY-SUB-004: Gán gói vào công trình.
 - STORY-SUB-005: Hủy và khôi phục gói.
 
 ## Non-Functional
@@ -321,7 +330,7 @@ Khôi phục gói đã hoàn thành bị hủy khi công trình đã có gói kh
 ## Out of Scope
 
 - Luồng mua và nhận gói theo STORY-PAY-001.
-- Tạo và quản lý công trình: công trình là thực thể riêng, khác với bản dự toán; Story và BR của phần này sẽ chuẩn bị riêng.
+- Tạo và quản lý công trình thuộc STORY-SITE-001; công trình là thực thể riêng, khác với bản dự toán.
 - EXC-08 và AC-016 về phân công mức khách hàng đã rút ngày 25/09/2026 vì đợt này không còn loại phân công này; không dùng lại hai mã.
 - Hoãn quản lý lịch và lượt trên nền tảng: số dư, giữ/trừ/hoàn lượt, đặt/hủy/đổi lịch, điều phối kỹ sư. Các phần này tiếp tục offline theo [nợ nghiệp vụ](../debt/supervision-offline.md).
-- Đổi công trình đã gán được đặc tả riêng trong STORY-SUB-004; không cho khách tự chuyển. Chưa thêm cơ chế tự động đóng công trình.
+- Đổi công trình của gói đã gán: đã bỏ ngày 25/09/2026, kể cả nhân viên và Admin. Chưa thêm cơ chế tự động đóng công trình.

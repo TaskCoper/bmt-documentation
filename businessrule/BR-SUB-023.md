@@ -36,7 +36,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Rule Info
 
-- **Name**: Nhân viên có quyền riêng được đổi công trình đã gán và phải ghi lý do.
+- **Name**: [ĐÃ BỎ] Nhân viên có quyền riêng được đổi công trình đã gán và phải ghi lý do.
 - **Category**: Thanh toán và gói dịch vụ
 - **Status**: Draft
 - **Version**:
@@ -47,6 +47,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Source**: Các quyết định người dùng xác nhận trong hội thoại thiết kế thanh toán ngày 19/09/2026; xem discovery/payment-packages.md. Quyết định mới nhất được ưu tiên khi thay thế phương án trước đó.
 
 ## Statement
+
+**Đã bỏ ngày 25/09/2026:** Người dùng xác nhận gói đã gắn công trình thì không đổi sang công trình khác, kể cả nhân viên và Admin. Quy tắc này và mã quyền `supervision.reassign` không còn áp dụng; xem [BR-SUB-009](BR-SUB-009.md). Nội dung dưới đây giữ để tra lịch sử, không dùng làm căn cứ nghiệm thu hay triển khai.
 
 Khách không được tự gỡ hoặc đổi công trình của gói giám sát. Nhân viên có quyền riêng được đổi công trình đã gán, bắt buộc nhập lý do.
 

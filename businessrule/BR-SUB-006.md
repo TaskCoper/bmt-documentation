@@ -49,7 +49,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Statement
 
-**Cập nhật 19/09/2026:** Khách được sở hữu nhiều gói giám sát chưa gán công trình. Giới hạn một gói áp dụng khi gán/khôi phục hiệu lực trên một công trình, không chặn mua nhiều gói chưa gán. Hạn gán lần đầu và sửa liên kết theo [BR-SUB-022](BR-SUB-022.md), [BR-SUB-023](BR-SUB-023.md); hủy/khôi phục theo [BR-SUB-024](BR-SUB-024.md), [BR-SUB-025](BR-SUB-025.md).
+**Cập nhật 19/09/2026:** Khách được sở hữu nhiều gói giám sát chưa gán công trình. Giới hạn một gói áp dụng khi gán/khôi phục hiệu lực trên một công trình, không chặn mua nhiều gói chưa gán. Hạn gán lần đầu theo [BR-SUB-022](BR-SUB-022.md); quy tắc sửa liên kết ở [BR-SUB-023](BR-SUB-023.md) đã bỏ ngày 25/09/2026; hủy/khôi phục theo [BR-SUB-024](BR-SUB-024.md), [BR-SUB-025](BR-SUB-025.md).
 
 **Cập nhật 24/09/2026:** Với giám sát, gói có hiệu lực trên công trình là gói giữ chỗ: đã gán hoặc đã hoàn thành. Gói đã hoàn thành vẫn giữ chỗ nên công trình không nhận được gói khác cho tới khi gói đó bị hủy. Gói chưa gán hoặc đang bị hủy không giữ chỗ.
 

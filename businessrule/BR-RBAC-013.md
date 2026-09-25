@@ -44,11 +44,11 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Owner**: [Chưa xác định]
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
-- **Source**: Quyết định người dùng xác nhận trong hội thoại thiết kế RBAC ngày 20/09/2026: hỗ trợ phân công theo nhiều loại tài nguyên bằng một cơ chế chung. Quyết định người dùng xác nhận trong hội thoại rà soát ngày 25/09/2026: đợt này chỉ phân công theo công trình, mỗi công trình một người phụ trách, người nhận phải có quyền `supervision.complete`, danh sách cần chia lại gồm cả công trình có người phụ trách đang bị khóa.
+- **Source**: Quyết định người dùng xác nhận trong hội thoại thiết kế RBAC ngày 20/09/2026: hỗ trợ phân công theo nhiều loại tài nguyên bằng một cơ chế chung. Quyết định người dùng xác nhận trong hội thoại rà soát ngày 25/09/2026: đợt này chỉ phân công theo công trình, mỗi công trình một người phụ trách, người nhận phải có quyền `supervision.complete`, danh sách cần chia lại gồm cả công trình có người phụ trách đang bị khóa. Cũng trong ngày 25/09/2026, khi chuẩn bị tính năng Công trình, người dùng xác nhận đổi đối tượng phân công từ công trình sang từng gói giám sát: chỉ giao gói đang giữ chỗ trên công trình; danh sách cần chia lại chỉ gồm gói đang gán; gói bị hủy vẫn giữ phân công.
 
 ## Statement
 
-Phân công được ghi theo loại tài nguyên. Mỗi phân công cho biết nhân viên nào phụ trách loại tài nguyên nào, tài nguyên cụ thể nào, hiệu lực từ lúc nào và tới lúc nào. Trong đợt này chỉ có một loại tài nguyên là công trình, và mỗi công trình tại một thời điểm chỉ có một người phụ trách; các loại khác thêm sau dùng cùng cơ chế.
+Phân công được ghi theo loại tài nguyên. Mỗi phân công cho biết nhân viên nào phụ trách loại tài nguyên nào, tài nguyên cụ thể nào, hiệu lực từ lúc nào và tới lúc nào. Trong đợt này chỉ có một loại tài nguyên là gói giám sát, và mỗi gói tại một thời điểm chỉ có một người phụ trách; các loại khác thêm sau dùng cùng cơ chế.
 
 ## When
 
@@ -58,19 +58,23 @@ Người có quyền `assignment.manage` tạo, chuyển giao hoặc gỡ một 
 
 1. Ghi phân công gồm nhân viên, loại tài nguyên, định danh tài nguyên và thời điểm bắt đầu hiệu lực. Thời điểm kết thúc để trống nghĩa là còn hiệu lực.
 2. Chỉ phân công được cho tài khoản nhân viên đang hoạt động và đang có quyền `supervision.complete`. Từ chối phân công cho tài khoản khách hàng, tài khoản đang bị khóa hoặc nhân viên thiếu quyền này. Điều kiện này áp dụng cả khi chuyển giao.
-3. Đợt này không có phân công ở mức khách hàng. Nhân viên chỉ thao tác được trên công trình được phân công cho chính mình.
-4. Mỗi công trình tại một thời điểm chỉ có một phân công đang hiệu lực. Yêu cầu giao một công trình đang có người phụ trách cho người khác bị từ chối và hướng sang chuyển giao; không tạo phân công thứ hai.
+3. Đợt này không có phân công ở mức khách hàng hay mức công trình. Nhân viên chỉ thao tác được trên gói giám sát được phân công cho chính mình. Gói mới gắn vào một công trình phải được phân công riêng; người phụ trách gói trước đó trên cùng công trình không tự phụ trách gói mới.
+4. Mỗi gói tại một thời điểm chỉ có một phân công đang hiệu lực. Yêu cầu giao một gói đang có người phụ trách cho người khác bị từ chối và hướng sang chuyển giao; không tạo phân công thứ hai.
 5. Chuyển giao là kết thúc hiệu lực phân công cũ và tạo phân công mới cho người nhận tại cùng thời điểm. Người bàn giao mất quyền thao tác trên tài nguyên đó kể từ lúc đó.
-6. Gỡ phân công mà không chuyển giao thì công trình về danh sách cần chia lại. Danh sách này gồm công trình chưa có người phụ trách và công trình có người phụ trách đang bị khóa theo [BR-RBAC-008](BR-RBAC-008.md).
+6. Gỡ phân công mà không chuyển giao thì gói chưa có người phụ trách. Danh sách cần chia lại chỉ gồm gói đang ở trạng thái đã gán mà chưa có người phụ trách, hoặc người phụ trách đang bị khóa theo [BR-RBAC-008](BR-RBAC-008.md). Gói chưa gán, đã hoàn thành hoặc đang bị hủy không vào danh sách này.
 7. Mọi thay đổi phân công đều ghi nhật ký theo [BR-RBAC-012](BR-RBAC-012.md).
+8. Chỉ giao mới hoặc chuyển giao được gói đang giữ chỗ trên công trình, tức gói đã gán hoặc đã hoàn thành theo [BR-SUB-006](BR-SUB-006.md). Từ chối giao hoặc chuyển giao gói chưa gán công trình hoặc đang bị hủy. Gỡ phân công được với gói ở mọi trạng thái.
+9. Khi gói bị hủy theo [BR-SUB-024](BR-SUB-024.md), phân công của gói giữ nguyên. Khi gói được khôi phục theo [BR-SUB-025](BR-SUB-025.md), người đó tiếp tục phụ trách mà không cần giao lại.
 
 ## Except
 
-Admin thao tác được trên gói giám sát mà không cần phân công công trình, theo [BR-SUB-011](BR-SUB-011.md) và [BR-SUB-012](BR-SUB-012.md).
+Admin thao tác được trên gói giám sát mà không cần phân công, theo [BR-SUB-011](BR-SUB-011.md) và [BR-SUB-012](BR-SUB-012.md).
 
 ## Notes
 
 - Khoản 3 và khoản 4 được người dùng xác nhận ngày 25/09/2026. Bản trước cho phân công mức khách hàng có hiệu lực xuống dự án và cho nhiều người cùng phụ trách một tài nguyên; cả hai nội dung này đã bỏ.
+- Cùng ngày 25/09/2026, người dùng đổi đối tượng phân công từ công trình sang từng gói giám sát. Khoản 3, 4, 6, 8 và 9 viết theo quyết định này. Ví dụ: gói G1 của công trình P do A phụ trách. G1 bị hủy thì A vẫn phụ trách G1 và khôi phục G1 thì A làm tiếp. Khách gắn gói mới G2 vào P thì G2 chưa có người phụ trách, nằm trong danh sách cần chia lại, và người quản trị giao G2 cho A hoặc người khác.
+- Gói gắn cố định với một công trình theo [BR-SUB-009](BR-SUB-009.md), nên người phụ trách gói cũng là người lo công trình đó trong thời gian gói còn ở đó. Công trình được đặc tả tại [STORY-SITE-001](../userstory/STORY-SITE-001.md).
 - Cơ chế này được thiết kế để tính năng chia lead sau này dùng lại: lead là một loại tài nguyên mới, không cần thêm bảng phân công riêng. Việc chia lead không thuộc phạm vi đợt này.
-- Phân công tham chiếu tới công trình theo định danh. Công trình là thực thể riêng, khác với bản dự toán; khách tự tạo công trình, không cần gói thiết kế. Story và BR tạo, quản lý công trình chưa được soạn và sẽ chuẩn bị riêng. [TDD-SUB-003](../tdd/TDD-SUB-003.md) và TDD-RBAC-003 cần cập nhật theo quyết định này.
+- Phân công tham chiếu tới gói giám sát theo định danh. TDD-RBAC-003 cần cập nhật theo quyết định này.
 - Bản nháp nghiệp vụ, chưa triển khai hoặc chạy kiểm thử. Reviewer và Approver lấy theo xác nhận đang dùng cho các bản nháp mới, không phải bằng chứng đã phê duyệt. Owner và ngày hiệu lực chưa xác định.

@@ -89,11 +89,11 @@ Người quản trị gán thêm vai trò cho một nhân viên đang làm việ
 
 #### ALT-02
 
-Người quản trị thu hồi một vai trò mà sau khi thu hồi, nhân viên vẫn làm được việc trên các công trình đang phụ trách.
+Người quản trị thu hồi một vai trò mà sau khi thu hồi, nhân viên vẫn làm được việc trên các gói giám sát đang phụ trách.
 
-1. Hệ thống kiểm tra theo BR-RBAC-007: sau khi thu hồi, nhân viên không còn phụ trách công trình nào, hoặc vẫn còn quyền `supervision.complete` từ vai trò khác.
+1. Hệ thống kiểm tra theo BR-RBAC-007: sau khi thu hồi, nhân viên không còn phụ trách gói nào, hoặc vẫn còn quyền `supervision.complete` từ vai trò khác.
 2. Hệ thống thu hồi vai trò và ghi nhật ký.
-3. Các vai trò còn lại và các phân công công trình giữ nguyên.
+3. Các vai trò còn lại và các phân công gói giữ nguyên.
 
 #### ALT-03
 
@@ -101,7 +101,7 @@ Người quản trị khóa một tài khoản nhân viên.
 
 1. Hệ thống khóa tài khoản ngay, không kiểm tra người đó còn phân công hay không, theo BR-RBAC-008.
 2. Hệ thống hủy toàn bộ phiên đăng nhập của tài khoản đó; các yêu cầu tiếp theo bị từ chối dù access token cấp trước đó chưa hết hạn.
-3. Các vai trò và bản ghi phân công của người đó giữ nguyên; người bị khóa không thao tác được trên chúng. Các công trình người đó phụ trách hiện trong danh sách cần chia lại theo BR-RBAC-013.
+3. Các vai trò và bản ghi phân công của người đó giữ nguyên; người bị khóa không thao tác được trên chúng. Các gói đang gán mà người đó phụ trách hiện trong danh sách cần chia lại theo BR-RBAC-013.
 4. Hệ thống ghi nhật ký việc khóa.
 
 #### ALT-04
@@ -139,9 +139,9 @@ Người quản trị tạo tài khoản nhân viên cho một địa chỉ emai
 
 #### EXC-02
 
-Người quản trị thu hồi một vai trò khiến nhân viên mất quyền `supervision.complete` trong khi vẫn đang phụ trách công trình.
+Người quản trị thu hồi một vai trò khiến nhân viên mất quyền `supervision.complete` trong khi vẫn đang phụ trách gói giám sát.
 
-1. Hệ thống từ chối theo BR-RBAC-007, cho biết số công trình người đó đang phụ trách.
+1. Hệ thống từ chối theo BR-RBAC-007, cho biết số gói người đó đang phụ trách.
 2. Hệ thống hướng người quản trị sang luồng chuyển giao ở STORY-RBAC-003; không tự chuyển giao hoặc tự gỡ phân công.
 3. Nếu cần cắt quyền gấp, người quản trị khóa tài khoản theo ALT-03; thao tác đó không đòi chuyển giao.
 
@@ -205,17 +205,17 @@ Người quản trị yêu cầu khóa tài khoản của chính mình.
 
 #### AC-004
 
-- **Given**: Nhân viên A chỉ có quyền `supervision.complete` từ vai trò "Nhân viên giám sát" và đang phụ trách 2 công trình.
+- **Given**: Nhân viên A chỉ có quyền `supervision.complete` từ vai trò "Nhân viên giám sát" và đang phụ trách 2 gói giám sát.
 - **When**: Người quản trị thu hồi vai trò "Nhân viên giám sát" khỏi A.
-- **Then**: Hệ thống từ chối và cho biết A còn 2 công trình đang phụ trách.
+- **Then**: Hệ thống từ chối và cho biết A còn 2 gói đang phụ trách.
 - **And**: A vẫn giữ vai trò đó và cả 2 phân công vẫn còn hiệu lực.
 
 #### AC-005
 
-- **Given**: Nhân viên A đang phụ trách 2 công trình và đang có phiên đăng nhập với access token chưa hết hạn.
+- **Given**: Nhân viên A đang phụ trách 2 gói giám sát ở trạng thái đã gán và đang có phiên đăng nhập với access token chưa hết hạn.
 - **When**: Người quản trị khóa tài khoản của A.
 - **Then**: Tài khoản bị khóa ngay dù A còn phân công; mọi yêu cầu tiếp theo của A bị từ chối dù token chưa hết hạn.
-- **And**: Hai bản ghi phân công của A vẫn còn, và hai công trình đó hiện trong danh sách cần chia lại.
+- **And**: Hai bản ghi phân công của A vẫn còn, và hai gói đó hiện trong danh sách cần chia lại.
 
 #### AC-006
 
@@ -254,10 +254,10 @@ Người quản trị yêu cầu khóa tài khoản của chính mình.
 
 #### AC-011
 
-- **Given**: Nhân viên B có quyền `supervision.complete` từ cả vai trò "Nhân viên giám sát" lẫn vai trò "Trưởng nhóm giám sát", và đang phụ trách 2 công trình.
+- **Given**: Nhân viên B có quyền `supervision.complete` từ cả vai trò "Nhân viên giám sát" lẫn vai trò "Trưởng nhóm giám sát", và đang phụ trách 2 gói giám sát.
 - **When**: Người quản trị thu hồi vai trò "Nhân viên giám sát" của B.
 - **Then**: Hệ thống cho thu hồi vì B vẫn còn quyền `supervision.complete` từ vai trò còn lại.
-- **And**: Hai phân công công trình của B giữ nguyên.
+- **And**: Hai phân công gói của B giữ nguyên.
 
 #### AC-012
 

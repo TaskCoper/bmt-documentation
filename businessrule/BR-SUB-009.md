@@ -45,11 +45,11 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Owner**: [Chưa xác định]
 - **Reviewer**: [Chưa xác định]
 - **Approver**: [Chưa xác định]
-- **Source**: Người dùng chọn gắn gói giám sát với một công trình cụ thể, không chia lượt sang công trình khác. Người dùng xác nhận một buổi kỹ sư đến kiểm tra thực tế tại công trình được tính là một lượt.
+- **Source**: Người dùng chọn gắn gói giám sát với một công trình cụ thể, không chia lượt sang công trình khác. Người dùng xác nhận một buổi kỹ sư đến kiểm tra thực tế tại công trình được tính là một lượt. Người dùng xác nhận ngày 25/09/2026: gói đã gắn công trình thì không đổi sang công trình khác, kể cả nhân viên và Admin.
 
 ## Statement
 
-Gói giám sát có thể được mua và cấp trước khi có công trình. Khách phải gán lần đầu trong một năm từ lúc cấp theo [BR-SUB-022](BR-SUB-022.md); quá hạn chưa gán thì mất quyền sử dụng. Sau khi gán đúng hạn, gói chỉ phục vụ công trình đang liên kết và không tự hết hạn theo mốc một năm. Khách không tự gỡ/đổi; nhân viên có quyền riêng được đổi công trình theo [BR-SUB-023](BR-SUB-023.md). Hiện chỉ quản lý liên kết gói–công trình; lịch, lượt và hoạt động khảo sát/giám sát vẫn ngoài phạm vi.
+Gói giám sát có thể được mua và cấp trước khi có công trình. Khách phải gán lần đầu trong một năm từ lúc cấp theo [BR-SUB-022](BR-SUB-022.md); quá hạn chưa gán thì mất quyền sử dụng. Sau khi gán đúng hạn, gói chỉ phục vụ công trình đang liên kết và không tự hết hạn theo mốc một năm. Đã gắn thì không ai gỡ hoặc đổi công trình được, kể cả nhân viên và Admin. Hiện chỉ quản lý liên kết gói–công trình; lịch, lượt và hoạt động khảo sát/giám sát vẫn ngoài phạm vi.
 
 ## When
 
@@ -63,10 +63,11 @@ Hệ thống kiểm tra quyền giám sát cho một công trình dựa trên su
 
 ## Except
 
-Nhân viên có quyền riêng được đổi công trình đã gán, phải có lý do; công trình đích cùng khách hàng và chưa có gói giám sát hiệu lực. Cho sửa sau một năm nếu gói từng gán đúng hạn, không làm mới hạn. Khách không được tự gỡ/đổi. Xem BR-SUB-023. Quyền sử dụng không tự lan sang công trình khác khi chưa sửa liên kết hợp lệ.
+Không có ngoại lệ đổi công trình. Khách, nhân viên và Admin đều không gỡ hoặc đổi được công trình của gói đã gắn, kể cả gói đã hoàn thành hoặc vừa được mở lại. Quyền sử dụng không lan sang công trình khác.
 
 ## Notes
 
+- Ngoại lệ sửa nhầm công trình của [BR-SUB-023](BR-SUB-023.md), thêm ngày 19/09/2026, đã bỏ ngày 25/09/2026; gói quay về gắn cố định với công trình.
 - Quyền lợi thiết kế vẫn dùng chung theo tài khoản theo [BR-SUB-001](BR-SUB-001.md).
 - [BR-SUB-006](BR-SUB-006.md) giới hạn một gói giám sát đang hiệu lực cho mỗi công trình. Các công trình khác nhau của tài khoản được có gói riêng cùng hiệu lực, không chia lượt giữa các công trình.
 - “Lượt kiểm tra thực tế” là tên dùng cho quyền lợi “Số lần kỹ sư kiểm tra thực tế”; không dùng từ này để chỉ tư vấn từ xa hoặc xem báo cáo. Đây là định nghĩa đã trao đổi cho phần offline. [BR-SUB-010](BR-SUB-010.md) hiện hoãn theo [nợ nghiệp vụ](../debt/supervision-offline.md).

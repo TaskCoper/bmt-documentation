@@ -48,7 +48,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Statement
 
-Admin và nhân viên được cấp quyền tra cứu riêng được xem người mua, gói đã mua, đơn thanh toán và từng giao dịch nhận tiền trong hệ thống. Giao dịch chưa khớp đơn vẫn được hiển thị với nhãn “Chưa xác định đơn”. Quyền tra cứu không tự cấp quyền đổi công trình, hủy hoặc khôi phục gói.
+Admin và nhân viên được cấp quyền tra cứu riêng được xem người mua, gói đã mua, đơn thanh toán và từng giao dịch nhận tiền trong hệ thống. Giao dịch chưa khớp đơn vẫn được hiển thị với nhãn “Chưa xác định đơn”. Quyền tra cứu không tự cấp quyền hủy hoặc khôi phục gói.
 
 ## When
 
@@ -57,11 +57,11 @@ Người dùng truy cập danh sách hoặc chi tiết quản trị gói đã mu
 ## Then
 
 1. Kiểm tra người gọi là Admin hoặc nhân viên có quyền tra cứu riêng. Áp dụng cho cả danh sách và chi tiết, kể cả yêu cầu trực tiếp; không chỉ ẩn nút trên giao diện.
-2. Cho biết khách nào đã mua gói nào và liên kết đơn mua tương ứng. Gói giám sát chưa gán vẫn thuộc danh sách gói đã mua.
+2. Cho biết khách nào đã mua gói nào và liên kết đơn mua tương ứng. Gói giám sát chưa gán vẫn thuộc danh sách gói đã mua. Với gói giám sát đã gán, cho biết tên công trình gắn với gói; quyền tra cứu không cho xem danh sách công trình của khách (người dùng xác nhận ngày 25/09/2026).
 3. Cho tra cứu đơn và các giao dịch thực tế liên quan, gồm các khoản chuyển bổ sung; phân biệt tiền từng giao dịch với tổng tiền nhận của đơn. Không coi webhook gửi lại là giao dịch tiền mới.
 4. Giữ khả năng tra cứu đơn đang chờ, nhận thiếu, hết hạn, đã hủy và đã thanh toán; gói không còn hiệu lực vẫn là lịch sử mua, không được trình bày như gói đang dùng.
 5. Giao dịch chưa khớp đơn vẫn có thông tin giao dịch đã nhận và nhãn “Chưa xác định đơn”. Không tự gán khách hàng/gói từ suy đoán và chưa hỗ trợ gán thủ công.
-6. Quyền xem không thay thế các quyền riêng ở BR-SUB-023, BR-SUB-024 và BR-SUB-025. Không ghi nhận hoàn tiền, chuyển tiền hoặc xác nhận cấp gói thủ công từ màn hình tra cứu.
+6. Quyền xem không thay thế các quyền riêng ở BR-SUB-024 và BR-SUB-025. Không có thao tác đổi công trình của gói theo BR-SUB-009. Không ghi nhận hoàn tiền, chuyển tiền hoặc xác nhận cấp gói thủ công từ màn hình tra cứu.
 
 ## Except
 

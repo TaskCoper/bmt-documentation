@@ -59,15 +59,17 @@ Hệ thống nhận một yêu cầu từ tài khoản nhân viên và đã xác
 1. Với yêu cầu chỉ đọc dữ liệu, kiểm tra người gọi có quyền xem tương ứng. Có quyền thì cho xem toàn bộ phạm vi của quyền đó, không đòi thêm phân công.
 2. Với yêu cầu thay đổi dữ liệu, trước hết kiểm tra người gọi có quyền tương ứng. Không có thì từ chối.
 3. Nếu quyền đó thuộc nhóm quyền có gắn phân công, kiểm tra thêm người gọi đang được phân công tài nguyên đích tại thời điểm thao tác. Không đạt thì từ chối, kể cả khi người đó có quyền.
-4. Trong chín quyền khởi tạo, `supervision.complete` là quyền có gắn phân công. Các quyền `commerce.read`, `supervision.reassign`, `package.cancel`, `package.restore`, `user.manage`, `role.manage`, `assignment.manage` và `audit.read` chỉ kiểm tra quyền, không đòi phân công. Năm quyền quản trị bổ sung ngày 25/09/2026 (cấu hình gói, quản lý danh mục loại công trình và phong cách, quản lý thư viện mẫu, quản lý tin tức, quản lý tư vấn KTS) cũng không đòi phân công.
+4. Trong tám quyền khởi tạo, `supervision.complete` là quyền có gắn phân công. Các quyền `commerce.read`, `package.cancel`, `package.restore`, `user.manage`, `role.manage`, `assignment.manage` và `audit.read` chỉ kiểm tra quyền, không đòi phân công. Năm quyền quản trị bổ sung ngày 25/09/2026 (cấu hình gói, quản lý danh mục loại công trình và phong cách, quản lý thư viện mẫu, quản lý tin tức, quản lý tư vấn KTS) cũng không đòi phân công.
 5. Quyền xem không tự cấp quyền thay đổi. Người chỉ có quyền xem bị từ chối mọi thao tác sửa, hủy hoặc khôi phục.
 
 ## Except
 
-Vai trò Admin có đủ các quyền nên xem và thao tác được trong phạm vi các quyền đó. Riêng `supervision.complete`, [BR-SUB-011](BR-SUB-011.md) và [BR-SUB-012](BR-SUB-012.md) đã chốt Admin thao tác được mà không cần phân công công trình.
+Vai trò Admin có đủ các quyền nên xem và thao tác được trong phạm vi các quyền đó. Riêng `supervision.complete`, [BR-SUB-011](BR-SUB-011.md) và [BR-SUB-012](BR-SUB-012.md) đã chốt Admin thao tác được mà không cần phân công gói.
 
 ## Notes
 
 - Quy tắc này giữ nguyên nội dung của [BR-PAY-005](BR-PAY-005.md) về việc quyền tra cứu không kéo theo quyền sửa, hủy hay khôi phục; ở đây chỉ nêu thành quy tắc chung cho mọi tính năng.
+- Phạm vi xem công trình theo [BR-SITE-003](BR-SITE-003.md) là trường hợp riêng của khoản 1: người có `assignment.manage` xem mọi công trình, còn người chỉ có `supervision.complete` chỉ xem công trình của gói mình đang phụ trách. Đây là giới hạn phạm vi xem, không phải quyền sửa.
+- Mã `supervision.reassign` đã bỏ ngày 25/09/2026 cùng với việc bỏ đổi công trình của gói theo [BR-SUB-009](BR-SUB-009.md).
 - Danh sách quyền có gắn phân công sẽ dài thêm khi có tính năng mới, chẳng hạn khi làm chia lead. Mỗi lần thêm quyền phải ghi rõ quyền đó có gắn phân công hay không.
 - Bản nháp nghiệp vụ, chưa triển khai hoặc chạy kiểm thử. Reviewer và Approver lấy theo xác nhận đang dùng cho các bản nháp mới, không phải bằng chứng đã phê duyệt. Owner và ngày hiệu lực chưa xác định.
