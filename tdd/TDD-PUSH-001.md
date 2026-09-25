@@ -53,7 +53,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ### Problem
 
-**Trạng thái quyết định:** đã chốt tạm hoãn thông báo website; trạng thái Pending — technical debt được ghi tại STORY-PUSH-001/Out of Scope. Expo chưa được chốt; các sơ đồ, trường dữ liệu và contract liên quan Expo dưới đây là phương án để review, chưa phải căn cứ triển khai đã duyệt. Cần kiểm tra source mobile trước khi chọn dịch vụ push.
+**Trạng thái quyết định:** đã chốt tạm hoãn thông báo website; trạng thái Pending — technical debt được ghi tại STORY-PUSH-001/Out of Scope. Expo chưa được chốt; các sơ đồ, trường dữ liệu và contract liên quan Expo dưới đây là phương án để review, chưa phải căn cứ triển khai đã duyệt. Cần kiểm tra source mobile trước khi chọn dịch vụ push. Người dùng xác nhận ngày 25/09/2026: đội mobile chưa chọn công nghệ cho app, nên tài liệu này tạm hoãn; chưa viết đặc tả Unit Test và chưa triển khai code cho tới khi chốt app có dùng Expo hay không.
 
 STORY-PUSH-001 và BR-PUSH-001..003 đã được người dùng chốt trong hội thoại. Một khách hàng có thể nhận push trên nhiều thiết bị; logout hoặc đổi tài khoản phải ngừng gửi cho phiên/tài khoản cũ. Đợt này chưa chọn loại thông báo nghiệp vụ. Đây là thiết kế đề xuất để review, chưa phải code đã triển khai hoặc kiểm thử đã chạy.
 
@@ -167,7 +167,7 @@ flowchart LR
 
 - **Đã xác nhận:** phạm vi Customer Android/iOS, nhiều thiết bị, dừng gửi sau logout, chống yêu cầu A đến muộn, chuyển token sang bản cài mới khi cài lại app (BR-PUSH-001 khoản 6, xác nhận ngày 25/09/2026) và nền tảng gửi chưa gắn sự kiện nghiệp vụ. Reviewer/Approver: Tân Trần.
 - **Đề xuất chưa chốt:** bốn bảng, API mobile trả token riêng, khóa điều phối qua bước gọi Expo, ngân sách retry. Rào chắn LoginOrder khi chuyển token giữa hai bản cài đã được người dùng chốt ngày 25/09/2026 và ghi vào BR-PUSH-001 khoản 6. Bản TDD này cần review trước khi làm căn cứ viết Unit Test.
-- **Cần làm rõ trước triển khai:** phiên bản SDK/project/credentials mobile, thời gian lưu dữ liệu. Luồng cài lại app cần thử trên thiết bị Android/iOS thật để xác nhận Expo có trả lại token cũ hay cấp token mới; cả hai trường hợp đều được thiết kế xử lý.
+- **Cần làm rõ trước triển khai:** app mobile có dùng Expo hay không (ngày 25/09/2026 đội mobile chưa chọn công nghệ), phiên bản SDK/project/credentials mobile, thời gian lưu dữ liệu. Luồng cài lại app cần thử trên thiết bị Android/iOS thật để xác nhận Expo có trả lại token cũ hay cấp token mới; cả hai trường hợp đều được thiết kế xử lý.
 - **Thứ tự triển khai đề xuất:** migration thêm bảng → điều phối phiên và API mobile → đăng ký/token rotation/logout → dispatcher/outbox/worker → receipt/retry → tích hợp Android/iOS → kiểm chứng staging rồi bật feature. Chưa thực hiện bước nào trong giai đoạn tài liệu này.
 - **Transaction auth:** thêm command/coordinator cho mobile; không dùng nguyên login query hiện tại để giả định có transaction. Mỗi bước SQL phải commit rõ trước bước Redis theo thứ tự trên; pipeline không được trì hoãn commit đến sau khi trả token. Refresh dùng cùng thứ tự khóa user, installation, session với các writer khác.
 - **Lease:** đề xuất lease 60 giây, HTTP timeout 10 giây; sau khi lấy khóa điều phối phải kiểm lại lease và expiry. Worker hết lease không được gọi mới hoặc ghi kết quả bằng claim cũ. Khóa điều phối vẫn cần thiết vì lease riêng không chặn được hai cuộc gọi ngoài hệ thống. Ngân sách kiểm tra điều kiện do lỗi hạ tầng đề xuất tối đa 10 lần, đồng thời bị chặn bởi ExpiresAtUtc.
@@ -497,4 +497,5 @@ Bật bảo vệ access token của Expo cho môi trường production nếu c�
 
 ## Change Log
 
+- 2026-09-25 (tạm hoãn): Người dùng xác nhận đội mobile chưa chọn công nghệ cho app. Tài liệu giữ trạng thái chờ; chưa viết đặc tả Unit Test và chưa triển khai code cho tới khi chốt app có dùng Expo hay không.
 - 2026-09-25: Theo BR-PUSH-001 khoản 6 và STORY-PUSH-001/AC-010, token đang gắn với bản cài khác được chuyển sang registration của bản cài mới và registration cũ bị tắt (DisabledReason=TokenMovedToNewInstallation) trong cùng transaction; bỏ mã lỗi `PushTokenAlreadyBound` và phương án challenge khôi phục. Giữ rào chắn yêu cầu đến muộn bằng LoginOrder (sid cũ hơn nhận 409 PushRegistrationStale); thêm mẫu dữ liệu nhánh cài lại app. `CustomerOnly` và điều kiện chọn đích ghi rõ kiểm User.AccountKind=Customer. Câu về thông báo website trỏ tới STORY-PUSH-001/Out of Scope thay cho ghi nhận technical debt riêng.

@@ -164,13 +164,15 @@ Thu hồi vai trò kiểm theo thứ tự, trong transaction do pipeline mở:
 2. Khóa dòng `User` của nhân viên bị thu hồi bằng `SELECT ... FOR NO KEY UPDATE`.
 3. Tính bộ quyền còn lại theo `BR-RBAC-001`: hợp quyền của các vai trò khác mà người đó giữ, đọc từ `UserRole` và `RolePermission` trong database, không đọc từ token.
 4. Còn `supervision.complete` thì cho thu hồi, không cần đếm phân công. Không còn thì đếm phân công đang hiệu lực của người đó. Mỗi phân công ứng với đúng một gói giám sát theo [TDD-RBAC-003](TDD-RBAC-003.md), nên số phân công chính là số gói đang phụ trách, kể cả gói đang bị hủy mà phân công còn hiệu lực.
-5. Số gói lớn hơn 0 thì trả 409 `StaffHasActiveAssignments` kèm số gói, ghi nhật ký từ chối ngoài transaction, không đổi gì. Người quản trị chuyển giao hoặc gỡ phân công theo [TDD-RBAC-003](TDD-RBAC-003.md) rồi gọi lại; gói đang bị hủy không chuyển giao được nên chỉ gỡ được. Bằng 0 thì xóa dòng `UserRole` và ghi nhật ký `RoleRevoked`.
+5. Số gói lớn hơn 0 thì trả 409 `StaffHasActiveAssignments` kèm số gói, không đổi gì. Đây là lỗi nghiệp vụ, không phải rào chắn quyền, nên không ghi nhật ký từ chối (`BR-RBAC-012/Notes`). Người quản trị chuyển giao hoặc gỡ phân công theo [TDD-RBAC-003](TDD-RBAC-003.md) rồi gọi lại; gói đang bị hủy không chuyển giao được nên chỉ gỡ được. Bằng 0 thì xóa dòng `UserRole` và ghi nhật ký `RoleRevoked`.
 
 Bản ghi phân công không lưu vai trò nào làm căn cứ, nên phép kiểm chỉ xét quyền còn lại sau thu hồi. `supervision.complete` là quyền duy nhất có `RequiresAssignment = true`; thu hồi một vai trò không mang quyền này, ví dụ vai trò chỉ có `commerce.read`, không bao giờ bị chặn.
 
 Bước 2 cần vì kiểm tra này đọc hai thứ có thể đổi song song. Không khóa thì một yêu cầu giao gói giám sát cho chính người này có thể chạy cùng lúc: thu hồi thấy chưa có gói nào nên cho qua, còn giao việc thấy người đó vẫn có `supervision.complete` nên cũng cho qua. Hai bên cùng commit và người đó phụ trách gói mà không còn quyền. Giao, chuyển giao ([TDD-RBAC-003](TDD-RBAC-003.md#architecture)) và sửa quyền vai trò ([TDD-RBAC-001](TDD-RBAC-001.md#architecture)) cũng khóa cùng dòng `User` đó, nên các thao tác này nối đuôi nhau; bên đến sau đọc lại dữ liệu sau khi lấy được khóa. Dùng `FOR NO KEY UPDATE` để không chặn các lệnh chèn cần khóa ngoại tới `User`.
 
 Đã có trong code (commit `182e2a8`, nhánh `feature/construction-site` của `bmt-be`): `RevokeRoleCommandHandler` khóa dòng `User` bằng `IAccessRowLocker.LockUsersForNoKeyUpdateAsync`, rồi đọc quyền còn lại và đếm phân công qua `StaffPermissionQueries`, dùng chung với handler sửa quyền vai trò. Thông báo lỗi nói "gói giám sát". Số gói gửi về qua `DomainException.Extensions` với khóa `activeAssignmentCount`, và middleware đưa khóa này thành trường cùng cấp trong thân lỗi.
+
+Chưa có trong code: bỏ ghi nhật ký từ chối ở bước 5. Handler hiện vẫn gọi `RecordRejectionAsync` với `StaffHasActiveAssignments`; người dùng xác nhận bỏ lời ghi này ngày 25/09/2026.
 
 Ví dụ theo `STORY-RBAC-002/AC-004`: nhân viên A chỉ có `supervision.complete` từ vai trò "Nhân viên giám sát" và đang phụ trách 2 gói giám sát. Thu hồi vai trò này bị từ chối, phản hồi báo còn 2 gói. Theo `AC-011`: nhân viên B có `supervision.complete` từ cả "Nhân viên giám sát" lẫn "Trưởng nhóm giám sát" và cũng phụ trách 2 gói. Thu hồi "Nhân viên giám sát" của B được chấp nhận, vì bước 4 thấy B vẫn còn quyền này từ vai trò kia; hai phân công của B giữ nguyên.
 
@@ -205,7 +207,7 @@ Ví dụ: anh Nam nghỉ đột ngột khi đang phụ trách 30 gói giám sát
 | BR-RBAC-007 | Handler thu hồi vai trò khóa dòng `User`, tính quyền còn lại; mất `supervision.complete` thì đếm gói giám sát đang phụ trách. Khoản 6 ở [TDD-RBAC-001](TDD-RBAC-001.md) |
 | BR-RBAC-008 | Đổi `SecurityStamp`, xóa khóa Redis và `RevokeAllForUserAsync` sau commit. Khoản 4: gói đang gán của người bị khóa vào danh sách cần chia lại ở [TDD-RBAC-003](TDD-RBAC-003.md). Khoản 7: chặn tự khóa bằng `CannotLockSelf` |
 | BR-RBAC-009 | Endpoint buộc đăng xuất; gán và thu hồi vai trò không đổi dấu phiên |
-| BR-RBAC-011 | Policy `user.manage` hoặc `role.manage` ở từng endpoint; yêu cầu bị từ chối không ghi dữ liệu nghiệp vụ, chỉ để lại dòng nhật ký từ chối khi bị rào chắn chặn |
+| BR-RBAC-011 | Policy `user.manage` hoặc `role.manage` ở từng endpoint; yêu cầu bị từ chối không ghi dữ liệu nghiệp vụ, chỉ để lại dòng nhật ký từ chối khi thuộc phạm vi ghi ở [TDD-RBAC-001](TDD-RBAC-001.md) |
 | BR-RBAC-012 | `IAccessAuditWriter` theo [TDD-RBAC-001](TDD-RBAC-001.md), với các hành động `StaffCreated`, `StaffFirstPasswordChanged`, `StaffLocked`, `StaffUnlocked`, `StaffForceLoggedOut`, `RoleGranted`, `RoleRevoked` |
 
 **Notes**:
@@ -465,8 +467,8 @@ Mỗi mã dưới đây là giá trị `messageCode` trong thân lỗi; trườn
 - **MustChangePassword** (403): Tài khoản chưa đổi mật khẩu lần đầu nhưng gọi một chức năng khác ngoài đổi mật khẩu.
 - **SelfPrivilegeEscalation** (403): Tự gán thêm vai trò cho chính mình.
 - **PermissionNotHeldByActor** (403): Vai trò định gán có quyền mà người thao tác không có.
-- **EmailAlreadyUsed** (409): Email đã thuộc một tài khoản, kể cả tài khoản khách hàng.
-- **StaffHasActiveAssignments** (409): Sau khi thu hồi vai trò, nhân viên không còn quyền `supervision.complete` mà vẫn phụ trách ít nhất một gói giám sát. Phản hồi có số gói. Cùng mã được dùng khi sửa quyền vai trò ở [TDD-RBAC-001](TDD-RBAC-001.md).
+- **EmailAlreadyUsed** (409): Email đã thuộc một tài khoản, kể cả tài khoản khách hàng. Không ghi nhật ký từ chối.
+- **StaffHasActiveAssignments** (409): Sau khi thu hồi vai trò, nhân viên không còn quyền `supervision.complete` mà vẫn phụ trách ít nhất một gói giám sát. Phản hồi có số gói. Cùng mã được dùng khi sửa quyền vai trò ở [TDD-RBAC-001](TDD-RBAC-001.md). Không ghi nhật ký từ chối.
 - **CannotLockSelf** (409): Người thao tác yêu cầu khóa tài khoản của chính mình. Ghi nhật ký từ chối; trạng thái tài khoản và phiên giữ nguyên.
 - **LastAdminProtected** (409): Thao tác làm hệ thống không còn Admin nào đang hoạt động.
 - **StaffNotFound** (404): Tài khoản không tồn tại hoặc không phải tài khoản nhân viên.
@@ -502,6 +504,7 @@ Mỗi mã dưới đây là giá trị `messageCode` trong thân lỗi; trườn
 
 ## Change Log
 
+- 2026-09-25 (chốt nhật ký): Theo `BR-RBAC-012/Notes`, người dùng xác nhận ngày 25/09/2026: ba trường hợp sau không ghi nhật ký từ chối: thu hồi vai trò bị chặn vì `StaffHasActiveAssignments`, tạo nhân viên bằng email đã dùng (`EmailAlreadyUsed`), và gán vai trò Khách hàng cho nhân viên (`RoleNotAssignableToStaff`). Code chưa đổi.
 - 2026-09-25 (đồng bộ code): Đồng bộ với code đã triển khai ở commit `182e2a8`: thu hồi vai trò khóa dòng `User`, `CannotLockSelf`, `StaffCreated` và `POST /staff` cần hai mã quyền đã có. Ví dụ lỗi ghi mã nghiệp vụ ở `messageCode`, `code` là loại lỗi chung.
 - 2026-09-25: Cập nhật theo US/BR chốt lần hai trong ngày 25/09/2026: phân công tính theo gói giám sát thay cho công trình. Thu hồi vai trò đếm số gói đang phụ trách, kể cả gói đang bị hủy mà phân công còn; khóa tài khoản chỉ đưa gói đang gán vào danh sách cần chia lại. Không đổi luồng hay mã lỗi.
 - 2026-09-25: Cập nhật theo US/BR đã chốt ngày 25/09/2026. Thu hồi vai trò chỉ bị chặn khi sau thu hồi nhân viên không còn `supervision.complete` mà vẫn phụ trách công trình (`BR-RBAC-007`), không còn khái niệm "phân công dựa trên vai trò"; lỗi báo số công trình, thêm ví dụ `STORY-RBAC-002/AC-011`, và khóa dòng `User` để không chạy lẫn với giao hoặc chuyển giao. Chặn tự khóa tài khoản bằng mã riêng 409 `CannotLockSelf` có ghi nhật ký (`BR-RBAC-008` khoản 7, `EXC-07`, `AC-012`), thay cho 403 `SelfPrivilegeEscalation`. Công trình của người bị khóa hiện trong danh sách cần chia lại; đổi các ví dụ "khách hàng" sang công trình. Ghi rõ hiện trạng code với thay đổi dự kiến; bổ sung tham chiếu `BR-RBAC-001`, `BR-RBAC-011`.

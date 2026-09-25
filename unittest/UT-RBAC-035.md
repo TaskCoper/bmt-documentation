@@ -42,10 +42,11 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-035 | Staff | RevokeRoleCommandHandler.Handle | Error | REGRESSION | P1 | Handler đã có; thông báo theo gói giám sát là thay đổi dự kiến theo TDD-RBAC-002. Nhân viên chỉ có supervision.complete từ vai trò giám sát định thu hồi; vai trò còn lại chỉ có commerce.read. Mock bộ đếm phân công đang hiệu lực của người đó trả 2. | UserId của nhân viên và RoleId của vai trò giám sát. | Ném ngoại lệ ánh xạ 409 với mã StaffHasActiveAssignments, activeAssignmentCount bằng 2 và thông báo nói về số gói giám sát. Dòng UserRole không bị xóa, không phân công nào bị đổi, và dòng nhật ký từ chối được ghi qua RecordRejectionAsync. | BR-RBAC-007/Then<br>STORY-RBAC-002/AC-004<br>TDD-RBAC-002/Architecture | Chặn khi vai trò bị thu hồi là nguồn duy nhất của supervision.complete và người đó còn phụ trách gói; không tự gỡ phân công giúp. | [Chưa xác định] | Draft |
+| UT-RBAC-035 | Staff | RevokeRoleCommandHandler.Handle | Error | REGRESSION | P1 | Handler đã có và đã báo theo số gói giám sát; handler hiện vẫn ghi nhật ký từ chối, bỏ lời ghi này là thay đổi dự kiến theo BR-RBAC-012/Notes. Nhân viên chỉ có supervision.complete từ vai trò giám sát định thu hồi; vai trò còn lại chỉ có commerce.read. Mock bộ đếm phân công đang hiệu lực của người đó trả 2. | UserId của nhân viên và RoleId của vai trò giám sát. | Ném ngoại lệ ánh xạ 409 với mã StaffHasActiveAssignments, activeAssignmentCount bằng 2 và thông báo nói về số gói giám sát. Dòng UserRole không bị xóa, không phân công nào bị đổi, và không gọi RecordRejectionAsync. | BR-RBAC-007/Then<br>STORY-RBAC-002/AC-004<br>TDD-RBAC-002/Architecture<br>BR-RBAC-012/Notes | Chặn khi vai trò bị thu hồi là nguồn duy nhất của supervision.complete và người đó còn phụ trách gói; không tự gỡ phân công giúp. Đây là lỗi nghiệp vụ, không phải rào chắn quyền, nên không ghi nhật ký từ chối. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - BR-RBAC-007/Then
 - STORY-RBAC-002/AC-004
 - TDD-RBAC-002/Architecture
+- BR-RBAC-012/Notes

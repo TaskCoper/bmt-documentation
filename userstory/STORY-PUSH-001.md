@@ -195,6 +195,8 @@ Phiên đã hết hiệu lực, bị thu hồi hoặc không xác minh được 
 
 Các chi tiết Expo trong bộ tài liệu là phương án đề xuất, chưa xác nhận mobile đang dùng Expo hoặc đã có cấu hình push. Cần kiểm tra source mobile trước khi chốt nhà cung cấp và cập nhật đồng bộ Story, BR, TDD và test nếu phương án thay đổi.
 
+Người dùng xác nhận ngày 25/09/2026: đội mobile chưa chọn công nghệ cho app, nên story này tạm hoãn. Chưa viết đặc tả Unit Test và chưa triển khai code cho tới khi chốt app có dùng Expo hay không.
+
 - TDD-PUSH-001/Architecture
 
 ### Rules

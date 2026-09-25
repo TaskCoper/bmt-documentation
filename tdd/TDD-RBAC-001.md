@@ -68,6 +68,8 @@ Các thay đổi ngày 25/09/2026 trong tài liệu này **đã có trong code**
 
 Phần **chưa có trong code**: bốn mã quyền quản trị theo từng module (`estimate.catalog.manage`, `library.manage`, `news.manage`, `consultation.manage`). Mỗi mã được thêm cùng module có chỗ kiểm nó, nên danh mục hiện có 9 mã và đủ 13 mã khi bốn module đó được dựng.
 
+Cũng **chưa có trong code**: bỏ ghi nhật ký từ chối cho các lỗi nghiệp vụ theo `BR-RBAC-012/Notes`, người dùng xác nhận ngày 25/09/2026. Các handler vai trò và nhân viên hiện vẫn gọi `RecordRejectionAsync` cho các lỗi này. Phạm vi ghi đã chốt nằm ở mục "Ghi nhật ký, kể cả khi yêu cầu bị từ chối" bên dưới.
+
 ### Goals
 
 - Lưu vai trò và quyền theo mô hình `User` → `UserRole` → `Role` → `RolePermission` → `Permission`, cho phép một người giữ nhiều vai trò và quyền là hợp các vai trò đó.
@@ -155,6 +157,13 @@ Giới hạn: vì hai đường ghi dùng hai kết nối, một dòng nhật k�
 
 Dòng nhật ký từ chối là ngoại lệ duy nhất của `BR-RBAC-011` khoản 4: yêu cầu bị từ chối không để lại dữ liệu nghiệp vụ nào, chỉ để lại bản ghi nhật ký theo `BR-RBAC-012` khoản 2. Yêu cầu bị policy chặn vì thiếu mã quyền (403 `AccessForbidden`) không phải rào chắn nên không ghi nhật ký, đúng `STORY-RBAC-004/EXC-01`.
 
+Phạm vi ghi nhật ký từ chối theo `BR-RBAC-012/Notes`, người dùng xác nhận ngày 25/09/2026:
+
+- **Có ghi** khi yêu cầu bị chặn bởi ba rào chắn của `BR-RBAC-004` (`SelfPrivilegeEscalation`, `PermissionNotHeldByActor`, `LastAdminProtected`), khi sửa hoặc xóa vai trò hệ thống theo `BR-RBAC-002` (`RoleIsSystem`), và khi tự khóa tài khoản theo `BR-RBAC-008` khoản 7 (`CannotLockSelf`).
+- **Không ghi** với lỗi nghiệp vụ thông thường: trùng tên vai trò (`RoleNameDuplicated`), xóa vai trò còn người giữ (`RoleInUse`), email đã thuộc tài khoản khác (`EmailAlreadyUsed`), gán vai trò Khách hàng cho nhân viên (`RoleNotAssignableToStaff`), và làm người đang phụ trách gói giám sát mất `supervision.complete` (`StaffHasActiveAssignments`). Các lỗi phân công ở [TDD-RBAC-003](TDD-RBAC-003.md) cũng không ghi.
+
+Code hiện vẫn gọi `RecordRejectionAsync` cho năm mã trong nhóm không ghi; bỏ các lời gọi đó là thay đổi dự kiến.
+
 ### Sửa danh sách quyền của vai trò
 
 `PUT /roles/{roleId}` là thao tác duy nhất có thể làm nhiều người đổi quyền cùng lúc, nên có thêm hai kiểm tra so với tạo vai trò. Cả hai đã có trong `UpdateRoleCommandHandler`, bên cạnh rào chắn thứ hai trên phần quyền được thêm (`EnsureCanGrant` với `targetUserId = null`).
@@ -166,7 +175,7 @@ Dòng nhật ký từ chối là ngoại lệ duy nhất của `BR-RBAC-011` kho
 1. Khóa dòng `Role` đang sửa bằng `SELECT ... FOR UPDATE`. Code lấy khóa này ở mọi lần sửa vai trò tự tạo, ngay trước khi đọc danh sách quyền hiện tại, nên hai lần sửa cùng một vai trò luôn nối đuôi nhau. Khóa này chặn việc gán vai trò đó cho người mới trong lúc đang xét, vì lệnh chèn `UserRole` phải kiểm khóa ngoại tới `Role` bằng khóa `FOR KEY SHARE`, mà khóa này phải chờ `FOR UPDATE`.
 2. Đọc danh sách người giữ vai trò, **kể cả tài khoản đang bị khóa**, rồi khóa các dòng `User` của họ theo thứ tự `Id` tăng dần bằng `SELECT ... FOR NO KEY UPDATE`.
 3. Với từng người, tính bộ quyền sau thay đổi: hợp quyền của các vai trò khác mà người đó giữ, cộng danh sách quyền mới của vai trò đang sửa. Không còn `supervision.complete` thì đếm phân công đang hiệu lực của người đó theo [TDD-RBAC-003](TDD-RBAC-003.md#data-model).
-4. Có ít nhất một người mất `supervision.complete` mà vẫn phụ trách từ một gói giám sát trở lên thì từ chối **toàn bộ** thay đổi: trả 409 `StaffHasActiveAssignments` kèm danh sách người bị ảnh hưởng và số gói của từng người, ghi nhật ký từ chối ngoài transaction, không lưu tên mới hay phần quyền nào.
+4. Có ít nhất một người mất `supervision.complete` mà vẫn phụ trách từ một gói giám sát trở lên thì từ chối **toàn bộ** thay đổi: trả 409 `StaffHasActiveAssignments` kèm danh sách người bị ảnh hưởng và số gói của từng người, không lưu tên mới hay phần quyền nào. Đây là lỗi nghiệp vụ nên không ghi nhật ký từ chối; code hiện vẫn ghi, bỏ lời ghi này là thay đổi dự kiến.
 
 Ví dụ theo `STORY-RBAC-001/AC-008`: vai trò "Nhân viên giám sát" có ba người giữ. Anh Tú phụ trách 2 gói giám sát, chị Mai phụ trách 1 gói, cả hai chỉ có `supervision.complete` từ vai trò này. Anh Hải không phụ trách gói nào. Bỏ `supervision.complete` khỏi vai trò thì bị từ chối, phản hồi liệt kê anh Tú (2) và chị Mai (1). Số gói gồm cả gói đang bị hủy mà phân công còn hiệu lực. Sau khi ba gói được chuyển giao hoặc gỡ phân công, thao tác bỏ quyền mới thực hiện được.
 
@@ -191,7 +200,7 @@ Hai khóa trên đi qua cổng `IAccessRowLocker` (`bmt-be.domain/abstractions/r
 | BR-RBAC-008 | Cột `User.SecurityStamp` và bước so dấu phiên trong `OnTokenValidated`; luồng khóa tài khoản ở [TDD-RBAC-002](TDD-RBAC-002.md) |
 | BR-RBAC-009 | Hạn access token cộng với việc dấu phiên không đổi khi sửa vai trò |
 | BR-RBAC-010 | Policy theo mã quyền ở endpoint, cộng kiểm phân công trong handler theo [TDD-RBAC-003](TDD-RBAC-003.md) |
-| BR-RBAC-011 | Policy ở endpoint, `OnTokenValidated`, và `ExceptionHandlingMiddleware` ánh xạ `NotPermissionException` sang 403. Yêu cầu bị từ chối chỉ để lại dòng nhật ký từ chối |
+| BR-RBAC-011 | Policy ở endpoint, `OnTokenValidated`, và `ExceptionHandlingMiddleware` ánh xạ `NotPermissionException` sang 403. Yêu cầu bị từ chối không để lại dữ liệu nghiệp vụ; chỉ trường hợp thuộc phạm vi ghi nhật ký từ chối để lại một dòng nhật ký |
 | BR-RBAC-012 | `IAccessAuditWriter` với hai đường ghi |
 
 **Notes**:
@@ -363,7 +372,9 @@ Một dòng là **một lần một người đang giữ một vai trò**. Thu h
 
 ### `AccessAuditLog` — nhật ký thay đổi quyền
 
-Một dòng là **một lần thao tác liên quan tới vai trò, quyền hoặc phân công**, kể cả lần bị từ chối. Chỉ ghi thêm, không sửa và không xóa theo `BR-RBAC-012`.
+Một dòng là **một lần thao tác liên quan tới vai trò, quyền hoặc phân công**, kể cả lần bị từ chối thuộc phạm vi ghi ở mục "Ghi nhật ký, kể cả khi yêu cầu bị từ chối". Chỉ ghi thêm, không sửa và không xóa theo `BR-RBAC-012`.
+
+Không có tác vụ tự xóa nhật ký. Người dùng xác nhận ngày 25/09/2026 giữ toàn bộ nhật ký trong đợt này và xem lại thời hạn lưu khi làm phần lưu trữ dài hạn (`BR-RBAC-012/Notes`).
 
 | Cột | Kiểu | Ràng buộc | Ý nghĩa |
 |---|---|---|---|
@@ -501,13 +512,9 @@ Giả sử tiếp: chị Lan không có quyền `audit.read`, nhưng thử đưa
 
 Sau đó chị Lan xóa vai trò `role-ops` khi không còn ai giữ. Dòng `Role` biến mất, nhưng cả ba dòng nhật ký trên vẫn đọc được tên "Nhân viên vận hành gói" nhờ `TargetLabel`.
 
-Nhánh bỏ quyền bị chặn theo `BR-RBAC-007` khoản 6, cùng giả định ở mục Architecture: vai trò `role-sup` "Nhân viên giám sát" có `supervision.complete`, do `user-tu`, `user-mai` và `user-hai` giữ. `Assignment` đang có ba dòng hiệu lực: hai dòng của `user-tu`, một dòng của `user-mai`. Chị Lan gửi danh sách quyền mới không có `supervision.complete`. Hai người mất quyền này mà vẫn phụ trách gói giám sát, nên transaction chính rollback: `RolePermission` của `role-sup` vẫn còn `supervision.complete`, ba dòng `Assignment` không đổi. `AccessAuditLog` có thêm một dòng từ chối:
+Nhánh bỏ quyền bị chặn theo `BR-RBAC-007` khoản 6, cùng giả định ở mục Architecture: vai trò `role-sup` "Nhân viên giám sát" có `supervision.complete`, do `user-tu`, `user-mai` và `user-hai` giữ. `Assignment` đang có ba dòng hiệu lực: hai dòng của `user-tu`, một dòng của `user-mai`. Chị Lan gửi danh sách quyền mới không có `supervision.complete`. Hai người mất quyền này mà vẫn phụ trách gói giám sát, nên transaction chính rollback: `RolePermission` của `role-sup` vẫn còn `supervision.complete`, ba dòng `Assignment` không đổi. `AccessAuditLog` không có dòng mới, vì đây là lỗi nghiệp vụ chứ không phải rào chắn quyền (`BR-RBAC-012/Notes`).
 
-| Id | ActorUserId | Action | TargetType | TargetId | TargetLabel | Outcome | RejectReasonCode | AfterJson |
-|---|---|---|---|---|---|---|---|---|
-| `log-4` | `user-lan` | RoleUpdated | Role | `role-sup` | Nhân viên giám sát | Rejected | `StaffHasActiveAssignments` | NULL |
-
-Danh sách người bị ảnh hưởng chỉ có trong phản hồi API, không lưu thành bảng. Nếu chị Lan đang giữ chính `role-sup` và thử **thêm** quyền vào vai trò này, dòng nhật ký có cùng dạng với `RejectReasonCode = SelfPrivilegeEscalation`.
+Danh sách người bị ảnh hưởng chỉ có trong phản hồi API, không lưu thành bảng. Nếu chị Lan đang giữ chính `role-sup` và thử **thêm** quyền vào vai trò này thì khác: đó là rào chắn tự nâng quyền, nên `AccessAuditLog` có thêm một dòng từ chối cùng dạng `log-3`, với `RejectReasonCode = SelfPrivilegeEscalation`.
 
 **Notes**:
 
@@ -607,7 +614,7 @@ Mỗi mã dưới đây là giá trị `messageCode` trong thân lỗi. Trườn
 - **PermissionCodeUnknown** (422): Mã quyền gửi lên không có trong danh mục. Kiểm ở validator FluentValidation, nên đi theo nhánh `ValidationException` của `ExceptionHandlingMiddleware` và trả 422 như các lỗi đầu vào khác trong repo.
 - **AuditLogImmutable** (409): Yêu cầu sửa hoặc xóa một bản ghi nhật ký.
 
-Ba mã 401 và `AccessForbidden` có trong `JwtExtensions.cs`. Các mã khác, trừ `AuditLogImmutable`, đã có trong `src/bmt-be.contract/constants/AccessErrorCodes.cs` và được handler ném bằng các kiểu ngoại lệ miền nghiệp vụ. Ngày 25/09/2026, `StaffHasActiveAssignments` có thêm nghĩa mới cho sửa quyền vai trò; `SelfPrivilegeEscalation` có thêm trường hợp thêm quyền vào vai trò mình đang giữ.
+Ba mã 401 và `AccessForbidden` có trong `JwtExtensions.cs`. Các mã khác, trừ `AuditLogImmutable`, đã có trong `src/bmt-be.contract/constants/AccessErrorCodes.cs` và được handler ném bằng các kiểu ngoại lệ miền nghiệp vụ. Ngày 25/09/2026, `StaffHasActiveAssignments` có thêm nghĩa mới cho sửa quyền vai trò; `SelfPrivilegeEscalation` có thêm trường hợp thêm quyền vào vai trò mình đang giữ. Trong các mã 403 và 409 ở trên, `PermissionNotHeldByActor`, `SelfPrivilegeEscalation` và `RoleIsSystem` được ghi nhật ký từ chối; `AccessForbidden`, `RoleInUse`, `StaffHasActiveAssignments` và `RoleNameDuplicated` không ghi.
 
 Cách ánh xạ bám đúng bảng đã có trong `ExceptionHandlingMiddleware.cs`, không thêm nhánh mới: `NotPermissionException` cho 403, `BadRequestException` cho 400, `NotFoundException` cho 404, `ConflictException` cho 409, `ValidationException` cho 422. Dữ liệu kèm lỗi như `affectedStaff` đi qua `DomainException.Extensions`; middleware đưa vào thân lỗi thành trường cùng cấp và không cho ghi đè các trường chuẩn. Vi phạm ràng buộc duy nhất (`DbUpdateException` với mã PostgreSQL `23505`) ra 409 với mã chung, trừ các ràng buộc có trong bảng ánh xạ của `ConstraintViolationPipelineBehavior` ([TDD-SITE-001](TDD-SITE-001.md#architecture)); các bảng của tài liệu này chưa có ràng buộc nào cần ánh xạ riêng.
 
@@ -645,6 +652,7 @@ Cách ánh xạ bám đúng bảng đã có trong `ExceptionHandlingMiddleware.c
 
 ## Change Log
 
+- 2026-09-25 (chốt nhật ký): Theo `BR-RBAC-012/Notes`, người dùng xác nhận ngày 25/09/2026: không ghi nhật ký từ chối cho năm lỗi nghiệp vụ `RoleNameDuplicated`, `RoleInUse`, `EmailAlreadyUsed`, `RoleNotAssignableToStaff` và `StaffHasActiveAssignments`. Thêm phạm vi ghi vào mục Ghi nhật ký, bỏ dòng `log-4` khỏi dữ liệu mẫu, và ghi rõ nhật ký không có tác vụ tự xóa trong đợt này. Code chưa đổi.
 - 2026-09-25 (đồng bộ code): Đồng bộ với code đã triển khai ở commit `182e2a8`: danh mục còn 9 mã sau migration `20260925074152_ConstructionSiteAndPackageAssignment`, hai kiểm tra khi sửa quyền vai trò, `StaffCreated` và cổng `IAccessRowLocker` đã có; bốn mã quyền theo module vẫn chưa có. Ví dụ lỗi ghi mã nghiệp vụ ở `messageCode`, `code` là loại lỗi chung. Ghi rõ `RoleInUse` chưa trả `memberCount`.
 - 2026-09-25: Cập nhật theo US/BR chốt lần hai trong ngày 25/09/2026. Bỏ mã `supervision.reassign` cùng chức năng đổi công trình của gói: danh mục còn 13 mã (tám mã khởi tạo và năm mã quản trị); thêm kế hoạch migration xóa mã này khỏi `RolePermission` và `Permission` trên dữ liệu dev/test, không ghi nhật ký. Phân công tính theo gói giám sát thay cho công trình trong kiểm tra `BR-RBAC-007` khoản 6 và ví dụ đi kèm.
 - 2026-09-25: Cập nhật theo US/BR đã chốt ngày 25/09/2026. Danh mục quyền tăng từ chín lên 14 mã: thêm `plan.manage` (đã có trong code), `estimate.catalog.manage`, `library.manage`, `news.manage` và `consultation.manage`, cùng `RequiresAssignment = false` và seed cho `admin`. Thêm mục sửa danh sách quyền của vai trò: chặn thêm quyền vào vai trò mình đang giữ (`BR-RBAC-004` khoản 1) và chặn bỏ `supervision.complete` khi có người giữ vai trò còn phụ trách công trình (`BR-RBAC-007` khoản 6), dưới khóa dòng `Role` và `User`. Đổi hành động nhật ký `StaffInvited`/`StaffActivated` thành `StaffCreated`; sửa "thêm ba cột" thành bốn cột; ghi rõ ngoại lệ Admin nhận diện theo mã vai trò `admin`. Tách hiện trạng code (migration `InitialRbac`, MassTransit đã đưa lại ngày 23/09) với thay đổi dự kiến; bổ sung tham chiếu `BR-RBAC-005`, `BR-RBAC-007`, `BR-RBAC-008`.

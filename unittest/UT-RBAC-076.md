@@ -42,10 +42,11 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-076 | Role | UpdateRoleCommandHandler.Handle | Error | REGRESSION | P1 | Handler đã có; kiểm tra này là thay đổi dự kiến theo TDD-RBAC-001. Vai trò role-sup có supervision.complete, do Tú, Mai và Hải giữ; cả ba không có supervision.complete từ vai trò khác. Mock bộ đếm trả Tú 2, Mai 1, Hải 0 gói giám sát. Người thao tác không giữ role-sup. | Đổi tên role-sup và bỏ supervision.complete khỏi danh sách quyền. | Ném ngoại lệ ánh xạ 409 với mã StaffHasActiveAssignments; affectedStaff gồm Tú với 2 và Mai với 1, không có Hải. Không đổi tên, không thêm hoặc xóa dòng RolePermission nào; ghi nhật ký từ chối qua RecordRejectionAsync. | BR-RBAC-007/Then<br>STORY-RBAC-001/AC-008<br>STORY-RBAC-001/EXC-06 | Từ chối toàn bộ thay đổi, không lưu một phần; danh sách người bị ảnh hưởng chỉ gồm người thật sự mất quyền mà còn phụ trách gói. | [Chưa xác định] | Draft |
+| UT-RBAC-076 | Role | UpdateRoleCommandHandler.Handle | Error | REGRESSION | P1 | Handler đã có và đã chặn ca này; handler hiện vẫn ghi nhật ký từ chối, bỏ lời ghi này là thay đổi dự kiến theo BR-RBAC-012/Notes. Vai trò role-sup có supervision.complete, do Tú, Mai và Hải giữ; cả ba không có supervision.complete từ vai trò khác. Mock bộ đếm trả Tú 2, Mai 1, Hải 0 gói giám sát. Người thao tác không giữ role-sup. | Đổi tên role-sup và bỏ supervision.complete khỏi danh sách quyền. | Ném ngoại lệ ánh xạ 409 với mã StaffHasActiveAssignments; affectedStaff gồm Tú với 2 và Mai với 1, không có Hải. Không đổi tên, không thêm hoặc xóa dòng RolePermission nào, và không gọi RecordRejectionAsync. | BR-RBAC-007/Then<br>STORY-RBAC-001/AC-008<br>STORY-RBAC-001/EXC-06<br>BR-RBAC-012/Notes | Từ chối toàn bộ thay đổi, không lưu một phần; danh sách người bị ảnh hưởng chỉ gồm người thật sự mất quyền mà còn phụ trách gói. Đây là lỗi nghiệp vụ nên không ghi nhật ký từ chối. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - BR-RBAC-007/Then
 - STORY-RBAC-001/AC-008
 - STORY-RBAC-001/EXC-06
+- BR-RBAC-012/Notes

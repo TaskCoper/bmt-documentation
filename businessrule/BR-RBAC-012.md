@@ -69,6 +69,13 @@ Quy tắc này không quy định nhật ký cho các nghiệp vụ khác. Lý d
 ## Notes
 
 - Thao tác thu hồi vai trò và gỡ phân công không bắt nhập lý do trong đợt này; nếu sau này cần thì bổ sung, quy tắc ghi nhật ký vẫn giữ nguyên.
-- Thời gian giữ nhật ký chưa được xác định, cần chốt trước khi triển khai.
+- Người dùng xác nhận ngày 25/09/2026: trong đợt này hệ thống giữ toàn bộ nhật ký, không tự xóa bản ghi nào. Thời hạn lưu sẽ được xem lại khi làm phần lưu trữ nhật ký dài hạn, hiện nằm ngoài phạm vi của STORY-RBAC-004.
 - Người dùng xác nhận ngày 25/09/2026: yêu cầu phân công bị từ chối vì gói đã có người phụ trách, gói chưa gán công trình hoặc đang bị hủy, hoặc người nhận thiếu quyền `supervision.complete` là lỗi nghiệp vụ, không phải rào chắn quyền, nên không ghi nhật ký theo khoản 2.
+- Người dùng xác nhận ngày 25/09/2026: các yêu cầu bị từ chối vì lỗi nghiệp vụ dưới đây cũng không ghi nhật ký theo khoản 2:
+  - tạo hoặc đổi tên vai trò trùng tên một vai trò đang có;
+  - xóa vai trò còn người giữ;
+  - tạo tài khoản nhân viên bằng email đã thuộc tài khoản khác;
+  - gán vai trò Khách hàng cho nhân viên;
+  - thu hồi vai trò, hoặc bỏ quyền khỏi vai trò, khiến người đang phụ trách gói giám sát mất quyền `supervision.complete`.
+- Vẫn ghi nhật ký yêu cầu bị từ chối trong ba trường hợp: bị chặn bởi một trong ba rào chắn của [BR-RBAC-004](BR-RBAC-004.md), sửa hoặc xóa vai trò hệ thống theo [BR-RBAC-002](BR-RBAC-002.md), và tự khóa tài khoản của chính mình theo [BR-RBAC-008](BR-RBAC-008.md) khoản 7.
 - Bản nháp nghiệp vụ, chưa triển khai hoặc chạy kiểm thử. Reviewer và Approver lấy theo xác nhận đang dùng cho các bản nháp mới, không phải bằng chứng đã phê duyệt. Owner và ngày hiệu lực chưa xác định.
