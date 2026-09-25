@@ -40,12 +40,12 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## System Test
 
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SUB-035 | STORY-SUB-002 | ALT / Integration boundary | REGRESSION | P1 | Khách có subscription thiết kế còn hiệu lực với lượt đã dùng/đang giữ; khách khác có gói giám sát đang thực hiện. Ghi nhận dữ liệu trước thao tác. | 1. Admin ngừng bán các gói tương ứng trong danh mục.<br>2. Kiểm tra quyền lợi, trạng thái, thời hạn và các số lượt thiết kế.<br>3. Kiểm tra gói giám sát vẫn gắn đúng dự án và đang thực hiện. | Dữ liệu thử; không chạy thanh toán hoặc gia hạn. Không tạo số dư lượt giám sát. API và cách thiết lập sẽ bổ sung trong TDD. | Các gói đã cấp giữ nguyên dữ liệu. Thiết kế tiếp tục kỳ hiện tại, không thay đổi hạn mức hoặc lượt. Giám sát không bị hoàn thành hay gán ngày hết hạn. | STORY-SUB-002/AC-006<br>BR-SUB-013/Statement | Kiểm tra ngừng bán độc lập với vòng đời gói đã cấp. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
+| ST-SUB-035 | STORY-SUB-002 | ALT / Integration boundary | REGRESSION | P1 | Khách có subscription thiết kế còn hiệu lực với lượt đã dùng/đang giữ; khách khác có gói giám sát đã gán công trình. Ghi nhận dữ liệu trước thao tác. | 1. Admin ngừng bán các gói tương ứng trong danh mục.<br>2. Kiểm tra quyền lợi, trạng thái, thời hạn và các số lượt thiết kế.<br>3. Kiểm tra gói giám sát vẫn gắn đúng công trình và vẫn ở trạng thái đã gán. | Dữ liệu thử; không chạy thanh toán hoặc gia hạn. Không tạo số dư lượt giám sát. API và cách thiết lập sẽ bổ sung trong TDD. | Các gói đã cấp giữ nguyên dữ liệu. Thiết kế tiếp tục kỳ hiện tại, không thay đổi hạn mức hoặc lượt. Giám sát không bị hoàn thành hay gán ngày hết hạn. | STORY-SUB-002/AC-006<br>BR-SUB-013/Statement | Kiểm tra ngừng bán độc lập với vòng đời gói đã cấp. Đặc tả nháp, chưa chạy. Cập nhật 25/09/2026: gói giám sát gắn với công trình, không gắn với bản dự toán. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

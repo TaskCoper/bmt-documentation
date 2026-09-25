@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PROJ-001 | Tạo dự toán | EstimateInputPolicy — Biên tên bản dự toán | Boundary | FULL | P1 | Unit dự kiến trong TDD, chưa có implementation hoặc mã test. Dùng clock cố định và fake dependency có thể đọc lại đối số/trạng thái; không gọi dịch vụ thật. Kiểm tên ở chế độ tạo/lưu. | Tên rỗng; khoảng trắng; A lặp 1, 200, 201 lần; tên 200 ký tự có khoảng trắng đầu/cuối. | Chấp nhận 1 và 200 sau trim; trả tên đã trim. Từ chối rỗng/whitespace/201; không cắt ngắn. | TDD-PROJ-001/Architecture<br>TDD-PROJ-001/Internal API<br>BR-PROJ-003/Then<br>ST-PROJ-002/System Test | Biên tên bản dự toán. Kiểm hành vi ở biên unit; không dùng mock để kết luận transaction, SQL hoặc tích hợp thật đúng. | [Chưa xác định] | Draft |
+| UT-PROJ-001 | Tạo dự toán | EstimateInputPolicy — Biên tên bản dự toán | Boundary | FULL | P1 | Unit dự kiến trong TDD, chưa có implementation hoặc mã test. Dùng clock cố định và fake dependency có thể đọc lại đối số/trạng thái; không gọi dịch vụ thật. Kiểm tên ở chế độ tạo (POST) và đổi tên (PATCH /name); PUT /input không còn nhận tên. | Tên rỗng; khoảng trắng; A lặp 1, 200, 201 lần; tên 200 ký tự có khoảng trắng đầu/cuối; 200 ký tự ngoài BMP. | Chấp nhận 1 và 200 sau trim, kể cả 200 ký tự ngoài BMP (đếm theo Rune); trả tên đã trim. Từ chối rỗng/whitespace/201 bằng InvalidEstimateInput với lỗi trường name; không cắt ngắn. Kết quả như nhau ở chế độ tạo và đổi tên. | TDD-PROJ-001/Architecture<br>TDD-PROJ-001/Internal API<br>BR-PROJ-003/Then<br>ST-PROJ-002/System Test<br>ST-PROJ-067/System Test | Biên tên bản dự toán. Kiểm hành vi ở biên unit; không dùng mock để kết luận transaction, SQL hoặc tích hợp thật đúng. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
@@ -50,3 +50,4 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - TDD-PROJ-001/Internal API
 - BR-PROJ-003/Then
 - ST-PROJ-002/System Test
+- ST-PROJ-067/System Test

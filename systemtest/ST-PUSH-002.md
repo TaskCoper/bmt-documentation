@@ -44,7 +44,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-PUSH-002 | STORY-PUSH-001 | EXC | FULL | P0 | Nhân viên có phiên hợp lệ hoặc khách chưa có phiên. | 1. Gửi yêu cầu đăng ký token bằng phiên Staff<br>2. gửi tiếp khi không có phiên. | Staff S; request không mang xác thực. | Bị từ chối; không tạo đăng ký. | STORY-PUSH-001/AC-001<br>BR-PUSH-001/Then | Không cho phép mở rộng push sang nhân viên hoặc đăng ký mạo danh. | [Chưa phân công] | Draft |
+| ST-PUSH-002 | STORY-PUSH-001 | EXC | FULL | P0 | Nhân viên có phiên hợp lệ hoặc khách chưa có phiên. | 1. Gửi yêu cầu đăng ký token bằng phiên Staff<br>2. gửi tiếp khi không có phiên. | Nhân viên S (AccountKind=Staff, thuộc vai trò Admin); request không mang xác thực. | Phiên nhân viên nhận 403 CustomerOnly vì kiểm AccountKind, không theo tên vai trò; request không xác thực nhận 401. Không tạo đăng ký. | STORY-PUSH-001/AC-001<br>BR-PUSH-001/Then | Không cho phép mở rộng push sang nhân viên hoặc đăng ký mạo danh. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 

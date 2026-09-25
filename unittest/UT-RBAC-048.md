@@ -42,9 +42,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-048 | Assignment | AssignmentAuthorizer.IsAssignedAsync (dự kiến) | Happy | SMOKE | P1 | Unit chưa triển khai; kho Assignment có một dòng đang hiệu lực khớp đúng nhân viên A, loại Project và dự án P. Mock IResourceHierarchyReader để xác minh không bị gọi. | staffUserId là A, resourceType là Project, resourceId là P, thời điểm là hiện tại. | Trả về đạt. IResourceHierarchyReader không được gọi lần nào vì bước một đã khớp. | BR-RBAC-013/Then<br>STORY-RBAC-003/AC-001 | Trường hợp phổ biến chỉ tốn một truy vấn; thứ tự hai bước có chủ đích. | [Chưa xác định] | Draft |
+| UT-RBAC-048 | Assignment | AssignmentAuthorizer.IsDirectlyAssignedAsync | Happy | SMOKE | P1 | Hàm đã có; chuyển sang loại ConstructionSite là thay đổi dự kiến theo TDD-RBAC-003. Kho Assignment có một dòng đang hiệu lực khớp đúng nhân viên A, loại ConstructionSite và công trình P. A không giữ vai trò admin. | staffUserId là A, resourceType là ConstructionSite, resourceId là P. | Trả về đạt bằng một truy vấn theo công trình; không có bước tra khách hàng sở hữu công trình. | BR-RBAC-013/Then<br>STORY-RBAC-003/AC-001<br>TDD-RBAC-003/Architecture | Trường hợp phổ biến: nhân viên được phân công trực tiếp công trình. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - BR-RBAC-013/Then
 - STORY-RBAC-003/AC-001
+- TDD-RBAC-003/Architecture

@@ -40,12 +40,12 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## System Test
 
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SUB-028 | STORY-SUB-003 | EXC | REGRESSION | P1 | Gói giám sát G1 đã gán dự án A. Có ba tài khoản: khách hàng sở hữu A; nhân viên có quyền supervision.complete nhưng chỉ được phân công dự án B; Admin không có quyền supervision.complete. | 1. Với mỗi tài khoản, kiểm tra giao diện không cho thao tác hoàn thành.<br>2. Gửi trực tiếp yêu cầu hoàn thành G1 qua API.<br>3. Kiểm tra yêu cầu bị từ chối và dữ liệu G1 không đổi. | Dữ liệu thử; không tạo dữ liệu lịch hoặc số dư lượt giám sát. API cụ thể bổ sung trong TDD. | Cả ba tài khoản đều bị từ chối. G1 vẫn đã gán, liên kết khách hàng/dự án và các gói khác giữ nguyên; không có dòng lịch sử mới. | STORY-SUB-003/AC-008<br>BR-SUB-011/Then | Kiểm tra phân quyền ở nơi xử lý yêu cầu, gồm Admin thiếu mã quyền. Cập nhật 24/09/2026 theo vòng đời mới của gói giám sát. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
+| ST-SUB-028 | STORY-SUB-003 | EXC | REGRESSION | P1 | Gói giám sát G1 đã gán công trình A. Có hai tài khoản: khách hàng sở hữu A; nhân viên có quyền supervision.complete nhưng chỉ được phân công công trình B. | 1. Với mỗi tài khoản, kiểm tra giao diện không cho thao tác hoàn thành.<br>2. Gửi trực tiếp yêu cầu hoàn thành G1 qua API.<br>3. Kiểm tra yêu cầu bị từ chối và dữ liệu G1 không đổi. | Dữ liệu thử; không tạo dữ liệu lịch hoặc số dư lượt giám sát. API cụ thể bổ sung trong TDD. | Cả hai tài khoản đều bị từ chối. G1 vẫn đã gán, liên kết khách hàng/công trình và các gói khác giữ nguyên; không có dòng lịch sử mới. | STORY-SUB-003/AC-008<br>BR-SUB-011/Then | Kiểm tra phân quyền ở nơi xử lý yêu cầu. Cập nhật 25/09/2026: bỏ ca Admin không có quyền supervision.complete vì AC-008 đã bỏ ca này; gói giám sát gắn với công trình. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

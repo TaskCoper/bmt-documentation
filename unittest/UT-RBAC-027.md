@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-027 | Role | PermissionCatalogStartupCheck.Validate (dự kiến) | Error | REGRESSION | P1 | Unit chưa triển khai; hằng số PermissionNames trong code có chín mã, bảng Permission mock trả về tám mã, thiếu audit.read. | Chạy kiểm tra lúc khởi động ứng dụng. | Kiểm tra thất bại, ghi log mức cảnh báo nêu rõ mã bị lệch, và ứng dụng từ chối khởi động. Kiểm cả chiều ngược lại khi bảng có mã mà code không biết. | TDD-RBAC-001/Data Model | Lệch giữa code và bảng sẽ tạo ra quyền tồn tại trên giấy nhưng không chỗ nào kiểm. | [Chưa xác định] | Draft |
+| UT-RBAC-027 | Role | PermissionCatalogGuard.EnsurePermissionCatalogMatchesCodeAsync | Error | REGRESSION | P1 | Guard đã có trong code. Hằng số PermissionNames.All có 14 mã theo danh mục ngày 25/09/2026; bảng Permission mock trả 13 mã, thiếu consultation.manage. | Chạy kiểm tra lúc khởi động ứng dụng; lặp lại với biến thể bảng có thêm một mã mà code không biết. | Kiểm tra thất bại ở cả hai biến thể, ghi log mức cảnh báo nêu rõ mã bị lệch, và ứng dụng từ chối khởi động. | TDD-RBAC-001/Data Model | Lệch giữa code và bảng, ví dụ triển khai code có mã mới trước migration seed, tạo ra quyền tồn tại trên giấy nhưng không chỗ nào kiểm. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

@@ -39,8 +39,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## System Test
 
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+**Đã rút khỏi nghiệm thu hiện tại: STORY-SUB-002/AC-016 không nghiệm thu đợt này theo BR-SUB-008 khoản 12, vì chưa cấu hình và kiểm tra quyền dạng mức. Nội dung bên dưới chỉ để tra cứu. Không tái sử dụng mã này.**
+
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |

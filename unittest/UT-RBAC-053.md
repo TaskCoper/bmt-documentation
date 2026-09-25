@@ -42,9 +42,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-053 | Assignment | AssignmentAuthorizer.IsAssignedAsync (dự kiến) | Branch | REGRESSION | P1 | Unit chưa triển khai; người gọi giữ vai trò admin và không có dòng phân công nào trên dự án P. | staffUserId là tài khoản Admin, resourceType là Project, resourceId là P. | Trả về đạt mà không cần dòng phân công nào, đúng phần Except đã chốt ở BR-SUB-011 và BR-SUB-012. | BR-RBAC-013/Except<br>BR-SUB-011/Then | Admin thao tác được trên gói giám sát không cần phân công dự án; ngoại lệ này đã chốt từ trước. | [Chưa xác định] | Draft |
+| UT-RBAC-053 | Assignment | AssignmentAuthorizer.IsDirectlyAssignedAsync | Branch | REGRESSION | P1 | Hàm đã có; chuyển sang loại ConstructionSite là thay đổi dự kiến theo TDD-RBAC-003. Người gọi giữ vai trò hệ thống có Role.Code bằng admin (RoleCodes.Admin) và không có dòng phân công nào trên công trình P. | staffUserId là tài khoản Admin, resourceType là ConstructionSite, resourceId là P. | Trả về đạt mà không cần dòng phân công nào, đúng phần Except của BR-SUB-011 và BR-SUB-012. Việc nhận diện Admin đọc Role.Code từ database, không so tên hiển thị Role.Name. | BR-RBAC-013/Except<br>BR-SUB-011/Then<br>TDD-RBAC-003/Activity Diagram | Admin thao tác được trên gói giám sát không cần phân công công trình; đây là ngoại lệ duy nhất theo vai trò. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - BR-RBAC-013/Except
 - BR-SUB-011/Then
+- TDD-RBAC-003/Activity Diagram

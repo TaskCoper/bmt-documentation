@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-063 | AdminRead | CommerceReadAuthorization (dự kiến) | Happy | REGRESSION | P1 | Verified session role Admin. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Query danh sách/chi tiết. | Allowed cho read, không yêu cầu profile employee; không tự cấp mutation permission. | STORY-PAY-002/AC-001<br>TDD-PAY-002/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
+| UT-PAY-063 | AdminRead | CommerceReadAuthorization (dự kiến) | Happy | REGRESSION | P1 | Verified session của tài khoản giữ vai trò hệ thống admin; claim perm có commerce.read vì vai trò admin có mã này trong RolePermission. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Query danh sách/chi tiết; lặp lại với principal có claim role admin nhưng claim perm không có commerce.read. | Fixture đầu được phép đọc nhờ claim commerce.read, không tự cấp quyền ghi. Fixture sau bị từ chối 403: policy kiểm mã quyền, không có đường tắt theo tên hay mã vai trò. | STORY-PAY-002/AC-001<br>TDD-PAY-002/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

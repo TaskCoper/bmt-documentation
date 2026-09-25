@@ -42,9 +42,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-038 | Subscription / Entitlement | OpenTemplateHandler (dự kiến trong TDD) | Happy | REGRESSION | P0 | Kỳ đủ quyền/lượt; adapter trả nội dung hợp lệ | Mở chi tiết với key mới | Chốt Used+1 cùng response đã lưu; quota tạo thiết kế không đổi. | BR-SUB-017/Then<br>TDD-SUB-002/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. | [Chưa phân công] | Draft |
+| UT-SUB-038 | Subscription / Entitlement | OpenTemplateHandler (dự kiến trong TDD) | Happy | REGRESSION | P0 | Kỳ đủ quyền/lượt; tài khoản chưa có LibraryAccess cho phiên bản V1; adapter trả nội dung hợp lệ | Mở lần đầu phiên bản V1 với confirmUse=true | Trong một giao dịch: Used+1, UsageOperation Succeeded với OperationKey lib-open:V1 và LibraryAccess của tài khoản cho V1; quota tạo thiết kế không đổi. | BR-SUB-017/Then<br>BR-LIB-003/Then<br>TDD-SUB-002/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. Cập nhật 25/09/2026 theo BR-LIB-003 và TDD-LIB-002: lượt tính theo phiên bản chưa từng mở, không theo key của client. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 
 - BR-SUB-017/Then
+- BR-LIB-003/Then
 - TDD-SUB-002/Architecture

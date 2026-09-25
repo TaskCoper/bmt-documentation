@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-072 | Subscription / Supervision | GetMySupervisionGrantsQueryHandler | Happy | REGRESSION | P2 | Khách U1 có G1 State=Completed trên PR1 và G2 State=Assigned trên PR2. | GetMySupervisionGrantsQuery() với actor U1 | Danh sách có G1 với State=Completed, EffectiveState=Completed, ProjectId=PR1; G2 với State=Assigned. | STORY-SUB-003/AC-017<br>TDD-SUB-006/Internal API | Khách xem được trạng thái đã hoàn thành; giá trị mới của state. | [Chưa phân công] | Draft |
+| UT-SUB-072 | Subscription / Supervision | GetMySupervisionGrantsQueryHandler | Happy | REGRESSION | P2 | Khách U1 có G1 State=Completed trên CS1 và G2 State=Assigned trên CS2. | GetMySupervisionGrantsQuery() với actor U1 | Danh sách có G1 với State=Completed, EffectiveState=Completed, ConstructionSiteId=CS1; G2 với State=Assigned. | STORY-SUB-003/AC-017<br>TDD-SUB-006/Internal API | Khách xem được trạng thái đã hoàn thành; giá trị mới của state. Cập nhật 25/09/2026: dùng tên công trình dự kiến theo TDD-SUB-004/006 (code hiện còn ProjectId). | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 

@@ -39,15 +39,16 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## System Test
 
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SUB-106 | STORY-SUB-002 | ALT / Integration boundary | REGRESSION | P1 | Khách A có kỳ PLUS còn hiệu lực, mô tả tư vấn đã chốt là Tư vấn ưu tiên; Admin được sửa bản nháp gói. | 1. Đọc cam kết tư vấn của kỳ A.<br>2. Admin lưu nháp rồi công bố mô tả Tư vấn online.<br>3. Kiểm tra cam kết kỳ A.<br>4. Chuẩn bị lần mua mới hợp lệ dùng nội dung mới, đối chiếu hai kỳ và quyền/lượt. | Hai mô tả thử: Tư vấn ưu tiên và Tư vấn online. Dữ liệu lần mua được chuẩn bị hợp lệ; không thực hiện thu tiền. | Kỳ A giữ Tư vấn ưu tiên trong suốt kỳ đã mua; lần mua mới dùng nội dung mới đã chốt hợp lệ. Không tạo mức/lượt tư vấn hoặc thay quyền/lượt, tự đổi gói hay gia hạn vì Admin sửa mô tả. | STORY-SUB-002/AC-024<br>BR-SUB-004/Then<br>BR-SUB-008/Notes | Kiểm tra cam kết tư vấn offline không bị sửa ngược; đặc tả nháp, chưa thực thi. | [Chưa xác định] | Draft |
+| ST-SUB-106 | STORY-SUB-002 | ALT / Integration boundary | REGRESSION | P1 | Khách A có kỳ PLUS còn hiệu lực, mô tả tư vấn đã chốt là Tư vấn ưu tiên; Admin được sửa bản nháp gói. | 1. Đọc cam kết tư vấn của kỳ A.<br>2. Admin lưu nháp rồi công bố mô tả Tư vấn online.<br>3. Kiểm tra cam kết kỳ A.<br>4. Chuẩn bị lần mua mới hợp lệ dùng nội dung mới, đối chiếu hai kỳ và quyền/lượt. | Hai mô tả thử: Tư vấn ưu tiên và Tư vấn online. Lần mua mới là đơn tạo sau khi công bố; nội dung tư vấn chốt lúc tạo đơn theo BR-PAY-001. Không thực hiện thu tiền. | Kỳ A giữ Tư vấn ưu tiên trong suốt kỳ đã mua; lần mua mới dùng nội dung mới đã chốt hợp lệ. Không tạo mức/lượt tư vấn hoặc thay quyền/lượt, tự đổi gói hay gia hạn vì Admin sửa mô tả. | STORY-SUB-002/AC-024<br>BR-SUB-004/Then<br>BR-SUB-008/Notes<br>BR-PAY-001/Then | Kiểm tra cam kết tư vấn offline không bị sửa ngược; đặc tả nháp, chưa thực thi. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-SUB-002/AC-024
 - BR-SUB-004/Then
 - BR-SUB-008/Notes
+- BR-PAY-001/Then

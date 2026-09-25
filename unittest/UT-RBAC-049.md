@@ -42,9 +42,9 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-049 | Assignment | AssignmentAuthorizer.IsAssignedAsync (dự kiến) | Branch | REGRESSION | P1 | Unit chưa triển khai; không có dòng nào khớp đúng dự án P, nhưng có một dòng đang hiệu lực khớp nhân viên A với loại Customer và khách hàng K. Mock IResourceHierarchyReader trả về P thuộc K. | staffUserId là A, resourceType là Project, resourceId là P. | Trả về đạt nhờ phân công ở mức khách hàng. IResourceHierarchyReader được gọi đúng một lần. | BR-RBAC-013/Then<br>STORY-RBAC-003/AC-004 | Kế thừa từ khách hàng xuống dự án; không cần phân công riêng từng dự án. | [Chưa xác định] | Draft |
+| UT-RBAC-049 | Assignment | AssignmentAuthorizer.IsDirectlyAssignedAsync | Branch | REGRESSION | P1 | Hàm đã có; chuyển sang loại ConstructionSite là thay đổi dự kiến theo TDD-RBAC-003. Dòng đang hiệu lực duy nhất của công trình P thuộc nhân viên C; nhân viên A chỉ có phân công đang hiệu lực trên công trình P2. A không giữ vai trò admin. | staffUserId là A, resourceType là ConstructionSite, resourceId là P. | Trả về không đạt. Hàm không tìm phân công ở mức khách hàng và không dùng phân công của A trên công trình khác. | BR-RBAC-013/Then<br>STORY-RBAC-003/AC-002 | Đợt này không còn phân công mức khách hàng; nhân viên chỉ thao tác trên công trình được giao cho chính mình. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - BR-RBAC-013/Then
-- STORY-RBAC-003/AC-004
+- STORY-RBAC-003/AC-002

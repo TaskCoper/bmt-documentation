@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-067 | AdminRead | PurchaseDtoMapper (dự kiến) | Branch | REGRESSION | P1 | Fulfillment SupersededBeforeActivation không có DesignPeriod; supervision chưa có project. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Map hai dòng. | Cả hai hiện trong kết quả; target/project nullable và state đúng, không tạo dữ liệu giả. | STORY-PAY-002/AC-001<br>STORY-PAY-002/AC-006<br>TDD-PAY-002/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
+| UT-PAY-067 | AdminRead | PurchaseDtoMapper (dự kiến) | Branch | REGRESSION | P1 | Fulfillment SupersededBeforeActivation không có DesignPeriod; supervision chưa có công trình. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Map hai dòng. | Cả hai hiện trong kết quả; target/constructionSiteId nullable và state đúng, không tạo dữ liệu giả. | STORY-PAY-002/AC-001<br>STORY-PAY-002/AC-006<br>TDD-PAY-002/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

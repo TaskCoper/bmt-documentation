@@ -44,7 +44,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-PAY-066 | STORY-SUB-004 | Integration boundary | REGRESSION | P1 | Hai gói chưa gán còn hạn cùng chủ, một dự án hợp lệ còn trống. Dùng PostgreSQL thật và API/worker của môi trường thử nghiệm. | 1. Chuẩn bị dữ liệu cô lập.<br>2. Gửi đồng thời hai yêu cầu gán qua hai connection.<br>3. Đọc lại API và DB sau commit/rollback. | Dữ liệu giả lập; không chuyển tiền thật. | Chỉ một gói Assigned vào dự án; gói còn lại giữ trạng thái/hạn cũ; không có hai liên kết hiệu lực. | STORY-SUB-004/AC-004<br>TDD-SUB-004/Architecture | Hai gói tranh cùng dự án; mock và EF InMemory không chứng minh được ca này. | [Chưa xác định] | Draft |
+| ST-PAY-066 | STORY-SUB-004 | Integration boundary | REGRESSION | P1 | Hai gói chưa gán còn hạn cùng chủ, một công trình hợp lệ còn trống. Dùng PostgreSQL thật và API/worker của môi trường thử nghiệm. | 1. Chuẩn bị dữ liệu cô lập.<br>2. Gửi đồng thời hai yêu cầu gán qua hai connection.<br>3. Đọc lại API và DB sau commit/rollback. | Dữ liệu giả lập; không chuyển tiền thật. | Chỉ một gói Assigned vào công trình; gói còn lại giữ trạng thái/hạn cũ; không có hai liên kết hiệu lực. | STORY-SUB-004/AC-004<br>TDD-SUB-004/Architecture | Hai gói tranh cùng công trình; mock và EF InMemory không chứng minh được ca này. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

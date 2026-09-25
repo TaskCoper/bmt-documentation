@@ -44,10 +44,11 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-RBAC-028 | STORY-RBAC-003 | EXC | REGRESSION | P1 | Nhân viên E đang bị khóa tài khoản và trước đó đã được phân công dự án Q. Dự án P đang tồn tại. Người quản trị có quyền assignment.manage. | 1. Chuẩn bị E đang bị khóa và phân công cũ trên dự án Q theo Test data.<br>2. Gửi yêu cầu phân công thêm dự án P cho E.<br>3. Đọc lại danh sách phân công của dự án P.<br>4. Đọc lại phân công của E trên dự án Q. | Nhân viên E đang bị khóa, đang phụ trách dự án Q. Dữ liệu minh họa. | Hệ thống từ chối yêu cầu và không tạo bản ghi phân công cho E trên P. Phân công cũ của E trên dự án Q vẫn còn hiệu lực; khóa tài khoản chỉ chặn phân công mới, không gỡ phân công đang có. | STORY-RBAC-003/AC-006<br>BR-RBAC-013/Then<br>BR-RBAC-008/Then | Tài khoản bị khóa không nhận phân công mới nhưng giữ phân công cũ để chia lại. Đặc tả chưa chạy. | [Chưa xác định] | Draft |
+| ST-RBAC-028 | STORY-RBAC-003 | EXC | REGRESSION | P1 | Nhân viên E có quyền supervision.complete, đang bị khóa tài khoản và trước đó đã được phân công công trình Q. Công trình P đang tồn tại và chưa có người phụ trách. Người quản trị có quyền assignment.manage. | 1. Chuẩn bị E đang bị khóa và phân công cũ trên công trình Q theo Test data.<br>2. Gửi yêu cầu phân công thêm công trình P cho E.<br>3. Đọc lại các phân công của công trình P.<br>4. Đọc lại phân công của E trên công trình Q. | Nhân viên E đang bị khóa, đang phụ trách công trình Q. Dữ liệu minh họa. | Hệ thống từ chối yêu cầu và không tạo bản ghi phân công cho E trên P; P vẫn chưa có người phụ trách. Phân công cũ của E trên công trình Q vẫn còn hiệu lực; khóa tài khoản chỉ chặn phân công mới, không gỡ phân công đang có. | STORY-RBAC-003/AC-006<br>STORY-RBAC-003/EXC-01<br>BR-RBAC-013/Then<br>BR-RBAC-008/Then | Tài khoản bị khóa không nhận phân công mới nhưng giữ phân công cũ để chia lại. Đặc tả chưa chạy. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-RBAC-003/AC-006
+- STORY-RBAC-003/EXC-01
 - BR-RBAC-013/Then
 - BR-RBAC-008/Then

@@ -44,9 +44,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-RBAC-027 | STORY-RBAC-003 | ALT | REGRESSION | P1 | Nhân viên A đang phụ trách dự án P và không có người nào khác phụ trách P. Người quản trị có quyền assignment.manage. | 1. Chuẩn bị A và phân công dự án P theo Test data.<br>2. Gỡ phân công của A trên P mà không chuyển cho ai.<br>3. Mở danh sách tài nguyên chưa có người phụ trách.<br>4. Để A gửi yêu cầu thao tác trên gói giám sát của P. | Nhân viên A phụ trách P, không có người phụ trách khác. Dữ liệu minh họa. | Dự án P nằm trong danh sách tài nguyên chưa có người phụ trách. A không còn thao tác được trên P kể từ khi phân công hết hiệu lực. | STORY-RBAC-003/AC-005<br>BR-RBAC-013/Then | Gỡ phân công không chuyển giao đưa tài nguyên về danh sách chờ chia lại. Đặc tả chưa chạy. | [Chưa xác định] | Draft |
+| ST-RBAC-027 | STORY-RBAC-003 | ALT | REGRESSION | P1 | Nhân viên A đang phụ trách công trình P. Người quản trị có quyền assignment.manage. Danh sách công trình cần chia lại đã có trên môi trường thử; danh sách này phụ thuộc đặc tả Công trình chưa soạn theo TDD-RBAC-003. | 1. Chuẩn bị A và phân công công trình P theo Test data.<br>2. Gỡ phân công của A trên P mà không chuyển cho ai.<br>3. Mở danh sách công trình cần chia lại.<br>4. Để A gửi yêu cầu thao tác trên gói giám sát của P. | Nhân viên A phụ trách P. Dữ liệu minh họa. | P nằm trong danh sách công trình cần chia lại với trạng thái chưa có người phụ trách. A không còn thao tác được trên P kể từ khi phân công hết hiệu lực; bản ghi phân công đã kết thúc của A vẫn tra cứu được. | STORY-RBAC-003/AC-005<br>STORY-RBAC-003/ALT-04<br>BR-RBAC-013/Then | Gỡ phân công không chuyển giao đưa công trình về danh sách cần chia lại. Đặc tả chưa chạy. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-RBAC-003/AC-005
+- STORY-RBAC-003/ALT-04
 - BR-RBAC-013/Then

@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-060 | Assignment | EndAssignmentHandler.Handle (dự kiến) | Happy | REGRESSION | P2 | Unit chưa triển khai; dòng phân công đang hiệu lực của nhân viên A trên dự án P, không có người nào khác phụ trách P. | assignmentId của dòng đó. | Dòng nhận EffectiveToUtc bằng thời điểm thao tác, EndedBy là người quản trị và EndReason bằng Removed. Không tạo dòng mới nào, nên dự án P về danh sách chưa có người phụ trách. | BR-RBAC-013/Then<br>STORY-RBAC-003/AC-005 | EndReason phân biệt gỡ với chuyển giao, vì hai lý do dẫn tới hai hệ quả khác nhau. | [Chưa xác định] | Draft |
+| UT-RBAC-060 | Assignment | EndAssignmentCommandHandler.Handle | Happy | REGRESSION | P2 | Handler đã có. Dòng phân công đang hiệu lực của nhân viên A trên công trình P. | assignmentId của dòng đó. | Dòng nhận EffectiveToUtc bằng thời điểm thao tác, EndedBy là người quản trị và EndReason bằng Removed. Không tạo dòng mới nào, nên công trình P về danh sách cần chia lại với trạng thái Unassigned. | BR-RBAC-013/Then<br>STORY-RBAC-003/AC-005 | EndReason phân biệt gỡ với chuyển giao, vì hai lý do dẫn tới hai hệ quả khác nhau. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

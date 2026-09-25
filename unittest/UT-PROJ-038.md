@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PROJ-038 | Tạo dự toán | CreateEstimateShareHandler — Dùng lại một link khi còn hiệu lực | Branch | FULL | P0 | Unit dự kiến trong TDD, chưa có implementation hoặc mã test. Dùng clock cố định và fake dependency có thể đọc lại đối số/trạng thái; không gọi dịch vụ thật. CurrentShare=S1 đang hiệu lực ngày 25; store/token protector giả trả cùng token đã bảo vệ. | Yêu cầu ngày 25 với key mới; biến thể ngày 26. | Ngày 25 trả S1/URL cũ, thêm receipt nhưng không tạo share/token mới. Ngày 26 trả ExistingShareActive, không thay expiry S1. | TDD-PROJ-003/Architecture<br>TDD-PROJ-003/Internal API<br>BR-PROJ-006/Then<br>ST-PROJ-060/System Test | Dùng lại một link khi còn hiệu lực. Kiểm hành vi ở biên unit; không dùng mock để kết luận transaction, SQL hoặc tích hợp thật đúng. | [Chưa xác định] | Draft |
+| UT-PROJ-038 | Tạo dự toán | CreateEstimateShareHandler — Dùng lại một link khi còn hiệu lực | Branch | FULL | P0 | Unit dự kiến trong TDD, chưa có implementation hoặc mã test. Dùng clock cố định và fake dependency có thể đọc lại đối số/trạng thái; không gọi dịch vụ thật. CurrentShare=S1 đang hiệu lực ngày 25; store/token protector giả trả cùng token đã bảo vệ. | Yêu cầu ngày 25 với key mới; biến thể ngày 26. | Ngày 25 (trùng ngày đang có) trả 200 với S1/URL cũ và requestedExpiryApplied=true, thêm receipt nhưng không tạo share/token mới. Ngày 26 trả 200 với S1/URL cũ, expiryDate vẫn 25, ExpiresAtUtc=2026-09-25T17:00:00Z và requestedExpiryApplied=false; thêm receipt trỏ S1, không thay expiry S1, không tạo share mới và không trả lỗi. | TDD-PROJ-003/Architecture<br>TDD-PROJ-003/Internal API<br>BR-PROJ-006/Then<br>ST-PROJ-060/System Test<br>ST-PROJ-070/System Test | Dùng lại một link khi còn hiệu lực, kể cả khi yêu cầu ngày khác. Kiểm hành vi ở biên unit; không dùng mock để kết luận transaction, SQL hoặc tích hợp thật đúng. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
@@ -50,3 +50,4 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - TDD-PROJ-003/Internal API
 - BR-PROJ-006/Then
 - ST-PROJ-060/System Test
+- ST-PROJ-070/System Test

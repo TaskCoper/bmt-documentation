@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-033 | Subscription / Entitlement | Generation admission policy (dự kiến trong TDD) | Branch | REGRESSION | P0 | Dự án thất bại; chưa có kết quả; kỳ hiện tại đủ quyền/lượt | Khách thử lại với operation key mới | Cho thử lại trên cùng dự án; giữ 1 lượt của kỳ hiện tại. | BR-SUB-017/Then<br>TDD-SUB-002/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. | [Chưa phân công] | Draft |
+| UT-SUB-033 | Subscription / Entitlement | Generation admission policy (dự kiến trong TDD) | Branch | REGRESSION | P0 | Bản dự toán có tác vụ trước thất bại, chưa có kết quả; kỳ hiện tại đủ quyền/lượt | Khách thử lại với operation key mới | Cho thử lại trên cùng bản dự toán; giữ 1 lượt của kỳ hiện tại. | BR-SUB-017/Then<br>TDD-SUB-002/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 

@@ -44,7 +44,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-PAY-053 | STORY-PAY-002 | EXC | REGRESSION | P1 | Nhân viên chỉ có quyền tra cứu, không có quyền sửa dự án, hủy hoặc khôi phục gói. | 1. Chuẩn bị dữ liệu và quyền theo Test data.<br>2. Nhân viên xem gói rồi thử gửi các yêu cầu sửa dự án, hủy và khôi phục.<br>3. Kiểm tra kết quả trả về và đọc lại dữ liệu gốc. | Nhân viên chỉ có quyền tra cứu, không có quyền sửa dự án, hủy hoặc khôi phục gói. Dữ liệu minh họa, không phải cấu hình bán thật. | Xem được nhưng tất cả yêu cầu ghi đều bị từ chối. Gói, dự án và lịch sử thao tác thành công không thay đổi. | STORY-PAY-002/AC-007<br>BR-PAY-005/Then | Quyền xem không cấp quyền sửa. Đặc tả chưa chạy. | [Chưa xác định] | Draft |
+| ST-PAY-053 | STORY-PAY-002 | EXC | REGRESSION | P1 | Nhân viên chỉ có quyền tra cứu, không có quyền đổi công trình, hủy hoặc khôi phục gói. | 1. Chuẩn bị dữ liệu và quyền theo Test data.<br>2. Nhân viên xem gói rồi thử gửi các yêu cầu đổi công trình, hủy và khôi phục.<br>3. Kiểm tra kết quả trả về và đọc lại dữ liệu gốc. | Nhân viên chỉ có quyền tra cứu, không có quyền đổi công trình, hủy hoặc khôi phục gói. Dữ liệu minh họa, không phải cấu hình bán thật. | Xem được nhưng tất cả yêu cầu ghi đều bị từ chối. Gói, công trình và lịch sử thao tác thành công không thay đổi. | STORY-PAY-002/AC-007<br>BR-PAY-005/Then | Quyền xem không cấp quyền sửa. Đặc tả chưa chạy. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

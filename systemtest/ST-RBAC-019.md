@@ -44,9 +44,11 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-RBAC-019 | STORY-RBAC-002 | ALT | REGRESSION | P1 | Người quản trị có đủ quyền user.manage và role.manage cho các thao tác quản lý tài khoản. | 1. Thực hiện lần lượt: tạo một tài khoản nhân viên, gán vai trò, thu hồi vai trò, khóa, mở khóa và buộc đăng xuất.<br>2. Thực hiện thêm một thao tác bị rào chắn quyền từ chối, ví dụ tự gán thêm vai trò cho chính mình.<br>3. Mở nhật ký thay đổi quyền và đọc các bản ghi vừa sinh ra. | Một tài khoản nhân viên dùng cho toàn bộ chuỗi thao tác. Dữ liệu minh họa. | Mỗi thao tác sinh một bản ghi nhật ký có người thao tác, loại thao tác, tài khoản bị tác động, thời điểm và nội dung thay đổi. Yêu cầu bị từ chối vì rào chắn quyền cũng có bản ghi nhật ký. | STORY-RBAC-002/AC-010<br>BR-RBAC-012/Then | Nhật ký phủ cả thao tác thành công lẫn thao tác bị từ chối. Đặc tả chưa chạy. | [Chưa xác định] | Draft |
+| ST-RBAC-019 | STORY-RBAC-002 | ALT | REGRESSION | P1 | Người quản trị có đủ quyền user.manage và role.manage cho các thao tác quản lý tài khoản. Nhân viên được tạo trong chuỗi thao tác đăng nhập được để đổi mật khẩu lần đầu. | 1. Tạo một tài khoản nhân viên.<br>2. Để nhân viên đó đăng nhập bằng mật khẩu được giao và đổi mật khẩu lần đầu.<br>3. Gán vai trò, thu hồi vai trò, khóa, mở khóa và buộc đăng xuất tài khoản đó.<br>4. Thực hiện thêm một thao tác bị rào chắn quyền từ chối, ví dụ tự gán thêm vai trò cho chính mình.<br>5. Mở nhật ký thay đổi quyền và đọc các bản ghi vừa sinh ra. | Một tài khoản nhân viên dùng cho toàn bộ chuỗi thao tác. Dữ liệu minh họa. | Mỗi thao tác sinh một bản ghi nhật ký có người thao tác, loại thao tác, tài khoản bị tác động, thời điểm và nội dung thay đổi. Việc tạo tài khoản được ghi là tạo tài khoản nhân viên (StaffCreated), không có bản ghi mời hay kích hoạt; việc đổi mật khẩu lần đầu có bản ghi riêng. Yêu cầu bị từ chối vì rào chắn quyền cũng có bản ghi nhật ký. | STORY-RBAC-002/AC-010<br>STORY-RBAC-002/Main Flow<br>BR-RBAC-012/When<br>BR-RBAC-012/Then | Nhật ký phủ cả thao tác thành công lẫn thao tác bị từ chối, gồm tạo tài khoản và đổi mật khẩu lần đầu theo BR-RBAC-012. Đặc tả chưa chạy. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-RBAC-002/AC-010
+- STORY-RBAC-002/Main Flow
+- BR-RBAC-012/When
 - BR-RBAC-012/Then

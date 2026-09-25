@@ -42,9 +42,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-043 | Subscription / Entitlement | OpenTemplateHandler (dự kiến trong TDD) | Error | REGRESSION | P0 | Key K đã dùng cho mẫu X | Key K cho mẫu Y | Trả IdempotencyConflict; không tăng Used hoặc trả nội dung X như Y. | BR-SUB-017/Then<br>TDD-SUB-002/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. | [Chưa phân công] | Draft |
+| UT-SUB-043 | Subscription / Entitlement | OpenTemplateHandler (dự kiến trong TDD) | Error | REGRESSION | P0 | Đã mở phiên bản VX của mẫu X, client gửi kèm header Idempotency-Key K; chưa có LibraryAccess cho phiên bản VY của mẫu Y; còn lượt | Mở lần đầu VY, client gửi lại cùng header K | Không trả IdempotencyConflict và không trả nội dung X. Mở VY bình thường với OperationKey lib-open:VY do server dựng và tính 1 lượt. | BR-SUB-017/Then<br>BR-LIB-003/Then<br>TDD-SUB-002/Architecture | Cập nhật 25/09/2026 theo TDD-LIB-002: OperationKey do server dựng theo phiên bản, header Idempotency-Key của client không quyết định lượt; thay ca cũ trùng key giữa hai mẫu. Mock không chứng minh transaction hoặc khóa PostgreSQL. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 
 - BR-SUB-017/Then
+- BR-LIB-003/Then
 - TDD-SUB-002/Architecture

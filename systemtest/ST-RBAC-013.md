@@ -44,9 +44,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-RBAC-013 | STORY-RBAC-002 | EXC | REGRESSION | P1 | Nhân viên A giữ vai trò "Nhân viên giám sát" và đang được phân công 2 dự án dựa trên vai trò đó. Người quản trị có quyền role.manage. | 1. Chuẩn bị nhân viên A, vai trò và 2 phân công theo Test data.<br>2. Gửi yêu cầu thu hồi vai trò Nhân viên giám sát khỏi A.<br>3. Đọc lại vai trò của A và hai bản ghi phân công. | Nhân viên A, vai trò Nhân viên giám sát, 2 dự án đang phụ trách. Dữ liệu minh họa. | Hệ thống từ chối và cho biết A còn 2 tài nguyên đang phụ trách. A vẫn giữ vai trò đó; cả 2 phân công vẫn còn hiệu lực và không bị hệ thống tự chuyển hoặc tự gỡ. | STORY-RBAC-002/AC-004<br>BR-RBAC-007/Then | Bắt chuyển giao trước khi thu hồi vai trò. Đặc tả chưa chạy. | [Chưa xác định] | Draft |
+| ST-RBAC-013 | STORY-RBAC-002 | EXC | REGRESSION | P1 | Nhân viên A chỉ có quyền supervision.complete từ vai trò "Nhân viên giám sát", không có quyền này từ vai trò nào khác, và đang phụ trách 2 công trình. Người quản trị có quyền role.manage. | 1. Chuẩn bị nhân viên A, vai trò và 2 phân công công trình theo Test data.<br>2. Gửi yêu cầu thu hồi vai trò Nhân viên giám sát khỏi A, qua giao diện rồi gọi thẳng API.<br>3. Đọc lại vai trò của A và hai bản ghi phân công. | Nhân viên A: vai trò Nhân viên giám sát là nguồn duy nhất của supervision.complete; 2 công trình đang phụ trách. Dữ liệu minh họa. | Hệ thống từ chối ở cả hai đường gửi và cho biết A còn 2 công trình đang phụ trách. A vẫn giữ vai trò đó; cả 2 phân công vẫn còn hiệu lực và không bị hệ thống tự chuyển hoặc tự gỡ. | STORY-RBAC-002/AC-004<br>STORY-RBAC-002/EXC-02<br>BR-RBAC-007/Then | Chỉ chặn khi vai trò bị thu hồi là nguồn duy nhất của supervision.complete mà nhân viên vẫn phụ trách công trình. Đặc tả chưa chạy. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-RBAC-002/AC-004
+- STORY-RBAC-002/EXC-02
 - BR-RBAC-007/Then

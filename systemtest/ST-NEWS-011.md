@@ -44,10 +44,11 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-NEWS-011 | STORY-NEWS-001 | EXC / NFR | REGRESSION | P1 | Môi trường thử có chức năng Tin tức và cloud thử nghiệm khi cần; A có quyền quản lý trừ tác nhân nêu riêng; được kiểm dữ liệu lưu. Mỗi biến thể dùng dữ liệu độc lập. | 1. Với mỗi tác nhân, gửi trực tiếp các thao tác tạo, sửa, công bố, ẩn và xóa.<br>2. Dùng người có quyền đọc lại dữ liệu sau từng yêu cầu. | Khách chưa đăng nhập và tài khoản không có quyền; bài đủ dữ liệu. Dữ liệu minh họa, không phải mặc định sản phẩm. | Tất cả thao tác bị từ chối tại backend; không tạo hoặc đổi bài. | STORY-NEWS-001/AC-008<br>STORY-NEWS-001/EXC-01<br>BR-NEWS-001/Then | Bảo vệ thao tác quản trị bài. Đặc tả chưa thực thi; API và fixture cụ thể bổ sung sau TDD. | [Chưa xác định] | Draft |
+| ST-NEWS-011 | STORY-NEWS-001 | EXC / NFR | REGRESSION | P1 | Môi trường thử có chức năng Tin tức và cloud thử nghiệm khi cần; A có quyền quản lý trừ tác nhân nêu riêng; được kiểm dữ liệu lưu. Mỗi biến thể dùng dữ liệu độc lập. | 1. Với mỗi tác nhân, gửi trực tiếp các thao tác tạo, sửa, công bố, ẩn và xóa.<br>2. Dùng người có quyền đọc lại dữ liệu sau từng yêu cầu.<br>3. A thực hiện một thao tác hợp lệ làm đối chứng. | Khách chưa đăng nhập; nhân viên B không có news.manage; bài đủ dữ liệu. A thuộc vai trò tùy chỉnh (không phải Admin) được cấp news.manage. Dữ liệu minh họa, không phải mặc định sản phẩm. | Thao tác của khách và B bị từ chối tại backend (401 khi chưa đăng nhập, 403 khi thiếu quyền); không tạo hoặc đổi bài. A thực hiện được vì có news.manage; quyền được kiểm theo mã quyền, không theo tên vai trò Admin. | STORY-NEWS-001/AC-008<br>STORY-NEWS-001/EXC-01<br>BR-NEWS-001/Then<br>BR-RBAC-011/Then | Bảo vệ thao tác quản trị bài. Đặc tả chưa thực thi; API và fixture cụ thể bổ sung sau TDD. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-NEWS-001/AC-008
 - STORY-NEWS-001/EXC-01
 - BR-NEWS-001/Then
+- BR-RBAC-011/Then

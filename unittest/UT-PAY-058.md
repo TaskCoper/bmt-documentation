@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-058 | Lifecycle | PackageLifecyclePolicy.Restore (dự kiến) | Happy | REGRESSION | P1 | Giám sát từng gán đúng hạn, nay quá một năm, project trống. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Restore đúng quyền/lý do. | Assigned cùng project và quyền lợi cũ; không tính lại deadline. | STORY-SUB-005/AC-007<br>TDD-SUB-005/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
+| UT-PAY-058 | Lifecycle | PackageLifecyclePolicy.Restore (dự kiến) | Happy | REGRESSION | P1 | Giám sát từng gán đúng hạn, nay quá một năm, công trình trống. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Restore đúng quyền/lý do. | Assigned cùng công trình và quyền lợi cũ; không tính lại deadline. | STORY-SUB-005/AC-007<br>TDD-SUB-005/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

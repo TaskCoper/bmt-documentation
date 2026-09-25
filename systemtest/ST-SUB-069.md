@@ -41,8 +41,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 **Không thuộc nghiệm thu hiện tại:** ca cũ kiểm tra AI theo quyền 3D hoặc giới hạn danh mục đúng ba quyền. Quyết định mới chỉ cấu hình/hiển thị 3D; xem ST-SUB-107. Giữ mã để tra lịch sử.
 
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |

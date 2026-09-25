@@ -39,17 +39,16 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## System Test
 
-**Giới hạn phạm vi:** tiêu chí trả đủ bộ kết quả cùng lúc và tính một lượt vẫn giữ. Phần chọn đầu ra 3D theo quyền gói chưa triển khai; không dùng phần đó để nghiệm thu đợt này theo STORY-SUB-002/AC-025.
-
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SUB-070 | STORY-SUB-001 | Main | REGRESSION | P1 | Tài khoản có kỳ thiết kế còn hiệu lực, có quyền tạo mới và 3D chân thực; còn 2 lượt tạo; dự án chưa có kết quả thành công. Chuẩn bị tác vụ trả đủ bộ kết quả hợp lệ gồm 3D, trong thời gian chờ cho phép. | 1. Bấm Gen AI một lần.<br>2. Khi tác vụ còn xử lý, kiểm tra lượt giữ và kết quả khách được xem.<br>3. Cho tác vụ hoàn tất đủ bộ kết quả, lưu thành công và có thể mở xem.<br>4. Mở kết quả, kiểm tra các phần được trả cùng lúc và số lượt. | Một yêu cầu tạo thiết kế; 2 lượt ban đầu. Phối cảnh 3D nằm trong cùng bộ kết quả, không có yêu cầu tạo 3D riêng. Danh sách các phần đầu ra còn lại theo đặc tả tính năng khi được chốt. | Khi xử lý: giữ 1 lượt, chưa tính đã dùng, không trả một phần như kết quả thành công. Khi đủ kết quả: trả cùng lúc các phần gồm 3D, chuyển đúng 1 lượt giữ thành đã dùng, còn 1 lượt tạo sẵn dùng. Không yêu cầu bấm tạo 3D riêng hoặc tính thêm lượt 3D; lượt tra cứu không đổi. | STORY-SUB-001/AC-040<br>BR-SUB-003/Then<br>BR-SUB-017/Then | Kiểm tra một lần tạo và một bộ kết quả, tránh tách 3D thành tác vụ tính lượt riêng. Đặc tả nháp, chưa chạy; dữ liệu đầu ra đầy đủ phụ thuộc đặc tả tính năng. | [Chưa xác định] | Draft |
+| ST-SUB-070 | STORY-SUB-001 | Main | REGRESSION | P1 | Tài khoản có kỳ thiết kế còn hiệu lực và quyền tạo thiết kế; còn 2 lượt tạo; dự án chưa có kết quả thành công. Chuẩn bị tác vụ trả đủ bộ kết quả hợp lệ trong thời gian chờ cho phép. | 1. Bấm Gen AI một lần.<br>2. Khi tác vụ còn xử lý, kiểm tra lượt giữ và kết quả khách được xem.<br>3. Cho tác vụ hoàn tất đủ bộ kết quả, lưu thành công và có thể mở xem.<br>4. Mở kết quả, kiểm tra các phần được trả cùng lúc và số lượt. | Một yêu cầu tạo thiết kế; 2 lượt ban đầu. Không thiết lập hay kiểm tra quyền 3D của gói. Nếu bộ kết quả có phối cảnh 3D thì phần này nằm trong cùng bộ kết quả, không có yêu cầu tạo 3D riêng. Danh sách các phần đầu ra theo đặc tả tính năng khi được chốt. | Khi xử lý: giữ 1 lượt, chưa tính đã dùng, không trả một phần như kết quả thành công. Khi đủ kết quả: trả cùng lúc toàn bộ các phần, chuyển đúng 1 lượt giữ thành đã dùng, còn 1 lượt tạo sẵn dùng. Không có thao tác tạo 3D riêng và không tính thêm lượt cho phần 3D nếu có; lượt tra cứu không đổi. | STORY-SUB-001/AC-040<br>BR-SUB-003/Then<br>BR-SUB-017/Then<br>BR-SUB-005/Except | Cập nhật 25/09/2026 theo AC-040 đã sửa: đợt này không kiểm tra quyền 3D khi Gen AI (STORY-SUB-002/AC-025). Kiểm tra một lần tạo và một bộ kết quả. Đặc tả nháp, chưa chạy; dữ liệu đầu ra đầy đủ phụ thuộc đặc tả tính năng. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-SUB-001/AC-040
 - BR-SUB-003/Then
 - BR-SUB-017/Then
+- BR-SUB-005/Except

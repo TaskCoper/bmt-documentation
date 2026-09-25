@@ -44,7 +44,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-PAY-024 | STORY-SUB-004 | Main | REGRESSION | P1 | Khách có gói giám sát đã cấp 01/10/2026, chưa gán; dự án A thuộc khách và chưa có gói. | 1. Chuẩn bị tài khoản, gói/đơn và mốc thời gian như Test data.<br>2. Ngày 01/11/2026 khách gán gói cho A.<br>3. Đọc lại đơn/gói và giao diện liên quan; kiểm tra cả dữ liệu không được thay đổi. | Khách có gói giám sát đã cấp 01/10/2026, chưa gán; dự án A thuộc khách và chưa có gói. Đây là dữ liệu thử, không phải giá bán hoặc lịch vận hành đã chốt. | Gán thành công, gói được coi là đã sử dụng. Không tạo đơn hoặc yêu cầu thanh toán lại. | STORY-SUB-004/AC-001<br>BR-SUB-022/Then | Gán lần đầu không thu tiền lại. Đặc tả chưa thực thi. | [Chưa xác định] | Draft |
+| ST-PAY-024 | STORY-SUB-004 | Main | REGRESSION | P1 | Khách có gói giám sát đã cấp 01/10/2026, chưa gán; công trình A thuộc khách và chưa có gói. | 1. Chuẩn bị tài khoản, gói/đơn và mốc thời gian như Test data.<br>2. Ngày 01/11/2026 khách gán gói cho A.<br>3. Đọc lại đơn/gói và giao diện liên quan; kiểm tra cả dữ liệu không được thay đổi. | Khách có gói giám sát đã cấp 01/10/2026, chưa gán; công trình A thuộc khách và chưa có gói. Đây là dữ liệu thử, không phải giá bán hoặc lịch vận hành đã chốt. | Gán thành công, gói được coi là đã sử dụng. Không tạo đơn hoặc yêu cầu thanh toán lại. | STORY-SUB-004/AC-001<br>BR-SUB-022/Then | Gán lần đầu không thu tiền lại. Đặc tả chưa thực thi. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

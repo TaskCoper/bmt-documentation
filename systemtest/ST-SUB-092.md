@@ -41,8 +41,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 **Đã rút khỏi nghiệm thu hiện tại: đặc tả lịch sử trước BR-SUB-021. Nội dung bên dưới chỉ để tra cứu; ST-SUB-100/101 kiểm tra mô hình đổi ngay. Không tái sử dụng mã này.**
 
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |

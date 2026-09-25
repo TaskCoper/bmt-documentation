@@ -39,15 +39,16 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## System Test
 
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SUB-072 | STORY-SUB-001 | Main | REGRESSION | P1 | Hai tài khoản thuộc hai gói khác tên/giá, kỳ còn hiệu lực, có quyền tạo thiết kế và đủ lượt. Chuẩn bị tiêu chí mức chi tiết bố trí công năng từ đặc tả chung khi được chốt. | 1. Tạo dự án mới ở mỗi tài khoản với đầu vào tương đương.<br>2. Mỗi tài khoản bấm Gen AI và nhận đủ bộ kết quả thành công.<br>3. Đối chiếu phần bố trí công năng theo cùng tiêu chí mức chi tiết.<br>4. Kiểm tra cách trả kết quả, tính lượt và quyền 3D. | Gói A/B có giá VNĐ dương khác nhau; A không có quyền phối cảnh 3D chân thực, B có quyền này. Cả hai đều có quyền tạo thiết kế và hạn mức hợp lệ. Không lấy mức bố trí cơ bản/2D và 3D/nâng cao trên trang làm tiêu chí. | Bố trí công năng ở cả hai gói đáp ứng cùng mức chi tiết, không bị giảm vì tên/giá gói; không yêu cầu hai phương án giống hệt nhau. Kết quả mỗi yêu cầu trả cùng lúc và tính 1 lượt tạo thiết kế. Việc dùng chung mức chi tiết bố trí không tự cấp quyền phối cảnh 3D chân thực cho A. | STORY-SUB-001/AC-042<br>BR-SUB-008/Then<br>BR-SUB-003/Then | Kiểm tra bố trí công năng không phân mức và không lẫn với quyền tạo ảnh 3D. Đặc tả nháp, chưa chạy; tiêu chí nội dung chờ đặc tả bố trí chung. | [Chưa xác định] | Draft |
+| ST-SUB-072 | STORY-SUB-001 | Main | REGRESSION | P1 | Hai tài khoản thuộc hai gói khác tên/giá, kỳ còn hiệu lực, có quyền tạo thiết kế và đủ lượt. Chuẩn bị tiêu chí mức chi tiết bố trí công năng từ đặc tả chung khi được chốt. | 1. Tạo dự án mới ở mỗi tài khoản với đầu vào tương đương.<br>2. Mỗi tài khoản bấm Gen AI và nhận đủ bộ kết quả thành công.<br>3. Đối chiếu phần bố trí công năng theo cùng tiêu chí mức chi tiết.<br>4. Kiểm tra cách trả kết quả và tính lượt. | Gói A/B có giá VNĐ dương khác nhau; A tắt 3D, B bật 3D trong cấu hình gói. Cả hai đều có quyền tạo thiết kế và hạn mức hợp lệ. Không lấy mức bố trí cơ bản/2D và 3D/nâng cao trên trang làm tiêu chí. | Bố trí công năng ở cả hai gói đáp ứng cùng mức chi tiết, không bị giảm vì tên/giá gói; không yêu cầu hai phương án giống hệt nhau. Kết quả mỗi yêu cầu trả cùng lúc và tính 1 lượt tạo thiết kế. Không kiểm tra quyền phối cảnh 3D chân thực khi Gen AI; cấu hình 3D khác nhau không làm yêu cầu nào bị từ chối. | STORY-SUB-001/AC-042<br>BR-SUB-008/Then<br>BR-SUB-003/Then<br>BR-SUB-005/Except | Kiểm tra bố trí công năng không phân mức theo gói. Cập nhật 25/09/2026 theo AC-042 đã sửa: đợt này không kiểm tra quyền 3D khi Gen AI. Đặc tả nháp, chưa chạy; tiêu chí nội dung chờ đặc tả bố trí chung. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-SUB-001/AC-042
 - BR-SUB-008/Then
 - BR-SUB-003/Then
+- BR-SUB-005/Except

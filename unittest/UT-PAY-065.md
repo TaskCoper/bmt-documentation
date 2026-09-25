@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-065 | AdminRead | CommerceReadAuthorization (dự kiến) | Error | REGRESSION | P1 | Chưa login, reset-password session, nhân viên disabled hoặc không commerce.read. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Query quản trị. | Từ chối trước đọc dữ liệu trong từng fixture; không suy role khácUser là nhân viên. | STORY-PAY-002/AC-003<br>TDD-PAY-002/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
+| UT-PAY-065 | AdminRead | CommerceReadAuthorization (dự kiến) | Error | REGRESSION | P1 | Các fixture: chưa login; phiên reset-password; token có dấu phiên lệch vì tài khoản đã bị khóa; token hợp lệ nhưng claim perm không có commerce.read. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Query quản trị. | Từ chối trước khi đọc dữ liệu trong từng fixture. Chưa login và dấu phiên lệch trả 401; thiếu commerce.read trả 403; phiên reset-password không dùng được cho API này. Không suy quyền từ loại tài khoản hay tên vai trò. | STORY-PAY-002/AC-003<br>TDD-PAY-002/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

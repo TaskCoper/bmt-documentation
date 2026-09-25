@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-050 | Assignment | AssignmentAuthorizer.IsAssignedAsync (dự kiến) | Branch | REGRESSION | P0 | Unit chưa triển khai; nhân viên B không có dòng phân công nào đang hiệu lực, và không phụ trách khách hàng sở hữu dự án P. | staffUserId là B, resourceType là Project, resourceId là P. | Trả về không đạt. Handler gọi tới sẽ từ chối với 403 dù B có quyền supervision.complete. | BR-RBAC-010/Then<br>STORY-RBAC-003/AC-002 | Có quyền nhưng thiếu phân công thì vẫn không sửa được; đây là cốt lõi của sửa hẹp. | [Chưa xác định] | Draft |
+| UT-RBAC-050 | Assignment | AssignmentAuthorizer.IsDirectlyAssignedAsync | Branch | REGRESSION | P0 | Hàm đã có; chuyển sang loại ConstructionSite là thay đổi dự kiến theo TDD-RBAC-003. Nhân viên B không có dòng phân công đang hiệu lực nào trên công trình P và không giữ vai trò admin. | staffUserId là B, resourceType là ConstructionSite, resourceId là P. | Trả về không đạt. Handler gọi tới sẽ từ chối với 403 dù B có quyền supervision.complete. | BR-RBAC-010/Then<br>STORY-RBAC-003/AC-002 | Có quyền nhưng thiếu phân công thì vẫn không sửa được; đây là cốt lõi của sửa hẹp. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

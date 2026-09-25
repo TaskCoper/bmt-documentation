@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-056 | Lifecycle | PackageLifecyclePolicy.Restore (dự kiến) | Error | REGRESSION | P1 | Gói bị hủy còn hạn; account hoặc project có gói khác hiệu lực. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Restore. | AnotherPackageActive; không hủy gói khác để nhường chỗ. | STORY-SUB-005/AC-008<br>STORY-SUB-005/AC-009<br>TDD-SUB-005/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
+| UT-PAY-056 | Lifecycle | PackageLifecyclePolicy.Restore (dự kiến) | Error | REGRESSION | P1 | Gói bị hủy còn hạn; account hoặc công trình có gói khác hiệu lực. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Restore. | AnotherPackageActive; không hủy gói khác để nhường chỗ. | STORY-SUB-005/AC-008<br>STORY-SUB-005/AC-009<br>TDD-SUB-005/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

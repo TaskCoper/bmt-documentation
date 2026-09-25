@@ -40,12 +40,12 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## System Test
 
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SUB-021 | STORY-SUB-003 | EXC | REGRESSION | P1 | Tài khoản có công trình A/B; gói giám sát còn hiệu lực chỉ gắn với A. | 1. Ghi nhận gói gắn với A và dữ liệu gói hiện tại.<br>2. Kiểm tra dùng quyền giám sát từ gói này cho B.<br>3. Kiểm tra kết quả, dữ liệu gói và công trình được gắn. | A/B là hai dự án thử cùng tài khoản; không thiết lập số dư lượt giám sát. | Yêu cầu cho B bị từ chối vì sai công trình. Dữ liệu gói A giữ nguyên; gói không chuyển sang B. | STORY-SUB-003/AC-001<br>BR-SUB-009/Statement | Ngăn chia quyền giám sát sang công trình khác cùng tài khoản. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
+| ST-SUB-021 | STORY-SUB-003 | EXC | REGRESSION | P1 | Tài khoản có công trình A/B; gói giám sát còn hiệu lực chỉ gắn với A. | 1. Ghi nhận gói gắn với A và dữ liệu gói hiện tại.<br>2. Kiểm tra dùng quyền giám sát từ gói này cho B.<br>3. Kiểm tra kết quả, dữ liệu gói và công trình được gắn. | A/B là hai công trình thử cùng tài khoản; không thiết lập số dư lượt giám sát. | Yêu cầu cho B bị từ chối vì sai công trình. Dữ liệu gói A giữ nguyên; gói không chuyển sang B. | STORY-SUB-003/AC-001<br>BR-SUB-009/Statement | Ngăn chia quyền giám sát sang công trình khác cùng tài khoản. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

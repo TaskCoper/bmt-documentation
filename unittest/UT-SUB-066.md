@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-066 | Subscription / Supervision | CompleteSupervisionGrantCommandHandler (dự kiến trong TDD-SUB-006) | Error | REGRESSION | P0 | Nhân viên đã hoàn thành G1 với key k1 khi còn phân công PR1; sau đó IsDirectlyAssignedAsync trả false. | Gửi lại CompleteSupervisionGrantCommand(G1, 2, k1) | Ném NotPermissionException với MessageCode=ProjectNotAssignedToActor; không trả kết quả đã lưu. | STORY-SUB-003/AC-008<br>TDD-SUB-006/Architecture | Kiểm quyền chạy trước replay theo TDD-SUB-005. | [Chưa phân công] | Draft |
+| UT-SUB-066 | Subscription / Supervision | CompleteSupervisionGrantCommandHandler (dự kiến trong TDD-SUB-006) | Error | REGRESSION | P0 | Nhân viên đã hoàn thành G1 với key k1 khi còn phân công CS1; sau đó IsDirectlyAssignedAsync trả false. | Gửi lại CompleteSupervisionGrantCommand(G1, 2, k1) | Ném NotPermissionException với MessageCode=ConstructionSiteNotAssignedToActor; không trả kết quả đã lưu. | STORY-SUB-003/AC-008<br>TDD-SUB-006/Architecture | Kiểm quyền chạy trước replay theo TDD-SUB-005. Cập nhật 25/09/2026: dùng tên công trình dự kiến theo TDD-SUB-004/006 (code hiện còn ProjectId). | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 

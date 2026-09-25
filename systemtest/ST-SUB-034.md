@@ -40,14 +40,15 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## System Test
 
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SUB-034 | STORY-SUB-002 | ALT / Integration boundary | REGRESSION | P1 | Có gói đang hiển thị để đăng ký; Admin có quyền quản trị. Chuẩn bị dữ liệu khách/dự án hợp lệ cho yêu cầu cấp mới; không có yêu cầu chuyển đã ghi nhận trước lúc ngừng bán. | 1. Admin ngừng bán gói.<br>2. Kiểm tra danh sách đăng ký không còn gói đó.<br>3. Gửi yêu cầu cấp mới bằng mã gói qua điểm tích hợp sẽ thiết kế.<br>4. Kiểm tra yêu cầu bị từ chối và không có gói/quyền lợi mới được tạo.<br>5. Chạy riêng với gói thiết kế và giám sát. | Dữ liệu thử; không chạy thanh toán hoặc gia hạn. Không tạo số dư lượt giám sát. API và cách thiết lập sẽ bổ sung trong TDD. | Ẩn gói và chặn cấp mới cho cả hai loại, kể cả gửi yêu cầu trực tiếp; không tạo quyền lợi mới. | STORY-SUB-002/AC-005<br>BR-SUB-013/Statement | Kiểm tra ngừng bán độc lập với vòng đời gói đã cấp. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
+| ST-SUB-034 | STORY-SUB-002 | ALT / Integration boundary | REGRESSION | P1 | Có một gói thiết kế và một gói giám sát đang hiển thị để đăng ký; người thao tác có quyền cấu hình gói (plan.manage). Với mỗi gói, khách đã tạo một đơn hợp lệ trước lúc ngừng bán nhưng chưa thanh toán. | 1. Ngừng bán gói.<br>2. Kiểm tra danh sách đăng ký không còn gói đó.<br>3. Khách yêu cầu tạo đơn mới cho gói qua giao diện, rồi gửi trực tiếp bằng mã gói.<br>4. Kiểm tra yêu cầu bị từ chối, không có đơn, gói hay quyền lợi mới được tạo.<br>5. Thanh toán hợp lệ đơn đã tạo trước lúc ngừng bán và kiểm tra gói được cấp.<br>6. Chạy riêng với gói thiết kế và gói giám sát. | Dữ liệu thử; giá, quyền lợi hoặc mô tả dịch vụ đã lưu trong đơn cũ là dữ liệu minh họa. Không tạo số dư lượt giám sát. Luồng tạo đơn và thanh toán theo STORY-PAY-001. | Gói bị ẩn khỏi danh sách đăng ký. Yêu cầu tạo đơn mới bị từ chối với cả hai loại gói, kể cả gửi trực tiếp; không cấp quyền lợi hoặc tạo gói mới từ yêu cầu bị từ chối. Đơn tạo trước lúc ngừng bán vẫn được hoàn tất và cấp gói theo giá, quyền lợi hoặc mô tả đã lưu trong đơn. | STORY-SUB-002/AC-005<br>STORY-SUB-002/ALT-02<br>BR-SUB-013/Then | Cập nhật 25/09/2026: bỏ nhánh yêu cầu chuyển đã ghi nhận; chỉ đơn tạo trước lúc ngừng bán còn được hoàn tất. Kiểm tra ngừng bán độc lập với vòng đời gói đã cấp. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-SUB-002/AC-005
-- BR-SUB-013/Statement
+- STORY-SUB-002/ALT-02
+- BR-SUB-013/Then

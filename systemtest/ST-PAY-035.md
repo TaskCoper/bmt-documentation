@@ -44,7 +44,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-PAY-035 | STORY-SUB-005 | Main | REGRESSION | P1 | Nhân viên có quyền; khách có gói giám sát chưa gán còn hạn. | 1. Chuẩn bị tài khoản, gói/đơn và mốc thời gian như Test data.<br>2. Nhân viên hủy và nhập lý do.<br>3. Đọc lại đơn/gói và giao diện liên quan; kiểm tra cả dữ liệu không được thay đổi. | Nhân viên có quyền; khách có gói giám sát chưa gán còn hạn. Đây là dữ liệu thử, không phải giá bán hoặc lịch vận hành đã chốt. | Gói bị hủy, không được dùng để gán dự án. Giữ lịch sử; tiền xử lý ngoài hệ thống. | STORY-SUB-005/AC-002<br>BR-SUB-024/Then | Hủy giám sát chưa gán. Đặc tả chưa thực thi. | [Chưa xác định] | Draft |
+| ST-PAY-035 | STORY-SUB-005 | Main | REGRESSION | P1 | Nhân viên có quyền; khách có gói giám sát chưa gán còn hạn. | 1. Chuẩn bị tài khoản, gói/đơn và mốc thời gian như Test data.<br>2. Nhân viên hủy và nhập lý do.<br>3. Đọc lại đơn/gói và giao diện liên quan; kiểm tra cả dữ liệu không được thay đổi. | Nhân viên có quyền; khách có gói giám sát chưa gán còn hạn. Đây là dữ liệu thử, không phải giá bán hoặc lịch vận hành đã chốt. | Gói bị hủy, không được dùng để gán công trình. Giữ lịch sử; tiền xử lý ngoài hệ thống. | STORY-SUB-005/AC-002<br>BR-SUB-024/Then | Hủy giám sát chưa gán. Đặc tả chưa thực thi. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

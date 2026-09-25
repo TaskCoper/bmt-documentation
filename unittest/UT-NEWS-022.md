@@ -42,11 +42,12 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-NEWS-022 | Tin tức | Policy news.manage dự kiến — dùng chung quyền (dự kiến) | Branch | REGRESSION | P1 | Session/permission reader fake trả actor đủ quyền, thiếu quyền, locked hoặc phiên không hợp lệ. | Đánh giá quyền quản trị bài và danh mục cho từng actor; actor đủ quyền không có Assignment. | Actor hợp lệ có news.manage được phép ở cả hai phạm vi dù không Assignment; actor thiếu quyền/locked/phiên lỗi bị từ chối. Wiring route thực phải kiểm integration. | TDD-NEWS-001/Architecture<br>BR-NEWS-001/Then<br>STORY-NEWS-001/AC-008<br>STORY-NEWS-002/AC-007 | Theo thiết kế đã chốt; đặc tả chưa thực thi, không phải mã test. | [Chưa xác định] | Draft |
+| UT-NEWS-022 | Tin tức | Policy news.manage dự kiến — dùng chung quyền (dự kiến) | Branch | REGRESSION | P1 | Session/permission reader fake trả actor đủ quyền, thiếu quyền, locked hoặc phiên không hợp lệ. Actor đủ quyền thuộc vai trò tùy chỉnh (không phải Admin) có news.manage; một actor khác thuộc vai trò không có news.manage. | Đánh giá quyền quản trị bài và danh mục cho từng actor; actor đủ quyền không có Assignment. | Actor có news.manage được phép ở cả hai phạm vi dù không Assignment và không thuộc vai trò Admin; policy chỉ đọc tập mã quyền đã gộp, không đọc tên vai trò. Actor thiếu quyền, locked hoặc phiên lỗi bị từ chối. Wiring route thực phải kiểm integration. | TDD-NEWS-001/Architecture<br>BR-NEWS-001/Then<br>BR-RBAC-001/Then<br>STORY-NEWS-001/AC-008<br>STORY-NEWS-002/AC-007 | Theo thiết kế đã chốt; đặc tả chưa thực thi, không phải mã test. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - TDD-NEWS-001/Architecture
 - BR-NEWS-001/Then
+- BR-RBAC-001/Then
 - STORY-NEWS-001/AC-008
 - STORY-NEWS-002/AC-007

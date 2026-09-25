@@ -37,6 +37,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Unit Test
 
+**Đã rút khỏi nghiệm thu hiện tại: ca kiểm SupervisionGrantPolicy của TDD-SUB-003 với trạng thái InProgress và gắn cố định công trình lúc cấp. TDD-SUB-003 đã bị thay bởi TDD-SUB-004/005/006; gói giám sát nay mua trước, gán công trình sau. Nội dung bên dưới chỉ để tra cứu; gán công trình kiểm tra ở UT-SUB-069, hoàn thành ở UT-SUB-051. Không tái sử dụng mã này.**
+
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
 

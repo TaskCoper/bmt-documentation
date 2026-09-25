@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-034 | Subscription / Entitlement | Generation admission policy (dự kiến trong TDD) | Error | REGRESSION | P0 | Dự án đã có kết quả thành công | Yêu cầu tạo phương án mới cùng dự án | Từ chối ProjectAlreadyGenerated; không giữ thêm lượt. | BR-SUB-017/Then<br>TDD-SUB-002/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. | [Chưa phân công] | Draft |
+| UT-SUB-034 | Subscription / Entitlement | Generation admission policy (dự kiến trong TDD) | Error | REGRESSION | P0 | Bản dự toán đã có kết quả thành công | Yêu cầu tạo phương án mới trên cùng bản dự toán | Từ chối EstimateAlreadyGenerated; không giữ thêm lượt. | BR-SUB-017/Then<br>TDD-SUB-002/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. Cập nhật 25/09/2026: mã lỗi đổi từ ProjectAlreadyGenerated theo TDD-SUB-002. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 

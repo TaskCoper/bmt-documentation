@@ -42,11 +42,11 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-061 | Subscription / Supervision | AssignmentAuthorizer.IsDirectlyAssignedAsync (dự kiến trong TDD-SUB-006) | Branch | REGRESSION | P0 | Staff S không có vai trò admin. Fake IAssignmentRowLocker.LockActiveForShareAsync trả false cho (S, Project, PR1) vì S chỉ có phân công Customer K sở hữu PR1. IResourceHierarchyReader là mock ghi lại lời gọi. | IsDirectlyAssignedAsync(S, Project, PR1, now) | Trả false. IResourceHierarchyReader không được gọi lần nào. | STORY-SUB-003/AC-016<br>BR-RBAC-013/Except<br>BR-SUB-011/Then<br>TDD-SUB-006/Architecture | Phân công mức khách hàng không có hiệu lực cho hoàn thành/mở lại; hàm không đi nhánh kế thừa. | [Chưa phân công] | Draft |
+| UT-SUB-061 | Subscription / Supervision | AssignmentAuthorizer.IsDirectlyAssignedAsync (dự kiến trong TDD-SUB-006) | Branch | REGRESSION | P0 | Staff S không giữ vai trò admin. S có phân công đang hiệu lực trên CS2, một công trình khác của cùng khách U1, và không có phân công trên CS1. Fake IAssignmentRowLocker.LockActiveForShareAsync trả false cho (S, ConstructionSite, CS1). IResourceHierarchyReader là mock ghi lại lời gọi. | IsDirectlyAssignedAsync(S, ConstructionSite, CS1, now) | Trả false. LockActiveForShareAsync được gọi với đúng (S, ConstructionSite, CS1); IResourceHierarchyReader không được gọi lần nào. | STORY-SUB-003/AC-008<br>BR-RBAC-013/Then<br>BR-SUB-011/Then<br>TDD-SUB-006/Architecture | Cập nhật 25/09/2026: không còn phân công mức khách hàng theo BR-RBAC-013; ca cũ dẫn STORY-SUB-003/AC-016 đã rút. Phân công chỉ khớp đúng công trình của gói; phân công ở công trình khác của cùng khách không có hiệu lực. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 
-- STORY-SUB-003/AC-016
-- BR-RBAC-013/Except
+- STORY-SUB-003/AC-008
+- BR-RBAC-013/Then
 - BR-SUB-011/Then
 - TDD-SUB-006/Architecture

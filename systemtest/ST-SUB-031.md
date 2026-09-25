@@ -40,12 +40,12 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## System Test
 
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SUB-031 | STORY-SUB-003 | EXC | REGRESSION | P1 | Gói G1 đã hoàn thành trên dự án A. Có khách hàng sở hữu A, nhân viên có quyền supervision.complete nhưng chỉ được phân công dự án B, và Admin không có quyền supervision.complete. | 1. Với từng tài khoản, gửi trực tiếp yêu cầu mở lại G1 kèm lý do có nội dung.<br>2. Kiểm tra bị từ chối và trạng thái không đổi. | Dữ liệu thử; không tạo dữ liệu lịch hoặc số dư lượt giám sát. API cụ thể bổ sung trong TDD. | Cả ba tài khoản đều không mở lại được G1 dù có lý do; G1 vẫn đã hoàn thành. | STORY-SUB-003/AC-010<br>BR-SUB-012/Then | Cập nhật 24/09/2026 theo vòng đời mới của gói giám sát. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
+| ST-SUB-031 | STORY-SUB-003 | EXC | REGRESSION | P1 | Gói G1 đã hoàn thành trên công trình A. Có khách hàng sở hữu A và nhân viên có quyền supervision.complete nhưng chỉ được phân công công trình B. | 1. Với từng tài khoản, gửi trực tiếp yêu cầu mở lại G1 kèm lý do có nội dung.<br>2. Kiểm tra bị từ chối và trạng thái không đổi. | Dữ liệu thử; không tạo dữ liệu lịch hoặc số dư lượt giám sát. API cụ thể bổ sung trong TDD. | Cả hai tài khoản đều không mở lại được G1 dù có lý do; G1 vẫn đã hoàn thành, không có dòng lịch sử mới. | STORY-SUB-003/AC-010<br>BR-SUB-012/Then | Cập nhật 25/09/2026: bỏ ca Admin không có quyền supervision.complete cho khớp AC-008 đã sửa, vì vai trò hệ thống Admin không bị đổi quyền theo BR-RBAC-002; gói giám sát gắn với công trình. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

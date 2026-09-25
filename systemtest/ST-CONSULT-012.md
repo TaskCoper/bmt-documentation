@@ -39,14 +39,15 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## System Test
 
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-CONSULT-012 | STORY-CONSULT-002 | Main | REGRESSION | P1 | Môi trường thử đã triển khai tính năng, có frontend, API, database và tài khoản thử với quyền tương ứng. Có thể đọc dữ liệu đã lưu; chỉ dùng dữ liệu và email thử. | 1. Gửi yêu cầu bằng khách chưa mua gói<br>2. Gửi bằng khách có gói và ghi nhận số lượt trước/sau<br>3. Kiểm tra yêu cầu và dữ liệu gói | C1 không có gói; C2 có gói với số lượt thử đã biết; dữ liệu minh họa, không phải cấu hình sản phẩm. | Yêu cầu vẫn được tiếp nhận miễn phí. Không kiểm tra hoặc trừ lượt gói dịch vụ. Cả hai được gửi miễn phí, không tạo thanh toán và không trừ lượt. | STORY-CONSULT-002/AC-002<br>BR-CONSULT-002/Then | Đặc tả chưa thực thi; đối chiếu hành vi với dữ liệu thực lưu và nguồn đã chốt. | [Chưa xác định] | Draft |
+| ST-CONSULT-012 | STORY-CONSULT-002 | Main | REGRESSION | P1 | Môi trường thử đã triển khai tính năng, có frontend, API, database và tài khoản thử với quyền tương ứng. Có thể đọc dữ liệu đã lưu; chỉ dùng dữ liệu và email thử. | 1. Gửi yêu cầu bằng khách chưa mua gói<br>2. Gửi bằng khách có gói và ghi nhận số lượt trước/sau<br>3. Kiểm tra yêu cầu và dữ liệu gói | C1 không có gói; C2 có gói với số lượt thử đã biết; dữ liệu minh họa, không phải cấu hình sản phẩm. | Yêu cầu vẫn được tiếp nhận miễn phí. Không kiểm tra hoặc trừ lượt gói dịch vụ. Cả hai được gửi miễn phí, không tạo thanh toán, không trừ lượt và không được tính vào cam kết tư vấn của gói; dữ liệu gói giữ nguyên. | STORY-CONSULT-002/AC-002<br>BR-CONSULT-002/Then<br>BR-CONSULT-002/Notes | Đặc tả chưa thực thi; đối chiếu hành vi với dữ liệu thực lưu và nguồn đã chốt. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-CONSULT-002/AC-002
 - BR-CONSULT-002/Then
+- BR-CONSULT-002/Notes

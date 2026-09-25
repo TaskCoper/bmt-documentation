@@ -44,7 +44,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-RBAC-032 | STORY-RBAC-003 | EXC | REGRESSION | P1 | Một tài khoản khách hàng đang hoạt động. Dự án P đang tồn tại. Người quản trị có quyền assignment.manage. | 1. Chuẩn bị tài khoản khách hàng và dự án P theo Test data.<br>2. Gửi yêu cầu phân công dự án P cho tài khoản khách hàng đó, qua giao diện rồi gọi thẳng API.<br>3. Đọc lại danh sách phân công của dự án P. | Tài khoản khách hàng đang hoạt động. Dữ liệu minh họa. | Hệ thống từ chối ở cả hai đường gửi. Không tạo bản ghi phân công nào cho tài khoản khách hàng. | STORY-RBAC-003/EXC-02<br>BR-RBAC-005/Then | Tài khoản khách hàng không nhận phân công. Đặc tả chưa chạy. | [Chưa xác định] | Draft |
+| ST-RBAC-032 | STORY-RBAC-003 | EXC | REGRESSION | P1 | Một tài khoản khách hàng đang hoạt động. Công trình P đang tồn tại và chưa có người phụ trách. Người quản trị có quyền assignment.manage. | 1. Chuẩn bị tài khoản khách hàng và công trình P theo Test data.<br>2. Gửi yêu cầu phân công công trình P cho tài khoản khách hàng đó, qua giao diện rồi gọi thẳng API.<br>3. Đọc lại các phân công của công trình P. | Tài khoản khách hàng đang hoạt động. Dữ liệu minh họa. | Hệ thống từ chối ở cả hai đường gửi. Không tạo bản ghi phân công nào cho tài khoản khách hàng. | STORY-RBAC-003/EXC-02<br>BR-RBAC-005/Then | Tài khoản khách hàng không nhận phân công. Đặc tả chưa chạy. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

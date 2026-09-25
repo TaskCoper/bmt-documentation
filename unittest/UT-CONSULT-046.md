@@ -42,9 +42,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-CONSULT-046 | Tư vấn kiến trúc sư | Policy quản trị: quyền độc lập (unit dự kiến theo TDD) | Branch | REGRESSION | P1 | Đặc tả chưa thực thi. Dữ liệu minh họa; mock/fake trong bộ nhớ, không chứng minh PostgreSQL/broker. Principal với từng tập quyền; đánh giá requirement thật dự kiến. | Chỉ architect.manage; chỉ architect_category.manage; chỉ consultation.read; chỉ consultation.update; không quyền. | Mỗi quyền chỉ cho thao tác tương ứng; đọc category cho một trong hai quyền quản lý; update không tự cấp đọc dữ liệu cá nhân. | BR-CONSULT-004/Then<br>TDD-CONSULT-001/Architecture | Kiểm nhánh và kết quả quan sát được theo hợp đồng đã chốt. | Tân Trần | Draft |
+| UT-CONSULT-046 | Tư vấn kiến trúc sư | Policy quản trị: một mã consultation.manage (unit dự kiến theo TDD) | Branch | REGRESSION | P1 | Đặc tả chưa thực thi. Dữ liệu minh họa; mock/fake trong bộ nhớ, không chứng minh PostgreSQL/broker. Principal với từng tập claim perm; đánh giá requirement thật dự kiến cho năm nhóm route quản trị. | Chỉ consultation.manage; chỉ commerce.read; claim role admin nhưng claim perm không có consultation.manage; không quyền; claim perm chỉ mang một trong bốn mã cũ architect.manage, architect_category.manage, consultation.read, consultation.update. | Chỉ principal có consultation.manage được phép ở cả năm nhóm: quản trị hồ sơ, đọc category, tạo/sửa/xóa category, đọc đơn và cập nhật đơn. Các principal còn lại bị từ chối ở mọi nhóm; policy không kiểm tên hay mã vai trò và không nhận bốn mã cũ. | BR-CONSULT-001/Then<br>BR-CONSULT-004/Then<br>TDD-CONSULT-001/Endpoints | Kiểm nhánh và kết quả quan sát được theo hợp đồng đã chốt. | Tân Trần | Draft |
 
 ## TEST_LINKS
 
+- BR-CONSULT-001/Then
 - BR-CONSULT-004/Then
-- TDD-CONSULT-001/Architecture
+- TDD-CONSULT-001/Endpoints

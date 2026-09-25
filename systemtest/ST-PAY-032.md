@@ -44,7 +44,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-PAY-032 | STORY-SUB-004 | EXC | REGRESSION | P1 | Gói thuộc khách U1 gán A; B thuộc U2, C thuộc U1 nhưng đã có gói hiệu lực. | 1. Chuẩn bị tài khoản, gói/đơn và mốc thời gian như Test data.<br>2. Nhân viên có quyền và lý do lần lượt thử đổi sang B và C.<br>3. Đọc lại đơn/gói và giao diện liên quan; kiểm tra cả dữ liệu không được thay đổi. | Gói thuộc khách U1 gán A; B thuộc U2, C thuộc U1 nhưng đã có gói hiệu lực. Đây là dữ liệu thử, không phải giá bán hoặc lịch vận hành đã chốt. | Cả hai yêu cầu bị từ chối. Gói vẫn gắn A; các gói khác giữ nguyên. | STORY-SUB-004/AC-009<br>BR-SUB-023/Then | Từ chối đổi sang dự án khác khách hoặc đã có gói. Đặc tả chưa thực thi. | [Chưa xác định] | Draft |
+| ST-PAY-032 | STORY-SUB-004 | EXC | REGRESSION | P1 | Gói thuộc khách U1 gán A; B thuộc U2, C thuộc U1 nhưng đã có gói hiệu lực. | 1. Chuẩn bị tài khoản, gói/đơn và mốc thời gian như Test data.<br>2. Nhân viên có quyền và lý do lần lượt thử đổi sang B và C.<br>3. Đọc lại đơn/gói và giao diện liên quan; kiểm tra cả dữ liệu không được thay đổi. | Gói thuộc khách U1 gán A; B thuộc U2, C thuộc U1 nhưng đã có gói hiệu lực. Đây là dữ liệu thử, không phải giá bán hoặc lịch vận hành đã chốt. | Cả hai yêu cầu bị từ chối. Gói vẫn gắn A; các gói khác giữ nguyên. | STORY-SUB-004/AC-009<br>BR-SUB-023/Then | Từ chối đổi sang công trình khác khách hoặc đã có gói. Đặc tả chưa thực thi. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

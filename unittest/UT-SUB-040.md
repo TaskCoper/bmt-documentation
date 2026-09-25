@@ -42,9 +42,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-040 | Subscription / Entitlement | OpenTemplateHandler (dự kiến trong TDD) | Error | REGRESSION | P0 | Nội dung tải được nhưng serialize thất bại | Mở với key mới | Không commit lượt; không tạo operation Succeeded. | BR-SUB-017/Then<br>TDD-SUB-002/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. | [Chưa phân công] | Draft |
+| UT-SUB-040 | Subscription / Entitlement | OpenTemplateHandler (dự kiến trong TDD) | Error | REGRESSION | P0 | Tài khoản chưa có LibraryAccess cho V1; nội dung tải được nhưng bước chuẩn bị phản hồi thất bại | Mở lần đầu V1 | Không commit lượt; không tạo UsageOperation Succeeded hoặc LibraryAccess. | BR-SUB-017/Then<br>BR-LIB-003/Then<br>TDD-SUB-002/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. Cập nhật 25/09/2026 theo BR-LIB-003 và TDD-LIB-002: lượt tính theo phiên bản chưa từng mở, không theo key của client. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 
 - BR-SUB-017/Then
+- BR-LIB-003/Then
 - TDD-SUB-002/Architecture

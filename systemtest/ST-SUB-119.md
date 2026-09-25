@@ -40,12 +40,12 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## System Test
 
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SUB-119 | STORY-SUB-003 | EXC | REGRESSION | P1 | Gói G1 đã hoàn thành trên dự án A; dự án B của cùng khách chưa có gói. Nhân viên có quyền supervision.reassign. | 1. Nhân viên yêu cầu sửa dự án của G1 sang B, có lý do.<br>2. Kiểm tra kết quả, trạng thái và dự án của G1. | Dữ liệu thử; không tạo dữ liệu lịch hoặc số dư lượt giám sát. API cụ thể bổ sung trong TDD. | Yêu cầu bị từ chối; phải mở lại G1 trước. G1 vẫn đã hoàn thành trên A; không có dòng lịch sử sửa dự án mới. | STORY-SUB-003/AC-013<br>BR-SUB-023/Except | Bổ sung 24/09/2026 theo nghiệp vụ hoàn thành/mở lại trên vòng đời mới. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
+| ST-SUB-119 | STORY-SUB-003 | EXC | REGRESSION | P1 | Gói G1 đã hoàn thành trên công trình A; công trình B của cùng khách chưa có gói. Nhân viên có quyền supervision.reassign. | 1. Nhân viên yêu cầu đổi công trình của G1 sang B, có lý do.<br>2. Kiểm tra kết quả, trạng thái và công trình của G1. | Dữ liệu thử; không tạo dữ liệu lịch hoặc số dư lượt giám sát. API cụ thể bổ sung trong TDD. | Yêu cầu bị từ chối; phải mở lại G1 trước. G1 vẫn đã hoàn thành trên A; không có dòng lịch sử đổi công trình mới. | STORY-SUB-003/AC-013<br>BR-SUB-023/Except | Bổ sung 24/09/2026 theo nghiệp vụ hoàn thành/mở lại trên vòng đời mới. Đặc tả nháp, chưa chạy. Cập nhật 25/09/2026: gói giám sát gắn với công trình, không gắn với bản dự toán. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

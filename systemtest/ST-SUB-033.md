@@ -40,14 +40,15 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## System Test
 
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SUB-033 | STORY-SUB-002 | Main | REGRESSION | P1 | Danh mục giám sát đang công bố quyền lợi A; khách hàng có gói đã cấp từ A. Có dự án khác đủ điều kiện cấp gói mới. | 1. Admin lưu nháp thay đổi quyền lợi thành B.<br>2. Thiết lập gói cấp mới hợp lệ trước khi công bố và kiểm tra vẫn nhận A.<br>3. Admin công bố B.<br>4. Kiểm tra gói đã cấp vẫn giữ A.<br>5. Tạo đơn mới hợp lệ sau công bố B, thanh toán và kiểm tra gói nhận B.<br>6. Hoàn tất một đơn đã chốt A trước khi công bố B và kiểm tra vẫn cấp A. | A/B là hai bộ quyền lợi minh họa, chưa phải danh mục chính thức. Dùng đơn chốt bản quyền lợi tại lúc tạo theo BR-PAY-001; không giả định Admin cấp thủ công. Hợp đồng tích hợp cụ thể còn chờ TDD. | Các gói đã cấp giữ A. Đơn mới chốt sau công bố B nhận B; đơn đã chốt A vẫn cấp A dù thanh toán sau công bố. Không lấy quyền lợi từ bản nháp. Không tạo lịch hoặc quản lý số dư lượt giám sát. | STORY-SUB-002/AC-004<br>BR-SUB-004/Statement | Kiểm tra thời điểm áp dụng thay đổi cho giám sát không chu kỳ. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
+| ST-SUB-033 | STORY-SUB-002 | Main | REGRESSION | P1 | Gói giám sát S đang công bố với mô tả dịch vụ A; khách hàng đã có gói G1 cấp từ đơn tạo khi A đang công bố. Có đơn O1 cho S được tạo khi A còn công bố nhưng chưa thanh toán. | 1. Admin lưu nháp mô tả mới B, chưa công bố.<br>2. Tạo đơn O2 cho S, thanh toán hợp lệ và kiểm tra gói cấp từ O2 nhận A.<br>3. Admin công bố B.<br>4. Kiểm tra G1 và gói cấp từ O2 vẫn giữ A.<br>5. Thanh toán hợp lệ O1 và kiểm tra gói cấp từ O1 nhận A.<br>6. Tạo đơn O3 sau khi công bố B, thanh toán hợp lệ và kiểm tra gói cấp từ O3 nhận B. | A: 6 buổi kỹ sư kiểm tra tại công trình. B: 8 buổi kỹ sư kiểm tra tại công trình. Hai mô tả chỉ là dữ liệu minh họa. Mô tả chốt lúc tạo đơn theo BR-PAY-001; không giả định Admin cấp gói thủ công. Gói chưa cần gán công trình để kiểm tra mô tả. | G1 và các gói từ đơn tạo trước khi công bố B giữ mô tả A, kể cả O1 thanh toán sau khi công bố. Gói từ đơn tạo sau khi công bố nhận B. Không lấy mô tả từ bản nháp. Mô tả chỉ để hiển thị; không tạo quyền lợi, lượt, lịch hoặc bộ đếm giám sát. | STORY-SUB-002/AC-004<br>BR-SUB-004/Then<br>BR-PAY-001/Then | Cập nhật 25/09/2026: gói giám sát không dùng danh mục quyền lợi; kiểm tra mô tả dịch vụ được chốt theo đơn và giữ nguyên cho gói đã cấp. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-SUB-002/AC-004
-- BR-SUB-004/Statement
+- BR-SUB-004/Then
+- BR-PAY-001/Then

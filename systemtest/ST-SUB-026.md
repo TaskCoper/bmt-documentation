@@ -40,12 +40,12 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## System Test
 
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SUB-026 | STORY-SUB-003 | Main | REGRESSION | P1 | Khách có gói giám sát G1 đã gán dự án A; dự án A đã xong. Có thêm gói đã gán dự án B và subscription thiết kế để đối chiếu. Chuẩn bị Admin có quyền supervision.complete (không phân công) và nhân viên có quyền supervision.complete được phân công trực tiếp dự án A. | 1. Chọn đúng khách hàng, dự án A và G1.<br>2. Bấm Hoàn thành gói giám sát, không nhập lý do.<br>3. Kiểm tra trạng thái G1, liên kết khách hàng/dự án, lịch sử thao tác và các gói khác.<br>4. Chạy với Admin và nhân viên trên hai bộ dữ liệu riêng. | Dữ liệu thử; không tạo dữ liệu lịch hoặc số dư lượt giám sát. API cụ thể bổ sung trong TDD. | G1 chuyển sang đã hoàn thành, vẫn gắn khách hàng và dự án A, vẫn giữ chỗ trên A. Lịch sử ghi người thao tác và thời điểm. Gói dự án B và subscription thiết kế không đổi; không yêu cầu lịch hay số lượt. | STORY-SUB-003/AC-006<br>BR-SUB-011/Then | Cập nhật 24/09/2026 theo vòng đời mới của gói giám sát. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
+| ST-SUB-026 | STORY-SUB-003 | Main | REGRESSION | P1 | Khách có gói giám sát G1 đã gán công trình A; công trình A đã xong. Có thêm gói đã gán công trình B và subscription thiết kế để đối chiếu. Chuẩn bị người giữ vai trò hệ thống Admin (mã admin) có quyền supervision.complete và không có phân công; nhân viên có quyền supervision.complete đang được phân công công trình A. | 1. Chọn đúng khách hàng, công trình A và G1.<br>2. Bấm Hoàn thành gói giám sát, không nhập lý do.<br>3. Kiểm tra trạng thái G1, liên kết khách hàng/công trình, lịch sử thao tác và các gói khác.<br>4. Chạy với Admin và nhân viên trên hai bộ dữ liệu riêng. | Dữ liệu thử; không tạo dữ liệu lịch hoặc số dư lượt giám sát. API cụ thể bổ sung trong TDD. | G1 chuyển sang đã hoàn thành, vẫn gắn khách hàng và công trình A, vẫn giữ chỗ trên A. Lịch sử ghi người thao tác và thời điểm. Admin hoàn thành được dù không có phân công. Gói của công trình B và subscription thiết kế không đổi; không yêu cầu lịch hay số lượt. | STORY-SUB-003/AC-006<br>BR-SUB-011/Then | Cập nhật 25/09/2026: gói giám sát gắn với công trình; Admin (mã vai trò admin) được miễn phân công, nhân viên phải được phân công công trình. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

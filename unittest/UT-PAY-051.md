@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-051 | Lifecycle | PackageLifecyclePolicy.Cancel (dự kiến) | Branch | REGRESSION | P1 | Supervision Unassigned hoặc Assigned, hai fixture. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Hủy hợp lệ. | CanceledByStaff cả hai; giữ ProjectId/FirstAssignedAt như trước, không xóa liên kết lịch sử. | STORY-SUB-005/AC-002<br>STORY-SUB-005/AC-003<br>TDD-SUB-005/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
+| UT-PAY-051 | Lifecycle | PackageLifecyclePolicy.Cancel (dự kiến) | Branch | REGRESSION | P1 | Supervision Unassigned hoặc Assigned, hai fixture. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Hủy hợp lệ. | CanceledByStaff cả hai; giữ ConstructionSiteId/FirstAssignedAt như trước, không xóa liên kết lịch sử. | STORY-SUB-005/AC-002<br>STORY-SUB-005/AC-003<br>TDD-SUB-005/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

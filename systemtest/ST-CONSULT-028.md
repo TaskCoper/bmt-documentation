@@ -39,14 +39,15 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## System Test
 
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-CONSULT-028 | STORY-CONSULT-003 | NFR / EXC | REGRESSION | P1 | Môi trường thử đã triển khai tính năng, có frontend, API, database và tài khoản thử với quyền tương ứng. Có thể đọc dữ liệu đã lưu; chỉ dùng dữ liệu và email thử. | 1. Thêm ghi chú nội bộ có dấu nhận biết<br>2. Dùng khách và phiên không đăng nhập gọi danh sách, chi tiết, cập nhật trạng thái, cập nhật ghi chú<br>3. Kiểm tra phản hồi và dữ liệu<br>4. Đọc email tiếp nhận tại hộp thư thử | R1; ghi chú INTERNAL-CONSULT-ONLY; email thử; dữ liệu minh họa, không phải cấu hình sản phẩm. | Ghi chú không có trong email; truy cập quản trị bị từ chối. Không cung cấp trang khách theo dõi yêu cầu. Không lộ ghi chú hoặc dữ liệu quản trị; thao tác trái quyền bị từ chối; ghi chú không có trong email. | STORY-CONSULT-003/AC-006<br>BR-CONSULT-004/Then | Đặc tả chưa thực thi; đối chiếu hành vi với dữ liệu thực lưu và nguồn đã chốt. | [Chưa xác định] | Draft |
+| ST-CONSULT-028 | STORY-CONSULT-003 | NFR / EXC | REGRESSION | P1 | Môi trường thử đã triển khai tính năng, có frontend, API, database và tài khoản thử với quyền tương ứng. Có thể đọc dữ liệu đã lưu; chỉ dùng dữ liệu và email thử. | 1. Thêm ghi chú nội bộ có dấu nhận biết<br>2. Dùng khách, phiên không đăng nhập và nhân viên không có consultation.manage gọi danh sách, chi tiết, cập nhật trạng thái, cập nhật ghi chú<br>3. Kiểm tra phản hồi và dữ liệu<br>4. Đọc email tiếp nhận tại hộp thư thử | R1; ghi chú INTERNAL-CONSULT-ONLY; email thử; nhân viên N chỉ có commerce.read; dữ liệu minh họa, không phải cấu hình sản phẩm. | Ghi chú không có trong email; truy cập quản trị bị từ chối. Không cung cấp trang khách theo dõi yêu cầu. Không lộ ghi chú hoặc dữ liệu quản trị; thao tác trái quyền bị từ chối, nhân viên N nhận 403; ghi chú không có trong email. | STORY-CONSULT-003/AC-006<br>BR-CONSULT-004/Then<br>TDD-CONSULT-001/Endpoints | Đặc tả chưa thực thi; đối chiếu hành vi với dữ liệu thực lưu và nguồn đã chốt. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-CONSULT-003/AC-006
 - BR-CONSULT-004/Then
+- TDD-CONSULT-001/Endpoints

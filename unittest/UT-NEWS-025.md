@@ -42,9 +42,11 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-NEWS-025 | Tin tức | NewsCategoryNamePolicy — giới hạn Unicode 200 (dự kiến) | Boundary | REGRESSION | P1 | Policy thật; kiểm cả Name và NameKey sau chuẩn hóa. | Tên 199,200,201 Unicode scalar; 200 ký tự ngoài BMP; tên có dấu tổ hợp chuẩn hóa về 200 scalar và có khoảng trắng đầu/cuối. | 199/200 hợp lệ,201 bị từ chối không cắt; 200 ký tự ngoài BMP không bị đếm nhầm thành 400; trim/FormC trước đếm. Không đặt giới hạn số cấp. | TDD-NEWS-002/Data Model<br>TDD-NEWS-002/Internal API | Theo thiết kế đã chốt; đặc tả chưa thực thi, không phải mã test. | [Chưa xác định] | Draft |
+| UT-NEWS-025 | Tin tức | NewsCategoryNamePolicy — giới hạn Unicode 200 (dự kiến) | Boundary | REGRESSION | P1 | Policy thật; kiểm cả Name và NameKey sau chuẩn hóa. | Tên 199,200,201 Unicode scalar; 200 ký tự ngoài BMP; tên có dấu tổ hợp chuẩn hóa về 200 scalar và có khoảng trắng đầu/cuối. | 199/200 hợp lệ; 201 trả InvalidNewsCategory và không cắt ngắn; 200 ký tự ngoài BMP không bị đếm nhầm thành 400; trim/FormC trước khi đếm. Không đặt giới hạn số cấp. | TDD-NEWS-002/Data Model<br>TDD-NEWS-002/Internal API<br>BR-NEWS-002/Then<br>STORY-NEWS-002/AC-008 | Theo thiết kế đã chốt; đặc tả chưa thực thi, không phải mã test. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - TDD-NEWS-002/Data Model
 - TDD-NEWS-002/Internal API
+- BR-NEWS-002/Then
+- STORY-NEWS-002/AC-008

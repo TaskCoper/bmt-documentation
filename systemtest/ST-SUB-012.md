@@ -40,12 +40,12 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## System Test
 
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SUB-012 | STORY-SUB-001 | EXC / Integration boundary | REGRESSION | P1 | Tài khoản thử có subscription thiết kế A đang hiệu lực; ghi nhận quyền lợi, lượt sẵn dùng, đang giữ và đã dùng. Có dữ liệu subscription thiết kế B cùng tài khoản. | 1. Gửi thay đổi làm B có hiệu lực chồng với A qua điểm tích hợp được thiết kế.<br>2. Kiểm tra thay đổi bị từ chối và chỉ A còn hiệu lực.<br>3. Kiểm tra không cấp quyền hoặc lượt từ B và không thay đổi A.<br>4. Lặp lại với B thuộc cùng gói và khác gói thiết kế so với A. | Dữ liệu subscription thử; điểm tích hợp và cách thiết lập sẽ bổ sung trong TDD. Không giả định API thanh toán hoặc Admin cấp gói. | Không tồn tại hai subscription thiết kế cùng tài khoản đồng thời có hiệu lực. A và các quyền lợi, số lượt đã ghi nhận của A giữ nguyên; không cấp thêm quyền hoặc hạn mức từ B. | STORY-SUB-001/AC-011<br>BR-SUB-006/Statement | Kiểm tra ràng buộc một subscription thiết kế có hiệu lực trên tài khoản. Đặc tả nháp, chưa chạy; luồng nhận gói và gia hạn thiết kế sau. | [Chưa xác định] | Draft |
+| ST-SUB-012 | STORY-SUB-001 | EXC / Integration boundary | REGRESSION | P1 | Tài khoản thử có subscription thiết kế A đang hiệu lực; ghi nhận quyền lợi, lượt sẵn dùng, đang giữ và đã dùng. Có dữ liệu subscription thiết kế B cùng tài khoản. | 1. Gửi thay đổi làm B có hiệu lực chồng với A qua điểm tích hợp được thiết kế.<br>2. Kiểm tra thay đổi bị từ chối và chỉ A còn hiệu lực.<br>3. Kiểm tra không cấp quyền hoặc lượt từ B và không thay đổi A.<br>4. Lặp lại với B thuộc cùng gói và khác gói thiết kế so với A. | Dữ liệu subscription thử; điểm tích hợp và cách thiết lập sẽ bổ sung trong TDD. Không giả định API thanh toán hoặc Admin cấp gói. | Không tồn tại hai subscription thiết kế cùng tài khoản đồng thời có hiệu lực. A và các quyền lợi, số lượt đã ghi nhận của A giữ nguyên; không cấp thêm quyền hoặc hạn mức từ B. | STORY-SUB-001/AC-011<br>BR-SUB-006/Statement | Kiểm tra ràng buộc một subscription thiết kế có hiệu lực trên tài khoản. Đặc tả nháp, chưa chạy; luồng mua và nhận gói theo STORY-PAY-001. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

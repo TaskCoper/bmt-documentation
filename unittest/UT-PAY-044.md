@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-044 | Supervision | ReassignSupervisionGrantHandler (dự kiến) | Error | REGRESSION | P1 | Actor là khách hoặc nhân viên thiếu supervision.reassign. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Gửi sửa/gỡ project trực tiếp. | AccessForbidden hoặc không có route gỡ; grant giữ nguyên. | STORY-SUB-004/AC-005<br>STORY-SUB-004/AC-008<br>TDD-SUB-004/Internal API | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
+| UT-PAY-044 | Supervision | ReassignSupervisionGrantHandler (dự kiến) | Error | REGRESSION | P1 | Actor là khách hoặc nhân viên thiếu supervision.reassign. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Gửi sửa/gỡ công trình trực tiếp. | AccessForbidden hoặc không có route gỡ; grant giữ nguyên. | STORY-SUB-004/AC-005<br>STORY-SUB-004/AC-008<br>TDD-SUB-004/Internal API | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

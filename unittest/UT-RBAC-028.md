@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-028 | Role | PermissionCatalogStartupCheck.Validate (dự kiến) | Happy | FULL | P2 | Unit chưa triển khai; bảng Permission mock trả về đúng chín mã khớp hằng số trong code. | Chạy kiểm tra lúc khởi động ứng dụng. | Kiểm tra đạt và ứng dụng khởi động bình thường; không ghi cảnh báo nào. | TDD-RBAC-001/Data Model | Đối chứng cho ca lệch danh mục, tránh kiểm tra luôn báo lỗi. | [Chưa xác định] | Draft |
+| UT-RBAC-028 | Role | PermissionCatalogGuard.EnsurePermissionCatalogMatchesCodeAsync | Happy | FULL | P2 | Guard đã có trong code. Bảng Permission mock trả về đúng 14 mã khớp hằng số PermissionNames.All. | Chạy kiểm tra lúc khởi động ứng dụng. | Kiểm tra đạt và ứng dụng khởi động bình thường; không ghi cảnh báo nào. | TDD-RBAC-001/Data Model | Đối chứng cho ca lệch danh mục, tránh kiểm tra luôn báo lỗi. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

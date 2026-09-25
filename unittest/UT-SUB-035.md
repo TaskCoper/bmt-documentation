@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-035 | Subscription / Entitlement | Project access policy (dự kiến trong TDD) | Boundary | REGRESSION | P0 | Kỳ còn hiệu lực; toàn bộ lượt tạo đang giữ | Tạo hoặc lưu dự án | Từ chối; không cho rằng Reserved là lượt sẵn dùng. | BR-SUB-007/Then<br>TDD-SUB-002/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. | [Chưa phân công] | Draft |
+| UT-SUB-035 | Subscription / Entitlement | EstimateInputWriteAccessPolicy (dự kiến trong TDD-SUB-002) | Boundary | REGRESSION | P0 | Kỳ còn hiệu lực; toàn bộ lượt tạo đang giữ | Tạo bản dự toán hoặc lưu thông tin đầu vào | Từ chối; không cho rằng Reserved là lượt sẵn dùng. | BR-SUB-007/Then<br>TDD-SUB-002/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. Cập nhật 25/09/2026: policy chỉ áp cho tạo bản dự toán và lưu thông tin đầu vào, không áp cho đổi tên. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 

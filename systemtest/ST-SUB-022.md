@@ -40,12 +40,12 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## System Test
 
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SUB-022 | STORY-SUB-003 | ALT / Integration boundary | REGRESSION | P1 | Tài khoản có công trình A/B; A có gói giám sát còn hiệu lực, B chưa có. | 1. Tiếp nhận gói giám sát hợp lệ cho B.<br>2. Kiểm tra A/B đều có gói giám sát đang hiệu lực.<br>3. Kiểm tra gói vẫn gắn riêng với từng công trình. | Dữ liệu thử; điểm tích hợp và cách thiết lập sẽ bổ sung trong TDD, không giả định Admin cấp gói thủ công. | Hai subscription được cùng hiệu lực. Gói A/B vẫn gắn riêng đúng dự án, không bị gộp. | STORY-SUB-003/AC-002<br>BR-SUB-006/Statement<br>BR-SUB-009/Statement | Kiểm tra giới hạn giám sát theo công trình. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
+| ST-SUB-022 | STORY-SUB-003 | ALT / Integration boundary | REGRESSION | P1 | Tài khoản có công trình A/B; A có gói giám sát còn hiệu lực, B chưa có. | 1. Tiếp nhận gói giám sát hợp lệ cho B.<br>2. Kiểm tra A/B đều có gói giám sát đang hiệu lực.<br>3. Kiểm tra gói vẫn gắn riêng với từng công trình. | Dữ liệu thử; điểm tích hợp và cách thiết lập sẽ bổ sung trong TDD, không giả định Admin cấp gói thủ công. | Hai subscription được cùng hiệu lực. Gói A/B vẫn gắn riêng đúng công trình, không bị gộp. | STORY-SUB-003/AC-002<br>BR-SUB-006/Statement<br>BR-SUB-009/Statement | Kiểm tra giới hạn giám sát theo công trình. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

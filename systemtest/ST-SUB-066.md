@@ -39,15 +39,16 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## System Test
 
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SUB-066 | STORY-SUB-002 | ALT / EXC | REGRESSION | P1 | Admin có quyền cấu hình. Chuẩn bị bản nháp gói thiết kế chưa có quyền lợi; tên, giá tháng/năm và các dữ liệu khác hợp lệ. Thử cả gói mới và bản nháp sửa gói đang có khách dùng. | 1. Lưu bản nháp không có quyền lợi rồi mở lại.<br>2. Yêu cầu Công bố qua giao diện và yêu cầu gửi trực tiếp.<br>3. Kiểm tra thông báo, bản nháp, bản đang áp dụng và quyền đã cấp.<br>4. Thêm quyền tạo thiết kế với hạn mức hợp lệ, lưu và Công bố lại. | Quyền lợi ban đầu: danh sách rỗng. Bổ sung duy nhất quyền tạo thiết kế: 1 lượt cho mỗi lựa chọn tháng/năm; chỉ là dữ liệu kiểm thử. | Lưu nháp được, danh sách vẫn rỗng, không tự thêm quyền. Công bố khi chưa có quyền lợi bị từ chối, báo cần thêm ít nhất một quyền lợi; giữ nháp, không thay thế bản đang áp dụng hoặc thay đổi quyền đã cấp. Sau khi bổ sung một quyền hợp lệ và các điều kiện khác đáp ứng, Công bố được; không buộc thêm quyền tra cứu. Bản mới áp dụng theo BR-SUB-004. | STORY-SUB-002/AC-014<br>BR-SUB-008/Then<br>BR-SUB-004/Then | Phân biệt lưu nháp và Công bố, tránh đưa gói rỗng vào sử dụng. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
+| ST-SUB-066 | STORY-SUB-002 | ALT / EXC | REGRESSION | P1 | Admin có quyền cấu hình. Chuẩn bị bản nháp gói thiết kế chưa có quyền lợi; tên, giá tháng/năm và các dữ liệu khác hợp lệ. Thử cả gói mới và bản nháp sửa gói đang có khách dùng. | 1. Lưu bản nháp không có quyền lợi rồi mở lại.<br>2. Yêu cầu Công bố qua giao diện và yêu cầu gửi trực tiếp.<br>3. Kiểm tra thông báo, bản nháp, bản đang áp dụng và quyền đã cấp.<br>4. Thêm quyền tạo thiết kế với hạn mức hợp lệ, lưu và Công bố lại. | Quyền lợi ban đầu: danh sách rỗng. Bổ sung duy nhất quyền tạo thiết kế: 1 lượt cho mỗi lựa chọn tháng/năm; chỉ là dữ liệu kiểm thử. | Lưu nháp được, danh sách vẫn rỗng, không tự thêm quyền. Công bố khi chưa có quyền lợi bị từ chối, báo cần thêm ít nhất một quyền lợi; giữ nháp, không thay thế bản đang áp dụng hoặc thay đổi quyền đã cấp. Sau khi bổ sung một quyền hợp lệ và các điều kiện khác đáp ứng, Công bố được; không buộc thêm quyền tra cứu. Bản mới áp dụng theo BR-SUB-004. | STORY-SUB-002/AC-014<br>STORY-SUB-002/EXC-06<br>BR-SUB-008/Then<br>BR-SUB-004/Then | Phân biệt lưu nháp và Công bố, tránh đưa gói rỗng vào sử dụng. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-SUB-002/AC-014
+- STORY-SUB-002/EXC-06
 - BR-SUB-008/Then
 - BR-SUB-004/Then

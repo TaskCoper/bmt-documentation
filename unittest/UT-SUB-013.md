@@ -42,9 +42,9 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-013 | Subscription / Entitlement | PublishPlanHandler (dự kiến trong TDD) | Error | REGRESSION | P0 | CurrentUser role User; tài khoản hợp lệ | Yêu cầu công bố gói | Từ chối quyền; không ghi dữ liệu. | BR-SUB-008/Then<br>TDD-SUB-001/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. | [Chưa phân công] | Draft |
+| UT-SUB-013 | Subscription / Entitlement | Policy plan.manage trên route quản trị gói của PlanApi (dự kiến trong TDD-SUB-001) | Error | REGRESSION | P0 | Phiên hợp lệ. Lần lượt ba người gọi: khách hàng không có claim perm plan.manage; nhân viên giữ vai trò khác, không có plan.manage; nhân viên giữ vai trò tự tạo có plan.manage nhưng không giữ vai trò admin. PublishPlanHandler là mock ghi lại lời gọi. | POST /api/v1/admin/plans/{planId}/publish với expectedVersion hợp lệ | Hai người gọi đầu nhận 403 AccessForbidden trước khi vào handler; handler không được gọi, không ghi dữ liệu. Người có plan.manage qua bước phân quyền và handler được gọi đúng một lần dù không giữ vai trò admin. | BR-RBAC-010/Then<br>TDD-SUB-001/Architecture | Cập nhật 25/09/2026: quyền cấu hình gói kiểm theo mã plan.manage, không theo tên hay mã vai trò. Kiểm ở tầng policy với claim giả lập; không chứng minh transaction hoặc khóa PostgreSQL. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 
-- BR-SUB-008/Then
+- BR-RBAC-010/Then
 - TDD-SUB-001/Architecture

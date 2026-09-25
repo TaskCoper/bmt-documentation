@@ -44,7 +44,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-NEWS-019 | STORY-NEWS-002 | EXC / NFR | REGRESSION | P1 | Môi trường thử có chức năng Tin tức và cloud thử nghiệm khi cần; A có quyền quản lý trừ tác nhân nêu riêng; được kiểm dữ liệu lưu. Mỗi biến thể dùng dữ liệu độc lập. | 1. B và khách gửi trực tiếp tạo, đổi tên, thứ tự, chuyển cha và xóa danh mục.<br>2. Kiểm cây không đổi.<br>3. A tạo danh mục, gắn vào bài và công bố bài đủ dữ liệu. | A có quyền quản lý Tin tức, không có Assignment; B không có quyền; khách ẩn danh. Dữ liệu minh họa, không phải mặc định sản phẩm. | B và khách bị từ chối mọi thay đổi; A quản lý được cả danh mục lẫn bài chỉ với quyền chung, không cần phân công dự án. | STORY-NEWS-002/AC-007<br>STORY-NEWS-002/EXC-03<br>BR-NEWS-001/Then<br>BR-NEWS-002/Then | Dùng chung quyền quản lý bài và danh mục. Đặc tả chưa thực thi; API và fixture cụ thể bổ sung sau TDD. | [Chưa xác định] | Draft |
+| ST-NEWS-019 | STORY-NEWS-002 | EXC / NFR | REGRESSION | P1 | Môi trường thử có chức năng Tin tức và cloud thử nghiệm khi cần; A có quyền quản lý trừ tác nhân nêu riêng; được kiểm dữ liệu lưu. Mỗi biến thể dùng dữ liệu độc lập. | 1. B và khách gửi trực tiếp tạo, đổi tên, thứ tự, chuyển cha và xóa danh mục.<br>2. Kiểm cây không đổi.<br>3. A tạo danh mục, gắn vào bài và công bố bài đủ dữ liệu. | A thuộc vai trò tùy chỉnh (không phải Admin) được cấp news.manage, không có Assignment; B không có news.manage; khách ẩn danh. Dữ liệu minh họa, không phải mặc định sản phẩm. | B và khách bị từ chối mọi thay đổi (403 với B, 401 với khách ẩn danh). A quản lý được cả danh mục lẫn bài chỉ với news.manage, không cần phân công dự án và không cần vai trò Admin. | STORY-NEWS-002/AC-007<br>STORY-NEWS-002/EXC-03<br>BR-NEWS-001/Then<br>BR-NEWS-002/Then<br>BR-RBAC-011/Then | Dùng chung quyền quản lý bài và danh mục. Đặc tả chưa thực thi; API và fixture cụ thể bổ sung sau TDD. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
@@ -52,3 +52,4 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - STORY-NEWS-002/EXC-03
 - BR-NEWS-001/Then
 - BR-NEWS-002/Then
+- BR-RBAC-011/Then

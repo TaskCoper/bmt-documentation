@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-042 | Supervision | SupervisionAssignmentPolicy (dự kiến) | Error | REGRESSION | P1 | Gói U1, project U2. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Gán lần đầu hoặc reassign. | Từ chối cả hai, không đổi chủ gói hoặc project. | STORY-SUB-004/AC-009<br>STORY-SUB-004/AC-010<br>TDD-SUB-004/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
+| UT-PAY-042 | Supervision | SupervisionAssignmentPolicy (dự kiến) | Error | REGRESSION | P1 | Gói U1, công trình U2. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Gán lần đầu hoặc reassign. | Từ chối cả hai, không đổi chủ gói hoặc công trình. | STORY-SUB-004/AC-009<br>STORY-SUB-004/AC-010<br>TDD-SUB-004/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

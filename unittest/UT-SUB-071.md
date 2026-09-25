@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-071 | Subscription / Supervision | CancelPackageCommandHandler, nhánh Supervision | Happy | REGRESSION | P1 | Actor Staff có package.cancel. G1 State=Completed trên PR1, Version=3. | CancelPackageCommand(Supervision, G1, 3, 'Khách tạm dừng', k1) | G1: State=CanceledByStaff, Version=4, CancelEventId trỏ event mới; ProjectId và FirstAssignedAtUtc giữ nguyên. Event Action=Cancel, FromState=Completed. | STORY-SUB-003/AC-014<br>BR-SUB-024/Then<br>TDD-SUB-006/Data Model | FromState=Completed là dữ kiện bước khôi phục cần đọc. | [Chưa phân công] | Draft |
+| UT-SUB-071 | Subscription / Supervision | CancelPackageCommandHandler, nhánh Supervision | Happy | REGRESSION | P1 | Actor Staff có package.cancel. G1 State=Completed trên CS1, Version=3. | CancelPackageCommand(Supervision, G1, 3, 'Khách tạm dừng', k1) | G1: State=CanceledByStaff, Version=4, CancelEventId trỏ event mới; ConstructionSiteId và FirstAssignedAtUtc giữ nguyên. Event Action=Cancel, FromState=Completed. | STORY-SUB-003/AC-014<br>BR-SUB-024/Then<br>TDD-SUB-006/Data Model | FromState=Completed là dữ kiện bước khôi phục cần đọc. Cập nhật 25/09/2026: dùng tên công trình dự kiến theo TDD-SUB-004/006 (code hiện còn ProjectId). | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 

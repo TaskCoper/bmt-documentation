@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-060 | Subscription / Supervision | SupervisionPolicy (dự kiến trong TDD-SUB-006).EnsureCanReopen | Branch | REGRESSION | P1 | Không cần mock. Grant Version=3, lần lượt State=Assigned, Unassigned, CanceledByStaff. | EnsureCanReopen(grant, expectedVersion=3, 'Lý do', projectHeldByAnother=false) | Cả ba ném ConflictException với MessageCode=PackageStateConflict. Với State=Completed thì không ném. | STORY-SUB-003/AC-010<br>BR-SUB-012/Then<br>TDD-SUB-006/Architecture | Chỉ gói đã hoàn thành mới được mở lại. | [Chưa phân công] | Draft |
+| UT-SUB-060 | Subscription / Supervision | SupervisionPolicy (dự kiến trong TDD-SUB-006).EnsureCanReopen | Branch | REGRESSION | P1 | Không cần mock. Grant Version=3, lần lượt State=Assigned, Unassigned, CanceledByStaff. | EnsureCanReopen(grant, expectedVersion=3, 'Lý do', cờ công trình có gói khác giữ chỗ=false) | Cả ba ném ConflictException với MessageCode=PackageStateConflict. Với State=Completed thì không ném. | STORY-SUB-003/AC-010<br>BR-SUB-012/Then<br>TDD-SUB-006/Architecture | Chỉ gói đã hoàn thành mới được mở lại. Cập nhật 25/09/2026: dùng tên công trình dự kiến theo TDD-SUB-004/006 (code hiện còn ProjectId). | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 

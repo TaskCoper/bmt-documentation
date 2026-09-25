@@ -40,15 +40,16 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## System Test
 
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SUB-041 | STORY-SUB-002 | Main | REGRESSION | P1 | Admin có quyền sửa gói thiết kế với hai lựa chọn tháng/năm trong cùng bản nháp. Có các quyền thử dạng bật/tắt, mức và lượt. | 1. Đặt một quyền bật, một quyền tắt và mức tính năng nâng cao ở gói.<br>2. Cấu hình giá và hạn mức tháng/năm khác nhau.<br>3. Lưu nháp, mở lại và đối chiếu cả hai lựa chọn.<br>4. Kiểm tra không có giá trị quyền bật/tắt hoặc mức riêng theo chu kỳ; quyền lợi của kỳ đã cấp không thay đổi. | Quyền thử và mức nâng cao chỉ là dữ liệu minh họa. Không chốt danh mục thật hoặc tích hợp thanh toán. | Tháng/năm cùng nhận cấu hình bật, tắt và mức nâng cao từ cùng bản gói. Giá và hạn mức riêng được giữ đúng. Không tự cập nhật quyền của kỳ đã cấp từ bản nháp. | STORY-SUB-002/AC-008<br>BR-SUB-015/Statement<br>BR-SUB-004/Statement | Kiểm tra cùng gói có cùng tính năng ở hai chu kỳ nhưng giá và hạn mức độc lập. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
+| ST-SUB-041 | STORY-SUB-002 | Main | REGRESSION | P1 | Admin có quyền sửa gói thiết kế với hai lựa chọn tháng/năm trong cùng bản nháp. Có các quyền thử dạng bật/tắt và dạng lượt. | 1. Đặt một quyền bật và một quyền tắt ở gói.<br>2. Cấu hình giá và hạn mức tháng/năm khác nhau.<br>3. Lưu nháp, mở lại và đối chiếu cả hai lựa chọn.<br>4. Kiểm tra không có giá trị quyền bật/tắt riêng theo chu kỳ; quyền lợi của kỳ đã cấp không thay đổi. | Quyền thử chỉ là dữ liệu minh họa. Không cấu hình mức tính năng vì đợt này không có quyền dạng mức theo BR-SUB-008 khoản 12. Không chốt danh mục thật hoặc tích hợp thanh toán. | Tháng/năm cùng nhận cấu hình bật và tắt từ cùng bản gói. Giá và hạn mức riêng được giữ đúng. Không tự cập nhật quyền của kỳ đã cấp từ bản nháp. | STORY-SUB-002/AC-008<br>BR-SUB-015/Statement<br>BR-SUB-004/Statement<br>BR-SUB-008/Then | Kiểm tra cùng gói có cùng tính năng ở hai chu kỳ nhưng giá và hạn mức độc lập. Đặc tả nháp, chưa chạy. Cập nhật 25/09/2026: bỏ phần mức tính năng theo BR-SUB-008 khoản 12. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-SUB-002/AC-008
 - BR-SUB-015/Statement
 - BR-SUB-004/Statement
+- BR-SUB-008/Then

@@ -40,12 +40,12 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## System Test
 
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SUB-007 | STORY-SUB-001 | ALT | REGRESSION | P1 | Kỳ hiện tại có hạn mức 10, đã dùng 2, không có lượt đang giữ. Chuẩn bị khả năng thiết lập bản đã chốt cho kỳ mới hợp lệ trong dữ liệu thử; không giả định luồng thanh toán đã triển khai. | 1. Admin công bố B có 20 lượt và quyền 3D bật.<br>2. Ghi nhận B là bản đã chốt cho lần đăng ký/gia hạn kỳ mới trong dữ liệu thử.<br>3. Admin công bố C có 30 lượt và quyền 3D tắt.<br>4. Kiểm tra kỳ hiện tại vẫn còn 8 lượt, quyền không đổi.<br>5. Cho kỳ mới hợp lệ bắt đầu, kiểm tra toàn bộ quyền được cấp. | 10/20/30 lượt là dữ liệu minh họa. Thời điểm chốt trong giao dịch sẽ thiết kế cùng thanh toán; không gọi luồng cấp/gia hạn thủ công chưa được chốt. | Kỳ hiện tại giữ nguyên. Kỳ mới dùng B: 20 lượt và quyền 3D bật; không nhận 30 lượt, không ghép quyền 3D tắt từ C, không cộng 8 lượt dư. | STORY-SUB-001/AC-007<br>BR-SUB-004/Statement<br>BR-SUB-002/Statement | Kiểm tra chọn đúng bản đã chốt dù có bản công bố mới hơn, giữ kỳ hiện tại và không cộng dồn. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
+| ST-SUB-007 | STORY-SUB-001 | ALT | REGRESSION | P1 | Kỳ hiện tại có hạn mức 10, đã dùng 2, không có lượt đang giữ. Chuẩn bị khả năng thiết lập bản đã chốt cho kỳ mới hợp lệ trong dữ liệu thử; không giả định luồng thanh toán đã triển khai. | 1. Admin công bố B có 20 lượt và quyền 3D bật.<br>2. Ghi nhận B là bản đã chốt cho lần đăng ký/gia hạn kỳ mới trong dữ liệu thử.<br>3. Admin công bố C có 30 lượt và quyền 3D tắt.<br>4. Kiểm tra kỳ hiện tại vẫn còn 8 lượt, quyền không đổi.<br>5. Cho kỳ mới hợp lệ bắt đầu, kiểm tra toàn bộ quyền được cấp. | 10/20/30 lượt là dữ liệu minh họa. Bản đã chốt cho kỳ mới được ghi nhận lúc tạo đơn theo BR-PAY-001; không gọi luồng cấp/gia hạn thủ công. | Kỳ hiện tại giữ nguyên. Kỳ mới dùng B: 20 lượt và quyền 3D bật; không nhận 30 lượt, không ghép quyền 3D tắt từ C, không cộng 8 lượt dư. | STORY-SUB-001/AC-007<br>BR-SUB-004/Statement<br>BR-SUB-002/Statement | Kiểm tra chọn đúng bản đã chốt dù có bản công bố mới hơn, giữ kỳ hiện tại và không cộng dồn. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

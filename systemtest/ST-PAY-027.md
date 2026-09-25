@@ -44,7 +44,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-PAY-027 | STORY-SUB-004 | EXC | REGRESSION | P1 | Dự án A đang có gói hiệu lực; khách có gói B chưa gán và còn hạn. | 1. Chuẩn bị tài khoản, gói/đơn và mốc thời gian như Test data.<br>2. Khách gán B vào A.<br>3. Đọc lại đơn/gói và giao diện liên quan; kiểm tra cả dữ liệu không được thay đổi. | Dự án A đang có gói hiệu lực; khách có gói B chưa gán và còn hạn. Đây là dữ liệu thử, không phải giá bán hoặc lịch vận hành đã chốt. | Từ chối; A giữ gói cũ, B vẫn chưa gán. B còn được gán cho dự án khác trong hạn ban đầu. | STORY-SUB-004/AC-004<br>BR-SUB-022/Then | Chặn dự án đã có gói. Đặc tả chưa thực thi. | [Chưa xác định] | Draft |
+| ST-PAY-027 | STORY-SUB-004 | EXC | REGRESSION | P1 | Công trình A đang có gói hiệu lực; khách có gói B chưa gán và còn hạn. | 1. Chuẩn bị tài khoản, gói/đơn và mốc thời gian như Test data.<br>2. Khách gán B vào A.<br>3. Đọc lại đơn/gói và giao diện liên quan; kiểm tra cả dữ liệu không được thay đổi. | Công trình A đang có gói hiệu lực; khách có gói B chưa gán và còn hạn. Đây là dữ liệu thử, không phải giá bán hoặc lịch vận hành đã chốt. | Từ chối; A giữ gói cũ, B vẫn chưa gán. B còn được gán cho công trình khác trong hạn ban đầu. | STORY-SUB-004/AC-004<br>BR-SUB-022/Then | Chặn công trình đã có gói. Đặc tả chưa thực thi. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

@@ -44,7 +44,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-PAY-036 | STORY-SUB-005 | ALT | REGRESSION | P1 | Dự án A có gói G1; khách còn gói G2 chưa gán còn hạn. | 1. Chuẩn bị tài khoản, gói/đơn và mốc thời gian như Test data.<br>2. Nhân viên có quyền hủy G1 với lý do; khách gán G2 vào A.<br>3. Đọc lại đơn/gói và giao diện liên quan; kiểm tra cả dữ liệu không được thay đổi. | Dự án A có gói G1; khách còn gói G2 chưa gán còn hạn. Đây là dữ liệu thử, không phải giá bán hoặc lịch vận hành đã chốt. | G1 bị hủy và A được nhận G2. Không xóa lịch sử G1 hoặc tự hoàn tiền. | STORY-SUB-005/AC-003<br>BR-SUB-024/Then | Hủy giám sát đã gán giải phóng dự án. Đặc tả chưa thực thi. | [Chưa xác định] | Draft |
+| ST-PAY-036 | STORY-SUB-005 | ALT | REGRESSION | P1 | Công trình A có gói G1; khách còn gói G2 chưa gán còn hạn. | 1. Chuẩn bị tài khoản, gói/đơn và mốc thời gian như Test data.<br>2. Nhân viên có quyền hủy G1 với lý do; khách gán G2 vào A.<br>3. Đọc lại đơn/gói và giao diện liên quan; kiểm tra cả dữ liệu không được thay đổi. | Công trình A có gói G1; khách còn gói G2 chưa gán còn hạn. Đây là dữ liệu thử, không phải giá bán hoặc lịch vận hành đã chốt. | G1 bị hủy và A được nhận G2. Không xóa lịch sử G1 hoặc tự hoàn tiền. | STORY-SUB-005/AC-003<br>BR-SUB-024/Then | Hủy giám sát đã gán giải phóng công trình. Đặc tả chưa thực thi. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

@@ -44,9 +44,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SUB-109 | STORY-SUB-001 | Integration boundary | FULL | P0 | Kỳ đủ quyền; proxy có thể cắt phản hồi sau commit | 1. Mở mẫu bằng key K<br>2. Cắt phản hồi sau commit<br>3. Gửi lại K<br>4. Kiểm tra response và PostgreSQL | Dữ liệu minh họa được tạo riêng cho mỗi ca; Ngắt mạng sau commit lần mở chi tiết | Một operation thành công; Used tăng đúng 1; trả đúng nội dung đã lưu, không gọi lại nguồn nội dung. | STORY-SUB-001/AC-071<br>TDD-SUB-002/Data Model | Kiểm chứng transaction/đường truyền thật; không thay bằng EF InMemory. | [Chưa phân công] | Draft |
+| ST-SUB-109 | STORY-SUB-001 | Integration boundary | FULL | P0 | PostgreSQL thật. Kỳ đủ quyền tra cứu; tài khoản chưa từng mở phiên bản V1 của mẫu; proxy có thể cắt phản hồi sau commit. | 1. Xác nhận dùng lượt và mở lần đầu phiên bản V1 (lần mở K).<br>2. Cắt phản hồi sau commit.<br>3. Gửi lại cùng lần mở V1.<br>4. Kiểm tra response và PostgreSQL. | Dữ liệu minh họa được tạo riêng cho mỗi ca; Ngắt mạng sau commit lần mở chi tiết | Có đúng một UsageOperation Succeeded với OperationKey lib-open:V1 và một LibraryAccess của tài khoản cho V1; Used tăng đúng 1. Lần gửi lại mở miễn lượt qua LibraryAccess và trả nội dung hiện tại của đúng V1, không trừ thêm lượt. | STORY-SUB-001/AC-071<br>BR-LIB-003/Then<br>TDD-SUB-002/Data Model | Kiểm chứng transaction/đường truyền thật; không thay bằng EF InMemory. Cập nhật 25/09/2026 theo BR-LIB-003 và TDD-LIB-002: xem lại dựa trên quyền xem theo phiên bản, không trả nội dung đã lưu từ lần mở trước. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 
 - STORY-SUB-001/AC-071
+- BR-LIB-003/Then
 - TDD-SUB-002/Data Model

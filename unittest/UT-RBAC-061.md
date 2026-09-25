@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-061 | Assignment | ActiveAssignmentCounter.CountDependentOnRole (dự kiến) | Branch | REGRESSION | P1 | Unit chưa triển khai; nhân viên A có hai dòng phân công đang hiệu lực và một dòng đã kết thúc. Sau khi gỡ vai trò R, A không còn quyền nào có RequiresAssignment. | staffUserId là A và roleId là R. | Trả về 2, chỉ đếm các dòng đang hiệu lực. Nếu sau khi gỡ R mà A vẫn còn supervision.complete qua vai trò khác thì trả về 0. | BR-RBAC-007/Then<br>TDD-RBAC-003/Architecture | Con số này quyết định việc chặn thu hồi vai trò; phải loại dòng đã kết thúc và phải xét quyền còn lại. | [Chưa xác định] | Draft |
+| UT-RBAC-061 | Assignment | ActiveAssignmentCounter.CountActiveByStaff (dự kiến) | Branch | REGRESSION | P1 | Unit dự kiến theo TDD-RBAC-003. Nhân viên A có hai dòng phân công đang hiệu lực trên hai công trình và một dòng đã kết thúc. Hàm không nhận tham số vai trò. | staffUserId là A. | Trả về 2, chỉ đếm các dòng có EffectiveToUtc còn trống. Kết quả không phụ thuộc vai trò nào của A; việc xét A còn supervision.complete hay không thuộc handler thu hồi vai trò và handler sửa vai trò. | BR-RBAC-007/Then<br>TDD-RBAC-003/Architecture | Bản ghi phân công không lưu vai trò; số dòng đang hiệu lực chính là số công trình người đó phụ trách. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

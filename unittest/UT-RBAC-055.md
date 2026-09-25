@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-055 | Assignment | CreateAssignmentHandler.Handle (dự kiến) | Error | REGRESSION | P1 | Unit chưa triển khai; người nhận là tài khoản có AccountKind bằng Customer. | staffUserId của tài khoản khách hàng, resourceType là Project, resourceId là P. | Ném ngoại lệ với mã AssignmentTargetInvalid; tài khoản khách hàng không nhận phân công. | BR-RBAC-005/Then<br>STORY-RBAC-003/EXC-02 | Phân công chỉ dành cho tài khoản nhân viên đang hoạt động. | [Chưa xác định] | Draft |
+| UT-RBAC-055 | Assignment | CreateAssignmentCommandHandler.Handle | Error | REGRESSION | P1 | Handler đã có; kiểm quyền người nhận và loại ConstructionSite là thay đổi dự kiến theo TDD-RBAC-003. Người nhận là tài khoản có AccountKind bằng Customer. Công trình P chưa có người phụ trách. | staffUserId của tài khoản khách hàng, resourceType là ConstructionSite, resourceId là P. | Ném ngoại lệ với mã AssignmentTargetInvalid; tài khoản khách hàng không nhận phân công. | BR-RBAC-005/Then<br>STORY-RBAC-003/EXC-02 | Phân công chỉ dành cho tài khoản nhân viên đang hoạt động. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

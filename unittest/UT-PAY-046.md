@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-046 | Supervision | ReassignSupervisionGrantHandler (dự kiến) | Error | REGRESSION | P1 | Grant version3; request version2. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Sửa với key mới. | GrantVersionConflict, không sửa project/audit; không tự dùng version3 để retry. | TDD-SUB-004/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
+| UT-PAY-046 | Supervision | ReassignSupervisionGrantHandler (dự kiến) | Error | REGRESSION | P1 | Grant version3; request version2. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Sửa với key mới. | GrantVersionConflict, không sửa công trình/audit; không tự dùng version3 để retry. | TDD-SUB-004/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

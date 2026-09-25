@@ -39,14 +39,15 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## System Test
 
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SUB-057 | STORY-SUB-001 | EXC | REGRESSION | P1 | Khách có dự án; subscription thiết kế hết hạn và chưa có kỳ mới. Ghi nhận dữ liệu đã lưu và số lượt. | 1. Kiểm tra giao diện không cho sửa/lưu tên dự án, ghi chú hoặc thông tin đầu vào.<br>2. Với từng nhóm thông tin, gửi yêu cầu lưu trực tiếp qua điểm tiếp nhận sẽ thiết kế.<br>3. Kiểm tra yêu cầu bị từ chối và dữ liệu cũ giữ nguyên.<br>4. Kiểm tra không tính lượt/cấp kỳ mới; khách vẫn xem được dữ liệu cũ. | Dự án và dữ liệu thử thuộc tài khoản. Trường dữ liệu, API và mã lỗi bổ sung trong TDD. | Không sửa/lưu được thông tin khi hết hạn, kể cả yêu cầu trực tiếp; dữ liệu và lượt giữ nguyên, không tạo kỳ mới. Khách vẫn xem được dữ liệu cũ. | STORY-SUB-001/AC-036<br>BR-SUB-007/Then | Kiểm tra khóa ghi dữ liệu sau hết hạn tại backend. Quyền tải/xuất được kiểm tra ở ST-SUB-055/056. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
+| ST-SUB-057 | STORY-SUB-001 | EXC | REGRESSION | P1 | Khách có dự án với tên, ghi chú và thông tin đầu vào đã lưu; subscription thiết kế hết hạn và chưa có kỳ mới. Ghi nhận dữ liệu đã lưu và số lượt. | 1. Kiểm tra giao diện không cho sửa/lưu ghi chú hoặc thông tin đầu vào.<br>2. Với ghi chú và từng nhóm thông tin đầu vào, gửi yêu cầu lưu trực tiếp.<br>3. Kiểm tra yêu cầu bị từ chối và dữ liệu cũ giữ nguyên.<br>4. Đổi tên dự án sang tên mới hợp lệ bằng thao tác đổi tên riêng.<br>5. Kiểm tra tên mới được lưu; ghi chú, thông tin đầu vào, số lượt và kỳ không đổi; khách vẫn xem được dữ liệu cũ. | Dự án và dữ liệu thử thuộc tài khoản; tên mới ví dụ Nhà phố Quận 7 - bản sửa. Đổi tên theo PATCH /api/v1/estimates/{estimateId}/name của TDD-PROJ-001; kiểm tra chi tiết thao tác đổi tên thuộc bộ test PROJ. | Không sửa/lưu được ghi chú hoặc thông tin đầu vào khi hết hạn, kể cả yêu cầu trực tiếp; dữ liệu đó giữ nguyên. Yêu cầu chỉ đổi tên được chấp nhận. Không tính lượt hoặc tạo kỳ mới; khách vẫn xem được dữ liệu cũ. | STORY-SUB-001/AC-036<br>STORY-SUB-001/EXC-05<br>BR-SUB-007/Then | Cập nhật 25/09/2026 theo AC-036 đã sửa: khi gói hết hạn chỉ tên dự án được đổi, theo BR-SUB-007 khoản 11. Không chỉ dựa vào khóa nút trên giao diện. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-SUB-001/AC-036
+- STORY-SUB-001/EXC-05
 - BR-SUB-007/Then

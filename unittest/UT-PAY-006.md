@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-006 | Payment | CreatePaymentOrderHandler (dự kiến) | Happy | REGRESSION | P1 | Account có hai đơn supervision chờ, không có project. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Tạo đơn supervision thứ ba. | Cho tạo đơn; không gọi ownership reader hoặc kiểm dự án. | STORY-PAY-001/AC-005<br>TDD-PAY-001/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
+| UT-PAY-006 | Payment | CreatePaymentOrderHandler (dự kiến) | Happy | REGRESSION | P1 | Account có hai đơn supervision chờ, không có công trình. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Tạo đơn supervision thứ ba. | Cho tạo đơn; không gọi IConstructionSiteOwnershipReader hoặc kiểm công trình. | STORY-PAY-001/AC-005<br>TDD-PAY-001/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

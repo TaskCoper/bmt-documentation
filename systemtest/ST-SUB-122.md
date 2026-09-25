@@ -40,15 +40,17 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## System Test
 
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SUB-122 | STORY-SUB-003 | EXC | REGRESSION | P1 | Khách K sở hữu dự án A. Gói G1 đã gán A; gói G2 đã hoàn thành trên dự án khác của K. Nhân viên có quyền supervision.complete, được phân công khách hàng K nhưng không được phân công trực tiếp dự án nào của K. | 1. Nhân viên gửi yêu cầu hoàn thành G1.<br>2. Nhân viên gửi yêu cầu mở lại G2 có lý do.<br>3. Kiểm tra kết quả và trạng thái hai gói. | Dữ liệu thử; không tạo dữ liệu lịch hoặc số dư lượt giám sát. API cụ thể bổ sung trong TDD. | Cả hai yêu cầu bị từ chối vì phân công mức khách hàng không đủ. G1 vẫn đã gán, G2 vẫn đã hoàn thành; không có dòng lịch sử mới. | STORY-SUB-003/AC-016<br>BR-SUB-011/Then<br>BR-RBAC-013/Except | Bổ sung 24/09/2026 theo nghiệp vụ hoàn thành/mở lại trên vòng đời mới. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
+| ST-SUB-122 | STORY-SUB-003 | EXC | REGRESSION | P1 | Khách K sở hữu công trình A, B và C. Gói G1 đã gán A; gói G2 đã hoàn thành trên C; gói G3 đã gán B. Nhân viên NV có quyền supervision.complete, đang được phân công công trình B, không được phân công A hay C. | 1. NV gửi yêu cầu hoàn thành G1.<br>2. NV gửi yêu cầu mở lại G2 có lý do.<br>3. Đối chứng: NV gửi yêu cầu hoàn thành G3.<br>4. Kiểm tra kết quả, trạng thái và lịch sử của ba gói. | Dữ liệu thử; không tạo dữ liệu lịch hoặc số dư lượt giám sát. Không có phân công ở mức khách hàng. API cụ thể bổ sung trong TDD. | Yêu cầu với G1 và G2 bị từ chối vì NV không được phân công A và C; phân công ở công trình B của cùng khách không có hiệu lực sang công trình khác. G1 vẫn đã gán, G2 vẫn đã hoàn thành, không có dòng lịch sử mới cho hai gói này. G3 được hoàn thành vì NV đang phụ trách B. | STORY-SUB-003/AC-008<br>STORY-SUB-003/AC-010<br>BR-SUB-011/Then<br>BR-SUB-012/Then<br>BR-RBAC-013/Then | Cập nhật 25/09/2026: đợt này không có phân công mức khách hàng theo BR-RBAC-013; ca cũ dẫn STORY-SUB-003/AC-016 đã rút. Ca này kiểm nhân viên chỉ thao tác được trên đúng công trình được phân công, kể cả khi đang phụ trách công trình khác của cùng khách. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- STORY-SUB-003/AC-016
+- STORY-SUB-003/AC-008
+- STORY-SUB-003/AC-010
 - BR-SUB-011/Then
-- BR-RBAC-013/Except
+- BR-SUB-012/Then
+- BR-RBAC-013/Then

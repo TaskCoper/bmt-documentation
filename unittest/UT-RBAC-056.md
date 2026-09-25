@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-056 | Assignment | CreateAssignmentHandler.Handle (dự kiến) | Happy | SMOKE | P1 | Unit chưa triển khai; người nhận là tài khoản nhân viên đang Active, chưa được phân công tài nguyên đích. | staffUserId hợp lệ, resourceType là Customer, resourceId là K. | Tạo một dòng Assignment với EffectiveFromUtc bằng thời điểm thao tác, EffectiveToUtc để trống, EndedBy và EndReason để trống. Sinh bản ghi nhật ký AssignmentCreated. | BR-RBAC-013/Then<br>STORY-RBAC-003/AC-001 | Luồng chính phân công; kiểm đủ các cột khởi tạo của dòng đang hiệu lực. | [Chưa xác định] | Draft |
+| UT-RBAC-056 | Assignment | CreateAssignmentCommandHandler.Handle | Happy | SMOKE | P1 | Handler đã có; kiểm quyền người nhận và loại ConstructionSite là thay đổi dự kiến theo TDD-RBAC-003. Người nhận là tài khoản nhân viên đang Active, có supervision.complete qua một vai trò. Công trình P chưa có phân công đang hiệu lực. | staffUserId hợp lệ, resourceType là ConstructionSite, resourceId là P. | Tạo một dòng Assignment với ResourceType bằng ConstructionSite, EffectiveFromUtc bằng thời điểm thao tác, EffectiveToUtc, EndedBy và EndReason để trống. Sinh bản ghi nhật ký AssignmentCreated. | BR-RBAC-013/Then<br>STORY-RBAC-003/AC-001 | Luồng chính phân công; kiểm đủ các cột khởi tạo của dòng đang hiệu lực. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

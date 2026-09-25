@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-054 | Assignment | CreateAssignmentHandler.Handle (dự kiến) | Error | REGRESSION | P1 | Unit chưa triển khai; người nhận là tài khoản nhân viên đang ở trạng thái Locked, và trước đó đang phụ trách dự án Q. | staffUserId của người bị khóa, resourceType là Project, resourceId là P. | Ném ngoại lệ ánh xạ 409 với mã AssignmentTargetInvalid; không tạo dòng phân công mới. Dòng phân công cũ trên dự án Q vẫn còn hiệu lực. | BR-RBAC-013/Then<br>STORY-RBAC-003/AC-006 | Khóa tài khoản chặn phân công mới nhưng không gỡ phân công đang có. | [Chưa xác định] | Draft |
+| UT-RBAC-054 | Assignment | CreateAssignmentCommandHandler.Handle | Error | REGRESSION | P1 | Handler đã có; kiểm quyền người nhận và loại ConstructionSite là thay đổi dự kiến theo TDD-RBAC-003. Người nhận là tài khoản nhân viên đang Locked, có supervision.complete, và trước đó đang phụ trách công trình Q. Công trình P chưa có người phụ trách. | staffUserId của người bị khóa, resourceType là ConstructionSite, resourceId là P. | Ném ngoại lệ ánh xạ 409 với mã AssignmentTargetInvalid; không tạo dòng phân công mới. Dòng phân công cũ trên công trình Q vẫn còn hiệu lực. | BR-RBAC-013/Then<br>STORY-RBAC-003/AC-006 | Khóa tài khoản chặn phân công mới nhưng không gỡ phân công đang có. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

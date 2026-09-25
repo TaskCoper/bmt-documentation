@@ -40,12 +40,12 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## System Test
 
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SUB-117 | STORY-SUB-003 | EXC | REGRESSION | P1 | Người thao tác có quyền supervision.complete và phân công hợp lệ. Gói G1 chưa gán dự án. Gói G2 từng gán dự án A nhưng đang bị nhân viên hủy. | 1. Gửi yêu cầu hoàn thành G1.<br>2. Gửi yêu cầu hoàn thành G2.<br>3. Kiểm tra kết quả và trạng thái hai gói. | Dữ liệu thử; không tạo dữ liệu lịch hoặc số dư lượt giám sát. API cụ thể bổ sung trong TDD. | Cả hai yêu cầu bị từ chối. G1 vẫn chưa gán, G2 vẫn bị hủy; không có dòng lịch sử mới. | STORY-SUB-003/AC-011<br>BR-SUB-011/Then | Bổ sung 24/09/2026 theo nghiệp vụ hoàn thành/mở lại trên vòng đời mới. Đặc tả nháp, chưa chạy. | [Chưa xác định] | Draft |
+| ST-SUB-117 | STORY-SUB-003 | EXC | REGRESSION | P1 | Người thao tác có quyền supervision.complete và phân công hợp lệ. Gói G1 chưa gán công trình. Gói G2 từng gán công trình A nhưng đang bị nhân viên hủy. | 1. Gửi yêu cầu hoàn thành G1.<br>2. Gửi yêu cầu hoàn thành G2.<br>3. Kiểm tra kết quả và trạng thái hai gói. | Dữ liệu thử; không tạo dữ liệu lịch hoặc số dư lượt giám sát. API cụ thể bổ sung trong TDD. | Cả hai yêu cầu bị từ chối. G1 vẫn chưa gán, G2 vẫn bị hủy; không có dòng lịch sử mới. | STORY-SUB-003/AC-011<br>BR-SUB-011/Then | Bổ sung 24/09/2026 theo nghiệp vụ hoàn thành/mở lại trên vòng đời mới. Đặc tả nháp, chưa chạy. Cập nhật 25/09/2026: gói giám sát gắn với công trình, không gắn với bản dự toán. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
