@@ -43,8 +43,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Version**:
 - **Effective Date**:
 - **Owner**: [Chưa xác định]
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 - **Source**: Xác nhận trực tiếp của người dùng trong trao đổi thiết kế: quyền lợi cấp theo tài khoản, dùng chung cho các dự án của tài khoản. Sau khi bổ sung giám sát, người dùng xác nhận giám sát là ngoại lệ theo công trình.
 
 ## Statement

@@ -44,7 +44,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Sprint**:
 - **Priority**:
 - **Status**: Todo
-- **Creator**: [Chưa xác định]
+- **Creator**: Tân Trần
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
 - **Assignee**:
@@ -278,4 +278,4 @@ Không ai đổi được công trình của gói đã gán.
 ## Out of Scope
 
 - Quản lý khảo sát, tiến độ giám sát, lịch và lượt kiểm tra; gỡ hoặc đổi công trình của gói đã gán, kể cả nhân viên và Admin; chuyển gói sang khách khác. Tạo và quản lý công trình thuộc STORY-SITE-001.
-- Chưa triển khai, chạy test hoặc phê duyệt tài liệu. Sprint, Priority, Creator và người thực hiện chưa được phân công; không lấy ví dụ trong template làm giá trị thật.
+- Chưa triển khai, chạy test hoặc phê duyệt tài liệu. Sprint, Priority và người thực hiện chưa được phân công; không lấy ví dụ trong template làm giá trị thật.

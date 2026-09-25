@@ -43,8 +43,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Version**:
 - **Effective Date**:
 - **Owner**: [Chưa xác định]
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 - **Source**: Người dùng chốt giữ trước 1 lượt tạo mới, thành công tính đã dùng, lỗi giải phóng; tác vụ qua kỳ tính vào kỳ giữ và được tiếp tục sau hết hạn. Người dùng chọn thành công là AI tạo đủ kết quả, đã lưu và khách có thể mở xem, không chờ khách duyệt hoặc hài lòng. Người dùng xác nhận toàn bộ kết quả AI trả cùng một lúc; phối cảnh 3D là một phần của bộ kết quả.
 
 ## Statement

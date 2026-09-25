@@ -218,9 +218,9 @@ Cũng dùng đồng hồ cố định để kiểm tra kỳ bắt đầu ngày 3
 
 | Thành phần dự kiến | Vai trò và phạm vi trách nhiệm |
 |---|---|
-| `SubscriptionPeriodPolicy` (domain) | Tính thời hạn: có hiệu lực từ start, hết hiệu lực tại end; kỳ mới không cộng lượt dư kỳ cũ |
-| `QuotaPolicy` (domain) | Kiểm tra quyền tính lượt, số còn sẵn dùng và hạn mức hữu hạn/không giới hạn; không dùng quyền Boolean |
-| `UsageTransitionPolicy` (domain) | Chuyển Pending sang Succeeded/Failed/TimedOut; không đổi lại trạng thái đã kết thúc |
+| `PeriodPolicy` (application, qua `IPeriodPolicy`) | Tính thời hạn: có hiệu lực từ start, hết hiệu lực tại end; kỳ mới không cộng lượt dư kỳ cũ |
+| `QuotaPolicy` (application, qua `IQuotaPolicy`) | Kiểm tra quyền tính lượt, số còn sẵn dùng và hạn mức hữu hạn/không giới hạn; không dùng quyền Boolean |
+| `UsageTransitionPolicy` (application, qua `IUsageTransitionPolicy`) | Chuyển Pending sang Succeeded/Failed/TimedOut; không đổi lại trạng thái đã kết thúc |
 | `CommitDesignPeriodHandler` (application, nội bộ) | Nhận kết quả xác minh giao dịch từ fulfillment của TDD-PAY-001; khóa `AccountCommerceState`, đóng kỳ cũ và tạo kỳ mới |
 | `ReserveDesignUsageHandler`, `CompleteDesignUsageHandler`, `FailDesignUsageHandler`, `ExpireDesignUsageHandler` | Mỗi bước ghi dùng giao dịch ngắn riêng; không giữ giao dịch database trong lúc gọi AI hoặc lưu tệp |
 | `EstimateInputWriteAccessPolicy` | Kiểm tra gói, quyền và số lượt trong cùng giao dịch tạo bản dự toán hoặc lưu thông tin đầu vào; không tính hoặc giữ lượt. Là nguồn quyết định cho adapter `IEstimateWriteAccess` của TDD-PROJ-001. Không áp cho đổi tên bản dự toán (BR-SUB-007 khoản 11) |
@@ -781,5 +781,5 @@ Không giữ giao dịch SQL trong lúc gọi dịch vụ ngoài. Lỗi trước
 
 ## Change Log
 
-- 2026-09-25 (đồng bộ code lần 2): Đồng bộ với code ở commit `72e7327`: UoW scoped, `TimeProvider`, 409 `ConcurrencyConflict`, lệnh giữ lượt chỉ cho tạo thiết kế, `GET /api/v1/me/design-subscription` kèm ví dụ phản hồi, migration `PackageHistoryRestrict`. Thêm mã lỗi `ConcurrencyConflict` và đặc tả UT-SUB-082 đến UT-SUB-087, UT-SUB-090 đến UT-SUB-092.
+- 2026-09-25 (đồng bộ code lần 2): Ghi đúng tên và tầng của ba policy (`PeriodPolicy`, `QuotaPolicy`, `UsageTransitionPolicy` ở application) như code. Đồng bộ với code ở commit `72e7327`: UoW scoped, `TimeProvider`, 409 `ConcurrencyConflict`, lệnh giữ lượt chỉ cho tạo thiết kế, `GET /api/v1/me/design-subscription` kèm ví dụ phản hồi, migration `PackageHistoryRestrict`. Thêm mã lỗi `ConcurrencyConflict` và đặc tả UT-SUB-082 đến UT-SUB-087, UT-SUB-090 đến UT-SUB-092.
 - 2026-09-25: Cập nhật theo nghiệp vụ đã chốt ngày 25/09/2026. Tách policy lưu thông tin đầu vào (`EstimateInputWriteAccessPolicy`, `CheckEstimateInputWriteAccess`) khỏi đổi tên bản dự toán; đổi tên theo BR-SUB-007 khoản 11 và TDD-PROJ-001. Sửa mục tiêu tra cứu theo BR-LIB-003: mở lại cùng phiên bản miễn lượt. Đổi "dự án"/`Project` trong luồng thiết kế thành bản dự toán (`Estimate`); route Gen AI, index giữ chỗ và mã lỗi theo TDD-PROJ-002. Thay khóa dòng `User` bằng `AccountCommerceState` cho mọi đường quota, bỏ "phân công" khỏi thứ tự khóa. Giá và phiên bản của kỳ lấy từ snapshot đơn theo TDD-PAY-001, bỏ các ghi chú "thanh toán thiết kế sau"; ghi không có kỳ tương lai trả trước theo BR-SUB-021. Ghi AC-009/010 của STORY-SUB-001 không nghiệm thu đợt này, AC-036 theo nghĩa mới và UT-SUB-042/044 cần cập nhật. Tách hiện trạng code khỏi thay đổi dự kiến.

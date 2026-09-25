@@ -49,9 +49,9 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Sprint**:
 - **Priority**:
 - **Status**: Todo
-- **Creator**: [Chưa xác định]
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Creator**: Tân Trần
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 - **Assignee**:
   - Backend: [Chưa xác định]
   - QA: [Chưa xác định]

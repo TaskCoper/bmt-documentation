@@ -44,9 +44,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-CONSULT-025 | STORY-CONSULT-003 | ALT | REGRESSION | P1 | Môi trường thử đã triển khai tính năng, có frontend, API, database và tài khoản thử với quyền tương ứng. Có thể đọc dữ liệu đã lưu; chỉ dùng dữ liệu và email thử. | 1. Mở R1 Chưa xử lý<br>2. Ghi chú Gọi chưa nghe máy, lưu<br>3. Tải lại và lọc Chưa xử lý | R1; tình huống gọi không được do tester mô phỏng; dữ liệu minh họa, không phải cấu hình sản phẩm. | Yêu cầu vẫn ở Chưa xử lý. Admin được lưu ghi chú nội bộ. Ghi chú được lưu, R1 vẫn Chưa xử lý. | STORY-CONSULT-003/AC-003<br>BR-CONSULT-004/Then | Đặc tả chưa thực thi; đối chiếu hành vi với dữ liệu thực lưu và nguồn đã chốt. | [Chưa xác định] | Draft |
+| ST-CONSULT-025 | STORY-CONSULT-003 | ALT | REGRESSION | P1 | Môi trường thử đã triển khai tính năng, có frontend, API, database và tài khoản thử với quyền tương ứng. Có thể đọc dữ liệu đã lưu; chỉ dùng dữ liệu và email thử. | 1. Mở R1 Chưa xử lý<br>2. Ghi chú Gọi chưa nghe máy, lưu<br>3. Tải lại và lọc Chưa xử lý | R1; tình huống gọi không được do tester mô phỏng; dữ liệu minh họa, không phải cấu hình sản phẩm. | Yêu cầu vẫn ở Chưa xử lý. Admin được lưu ghi chú nội bộ. Ghi chú được lưu, R1 vẫn Chưa xử lý. | STORY-CONSULT-003/AC-003<br>BR-CONSULT-004/Then<br>STORY-CONSULT-003/ALT-01 | Đặc tả chưa thực thi; đối chiếu hành vi với dữ liệu thực lưu và nguồn đã chốt. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-CONSULT-003/AC-003
 - BR-CONSULT-004/Then
+- STORY-CONSULT-003/ALT-01

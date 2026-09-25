@@ -43,8 +43,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Version**:
 - **Effective Date**:
 - **Owner**: [Chưa xác định]
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 - **Source**: Người dùng chốt lưu nháp → kiểm tra → Công bố; giữ quyền kỳ thiết kế hiện tại và quyền gói giám sát đã cấp. Với kỳ thiết kế mới, dùng bản quyền lợi đã chốt khi đăng ký/gia hạn, không tự lấy bản công bố mới nhất. Thời điểm chốt cụ thể sẽ thiết kế cùng thanh toán. Giám sát chỉ áp dụng thay đổi cho gói cấp mới.
 
 ## Statement

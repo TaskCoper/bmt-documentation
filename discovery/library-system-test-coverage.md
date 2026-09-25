@@ -1,8 +1,8 @@
 # Truy vết System Test thư viện mẫu
 
-US và BR đã được người dùng chốt trong hội thoại. 28 ca dưới đây là đặc tả, chưa thực thi; không phải kết quả Pass. Reviewer/Approver: Tân Trần. Owner kiểm thử chưa xác định.
+US và BR đã được người dùng chốt trong hội thoại. 30 ca dưới đây là đặc tả, chưa thực thi; không phải kết quả Pass. Reviewer/Approver: Tân Trần. Owner kiểm thử chưa xác định.
 
-**Cập nhật 25/09/2026:** quyền quản lý thư viện mẫu theo STORY-RBAC-001 và BR-LIB-002 có mã kỹ thuật `library.manage` trong TDD-RBAC-001, không gắn phân công; ST-LIB-011 kiểm thêm nhân viên thuộc vai trò tùy chỉnh được cấp mã này. Đã thêm ST-LIB-028 kiểm việc mở mẫu lần đầu và thay đổi gói của cùng khách chạy đồng thời.
+**Cập nhật 25/09/2026:** quyền quản lý thư viện mẫu theo STORY-RBAC-001 và BR-LIB-002 có mã kỹ thuật `library.manage` trong TDD-RBAC-001, không gắn phân công; ST-LIB-011 kiểm thêm nhân viên thuộc vai trò tùy chỉnh được cấp mã này. Đã thêm ST-LIB-028 kiểm việc mở mẫu lần đầu và thay đổi gói của cùng khách chạy đồng thời. Bổ sung sau đó: ST-LIB-029 kiểm sửa tại chỗ cùng phiên bản không tính lượt mới (STORY-LIB-003/ALT-01), ST-LIB-030 kiểm mẫu bị ẩn không nhận lượt mở mới nhưng người đã có quyền vẫn xem lại được (STORY-LIB-003/EXC-01); các ca đang phủ luồng ALT/EXC được ghi thêm mã luồng trong TEST_LINKS.
 
 | Tiêu chí | System Test |
 | --- | --- |
@@ -24,6 +24,12 @@ US và BR đã được người dùng chốt trong hội thoại. 28 ca dưới
 | STORY-LIB-003/AC-005 | [ST-LIB-022](../systemtest/ST-LIB-022.md), [ST-LIB-023](../systemtest/ST-LIB-023.md), [ST-LIB-025](../systemtest/ST-LIB-025.md) |
 | STORY-LIB-003/AC-006 | [ST-LIB-024](../systemtest/ST-LIB-024.md) |
 | STORY-LIB-003/AC-007 | [ST-LIB-026](../systemtest/ST-LIB-026.md) |
+| STORY-LIB-001/ALT-01 | [ST-LIB-010](../systemtest/ST-LIB-010.md) |
+| STORY-LIB-001/EXC-01 | [ST-LIB-011](../systemtest/ST-LIB-011.md) |
+| STORY-LIB-002/ALT-01 | [ST-LIB-014](../systemtest/ST-LIB-014.md) |
+| STORY-LIB-002/EXC-01 | [ST-LIB-016](../systemtest/ST-LIB-016.md) |
+| STORY-LIB-003/ALT-01 | [ST-LIB-018](../systemtest/ST-LIB-018.md), [ST-LIB-029](../systemtest/ST-LIB-029.md) |
+| STORY-LIB-003/EXC-01 | [ST-LIB-021](../systemtest/ST-LIB-021.md), [ST-LIB-022](../systemtest/ST-LIB-022.md), [ST-LIB-027](../systemtest/ST-LIB-027.md), [ST-LIB-030](../systemtest/ST-LIB-030.md) |
 
 Đã kiểm tra cấu trúc mỗi ca một file, 13 cột, mã/section tham chiếu tồn tại và Trace to khớp TEST_LINKS. Bao phủ tham chiếu không đồng nghĩa đã chứng minh hành vi đúng.
 

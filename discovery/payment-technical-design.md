@@ -1,12 +1,12 @@
 # Bàn giao thiết kế thanh toán và gói đã mua
 
-Đã lưu 4 TDD và 74 đặc tả Unit Test cho 4 User Story mới. Bộ System Test thanh toán hiện có 70 ca, gồm 7 ca bổ sung kiểm tra transaction và xử lý đồng thời. Tất cả là bản nháp thiết kế, chưa nhập vào Document First. Kiểm code ngày 25/09/2026: phần gán, đổi, hủy và khôi phục gói (TDD-SUB-004, TDD-SUB-005) đã có handler và migration, trong đó gói giám sát còn dùng cột `ProjectId` của mô hình cũ; phần đơn, giao dịch và tra cứu (TDD-PAY-001, TDD-PAY-002) chưa có code. Chưa chạy các test trong bộ đặc tả này.
+Đã lưu 4 TDD và 74 đặc tả Unit Test cho 4 User Story mới. Bộ System Test thanh toán hiện có 70 ca, gồm 7 ca bổ sung kiểm tra transaction và xử lý đồng thời. Tất cả là bản nháp thiết kế, chưa nhập vào Document First. Kiểm code ngày 25/09/2026: phần gán, hủy và khôi phục gói (TDD-SUB-004, TDD-SUB-005) đã có handler và migration. Từ commit `182e2a8` của `bmt-be`, gói giám sát dùng cột `ConstructionSiteId` gắn với công trình và thao tác đổi công trình đã bỏ. Phần đơn, giao dịch và tra cứu (TDD-PAY-001, TDD-PAY-002) chưa có code. Chưa chạy các test trong bộ đặc tả này.
 
 ## Cập nhật ngày 25/09/2026
 
 Bốn TDD được sửa theo US/BR người dùng chốt ngày 25/09/2026. Các thay đổi chính:
 
-- Gói giám sát gắn với **công trình**, một thực thể riêng khác bản dự toán do khách tự tạo. Tên kỹ thuật là `ConstructionSite`: cột `ConstructionSiteId`, `OfferKey = ConstructionSite` và cổng đọc `IConstructionSiteOwnershipReader` (dự kiến, thay `IProjectOwnershipReader`). Story, BR và TDD của Công trình chưa được soạn.
+- Gói giám sát gắn với **công trình**, một thực thể riêng khác bản dự toán do khách tự tạo. Tên kỹ thuật là `ConstructionSite`: cột `ConstructionSiteId`, `OfferKey = ConstructionSite` và cổng đọc `IConstructionSiteOwnershipReader` thay `IProjectOwnershipReader`. Story, BR và TDD của Công trình đã có (STORY-SITE-001/002, BR-SITE-001..003, TDD-SITE-001) và đã có code ở commit `182e2a8`.
 - Tài khoản nhân viên không được tạo hoặc hủy đơn mua gói, kể cả khi có quyền tra cứu; hệ thống trả 403 theo BR-RBAC-005 (STORY-PAY-001/EXC-08, AC-028).
 - Mọi luồng đụng tới gói và lượt của một khách khóa `AccountCommerceState` trước, rồi mới tới kỳ, lượt và dữ liệu khác (TDD-PAY-001).
 - Gói giám sát chốt tên, giá và mô tả dịch vụ theo đơn qua revision, không dùng danh mục quyền lợi (BR-SUB-004 khoản 5, BR-SUB-008 khoản 7).

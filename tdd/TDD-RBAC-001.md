@@ -545,7 +545,8 @@ Các đường dẫn dưới đây đã có trong mã nguồn, ở `src/bmt-be.p
 - **POST** `/api/v1/roles` — Tạo vai trò mới. Cần quyền `role.manage`.
 - **PUT** `/api/v1/roles/{roleId}` — Đổi tên và đặt lại danh sách quyền của vai trò tự tạo. Cần quyền `role.manage`.
 - **DELETE** `/api/v1/roles/{roleId}` — Xóa vai trò tự tạo không còn ai giữ. Cần quyền `role.manage`.
-- **GET** `/api/v1/access-audit` — Tra cứu nhật ký, lọc theo `actorUserId`, `targetType`, `targetId`, `fromUtc`, `toUtc`, có phân trang. Cần quyền `audit.read`.
+- **GET** `/api/v1/access-audit` — Tra cứu nhật ký, lọc theo `actorUserId`, `targetType`, `targetId`, `fromUtc`, `toUtc`, có phân trang. Cần quyền `audit.read`. Mỗi dòng không kèm nội dung trước/sau để danh sách gọn.
+- **GET** `/api/v1/access-audit/{auditLogId}` — Xem một bản ghi đầy đủ: các trường của danh sách cộng `before` và `after` là nội dung trước và sau khi thay đổi (BR-RBAC-012 khoản 1 và 5, STORY-RBAC-004/EXC-04). Cần quyền `audit.read`. Không có bản ghi thì 404 `AuditLogNotFound`. Đã có trong code ở commit `2c8dd90` trên nhánh `feature/audit-log-detail` của `bmt-be`.
 
 ### Examples
 
@@ -597,6 +598,18 @@ Response 200:
 {"items": [{"id": "log-2", "actorUserId": "user-lan", "actorName": "Trần Thị Lan", "action": "RoleGranted", "targetType": "User", "targetId": "user-nam", "targetLabel": "Nguyễn Văn Nam", "outcome": "Succeeded", "rejectReasonCode": null, "occurredAtUtc": "2026-09-21T03:05:00Z"}], "pageIndex": 1, "pageSize": 20, "totalCount": 137}
 ```
 
+#### GET /api/v1/access-audit/{auditLogId}
+
+```
+Response 200:
+{"value": {"id": "log-2", "actorUserId": "user-lan", "actorName": "Trần Thị Lan", "action": "RoleGranted", "targetType": "User", "targetId": "user-nam", "targetLabel": "Nguyễn Văn Nam", "outcome": "Succeeded", "rejectReasonCode": null, "occurredAtUtc": "2026-09-21T03:05:00Z", "before": {"roles": ["role-finance"]}, "after": {"roles": ["role-finance", "role-ops"]}}, "isSuccess": true, "isFailure": false, "error": {"code": "", "message": ""}}
+
+Error Response:
+{"title": "Not Found", "code": "NotFound", "status": 404, "detail": "Không có bản ghi nhật ký này.", "messageCode": "AuditLogNotFound", "errors": null}
+```
+
+`before` và `after` là JSON đúng như lúc ghi, lấy từ `BeforeJson` và `AfterJson`; ví dụ khớp dòng `log-2` ở Data Model. Bản ghi từ chối như `log-3` có `after` là null và mang `rejectReasonCode`.
+
 ### Error Codes
 
 Mỗi mã dưới đây là giá trị `messageCode` trong thân lỗi. Trường `code` chỉ là loại lỗi chung: `Unauthorized`, `Forbidden`, `NotFound`, `Conflict`, lấy từ tiêu đề ngoại lệ.
@@ -613,6 +626,7 @@ Mỗi mã dưới đây là giá trị `messageCode` trong thân lỗi. Trườn
 - **RoleNameDuplicated** (409): Tên vai trò trùng vai trò đang có.
 - **PermissionCodeUnknown** (422): Mã quyền gửi lên không có trong danh mục. Kiểm ở validator FluentValidation, nên đi theo nhánh `ValidationException` của `ExceptionHandlingMiddleware` và trả 422 như các lỗi đầu vào khác trong repo.
 - **AuditLogImmutable** (409): Yêu cầu sửa hoặc xóa một bản ghi nhật ký.
+- **AuditLogNotFound** (404): Xem chi tiết một bản ghi nhật ký không tồn tại.
 
 Ba mã 401 và `AccessForbidden` có trong `JwtExtensions.cs`. Các mã khác, trừ `AuditLogImmutable`, đã có trong `src/bmt-be.contract/constants/AccessErrorCodes.cs` và được handler ném bằng các kiểu ngoại lệ miền nghiệp vụ. Ngày 25/09/2026, `StaffHasActiveAssignments` có thêm nghĩa mới cho sửa quyền vai trò; `SelfPrivilegeEscalation` có thêm trường hợp thêm quyền vào vai trò mình đang giữ. Trong các mã 403 và 409 ở trên, `PermissionNotHeldByActor`, `SelfPrivilegeEscalation` và `RoleIsSystem` được ghi nhật ký từ chối; `AccessForbidden`, `RoleInUse`, `StaffHasActiveAssignments` và `RoleNameDuplicated` không ghi.
 
@@ -648,10 +662,11 @@ Cách ánh xạ bám đúng bảng đã có trong `ExceptionHandlingMiddleware.c
 - Tài liệu kỹ thuật: [TDD-RBAC-002](TDD-RBAC-002.md) vòng đời tài khoản nhân viên và cắt phiên; [TDD-RBAC-003](TDD-RBAC-003.md) phân công tài nguyên.
 - Tài liệu kỹ thuật dùng năm mã quyền quản trị: [TDD-SUB-001](TDD-SUB-001.md) cho `plan.manage`, [TDD-PROJ-001](TDD-PROJ-001.md) cho `estimate.catalog.manage`, [TDD-LIB-001](TDD-LIB-001.md) cho `library.manage`, [TDD-NEWS-001](TDD-NEWS-001.md) cho `news.manage`, [TDD-CONSULT-001](TDD-CONSULT-001.md) cho `consultation.manage`.
 - Tài liệu kỹ thuật: [TDD-SUB-005](TDD-SUB-005.md), [TDD-SUB-004](TDD-SUB-004.md) và [TDD-PAY-002](TDD-PAY-002.md) đã chuyển sang mô hình vai trò, giữ nguyên ba mã quyền `commerce.read`, `package.cancel`, `package.restore`; mã `supervision.reassign` đã bỏ ngày 25/09/2026.
-- Đặc tả Unit Test: UT-RBAC-001 đến UT-RBAC-028, UT-RBAC-047, UT-RBAC-062, UT-RBAC-074 đến UT-RBAC-080 và UT-RBAC-091 (migration gỡ `supervision.reassign`). Mã test nằm ở `test/bmt-be.application.tests/usecases/role/`, `usecases/authorization/` và `usecases/audit/`; bộ unit test chạy đạt 338/338 ngày 25/09/2026. Chưa có mã test cho UT-RBAC-080, vì ca này đòi đủ 13 mã trong khi code mới có 9, và cho UT-RBAC-091; migration gỡ mã được kiểm bằng lần chạy thử `Up`/`Down` nêu ở Data Model.
+- Đặc tả Unit Test: UT-RBAC-001 đến UT-RBAC-028, UT-RBAC-047, UT-RBAC-062, UT-RBAC-074 đến UT-RBAC-080, UT-RBAC-091, UT-RBAC-093 và UT-RBAC-094 (migration gỡ `supervision.reassign`). Mã test nằm ở `test/bmt-be.application.tests/usecases/role/`, `usecases/authorization/` và `usecases/audit/`; bộ unit test chạy đạt 338/338 ngày 25/09/2026. Chưa có mã test cho UT-RBAC-080, vì ca này đòi đủ 13 mã trong khi code mới có 9, và cho UT-RBAC-091; migration gỡ mã được kiểm bằng lần chạy thử `Up`/`Down` nêu ở Data Model.
 
 ## Change Log
 
+- 2026-09-25 (API chi tiết nhật ký): Thêm `GET /api/v1/access-audit/{auditLogId}` trả nội dung trước/sau, ví dụ phản hồi và mã lỗi `AuditLogNotFound`, theo quyết định người dùng ngày 25/09/2026. Đã có trong code ở commit `2c8dd90`. Thêm đặc tả UT-RBAC-093, UT-RBAC-094.
 - 2026-09-25 (đồng bộ code lần 2): Ghi rõ việc bỏ ghi nhật ký từ chối cho năm lỗi nghiệp vụ đã có trong code ở commit `111a02e`, và `RoleInUse` đã trả `memberCount` ở commit `72e7327`.
 - 2026-09-25 (chốt nhật ký): Theo `BR-RBAC-012/Notes`, người dùng xác nhận ngày 25/09/2026: không ghi nhật ký từ chối cho năm lỗi nghiệp vụ `RoleNameDuplicated`, `RoleInUse`, `EmailAlreadyUsed`, `RoleNotAssignableToStaff` và `StaffHasActiveAssignments`. Thêm phạm vi ghi vào mục Ghi nhật ký, bỏ dòng `log-4` khỏi dữ liệu mẫu, và ghi rõ nhật ký không có tác vụ tự xóa trong đợt này. Code chưa đổi.
 - 2026-09-25 (đồng bộ code): Đồng bộ với code đã triển khai ở commit `182e2a8`: danh mục còn 9 mã sau migration `20260925074152_ConstructionSiteAndPackageAssignment`, hai kiểm tra khi sửa quyền vai trò, `StaffCreated` và cổng `IAccessRowLocker` đã có; bốn mã quyền theo module vẫn chưa có. Ví dụ lỗi ghi mã nghiệp vụ ở `messageCode`, `code` là loại lỗi chung. Ghi rõ `RoleInUse` chưa trả `memberCount`.

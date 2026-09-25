@@ -45,9 +45,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SUB-019 | STORY-SUB-002 | EXC | REGRESSION | P1 | Admin có quyền sửa gói. Đã xác định danh mục quyền lợi hệ thống trong môi trường thử. | 1. Mở lựa chọn quyền lợi và đối chiếu với danh mục hệ thống.<br>2. Gửi yêu cầu cấu hình một mã quyền lợi không tồn tại qua điểm tiếp nhận cấu hình.<br>3. Kiểm tra yêu cầu bị từ chối và danh mục không có quyền lợi mới. | Một mã không tồn tại trong danh mục thử. Contract và mã lỗi sẽ bổ sung trong TDD. | Chỉ chọn được quyền lợi hệ thống đã định nghĩa. Mã không tồn tại bị từ chối, không tự tạo quyền lợi hoặc cấp quyền tương ứng. | STORY-SUB-002/AC-003<br>BR-SUB-008/Statement | Kiểm tra không thể tự tạo quyền lợi bằng cách gửi mã tùy ý. Đặc tả nháp, chưa thực thi. | [Chưa xác định] | Draft |
+| ST-SUB-019 | STORY-SUB-002 | EXC | REGRESSION | P1 | Admin có quyền sửa gói. Đã xác định danh mục quyền lợi hệ thống trong môi trường thử. | 1. Mở lựa chọn quyền lợi và đối chiếu với danh mục hệ thống.<br>2. Gửi yêu cầu cấu hình một mã quyền lợi không tồn tại qua điểm tiếp nhận cấu hình.<br>3. Kiểm tra yêu cầu bị từ chối và danh mục không có quyền lợi mới. | Một mã không tồn tại trong danh mục thử, gửi qua tạo gói hoặc lưu nháp (POST /api/v1/admin/plans, PUT /api/v1/admin/plans/{planId}/draft). | Chỉ chọn được quyền lợi hệ thống đã định nghĩa. Mã không tồn tại bị từ chối với 422 PlanConfigurationInvalid, không tự tạo quyền lợi hoặc cấp quyền tương ứng. | STORY-SUB-002/AC-003<br>BR-SUB-008/Statement<br>TDD-SUB-001/Error Codes | Kiểm tra không thể tự tạo quyền lợi bằng cách gửi mã tùy ý. Đặc tả nháp, chưa thực thi. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-SUB-002/AC-003
 - BR-SUB-008/Statement
+- TDD-SUB-001/Error Codes

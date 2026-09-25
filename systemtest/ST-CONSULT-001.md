@@ -44,9 +44,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-CONSULT-001 | STORY-CONSULT-001 | Main | SMOKE | P1 | Môi trường thử đã triển khai tính năng, có frontend, API, database và tài khoản thử với quyền tương ứng. Có thể đọc dữ liệu đã lưu; chỉ dùng dữ liệu và email thử. | 1. Tạo KTS đủ bảy nhóm thông tin, chọn Hiện<br>2. Mở lại hồ sơ<br>3. Sửa giới thiệu và số công trình rồi lưu<br>4. Tải lại và đối chiếu dữ liệu lưu | KTS A; ảnh thử; Nguyễn An; KTS; category Nhà phố; 5 năm; 12 công trình; giới thiệu Bản đầu, sửa Bản mới; dữ liệu minh họa, không phải cấu hình sản phẩm. | Lưu và đọc lại được đầy đủ bảy nhóm thông tin đã xác nhận. Không tự thêm tài khoản đăng nhập cho KTS. Đối chiếu ảnh và tất cả trường; không chỉ kiểm tra thông báo thành công. | STORY-CONSULT-001/AC-001<br>BR-CONSULT-001/Then | Đặc tả chưa thực thi; đối chiếu hành vi với dữ liệu thực lưu và nguồn đã chốt. | [Chưa xác định] | Draft |
+| ST-CONSULT-001 | STORY-CONSULT-001 | Main | SMOKE | P1 | Môi trường thử đã triển khai tính năng, có frontend, API, database và tài khoản thử với quyền tương ứng. Có thể đọc dữ liệu đã lưu; chỉ dùng dữ liệu và email thử. | 1. Tạo KTS đủ bảy nhóm thông tin, chọn Hiện<br>2. Mở lại hồ sơ<br>3. Sửa giới thiệu và số công trình rồi lưu<br>4. Tải lại và đối chiếu dữ liệu lưu | KTS A; ảnh thử; Nguyễn An; KTS; category Nhà phố; 5 năm; 12 công trình; giới thiệu Bản đầu, sửa Bản mới; dữ liệu minh họa, không phải cấu hình sản phẩm. | Lưu và đọc lại được đầy đủ bảy nhóm thông tin đã xác nhận. Không tự thêm tài khoản đăng nhập cho KTS. Đối chiếu ảnh và tất cả trường; không chỉ kiểm tra thông báo thành công. | STORY-CONSULT-001/AC-001<br>BR-CONSULT-001/Then<br>STORY-CONSULT-001/ALT-01 | Đặc tả chưa thực thi; đối chiếu hành vi với dữ liệu thực lưu và nguồn đã chốt. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-CONSULT-001/AC-001
 - BR-CONSULT-001/Then
+- STORY-CONSULT-001/ALT-01

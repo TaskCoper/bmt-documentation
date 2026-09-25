@@ -44,9 +44,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-CONSULT-010 | STORY-CONSULT-001 | Main | REGRESSION | P1 | Môi trường thử đã triển khai tính năng, có frontend, API, database và tài khoản thử với quyền tương ứng. Có thể đọc dữ liệu đã lưu; chỉ dùng dữ liệu và email thử. | 1. Bỏ C khỏi mọi KTS nhưng giữ ít nhất một category khác trên mỗi hồ sơ<br>2. Xóa C bằng người có quyền<br>3. Mở lại danh mục chọn chuyên môn | C không còn được gán; category D còn dùng; dữ liệu minh họa, không phải cấu hình sản phẩm. | Category được xóa khỏi danh mục chuyên môn. Không còn được chọn khi gán chuyên môn cho hồ sơ KTS. Xóa thành công; C không còn trong danh mục lựa chọn. | STORY-CONSULT-001/AC-010<br>BR-CONSULT-001/Then | Đặc tả chưa thực thi; đối chiếu hành vi với dữ liệu thực lưu và nguồn đã chốt. | [Chưa xác định] | Draft |
+| ST-CONSULT-010 | STORY-CONSULT-001 | Main | REGRESSION | P1 | Môi trường thử đã triển khai tính năng, có frontend, API, database và tài khoản thử với quyền tương ứng. Có thể đọc dữ liệu đã lưu; chỉ dùng dữ liệu và email thử. | 1. Bỏ C khỏi mọi KTS nhưng giữ ít nhất một category khác trên mỗi hồ sơ<br>2. Xóa C bằng người có quyền<br>3. Mở lại danh mục chọn chuyên môn | C không còn được gán; category D còn dùng; dữ liệu minh họa, không phải cấu hình sản phẩm. | Category được xóa khỏi danh mục chuyên môn. Không còn được chọn khi gán chuyên môn cho hồ sơ KTS. Xóa thành công; C không còn trong danh mục lựa chọn. | STORY-CONSULT-001/AC-010<br>BR-CONSULT-001/Then<br>STORY-CONSULT-001/ALT-03 | Đặc tả chưa thực thi; đối chiếu hành vi với dữ liệu thực lưu và nguồn đã chốt. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-CONSULT-001/AC-010
 - BR-CONSULT-001/Then
+- STORY-CONSULT-001/ALT-03

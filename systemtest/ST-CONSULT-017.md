@@ -44,9 +44,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-CONSULT-017 | STORY-CONSULT-002 | EXC | REGRESSION | P1 | Môi trường thử đã triển khai tính năng, có frontend, API, database và tài khoản thử với quyền tương ứng. Có thể đọc dữ liệu đã lưu; chỉ dùng dữ liệu và email thử. | 1. Cố định thời gian backend T bằng môi trường thử<br>2. Gửi trực tiếp các thời điểm T-1 giây, T và T+1 giờ<br>3. Đọc kết quả và dữ liệu lưu | Đồng hồ thử T; tất cả trường khác hợp lệ; dữ liệu minh họa, không phải cấu hình sản phẩm. | Backend từ chối thời điểm không còn ở tương lai. Backend không cần danh mục khung giờ lưu trữ. T-1 và T bị từ chối; T+1 giờ được chấp nhận. Cần kiểm soát đồng hồ khi kiểm tra đúng biên, không dựa vào thời gian mạng. | STORY-CONSULT-002/AC-007<br>BR-CONSULT-003/Then | Đặc tả chưa thực thi; đối chiếu hành vi với dữ liệu thực lưu và nguồn đã chốt. | [Chưa xác định] | Draft |
+| ST-CONSULT-017 | STORY-CONSULT-002 | EXC | REGRESSION | P1 | Môi trường thử đã triển khai tính năng, có frontend, API, database và tài khoản thử với quyền tương ứng. Có thể đọc dữ liệu đã lưu; chỉ dùng dữ liệu và email thử. | 1. Cố định thời gian backend T bằng môi trường thử<br>2. Gửi trực tiếp các thời điểm T-1 giây, T và T+1 giờ<br>3. Đọc kết quả và dữ liệu lưu | Đồng hồ thử T; tất cả trường khác hợp lệ; dữ liệu minh họa, không phải cấu hình sản phẩm. | Backend từ chối thời điểm không còn ở tương lai. Backend không cần danh mục khung giờ lưu trữ. T-1 và T bị từ chối; T+1 giờ được chấp nhận. Cần kiểm soát đồng hồ khi kiểm tra đúng biên, không dựa vào thời gian mạng. | STORY-CONSULT-002/AC-007<br>BR-CONSULT-003/Then<br>STORY-CONSULT-002/EXC-02 | Đặc tả chưa thực thi; đối chiếu hành vi với dữ liệu thực lưu và nguồn đã chốt. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-CONSULT-002/AC-007
 - BR-CONSULT-003/Then
+- STORY-CONSULT-002/EXC-02

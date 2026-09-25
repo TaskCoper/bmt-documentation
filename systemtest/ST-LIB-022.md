@@ -44,9 +44,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-LIB-022 | STORY-LIB-003 | EXC / Integration boundary | REGRESSION | P1 | C đủ điều kiện; môi trường thử chặn phản hồi sau ghi nhận thành công. Môi trường thử có chức năng tương ứng; đọc lại được dữ liệu và lượt khi ca cần. | 1. Mở V1 và làm mất phản hồi.<br>2. Gửi lại rồi mở bằng yêu cầu mới.<br>3. Đọc số dư, lịch sử và quyền xem. | 20 lượt ban đầu. Đây là dữ liệu thử, không phải mặc định sản phẩm. | Giữ đúng một lượt đã dùng, còn 19; trả nội dung V1, không tính thêm cho gửi lại hay yêu cầu mới cùng phiên bản. | STORY-LIB-003/AC-005<br>BR-LIB-003/Then | Mất phản hồi sau thành công. Đặc tả chưa thực thi; API/fixture kỹ thuật bổ sung sau TDD. | [Chưa xác định] | Draft |
+| ST-LIB-022 | STORY-LIB-003 | EXC / Integration boundary | REGRESSION | P1 | C đủ điều kiện; môi trường thử chặn phản hồi sau ghi nhận thành công. Môi trường thử có chức năng tương ứng; đọc lại được dữ liệu và lượt khi ca cần. | 1. Mở V1 và làm mất phản hồi.<br>2. Gửi lại rồi mở bằng yêu cầu mới.<br>3. Đọc số dư, lịch sử và quyền xem. | 20 lượt ban đầu. Đây là dữ liệu thử, không phải mặc định sản phẩm. | Giữ đúng một lượt đã dùng, còn 19; trả nội dung V1, không tính thêm cho gửi lại hay yêu cầu mới cùng phiên bản. | STORY-LIB-003/AC-005<br>BR-LIB-003/Then<br>STORY-LIB-003/EXC-01 | Mất phản hồi sau thành công. Đặc tả chưa thực thi; API/fixture kỹ thuật bổ sung sau TDD. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-LIB-003/AC-005
 - BR-LIB-003/Then
+- STORY-LIB-003/EXC-01

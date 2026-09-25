@@ -44,9 +44,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-CONSULT-018 | STORY-CONSULT-002 | EXC | REGRESSION | P1 | Môi trường thử đã triển khai tính năng, có frontend, API, database và tài khoản thử với quyền tương ứng. Có thể đọc dữ liệu đã lưu; chỉ dùng dữ liệu và email thử. | 1. Khách mở form A khi đang hiện<br>2. Admin ẩn A<br>3. Khách gửi form đã mở<br>4. Admin đọc yêu cầu cũ R1 | A có R1 trước khi ẩn; dữ liệu minh họa, không phải cấu hình sản phẩm. | Hệ thống từ chối yêu cầu mới. Yêu cầu cũ của KTS vẫn được giữ. Không lưu yêu cầu mới; R1 vẫn tồn tại. | STORY-CONSULT-002/AC-008<br>BR-CONSULT-001/Then | Đặc tả chưa thực thi; đối chiếu hành vi với dữ liệu thực lưu và nguồn đã chốt. | [Chưa xác định] | Draft |
+| ST-CONSULT-018 | STORY-CONSULT-002 | EXC | REGRESSION | P1 | Môi trường thử đã triển khai tính năng, có frontend, API, database và tài khoản thử với quyền tương ứng. Có thể đọc dữ liệu đã lưu; chỉ dùng dữ liệu và email thử. | 1. Khách mở form A khi đang hiện<br>2. Admin ẩn A<br>3. Khách gửi form đã mở<br>4. Admin đọc yêu cầu cũ R1 | A có R1 trước khi ẩn; dữ liệu minh họa, không phải cấu hình sản phẩm. | Hệ thống từ chối yêu cầu mới. Yêu cầu cũ của KTS vẫn được giữ. Không lưu yêu cầu mới; R1 vẫn tồn tại. | STORY-CONSULT-002/AC-008<br>BR-CONSULT-001/Then<br>STORY-CONSULT-002/EXC-02 | Đặc tả chưa thực thi; đối chiếu hành vi với dữ liệu thực lưu và nguồn đã chốt. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-CONSULT-002/AC-008
 - BR-CONSULT-001/Then
+- STORY-CONSULT-002/EXC-02

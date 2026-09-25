@@ -35,7 +35,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# ST-LIB-027
+# ST-LIB-030
 
 ## System Test
 
@@ -44,10 +44,9 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-LIB-027 | STORY-LIB-003 | EXC | REGRESSION | P1 | Các tài khoản thử chưa từng xem V1. Môi trường thử có chức năng tương ứng; đọc lại được dữ liệu và lượt khi ca cần. | 1. Thử mở trực tiếp lần lượt khi chưa đăng nhập, chưa có gói, gói hết hạn, thiếu quyền, hết lượt.<br>2. Kiểm tra nội dung và dữ liệu lưu. | Mỗi điều kiện dùng tài khoản riêng, các điều kiện còn lại hợp lệ nếu có thể. Đây là dữ liệu thử, không phải mặc định sản phẩm. | Không trả chi tiết hoặc tệp, không ghi quyền xem/lịch sử, không giữ/trừ hay tự cấp lượt. | STORY-LIB-003/AC-001<br>BR-LIB-003/Then<br>STORY-LIB-003/EXC-01 | Mở lần đầu thiếu điều kiện. Đặc tả chưa thực thi; API/fixture kỹ thuật bổ sung sau TDD. | [Chưa xác định] | Draft |
+| ST-LIB-030 | STORY-LIB-003 | EXC | REGRESSION | P1 | Mẫu M có phiên bản V1 đang công khai. C đã mở V1; D đủ điều kiện mở lần đầu nhưng chưa mở V1. Người quản trị có quyền quản lý thư viện. Môi trường thử có chức năng tương ứng; đọc lại được dữ liệu và lượt khi ca cần. | 1. Người quản trị ẩn mẫu M.<br>2. D thử mở V1 lần đầu, cả qua giao diện và gọi thẳng API.<br>3. C mở lại V1 từ lịch sử và tải tệp đính kèm.<br>4. Đọc số dư, quyền xem và lịch sử của C và D. | C còn 19 lượt, D còn 20 lượt. Đây là dữ liệu thử, không phải mặc định sản phẩm. | D bị từ chối ở cả hai đường: không có quyền xem hay dòng lịch sử V1, vẫn 20 lượt, không lấy được ảnh hoặc tệp chi tiết. C vẫn xem và tải được V1 miễn lượt, vẫn 19 lượt. | STORY-LIB-003/EXC-01<br>BR-LIB-003/Then | BR-LIB-003 khoản 8: mẫu bị ẩn không nhận lượt xem mới nhưng vẫn phục vụ người đã có quyền xem phiên bản. Đặc tả chưa thực thi; API/fixture kỹ thuật bổ sung sau TDD. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- STORY-LIB-003/AC-001
-- BR-LIB-003/Then
 - STORY-LIB-003/EXC-01
+- BR-LIB-003/Then

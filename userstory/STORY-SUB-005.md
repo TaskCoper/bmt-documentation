@@ -44,7 +44,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Sprint**:
 - **Priority**:
 - **Status**: Todo
-- **Creator**: [Chưa xác định]
+- **Creator**: Tân Trần
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
 - **Assignee**:
@@ -271,4 +271,4 @@ Chặn khôi phục thiếu quyền hoặc lý do.
 ## Out of Scope
 
 - Chuyển tiền hoặc đánh dấu đã hoàn tiền; khôi phục kỳ thiết kế đã bị thay thế; tự gia hạn/bù thời gian; mở lại gói đã hoàn thành không thuộc Story này; thao tác đó theo STORY-SUB-003 và BR-SUB-012.
-- Chưa triển khai, chạy test hoặc phê duyệt tài liệu. Sprint, Priority, Creator và người thực hiện chưa được phân công; không lấy ví dụ trong template làm giá trị thật.
+- Chưa triển khai, chạy test hoặc phê duyệt tài liệu. Sprint, Priority và người thực hiện chưa được phân công; không lấy ví dụ trong template làm giá trị thật.

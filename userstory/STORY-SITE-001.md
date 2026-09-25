@@ -44,7 +44,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Sprint**:
 - **Priority**:
 - **Status**: Todo
-- **Creator**: [Chưa xác định]
+- **Creator**: Tân Trần
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
 - **Assignee**:
@@ -268,4 +268,4 @@ Khách xem, sửa hoặc xóa công trình của khách khác, kể cả gửi y
 
 - Trạng thái công trình (đang thi công, đã xong); nhân viên tạo, sửa hoặc xóa hộ khách; hiện tên nhân viên phụ trách cho khách; địa chỉ tách tỉnh/thành, quận/huyện, phường/xã; gắn công trình với bản dự toán hoặc tạo công trình từ bản dự toán; giới hạn số công trình.
 - Gắn gói giám sát vào công trình thuộc STORY-SUB-004; phân công nhân viên cho gói thuộc STORY-RBAC-003.
-- Chưa có TDD và System Test; System Test được viết sau khi User Story và Business Rule được chốt. Chưa triển khai, chạy test hoặc phê duyệt tài liệu. Sprint, Priority, Creator và người thực hiện chưa được phân công.
+- Đã có TDD-SITE-001 và bộ System Test ST-SITE. Code đã triển khai ở commit `182e2a8` của `bmt-be`; unit test và integration test chạy đạt ngày 25/09/2026, System Test chưa chạy. Tài liệu chưa được phê duyệt. Sprint, Priority và người thực hiện chưa được phân công.

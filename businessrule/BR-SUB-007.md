@@ -43,8 +43,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Version**:
 - **Effective Date**:
 - **Owner**: [Chưa xác định]
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 - **Source**: Người dùng xác nhận hết hạn vẫn xem, tải kết quả cũ và xuất PDF; không sửa/lưu thông tin hoặc bắt đầu tác vụ mới cần gói. Tác vụ đã bắt đầu hợp lệ được tiếp tục. Tạo/lưu dự án cần gói còn hiệu lực, quyền tạo thiết kế và lượt sẵn dùng. Dùng hết hoặc toàn bộ lượt còn lại đang giữ đều chặn tạo/lưu. Nếu tác vụ lỗi và trả lượt, khách được tiếp tục khi gói, quyền còn hợp lệ. Ngày 25/09/2026, người dùng xác nhận chỉ tên dự án được đổi bất cứ lúc nào; thông tin đầu vào giữ nguyên điều kiện gói, quyền và lượt.
 
 ## Statement

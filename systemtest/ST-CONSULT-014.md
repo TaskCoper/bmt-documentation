@@ -44,9 +44,11 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-CONSULT-014 | STORY-CONSULT-002 | ALT / EXC | REGRESSION | P1 | Môi trường thử đã triển khai tính năng, có frontend, API, database và tài khoản thử với quyền tương ứng. Có thể đọc dữ liệu đã lưu; chỉ dùng dữ liệu và email thử. | 1. Dùng tài khoản không có số<br>2. Thử gửi thiếu số cả trên form và trực tiếp backend<br>3. Nhập số rồi gửi<br>4. Đọc lại tài khoản | PhoneNumber rỗng; số thử P2; dữ liệu minh họa, không phải cấu hình sản phẩm. | Phải nhập số liên lạc mới được tiếp nhận. Không tự ghi số vừa nhập về tài khoản. Thiếu số bị từ chối; bổ sung số được tiếp nhận; tài khoản vẫn chưa có số. | STORY-CONSULT-002/AC-004<br>BR-CONSULT-002/Then | Đặc tả chưa thực thi; đối chiếu hành vi với dữ liệu thực lưu và nguồn đã chốt. | [Chưa xác định] | Draft |
+| ST-CONSULT-014 | STORY-CONSULT-002 | ALT / EXC | REGRESSION | P1 | Môi trường thử đã triển khai tính năng, có frontend, API, database và tài khoản thử với quyền tương ứng. Có thể đọc dữ liệu đã lưu; chỉ dùng dữ liệu và email thử. | 1. Dùng tài khoản không có số<br>2. Thử gửi thiếu số cả trên form và trực tiếp backend<br>3. Nhập số rồi gửi<br>4. Đọc lại tài khoản | PhoneNumber rỗng; số thử P2; dữ liệu minh họa, không phải cấu hình sản phẩm. | Phải nhập số liên lạc mới được tiếp nhận. Không tự ghi số vừa nhập về tài khoản. Thiếu số bị từ chối; bổ sung số được tiếp nhận; tài khoản vẫn chưa có số. | STORY-CONSULT-002/AC-004<br>BR-CONSULT-002/Then<br>STORY-CONSULT-002/ALT-01<br>STORY-CONSULT-002/EXC-02 | Đặc tả chưa thực thi; đối chiếu hành vi với dữ liệu thực lưu và nguồn đã chốt. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-CONSULT-002/AC-004
 - BR-CONSULT-002/Then
+- STORY-CONSULT-002/ALT-01
+- STORY-CONSULT-002/EXC-02

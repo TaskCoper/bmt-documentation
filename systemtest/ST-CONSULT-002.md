@@ -44,9 +44,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-CONSULT-002 | STORY-CONSULT-001 | ALT | REGRESSION | P1 | Môi trường thử đã triển khai tính năng, có frontend, API, database và tài khoản thử với quyền tương ứng. Có thể đọc dữ liệu đã lưu; chỉ dùng dữ liệu và email thử. | 1. Tạo yêu cầu R1 cho KTS A đang hiện<br>2. Ẩn KTS A<br>3. Thử gửi yêu cầu mới cho A<br>4. Admin mở và cập nhật R1 | A đang hiện; khách C1; R1 hợp lệ; dữ liệu minh họa, không phải cấu hình sản phẩm. | Khách không thể gửi yêu cầu mới cho KTS này. Các yêu cầu cũ vẫn xem và xử lý được. Yêu cầu mới bị từ chối; R1 còn nguyên và vẫn xử lý được. | STORY-CONSULT-001/AC-002<br>BR-CONSULT-001/Then | Đặc tả chưa thực thi; đối chiếu hành vi với dữ liệu thực lưu và nguồn đã chốt. | [Chưa xác định] | Draft |
+| ST-CONSULT-002 | STORY-CONSULT-001 | ALT | REGRESSION | P1 | Môi trường thử đã triển khai tính năng, có frontend, API, database và tài khoản thử với quyền tương ứng. Có thể đọc dữ liệu đã lưu; chỉ dùng dữ liệu và email thử. | 1. Tạo yêu cầu R1 cho KTS A đang hiện<br>2. Ẩn KTS A<br>3. Thử gửi yêu cầu mới cho A<br>4. Admin mở và cập nhật R1 | A đang hiện; khách C1; R1 hợp lệ; dữ liệu minh họa, không phải cấu hình sản phẩm. | Khách không thể gửi yêu cầu mới cho KTS này. Các yêu cầu cũ vẫn xem và xử lý được. Yêu cầu mới bị từ chối; R1 còn nguyên và vẫn xử lý được. | STORY-CONSULT-001/AC-002<br>BR-CONSULT-001/Then<br>STORY-CONSULT-001/ALT-02 | Đặc tả chưa thực thi; đối chiếu hành vi với dữ liệu thực lưu và nguồn đã chốt. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-CONSULT-001/AC-002
 - BR-CONSULT-001/Then
+- STORY-CONSULT-001/ALT-02

@@ -42,8 +42,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Version**:
 - **Effective Date**:
 - **Owner**: [Chưa xác định]
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 - **Source**: Người dùng xác nhận trong hội thoại nghiên cứu tính năng tư vấn KTS ngày 2026-09-23. Người dùng đã chốt bộ US/BR trong hội thoại.
 
 ## Statement

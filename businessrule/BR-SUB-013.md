@@ -43,8 +43,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Version**:
 - **Effective Date**:
 - **Owner**: [Chưa xác định]
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 - **Source**: Người dùng chốt ngừng bán ẩn gói, chặn yêu cầu mới, giữ gói đã cấp. Quyết định mới bỏ lịch chuyển cuối kỳ; xử lý giao dịch đang chờ thanh toán khi ngừng bán còn cần thiết kế.
 
 ## Statement

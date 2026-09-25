@@ -44,9 +44,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-LIB-021 | STORY-LIB-003 | EXC / Integration boundary | REGRESSION | P1 | C đủ điều kiện; môi trường thử gây được lỗi chuẩn bị nội dung trước ghi nhận thành công. Môi trường thử có chức năng tương ứng; đọc lại được dữ liệu và lượt khi ca cần. | 1. Xác nhận mở V1.<br>2. Gây lỗi trước ghi nhận thành công.<br>3. Đọc số dư, quyền xem và lượt giữ.<br>4. Khôi phục rồi khách chủ động mở lại. | 20 lượt; không gây lỗi hệ thống thật. Đây là dữ liệu thử, không phải mặc định sản phẩm. | Lần lỗi không tính lượt, không cấp quyền, không còn lượt giữ sau xử lý; mở lại thành công tính đúng một lượt còn 19. | STORY-LIB-003/AC-004<br>BR-LIB-003/Then | Lỗi trước thành công. Đặc tả chưa thực thi; API/fixture kỹ thuật bổ sung sau TDD. | [Chưa xác định] | Draft |
+| ST-LIB-021 | STORY-LIB-003 | EXC / Integration boundary | REGRESSION | P1 | C đủ điều kiện; môi trường thử gây được lỗi chuẩn bị nội dung trước ghi nhận thành công. Môi trường thử có chức năng tương ứng; đọc lại được dữ liệu và lượt khi ca cần. | 1. Xác nhận mở V1.<br>2. Gây lỗi trước ghi nhận thành công.<br>3. Đọc số dư, quyền xem và lượt giữ.<br>4. Khôi phục rồi khách chủ động mở lại. | 20 lượt; không gây lỗi hệ thống thật. Đây là dữ liệu thử, không phải mặc định sản phẩm. | Lần lỗi không tính lượt, không cấp quyền, không còn lượt giữ sau xử lý; mở lại thành công tính đúng một lượt còn 19. | STORY-LIB-003/AC-004<br>BR-LIB-003/Then<br>STORY-LIB-003/EXC-01 | Lỗi trước thành công. Đặc tả chưa thực thi; API/fixture kỹ thuật bổ sung sau TDD. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-LIB-003/AC-004
 - BR-LIB-003/Then
+- STORY-LIB-003/EXC-01

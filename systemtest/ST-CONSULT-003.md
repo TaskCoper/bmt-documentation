@@ -44,9 +44,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-CONSULT-003 | STORY-CONSULT-001 | ALT | REGRESSION | P1 | Môi trường thử đã triển khai tính năng, có frontend, API, database và tài khoản thử với quyền tương ứng. Có thể đọc dữ liệu đã lưu; chỉ dùng dữ liệu và email thử. | 1. Cho hiện lại hồ sơ A đang ẩn<br>2. Khách chọn A và gửi yêu cầu hợp lệ<br>3. Đọc lại hồ sơ và yêu cầu | A đang ẩn; thời gian T+1 ngày; dữ liệu minh họa, không phải cấu hình sản phẩm. | Khách có thể chọn KTS để gửi yêu cầu mới. Thông tin hồ sơ vẫn được giữ. Yêu cầu mới được lưu, dữ liệu hồ sơ giữ nguyên. | STORY-CONSULT-001/AC-003<br>BR-CONSULT-001/Then | Đặc tả chưa thực thi; đối chiếu hành vi với dữ liệu thực lưu và nguồn đã chốt. | [Chưa xác định] | Draft |
+| ST-CONSULT-003 | STORY-CONSULT-001 | ALT | REGRESSION | P1 | Môi trường thử đã triển khai tính năng, có frontend, API, database và tài khoản thử với quyền tương ứng. Có thể đọc dữ liệu đã lưu; chỉ dùng dữ liệu và email thử. | 1. Cho hiện lại hồ sơ A đang ẩn<br>2. Khách chọn A và gửi yêu cầu hợp lệ<br>3. Đọc lại hồ sơ và yêu cầu | A đang ẩn; thời gian T+1 ngày; dữ liệu minh họa, không phải cấu hình sản phẩm. | Khách có thể chọn KTS để gửi yêu cầu mới. Thông tin hồ sơ vẫn được giữ. Yêu cầu mới được lưu, dữ liệu hồ sơ giữ nguyên. | STORY-CONSULT-001/AC-003<br>BR-CONSULT-001/Then<br>STORY-CONSULT-001/ALT-02 | Đặc tả chưa thực thi; đối chiếu hành vi với dữ liệu thực lưu và nguồn đã chốt. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-CONSULT-001/AC-003
 - BR-CONSULT-001/Then
+- STORY-CONSULT-001/ALT-02

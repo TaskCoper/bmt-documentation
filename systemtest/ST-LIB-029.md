@@ -35,7 +35,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# ST-LIB-027
+# ST-LIB-029
 
 ## System Test
 
@@ -44,10 +44,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-LIB-027 | STORY-LIB-003 | EXC | REGRESSION | P1 | Các tài khoản thử chưa từng xem V1. Môi trường thử có chức năng tương ứng; đọc lại được dữ liệu và lượt khi ca cần. | 1. Thử mở trực tiếp lần lượt khi chưa đăng nhập, chưa có gói, gói hết hạn, thiếu quyền, hết lượt.<br>2. Kiểm tra nội dung và dữ liệu lưu. | Mỗi điều kiện dùng tài khoản riêng, các điều kiện còn lại hợp lệ nếu có thể. Đây là dữ liệu thử, không phải mặc định sản phẩm. | Không trả chi tiết hoặc tệp, không ghi quyền xem/lịch sử, không giữ/trừ hay tự cấp lượt. | STORY-LIB-003/AC-001<br>BR-LIB-003/Then<br>STORY-LIB-003/EXC-01 | Mở lần đầu thiếu điều kiện. Đặc tả chưa thực thi; API/fixture kỹ thuật bổ sung sau TDD. | [Chưa xác định] | Draft |
+| ST-LIB-029 | STORY-LIB-003 | ALT | REGRESSION | P1 | C đã mở V1 của mẫu M, còn 19 lượt; người quản trị có quyền quản lý thư viện. Môi trường thử có chức năng tương ứng; đọc lại được dữ liệu và lượt khi ca cần. | 1. Người quản trị sửa tại chỗ V1: gỡ ảnh X, thêm ảnh Z, không công bố phiên bản mới.<br>2. C mở lại V1 từ lịch sử.<br>3. Thử tải lại ảnh X bằng đường dẫn cũ.<br>4. Đọc số dư, lịch sử của C và danh sách phiên bản của M. | V1 ban đầu có ảnh X; sau khi sửa có ảnh Z. Đây là dữ liệu thử, không phải mặc định sản phẩm. | C mở lại V1 miễn lượt, thấy ảnh Z và không thấy ảnh X; đường dẫn ảnh X không còn tải được. C vẫn còn 19 lượt, lịch sử vẫn một dòng V1. M không có phiên bản mới. | STORY-LIB-003/ALT-01<br>BR-LIB-002/Statement<br>TDD-LIB-002/Internal API | Sửa tại chỗ không tạo đối tượng tính lượt mới; xem lại đọc nội dung hiện tại của đúng phiên bản. Đặc tả chưa thực thi; API/fixture kỹ thuật bổ sung sau TDD. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- STORY-LIB-003/AC-001
-- BR-LIB-003/Then
-- STORY-LIB-003/EXC-01
+- STORY-LIB-003/ALT-01
+- BR-LIB-002/Statement
+- TDD-LIB-002/Internal API

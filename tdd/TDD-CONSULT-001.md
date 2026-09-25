@@ -42,9 +42,9 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 ## Document Info
 
 - **Feature**: Tư vấn KTS — hồ sơ, category chuyên môn, yêu cầu tư vấn và email tiếp nhận
-- **Author**: [Chưa xác định]
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Author**: Tân Trần
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 - **Status**: Draft
 - **Version**:
 - **Updated At**:
@@ -713,4 +713,5 @@ Mặc định source hiện là 3 lần retry, khoảng đầu 5 giây, mỗi l�
 
 ## Change Log
 
+- 2026-09-25 (metadata): Điền Author, Reviewer và Approver là Tân Trần theo xác nhận của người dùng.
 - 2026-09-25: Cập nhật theo US/BR đã chốt ngày 25/09/2026. Gộp bốn mã đề xuất `architect.manage`, `architect_category.manage`, `consultation.read`, `consultation.update` thành một mã `consultation.manage` (`RequiresAssignment=false`, seed cho admin) cho toàn bộ quản trị tư vấn KTS; sửa bảng quyền, mẫu dữ liệu Permission/RolePermission, migration và câu kiểm "số Permission tăng đúng bốn" thành tăng đúng một. Thêm Non-goal: tư vấn KTS miễn phí là kênh riêng, không thay cam kết tư vấn của gói (BR-CONSULT-002/Notes). Cập nhật hiện trạng code: 10 mã quyền, policy theo mã quyền và kiểm dấu phiên đã có; sửa liên kết migration `InitialRbac`. Bổ sung tham chiếu STORY-RBAC-001, BR-RBAC-010, BR-RBAC-011.

@@ -43,8 +43,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Version**:
 - **Effective Date**:
 - **Owner**: [Chưa xác định]
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 - **Source**: Người dùng xác nhận hệ thống định nghĩa danh mục; Admin chọn quyền và cấu hình gói. Gói chưa có quyền được lưu nháp, Công bố cần ít nhất một quyền lợi. Phối cảnh 3D chân thực là quyền riêng do Admin cấp theo gói, không mặc định chỉ PRO. Dự toán nội thất và bố trí công năng có cùng mức chi tiết giữa các gói, không phân cấp theo tên hoặc giá gói.
 
 ## Statement

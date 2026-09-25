@@ -44,9 +44,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-CONSULT-013 | STORY-CONSULT-002 | ALT | REGRESSION | P1 | Môi trường thử đã triển khai tính năng, có frontend, API, database và tài khoản thử với quyền tương ứng. Có thể đọc dữ liệu đã lưu; chỉ dùng dữ liệu và email thử. | 1. Mở form có số tài khoản điền sẵn<br>2. Đổi sang số khác và gửi<br>3. Admin đọc số trên đơn<br>4. Đọc lại tài khoản | Số tài khoản P1 khác số trên đơn P2; dùng số thử thuộc môi trường kiểm thử; dữ liệu minh họa, không phải cấu hình sản phẩm. | Ban đầu điền số tài khoản; đơn lưu số khách thay. Số trong tài khoản giữ nguyên. Đơn dùng P2; tài khoản vẫn P1. | STORY-CONSULT-002/AC-003<br>BR-CONSULT-002/Then | Đặc tả chưa thực thi; đối chiếu hành vi với dữ liệu thực lưu và nguồn đã chốt. | [Chưa xác định] | Draft |
+| ST-CONSULT-013 | STORY-CONSULT-002 | ALT | REGRESSION | P1 | Môi trường thử đã triển khai tính năng, có frontend, API, database và tài khoản thử với quyền tương ứng. Có thể đọc dữ liệu đã lưu; chỉ dùng dữ liệu và email thử. | 1. Mở form có số tài khoản điền sẵn<br>2. Đổi sang số khác và gửi<br>3. Admin đọc số trên đơn<br>4. Đọc lại tài khoản | Số tài khoản P1 khác số trên đơn P2; dùng số thử thuộc môi trường kiểm thử; dữ liệu minh họa, không phải cấu hình sản phẩm. | Ban đầu điền số tài khoản; đơn lưu số khách thay. Số trong tài khoản giữ nguyên. Đơn dùng P2; tài khoản vẫn P1. | STORY-CONSULT-002/AC-003<br>BR-CONSULT-002/Then<br>STORY-CONSULT-002/ALT-01 | Đặc tả chưa thực thi; đối chiếu hành vi với dữ liệu thực lưu và nguồn đã chốt. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-CONSULT-002/AC-003
 - BR-CONSULT-002/Then
+- STORY-CONSULT-002/ALT-01

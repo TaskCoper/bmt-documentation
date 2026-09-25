@@ -44,7 +44,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Sprint**:
 - **Priority**:
 - **Status**: Todo
-- **Creator**: [Chưa xác định]
+- **Creator**: Tân Trần
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
 - **Assignee**:
@@ -461,4 +461,4 @@ Tài khoản nhân viên gửi yêu cầu tạo hoặc hủy đơn mua gói, k�
 ## Out of Scope
 
 - Giảm giá; phí cộng thêm; tự hoàn tiền; ghi nhận đã hoàn tiền; nhân viên xác nhận thủ công để cấp gói; API/schema và tích hợp SePay chi tiết; tự động gia hạn hoặc lưu phương thức trừ tiền định kỳ.
-- Chưa triển khai, chạy test hoặc phê duyệt tài liệu. Sprint, Priority, Creator và người thực hiện chưa được phân công; không lấy ví dụ trong template làm giá trị thật.
+- Chưa triển khai, chạy test hoặc phê duyệt tài liệu. Sprint, Priority và người thực hiện chưa được phân công; không lấy ví dụ trong template làm giá trị thật.

@@ -43,8 +43,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Version**:
 - **Effective Date**:
 - **Owner**: [Chưa xác định]
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 - **Source**: Người dùng chọn gắn gói giám sát với một công trình cụ thể, không chia lượt sang công trình khác. Người dùng xác nhận một buổi kỹ sư đến kiểm tra thực tế tại công trình được tính là một lượt. Người dùng xác nhận ngày 25/09/2026: gói đã gắn công trình thì không đổi sang công trình khác, kể cả nhân viên và Admin.
 
 ## Statement

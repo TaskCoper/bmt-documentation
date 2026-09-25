@@ -44,10 +44,11 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-CONSULT-004 | STORY-CONSULT-001 | EXC / NFR | REGRESSION | P1 | Môi trường thử đã triển khai tính năng, có frontend, API, database và tài khoản thử với quyền tương ứng. Có thể đọc dữ liệu đã lưu; chỉ dùng dữ liệu và email thử. | 1. Dùng khách thường, phiên không đăng nhập và nhân viên có vai trò không chứa consultation.manage gọi trực tiếp thao tác thêm, sửa, ẩn/hiện hồ sơ<br>2. Đọc lại bằng tài khoản có consultation.manage | Hồ sơ A có dữ liệu đối chứng; nhân viên N chỉ có commerce.read; dữ liệu minh họa, không phải cấu hình sản phẩm. | Hệ thống từ chối thao tác. Hồ sơ không bị thay đổi. Tất cả thao tác trái quyền bị từ chối, nhân viên N nhận 403; không thay dữ liệu. | STORY-CONSULT-001/AC-004<br>BR-CONSULT-001/Then<br>TDD-CONSULT-001/Endpoints | Đặc tả chưa thực thi; đối chiếu hành vi với dữ liệu thực lưu và nguồn đã chốt. | [Chưa xác định] | Draft |
+| ST-CONSULT-004 | STORY-CONSULT-001 | EXC / NFR | REGRESSION | P1 | Môi trường thử đã triển khai tính năng, có frontend, API, database và tài khoản thử với quyền tương ứng. Có thể đọc dữ liệu đã lưu; chỉ dùng dữ liệu và email thử. | 1. Dùng khách thường, phiên không đăng nhập và nhân viên có vai trò không chứa consultation.manage gọi trực tiếp thao tác thêm, sửa, ẩn/hiện hồ sơ<br>2. Đọc lại bằng tài khoản có consultation.manage | Hồ sơ A có dữ liệu đối chứng; nhân viên N chỉ có commerce.read; dữ liệu minh họa, không phải cấu hình sản phẩm. | Hệ thống từ chối thao tác. Hồ sơ không bị thay đổi. Tất cả thao tác trái quyền bị từ chối, nhân viên N nhận 403; không thay dữ liệu. | STORY-CONSULT-001/AC-004<br>BR-CONSULT-001/Then<br>TDD-CONSULT-001/Endpoints<br>STORY-CONSULT-001/EXC-01 | Đặc tả chưa thực thi; đối chiếu hành vi với dữ liệu thực lưu và nguồn đã chốt. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-CONSULT-001/AC-004
 - BR-CONSULT-001/Then
 - TDD-CONSULT-001/Endpoints
+- STORY-CONSULT-001/EXC-01

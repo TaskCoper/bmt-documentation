@@ -44,9 +44,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-LIB-014 | STORY-LIB-002 | ALT | REGRESSION | P1 | Mẫu công khai Nhà phố tầng 3; danh mục hiện chỉ cho tạo tầng 2. Môi trường thử có chức năng tương ứng; đọc lại được dữ liệu và lượt khi ca cần. | 1. Mở bộ lọc khi chưa chọn loại.<br>2. Chọn Nhà phố rồi tầng 3.<br>3. Đổi loại khác. | Loại khác không có mẫu tầng 3 và không cấu hình tầng 3. Đây là dữ liệu thử, không phải mặc định sản phẩm. | Tầng 3 vẫn lọc được mẫu Nhà phố cũ; danh sách tầng thu hẹp đúng loại được chọn. | STORY-LIB-002/AC-003<br>BR-LIB-001/Then | Lọc tầng cũ. Đặc tả chưa thực thi; API/fixture kỹ thuật bổ sung sau TDD. | [Chưa xác định] | Draft |
+| ST-LIB-014 | STORY-LIB-002 | ALT | REGRESSION | P1 | Mẫu công khai Nhà phố tầng 3; danh mục hiện chỉ cho tạo tầng 2. Môi trường thử có chức năng tương ứng; đọc lại được dữ liệu và lượt khi ca cần. | 1. Mở bộ lọc khi chưa chọn loại.<br>2. Chọn Nhà phố rồi tầng 3.<br>3. Đổi loại khác. | Loại khác không có mẫu tầng 3 và không cấu hình tầng 3. Đây là dữ liệu thử, không phải mặc định sản phẩm. | Tầng 3 vẫn lọc được mẫu Nhà phố cũ; danh sách tầng thu hẹp đúng loại được chọn. | STORY-LIB-002/AC-003<br>BR-LIB-001/Then<br>STORY-LIB-002/ALT-01 | Lọc tầng cũ. Đặc tả chưa thực thi; API/fixture kỹ thuật bổ sung sau TDD. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-LIB-002/AC-003
 - BR-LIB-001/Then
+- STORY-LIB-002/ALT-01

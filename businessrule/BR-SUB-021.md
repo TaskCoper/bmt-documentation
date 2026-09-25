@@ -42,8 +42,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Version**:
 - **Effective Date**:
 - **Owner**: [Chưa xác định]
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 - **Source**: Người dùng chọn đổi gói ngay, không so bậc hoặc giá. Sau ví dụ PLUS năm đã dùng 2 tháng còn 10 tháng, người dùng tiếp tục chọn 1: đổi tháng/năm cùng gói cũng áp dụng ngay, bỏ phần còn lại và trả đủ giá kỳ mới.
 
 ## Statement

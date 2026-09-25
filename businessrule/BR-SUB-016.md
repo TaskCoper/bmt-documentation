@@ -43,8 +43,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Version**:
 - **Effective Date**:
 - **Owner**: [Chưa xác định]
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 - **Source**: Người dùng chọn tự đánh dấu tác vụ thất bại khi quá thời gian chờ, giải phóng lượt đang giữ và không tự trừ lại nếu kết quả đến muộn. Người dùng chọn không đưa kết quả muộn cho khách, giữ tác vụ thất bại. Thời gian chờ cấu hình riêng; 15 phút chỉ là ví dụ.
 
 ## Statement

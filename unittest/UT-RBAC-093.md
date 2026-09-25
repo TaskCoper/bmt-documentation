@@ -11,13 +11,11 @@
 -->
 
 <!-- Mỗi file chứa một test, đúng một dòng dữ liệu và 13 cột theo thứ tự bên dưới.
-Thay ST-001 ở heading và Test ID, STORY-001 bằng mã Story cần kiểm thử.
-Trong ô bảng: xuống dòng bằng <br>, dấu | viết thành \|. Steps gồm các bước đánh số.
-Loại: Main / ALT / EXC / NFR / Integration boundary; ghép nhiều loại bằng dấu /.
-Suite: SMOKE / REGRESSION / FULL. Priority: P0 / P1 / P2 / P3.
+Thay UT-001 ở heading và Test ID. Trong ô bảng: xuống dòng bằng <br>, dấu | viết thành \|.
+Loại: Happy / Branch / Boundary / Error / Quirk / Determinism. Suite: SMOKE / REGRESSION / FULL. Priority: P0 / P1 / P2 / P3.
 TEST_LINKS là nguồn liên kết khi import; cột Trace to chỉ để đọc. Giữ hai nơi nhất quán.
-Owner là tên hiển thị; phê duyệt thực hiện sau import.
-Steps và Expected result phải bám Flow, AC và Business Rule của Story có thật. Test data là dữ liệu kiểm thử minh hoạ; không tự thêm hành vi nghiệp vụ hoặc ghi Pass/đã chạy nếu chưa có bằng chứng thực thi.
+Mỗi liên kết dùng DOC-KEY/section: ghi chú. Owner là tên hiển thị; phê duyệt thực hiện sau import.
+Expected output và assertion phải suy ra từ Business Rule/contract đã xác nhận. Dữ liệu mock chỉ là dữ liệu kiểm thử minh hoạ, không phải dữ liệu production; không ghi Pass/đã chạy nếu chưa có bằng chứng thực thi.
 BẮT BUỘC KHI HOÀN THIỆN MẪU: phải có cả Reviewer và Approver, mỗi tên 1–200 ký tự sau khi bỏ khoảng trắng đầu/cuối. Không xoá hai dòng metadata, để trống, dùng tên bịa hoặc giữ placeholder rồi coi là hoàn tất.
 Nếu chưa biết người review hoặc người phê duyệt, phải hỏi người dùng và báo tài liệu chưa đủ thông tin; không tự lấy Author/Owner làm người thay thế. Tên trong file không tự gán tài khoản hoặc xác nhận đã duyệt; gán thành viên trên giao diện sau import.
 Đây là yêu cầu hoàn thiện mẫu; backend hiện vẫn nhận file cũ thiếu hai trường để tương thích.
@@ -29,25 +27,25 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Không dùng Status trong Markdown hoặc tên Approver để tự xác nhận phê duyệt; import không cấp quyền hay gán tài khoản từ tên. Chạy Kiểm tra file và xử lý lỗi/cảnh báo trước khi nhập.
 - Giới hạn độ dài bên dưới tính theo string.Length của .NET (đơn vị UTF-16); không tự cắt ngắn dữ kiện quan trọng để vượt validation, hãy viết lại có căn cứ hoặc hỏi người dùng.
 - Bảng phải có header, dòng phân cách và đúng một dòng dữ liệu, đủ 13 cột theo thứ tự mẫu. Reviewer/Approver là hai bullet trước bảng, không thêm thành cột. Test ID trong bảng phải nhất quán với heading; mã tài liệu import lấy từ heading.
-- Story tối đa 100 ký tự và được dùng làm tiêu đề tài liệu; Owner tối đa 200. Trạng thái parser nhận: Draft / Approved; đây không phải kết quả chạy test hoặc quyền phê duyệt.
-- Giữ Loại: Main / ALT / EXC / NFR / Integration boundary, có thể ghép bằng dấu /; Suite: SMOKE / REGRESSION / FULL; Priority: P0 / P1 / P2 / P3. Không dùng số ngoài dải Priority 0–3.
-- Steps là các bước đánh số trong một ô, tách bằng <br>; không xuống dòng vật lý trong ô, dấu | trong nội dung phải viết \|. TEST_LINKS mới là nguồn liên kết import; cột Trace to chỉ hiển thị, hai nơi phải nhất quán.
+- Module tối đa 200 ký tự; Unit under test tối đa 500 (được dùng làm tiêu đề tài liệu); Owner tối đa 200. Trạng thái parser nhận: Draft / Approved; đây không phải kết quả chạy test hoặc quyền phê duyệt.
+- Giữ Loại: Happy / Branch / Boundary / Error / Quirk / Determinism; Suite: SMOKE / REGRESSION / FULL; Priority: P0 / P1 / P2 / P3. Không dùng số ngoài dải Priority 0–3.
+- Không xuống dòng vật lý trong ô: dùng <br>; dấu phân cột trong nội dung phải viết \|. TEST_LINKS mới là nguồn liên kết import; cột Trace to chỉ hiển thị, hai nơi phải nhất quán.
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# ST-LIB-027
+# UT-RBAC-093
 
-## System Test
+## Unit Test
 
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
 
-| Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
+| Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-LIB-027 | STORY-LIB-003 | EXC | REGRESSION | P1 | Các tài khoản thử chưa từng xem V1. Môi trường thử có chức năng tương ứng; đọc lại được dữ liệu và lượt khi ca cần. | 1. Thử mở trực tiếp lần lượt khi chưa đăng nhập, chưa có gói, gói hết hạn, thiếu quyền, hết lượt.<br>2. Kiểm tra nội dung và dữ liệu lưu. | Mỗi điều kiện dùng tài khoản riêng, các điều kiện còn lại hợp lệ nếu có thể. Đây là dữ liệu thử, không phải mặc định sản phẩm. | Không trả chi tiết hoặc tệp, không ghi quyền xem/lịch sử, không giữ/trừ hay tự cấp lượt. | STORY-LIB-003/AC-001<br>BR-LIB-003/Then<br>STORY-LIB-003/EXC-01 | Mở lần đầu thiếu điều kiện. Đặc tả chưa thực thi; API/fixture kỹ thuật bổ sung sau TDD. | [Chưa xác định] | Draft |
+| UT-RBAC-093 | Audit | GetAccessAuditDetailQueryHandler.Handle — bản ghi có nội dung trước/sau | Happy | REGRESSION | P1 | EF InMemory có người thao tác Lan và hai bản ghi: log-2 RoleGranted thành công với BeforeJson {"roles":["role-finance"]}, AfterJson {"roles":["role-finance","role-ops"]}; log-3 bị từ chối với RejectReasonCode=SelfPrivilegeEscalation, BeforeJson và AfterJson NULL. | GetAccessAuditDetailQuery(log-2), rồi GetAccessAuditDetailQuery(log-3). | log-2: trả đúng các trường như danh sách, ActorName là tên người thao tác, Before có roles 1 phần tử và After có roles 2 phần tử dưới dạng JSON thật. log-3: Outcome=Rejected, giữ RejectReasonCode, Before và After là null. | BR-RBAC-012/Then<br>STORY-RBAC-004/EXC-04<br>TDD-RBAC-001/Internal API | BR-RBAC-012 yêu cầu bản ghi có nội dung trước và sau, và người có audit.read tra cứu được; danh sách không trả phần này nên cần xem chi tiết. Policy audit.read ở endpoint không kiểm trong unit test này. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- STORY-LIB-003/AC-001
-- BR-LIB-003/Then
-- STORY-LIB-003/EXC-01
+- BR-RBAC-012/Then
+- STORY-RBAC-004/EXC-04
+- TDD-RBAC-001/Internal API

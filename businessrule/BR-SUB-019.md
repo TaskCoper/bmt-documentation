@@ -43,8 +43,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Version**:
 - **Effective Date**:
 - **Owner**: [Chưa xác định]
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 - **Source**: Người dùng chọn hạ gói từ kỳ tiếp theo, giữ gói hiện tại đến hết kỳ. Khách được tự hủy yêu cầu đang chờ trước thời điểm chuyển; hủy không tự gia hạn. Nếu muốn đổi gói đích của yêu cầu hạ gói đang chờ, khách phải hủy yêu cầu cũ rồi chọn lại, không thay thế trực tiếp. Người dùng cho phép chọn luôn chu kỳ tháng/năm của gói đích trong lần hạ; dùng hết kỳ hiện tại rồi bắt đầu gói và chu kỳ mới.
 
 ## Statement

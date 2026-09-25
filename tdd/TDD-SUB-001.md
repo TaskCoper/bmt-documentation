@@ -175,7 +175,8 @@ Ví dụ Admin ngừng bán thì lần đọc database tiếp theo không trả 
 | contract | `services/plan/{Command,Query,Response}.cs`, validators | Định nghĩa dữ liệu gửi/nhận (DTO) và kiểm tra đầu vào; lệnh ghi dữ liệu có `ITransactionalRequest` |
 | presentation | `apis/plan/PlanApi.cs` | API v1 dùng Carter; mọi route quản trị phải có phiên xác thực hợp lệ và mã quyền `plan.manage` |
 | application | `SavePlanDraftHandler`, `PublishPlanHandler`, `StopSellingPlanHandler`, `GetPublishedPlansHandler` | Điều phối xử lý, tạo dữ liệu trả về và kiểm tra phiên bản dữ liệu; quyền đã được policy ở endpoint kiểm |
-| domain | `Plan`, `PlanRevision`, `BenefitDefinition`, `PlanConfigurationPolicy` | Kiểm tra các điều kiện cấu hình luôn phải đúng và các bước chuyển trạng thái; tách nhánh kiểm tra gói thiết kế và gói giám sát |
+| domain | `Plan`, `PlanRevision`, `BenefitDefinition` | Thực thể và cổng lưu trữ `IPlanConfigurationStore` |
+| application | `PlanConfigurationPolicy` (`application/services/`, qua `IPlanConfigurationPolicy`) | Kiểm tra các điều kiện cấu hình luôn phải đúng và các bước chuyển trạng thái; tách nhánh kiểm tra gói thiết kế và gói giám sát. Đặt ở application vì cần mã lỗi và kiểu ngoại lệ của tầng này; domain không tham chiếu project nào |
 | persistence | `IPlanStore` adapter dùng `ApplicationDbContext` trong cùng phạm vi xử lý | Khóa bản ghi gói khi ghi, kiểm tra ràng buộc/khóa ngoại và chọn các cột cần đọc |
 
 ```mermaid
@@ -553,7 +554,7 @@ Ví dụ là gói giám sát `P2`: bản nháp đã có tên và giá `Construct
 
 ## Change Log
 
-- 2026-09-25 (đồng bộ code lần 2): Đồng bộ với code ở commit `72e7327`: handler quản trị gói từ chối tài khoản đã bị xóa bằng 403 `AccessForbidden`; mô tả gói tối đa 4.000 ký tự; bốn khóa ngoại danh mục gói đổi từ CASCADE sang NO ACTION. Thêm đặc tả UT-SUB-088, UT-SUB-089.
+- 2026-09-25 (đồng bộ code lần 2): Ghi đúng vị trí `PlanConfigurationPolicy` ở tầng application như code. Đồng bộ với code ở commit `72e7327`: handler quản trị gói từ chối tài khoản đã bị xóa bằng 403 `AccessForbidden`; mô tả gói tối đa 4.000 ký tự; bốn khóa ngoại danh mục gói đổi từ CASCADE sang NO ACTION. Thêm đặc tả UT-SUB-088, UT-SUB-089.
 - 2026-09-25 (đồng bộ code): Đồng bộ với code đã triển khai ở commit `182e2a8`: mã `ConstructionSite`, cột `OfferKey` 24 ký tự và quy tắc công bố gói giám sát (`PlanDescriptionRequired`) đã có. Sửa ví dụ lỗi 422 theo thân lỗi thật.
 - 2026-09-25: Cập nhật theo nghiệp vụ đã chốt ngày 25/09/2026. Gói giám sát không dùng danh mục quyền lợi, công bố khi có tên, giá `ConstructionSite` và mô tả dịch vụ có nội dung; thêm mã lỗi `PlanDescriptionRequired` và ví dụ công bố. Đổi mã lựa chọn giá giám sát `Project` thành `ConstructionSite`, nới `PlanOffer.OfferKey` lên `varchar(24)` và thêm dữ liệu mẫu gói giám sát `P2`/`SR1`. Quyền cấu hình gói ghi rõ là mã `plan.manage`, không theo vai trò Admin. Ghi AC-001/015/016 của STORY-SUB-002 không nghiệm thu đợt này; bổ sung tham chiếu AC-004, AC-005, AC-006, AC-027, ALT-02, EXC-03, EXC-06. Trỏ `SupervisionGrant` sang TDD-SUB-004/005/006 thay cho TDD-SUB-003. Ghi rõ hiện trạng code so với thay đổi dự kiến.
 - 2026-09-20: Thay `RequireAuthorization(RoleNames.Admin)` bằng policy theo mã quyền, vì cột `User.Role` đã bị bỏ theo [TDD-RBAC-001](TDD-RBAC-001.md). Mã quyền cho việc cấu hình gói chưa được đặt tên và được ghi là điểm còn mở. Nghiệp vụ quản lý danh mục gói không đổi.

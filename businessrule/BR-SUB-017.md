@@ -42,8 +42,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Version**:
 - **Effective Date**:
 - **Owner**: [Chưa xác định]
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 - **Source**: Người dùng chốt chỉ có lượt tạo mới và tra cứu, bỏ chỉnh sửa sau Gen AI. Đã thành công muốn phương án khác phải tạo dự án mới; thất bại được thử lại cùng dự án, kiểm tra lại quyền/lượt. Tra cứu tính một lượt cho lần mở thành công đầu tiên của từng phiên bản; xem lại miễn lượt theo BR-LIB-003. Khách chưa đăng nhập hoặc chưa có gói vẫn được tìm kiếm/xem danh sách, không mất lượt; mở chi tiết cần đăng nhập, gói còn hiệu lực, quyền tra cứu và lượt sẵn dùng.
 
 ## Statement

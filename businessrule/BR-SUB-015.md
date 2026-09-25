@@ -43,8 +43,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Version**:
 - **Effective Date**:
 - **Owner**: [Chưa xác định]
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 - **Source**: Người dùng chốt giá VND dương, hạn mức riêng tháng/năm, quyền bật/tắt và mức dùng chung. Quyết định mới: đổi tháng/năm cả hai chiều ngay khi hoàn tất theo BR-SUB-021; bỏ lịch đổi cuối kỳ.
 
 ## Statement

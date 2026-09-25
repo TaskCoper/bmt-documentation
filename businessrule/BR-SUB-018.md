@@ -43,8 +43,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Version**:
 - **Effective Date**:
 - **Owner**: [Chưa xác định]
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 - **Source**: Người dùng chọn nâng gói có hiệu lực ngay khi hoàn tất và bắt đầu kỳ mới. Bỏ lượt dư cũ, cấp đủ hạn mức mới, trả đủ giá kỳ mới và không trừ tiền cho thời gian cũ còn lại. Khách được chọn luôn chu kỳ tháng/năm của gói đích trong lần nâng, ví dụ BASIC tháng lên PRO năm; không phải nâng cùng chu kỳ rồi chờ đổi chu kỳ sau. Nếu đang có yêu cầu hạ gói hoặc chỉ đổi chu kỳ đang chờ, khách phải hủy yêu cầu đó trước rồi mới nâng.
 
 ## Statement

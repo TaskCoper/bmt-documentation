@@ -44,9 +44,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-CONSULT-026 | STORY-CONSULT-003 | ALT | REGRESSION | P1 | Môi trường thử đã triển khai tính năng, có frontend, API, database và tài khoản thử với quyền tương ứng. Có thể đọc dữ liệu đã lưu; chỉ dùng dữ liệu và email thử. | 1. Mở R1<br>2. Ghi lý do Khách không còn nhu cầu<br>3. Đánh dấu Đã xử lý<br>4. Tải lại chi tiết | R1 Chưa xử lý; dữ liệu minh họa, không phải cấu hình sản phẩm. | Lưu trạng thái Đã xử lý cùng lý do. Không thêm trạng thái hủy. Giữ lý do trong ghi chú, trạng thái Đã xử lý; không tạo trạng thái hủy. | STORY-CONSULT-003/AC-004<br>BR-CONSULT-004/Then | Đặc tả chưa thực thi; đối chiếu hành vi với dữ liệu thực lưu và nguồn đã chốt. | [Chưa xác định] | Draft |
+| ST-CONSULT-026 | STORY-CONSULT-003 | ALT | REGRESSION | P1 | Môi trường thử đã triển khai tính năng, có frontend, API, database và tài khoản thử với quyền tương ứng. Có thể đọc dữ liệu đã lưu; chỉ dùng dữ liệu và email thử. | 1. Mở R1<br>2. Ghi lý do Khách không còn nhu cầu<br>3. Đánh dấu Đã xử lý<br>4. Tải lại chi tiết | R1 Chưa xử lý; dữ liệu minh họa, không phải cấu hình sản phẩm. | Lưu trạng thái Đã xử lý cùng lý do. Không thêm trạng thái hủy. Giữ lý do trong ghi chú, trạng thái Đã xử lý; không tạo trạng thái hủy. | STORY-CONSULT-003/AC-004<br>BR-CONSULT-004/Then<br>STORY-CONSULT-003/ALT-02 | Đặc tả chưa thực thi; đối chiếu hành vi với dữ liệu thực lưu và nguồn đã chốt. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-CONSULT-003/AC-004
 - BR-CONSULT-004/Then
+- STORY-CONSULT-003/ALT-02

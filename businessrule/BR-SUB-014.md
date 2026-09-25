@@ -43,8 +43,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Version**:
 - **Effective Date**:
 - **Owner**: [Chưa xác định]
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 - **Source**: Người dùng chọn tính kỳ từ ngày bắt đầu sử dụng: tháng kết thúc cùng ngày tháng sau, năm kết thúc cùng ngày năm sau; nếu không có ngày tương ứng thì lấy ngày cuối tháng. Người dùng chọn hết hạn đúng giờ bắt đầu theo giờ Việt Nam.
 
 ## Statement

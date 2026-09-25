@@ -313,7 +313,7 @@ Active trong ví dụ restore là thiết kế. Giám sát trả trạng thái t
 - **PackageSuperseded** (409): gói đã bị lần mua mới thay thế.
 - **AnotherPackageActive** (409): tài khoản có kỳ thiết kế khác hiệu lực, hoặc công trình đã có gói giám sát khác giữ chỗ (`Assigned` hoặc `Completed`).
 - **IdempotencyConflict** (409): cùng key khác nội dung.
-- **PackageMutationInvalid** (422): kind/version/key/lý do không hợp lệ.
+- **PackageMutationInvalid** (422): kind/version/key/lý do không hợp lệ. Lỗi này do bước kiểm đầu vào trả, nên thân lỗi là ProblemDetails và mã nằm ở `errors[].messageCode`; xem ví dụ ở [TDD-SUB-006](TDD-SUB-006.md#examples).
 
 ## References
 
@@ -351,7 +351,7 @@ Active trong ví dụ restore là thiết kế. Giám sát trả trạng thái t
 
 ## Change Log
 
-- 2026-09-25 (đồng bộ code lần 2): Ghi rõ migration `PackageHistoryRestrict` ở commit `72e7327` đã thêm CHECK `CK_DesignPeriod_SupersededClosedAt` và đổi ba khóa ngoại kỳ thiết kế sang RESTRICT.
+- 2026-09-25 (đồng bộ code lần 2): Ghi rõ dạng thân lỗi 422 `PackageMutationInvalid`. Ghi rõ migration `PackageHistoryRestrict` ở commit `72e7327` đã thêm CHECK `CK_DesignPeriod_SupersededClosedAt` và đổi ba khóa ngoại kỳ thiết kế sang RESTRICT.
 - 2026-09-25 (đồng bộ code): Đồng bộ với code đã triển khai ở commit `182e2a8`: cột `ConstructionSiteId` và ánh xạ vi phạm index giữ chỗ khi khôi phục thành `AnotherPackageActive`. Ví dụ lỗi ghi mã nghiệp vụ ở `messageCode`.
 - 2026-09-25 (lần 2): Bỏ `supervision.reassign` và thao tác đổi công trình khỏi mô tả quyền (BR-SUB-009). Ghi rõ hủy và khôi phục gói giám sát không đụng tới `Assignment` (BR-SUB-024/025 khoản 7), gói mới trên cùng công trình cần phân công riêng; bỏ bước khóa công trình khỏi thứ tự khóa vì khóa ngoại và index đã bảo vệ. Thêm ST-PAY-073; sửa liên kết mã nguồn `RoleNames` đã bị xóa.
 - 2026-09-25: Cập nhật theo nghiệp vụ đã chốt ngày 25/09/2026. Cho hủy gói giám sát `Completed`; partial unique index và kiểm xung đột khi khôi phục tính tập giữ chỗ `Assigned`/`Completed`; phản hồi khôi phục giám sát có thể trả `Completed`. Đổi "dự án"/`ProjectId` sang công trình (`ConstructionSite`). Hoàn thành/mở lại không còn là "luồng lịch sử" mà thuộc TDD-SUB-006. Bỏ bước khóa "profile quyền" khỏi Sequence Diagram cho khớp thứ tự khóa AccountCommerceState. Ghi hiện trạng code. Bổ sung tham chiếu STORY-SUB-003/AC-014, AC-015, ALT-04, EXC-09 và BR-RBAC-010.

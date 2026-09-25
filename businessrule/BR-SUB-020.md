@@ -43,8 +43,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Version**:
 - **Effective Date**:
 - **Owner**: [Chưa xác định]
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 - **Source**: Người dùng chọn Admin đặt thứ tự các gói, ví dụ BASIC < PLUS < PRO. Chuyển lên là nâng gói, chuyển xuống là hạ gói; không phụ thuộc giá bán hoặc lựa chọn tháng/năm. Người dùng xác nhận mỗi gói có một bậc riêng, không cho hai gói khác nhau ngang bậc. Khi gói đã có khách sử dụng, Admin không được đổi bậc; muốn thay đổi cách phân cấp thì tạo gói mới.
 
 ## Statement

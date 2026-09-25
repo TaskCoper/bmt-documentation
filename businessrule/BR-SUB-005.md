@@ -43,8 +43,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Version**:
 - **Effective Date**:
 - **Owner**: [Chưa xác định]
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 - **Source**: Người dùng chọn các gói khác cả số lượt lẫn tính năng. Hỗ trợ quyền bật/tắt, lượt và mức tính năng; mức cao bao gồm mức thấp của cùng quyền. Hạn mức ít nhất 1 hoặc không giới hạn; bắt đầu thao tác mới cần gói còn hiệu lực. Quyền bật/tắt chưa thêm hoặc đã tắt không cho dùng. Quyền dạng mức chưa cấu hình không cho dùng, không tự cấp mức thấp nhất. Danh mục tính năng và cách chia cho từng gói còn cần chốt.
 
 ## Statement

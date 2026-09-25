@@ -365,9 +365,11 @@ Idempotency-Key: 0c9d6c55-7a1e-4f3b-8b0c-1d2e3f4a5b6c
 Response 200:
 {"value":{"packageId":"44444444-4444-4444-4444-444444444444","packageKind":"Supervision","lifecycleState":"Assigned","version":6,"eventId":"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa","wasAlreadyApplied":false},"isSuccess":true,"isFailure":false,"error":{"code":"","message":""}}
 
-Error Response:
-{"title":"Unprocessable Entity","code":"PackageMutationInvalid","status":422,"detail":"Phải ghi lý do mở lại.","messageCode":"PackageMutationInvalid","errors":null}
+Error Response (thiếu lý do):
+{"type":"Validation Error","title":"Validation Error","status":422,"detail":"A validation error occured","errors":[{"code":"Reason","message":"Phải ghi lý do.","messageCode":"PackageMutationInvalid"}]}
 ```
+
+Lỗi đầu vào bị chặn ở bước kiểm đầu vào (validator) trước khi vào handler, nên thân lỗi 422 có dạng ProblemDetails như trên: mã nghiệp vụ nằm trong từng phần tử `errors[].messageCode`, không nằm ở trường `messageCode` cấp ngoài như các lỗi 403, 404, 409.
 
 ### Error Codes
 
@@ -427,6 +429,7 @@ Error Response:
 
 ## Change Log
 
+- 2026-09-25 (đồng bộ code lần 2): Sửa ví dụ lỗi 422 của mở lại gói theo dạng phản hồi thật (ProblemDetails, mã ở `errors[].messageCode`).
 - 2026-09-25 (đồng bộ code): Đồng bộ với code đã triển khai ở commit `182e2a8`: kiểm phân công theo gói, mã `SupervisionGrantNotAssignedToActor`, cột và hằng tập giữ chỗ theo công trình đã có; khóa `AccountCommerceState` vẫn chưa làm.
 - 2026-09-25 (lần 2): Phân công theo từng gói giám sát thay cho theo công trình: bước kiểm dùng `ResourceType = SupervisionGrant` và mã gói, mã lỗi đổi thành `SupervisionGrantNotAssignedToActor`; gói mới trên cùng công trình cần phân công riêng (AC-018, ST-SUB-126); người phụ trách gói bị hủy nhận 409 thay vì 403 (ST-PAY-073). Bỏ mọi mô tả đổi công trình và BR-SUB-023 (BR-SUB-009 gắn cố định), bỏ mũi tên `Assigned → Assigned` ở State Diagram.
 - 2026-09-25: Cập nhật theo nghiệp vụ đã chốt ngày 25/09/2026. Gói giám sát gắn với công trình (`ConstructionSite`): đổi "dự án"/`Project`/`ProjectId` trong luồng giám sát, `ResourceType` phân công và mã lỗi sang tên công trình dự kiến. Miễn phân công chỉ cho người giữ vai trò hệ thống mã `admin` sau khi đã có `supervision.complete`, nhận diện theo mã chứ không theo tên hiển thị. Bỏ ví dụ phân công mức khách hàng, nhánh kế thừa của `IsAssignedAsync` và tham chiếu STORY-SUB-003/AC-016 (đã rút); dẫn BR-RBAC-013/Then khoản 3, BR-SUB-011/Then khoản 6 và BR-RBAC-010. Thứ tự khóa dùng `AccountCommerceState`, không khóa bản ghi quyền. Cập nhật hiện trạng code (thiết kế đã được triển khai với tên cũ) và ghi UT-SUB-061, ST-SUB-122 cần cập nhật.

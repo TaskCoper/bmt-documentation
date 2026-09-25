@@ -44,9 +44,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-LIB-018 | STORY-LIB-003 | Main | REGRESSION | P1 | C đã mở V1, còn 19 lượt; V2 chưa công bố. Môi trường thử có chức năng tương ứng; đọc lại được dữ liệu và lượt khi ca cần. | 1. Công bố V2.<br>2. C mở V1 từ lịch sử.<br>3. C chọn V2, xác nhận lượt và mở.<br>4. Mở lại cả hai dòng lịch sử. | V1 ảnh X, V2 ảnh Y. Đây là dữ liệu thử, không phải mặc định sản phẩm. | V1 miễn lượt giữ X; V2 tính một lượt còn 18, có hai dòng lịch sử. Mở lại từng dòng không trừ thêm và trả đúng nội dung phiên bản. | STORY-LIB-003/AC-002<br>BR-LIB-003/Then | Hai phiên bản hai dòng lịch sử. Đặc tả chưa thực thi; API/fixture kỹ thuật bổ sung sau TDD. | [Chưa xác định] | Draft |
+| ST-LIB-018 | STORY-LIB-003 | Main | REGRESSION | P1 | C đã mở V1, còn 19 lượt; V2 chưa công bố. Môi trường thử có chức năng tương ứng; đọc lại được dữ liệu và lượt khi ca cần. | 1. Công bố V2.<br>2. C mở V1 từ lịch sử.<br>3. C chọn V2, xác nhận lượt và mở.<br>4. Mở lại cả hai dòng lịch sử. | V1 ảnh X, V2 ảnh Y. Đây là dữ liệu thử, không phải mặc định sản phẩm. | V1 miễn lượt giữ X; V2 tính một lượt còn 18, có hai dòng lịch sử. Mở lại từng dòng không trừ thêm và trả đúng nội dung phiên bản. | STORY-LIB-003/AC-002<br>BR-LIB-003/Then<br>STORY-LIB-003/ALT-01 | Hai phiên bản hai dòng lịch sử. Đặc tả chưa thực thi; API/fixture kỹ thuật bổ sung sau TDD. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-LIB-003/AC-002
 - BR-LIB-003/Then
+- STORY-LIB-003/ALT-01

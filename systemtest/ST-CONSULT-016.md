@@ -44,9 +44,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-CONSULT-016 | STORY-CONSULT-002 | ALT / Integration boundary | REGRESSION | P1 | Môi trường thử đã triển khai tính năng, có frontend, API, database và tài khoản thử với quyền tương ứng. Có thể đọc dữ liệu đã lưu; chỉ dùng dữ liệu và email thử. Dùng database thật; với ca email dùng worker, hàng chờ và SMTP thử, không thay bằng mock thành công. | 1. Hai khách gửi yêu cầu cùng A và cùng thời điểm, trước hết tuần tự rồi bằng hai phiên đồng thời<br>2. Đọc các yêu cầu lưu và danh sách admin | C1, C2; cùng A; cùng T+1 ngày; chạy tách dữ liệu từng biến thể; dữ liệu minh họa, không phải cấu hình sản phẩm. | Yêu cầu vẫn được tiếp nhận. Không khóa hoặc giữ chỗ theo khung giờ. Cả hai khách đều được tiếp nhận; không tranh giữ chỗ hoặc bị từ chối do trùng giờ. | STORY-CONSULT-002/AC-006<br>BR-CONSULT-003/Then | Đặc tả chưa thực thi; đối chiếu hành vi với dữ liệu thực lưu và nguồn đã chốt. | [Chưa xác định] | Draft |
+| ST-CONSULT-016 | STORY-CONSULT-002 | ALT / Integration boundary | REGRESSION | P1 | Môi trường thử đã triển khai tính năng, có frontend, API, database và tài khoản thử với quyền tương ứng. Có thể đọc dữ liệu đã lưu; chỉ dùng dữ liệu và email thử. Dùng database thật; với ca email dùng worker, hàng chờ và SMTP thử, không thay bằng mock thành công. | 1. Hai khách gửi yêu cầu cùng A và cùng thời điểm, trước hết tuần tự rồi bằng hai phiên đồng thời<br>2. Đọc các yêu cầu lưu và danh sách admin | C1, C2; cùng A; cùng T+1 ngày; chạy tách dữ liệu từng biến thể; dữ liệu minh họa, không phải cấu hình sản phẩm. | Yêu cầu vẫn được tiếp nhận. Không khóa hoặc giữ chỗ theo khung giờ. Cả hai khách đều được tiếp nhận; không tranh giữ chỗ hoặc bị từ chối do trùng giờ. | STORY-CONSULT-002/AC-006<br>BR-CONSULT-003/Then<br>STORY-CONSULT-002/ALT-02 | Đặc tả chưa thực thi; đối chiếu hành vi với dữ liệu thực lưu và nguồn đã chốt. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-CONSULT-002/AC-006
 - BR-CONSULT-003/Then
+- STORY-CONSULT-002/ALT-02
