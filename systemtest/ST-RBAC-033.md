@@ -44,7 +44,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-RBAC-033 | STORY-RBAC-003 | EXC | REGRESSION | P2 | Nhân viên A đang phụ trách công trình P. Người quản trị có quyền assignment.manage. | 1. Chuẩn bị A và phân công công trình P theo Test data.<br>2. Gửi yêu cầu chuyển giao phân công công trình P từ A sang chính A.<br>3. Đọc lại các phân công của công trình P. | Nhân viên A đang phụ trách P. Dữ liệu minh họa. | Hệ thống từ chối yêu cầu. Phân công hiện tại của A trên P giữ nguyên và không sinh bản ghi phân công thứ hai trùng người và trùng công trình. | STORY-RBAC-003/EXC-03 | Chặn chuyển giao vòng về chính người đang phụ trách. Đặc tả chưa chạy. | [Chưa xác định] | Draft |
+| ST-RBAC-033 | STORY-RBAC-003 | EXC | REGRESSION | P2 | Nhân viên A đang phụ trách gói giám sát G. Người quản trị có quyền assignment.manage. | 1. Chuẩn bị A và phân công gói G theo Test data.<br>2. Gửi yêu cầu chuyển giao phân công gói G từ A sang chính A.<br>3. Đọc lại các phân công của G. | Nhân viên A đang phụ trách G. Dữ liệu minh họa. | Hệ thống từ chối yêu cầu. Phân công hiện tại của A trên G giữ nguyên và không sinh bản ghi phân công thứ hai trùng người và trùng gói. | STORY-RBAC-003/EXC-03 | Chặn chuyển giao vòng về chính người đang phụ trách. Đặc tả chưa chạy. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

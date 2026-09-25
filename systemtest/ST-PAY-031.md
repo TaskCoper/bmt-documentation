@@ -39,6 +39,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## System Test
 
+**Đã rút khỏi nghiệm thu hiện tại: STORY-SUB-004/AC-008 không nghiệm thu vì người dùng xác nhận ngày 25/09/2026 bỏ việc đổi công trình của gói đã gán, kể cả nhân viên và Admin; BR-SUB-023 đã bỏ. Việc từ chối đổi công trình hiện kiểm ở ST-PAY-071. Không tái sử dụng mã này.**
+
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
 

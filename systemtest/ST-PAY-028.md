@@ -44,9 +44,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-PAY-028 | STORY-SUB-004 | EXC | REGRESSION | P1 | Gói đã gán cho A; B là công trình khác của cùng khách. | 1. Chuẩn bị tài khoản, gói/đơn và mốc thời gian như Test data.<br>2. Khách gửi yêu cầu gỡ gói hoặc đổi sang B, kể cả yêu cầu trực tiếp.<br>3. Đọc lại đơn/gói và giao diện liên quan; kiểm tra cả dữ liệu không được thay đổi. | Gói đã gán cho A; B là công trình khác của cùng khách. Đây là dữ liệu thử, không phải giá bán hoặc lịch vận hành đã chốt. | Từ chối và hướng dẫn liên hệ nhân viên. Gói vẫn gắn với A, không tạo thêm gói. | STORY-SUB-004/AC-005<br>BR-SUB-023/Then | Khách không tự gỡ hoặc đổi. Đặc tả chưa thực thi. | [Chưa xác định] | Draft |
+| ST-PAY-028 | STORY-SUB-004 | EXC | REGRESSION | P1 | Gói đã gán cho A; B là công trình khác của cùng khách. | 1. Chuẩn bị tài khoản, gói/đơn và mốc thời gian như Test data.<br>2. Khách gửi yêu cầu gỡ gói hoặc đổi sang B, kể cả yêu cầu trực tiếp.<br>3. Đọc lại đơn/gói và giao diện liên quan; kiểm tra cả dữ liệu không được thay đổi. | Gói đã gán cho A; B là công trình khác của cùng khách. Đây là dữ liệu thử, không phải giá bán hoặc lịch vận hành đã chốt. | Từ chối; gói đã gắn thì không gỡ hoặc đổi công trình được. Gói vẫn gắn với A, không tạo thêm gói. | STORY-SUB-004/AC-005<br>STORY-SUB-004/EXC-03<br>BR-SUB-009/Except | Khách không tự gỡ hoặc đổi. Cập nhật 25/09/2026: bỏ câu hướng dẫn liên hệ nhân viên vì nhân viên cũng không đổi được công trình; căn cứ chuyển từ BR-SUB-023 đã bỏ sang BR-SUB-009. Đặc tả chưa thực thi. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-SUB-004/AC-005
-- BR-SUB-023/Then
+- STORY-SUB-004/EXC-03
+- BR-SUB-009/Except

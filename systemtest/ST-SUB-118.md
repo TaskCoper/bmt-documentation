@@ -45,10 +45,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SUB-118 | STORY-SUB-003 | EXC | REGRESSION | P1 | Gói G1 đã hoàn thành trên công trình A của khách K. Khách K có gói G2 chưa gán còn hạn và gói G3 đã gán công trình B. Có nhân viên có quyền supervision.reassign. | 1. Khách gán G2 vào công trình A.<br>2. Nhân viên đổi công trình của G3 từ B sang A, có lý do.<br>3. Kiểm tra kết quả và trạng thái G1, G2, G3. | Dữ liệu thử; không tạo dữ liệu lịch hoặc số dư lượt giám sát. API cụ thể bổ sung trong TDD. | Cả hai yêu cầu bị từ chối vì G1 vẫn giữ chỗ trên A. G1 vẫn đã hoàn thành trên A; G2 vẫn chưa gán; G3 vẫn gắn B. | STORY-SUB-003/AC-012<br>BR-SUB-006/Statement<br>BR-SUB-023/Except | Bổ sung 24/09/2026 theo nghiệp vụ hoàn thành/mở lại trên vòng đời mới. Đặc tả nháp, chưa chạy. Cập nhật 25/09/2026: gói giám sát gắn với công trình, không gắn với bản dự toán. | [Chưa xác định] | Draft |
+| ST-SUB-118 | STORY-SUB-003 | EXC | REGRESSION | P1 | Gói G1 đã hoàn thành trên công trình A của khách K. Khách K có gói G2 chưa gán còn hạn. | 1. Khách gán G2 vào công trình A, kể cả gửi trực tiếp tới API.<br>2. Kiểm tra kết quả và trạng thái G1, G2. | Dữ liệu thử; không tạo dữ liệu lịch hoặc số dư lượt giám sát. API cụ thể bổ sung trong TDD. | Yêu cầu bị từ chối vì G1 vẫn giữ chỗ trên A. G1 vẫn đã hoàn thành trên A; G2 vẫn chưa gán và còn gán được cho công trình khác trong hạn. | STORY-SUB-003/AC-012<br>STORY-SUB-003/EXC-06<br>BR-SUB-006/Statement | Bổ sung 24/09/2026 theo nghiệp vụ hoàn thành/mở lại trên vòng đời mới. Đặc tả nháp, chưa chạy. Cập nhật 25/09/2026: gói giám sát gắn với công trình, không gắn với bản dự toán. Bỏ bước nhân viên đổi công trình của gói khác sang A vì thao tác đổi công trình đã bỏ cùng BR-SUB-023. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-SUB-003/AC-012
+- STORY-SUB-003/EXC-06
 - BR-SUB-006/Statement
-- BR-SUB-023/Except
