@@ -59,7 +59,7 @@ Khách chọn gói và yêu cầu tạo đơn thanh toán.
 1. Lưu giá, bản quyền lợi và nội dung cam kết đã chọn tại lúc tạo đơn; giữ nguyên cho đơn đó khi Admin sửa giá, quyền lợi hoặc ngừng bán gói. Không lấy bản công bố mới hơn tại lúc cấp gói.
 2. Tạo QR cho đơn. Thời hạn chờ thanh toán là 15 phút từ lúc tạo đơn; nhận một phần tiền không kéo dài thời hạn.
 3. Mỗi khách chỉ có một đơn thiết kế đang chờ, gồm cả đơn đã nhận một phần tiền. Giám sát cho phép nhiều đơn chờ và mua nhiều gói cùng loại.
-4. Khách mua giám sát ngay theo giá niêm yết, không bắt buộc có dự án, không chờ nhân viên kiểm tra địa điểm, diện tích hoặc phạm vi phục vụ.
+4. Khách mua giám sát ngay theo giá niêm yết, không bắt buộc có công trình, không chờ nhân viên kiểm tra địa điểm, diện tích hoặc phạm vi phục vụ.
 5. Đơn mới tạo sau khi hủy hoặc hết hạn là lần mua mới, dùng giá và quyền lợi tại lúc tạo đơn mới; không kế thừa giá của đơn cũ.
 
 ## Except

@@ -48,7 +48,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Statement
 
-Một tài khoản chỉ thuộc một trong hai nhóm: tài khoản khách hàng hoặc tài khoản nhân viên. Tài khoản khách hàng giữ vai trò Khách hàng và không nhận vai trò nhân viên. Tài khoản nhân viên giữ một hoặc nhiều vai trò nhân viên và không mua gói, không tạo dự án.
+Một tài khoản chỉ thuộc một trong hai nhóm: tài khoản khách hàng hoặc tài khoản nhân viên. Tài khoản khách hàng giữ vai trò Khách hàng và không nhận vai trò nhân viên. Tài khoản nhân viên giữ một hoặc nhiều vai trò nhân viên và không mua gói, không tạo bản dự toán.
 
 ## When
 
@@ -57,10 +57,10 @@ Hệ thống tạo tài khoản, gán vai trò cho một tài khoản, hoặc nh
 ## Then
 
 1. Tài khoản đăng ký công khai nhận vai trò Khách hàng và thuộc nhóm khách hàng.
-2. Tài khoản được mời theo [BR-RBAC-006](BR-RBAC-006.md) thuộc nhóm nhân viên.
+2. Tài khoản do người quản trị tạo theo [BR-RBAC-006](BR-RBAC-006.md) thuộc nhóm nhân viên.
 3. Từ chối gán vai trò nhân viên cho tài khoản khách hàng, và từ chối gán vai trò Khách hàng cho tài khoản nhân viên.
-4. Từ chối mời làm nhân viên một địa chỉ email đã thuộc tài khoản khách hàng. Người đó cần một địa chỉ email khác cho tài khoản nhân viên.
-5. Từ chối các thao tác của khách hàng trên tài khoản nhân viên: mua gói, tạo dự án, dùng quyền lợi thiết kế.
+4. Từ chối tạo tài khoản nhân viên cho một địa chỉ email đã thuộc tài khoản khách hàng. Người đó cần một địa chỉ email khác cho tài khoản nhân viên.
+5. Từ chối các thao tác của khách hàng trên tài khoản nhân viên: mua gói, tạo bản dự toán, dùng quyền lợi thiết kế.
 6. Việc giữ nhiều vai trò cùng lúc theo [BR-RBAC-001](BR-RBAC-001.md) chỉ áp dụng trong nhóm vai trò nhân viên.
 
 ## Except

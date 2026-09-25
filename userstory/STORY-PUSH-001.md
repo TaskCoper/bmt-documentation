@@ -182,9 +182,18 @@ Phiên đã hết hiệu lực, bị thu hồi hoặc không xác minh được 
 - **Then**: Lỗi tạm thời được xử lý theo chính sách thử lại có giới hạn; kết quả phân biệt việc Expo tiếp nhận với việc FCM/APNs tiếp nhận.
 - **And**: Không ghi nhận người dùng đã nhận hoặc đã đọc chỉ từ ticket/receipt thành công.
 
+#### AC-010
+
+- **Given**: Khách hàng cài lại app trên cùng thiết bị; Expo trả lại token đang gắn với đăng ký của bản cài cũ.
+- **When**: Khách hàng đăng nhập hợp lệ và app gửi token đó cùng mã bản cài mới.
+- **Then**: Backend chuyển token sang đăng ký của bản cài mới, không từ chối đăng ký; lần gửi tiếp theo đến thiết bị qua đăng ký mới.
+- **And**: Đăng ký cũ ngừng nhận thông báo; không tạo hai đích gửi cho cùng token.
+
 ## References
 
 ### TDDs
+
+Các chi tiết Expo trong bộ tài liệu là phương án đề xuất, chưa xác nhận mobile đang dùng Expo hoặc đã có cấu hình push. Cần kiểm tra source mobile trước khi chốt nhà cung cấp và cập nhật đồng bộ Story, BR, TDD và test nếu phương án thay đổi.
 
 - TDD-PUSH-001/Architecture
 
@@ -204,6 +213,8 @@ Phiên đã hết hiệu lực, bị thu hồi hoặc không xác minh được 
 - Không cam kết giao push đúng một lần hoặc bảo đảm thiết bị đã hiển thị. Không thu hồi được thông báo đã chuyển sang dịch vụ push trước khi đăng xuất.
 
 ## Out of Scope
+
+- Thông báo website: **Pending — technical debt**, theo xác nhận của người dùng ngày 2026-09-25. Chưa triển khai trong đợt này; loại thông báo trên website, phạm vi và lịch xử lý sẽ được xác định sau.
 
 - Chọn sự kiện nghiệp vụ, nội dung và lịch gửi thông báo cụ thể.
 - Push cho nhân viên, web push, chiến dịch marketing hoặc gửi cho khách chưa đăng nhập.

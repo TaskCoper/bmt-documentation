@@ -111,6 +111,7 @@ Có yêu cầu thay đổi đầu vào trong lúc AI đang xử lý.
 
 1. Từ chối cập nhật theo BR-PROJ-005, kể cả tự lưu đến muộn hoặc gửi trực tiếp.
 2. Giữ nguyên đầu vào của tác vụ đang chạy.
+3. Đổi tên bản dự toán không bị khóa, vì tên không phải đầu vào gửi AI; theo BR-SUB-007 khoản 11.
 
 #### EXC-03
 
@@ -183,6 +184,7 @@ Nhận kết quả sau khi tác vụ đã thất bại do quá thời gian.
 ### TDDs
 
 - TDD-PROJ-002
+- TDD-PROJ-001: Đổi tên bản dự toán không bị khóa khi AI đang xử lý (EXC-02).
 
 ### Rules
 

@@ -59,7 +59,7 @@ Hệ thống nhận bất kỳ yêu cầu nào tới một chức năng có yêu
 1. Xác định người gọi và tập quyền theo [BR-RBAC-001](BR-RBAC-001.md), rồi kiểm tra theo [BR-RBAC-010](BR-RBAC-010.md).
 2. Áp dụng cho cả danh sách và chi tiết, cả yêu cầu đọc và yêu cầu thay đổi.
 3. Yêu cầu chưa đăng nhập hoặc phiên không hợp lệ trả 401. Yêu cầu đã đăng nhập nhưng thiếu quyền hoặc thiếu phân công trả 403.
-4. Yêu cầu bị từ chối không ghi dữ liệu, không tạo bản ghi một phần và không để lại thay đổi nào.
+4. Yêu cầu bị từ chối không ghi dữ liệu, không tạo bản ghi một phần và không để lại thay đổi nào. Ngoại lệ duy nhất là bản ghi nhật ký yêu cầu bị từ chối theo [BR-RBAC-012](BR-RBAC-012.md) khoản 2; bản ghi này không phải dữ liệu nghiệp vụ.
 5. Thông báo lỗi cho biết thiếu quyền, không tiết lộ nội dung dữ liệu mà người gọi không được xem.
 
 ## Except

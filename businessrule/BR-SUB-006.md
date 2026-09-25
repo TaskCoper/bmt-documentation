@@ -49,7 +49,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Statement
 
-**Cập nhật 19/09/2026:** Khách được sở hữu nhiều gói giám sát chưa gán dự án. Giới hạn một gói áp dụng khi gán/khôi phục hiệu lực trên một dự án, không chặn mua nhiều gói chưa gán. Hạn gán lần đầu và sửa liên kết theo [BR-SUB-022](BR-SUB-022.md), [BR-SUB-023](BR-SUB-023.md); hủy/khôi phục theo [BR-SUB-024](BR-SUB-024.md), [BR-SUB-025](BR-SUB-025.md).
+**Cập nhật 19/09/2026:** Khách được sở hữu nhiều gói giám sát chưa gán công trình. Giới hạn một gói áp dụng khi gán/khôi phục hiệu lực trên một công trình, không chặn mua nhiều gói chưa gán. Hạn gán lần đầu và sửa liên kết theo [BR-SUB-022](BR-SUB-022.md), [BR-SUB-023](BR-SUB-023.md); hủy/khôi phục theo [BR-SUB-024](BR-SUB-024.md), [BR-SUB-025](BR-SUB-025.md).
 
 **Cập nhật 24/09/2026:** Với giám sát, gói có hiệu lực trên công trình là gói giữ chỗ: đã gán hoặc đã hoàn thành. Gói đã hoàn thành vẫn giữ chỗ nên công trình không nhận được gói khác cho tới khi gói đó bị hủy. Gói chưa gán hoặc đang bị hủy không giữ chỗ.
 
@@ -72,7 +72,7 @@ Không có ngoại lệ cho hai subscription thiết kế cùng hiệu lực ho�
 
 ## Notes
 
-- Với giám sát, gói chưa từng gán có hạn một năm từ lúc cấp; gói đã gán đúng hạn không tự hết hạn theo mốc đó. Không coi mọi gói chưa hoàn thành là còn hiệu lực nếu đã bị hủy hoặc quá hạn gán. Luồng hoàn thành lịch sử ở BR-SUB-011 khác với hủy hiệu lực.
+- Với giám sát, gói chưa từng gán có hạn một năm từ lúc cấp; gói đã gán đúng hạn không tự hết hạn theo mốc đó. Không coi mọi gói chưa hoàn thành là còn hiệu lực nếu đã bị hủy hoặc quá hạn gán. Hoàn thành và mở lại theo BR-SUB-011, BR-SUB-012 vẫn thuộc phạm vi theo cập nhật 24/09/2026 và khác với hủy hiệu lực.
 - Giới hạn áp dụng cho subscription đang hiệu lực, không phải tổng số bản ghi lịch sử của tài khoản.
 - Đây là ràng buộc nghiệp vụ cần bảo đảm; không bổ sung luồng Admin cấp gói thủ công. Mua và cấp gói theo [STORY-PAY-001](../userstory/STORY-PAY-001.md); không suy ra tự động gia hạn.
 - Đổi gói và chu kỳ theo BR-SUB-021; không còn phân loại nâng/hạ hoặc lịch chuyển cuối kỳ.

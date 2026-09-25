@@ -144,12 +144,20 @@ Chuẩn bị hoặc tải tệp thất bại sau khi kết quả thiết kế đ
 - **Then**: Không báo tệp đã sẵn sàng hoặc đã tải thành công khi chưa có căn cứ.
 - **And**: Giữ kết quả nguồn, không tính thêm lượt; khách có thể yêu cầu lại thao tác tệp.
 
+#### AC-006
+
+- **Given**: Bản dự toán "Phương án 3" đã có tệp PDF xuất sẵn và đang được chia sẻ qua link còn hiệu lực.
+- **When**: Chủ sở hữu đổi tên thành "Phương án chốt", rồi chủ sở hữu và người nhận link lần lượt mở hồ sơ và tải PDF.
+- **Then**: Cả hai đều thấy tên "Phương án chốt"; tệp PDF được xuất lại từ kết quả đã lưu với tên mới theo BR-PROJ-007.
+- **And**: Việc xuất lại không tính lượt, không gọi AI và không thay kết quả nguồn.
+
 ## References
 
 ### TDDs
 
 - TDD-PROJ-002
 - TDD-PROJ-003
+- TDD-PROJ-001: Thao tác đổi tên và NameVersion dùng cho AC-006.
 
 ### Rules
 

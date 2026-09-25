@@ -64,13 +64,13 @@ Admin sửa, lưu nháp hoặc công bố quyền lợi của gói, hoặc hệ 
 3. Lưu nháp không thay thế bản đang công bố. Admin kiểm tra rồi Công bố để bản mới có thể được chọn cho các lần đăng ký/gia hạn phù hợp; Công bố không thay thế bản đã chốt cho một kỳ hoặc sửa quyền kỳ hiện tại.
 4. Hạn mức thiết kế kỳ mới tuân theo quy tắc không cộng dồn; tác vụ đã giữ lượt ở kỳ cũ vẫn được tính vào kỳ cũ.
 
-5. Với giám sát, giữ nguyên quyền lợi của từng gói đã cấp. Chốt bản quyền lợi khi tạo đơn theo BR-PAY-001, không lấy bản mới nhất tại lúc cấp gói. Đơn tạo trước khi công bố thay đổi vẫn cấp theo bản đã lưu; đơn mới chọn bản công bố phù hợp tại lúc tạo. Lưu nháp không được dùng để cấp quyền.
+5. Với giám sát, giữ nguyên mô tả dịch vụ của từng gói đã cấp; gói giám sát không dùng danh mục quyền lợi theo BR-SUB-008 khoản 7. Chốt mô tả khi tạo đơn theo BR-PAY-001, không lấy bản mới nhất tại lúc cấp gói. Đơn tạo trước khi công bố thay đổi vẫn cấp theo bản đã lưu; đơn mới chọn bản công bố phù hợp tại lúc tạo. Lưu nháp không được dùng để cấp quyền.
 
-6. Bản đã chốt gồm toàn bộ quyền lợi của kỳ: hạn mức, quyền bật/tắt và mức tính năng. Không ghép hạn mức của bản đã chốt với quyền bật/tắt hoặc mức của bản công bố sau đó. Thời điểm ghi nhận bản đã chốt trong luồng đăng ký/gia hạn sẽ thiết kế cùng thanh toán; không tự thêm luồng nhận gói hoặc gia hạn thủ công.
+6. Bản đã chốt gồm toàn bộ quyền lợi của kỳ: hạn mức, quyền bật/tắt và mức tính năng. Không ghép hạn mức của bản đã chốt với quyền bật/tắt hoặc mức của bản công bố sau đó. Bản đã chốt được ghi nhận lúc tạo đơn theo BR-PAY-001; không tự thêm luồng nhận gói hoặc gia hạn thủ công.
 
-7. Đổi gói hoặc chu kỳ ngay theo BR-SUB-021. Chính sách cũ giữ giá/quyền cho lịch chuyển cuối kỳ không còn nhánh áp dụng; thời điểm chốt giá và quyền cho giao dịch đổi ngay vẫn thiết kế cùng thanh toán. Không thay nguyên tắc giữ bản quyền lợi đã chốt cho từng kỳ.
+7. Đổi gói hoặc chu kỳ ngay theo BR-SUB-021. Chính sách cũ giữ giá/quyền cho lịch chuyển cuối kỳ không còn nhánh áp dụng; giá và quyền của giao dịch đổi ngay chốt lúc tạo đơn theo BR-PAY-001. Không thay nguyên tắc giữ bản quyền lợi đã chốt cho từng kỳ.
 
-8. Khách đã mua giữ quyền lợi tư vấn offline theo nội dung mô tả đã chốt cho lần mua đó trong suốt kỳ đã mua. Admin sửa hoặc công bố mô tả mới không thay cam kết tư vấn của kỳ đang dùng; nội dung mới áp dụng cho lần mua mới. Tư vấn vẫn là mô tả tự do, không phải entitlement dạng mức hoặc hạn mức lượt. Thời điểm chốt nội dung trong giao dịch cụ thể thiết kế cùng thanh toán.
+8. Khách đã mua giữ quyền lợi tư vấn offline theo nội dung mô tả đã chốt cho lần mua đó trong suốt kỳ đã mua. Admin sửa hoặc công bố mô tả mới không thay cam kết tư vấn của kỳ đang dùng; nội dung mới áp dụng cho lần mua mới. Tư vấn vẫn là mô tả tự do, không phải entitlement dạng mức hoặc hạn mức lượt. Nội dung tư vấn của lần mua chốt lúc tạo đơn theo BR-PAY-001.
 
 ## Except
 
@@ -84,10 +84,10 @@ Khách chủ động đổi gói hoặc chu kỳ theo BR-SUB-021 sẽ kết thú
 
 - Phần lưu nháp/Công bố áp dụng cho danh mục gói. Với thiết kế, thay đổi chỉ có thể áp dụng ở kỳ mới qua bản được chốt cho kỳ đó; không mặc định kỳ mới luôn nhận mọi thay đổi vừa công bố. Giám sát không có kỳ tiếp theo; gói đã cấp giữ nguyên quyền lợi, thay đổi chỉ áp dụng cho gói cấp mới. Hoàn thành rồi mở lại cùng gói không phải cấp gói mới, nên không tự đổi quyền lợi.
 - Ví dụ minh họa: kỳ hiện tại có 10 lượt, đã dùng 2. Khách chốt bản B với 20 lượt cho kỳ mới; sau đó Admin công bố C với 30 lượt. Kỳ hiện tại vẫn còn 8 lượt; kỳ mới nhận đúng 20 lượt của B, không phải 30 và không cộng thêm 8 lượt dư. Không tự coi khách được giữ B cho mọi kỳ sau; mỗi lần đăng ký/gia hạn có bản đã chốt tương ứng.
-- Quy tắc áp dụng cho quyền lợi nói chung, không chỉ hạn mức lượt. Mốc chốt giá của giao dịch đổi ngay và quy trình thanh toán còn cần thiết kế.
+- Quy tắc áp dụng cho quyền lợi nói chung, không chỉ hạn mức lượt. Mốc chốt giá của giao dịch đổi ngay là lúc tạo đơn theo BR-PAY-001.
 - Điều kiện tối thiểu về quyền lợi theo [BR-SUB-008](BR-SUB-008.md): gói chưa có quyền lợi được lưu nháp, nhưng không được Công bố; phải bổ sung ít nhất một quyền lợi hợp lệ.
-- Luồng lưu nháp → kiểm tra → Công bố đã chốt; chưa đặt thêm người duyệt riêng. Cách chọn bản cho kỳ thiết kế đã chốt: dùng bản ghi nhận khi đăng ký/gia hạn. Thời điểm chốt và các tình huống giao dịch sẽ xử lý cùng thanh toán; các điều kiện công bố còn thiếu tiếp tục được làm rõ.
-- Không tự tạo hoặc gia hạn subscription chỉ vì gói được sửa. Luồng nhận gói và gia hạn sẽ thiết kế cùng thanh toán sau.
+- Luồng lưu nháp → kiểm tra → Công bố đã chốt; chưa đặt thêm người duyệt riêng. Cách chọn bản cho kỳ thiết kế đã chốt: dùng bản ghi nhận khi đăng ký/gia hạn. Thời điểm chốt và các tình huống giao dịch theo BR-PAY-001 đến BR-PAY-004; các điều kiện công bố còn thiếu tiếp tục được làm rõ.
+- Không tự tạo hoặc gia hạn subscription chỉ vì gói được sửa. Luồng mua và nhận gói theo STORY-PAY-001.
 - Tham chiếu [STORY-SUB-001](../userstory/STORY-SUB-001.md), [BR-SUB-002](BR-SUB-002.md), [BR-SUB-003](BR-SUB-003.md) và [ST-SUB-007](../systemtest/ST-SUB-007.md).
 - [ST-SUB-008](../systemtest/ST-SUB-008.md) kiểm tra bản nháp không được áp dụng cho kỳ tiếp theo.
 - [ST-SUB-033](../systemtest/ST-SUB-033.md) kiểm tra giữ quyền lợi gói giám sát đã cấp và áp dụng bản mới cho gói cấp mới. Quản lý lịch và lượt giám sát vẫn hoãn.

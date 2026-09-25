@@ -60,12 +60,12 @@ Nhân viên yêu cầu khôi phục một gói bị hủy.
 2. Không cộng thời gian bị hủy, không đổi bản quyền lợi, không cấp lại hạn mức hoặc làm mới số lượt.
 3. Với thiết kế, từ chối nếu đã hết kỳ hoặc tài khoản có gói thiết kế khác đang hiệu lực.
 4. Với giám sát chưa từng gán, từ chối nếu đã quá một năm từ lúc cấp. Trong hạn thì có thể khôi phục về chưa gán, giữ hạn ban đầu.
-5. Với giám sát đã gán đúng hạn, được khôi phục cả sau một năm nếu dự án chưa có gói giám sát khác đang hiệu lực. Gói đã hoàn thành trước khi bị hủy thì khôi phục về đã hoàn thành; gói đã gán thì về đã gán.
+5. Với giám sát đã gán đúng hạn, được khôi phục cả sau một năm nếu công trình chưa có gói giám sát khác đang hiệu lực. Gói đã hoàn thành trước khi bị hủy thì khôi phục về đã hoàn thành; gói đã gán thì về đã gán.
 6. Nếu có gói khác gây xung đột, từ chối và giữ nguyên các gói; không tự hủy gói khác để khôi phục. Lưu lịch sử và lý do khi khôi phục hợp lệ.
 
 ## Except
 
-Không dùng quy tắc này để mở lại gói đã hoàn thành trong thiết kế lịch sử BR-SUB-012; hoàn thành khác hủy. Không khôi phục một gói chưa từng gán đã mất hiệu lực do hết hạn.
+Không dùng quy tắc này để mở lại gói đã hoàn thành; mở lại theo [BR-SUB-012](BR-SUB-012.md), và hoàn thành khác hủy. Không khôi phục một gói chưa từng gán đã mất hiệu lực do hết hạn.
 
 ## Notes
 

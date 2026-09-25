@@ -55,7 +55,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ### Preconditions
 
-- Người thao tác đăng nhập với quyền Admin quản lý danh mục này. Cách ánh xạ quyền chi tiết vào hệ thống phân quyền cần được đối chiếu trong thiết kế; không mặc định mọi nhân viên có quyền.
+- Người thao tác đăng nhập và có quyền quản lý danh mục loại công trình và phong cách theo STORY-RBAC-001; vai trò Admin có quyền này. Không mặc định mọi nhân viên có quyền.
 - Quy tắc cấu hình và hiệu lực đối với bản dự toán áp dụng BR-PROJ-004.
 
 ### Trigger
@@ -89,7 +89,7 @@ Admin sửa cấu hình khi đã có bản dự toán sử dụng cấu hình tr
 
 #### EXC-01
 
-Người yêu cầu không có quyền Admin quản lý danh mục.
+Người yêu cầu không có quyền quản lý danh mục loại công trình và phong cách.
 
 1. Từ chối thao tác quản trị, kể cả yêu cầu gửi trực tiếp.
 2. Không ghi thay đổi từ yêu cầu bị từ chối.
@@ -187,6 +187,8 @@ Admin lưu cấu hình có danh sách chọn tầng hoặc nhóm phong cách đ�
 ### TDDs
 
 - TDD-PROJ-001
+- TDD-PROJ-002: Kiểm lựa chọn phong cách theo cấu hình khi gửi AI (AC-004).
+- TDD-LIB-001: Thư viện mẫu dùng chung danh mục loại công trình.
 
 ### Rules
 

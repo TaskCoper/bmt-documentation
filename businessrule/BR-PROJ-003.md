@@ -66,7 +66,7 @@ Khách tạo dự toán bằng tên hoặc nhập, sửa thông tin đầu vào 
 7. Khi tự lưu thất bại do mất mạng hoặc lỗi máy chủ, giữ nội dung đang nhập khi trang còn mở, thông báo chưa lưu và cung cấp thao tác Thử lại. Tự thử lưu lại khi kết nối phục hồi; mỗi yêu cầu thử lại vẫn phải kiểm tra quyền, điều kiện gói/lượt, dữ liệu và trạng thái khóa đầu vào.
 8. Chỉ báo đã lưu sau khi backend xác nhận lưu thành công. Tự thử lưu lại hoặc bấm Thử lại ở đây không gửi lại tác vụ AI.
 
-9. Tên bản dự toán bắt buộc có nội dung, tối đa 200 ký tự sau khi bỏ khoảng trắng đầu/cuối. Lưu tên sau khi bỏ khoảng trắng đầu/cuối; tên rỗng, chỉ có khoảng trắng hoặc vượt 200 ký tự sau bước này không hợp lệ. Từ chối tạo hoặc lưu tên không hợp lệ; không tự cắt ngắn tên để chấp nhận, giữ dữ liệu đã lưu khi yêu cầu sửa bị từ chối.
+9. Tên bản dự toán bắt buộc có nội dung, tối đa 200 ký tự sau khi bỏ khoảng trắng đầu/cuối. Lưu tên sau khi bỏ khoảng trắng đầu/cuối; tên rỗng, chỉ có khoảng trắng hoặc vượt 200 ký tự sau bước này không hợp lệ. Từ chối tạo hoặc lưu tên không hợp lệ; không tự cắt ngắn tên để chấp nhận, giữ dữ liệu đã lưu khi yêu cầu sửa bị từ chối. Đổi tên bản dự toán đã có chỉ cần quyền sở hữu và tên hợp lệ; không phụ thuộc gói, lượt hay khóa đầu vào, theo BR-SUB-007 khoản 11.
 
 ## Except
 

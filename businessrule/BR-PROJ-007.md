@@ -56,18 +56,21 @@ Hệ thống nhận kết quả AI hoặc khách yêu cầu xem dự toán, xem 
 
 ## Then
 
-1. Giữ cấu trúc dự toán theo trang mẫu gồm phần thô, hoàn thiện và nội thất, cùng tổng dự toán và nội dung tư vấn do AI trả. Áp dụng phạm vi này cho cả năm loại công trình; không tự loại nhóm phần thô riêng với Căn hộ.
+1. Giữ cấu trúc dự toán theo trang mẫu gồm phần thô, hoàn thiện và nội thất, cùng tổng dự toán và nội dung tư vấn do AI trả. Áp dụng phạm vi này cho mọi loại công trình trong danh mục theo BR-PROJ-004; không tự loại nhóm phần thô riêng với Căn hộ.
 2. Dữ liệu phục vụ màn hình, PDF và Excel phải thuộc đúng bản dự toán và cùng kết quả nguồn đã lưu. Không dùng số tiền, diện tích hoặc hình minh họa mẫu của website làm kết quả thật.
 3. Kiểm tra phản hồi theo hợp đồng AI trước khi công bố. Hợp đồng cần xác định trường và đầu ra bắt buộc; không tự điền kết quả chuyên môn còn thiếu để báo thành công.
 4. Hỗ trợ xem hồ sơ, chuẩn bị/tải PDF và tải Excel dự toán. Việc nhận tệp có sẵn từ AI hay xuất tệp từ dữ liệu AI sẽ xác định khi có hợp đồng; chưa chọn cách render hoặc thư viện xuất tệp.
 5. Xem, xuất hoặc tải từ kết quả cũ không tạo thiết kế AI mới, không thay thế kết quả nguồn và không giữ/trừ thêm lượt tạo thiết kế.
 6. Khi gói hết hạn, vẫn được dùng các thao tác hồ sơ cũ theo BR-SUB-007. Chia sẻ qua link, QR và email áp dụng BR-PROJ-006.
+7. Sau khi chủ sở hữu đổi tên bản dự toán theo BR-SUB-007 khoản 11, màn hình của chủ sở hữu và trang xem qua link luôn hiện tên hiện tại. Tệp PDF/Excel đã xuất trước khi đổi tên không được dùng nữa; lần tải tiếp theo xuất lại từ kết quả đã lưu với tên mới. Việc xuất lại không tính lượt, không gọi AI và không thay kết quả nguồn. Tệp người nhận đã tải về trước đó không bị thu hồi.
 
 ## Except
 
 Nếu chưa có bộ kết quả hợp lệ hoặc chưa chuẩn bị được tệp, không báo đã có tệp để tải. Lỗi xuất hoặc tải tệp từ một kết quả đã thành công không biến thành một lần tạo thiết kế mới hoặc tự trừ lượt; giữ kết quả nguồn để xử lý lại thao tác bị lỗi.
 
 ## Notes
+
+- Khoản 7 do người dùng xác nhận ngày 25/09/2026.
 
 - Trang mẫu mô tả dự toán là tham khảo. Không suy ra giá trị mẫu hoặc hình mẫu là định mức áp dụng cho công trình thực tế.
 - BR-PROJ-004 tách lựa chọn phong cách kiến trúc và nội thất theo loại công trình. Người dùng đã chốt cấu hình chỉ điều khiển lựa chọn đầu vào; AI vẫn trả đủ kết quả. Không loại phần thiết kế, dự toán hoặc hồ sơ chỉ vì một nhóm lựa chọn phong cách bị tắt.

@@ -60,7 +60,7 @@ Admin ngừng bán một gói thiết kế hoặc giám sát; hoặc có yêu c�
 1. Gói ngừng bán không xuất hiện trong danh sách gói có thể đăng ký.
 2. Từ chối tạo đơn mua mới hoặc yêu cầu chuyển mới sang gói đã ngừng bán, kể cả khi gửi trực tiếp với mã gói đã biết. Đơn đã tạo trước khi ngừng bán vẫn giữ giá/quyền lợi và được cấp gói nếu thanh toán hợp lệ theo BR-PAY-001–004; không chặn cấp chỉ vì lúc nhận webhook gói đã ngừng bán.
 3. Subscription thiết kế đã cấp tiếp tục đến hết kỳ hiện tại với quyền lợi, lượt đã dùng và lượt đang giữ không thay đổi do ngừng bán.
-4. Gói giám sát đã cấp tiếp tục theo dự án, không tự hoàn thành hoặc hết hạn do ngừng bán; giữ nguyên quyền lợi đã cấp.
+4. Gói giám sát đã cấp tiếp tục theo công trình, không tự hoàn thành hoặc hết hạn do ngừng bán; giữ nguyên quyền lợi đã cấp.
 5. Không xóa gói đã cấp, không tự đổi sang gói khác và không làm mới hạn mức do ngừng bán.
 
 ## Except
@@ -73,7 +73,7 @@ Admin ngừng bán một gói thiết kế hoặc giám sát; hoặc có yêu c�
 
 - Ngừng bán là trạng thái của gói trong danh mục, không phải hoàn thành gói giám sát của một khách hàng.
 - Mở lại cùng gói giám sát đã cấp là sửa trạng thái theo [BR-SUB-012](BR-SUB-012.md), không phải cấp gói mới.
-- Luồng nhận gói và thanh toán vẫn thiết kế sau; kiểm thử ràng buộc cấp mới tại điểm tích hợp sẽ được xác định trong TDD.
+- Luồng mua và nhận gói theo STORY-PAY-001; kiểm thử ràng buộc cấp mới tại điểm tích hợp sẽ được xác định trong TDD.
 - Tham chiếu [STORY-SUB-002](../userstory/STORY-SUB-002.md), [BR-SUB-004](BR-SUB-004.md), [BR-SUB-011](BR-SUB-011.md), [ST-SUB-034](../systemtest/ST-SUB-034.md) và [ST-SUB-035](../systemtest/ST-SUB-035.md).
 - ST-SUB-096 và STORY-SUB-002/AC-021 được giữ như lịch sử của lịch chuyển đã bỏ, không dùng nghiệm thu hiện tại.
 - Bản nháp còn thiếu metadata; chưa được phê duyệt.

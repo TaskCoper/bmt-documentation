@@ -56,7 +56,7 @@ Mỗi đơn thanh toán hợp lệ chỉ cấp một gói. Với thiết kế, l
 
 ## Then
 
-1. Tự cấp gói thiết kế hoặc giám sát theo giá và quyền lợi đã lưu trong đơn, không chờ nhân viên tiếp nhận. Gói giám sát được cấp khi chưa gán dự án.
+1. Tự cấp gói thiết kế hoặc giám sát theo giá và quyền lợi đã lưu trong đơn, không chờ nhân viên tiếp nhận. Gói giám sát được cấp khi chưa gán công trình.
 2. Thiết kế bắt đầu kỳ mới tại lúc hệ thống thực sự cấp gói; không tính lùi thời gian sử dụng về lúc giao dịch phát sinh chỉ vì webhook đến chậm.
 3. Đổi gói, đổi tháng/năm hoặc mua lại cùng gói/cùng chu kỳ theo BR-SUB-021: cấp đủ hạn mức mới, bỏ thời gian và lượt dư cũ, không khấu trừ tiền. Lượt đã giữ vẫn thuộc kỳ cũ.
 4. Nếu hai đơn thiết kế đều hợp lệ, ghi nhận cả hai lần mua. So sánh thời điểm mỗi đơn nhận đủ tiền, không so thời điểm tạo đơn hoặc webhook đến. Đơn mua trước được nhận diện là đã bị lần mua sau thay thế, không kích hoạt đè lên gói sau.

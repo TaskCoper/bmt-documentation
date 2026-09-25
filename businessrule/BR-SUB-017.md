@@ -81,4 +81,4 @@ Chế độ không giới hạn vẫn theo BR-SUB-005. Bỏ lượt chỉnh sử
 - [ST-SUB-077](../systemtest/ST-SUB-077.md) kiểm tra khách đã đăng nhập chưa có gói được tìm kiếm/xem danh sách nhưng không được mở chi tiết. Không tự cấp gói miễn phí hoặc lượt từ việc xem danh sách. Người dùng đã xác nhận khách chưa đăng nhập cũng được tìm kiếm/xem danh sách. Khi mở chi tiết, yêu cầu đăng nhập trước rồi kiểm tra gói, quyền và lượt; chưa đăng nhập thì không trả nội dung chi tiết. [ST-SUB-078](../systemtest/ST-SUB-078.md) kiểm tra ranh giới này.
 - Bản nháp chưa đủ metadata; test chưa chạy.
 
-- Cập nhật nghiệp vụ thư viện ngày 23/09/2026: [BR-LIB-003](BR-LIB-003.md) thay cách tính mỗi lần mở. ST-SUB-051 và phần tra cứu của TDD-SUB-002 cần cập nhật sau khi chốt bộ US/BR mới; chưa dùng nội dung cũ để nghiệm thu xem lại.
+- Cập nhật nghiệp vụ thư viện ngày 23/09/2026: [BR-LIB-003](BR-LIB-003.md) thay cách tính mỗi lần mở. ST-SUB-051 và phần tra cứu của TDD-SUB-002 đã được cập nhật theo quy tắc này ngày 25/09/2026.

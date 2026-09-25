@@ -59,12 +59,12 @@ Hệ thống nhận một yêu cầu từ tài khoản nhân viên và đã xác
 1. Với yêu cầu chỉ đọc dữ liệu, kiểm tra người gọi có quyền xem tương ứng. Có quyền thì cho xem toàn bộ phạm vi của quyền đó, không đòi thêm phân công.
 2. Với yêu cầu thay đổi dữ liệu, trước hết kiểm tra người gọi có quyền tương ứng. Không có thì từ chối.
 3. Nếu quyền đó thuộc nhóm quyền có gắn phân công, kiểm tra thêm người gọi đang được phân công tài nguyên đích tại thời điểm thao tác. Không đạt thì từ chối, kể cả khi người đó có quyền.
-4. Trong chín quyền khởi tạo, `supervision.complete` là quyền có gắn phân công. Các quyền `commerce.read`, `supervision.reassign`, `package.cancel`, `package.restore`, `user.manage`, `role.manage`, `assignment.manage` và `audit.read` chỉ kiểm tra quyền, không đòi phân công.
+4. Trong chín quyền khởi tạo, `supervision.complete` là quyền có gắn phân công. Các quyền `commerce.read`, `supervision.reassign`, `package.cancel`, `package.restore`, `user.manage`, `role.manage`, `assignment.manage` và `audit.read` chỉ kiểm tra quyền, không đòi phân công. Năm quyền quản trị bổ sung ngày 25/09/2026 (cấu hình gói, quản lý danh mục loại công trình và phong cách, quản lý thư viện mẫu, quản lý tin tức, quản lý tư vấn KTS) cũng không đòi phân công.
 5. Quyền xem không tự cấp quyền thay đổi. Người chỉ có quyền xem bị từ chối mọi thao tác sửa, hủy hoặc khôi phục.
 
 ## Except
 
-Vai trò Admin có đủ các quyền nên xem và thao tác được trong phạm vi các quyền đó. Riêng `supervision.complete`, [BR-SUB-011](BR-SUB-011.md) và [BR-SUB-012](BR-SUB-012.md) đã chốt Admin thao tác được mà không cần phân công dự án.
+Vai trò Admin có đủ các quyền nên xem và thao tác được trong phạm vi các quyền đó. Riêng `supervision.complete`, [BR-SUB-011](BR-SUB-011.md) và [BR-SUB-012](BR-SUB-012.md) đã chốt Admin thao tác được mà không cần phân công công trình.
 
 ## Notes
 

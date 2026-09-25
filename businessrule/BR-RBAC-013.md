@@ -44,11 +44,11 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Owner**: [Chưa xác định]
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
-- **Source**: Quyết định người dùng xác nhận trong hội thoại thiết kế RBAC ngày 20/09/2026: hỗ trợ phân công theo nhiều loại tài nguyên bằng một cơ chế chung.
+- **Source**: Quyết định người dùng xác nhận trong hội thoại thiết kế RBAC ngày 20/09/2026: hỗ trợ phân công theo nhiều loại tài nguyên bằng một cơ chế chung. Quyết định người dùng xác nhận trong hội thoại rà soát ngày 25/09/2026: đợt này chỉ phân công theo công trình, mỗi công trình một người phụ trách, người nhận phải có quyền `supervision.complete`, danh sách cần chia lại gồm cả công trình có người phụ trách đang bị khóa.
 
 ## Statement
 
-Phân công được ghi theo loại tài nguyên. Mỗi phân công cho biết nhân viên nào phụ trách loại tài nguyên nào, tài nguyên cụ thể nào, hiệu lực từ lúc nào và tới lúc nào. Trong đợt này có hai loại tài nguyên là khách hàng và dự án; các loại khác thêm sau dùng cùng cơ chế.
+Phân công được ghi theo loại tài nguyên. Mỗi phân công cho biết nhân viên nào phụ trách loại tài nguyên nào, tài nguyên cụ thể nào, hiệu lực từ lúc nào và tới lúc nào. Trong đợt này chỉ có một loại tài nguyên là công trình, và mỗi công trình tại một thời điểm chỉ có một người phụ trách; các loại khác thêm sau dùng cùng cơ chế.
 
 ## When
 
@@ -57,22 +57,20 @@ Người có quyền `assignment.manage` tạo, chuyển giao hoặc gỡ một 
 ## Then
 
 1. Ghi phân công gồm nhân viên, loại tài nguyên, định danh tài nguyên và thời điểm bắt đầu hiệu lực. Thời điểm kết thúc để trống nghĩa là còn hiệu lực.
-2. Chỉ phân công được cho tài khoản nhân viên đang hoạt động. Từ chối phân công cho tài khoản khách hàng hoặc tài khoản đang bị khóa.
-3. Phân công ở mức khách hàng có hiệu lực xuống các dự án thuộc khách hàng đó. Nhân viên phụ trách một khách hàng thao tác được trên các dự án của khách đó mà không cần phân công riêng từng dự án.
-4. Một tài nguyên có thể có nhiều người phụ trách cùng lúc, kể cả khi một người được phân công ở mức khách hàng và một người khác ở mức dự án. Cả hai đều thao tác được; hệ thống không tự gỡ phân công nào để nhường chỗ.
+2. Chỉ phân công được cho tài khoản nhân viên đang hoạt động và đang có quyền `supervision.complete`. Từ chối phân công cho tài khoản khách hàng, tài khoản đang bị khóa hoặc nhân viên thiếu quyền này. Điều kiện này áp dụng cả khi chuyển giao.
+3. Đợt này không có phân công ở mức khách hàng. Nhân viên chỉ thao tác được trên công trình được phân công cho chính mình.
+4. Mỗi công trình tại một thời điểm chỉ có một phân công đang hiệu lực. Yêu cầu giao một công trình đang có người phụ trách cho người khác bị từ chối và hướng sang chuyển giao; không tạo phân công thứ hai.
 5. Chuyển giao là kết thúc hiệu lực phân công cũ và tạo phân công mới cho người nhận tại cùng thời điểm. Người bàn giao mất quyền thao tác trên tài nguyên đó kể từ lúc đó.
-6. Gỡ phân công mà không chuyển giao thì tài nguyên về danh sách chưa có người phụ trách.
+6. Gỡ phân công mà không chuyển giao thì công trình về danh sách cần chia lại. Danh sách này gồm công trình chưa có người phụ trách và công trình có người phụ trách đang bị khóa theo [BR-RBAC-008](BR-RBAC-008.md).
 7. Mọi thay đổi phân công đều ghi nhật ký theo [BR-RBAC-012](BR-RBAC-012.md).
 
 ## Except
 
-Admin thao tác được trên gói giám sát mà không cần phân công dự án, theo [BR-SUB-011](BR-SUB-011.md) và [BR-SUB-012](BR-SUB-012.md).
-
-Điểm 3 không áp dụng cho hoàn thành và mở lại gói giám sát: nhân viên phải được phân công trực tiếp dự án; phân công mức khách hàng không đủ. Người dùng xác nhận ngày 24/09/2026, xem [BR-SUB-011](BR-SUB-011.md).
+Admin thao tác được trên gói giám sát mà không cần phân công công trình, theo [BR-SUB-011](BR-SUB-011.md) và [BR-SUB-012](BR-SUB-012.md).
 
 ## Notes
 
-- **Điểm 4 là nội dung suy ra từ nguyên tắc quyền cộng dồn, chưa được xác nhận riêng.** Cần người dùng chốt trước khi viết System Test cho nhánh này.
+- Khoản 3 và khoản 4 được người dùng xác nhận ngày 25/09/2026. Bản trước cho phân công mức khách hàng có hiệu lực xuống dự án và cho nhiều người cùng phụ trách một tài nguyên; cả hai nội dung này đã bỏ.
 - Cơ chế này được thiết kế để tính năng chia lead sau này dùng lại: lead là một loại tài nguyên mới, không cần thêm bảng phân công riêng. Việc chia lead không thuộc phạm vi đợt này.
-- Phân công tham chiếu tới khách hàng và dự án theo định danh. Module dự án hiện chưa tồn tại trong backend; [TDD-SUB-003](../tdd/TDD-SUB-003.md) đã ghi nhận điều này và khai báo sẵn một đầu đọc phân công dự án, phần đó cần cập nhật để đọc từ cơ chế chung.
+- Phân công tham chiếu tới công trình theo định danh. Công trình là thực thể riêng, khác với bản dự toán; khách tự tạo công trình, không cần gói thiết kế. Story và BR tạo, quản lý công trình chưa được soạn và sẽ chuẩn bị riêng. [TDD-SUB-003](../tdd/TDD-SUB-003.md) và TDD-RBAC-003 cần cập nhật theo quyết định này.
 - Bản nháp nghiệp vụ, chưa triển khai hoặc chạy kiểm thử. Reviewer và Approver lấy theo xác nhận đang dùng cho các bản nháp mới, không phải bằng chứng đã phê duyệt. Owner và ngày hiệu lực chưa xác định.

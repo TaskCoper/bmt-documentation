@@ -40,7 +40,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 ## Metadata
 
 - **Story**: Là admin, tôi muốn xem và cập nhật yêu cầu tư vấn để chủ động liên hệ khách và theo dõi việc xử lý.
-- **Context**: Admin gọi khách ngoài hệ thống để sắp xếp lịch; Đã xử lý không có nghĩa buổi tư vấn đã kết thúc. Nghiệp vụ được xác nhận qua hội thoại ngày 2026-09-23; người dùng đã chốt bộ US/BR trong hội thoại. Metadata chưa đầy đủ. Còn cần xác định ánh xạ quyền admin vào cơ chế phân quyền hiện có khi thiết kế kỹ thuật.
+- **Context**: Admin gọi khách ngoài hệ thống để sắp xếp lịch; Đã xử lý không có nghĩa buổi tư vấn đã kết thúc. Nghiệp vụ được xác nhận qua hội thoại ngày 2026-09-23; người dùng đã chốt bộ US/BR trong hội thoại. Metadata chưa đầy đủ. Quyền xem và xử lý yêu cầu là quyền quản lý tư vấn KTS theo STORY-RBAC-001 (người dùng xác nhận ngày 25/09/2026); tên mã đặt ở bước thiết kế kỹ thuật.
 - **Sprint**:
 - **Priority**: Must
 - **Status**: Todo
@@ -55,7 +55,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ### Preconditions
 
-- Người thao tác có quyền admin.
+- Người thao tác có quyền quản lý tư vấn KTS theo STORY-RBAC-001; vai trò Admin có quyền này.
 
 ### Trigger
 
@@ -101,7 +101,7 @@ KTS của yêu cầu đã bị ẩn.
 
 #### EXC-01
 
-Người thao tác không có quyền admin.
+Người thao tác không có quyền quản lý tư vấn KTS.
 
 1. Hệ thống từ chối đọc danh sách, chi tiết hoặc cập nhật yêu cầu và ghi chú.
 
@@ -145,7 +145,7 @@ Người thao tác không có quyền admin.
 #### AC-006
 
 - **Given**: Yêu cầu có ghi chú nội bộ.
-- **When**: Khách nhận email hoặc người không có quyền admin truy cập chức năng quản trị.
+- **When**: Khách nhận email hoặc người không có quyền quản lý tư vấn KTS truy cập chức năng quản trị.
 - **Then**: Ghi chú không có trong email; truy cập quản trị bị từ chối.
 - **And**: Không cung cấp trang khách theo dõi yêu cầu.
 
@@ -167,7 +167,7 @@ Người thao tác không có quyền admin.
 
 ## Non-Functional
 
-- Chức năng quản trị chỉ dành cho admin; ghi chú nội bộ không được công khai hoặc gửi cho khách. Chưa xác định chỉ tiêu hiệu năng định lượng.
+- Chức năng quản trị chỉ dành cho người có quyền quản lý tư vấn KTS theo STORY-RBAC-001; ghi chú nội bộ không được công khai hoặc gửi cho khách. Chưa xác định chỉ tiêu hiệu năng định lượng.
 
 ## Out of Scope
 

@@ -48,7 +48,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Statement
 
-Admin và nhân viên được cấp quyền tra cứu riêng được xem người mua, gói đã mua, đơn thanh toán và từng giao dịch nhận tiền trong hệ thống. Giao dịch chưa khớp đơn vẫn được hiển thị với nhãn “Chưa xác định đơn”. Quyền tra cứu không tự cấp quyền sửa dự án, hủy hoặc khôi phục gói.
+Admin và nhân viên được cấp quyền tra cứu riêng được xem người mua, gói đã mua, đơn thanh toán và từng giao dịch nhận tiền trong hệ thống. Giao dịch chưa khớp đơn vẫn được hiển thị với nhãn “Chưa xác định đơn”. Quyền tra cứu không tự cấp quyền đổi công trình, hủy hoặc khôi phục gói.
 
 ## When
 

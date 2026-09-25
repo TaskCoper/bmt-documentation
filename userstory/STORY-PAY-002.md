@@ -70,7 +70,7 @@ Người có quyền mở phần quản trị gói đã mua hoặc giao dịch.
 2. Hệ thống kiểm tra quyền tra cứu trước khi trả dữ liệu.
 3. Người dùng xem ai đã mua gói nào và chọn gói cần đối chiếu.
 4. Hệ thống cung cấp liên kết đơn mua và các giao dịch thực tế của đơn, giữ đúng thông tin đã ghi nhận.
-5. Người dùng xem chi tiết; thao tác xem không thay đổi tiền, liên kết dự án hoặc hiệu lực gói.
+5. Người dùng xem chi tiết; thao tác xem không thay đổi tiền, liên kết công trình hoặc hiệu lực gói.
 
 ### Alternative Flow
 
@@ -101,7 +101,7 @@ Người truy cập không có quyền tra cứu.
 Nhân viên có quyền xem nhưng không có quyền thực hiện thao tác ghi.
 
 1. Cho xem dữ liệu theo quyền tra cứu.
-2. Từ chối sửa dự án, hủy hoặc khôi phục nếu thiếu quyền riêng tương ứng; dữ liệu giữ nguyên.
+2. Từ chối đổi công trình, hủy hoặc khôi phục nếu thiếu quyền riêng tương ứng; dữ liệu giữ nguyên.
 
 ## Acceptance Criteria
 
@@ -117,7 +117,7 @@ Nhân viên có quyền xem nhưng không có quyền thực hiện thao tác gh
 - **Given**: Nhân viên đã đăng nhập và có quyền tra cứu riêng; hệ thống có đơn, gói và giao dịch của khách.
 - **When**: Nhân viên mở danh sách và chi tiết gói, đơn, giao dịch.
 - **Then**: Được tra cứu thông tin người mua, gói và giao dịch trong phạm vi quản trị đã chốt.
-- **And**: Không yêu cầu nhân viên phải có quyền sửa dự án, hủy hoặc khôi phục chỉ để xem.
+- **And**: Không yêu cầu nhân viên phải có quyền đổi công trình, hủy hoặc khôi phục chỉ để xem.
 
 #### AC-003
 
@@ -149,10 +149,10 @@ Nhân viên có quyền xem nhưng không có quyền thực hiện thao tác gh
 
 #### AC-007
 
-- **Given**: Nhân viên chỉ có quyền tra cứu, không có quyền sửa dự án, hủy hoặc khôi phục gói.
-- **When**: Nhân viên xem gói rồi thử gửi các yêu cầu sửa dự án, hủy và khôi phục.
+- **Given**: Nhân viên chỉ có quyền tra cứu, không có quyền đổi công trình, hủy hoặc khôi phục gói.
+- **When**: Nhân viên xem gói rồi thử gửi các yêu cầu đổi công trình, hủy và khôi phục.
 - **Then**: Xem được nhưng tất cả yêu cầu ghi đều bị từ chối.
-- **And**: Gói, dự án và lịch sử thao tác thành công không thay đổi.
+- **And**: Gói, công trình và lịch sử thao tác thành công không thay đổi.
 
 #### AC-008
 
@@ -180,7 +180,7 @@ Nhân viên có quyền xem nhưng không có quyền thực hiện thao tác gh
 ### Dependencies
 
 - STORY-PAY-001: Nguồn đơn, giao dịch và gói đã mua.
-- STORY-SUB-004: Liên kết dự án và quyền sửa riêng.
+- STORY-SUB-004: Liên kết công trình và quyền sửa riêng.
 - STORY-SUB-005: Hủy và khôi phục gói bằng quyền riêng.
 - [Tổng hợp quyết định](../discovery/payment-packages.md).
 
@@ -192,5 +192,5 @@ Nhân viên có quyền xem nhưng không có quyền thực hiện thao tác gh
 ## Out of Scope
 
 - Gán giao dịch vào đơn thủ công; chỉnh sửa số tiền; hoàn tiền hoặc đánh dấu đã hoàn tiền; xác nhận thủ công để cấp gói.
-- Báo cáo doanh thu, xuất file và thiết kế quản trị cấp quyền nhân viên chưa nằm trong phạm vi đã chốt.
+- Báo cáo doanh thu và xuất file chưa nằm trong phạm vi đã chốt. Quản trị cấp quyền nhân viên theo bộ STORY-RBAC-001 đến STORY-RBAC-004.
 - Chưa triển khai, chạy test hoặc phê duyệt. Các trường phân công còn thiếu giữ nguyên trạng thái chưa xác định.

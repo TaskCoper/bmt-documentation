@@ -216,7 +216,7 @@ Gửi email thất bại sau khi đã tiếp nhận.
 
 ## Non-Functional
 
-- Chức năng quản trị chỉ dành cho admin; ghi chú nội bộ không được công khai hoặc gửi cho khách. Chưa xác định chỉ tiêu hiệu năng định lượng.
+- Chức năng quản trị chỉ dành cho người có quyền quản lý tư vấn KTS theo STORY-RBAC-001; ghi chú nội bộ không được công khai hoặc gửi cho khách. Chưa xác định chỉ tiêu hiệu năng định lượng.
 
 ## Out of Scope
 

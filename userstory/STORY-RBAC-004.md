@@ -156,9 +156,9 @@ Người gọi yêu cầu sửa hoặc xóa một bản ghi nhật ký.
 
 #### AC-003
 
-- **Given**: Nhân viên C có quyền `commerce.read` và quyền `supervision.complete`, nhưng không được phân công dự án P và cũng không phụ trách khách hàng sở hữu P.
-- **When**: C mở danh sách quản trị gói đã mua, rồi gửi yêu cầu hoàn thành gói giám sát của dự án P.
-- **Then**: C xem được danh sách trong phạm vi quyền `commerce.read`, gồm cả gói của dự án P.
+- **Given**: Nhân viên C có quyền `commerce.read` và quyền `supervision.complete`, nhưng không được phân công công trình P.
+- **When**: C mở danh sách quản trị gói đã mua, rồi gửi yêu cầu hoàn thành gói giám sát của công trình P.
+- **Then**: C xem được danh sách trong phạm vi quyền `commerce.read`, gồm cả gói của công trình P.
 - **And**: Yêu cầu hoàn thành gói giám sát của P bị từ chối với mã 403.
 
 #### AC-004

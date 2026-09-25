@@ -67,7 +67,7 @@ Hệ thống xác định ngày kết thúc của một kỳ subscription thiế
 
 ## Except
 
-Chỉ áp dụng cho kỳ thiết kế. Gói giám sát có hạn gán lần đầu một năm theo [BR-SUB-022](BR-SUB-022.md); không tự áp dụng công thức kỳ thiết kế ở đây cho hạn gán chưa chốt quy ước biên.
+Chỉ áp dụng cho kỳ thiết kế. Gói giám sát có hạn gán lần đầu một năm theo [BR-SUB-022](BR-SUB-022.md); quy ước biên của hạn gán đã chốt riêng trong BR-SUB-022, không lấy từ quy tắc này.
 
 ## Notes
 

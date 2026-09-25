@@ -55,7 +55,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ### Preconditions
 
-- Người thao tác đăng nhập và có cùng quyền quản lý Tin tức dùng cho bài viết.
+- Người thao tác đăng nhập và có cùng quyền quản lý tin tức theo STORY-RBAC-001 dùng cho bài viết.
 
 ### Trigger
 
@@ -66,7 +66,7 @@ Người quản lý tạo, đổi tên, đổi thứ tự, chuyển cha hoặc x
 ### Main Flow
 
 1. Nhập tên và chọn vị trí gốc hoặc cha cho danh mục.
-2. Kiểm tên bắt buộc và không trùng trong cùng cha sau khi bỏ khoảng trắng đầu/cuối, không phân biệt hoa/thường.
+2. Kiểm tên bắt buộc, tối đa 200 ký tự và không trùng trong cùng cha sau khi bỏ khoảng trắng đầu/cuối, không phân biệt hoa/thường.
 3. Lưu danh mục trong cây riêng của Tin tức để người quản lý gắn bài và khách lọc tin.
 
 ### Alternative Flow
@@ -89,7 +89,7 @@ Xóa danh mục không còn được sử dụng.
 
 #### EXC-01
 
-Tên trống, trùng tên cùng cha hoặc chuyển cha tạo vòng lặp.
+Tên trống, dài quá 200 ký tự, trùng tên cùng cha hoặc chuyển cha tạo vòng lặp.
 
 1. Từ chối thay đổi và giữ cây hiện tại.
 
@@ -148,6 +148,13 @@ Người thao tác thiếu quyền quản lý.
 - **Given**: Người không có quyền quản lý Tin tức
 - **When**: Thay đổi danh mục
 - **Then**: Bị từ chối, không đổi dữ liệu.
+
+#### AC-008
+
+- **Given**: Người có quyền quản lý tin tức tạo hoặc đổi tên danh mục.
+- **When**: Tên sau khi bỏ khoảng trắng đầu/cuối dài 200 ký tự, rồi thử lại với 201 ký tự.
+- **Then**: Tên 200 ký tự được lưu; tên 201 ký tự bị từ chối và không tự cắt ngắn.
+- **And**: Yêu cầu bị từ chối không đổi tên hoặc vị trí của danh mục.
 
 ## References
 

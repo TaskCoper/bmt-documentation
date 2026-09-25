@@ -57,12 +57,12 @@ Admin thêm, sửa, ẩn/hiện hồ sơ hoặc khách gửi yêu cầu cho KTS.
 ## Then
 
 1. Hồ sơ gồm ảnh đại diện, họ tên, chức danh, chuyên môn, số năm kinh nghiệm, số công trình và giới thiệu.
-2. Người có quyền tương ứng được thêm, sửa, ẩn và hiện hồ sơ; không có bước phê duyệt hồ sơ.
+2. Người có quyền quản lý tư vấn KTS theo STORY-RBAC-001 được thêm, sửa, ẩn và hiện hồ sơ; không có bước phê duyệt hồ sơ.
 3. KTS bị ẩn không được nhận yêu cầu mới. Hệ thống kiểm tra khi tiếp nhận, kể cả khi khách đã mở trang trước lúc hồ sơ bị ẩn.
 4. Ẩn hồ sơ không xóa yêu cầu đã gửi; admin vẫn xem và xử lý các yêu cầu này.
 
 5. Chuyên môn của KTS lấy từ danh mục category. Một KTS có thể thuộc nhiều category.
-6. Người có quyền tương ứng được tạo, sửa và xóa category chuyên môn. Chỉ được xóa khi category không còn được gán cho bất kỳ KTS nào, kể cả KTS đang bị ẩn. Nếu còn được sử dụng, phải bỏ gán khỏi tất cả hồ sơ trước khi xóa.
+6. Người có quyền quản lý tư vấn KTS được tạo, sửa và xóa category chuyên môn. Chỉ được xóa khi category không còn được gán cho bất kỳ KTS nào, kể cả KTS đang bị ẩn. Nếu còn được sử dụng, phải bỏ gán khỏi tất cả hồ sơ trước khi xóa.
 
 7. Hồ sơ KTS bắt buộc có đủ bảy nhóm thông tin: ảnh đại diện, họ tên, chức danh, chuyên môn, số năm kinh nghiệm, số công trình và giới thiệu. Chuyên môn phải chọn ít nhất một category. Thiếu thông tin bắt buộc thì không được lưu hồ sơ.
 

@@ -55,7 +55,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ### Preconditions
 
-- Người thao tác đăng nhập và có quyền quản lý thư viện.
+- Người thao tác đăng nhập và có quyền quản lý thư viện mẫu theo STORY-RBAC-001; quyền này không gắn phân công.
 
 ### Trigger
 

@@ -61,6 +61,7 @@ App đăng ký lần đầu, gửi lại đăng ký hoặc đồng bộ token/qu
 3. Gửi lại cùng đăng ký không tạo thêm đích gửi trùng; cập nhật token thay thế token cũ của đăng ký đó.
 4. Không có quyền thông báo hoặc chưa lấy/lưu được token không làm đăng nhập thất bại. Đăng ký chưa đủ điều kiện không được chọn để gửi.
 5. App đồng bộ lại khi token hoặc quyền thông báo thay đổi; backend không tự suy ra ngay trạng thái quyền hệ điều hành khi app chưa báo lên.
+6. Khi một phiên khách hàng đã xác thực gửi token đang gắn với một bản cài khác, chẳng hạn sau khi cài lại app, token được chuyển sang đăng ký của bản cài mới và đăng ký cũ ngừng nhận thông báo. Yêu cầu đến muộn từ một phiên đăng nhập trước phiên đang giữ token không được lấy lại token đó; đăng ký của bản cài mới giữ nguyên. Người dùng xác nhận ngày 25/09/2026, kể cả ý về yêu cầu đến muộn.
 
 ## Except
 

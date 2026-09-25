@@ -49,7 +49,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Statement
 
-Hệ thống định nghĩa sẵn danh mục quyền lợi gắn với các tính năng. Admin chọn quyền lợi trong danh mục và cấu hình giá trị cho từng gói; không tự tạo định nghĩa quyền lợi mới qua chức năng quản trị gói. Gói chưa có quyền lợi được lưu nháp; khi Công bố phải có ít nhất một quyền lợi.
+Hệ thống định nghĩa sẵn danh mục quyền lợi gắn với các tính năng. Admin chọn quyền lợi trong danh mục và cấu hình giá trị cho từng gói; không tự tạo định nghĩa quyền lợi mới qua chức năng quản trị gói. Gói chưa có quyền lợi được lưu nháp; khi Công bố, gói thiết kế phải có ít nhất một quyền lợi. Gói giám sát không dùng danh mục quyền lợi; gói được Công bố khi có tên, giá và mô tả dịch vụ tự do.
 
 ## When
 
@@ -64,7 +64,7 @@ Admin chọn hoặc cấu hình quyền lợi trong bản nháp của gói, ho�
 5. Gói không có quyền tạo thiết kế thì không cho tạo/lưu thông tin dự án hoặc bắt đầu Gen AI; gói không có quyền tra cứu mẫu thì không cho mở chi tiết mẫu. Không tự cấp lượt mặc định cho quyền bị bỏ khỏi gói, không giữ/trừ lượt của quyền khác để thay thế.
 6. Thêm, bỏ hoặc đổi giá trị quyền trong gói đều đi qua lưu nháp và Công bố; giữ nguyên quyền lợi của kỳ hiện tại theo BR-SUB-004.
 
-7. Cho phép lưu nháp gói chưa chọn quyền lợi nếu các dữ liệu khác hợp lệ. Khi Công bố, nếu danh sách quyền lợi rỗng thì từ chối và báo cần thêm ít nhất một quyền lợi, kể cả yêu cầu gửi trực tiếp. Không tự thêm quyền mặc định để vượt qua điều kiện này.
+7. Cho phép lưu nháp gói chưa chọn quyền lợi nếu các dữ liệu khác hợp lệ. Khi Công bố gói thiết kế, nếu danh sách quyền lợi rỗng thì từ chối và báo cần thêm ít nhất một quyền lợi, kể cả yêu cầu gửi trực tiếp. Không tự thêm quyền mặc định để vượt qua điều kiện này. Gói giám sát không xét điều kiện này: Công bố gói giám sát cần tên, giá và mô tả dịch vụ có nội dung; mô tả chỉ để hiển thị và được chốt theo đơn như nội dung tư vấn theo BR-SUB-004.
 8. Sau khi thêm ít nhất một quyền lợi hợp lệ, gói đạt điều kiện về số lượng quyền lợi để Công bố; vẫn phải đáp ứng các điều kiện khác đã chốt. Công bố bị từ chối không thay thế bản đang áp dụng hoặc thay đổi quyền đã cấp.
 
 9. Phối cảnh 3D chân thực vẫn là quyền dạng bật/tắt để Admin cấu hình và hiển thị theo gói; không mặc định chỉ PRO. Hiện chưa triển khai logic kiểm tra quyền 3D để quyết định AI tạo hay không tạo 3D. Không thêm lượt 3D hoặc điều kiện bắt buộc quyền tạo thiết kế chỉ vì bật cấu hình 3D.
@@ -81,15 +81,17 @@ Không có luồng Admin tự tạo định nghĩa quyền lợi trong phạm vi
 
 ## Notes
 
+- Người dùng xác nhận ngày 25/09/2026: gói giám sát không dùng danh mục quyền lợi vì lịch và lượt giám sát đang vận hành offline; điều kiện ít nhất một quyền lợi ở khoản 7 chỉ áp dụng cho gói thiết kế.
+
 - Quyết định mới nhất mở rộng cách cấu hình chỉ bật/tắt từ 3D sang mọi quyền lợi khác ngoài hai quyền dạng lượt. Tư vấn vẫn vận hành offline, nội dung mô tả tự do đã chốt được giữ; bật/tắt mục tư vấn không phải danh sách mức Online/Ưu tiên/1:1. Không tự nhập toàn bộ nội dung website thành danh mục bán. Xem STORY-SUB-002/AC-026 và ST-SUB-108.
 
 - Quyết định mới thay phạm vi danh mục đúng ba quyền và việc kiểm tra 3D lúc Gen AI. STORY-SUB-002/AC-025 và ST-SUB-107 mô tả phạm vi hiện tại. Các ghi chú ba quyền và kiểm tra AI 3D bên dưới là lịch sử; tư vấn vẫn theo mô tả tự do đã chốt, không tự chuyển thành mức cố định.
 
 - Người dùng chọn phương án 2 cho tư vấn offline: Admin nhập nội dung mô tả tự do trong gói; không có trường chọn mức tư vấn riêng hoặc danh sách mức cố định. Không chuyển nội dung mô tả thành entitlement, hạn mức hay logic phân quyền. Giữ nội dung tư vấn đã chốt cho kỳ đã mua theo BR-SUB-004; mô tả mới chỉ áp dụng lần mua mới.
 
-- Người dùng xác nhận tư vấn Online, Ưu tiên và Chuyên gia 1:1 trên bảng gói là dịch vụ đang vận hành offline; website chưa có tính năng tư vấn tương ứng. Các mức này là mô tả dịch vụ, không phải quyền dạng mức để kiểm tra truy cập hoặc tính lượt trên nền tảng trong danh mục tạm thời. Không tự thêm lịch hẹn, bộ đếm tư vấn hoặc chức năng tư vấn vào phạm vi hiện tại. Không đồng nhất với trợ lý AI/chatbot hiển thị trên trang.
+- Người dùng xác nhận tư vấn Online, Ưu tiên và Chuyên gia 1:1 trên bảng gói là dịch vụ đang vận hành offline; cam kết tư vấn của gói không được quản lý trên nền tảng. Các mức này là mô tả dịch vụ, không phải quyền dạng mức để kiểm tra truy cập hoặc tính lượt trên nền tảng trong danh mục tạm thời. Không tự thêm lịch hẹn, bộ đếm tư vấn hoặc chức năng tư vấn gắn với gói. Yêu cầu tư vấn KTS miễn phí theo STORY-CONSULT-002 là kênh riêng, độc lập với gói và không thay cam kết tư vấn của gói (người dùng xác nhận ngày 25/09/2026). Không đồng nhất với trợ lý AI/chatbot hiển thị trên trang.
 
-- Người dùng đồng ý danh mục tạm thời ba quyền; STORY-SUB-002/AC-022 và [ST-SUB-104](../systemtest/ST-SUB-104.md) kiểm tra. Các ghi chú về danh mục còn mở bên dưới chỉ còn áp dụng cho mở rộng sau này, quyền giám sát và chi tiết đầu ra.
+- **Lịch sử:** Người dùng từng đồng ý danh mục tạm thời ba quyền; STORY-SUB-002/AC-022 và [ST-SUB-104](../systemtest/ST-SUB-104.md) kiểm tra. Quyết định này đã được thay bởi STORY-SUB-002/AC-025; danh mục không còn giới hạn đúng ba quyền.
 
 - Với tác vụ AI đã tiếp nhận trước khi đổi gói, quyền 3D được xác định theo bộ quyền lúc tiếp nhận theo BR-SUB-003 và BR-SUB-021. Gói mới không cắt hoặc bổ sung quyền cho tác vụ đang chạy; yêu cầu mới kiểm tra gói mới. Xem [ST-SUB-102](../systemtest/ST-SUB-102.md).
 

@@ -68,6 +68,8 @@ Không có ngoại lệ cho điều kiện đăng nhập hoặc yêu cầu phả
 
 ## Notes
 
+Yêu cầu tư vấn miễn phí là kênh riêng, không thay cam kết tư vấn offline đã chốt cho gói theo BR-SUB-004 và BR-SUB-008 (người dùng xác nhận ngày 25/09/2026).
+
 STORY-CONSULT-002. Định dạng số điện thoại và giới hạn độ dài sẽ được làm rõ khi thiết kế validation; không tự thêm OTP hoặc yêu cầu xác minh số.
 
 Nội dung nghiệp vụ của bộ US/BR đã được người dùng chốt trong hội thoại. Metadata người phụ trách tài liệu chưa xác định; không suy ra phê duyệt trên hệ thống quản lý tài liệu.

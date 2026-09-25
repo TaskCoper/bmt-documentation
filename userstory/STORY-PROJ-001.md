@@ -124,6 +124,7 @@ Khách không đáp ứng điều kiện tạo hoặc lưu bản dự toán, k�
 1. Từ chối yêu cầu theo BR-RBAC-005 hoặc BR-SUB-007; không tạo bản ghi hoặc ghi thay đổi từ yêu cầu bị từ chối.
 2. Giữ nguyên dữ liệu đã lưu trước đó; không giữ/trừ lượt vì thao tác tạo/lưu.
 3. Không tự lưu lại yêu cầu bị từ chối khi lượt hoặc quyền được khôi phục; xử lý yêu cầu tiếp theo theo điều kiện tại thời điểm tiếp nhận.
+4. Riêng yêu cầu chỉ đổi tên bản dự toán đã có không phụ thuộc gói, quyền tạo thiết kế hay lượt, theo BR-SUB-007 khoản 11; vẫn kiểm tra quyền sở hữu và tên hợp lệ.
 
 #### EXC-02
 
@@ -190,7 +191,7 @@ Khách thay ảnh nhưng tải lên hoặc lưu ảnh mới thất bại.
 - **Given**: Khách không còn đủ điều kiện tạo/lưu do hết hạn gói, thiếu quyền hoặc không còn lượt sẵn dùng theo BR-SUB-007.
 - **When**: Có yêu cầu tạo hoặc tự lưu, kể cả từ biểu mẫu đã mở trước đó.
 - **Then**: Từ chối yêu cầu, không tạo dự toán hoặc ghi thay đổi và giữ nguyên dữ liệu đã lưu.
-- **And**: Không giữ/trừ thêm lượt hoặc tự cấp quyền/lượt.
+- **And**: Không giữ/trừ thêm lượt hoặc tự cấp quyền/lượt. Yêu cầu chỉ đổi tên một bản dự toán đã có vẫn được chấp nhận theo BR-SUB-007 khoản 11.
 
 #### AC-007
 
@@ -281,7 +282,7 @@ Khách thay ảnh nhưng tải lên hoặc lưu ảnh mới thất bại.
 - **Given**: Khách tạo bản dự toán hoặc gửi yêu cầu lưu tên khi được phép sửa.
 - **When**: Backend kiểm tra tên sau khi bỏ khoảng trắng đầu/cuối.
 - **Then**: Chỉ chấp nhận tên có nội dung và không vượt 200 ký tự; lưu tên đã bỏ khoảng trắng đầu/cuối. Tên rỗng, chỉ có khoảng trắng hoặc quá dài bị từ chối, không tự cắt ngắn.
-- **And**: Yêu cầu tạo bị từ chối không tạo bản dự toán; yêu cầu sửa bị từ chối giữ tên đã lưu trước đó. Các điều kiện quyền/gói/lượt và khóa sửa vẫn áp dụng.
+- **And**: Yêu cầu tạo bị từ chối không tạo bản dự toán; yêu cầu sửa bị từ chối giữ tên đã lưu trước đó. Yêu cầu tạo vẫn cần điều kiện quyền/gói/lượt; đổi tên bản dự toán đã có chỉ cần quyền sở hữu và tên hợp lệ, không bị chặn bởi hết hạn gói, hết lượt hay khóa sửa khi AI đang xử lý theo BR-SUB-007 khoản 11.
 
 #### AC-020
 

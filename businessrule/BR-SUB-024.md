@@ -58,7 +58,7 @@ Nhân viên yêu cầu hủy một gói đã cấp.
 
 1. Kiểm tra quyền riêng và lý do; không mặc định mọi nhân viên được hủy. Thiếu quyền hoặc lý do thì từ chối, giữ nguyên gói.
 2. Cho phép hủy gói giám sát chưa gán, đã gán hoặc đã hoàn thành, cũng như gói thiết kế. Gói bị hủy không còn cấp quyền sử dụng mới.
-3. Hủy gói giám sát đã gán hoặc đã hoàn thành thì dự án được nhận gói giám sát khác; giữ lịch sử gói, trạng thái trước khi hủy và thao tác hủy.
+3. Hủy gói giám sát đã gán hoặc đã hoàn thành thì công trình được nhận gói giám sát khác; giữ lịch sử gói, trạng thái trước khi hủy và thao tác hủy.
 4. Hệ thống không chuyển tiền, không đánh dấu đã hoàn tiền và không tự cấp lại gói từ quyết định hoàn tiền bên ngoài.
 5. Nếu khảo sát sau mua thấy công trình không phù hợp, nhân viên xử lý hoàn tiền/bù trừ bên ngoài và hủy hiệu lực gói trong hệ thống.
 6. Hủy gói thiết kế mới không tự khôi phục gói cũ đã bị lần mua mới thay thế.

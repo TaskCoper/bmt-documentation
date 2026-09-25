@@ -45,7 +45,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 **Cập nhật: đổi gói và đổi chu kỳ đều áp dụng ngay theo BR-SUB-021. Các khối được đánh dấu lịch sử bên dưới không còn dùng nghiệm thu.**
 
 - **Story**: Là người dùng có subscription, tôi muốn dùng chung quyền lợi thiết kế của tài khoản cho các dự án của mình để không phải có một hạn mức riêng cho từng dự án.
-- **Context**: Đổi gói hoặc chu kỳ áp dụng ngay theo BR-SUB-021, không phân loại nâng/hạ hoặc dùng bậc. Mỗi tài khoản có tối đa một subscription thiết kế đang hiệu lực; mỗi công trình có tối đa một gói giám sát đang hiệu lực. Các subscription này được dùng đồng thời. Thiết kế dùng subscription định kỳ theo tháng hoặc năm tính từ ngày bắt đầu có hiệu lực; giám sát là gói theo dự án, không chu kỳ và hoàn thành thủ công. Quyền lợi thiết kế dùng chung theo tài khoản; quyền lợi giám sát chỉ dùng cho công trình gắn với gói giám sát. Đây là bản nháp cho phần đã chốt; điều kiện hiệu lực còn đang trao đổi. Hạn mức làm mới theo kỳ subscription, không cộng dồn lượt dư. Luồng nhận gói và gia hạn sẽ thiết kế cùng thanh toán sau.
+- **Context**: Đổi gói hoặc chu kỳ áp dụng ngay theo BR-SUB-021, không phân loại nâng/hạ hoặc dùng bậc. Mỗi tài khoản có tối đa một subscription thiết kế đang hiệu lực; mỗi công trình có tối đa một gói giám sát đang hiệu lực. Các subscription này được dùng đồng thời. Thiết kế dùng subscription định kỳ theo tháng hoặc năm tính từ ngày bắt đầu có hiệu lực; giám sát là gói theo công trình, không chu kỳ và hoàn thành thủ công. Quyền lợi thiết kế dùng chung theo tài khoản; quyền lợi giám sát chỉ dùng cho công trình gắn với gói giám sát. Đây là bản nháp cho phần đã chốt; điều kiện hiệu lực còn đang trao đổi. Hạn mức làm mới theo kỳ subscription, không cộng dồn lượt dư. Luồng mua và nhận gói theo STORY-PAY-001; mua lại cùng gói trước hạn áp dụng ngay theo BR-SUB-021.
 - **Sprint**:
 - **Priority**:
 - **Status**: Todo
@@ -64,7 +64,7 @@ Quy tắc tra cứu cập nhật ngày 23/09/2026 theo STORY-LIB-003 và BR-LIB-
 
 - Tìm kiếm/xem danh sách mẫu không yêu cầu đăng nhập hoặc có subscription. Mở chi tiết mẫu và các thao tác trên dự án yêu cầu đăng nhập. Việc bắt đầu thao tác cần quyền subscription yêu cầu gói còn hiệu lực và đáp ứng quyền/lượt tương ứng; tác vụ đã bắt đầu hợp lệ có thể hoàn thành sau khi hết hạn, luồng xem dữ liệu cũ áp dụng cả sau khi hết hạn.
 - Với thao tác trên dự án, các dự án đang xét thuộc tài khoản đó; tìm kiếm/xem danh sách mẫu không yêu cầu có dự án.
-- Hiệu lực thời gian theo BR-SUB-014; quyền thao tác hiện tại theo BR-SUB-007, BR-SUB-008 và BR-SUB-017. Sự kiện kích hoạt và điều kiện giao dịch thiết kế cùng thanh toán; không hỏi lại các thao tác đã chốt.
+- Hiệu lực thời gian theo BR-SUB-014; quyền thao tác hiện tại theo BR-SUB-007, BR-SUB-008 và BR-SUB-017. Sự kiện cấp gói và điều kiện giao dịch theo BR-PAY-001 đến BR-PAY-004; không hỏi lại các thao tác đã chốt.
 
 ### Trigger
 
@@ -297,6 +297,7 @@ Khách sửa hoặc lưu thông tin dự án khi subscription thiết kế đã 
 1. Hệ thống từ chối yêu cầu sửa/lưu, kể cả yêu cầu gửi trực tiếp hoặc từ biểu mẫu đã mở trước khi hết hạn.
 2. Giữ nguyên dữ liệu đã lưu, không tính lượt và không tự cấp kỳ mới.
 3. Khách vẫn được xem, tải tệp đã có và xuất PDF từ kết quả cũ theo quyền truy cập.
+4. Riêng tên dự án vẫn được đổi dù gói đã hết hạn, theo BR-SUB-007 khoản 11.
 
 #### EXC-06
 
@@ -318,6 +319,7 @@ Gói thiết kế còn hiệu lực và có quyền tạo thiết kế, nhưng k
 
 1. Hệ thống từ chối tạo dự án hoặc lưu thông tin dự án, kể cả lưu nháp, yêu cầu gửi trực tiếp hoặc biểu mẫu mở trước khi hết lượt.
 2. Báo đã hết lượt tạo thiết kế; không tạo bản ghi hoặc lưu thay đổi từ yêu cầu bị từ chối, giữ nguyên dữ liệu đã lưu. Không giữ/trừ thêm lượt hoặc tự cấp lượt mới.
+3. Riêng đổi tên dự án đã có không cần còn lượt, theo BR-SUB-007 khoản 11.
 
 #### EXC-09
 
@@ -325,6 +327,7 @@ Khách có gói còn hiệu lực và quyền tạo thiết kế nhưng toàn b�
 
 1. Tạm từ chối tạo/lưu dự án, gồm lưu nháp và yêu cầu gửi trực tiếp; không ghi thay đổi hoặc giữ/trừ thêm lượt.
 2. Tác vụ đang chạy tiếp tục xử lý bình thường. Nếu lỗi và trả lại lượt trong kỳ còn hiệu lực, khách được gửi lại yêu cầu tạo/lưu khi đủ quyền và có lượt sẵn dùng; không tự lưu yêu cầu đã bị từ chối.
+3. Riêng đổi tên dự án đã có không bị tạm chặn, theo BR-SUB-007 khoản 11.
 
 #### EXC-10
 
@@ -406,12 +409,16 @@ Khách đang chờ hạ gói nhưng muốn chỉ đổi chu kỳ trong cùng gó
 
 #### AC-009
 
+**Không nghiệm thu trong phạm vi hiện tại:** theo BR-SUB-008 khoản 12, đợt này chưa triển khai logic kiểm tra sử dụng quyền bật/tắt hoặc quyền dạng mức; chỉ hai quyền tạo mới và tra cứu có logic sử dụng. Người dùng xác nhận ngày 25/09/2026. Nội dung giữ để dùng khi danh mục mức được chốt.
+
 - **Given**: Một quyền lợi có thứ tự mức cơ bản < nâng cao; tài khoản được cấp mức nâng cao còn hiệu lực.
 - **When**: Hệ thống kiểm tra quyền đối với yêu cầu mức cơ bản và yêu cầu mức nâng cao của quyền lợi này.
 - **Then**: Cả hai yêu cầu đều đạt điều kiện về mức.
 - **And**: Việc kiểm tra mức không giữ hoặc trừ lượt.
 
 #### AC-010
+
+**Không nghiệm thu trong phạm vi hiện tại:** theo BR-SUB-008 khoản 12, đợt này chưa triển khai logic kiểm tra sử dụng quyền bật/tắt hoặc quyền dạng mức; chỉ hai quyền tạo mới và tra cứu có logic sử dụng. Người dùng xác nhận ngày 25/09/2026. Nội dung giữ để dùng khi danh mục mức được chốt.
 
 - **Given**: Một quyền lợi có thứ tự mức cơ bản < nâng cao; tài khoản được cấp mức cơ bản còn hiệu lực.
 - **When**: Hệ thống kiểm tra quyền đối với yêu cầu mức nâng cao của quyền lợi này.
@@ -568,9 +575,9 @@ Khách đang chờ hạ gói nhưng muốn chỉ đổi chu kỳ trong cùng gó
 #### AC-036
 
 - **Given**: Subscription thiết kế đã hết hạn, chưa gia hạn; khách có quyền xem dự án của mình.
-- **When**: Khách yêu cầu lưu thay đổi tên dự án, ghi chú hoặc thông tin đầu vào, kể cả gửi yêu cầu trực tiếp.
-- **Then**: Yêu cầu bị từ chối và dữ liệu đã lưu giữ nguyên; không chỉ dựa vào việc khóa nút trên giao diện.
-- **And**: Không tính lượt hoặc tự tạo kỳ mới; quyền xem, tải tệp đã có và xuất PDF từ kết quả cũ vẫn giữ nguyên.
+- **When**: Khách yêu cầu lưu thay đổi ghi chú hoặc thông tin đầu vào, kể cả gửi yêu cầu trực tiếp; sau đó khách chỉ đổi tên dự án.
+- **Then**: Yêu cầu sửa ghi chú hoặc thông tin đầu vào bị từ chối và dữ liệu đã lưu giữ nguyên; không chỉ dựa vào việc khóa nút trên giao diện.
+- **And**: Yêu cầu chỉ đổi tên dự án được chấp nhận theo BR-SUB-007 khoản 11. Không tính lượt hoặc tự tạo kỳ mới; quyền xem, tải tệp đã có và xuất PDF từ kết quả cũ vẫn giữ nguyên.
 
 #### AC-037
 
@@ -595,10 +602,10 @@ Khách đang chờ hạ gói nhưng muốn chỉ đổi chu kỳ trong cùng gó
 
 #### AC-040
 
-- **Given**: Tài khoản có subscription còn hiệu lực, quyền tạo thiết kế và phối cảnh 3D chân thực, còn 2 lượt tạo mới; dự án chưa có kết quả thành công.
+- **Given**: Tài khoản có subscription còn hiệu lực, quyền tạo thiết kế, còn 2 lượt tạo mới; dự án chưa có kết quả thành công.
 - **When**: Khách bấm Gen AI một lần và tác vụ hoàn thành đủ bộ kết quả, đã lưu và có thể mở xem.
-- **Then**: Khách nhận các phần kết quả, gồm phối cảnh 3D, cùng một lần hoàn tất; không phải bấm tạo 3D riêng. Tác vụ giữ 1 lượt khi bắt đầu và chuyển đúng 1 lượt thành đã dùng khi thành công.
-- **And**: Trước khi đủ bộ kết quả, không trả riêng một phần như kết quả thành công. Không trừ thêm lượt cho 3D; sau thành công còn 1 lượt tạo sẵn dùng, lượt tra cứu không đổi. Nếu tác vụ lỗi hoặc quá thời gian thì xử lý theo BR-SUB-003 và BR-SUB-016.
+- **Then**: Khách nhận toàn bộ các phần kết quả cùng một lần hoàn tất; không có thao tác tạo 3D riêng. Tác vụ giữ 1 lượt khi bắt đầu và chuyển đúng 1 lượt thành đã dùng khi thành công.
+- **And**: Trước khi đủ bộ kết quả, không trả riêng một phần như kết quả thành công. Nếu bộ kết quả có phần 3D thì không trừ thêm lượt cho phần này; sau thành công còn 1 lượt tạo sẵn dùng, lượt tra cứu không đổi. Đợt này không kiểm tra quyền 3D khi Gen AI theo STORY-SUB-002/AC-025. Nếu tác vụ lỗi hoặc quá thời gian thì xử lý theo BR-SUB-003 và BR-SUB-016.
 
 #### AC-041
 
@@ -612,7 +619,7 @@ Khách đang chờ hạ gói nhưng muốn chỉ đổi chu kỳ trong cùng gó
 - **Given**: Hai tài khoản dùng hai gói thiết kế khác nhau, đều còn hiệu lực, có quyền tạo thiết kế và đủ lượt; mỗi tài khoản có dự án mới với dữ liệu đầu vào tương đương.
 - **When**: Cả hai bấm Gen AI và nhận đủ bộ kết quả thành công, trong đó có bố trí công năng.
 - **Then**: Phần bố trí công năng của hai gói đáp ứng cùng mức chi tiết theo đặc tả chung; không chia cơ bản/nâng cao theo tên hoặc giá gói.
-- **And**: Không yêu cầu phương án bố trí phải giống hệt nhau. Các phần kết quả vẫn trả cùng lúc, mỗi bộ thành công tính một lượt tạo thiết kế. Quyền tạo phối cảnh 3D chân thực vẫn được kiểm tra riêng theo gói.
+- **And**: Không yêu cầu phương án bố trí phải giống hệt nhau. Các phần kết quả vẫn trả cùng lúc, mỗi bộ thành công tính một lượt tạo thiết kế. Đợt này không kiểm tra quyền tạo phối cảnh 3D chân thực khi Gen AI theo STORY-SUB-002/AC-025.
 
 #### AC-043
 
@@ -913,5 +920,5 @@ Khách đang chờ hạ gói nhưng muốn chỉ đổi chu kỳ trong cùng gó
 
 - Khách hàng hủy tác vụ tạo thiết kế đang chạy: chưa hỗ trợ trong đợt này; không bổ sung nút hoặc API hủy dành cho khách hàng. Việc đóng trang không phải yêu cầu hủy tác vụ.
 
-- Tích hợp thanh toán, luồng tài khoản nhận gói và gia hạn thuộc giai đoạn sau.
-- Bản nháp này chưa quy định giá bán cụ thể hoặc cách cấp/gia hạn. Tra cứu thuộc phạm vi hiện tại: lần mở thành công đầu tiên của từng phiên bản tính một lượt, xem lại miễn lượt theo BR-LIB-003; lỗi trước ghi nhận thành công không mất lượt; tìm kiếm và xem danh sách không dùng lượt. Không hỗ trợ nhiều subscription thiết kế cùng tài khoản hoặc nhiều gói giám sát cùng công trình đồng thời có hiệu lực.
+- Mua và nhận gói theo STORY-PAY-001; mua lại cùng gói trước hạn áp dụng ngay theo BR-SUB-021. Không có tự động gia hạn.
+- Bản nháp này chưa quy định giá bán cụ thể; cách cấp gói theo BR-PAY-004. Tra cứu thuộc phạm vi hiện tại: lần mở thành công đầu tiên của từng phiên bản tính một lượt, xem lại miễn lượt theo BR-LIB-003; lỗi trước ghi nhận thành công không mất lượt; tìm kiếm và xem danh sách không dùng lượt. Không hỗ trợ nhiều subscription thiết kế cùng tài khoản hoặc nhiều gói giám sát cùng công trình đồng thời có hiệu lực.

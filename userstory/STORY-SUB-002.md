@@ -45,7 +45,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 **Cập nhật: đổi gói và đổi chu kỳ đều áp dụng ngay theo BR-SUB-021. Các khối được đánh dấu lịch sử bên dưới không còn dùng nghiệm thu.**
 
 - **Story**: Là Admin, tôi muốn cấu hình quyền lợi của gói theo dạng bật/tắt, hạn mức lượt hoặc mức tính năng để mô tả đúng những gì tài khoản được sử dụng.
-- **Context**: Đổi gói hoặc chu kỳ áp dụng ngay theo BR-SUB-021, không phân loại nâng/hạ hoặc dùng bậc. Phạm vi gồm cả gói thiết kế và giám sát; thiết kế giới hạn một subscription đang hiệu lực trên tài khoản, giám sát giới hạn một gói đang thực hiện cho mỗi công trình. Danh mục quyền giám sát còn cần chốt. Các gói thiết kế khác cả số lượt lẫn tính năng được dùng; đã chốt quyền tạo phối cảnh 3D chân thực dạng bật/tắt. Dự toán nội thất và bố trí công năng đều dùng cùng mức chi tiết giữa các gói, không cấu hình mức riêng theo gói cho hai phần này. Danh mục thiết kế tạm thời đã chốt ba quyền theo AC-022; giá trị từng gói do Admin cấu hình. Hệ thống định nghĩa sẵn danh mục quyền lợi gắn với tính năng, hỗ trợ cả ba dạng quyền lợi. Admin chọn và cấu hình giá trị trong gói, không tự tạo quyền lợi mới. Admin lưu nháp, kiểm tra rồi Công bố; với thiết kế, giữ nguyên kỳ hiện tại và dùng bản quyền lợi đã chốt khi đăng ký/gia hạn cho từng kỳ mới. Giám sát không có chu kỳ; gói đã cấp giữ nguyên quyền lợi, thay đổi đã công bố chỉ dùng cho gói cấp mới. Danh mục cụ thể và các điều kiện công bố còn cần làm rõ.
+- **Context**: Đổi gói hoặc chu kỳ áp dụng ngay theo BR-SUB-021, không phân loại nâng/hạ hoặc dùng bậc. Phạm vi gồm cả gói thiết kế và giám sát; thiết kế giới hạn một subscription đang hiệu lực trên tài khoản, giám sát giới hạn một gói đang thực hiện cho mỗi công trình. Gói giám sát không dùng danh mục quyền lợi; gói được Công bố khi có tên, giá và mô tả dịch vụ tự do (người dùng xác nhận ngày 25/09/2026). Các gói thiết kế khác cả số lượt lẫn tính năng được dùng; đã chốt quyền tạo phối cảnh 3D chân thực dạng bật/tắt. Dự toán nội thất và bố trí công năng đều dùng cùng mức chi tiết giữa các gói, không cấu hình mức riêng theo gói cho hai phần này. Danh mục thiết kế không giới hạn đúng ba quyền theo AC-025: tạo mới và tra cứu là quyền dạng lượt, các quyền lợi còn lại bật/tắt để lưu và hiển thị; giá trị từng gói do Admin cấu hình. Hệ thống định nghĩa sẵn danh mục quyền lợi gắn với tính năng, hỗ trợ cả ba dạng quyền lợi. Admin chọn và cấu hình giá trị trong gói, không tự tạo quyền lợi mới. Admin lưu nháp, kiểm tra rồi Công bố; với thiết kế, giữ nguyên kỳ hiện tại và dùng bản quyền lợi đã chốt khi đăng ký/gia hạn cho từng kỳ mới. Giám sát không có chu kỳ; gói đã cấp giữ nguyên mô tả dịch vụ đã chốt theo đơn, thay đổi đã công bố chỉ dùng cho gói cấp mới. Danh mục cụ thể và các điều kiện công bố còn cần làm rõ.
 - **Sprint**:
 - **Priority**:
 - **Status**: Todo
@@ -60,7 +60,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ### Preconditions
 
-- Admin có quyền quản trị gói; cách phân quyền chi tiết còn cần xác định.
+- Người thao tác có quyền cấu hình gói theo STORY-RBAC-001; vai trò Admin có quyền này.
 - Có gói để cấu hình quyền lợi.
 
 ### Trigger
@@ -74,8 +74,8 @@ Admin mở gói để cấu hình hoặc sửa quyền lợi.
 1. Admin chọn quyền lợi cần cấu hình từ danh mục do hệ thống định nghĩa sẵn. Quyền dạng lượt của thiết kế gồm tạo mới và tra cứu mẫu; không có lượt chỉnh sửa. Admin được chọn một trong hai hoặc cả hai; quyền dạng lượt không được chọn sẽ không được cấp cho khách theo bản gói đó.
 2. Với gói thiết kế, không yêu cầu cấu hình bậc để phân loại nâng/hạ. Admin cấu hình hai lựa chọn tháng/năm, giá và hạn mức riêng; quyền bật/tắt và mức tính năng được cấu hình chung ở gói. Admin cấu hình bật/tắt, hạn mức lượt hoặc mức tính năng phù hợp với dạng quyền lợi. Với dạng lượt, Admin chọn số lượt cụ thể hoặc không giới hạn. Với dạng bật/tắt, chưa thêm quyền hoặc đặt là tắt đều không cho khách dùng tính năng; chỉ khi thêm và bật mới đáp ứng điều kiện về quyền đó. Với dạng mức tính năng, Admin phải thêm quyền và chọn mức cụ thể; thiếu cấu hình không tự cấp mức thấp nhất.
 3. Admin nhập giá và hạn mức bán thực tế trên trang quản trị, lưu nháp và kiểm tra lại nội dung. Giá tháng và giá năm của gói thiết kế đều nhập bằng VNĐ và phải lớn hơn 0; đợt này không cấu hình loại tiền khác. Các con số không được cố định từ ví dụ trong tài liệu.
-4. Admin bấm Công bố khi nội dung đã sẵn sàng; gói phải có ít nhất một quyền lợi hợp lệ và đáp ứng các điều kiện cấu hình đã chốt.
-5. Với thiết kế, kỳ mới hợp lệ dùng bản đã công bố và đã chốt khi đăng ký/gia hạn kỳ đó; không tự thay bằng bản công bố sau khi chốt. Quyền lợi kỳ hiện tại được giữ nguyên. Với giám sát, gói đã cấp giữ nguyên quyền lợi, chỉ gói cấp mới nhận quyền lợi đã thay đổi và công bố.
+4. Admin bấm Công bố khi nội dung đã sẵn sàng. Gói thiết kế phải có ít nhất một quyền lợi hợp lệ; gói giám sát phải có tên, giá và mô tả dịch vụ, không dùng danh mục quyền lợi. Cả hai loại vẫn phải đáp ứng các điều kiện cấu hình đã chốt.
+5. Với thiết kế, kỳ mới hợp lệ dùng bản đã công bố và đã chốt khi đăng ký/gia hạn kỳ đó; không tự thay bằng bản công bố sau khi chốt. Quyền lợi kỳ hiện tại được giữ nguyên. Với giám sát, gói đã cấp giữ nguyên mô tả dịch vụ đã chốt theo đơn, chỉ gói cấp mới nhận mô tả đã thay đổi và công bố.
 
 ### Alternative Flow
 
@@ -91,7 +91,7 @@ Admin đang chỉnh sửa và chỉ lưu nháp.
 Admin ngừng bán một gói trong danh mục.
 
 1. Admin chọn gói và thực hiện ngừng bán.
-2. Hệ thống ẩn gói khỏi danh sách đăng ký và chặn yêu cầu mới từ gói đó. Yêu cầu chuyển gói thiết kế đã ghi nhận hợp lệ trước lúc ngừng bán được giữ và vẫn thực hiện theo lịch nếu đủ điều kiện khác.
+2. Hệ thống ẩn gói khỏi danh sách đăng ký và chặn tạo đơn mới cho gói đó. Đơn đã tạo trước lúc ngừng bán vẫn được hoàn tất theo giá và quyền lợi đã lưu nếu thanh toán hợp lệ, theo BR-SUB-013 và BR-PAY-001.
 3. Các gói đã cấp tiếp tục theo quyền lợi và vòng đời hiện có; không bị tự kết thúc hoặc thay đổi hạn mức.
 
 ### Exception Flow
@@ -133,14 +133,16 @@ Yêu cầu lưu/công bố giá gói thiết kế dùng loại tiền khác VNĐ
 
 #### EXC-06
 
-Admin bấm Công bố gói chưa có bất kỳ quyền lợi nào.
+Admin bấm Công bố gói thiết kế chưa có bất kỳ quyền lợi nào, hoặc gói giám sát thiếu mô tả dịch vụ.
 
-1. Hệ thống từ chối Công bố, kể cả yêu cầu gửi trực tiếp; báo cần thêm ít nhất một quyền lợi.
+1. Hệ thống từ chối Công bố, kể cả yêu cầu gửi trực tiếp; báo gói thiết kế cần thêm ít nhất một quyền lợi, hoặc gói giám sát cần mô tả dịch vụ có nội dung.
 2. Giữ bản nháp để Admin bổ sung; không thay thế bản đang áp dụng hoặc thay đổi quyền đã cấp.
 
 ## Acceptance Criteria
 
 #### AC-001
+
+**Không nghiệm thu trong phạm vi hiện tại:** theo BR-SUB-008 khoản 12, đợt này chưa triển khai logic kiểm tra sử dụng quyền bật/tắt hoặc quyền dạng mức; chỉ hai quyền tạo mới và tra cứu có logic sử dụng. Người dùng xác nhận ngày 25/09/2026. Nội dung giữ để dùng khi danh mục mức được chốt.
 
 - **Given**: Admin đang cấu hình hai gói với ba quyền lợi thử, lần lượt thuộc dạng bật/tắt, hạn mức lượt và mức tính năng.
 - **When**: Admin đặt gói A là tắt, 5 lượt, cơ bản; gói B là bật, 20 lượt, nâng cao; sau đó lưu nháp và mở lại từng gói.
@@ -163,21 +165,21 @@ Admin bấm Công bố gói chưa có bất kỳ quyền lợi nào.
 
 #### AC-004
 
-- **Given**: Gói giám sát của khách hàng đã được cấp với bộ quyền lợi A; Admin có bản nháp thay đổi quyền lợi thành B.
-- **When**: Admin công bố B, sau đó một gói giám sát mới được cấp hợp lệ từ bản đã công bố.
+- **Given**: Gói giám sát của khách hàng đã được cấp với mô tả dịch vụ A; Admin có bản nháp thay đổi mô tả thành B.
+- **When**: Admin công bố B, sau đó một gói giám sát mới được cấp hợp lệ từ đơn tạo sau khi công bố.
 - **Then**: Gói đã cấp trước đó giữ nguyên A; gói cấp mới nhận B.
-- **And**: Nếu thay đổi B mới chỉ được lưu nháp, gói cấp mới vẫn nhận quyền lợi từ bản đang công bố, không dùng bản nháp.
+- **And**: Nếu B mới chỉ được lưu nháp, gói cấp mới vẫn nhận mô tả từ bản đang công bố, không dùng bản nháp.
 
 #### AC-005
 
 - **Given**: Một gói đang được hiển thị để đăng ký trong danh mục.
-- **When**: Admin ngừng bán gói đó và có yêu cầu cấp mới gửi đến sau đó, không thuộc yêu cầu chuyển đã ghi nhận trước khi ngừng bán.
-- **Then**: Gói không còn trong danh sách đăng ký; yêu cầu cấp mới bị từ chối kể cả khi dùng mã gói trực tiếp.
+- **When**: Admin ngừng bán gói đó, sau đó có yêu cầu tạo đơn mới cho gói này.
+- **Then**: Gói không còn trong danh sách đăng ký; yêu cầu tạo đơn mới bị từ chối kể cả khi dùng mã gói trực tiếp.
 - **And**: Không cấp thêm quyền lợi hoặc tạo gói mới từ yêu cầu bị từ chối.
 
 #### AC-006
 
-- **Given**: Khách đã có subscription thiết kế trong kỳ hiện tại hoặc gói giám sát đang thực hiện theo dự án.
+- **Given**: Khách đã có subscription thiết kế trong kỳ hiện tại hoặc gói giám sát đang thực hiện theo công trình.
 - **When**: Admin ngừng bán gói tương ứng trong danh mục.
 - **Then**: Quyền lợi, trạng thái và thời hạn hiện có của gói đã cấp không bị thay đổi bởi việc ngừng bán.
 - **And**: Thiết kế không mất hoặc được làm mới lượt; giám sát không tự hết hạn hay hoàn thành. Chính sách gia hạn thiết kế nằm ngoài tiêu chí này.
@@ -233,12 +235,14 @@ Admin bấm Công bố gói chưa có bất kỳ quyền lợi nào.
 
 #### AC-014
 
-- **Given**: Admin có bản nháp gói chưa có quyền lợi; các dữ liệu khác hợp lệ.
+- **Given**: Admin có bản nháp gói thiết kế chưa có quyền lợi; các dữ liệu khác hợp lệ.
 - **When**: Admin lưu, mở lại rồi yêu cầu Công bố; sau đó thêm một quyền lợi hợp lệ và Công bố lại.
 - **Then**: Lưu nháp được khi danh sách quyền lợi rỗng, nhưng Công bố bị từ chối và báo cần thêm quyền lợi. Sau khi thêm một quyền lợi hợp lệ, gói đạt điều kiện về số lượng quyền lợi để Công bố.
 - **And**: Không tự thêm quyền mặc định, không bắt buộc có cả hai quyền tạo mới và tra cứu. Yêu cầu Công bố bị từ chối không thay đổi bản đang áp dụng hoặc quyền đã cấp.
 
 #### AC-015
+
+**Không nghiệm thu trong phạm vi hiện tại:** theo BR-SUB-008 khoản 12, đợt này chưa triển khai logic kiểm tra sử dụng quyền bật/tắt hoặc quyền dạng mức; chỉ hai quyền tạo mới và tra cứu có logic sử dụng. Người dùng xác nhận ngày 25/09/2026. Nội dung giữ để dùng khi danh mục mức được chốt.
 
 - **Given**: Có ba tài khoản với subscription thiết kế còn hiệu lực; bản quyền lợi đã cấp lần lượt chưa có quyền bật/tắt đang xét, có quyền nhưng tắt và có quyền đã bật. Các điều kiện khác để dùng tính năng đều đáp ứng.
 - **When**: Mỗi tài khoản yêu cầu sử dụng tính năng tương ứng, gồm cả yêu cầu gửi trực tiếp.
@@ -246,6 +250,8 @@ Admin bấm Công bố gói chưa có bất kỳ quyền lợi nào.
 - **And**: Kiểm tra theo bản quyền lợi đã cấp; việc Admin sửa/công bố gói không đổi quyền của kỳ đang dùng. Chỉ kiểm tra quyền bật/tắt không giữ hoặc trừ lượt.
 
 #### AC-016
+
+**Không nghiệm thu trong phạm vi hiện tại:** theo BR-SUB-008 khoản 12, đợt này chưa triển khai logic kiểm tra sử dụng quyền bật/tắt hoặc quyền dạng mức; chỉ hai quyền tạo mới và tra cứu có logic sử dụng. Người dùng xác nhận ngày 25/09/2026. Nội dung giữ để dùng khi danh mục mức được chốt.
 
 - **Given**: Tài khoản có subscription thiết kế còn hiệu lực nhưng bản quyền lợi đã cấp không có cấu hình mức cho tính năng đang xét; các điều kiện khác để dùng tính năng đều đáp ứng.
 - **When**: Khách yêu cầu dùng tính năng ở mức thấp nhất hoặc mức cao hơn, gồm cả yêu cầu gửi trực tiếp.
@@ -318,7 +324,7 @@ Admin bấm Công bố gói chưa có bất kỳ quyền lợi nào.
 - **Given**: Khách đã mua kỳ PLUS với mô tả tư vấn “Tư vấn ưu tiên”. Admin có bản nháp mô tả mới “Tư vấn online”.
 - **When**: Admin công bố mô tả mới trong lúc kỳ của khách còn hiệu lực.
 - **Then**: Cam kết tư vấn của kỳ đã mua vẫn là “Tư vấn ưu tiên” đến khi kỳ đó kết thúc; không đổi theo mô tả mới. Lần mua mới sử dụng nội dung mới đã được chốt hợp lệ cho lần mua đó.
-- **And**: Mô tả tự do không tạo entitlement, mức hoặc lượt tư vấn. Sửa mô tả không tự đổi gói, gia hạn hoặc làm mới lượt. Mốc chốt nội dung trong giao dịch thiết kế cùng thanh toán; không tự mở rộng quy tắc này sang quà tặng.
+- **And**: Mô tả tự do không tạo entitlement, mức hoặc lượt tư vấn. Sửa mô tả không tự đổi gói, gia hạn hoặc làm mới lượt. Nội dung tư vấn chốt lúc tạo đơn theo BR-PAY-001; không tự mở rộng quy tắc này sang quà tặng.
 
 #### AC-025
 
@@ -334,11 +340,19 @@ Admin bấm Công bố gói chưa có bất kỳ quyền lợi nào.
 - **Then**: Hai quyền tạo mới/tra cứu dùng hạn mức riêng theo tháng/năm hoặc không giới hạn; các quyền lợi còn lại dùng bật/tắt để lưu và hiển thị theo gói, không có mức cụ thể hoặc bộ đếm sử dụng riêng trong đợt này.
 - **And**: Bật/tắt các quyền hiển thị không thay số dư, cấp thêm lượt hoặc điều khiển AI/dịch vụ. Tư vấn vẫn offline với nội dung mô tả tự do; không bắt chọn Online/Ưu tiên/1:1. Lưu nháp/Công bố vẫn áp dụng, không tự thay quyền hoặc cam kết của kỳ đã mua.
 
+#### AC-027
+
+- **Given**: Admin có bản nháp gói giám sát với tên và giá hợp lệ, chưa chọn quyền lợi nào.
+- **When**: Admin Công bố khi mô tả dịch vụ còn trống, sau đó nhập mô tả "6 buổi kỹ sư kiểm tra tại công trình" và Công bố lại.
+- **Then**: Lần đầu bị từ chối vì thiếu mô tả dịch vụ; lần sau Công bố thành công dù gói không có quyền lợi nào trong danh mục.
+- **And**: Mô tả chỉ để hiển thị và được chốt theo đơn; không tạo lượt, bộ đếm hoặc logic sử dụng trên nền tảng.
+
 ## References
 
 ### TDDs
 
 - [TDD-SUB-001](../tdd/TDD-SUB-001.md): Thiết kế kỹ thuật bản nháp; Reviewer/Approver Tân Trần.
+- [TDD-SUB-002](../tdd/TDD-SUB-002.md): Logic sử dụng của hai quyền dạng lượt tạo mới và tra cứu theo AC-026.
 
 ### Rules
 
@@ -365,7 +379,7 @@ Admin bấm Công bố gói chưa có bất kỳ quyền lợi nào.
 
 ## Out of Scope
 
-- Tính năng tư vấn trên website: ba mức Online, Ưu tiên và Chuyên gia 1:1 đang được thực hiện offline. Phần mô tả quyền lợi dịch vụ không tự tạo entitlement dạng mức, lịch hẹn hoặc lượt tư vấn trên nền tảng. Danh mục thiết kế tạm thời vẫn theo AC-022.
+- Quản lý cam kết tư vấn của gói trên nền tảng: ba mức Online, Ưu tiên và Chuyên gia 1:1 vẫn được thực hiện offline. Phần mô tả quyền lợi dịch vụ không tự tạo entitlement dạng mức, lịch hẹn hoặc lượt tư vấn trên nền tảng. Yêu cầu tư vấn KTS miễn phí ở STORY-CONSULT-002 là kênh riêng, không thay cam kết tư vấn của gói (người dùng xác nhận ngày 25/09/2026). Danh mục thiết kế theo AC-025.
 
 - So sánh các kết quả thiết kế đã hoãn; không triển khai giao diện so sánh hoặc quyền riêng theo gói trong đợt này. Khách vẫn xem từng kết quả riêng. Xem [nợ nghiệp vụ](../debt/design-comparison.md).
 
@@ -373,5 +387,5 @@ Admin bấm Công bố gói chưa có bất kỳ quyền lợi nào.
 
 - Chốt hoặc tự nhập dữ liệu giá/hạn mức bán ban đầu: Admin sẽ nhập sau. Giá và số lượt trong các AC, test là dữ liệu minh họa; không phải cấu hình bán đã được duyệt.
 
-- Luồng nhận gói, gia hạn và tích hợp thanh toán thiết kế sau.
-- Danh mục thiết kế tạm thời chỉ có lượt tạo mới, lượt tra cứu và phối cảnh 3D; mở rộng danh mục sẽ được xác nhận riêng; chưa chốt tên và thứ tự cụ thể của các mức, các điều kiện công bố chi tiết hoặc quy trình thay đổi danh mục trong các lần phát triển sau.
+- Luồng mua và nhận gói thuộc STORY-PAY-001; không có tự động gia hạn.
+- Tên cụ thể của các quyền lợi hiển thị ngoài hai quyền dạng lượt, các điều kiện công bố chi tiết và quy trình thay đổi danh mục trong các lần phát triển sau chưa được chốt.

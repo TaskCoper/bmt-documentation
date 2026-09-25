@@ -52,7 +52,7 @@ Hệ thống ghi nhật ký mọi thay đổi về vai trò, quyền và phân c
 
 ## When
 
-Hệ thống xử lý xong một trong các thao tác: tạo, sửa hoặc xóa vai trò; mời, kích hoạt, khóa, mở khóa hoặc buộc đăng xuất tài khoản; gán hoặc thu hồi vai trò; tạo, chuyển giao hoặc gỡ phân công.
+Hệ thống xử lý xong một trong các thao tác: tạo, sửa hoặc xóa vai trò; tạo tài khoản nhân viên, nhân viên đổi mật khẩu lần đầu, khóa, mở khóa hoặc buộc đăng xuất tài khoản; gán hoặc thu hồi vai trò; tạo, chuyển giao hoặc gỡ phân công.
 
 ## Then
 
@@ -70,4 +70,5 @@ Quy tắc này không quy định nhật ký cho các nghiệp vụ khác. Lý d
 
 - Thao tác thu hồi vai trò và gỡ phân công không bắt nhập lý do trong đợt này; nếu sau này cần thì bổ sung, quy tắc ghi nhật ký vẫn giữ nguyên.
 - Thời gian giữ nhật ký chưa được xác định, cần chốt trước khi triển khai.
+- Người dùng xác nhận ngày 25/09/2026: yêu cầu phân công bị từ chối vì công trình đã có người phụ trách hoặc người nhận thiếu quyền `supervision.complete` là lỗi nghiệp vụ, không phải rào chắn quyền, nên không ghi nhật ký theo khoản 2.
 - Bản nháp nghiệp vụ, chưa triển khai hoặc chạy kiểm thử. Reviewer và Approver lấy theo xác nhận đang dùng cho các bản nháp mới, không phải bằng chứng đã phê duyệt. Owner và ngày hiệu lực chưa xác định.

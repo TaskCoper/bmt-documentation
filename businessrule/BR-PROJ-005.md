@@ -71,7 +71,7 @@ Yêu cầu gửi tạo thiết kế bị từ chối trước khi được tiế
 ## Notes
 
 - Chỉ sửa dữ liệu sau thất bại không tự gửi lại AI. Khách phải chủ động gửi yêu cầu mới; không tự thử lại tác vụ theo các quy tắc hiện có.
-- Quy tắc khóa ở đây áp dụng cho đầu vào thiết kế. Không tự mở rộng thành chính sách khóa hoặc cho phép đổi mọi thông tin quản trị của bản dự toán.
+- Quy tắc khóa ở đây áp dụng cho đầu vào thiết kế, không áp dụng cho tên bản dự toán; đổi tên theo BR-SUB-007 khoản 11 (người dùng xác nhận ngày 25/09/2026). Không tự mở rộng thành chính sách khóa hoặc cho phép đổi các thông tin quản trị khác.
 - Không thêm quyền khách hàng hủy tác vụ; phạm vi hiện tại theo BR-SUB-003.
 - Mốc tiếp nhận, chống yêu cầu trùng và bảo vệ khỏi cập nhật đồng thời sẽ xác định trong thiết kế; không chọn công nghệ giao tiếp hoặc trạng thái API của AI khi chưa có hợp đồng.
 - Reviewer và Approver là Tân Trần theo xác nhận trong hội thoại; việc ghi tên không có nghĩa tài liệu đã được phê duyệt. Owner và ngày hiệu lực chưa xác định; chưa có kết quả kiểm thử.

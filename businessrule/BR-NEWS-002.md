@@ -56,7 +56,7 @@ Người quản lý tạo, đổi tên, sắp xếp, chuyển cha, xóa danh m�
 
 ## Then
 
-1. Danh mục có tên bắt buộc; bỏ khoảng trắng đầu và cuối. Tên không được trùng trong cùng một cấp cha, không phân biệt hoa/thường. Các danh mục gốc được xét chung một cấp; khác cha được trùng tên.
+1. Danh mục có tên bắt buộc; bỏ khoảng trắng đầu và cuối, sau đó tên tối đa 200 ký tự. Tên vượt giới hạn bị từ chối, không tự cắt ngắn. Tên không được trùng trong cùng một cấp cha, không phân biệt hoa/thường. Các danh mục gốc được xét chung một cấp; khác cha được trùng tên.
 2. Cho tạo danh mục gốc và danh mục con; không đặt giới hạn nghiệp vụ về số cấp.
 3. Cho đổi tên, đổi thứ tự và chuyển danh mục sang cha khác. Việc chuyển cha phải tiếp tục đáp ứng quy tắc tên không trùng tại cha mới.
 4. Không cho đặt chính danh mục hoặc bất kỳ danh mục con nào của nó làm cha, để cây không tạo vòng lặp.
@@ -71,5 +71,7 @@ Người quản lý tạo, đổi tên, sắp xếp, chuyển cha, xóa danh m�
 ## Notes
 
 Ví dụ: “Nhà phố → Thiết kế” và “Biệt thự → Thiết kế” được cùng tồn tại. Hai danh mục “ Sơn ” và “sơn” dưới cùng cha bị coi là trùng tên.
+
+Giới hạn 200 ký tự ở khoản 1 do người dùng xác nhận ngày 25/09/2026.
 
 Owner và ngày hiệu lực chưa xác định. Người dùng đã chốt bộ US/BR Tin tức trong hội thoại. Status Draft vẫn giữ theo quy trình tài liệu; xác nhận này không thay cho phê duyệt trên hệ thống hoặc kết quả kiểm thử.

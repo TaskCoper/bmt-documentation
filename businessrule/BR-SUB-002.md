@@ -71,7 +71,7 @@ Không cộng dồn lượt dư trong phạm vi quy tắc đã xác nhận. Lư�
 ## Notes
 
 - Ví dụ: kỳ cũ còn 3 lượt, kỳ mới có hạn mức 10 thì tài khoản có 10 lượt, không phải 13. Đây là dữ liệu minh họa.
-- Quy tắc này không tự gia hạn subscription. Luồng nhận gói và gia hạn sẽ thiết kế cùng thanh toán sau.
+- Quy tắc này không tự gia hạn subscription. Luồng mua và nhận gói theo STORY-PAY-001; mua lại trước hạn theo BR-SUB-021.
 - Ngày kết thúc tính từ ngày bắt đầu theo [BR-SUB-014](BR-SUB-014.md); không theo lịch tháng/năm chung. Kỳ kết thúc đúng giờ bắt đầu theo giờ Việt Nam, không kéo dài đến hết ngày.
 - [STORY-SUB-001](../userstory/STORY-SUB-001.md), [BR-SUB-001](BR-SUB-001.md) và [ST-SUB-002](../systemtest/ST-SUB-002.md) mô tả hành vi dùng chung và kiểm thử làm mới hạn mức.
 - Giá và hạn mức riêng cho từng lựa chọn theo [BR-SUB-015](BR-SUB-015.md). Hạn mức kỳ mới lấy từ bản quyền lợi đã chốt cho kỳ đó theo [BR-SUB-004](BR-SUB-004.md), không tự lấy bản công bố mới nhất.

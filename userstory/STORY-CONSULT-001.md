@@ -55,7 +55,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ### Preconditions
 
-- Người thao tác có quyền admin.
+- Người thao tác có quyền quản lý tư vấn KTS theo STORY-RBAC-001; vai trò Admin có quyền này.
 
 ### Trigger
 
@@ -96,7 +96,7 @@ Người có quyền quản lý danh mục chuyên môn.
 
 #### EXC-01
 
-Người thao tác không có quyền admin.
+Người thao tác không có quyền quản lý tư vấn KTS.
 
 1. Hệ thống từ chối thêm, sửa hoặc đổi trạng thái hiển thị.
 
@@ -139,7 +139,7 @@ Category cần xóa còn được gán cho KTS.
 
 #### AC-004
 
-- **Given**: Người thao tác không có quyền admin.
+- **Given**: Người thao tác không có quyền quản lý tư vấn KTS.
 - **When**: Gửi thao tác quản lý hồ sơ.
 - **Then**: Hệ thống từ chối thao tác.
 - **And**: Hồ sơ không bị thay đổi.
@@ -202,7 +202,7 @@ Category cần xóa còn được gán cho KTS.
 
 ## Non-Functional
 
-- Chức năng quản trị chỉ dành cho admin; ghi chú nội bộ không được công khai hoặc gửi cho khách. Chưa xác định chỉ tiêu hiệu năng định lượng.
+- Chức năng quản trị chỉ dành cho người có quyền quản lý tư vấn KTS theo STORY-RBAC-001; ghi chú nội bộ không được công khai hoặc gửi cho khách. Chưa xác định chỉ tiêu hiệu năng định lượng.
 
 ## Out of Scope
 

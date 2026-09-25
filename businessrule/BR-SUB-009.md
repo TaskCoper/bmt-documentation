@@ -49,7 +49,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Statement
 
-Gói giám sát có thể được mua và cấp trước khi có dự án. Khách phải gán lần đầu trong một năm từ lúc cấp theo [BR-SUB-022](BR-SUB-022.md); quá hạn chưa gán thì mất quyền sử dụng. Sau khi gán đúng hạn, gói chỉ phục vụ dự án đang liên kết và không tự hết hạn theo mốc một năm. Khách không tự gỡ/đổi; nhân viên có quyền riêng được sửa dự án theo [BR-SUB-023](BR-SUB-023.md). Hiện chỉ quản lý liên kết gói–dự án; lịch, lượt và hoạt động khảo sát/giám sát vẫn ngoài phạm vi.
+Gói giám sát có thể được mua và cấp trước khi có công trình. Khách phải gán lần đầu trong một năm từ lúc cấp theo [BR-SUB-022](BR-SUB-022.md); quá hạn chưa gán thì mất quyền sử dụng. Sau khi gán đúng hạn, gói chỉ phục vụ công trình đang liên kết và không tự hết hạn theo mốc một năm. Khách không tự gỡ/đổi; nhân viên có quyền riêng được đổi công trình theo [BR-SUB-023](BR-SUB-023.md). Hiện chỉ quản lý liên kết gói–công trình; lịch, lượt và hoạt động khảo sát/giám sát vẫn ngoài phạm vi.
 
 ## When
 
@@ -63,7 +63,7 @@ Hệ thống kiểm tra quyền giám sát cho một công trình dựa trên su
 
 ## Except
 
-Nhân viên có quyền riêng được sửa dự án đã gán, phải có lý do; dự án đích cùng khách hàng và chưa có gói giám sát hiệu lực. Cho sửa sau một năm nếu gói từng gán đúng hạn, không làm mới hạn. Khách không được tự gỡ/đổi. Xem BR-SUB-023. Quyền sử dụng không tự lan sang dự án khác khi chưa sửa liên kết hợp lệ.
+Nhân viên có quyền riêng được đổi công trình đã gán, phải có lý do; công trình đích cùng khách hàng và chưa có gói giám sát hiệu lực. Cho sửa sau một năm nếu gói từng gán đúng hạn, không làm mới hạn. Khách không được tự gỡ/đổi. Xem BR-SUB-023. Quyền sử dụng không tự lan sang công trình khác khi chưa sửa liên kết hợp lệ.
 
 ## Notes
 

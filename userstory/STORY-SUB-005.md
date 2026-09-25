@@ -75,7 +75,7 @@ Nhân viên gửi yêu cầu hủy hoặc khôi phục gói.
 
 #### ALT-01
 
-Hủy giám sát đã gán giải phóng dự án.
+Hủy giám sát đã gán giải phóng công trình.
 
 1. Nhân viên có quyền hủy G1 với lý do; khách gán G2 vào A.
 2. G1 bị hủy và A được nhận G2.
@@ -160,12 +160,12 @@ Chặn khôi phục thiếu quyền hoặc lý do.
 
 - **Given**: Nhân viên có quyền; khách có gói giám sát chưa gán còn hạn.
 - **When**: Nhân viên hủy và nhập lý do.
-- **Then**: Gói bị hủy, không được dùng để gán dự án.
+- **Then**: Gói bị hủy, không được dùng để gán công trình.
 - **And**: Giữ lịch sử; tiền xử lý ngoài hệ thống.
 
 #### AC-003
 
-- **Given**: Dự án A có gói G1; khách còn gói G2 chưa gán còn hạn.
+- **Given**: Công trình A có gói G1; khách còn gói G2 chưa gán còn hạn.
 - **When**: Nhân viên có quyền hủy G1 với lý do; khách gán G2 vào A.
 - **Then**: G1 bị hủy và A được nhận G2.
 - **And**: Không xóa lịch sử G1 hoặc tự hoàn tiền.
@@ -270,5 +270,5 @@ Chặn khôi phục thiếu quyền hoặc lý do.
 
 ## Out of Scope
 
-- Chuyển tiền hoặc đánh dấu đã hoàn tiền; khôi phục kỳ thiết kế đã bị thay thế; tự gia hạn/bù thời gian; mở lại gói hoàn thành theo luồng lịch sử không thuộc Story này.
+- Chuyển tiền hoặc đánh dấu đã hoàn tiền; khôi phục kỳ thiết kế đã bị thay thế; tự gia hạn/bù thời gian; mở lại gói đã hoàn thành không thuộc Story này; thao tác đó theo STORY-SUB-003 và BR-SUB-012.
 - Chưa triển khai, chạy test hoặc phê duyệt tài liệu. Sprint, Priority, Creator và người thực hiện chưa được phân công; không lấy ví dụ trong template làm giá trị thật.

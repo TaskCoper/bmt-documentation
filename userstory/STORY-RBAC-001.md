@@ -57,7 +57,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 ### Preconditions
 
 - Người thao tác đã đăng nhập bằng tài khoản nhân viên đang hoạt động và có quyền `role.manage`.
-- Hệ thống đã có sẵn danh sách mã quyền do hệ thống định nghĩa. Người quản trị chọn trong danh sách này, không tự đặt mã quyền mới. Chín mã quyền khởi tạo gồm: `commerce.read` xem người mua, gói đã mua, đơn và giao dịch; `supervision.reassign` sửa liên kết gói giám sát và dự án; `package.cancel` hủy hiệu lực gói; `package.restore` khôi phục gói bị hủy; `supervision.complete` hoàn thành và mở lại gói giám sát; `user.manage` mời, khóa và mở khóa tài khoản nhân viên; `role.manage` tạo, sửa, xóa vai trò và gán vai trò cho người; `assignment.manage` phân công và chuyển giao tài nguyên; `audit.read` xem nhật ký thay đổi quyền.
+- Hệ thống đã có sẵn danh sách mã quyền do hệ thống định nghĩa. Người quản trị chọn trong danh sách này, không tự đặt mã quyền mới. Chín mã quyền khởi tạo gồm: `commerce.read` xem người mua, gói đã mua, đơn và giao dịch; `supervision.reassign` đổi công trình của gói giám sát; `package.cancel` hủy hiệu lực gói; `package.restore` khôi phục gói bị hủy; `supervision.complete` hoàn thành và mở lại gói giám sát; `user.manage` tạo, khóa, mở khóa và buộc đăng xuất tài khoản nhân viên; `role.manage` tạo, sửa, xóa vai trò và gán vai trò cho người; `assignment.manage` phân công và chuyển giao tài nguyên; `audit.read` xem nhật ký thay đổi quyền.
+- Ngày 25/09/2026, người dùng xác nhận bổ sung năm quyền cho chức năng quản trị, mỗi chức năng một quyền: cấu hình gói; quản lý danh mục loại công trình và phong cách; quản lý thư viện mẫu; quản lý tin tức; quản lý tư vấn KTS, gồm hồ sơ KTS và yêu cầu tư vấn. Năm quyền này không gắn phân công và vai trò Admin có đủ. Tên mã đặt ở bước thiết kế kỹ thuật.
 - Hai vai trò hệ thống Admin và Khách hàng đã tồn tại và không sửa được theo BR-RBAC-002.
 
 ### Trigger
@@ -82,9 +83,9 @@ Người quản trị mở màn hình quản lý vai trò để tạo mới, s�
 Người quản trị sửa danh sách quyền của một vai trò tự tạo đang có người giữ.
 
 1. Người quản trị thêm hoặc bỏ quyền của vai trò.
-2. Hệ thống kiểm tra rào chắn cấp quyền theo BR-RBAC-004, rồi lưu thay đổi và ghi nhật ký.
+2. Hệ thống kiểm tra rào chắn cấp quyền theo BR-RBAC-004. Nếu thay đổi bỏ quyền `supervision.complete`, hệ thống kiểm tra thêm theo BR-RBAC-007 rằng không người giữ vai trò nào mất quyền này trong khi còn phụ trách công trình. Đạt thì lưu thay đổi và ghi nhật ký.
 3. Những người đang giữ vai trò đó nhận bộ quyền mới chậm nhất khi access token của họ hết hạn, theo BR-RBAC-009. Hệ thống cho biết thay đổi chưa có hiệu lực ngay với người đang đăng nhập.
-4. Muốn có hiệu lực ngay, người quản trị buộc đăng xuất những người đó theo STORY-RBAC-002.
+4. Muốn có hiệu lực ngay, người có quyền `user.manage` buộc đăng xuất những người đó theo STORY-RBAC-002.
 
 #### ALT-02
 
@@ -137,6 +138,13 @@ Người gọi không có quyền `role.manage` yêu cầu xem hoặc thay đổ
 1. Hệ thống từ chối với mã 403 theo BR-RBAC-011, kể cả yêu cầu gửi trực tiếp tới API.
 2. Không trả danh sách vai trò hoặc danh sách quyền cho người gọi.
 
+#### EXC-06
+
+Người quản trị bỏ quyền `supervision.complete` khỏi một vai trò, trong khi có người giữ vai trò đó sẽ mất quyền này mà vẫn đang phụ trách công trình.
+
+1. Hệ thống từ chối toàn bộ thay đổi theo BR-RBAC-007 và cho biết những người bị ảnh hưởng cùng số công trình của từng người.
+2. Vai trò giữ nguyên; người quản trị chuyển giao các công trình theo STORY-RBAC-003 rồi sửa lại vai trò.
+
 ## Acceptance Criteria
 
 #### AC-001
@@ -188,11 +196,19 @@ Người gọi không có quyền `role.manage` yêu cầu xem hoặc thay đổ
 - **Then**: Hệ thống từ chối với mã 403.
 - **And**: Không trả danh sách vai trò và không tạo vai trò nào.
 
+#### AC-008
+
+- **Given**: Vai trò "Nhân viên giám sát" có quyền `supervision.complete` và có 3 người giữ; 2 người đang phụ trách công trình và không có quyền này từ vai trò khác.
+- **When**: Người quản trị bỏ quyền `supervision.complete` khỏi vai trò đó.
+- **Then**: Hệ thống từ chối và liệt kê 2 người bị ảnh hưởng cùng số công trình của từng người.
+- **And**: Danh sách quyền của vai trò giữ nguyên; sau khi công trình của 2 người đó được chuyển giao hết, thao tác bỏ quyền thực hiện được.
+
 ## References
 
 ### TDDs
 
 - [TDD-RBAC-001](../tdd/TDD-RBAC-001.md): Mô hình vai trò – quyền, thực thi phân quyền và nhật ký.
+- [TDD-CONSULT-001](../tdd/TDD-CONSULT-001.md): Dùng mã quyền `consultation.manage` cho quản trị tư vấn KTS.
 
 ### Rules
 
@@ -200,6 +216,7 @@ Người gọi không có quyền `role.manage` yêu cầu xem hoặc thay đổ
 - BR-RBAC-002
 - BR-RBAC-003
 - BR-RBAC-004
+- BR-RBAC-007
 - BR-RBAC-009
 - BR-RBAC-011
 - BR-RBAC-012

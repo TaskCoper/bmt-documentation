@@ -48,7 +48,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Statement
 
-Người có quyền quản lý Tin tức được quản lý bài viết và danh mục, không cần phân công dự án hoặc người duyệt công bố.
+Người có quyền quản lý Tin tức được quản lý bài viết và danh mục, không cần phân công hoặc người duyệt công bố.
 
 ## When
 
@@ -56,7 +56,7 @@ Người quản lý tạo, lưu, sửa, công bố, ẩn hoặc xóa bài viết
 
 ## Then
 
-1. Dùng chung quyền quản lý Tin tức cho bài viết và danh mục. Người không có quyền không được thực hiện thao tác quản lý.
+1. Dùng chung quyền quản lý tin tức theo STORY-RBAC-001 cho bài viết và danh mục. Người không có quyền không được thực hiện thao tác quản lý.
 2. Bài có các trạng thái Nháp, Công bố và Ẩn. Cho lưu nháp thiếu thông tin; chỉ cho công bố khi có tiêu đề, ảnh đại diện, mô tả ngắn, nội dung rich text và ít nhất một danh mục hợp lệ.
 3. Rich text hỗ trợ định dạng chữ, tiêu đề đoạn, danh sách, liên kết và chèn nhiều ảnh. FE tải ảnh lên cloud trước rồi chèn URL ảnh vào nội dung lưu. Đợt này không có video hoặc tệp đính kèm.
 4. Một bài được gắn nhiều danh mục, không có danh mục chính. Được chọn danh mục tại bất kỳ cấp nào; chọn con không bắt buộc gắn thêm cha.

@@ -56,7 +56,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## When
 
-Tài khoản có kỳ thiết kế còn hiệu lực; việc đổi sang gói khác, đổi chu kỳ cùng gói đổi cả gói lẫn chu kỳ hoặc mua lại cùng gói/cùng chu kỳ đã hoàn tất hợp lệ. Chỉ chọn gói hoặc bắt đầu giao dịch chưa đủ điều kiện; điều kiện hoàn tất sẽ thiết kế cùng thanh toán.
+Tài khoản có kỳ thiết kế còn hiệu lực; việc đổi sang gói khác, đổi chu kỳ cùng gói đổi cả gói lẫn chu kỳ hoặc mua lại cùng gói/cùng chu kỳ đã hoàn tất hợp lệ. Chỉ chọn gói hoặc bắt đầu giao dịch chưa đủ điều kiện; điều kiện hoàn tất theo BR-PAY-002 đến BR-PAY-004.
 
 ## Then
 
@@ -67,14 +67,14 @@ Tài khoản có kỳ thiết kế còn hiệu lực; việc đổi sang gói kh
 5. Cấp đủ hạn mức của các quyền dạng lượt trong bản quyền lợi đích đã xác định hợp lệ. Bỏ lượt dư kỳ cũ, không cộng sang kỳ mới và không trừ lượt đã dùng kỳ cũ vào hạn mức mới. Không tự cấp quyền không có trong gói đích; không giới hạn vẫn theo BR-SUB-005.
 6. Lượt đang giữ thuộc kỳ cũ, không bị xóa như lượt dư. Tác vụ thành công ghi đã dùng ở kỳ cũ; lỗi giải phóng ở kỳ cũ, không cộng vào kỳ mới hoặc mở lại kỳ đã kết thúc. Timeout và kết quả muộn vẫn theo BR-SUB-016. Tác vụ AI đã được tiếp nhận hợp lệ hoàn tất theo bộ quyền của gói tại thời điểm tiếp nhận, kể cả quyền 3D, dù khách đổi gói hoặc chu kỳ trong lúc xử lý. Không bổ sung hoặc bỏ đầu ra của tác vụ đó theo gói mới. Yêu cầu mới sau khi chuyển kiểm tra quyền gói mới. Quy tắc này không cho phép trả kết quả muộn sau timeout; BR-SUB-016 vẫn áp dụng.
 7. Trả đủ giá kỳ đích đã xác định hợp lệ, không khấu trừ thời gian cũ chưa dùng. Ví dụ PLUS năm còn 10 tháng đổi sang PLUS tháng: bỏ phần thời gian còn lại, kỳ tháng bắt đầu ngay tại T và trả đủ giá tháng. Không tự quyết định hoàn tiền/tranh chấp hoặc khuyến mãi từ quy tắc này.
-8. Giao dịch chưa hoàn tất không tự kết thúc kỳ cũ, cấp kỳ mới hay làm mới lượt. Việc bỏ lịch đổi cuối kỳ không loại bỏ nhu cầu xử lý giao dịch đang chờ, lỗi hoặc gửi lặp; chi tiết thuộc thiết kế thanh toán và TDD.
+8. Giao dịch chưa hoàn tất không tự kết thúc kỳ cũ, cấp kỳ mới hay làm mới lượt. Việc bỏ lịch đổi cuối kỳ không loại bỏ nhu cầu xử lý giao dịch đang chờ, lỗi hoặc gửi lặp; chi tiết theo BR-PAY-001 đến BR-PAY-004 và TDD.
 9. Không tự xóa dữ liệu và kết quả đã có do đổi gói. Quyền truy cập dữ liệu cũ vẫn theo BR-SUB-007; thao tác tạo mới hoặc tra cứu mới kiểm tra gói hiện tại theo BR-SUB-017. Admin sửa danh mục không tự chuyển gói của khách.
 
-10. Cho phép khách chủ động mua lại đúng cùng gói và cùng chu kỳ khi kỳ hiện tại còn hiệu lực, kể cả đã hết lượt hoặc còn lượt dư. Khi hoàn tất hợp lệ, trả đủ giá kỳ mới, kết thúc kỳ cũ và bắt đầu kỳ mới ngay tại T; cấp đủ hạn mức, bỏ thời gian và lượt dư cũ. Không cộng dồn, không chỉ nạp thêm lượt hoặc tự gia hạn. Lượt giữ và quyền của tác vụ đã tiếp nhận vẫn thuộc kỳ cũ theo khoản 6. Bản giá/quyền lợi và mốc chốt bản của giao dịch mua lại vẫn thiết kế cùng thanh toán; không tự suy ra được giữ bản cũ hoặc phải dùng bản mới nhất.
+10. Cho phép khách chủ động mua lại đúng cùng gói và cùng chu kỳ khi kỳ hiện tại còn hiệu lực, kể cả đã hết lượt hoặc còn lượt dư. Khi hoàn tất hợp lệ, trả đủ giá kỳ mới, kết thúc kỳ cũ và bắt đầu kỳ mới ngay tại T; cấp đủ hạn mức, bỏ thời gian và lượt dư cũ. Không cộng dồn, không chỉ nạp thêm lượt hoặc tự gia hạn. Lượt giữ và quyền của tác vụ đã tiếp nhận vẫn thuộc kỳ cũ theo khoản 6. Giá và quyền lợi của giao dịch mua lại chốt lúc tạo đơn theo BR-PAY-001, như mọi lần mua khác.
 
 ## Except
 
-Không áp dụng cho giám sát. Mốc chốt giá/quyền cho giao dịch, gói ngừng bán trong lúc giao dịch và kỳ tương lai đã trả trước thiết kế cùng thanh toán; không lấy chính sách lịch chuyển đã bỏ làm quy tắc giao dịch mới.
+Không áp dụng cho giám sát. Mốc chốt giá/quyền theo BR-PAY-001; gói ngừng bán trong lúc giao dịch theo BR-SUB-013. Không có kỳ tương lai trả trước: mỗi lần mua hoàn tất bắt đầu kỳ mới ngay theo BR-PAY-004. Không lấy chính sách lịch chuyển đã bỏ làm quy tắc giao dịch mới.
 
 ## Notes
 

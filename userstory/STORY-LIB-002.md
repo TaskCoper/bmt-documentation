@@ -117,6 +117,7 @@ Không có kết quả phù hợp.
 ### TDDs
 
 - TDD-LIB-001
+- TDD-LIB-002: Quyền xem, lượt và tải tài nguyên khi khách mở mẫu từ danh sách.
 
 ### Rules
 

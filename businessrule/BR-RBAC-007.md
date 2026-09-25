@@ -36,7 +36,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Rule Info
 
-- **Name**: Thu hồi vai trò đòi chuyển giao hết phân công đang hiệu lực trước.
+- **Name**: Không thu hồi vai trò hoặc bỏ quyền khỏi vai trò khiến nhân viên mất quyền trên công trình đang phụ trách.
 - **Category**: Quản lý người dùng và phân quyền
 - **Status**: Draft
 - **Version**:
@@ -44,23 +44,24 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Owner**: [Chưa xác định]
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
-- **Source**: Quyết định người dùng xác nhận trong hội thoại thiết kế RBAC ngày 20/09/2026: bắt chuyển giao trước khi thu hồi vai trò, tách riêng khỏi thao tác khóa tài khoản.
+- **Source**: Quyết định người dùng xác nhận trong hội thoại thiết kế RBAC ngày 20/09/2026: bắt chuyển giao trước khi thu hồi vai trò, tách riêng khỏi thao tác khóa tài khoản. Quyết định người dùng xác nhận trong hội thoại rà soát ngày 25/09/2026: chỉ chặn khi sau thu hồi nhân viên không còn quyền `supervision.complete` mà vẫn đang phụ trách công trình; không ghi vai trò lên phân công. Cùng ngày, người dùng xác nhận chặn tương tự khi sửa danh sách quyền của vai trò.
 
 ## Statement
 
-Hệ thống từ chối thu hồi một vai trò của nhân viên khi người đó còn phân công đang hiệu lực dựa trên vai trò đó. Người quản trị phải chuyển các phân công này cho người khác hoặc gỡ chúng, rồi mới thu hồi được vai trò.
+Hệ thống từ chối thu hồi một vai trò của nhân viên khi sau thu hồi, người đó không còn quyền `supervision.complete` trong khi vẫn đang phụ trách ít nhất một công trình. Người quản trị phải chuyển các công trình này cho người khác hoặc gỡ phân công, rồi mới thu hồi được vai trò. Quy tắc tương tự áp dụng khi sửa danh sách quyền của một vai trò: nếu bỏ `supervision.complete` khiến ít nhất một người giữ vai trò đó mất quyền này trong khi vẫn phụ trách công trình, hệ thống từ chối toàn bộ thay đổi.
 
 ## When
 
-Người có quyền `role.manage` yêu cầu thu hồi một vai trò khỏi một nhân viên.
+Người có quyền `role.manage` yêu cầu thu hồi một vai trò khỏi một nhân viên, hoặc sửa danh sách quyền của một vai trò đang có người giữ.
 
 ## Then
 
-1. Tìm các phân công đang hiệu lực của nhân viên đó mà vai trò bị thu hồi là căn cứ để thao tác, theo [BR-RBAC-010](BR-RBAC-010.md) và [BR-RBAC-013](BR-RBAC-013.md).
-2. Còn ít nhất một phân công như vậy thì từ chối, cho biết số tài nguyên đang phụ trách và hướng người quản trị sang màn hình chuyển giao.
+1. Xác định tập quyền của nhân viên sau khi bỏ vai trò bị thu hồi theo [BR-RBAC-001](BR-RBAC-001.md), và các công trình người đó đang phụ trách theo [BR-RBAC-013](BR-RBAC-013.md). Bản ghi phân công không lưu vai trò; chỉ xét quyền còn lại.
+2. Nếu sau thu hồi người đó không còn `supervision.complete` mà vẫn phụ trách ít nhất một công trình, từ chối, cho biết số công trình đang phụ trách và hướng người quản trị sang màn hình chuyển giao.
 3. Không tự chuyển giao, không tự gỡ phân công và không tự thu hồi một phần vai trò.
-4. Không còn phân công đang hiệu lực thì thu hồi vai trò và ghi nhật ký theo [BR-RBAC-012](BR-RBAC-012.md).
+4. Nếu người đó không còn phụ trách công trình nào, hoặc vẫn còn `supervision.complete` từ vai trò khác, thu hồi vai trò và ghi nhật ký theo [BR-RBAC-012](BR-RBAC-012.md).
 5. Quyền mất hiệu lực theo [BR-RBAC-009](BR-RBAC-009.md); muốn cắt ngay thì buộc đăng xuất người đó.
+6. Khi sửa danh sách quyền của vai trò, xét từng người đang giữ vai trò đó theo khoản 1 với danh sách quyền mới, kể cả tài khoản đang bị khóa. Nếu có ít nhất một người sẽ mất `supervision.complete` mà vẫn phụ trách công trình, từ chối toàn bộ thay đổi, không lưu một phần; cho biết những người bị ảnh hưởng và số công trình của từng người.
 
 ## Except
 
@@ -68,6 +69,6 @@ Khóa tài khoản không chịu điều kiện này. Khi cần cắt quyền g�
 
 ## Notes
 
-- Quy tắc này giữ cho tài nguyên không rơi vào trạng thái không ai phụ trách do một thao tác quản trị bình thường. Trường hợp gấp đã có đường thoát riêng ở phần Except.
-- Nhân viên giữ nhiều vai trò mà chỉ bị thu hồi một vai trò thì chỉ xét các phân công phụ thuộc vào vai trò đó; các phân công dựa trên vai trò còn lại giữ nguyên.
+- Quy tắc này giữ cho công trình không rơi vào tình trạng có người phụ trách nhưng người đó không làm được việc, do một thao tác quản trị bình thường. Trường hợp gấp đã có đường thoát riêng ở phần Except.
+- Ví dụ: A đang phụ trách hai công trình. Nếu A giữ hai vai trò cùng có `supervision.complete`, thu hồi một vai trò thì cho phép vì A vẫn còn quyền này. Thu hồi vai trò chỉ có `commerce.read` cũng không bị chặn. Nếu vai trò bị thu hồi là nguồn duy nhất của `supervision.complete`, từ chối cho tới khi hai công trình được chuyển giao hoặc gỡ phân công.
 - Bản nháp nghiệp vụ, chưa triển khai hoặc chạy kiểm thử. Reviewer và Approver lấy theo xác nhận đang dùng cho các bản nháp mới, không phải bằng chứng đã phê duyệt. Owner và ngày hiệu lực chưa xác định.

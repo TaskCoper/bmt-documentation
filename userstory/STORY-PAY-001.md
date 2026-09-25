@@ -70,7 +70,7 @@ Khách chọn gói hoặc quay lại đơn đang chờ thanh toán.
 3. Khách chuyển khoản theo QR; hệ thống nhận webhook SePay và nhận diện giao dịch của đơn.
 4. Hệ thống ghi nhận khoản tiền một lần, xét thời điểm phát sinh và tổng tiền hợp lệ của đơn.
 5. Khi đủ hoặc dư tiền trong hạn, hệ thống ghi nhận lần mua và cấp đúng một gói theo bản đã lưu. Với thiết kế, áp dụng thứ tự đủ tiền và thay kỳ cũ nếu đây là lần mua sau.
-6. Khách thấy gói đã mua; giám sát có thể chưa gán dự án. Không cần nhân viên tiếp nhận.
+6. Khách thấy gói đã mua; giám sát có thể chưa gán công trình. Không cần nhân viên tiếp nhận.
 
 ### Alternative Flow
 
@@ -228,6 +228,14 @@ Gói cũ giữ nguyên khi tiền chưa đủ.
 2. Gói cũ vẫn giữ hiệu lực, quyền lợi và thời hạn.
 3. Chưa cấp kỳ hoặc làm mới lượt từ việc tạo QR/nhận một phần tiền.
 
+#### EXC-08
+
+Tài khoản nhân viên gửi yêu cầu tạo hoặc hủy đơn mua gói, kể cả gửi trực tiếp tới API.
+
+1. Hệ thống từ chối với mã 403 theo BR-RBAC-005, trước mọi thao tác ghi.
+2. Không tạo đơn, không sinh QR và không đổi trạng thái đơn nào.
+3. Nhân viên muốn dùng thử sản phẩm như khách phải dùng một tài khoản khách hàng riêng.
+
 ## Acceptance Criteria
 
 #### AC-001
@@ -260,7 +268,7 @@ Gói cũ giữ nguyên khi tiền chưa đủ.
 
 #### AC-005
 
-- **Given**: Khách chưa có dự án, chọn cùng loại gói giám sát hai lần.
+- **Given**: Khách chưa có công trình, chọn cùng loại gói giám sát hai lần.
 - **When**: Khách tạo hai đơn riêng và thanh toán đủ từng đơn.
 - **Then**: Hai đơn được phép chờ đồng thời và cấp hai gói riêng.
 - **And**: Không cần kiểm tra địa điểm/diện tích/phạm vi phục vụ hoặc nhân viên tiếp nhận.
@@ -419,6 +427,13 @@ Gói cũ giữ nguyên khi tiền chưa đủ.
 - **Then**: Giữ A đang hiệu lực, không tự chuyển lại B.
 - **And**: Ghi nhận lệch thứ tự để tra cứu; nhân viên xử lý bên ngoài, không tự hoàn tiền hoặc làm mới lượt.
 
+#### AC-028
+
+- **Given**: Nhân viên N đăng nhập bằng tài khoản nhân viên đang hoạt động; khách K có một đơn thiết kế đang chờ thanh toán; gói thiết kế đang bán.
+- **When**: N gửi yêu cầu tạo đơn mua gói và yêu cầu hủy đơn của K, kể cả gửi trực tiếp tới API.
+- **Then**: Hệ thống từ chối cả hai yêu cầu với mã 403.
+- **And**: Không tạo đơn hay QR cho N; đơn của K giữ nguyên trạng thái chờ.
+
 ## References
 
 ### TDDs
@@ -432,6 +447,7 @@ Gói cũ giữ nguyên khi tiền chưa đủ.
 - BR-PAY-003/Then
 - BR-PAY-004/Then
 - BR-SUB-021/Then
+- BR-RBAC-005/Then
 
 ### Dependencies
 

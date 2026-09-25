@@ -70,22 +70,22 @@ Admin cấu hình quyền lợi của gói hoặc hệ thống kiểm tra quyề
 
 ## Except
 
-Tạo thiết kế cần quyền tạo và lượt sẵn dùng; tạo phối cảnh 3D trong cùng bộ kết quả cần thêm quyền 3D đã bật theo BR-SUB-003 và BR-SUB-008. Mở chi tiết mẫu cần quyền tra cứu và lượt theo BR-SUB-017. Chỉ làm rõ cách kết hợp bổ sung nếu danh mục còn lại thực sự có thao tác cần nhiều quyền. Không giới hạn lượt không đồng nghĩa với quyền sử dụng sau khi subscription hết hạn.
+Tạo thiết kế cần quyền tạo và lượt sẵn dùng; đợt này chưa kiểm tra quyền 3D khi Gen AI theo BR-SUB-008 khoản 9. Mở chi tiết mẫu cần quyền tra cứu và lượt theo BR-SUB-017. Chỉ làm rõ cách kết hợp bổ sung nếu danh mục còn lại thực sự có thao tác cần nhiều quyền. Không giới hạn lượt không đồng nghĩa với quyền sử dụng sau khi subscription hết hạn.
 
 ## Notes
 
 - Quản lý số dư và giữ/trừ lượt giám sát trên nền tảng đã hoãn theo [nợ nghiệp vụ](../debt/supervision-offline.md). Chế độ hữu hạn/không giới hạn đã chốt không tạo nghĩa vụ triển khai bộ đếm giám sát trong đợt này. Quy tắc hiệu lực theo thời gian áp dụng cho thiết kế; giám sát theo [BR-SUB-011](BR-SUB-011.md).
 - Quyền lợi được chọn từ danh mục hệ thống theo [BR-SUB-008](BR-SUB-008.md); Admin cấu hình giá trị cho gói.
 - Dự toán nội thất và bố trí công năng đều dùng cùng mức chi tiết giữa các gói theo [BR-SUB-008](BR-SUB-008.md); không dùng hai phần này làm ví dụ về quyền phân mức của BMT. Khả năng hỗ trợ quyền dạng mức vẫn giữ cho tính năng khác nếu được chốt.
-- Đã chốt cần phân biệt tính năng giữa các gói; chưa chốt tên từng tính năng, mức và gói nào có quyền nào. Tên quyền lợi, số lượt và tên mức trong ví dụ chưa phải danh mục chính thức của BMT. [ST-SUB-009](../systemtest/ST-SUB-009.md) kiểm tra cấu hình khác nhau giữa hai gói bằng dữ liệu minh họa.
+- Đã chốt cần phân biệt tính năng giữa các gói; chưa chốt tên từng tính năng, mức và gói nào có quyền nào. Tên quyền lợi, số lượt và tên mức trong ví dụ chưa phải danh mục chính thức của BMT. [ST-SUB-009](../systemtest/ST-SUB-009.md) kiểm tra cấu hình khác nhau giữa hai gói bằng dữ liệu minh họa. Đã rút khỏi nghiệm thu ngày 25/09/2026 vì STORY-SUB-002/AC-001 không nghiệm thu đợt này theo BR-SUB-008 khoản 12.
 - Ví dụ cơ bản < nâng cao: được cấp nâng cao thì dùng được cả hai mức; được cấp cơ bản thì không dùng được tính năng yêu cầu nâng cao. Chỉ so sánh mức trong cùng quyền lợi; không suy ra quyền sử dụng một quyền lợi khác. Tên mức và thứ tự cụ thể trong danh mục còn cần xác định.
 - Tham chiếu [STORY-SUB-002](../userstory/STORY-SUB-002.md), [BR-SUB-001](BR-SUB-001.md), [BR-SUB-002](BR-SUB-002.md), [BR-SUB-003](BR-SUB-003.md), [BR-SUB-004](BR-SUB-004.md) và [ST-SUB-009](../systemtest/ST-SUB-009.md).
-- [ST-SUB-010](../systemtest/ST-SUB-010.md) và [ST-SUB-011](../systemtest/ST-SUB-011.md) kiểm tra quyền theo thứ tự mức.
+- [ST-SUB-010](../systemtest/ST-SUB-010.md) và [ST-SUB-011](../systemtest/ST-SUB-011.md) kiểm tra quyền theo thứ tự mức. Đã rút khỏi nghiệm thu ngày 25/09/2026 vì STORY-SUB-001/AC-009 và AC-010 không nghiệm thu đợt này theo BR-SUB-008 khoản 12.
 - Không giới hạn là một lựa chọn riêng; không tự quy ước số 0 hoặc số âm có nghĩa là không giới hạn. Cách lưu dữ liệu và ghi nhận số lượt sử dụng sẽ được thiết kế trong TDD.
 - [ST-SUB-017](../systemtest/ST-SUB-017.md) và [ST-SUB-018](../systemtest/ST-SUB-018.md) kiểm tra cấu hình và sử dụng quyền không giới hạn lượt.
 - Quy tắc tối thiểu 1 áp dụng cho hạn mức Admin cấu hình, không áp dụng cho số lượt còn lại sau sử dụng. Số dư về 0 do đã dùng/giữ hết lượt là hợp lệ. Không giới hạn vẫn là lựa chọn riêng, không biểu diễn bằng hạn mức 0.
 - Admin được chọn quyền tạo mới, tra cứu hoặc cả hai vào gói theo [BR-SUB-008](BR-SUB-008.md). Quyền dạng lượt không được đưa vào gói không cấp quyền sử dụng tương ứng; không tự thêm hạn mức mặc định.
 - [ST-SUB-062](../systemtest/ST-SUB-062.md) kiểm tra hạn mức 0 bị từ chối, hạn mức 1 và lựa chọn không giới hạn hợp lệ khi các điều kiện khác đáp ứng.
-- [ST-SUB-067](../systemtest/ST-SUB-067.md) kiểm tra ba trường hợp quyền bật/tắt: chưa thêm, đã tắt và đã bật. Sửa bản nháp hoặc Công bố không đổi quyền của kỳ đang dùng; kiểm tra theo bản đã cấp, không theo bản nháp mới nhất.
-- [ST-SUB-068](../systemtest/ST-SUB-068.md) kiểm tra thiếu cấu hình mức không được tự cấp mức thấp nhất. Ví dụ xem/xoay mô hình 3D trong hội thoại chỉ để giải thích, không xác nhận các mức xem/xoay 3D của BMT. Quyền tạo ảnh phối cảnh 3D chân thực đã được xác nhận riêng ở dạng bật/tắt theo [BR-SUB-008](BR-SUB-008.md).
+- [ST-SUB-067](../systemtest/ST-SUB-067.md) kiểm tra ba trường hợp quyền bật/tắt: chưa thêm, đã tắt và đã bật. Sửa bản nháp hoặc Công bố không đổi quyền của kỳ đang dùng; kiểm tra theo bản đã cấp, không theo bản nháp mới nhất. Đã rút khỏi nghiệm thu ngày 25/09/2026 vì STORY-SUB-002/AC-015 không nghiệm thu đợt này theo BR-SUB-008 khoản 12.
+- [ST-SUB-068](../systemtest/ST-SUB-068.md) kiểm tra thiếu cấu hình mức không được tự cấp mức thấp nhất. Đã rút khỏi nghiệm thu ngày 25/09/2026 vì STORY-SUB-002/AC-016 không nghiệm thu đợt này theo BR-SUB-008 khoản 12. Ví dụ xem/xoay mô hình 3D trong hội thoại chỉ để giải thích, không xác nhận các mức xem/xoay 3D của BMT. Quyền tạo ảnh phối cảnh 3D chân thực đã được xác nhận riêng ở dạng bật/tắt theo [BR-SUB-008](BR-SUB-008.md).
 - Bản nháp còn thiếu metadata; chưa được phê duyệt.

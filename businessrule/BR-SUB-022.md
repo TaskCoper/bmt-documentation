@@ -48,28 +48,29 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Statement
 
-Khách được mua nhiều gói giám sát chưa gán dự án, kể cả nhiều gói cùng loại. Mỗi gói phải được khách gán cho một dự án trong một năm từ lúc cấp; quá hạn chưa gán thì mất quyền sử dụng.
+Khách được mua nhiều gói giám sát chưa gán công trình, kể cả nhiều gói cùng loại. Mỗi gói phải được khách gán cho một công trình trong một năm từ lúc cấp; quá hạn chưa gán thì mất quyền sử dụng.
 
 ## When
 
-Gói giám sát đã được cấp hoặc khách yêu cầu gán lần đầu cho dự án.
+Gói giám sát đã được cấp hoặc khách yêu cầu gán lần đầu cho công trình.
 
 ## Then
 
-1. Không yêu cầu dự án khi mua hoặc cấp gói. Gói chưa gán nằm trong các gói đã mua của khách, không phát sinh thanh toán lần nữa khi gán.
-2. Khách tự gán gói của mình cho một dự án thuộc mình, trong hạn một năm từ lúc cấp. Mỗi gói chỉ gán cho một dự án.
-3. Nếu dự án đã có gói giám sát đang hiệu lực, chặn gán thêm. Gói bị chặn vẫn chưa gán và giữ hạn ban đầu để dùng cho dự án khác.
+1. Không yêu cầu công trình khi mua hoặc cấp gói. Gói chưa gán nằm trong các gói đã mua của khách, không phát sinh thanh toán lần nữa khi gán.
+2. Khách tự gán gói của mình cho một công trình thuộc mình, trong hạn một năm từ lúc cấp. Mỗi gói chỉ gán cho một công trình.
+3. Nếu công trình đã có gói giám sát đang hiệu lực, chặn gán thêm. Gói bị chặn vẫn chưa gán và giữ hạn ban đầu để dùng cho công trình khác.
 4. Quá một năm mà chưa từng gán thì không cho sử dụng hoặc gán lần đầu. Không tự hoàn tiền hay tạo gói thay thế.
-5. Gán dự án được coi là đã sử dụng gói. Sau khi gán đúng hạn, gói tiếp tục phục vụ dự án sau mốc một năm, không tự hết hạn vì mốc này.
-6. Hiện chỉ quản lý gói gán cho dự án nào; không quản lý hoạt động khảo sát/giám sát để quyết định quyền gán hoặc sửa.
+5. Gán công trình được coi là đã sử dụng gói. Sau khi gán đúng hạn, gói tiếp tục phục vụ công trình sau mốc một năm, không tự hết hạn vì mốc này.
+6. Hiện chỉ quản lý gói gán cho công trình nào; không quản lý hoạt động khảo sát/giám sát để quyết định quyền gán hoặc sửa.
 
 ## Except
 
-Gói bị nhân viên hủy không được sử dụng khi chưa khôi phục hợp lệ. Hạn gán lần đầu không phải chu kỳ giám sát. Sửa dự án sau lần gán đúng hạn theo BR-SUB-023.
+Gói bị nhân viên hủy không được sử dụng khi chưa khôi phục hợp lệ. Hạn gán lần đầu không phải chu kỳ giám sát. Đổi công trình sau lần gán đúng hạn theo BR-SUB-023.
 
 ## Notes
 
-Thay quy tắc cũ bắt buộc gắn dự án ngay khi cấp và không có hạn cho mọi gói giám sát. Hạn gán là cùng ngày và giờ năm sau theo Asia/Ho_Chi_Minh; ngày 29/02 thành 28/02 nếu năm sau không nhuận. Chỉ gán trước hạn; đúng mốc hạn bị từ chối. Không coi một năm là 365 ngày.
+Thay quy tắc cũ bắt buộc gắn công trình ngay khi cấp và không có hạn cho mọi gói giám sát. Hạn gán là cùng ngày và giờ năm sau theo Asia/Ho_Chi_Minh; ngày 29/02 thành 28/02 nếu năm sau không nhuận. Chỉ gán trước hạn; đúng mốc hạn bị từ chối. Không coi một năm là 365 ngày.
 
 - Bản nháp nghiệp vụ, chưa triển khai hoặc chạy kiểm thử. Tên Reviewer/Approver lấy theo xác nhận cho các bản nháp mới trong discovery/subscription-entitlements.md; không phải bằng chứng phê duyệt. Owner và ngày hiệu lực chưa được phân công/xác nhận.
+- Công trình là thực thể riêng, khác với bản dự toán; khách tự tạo công trình miễn phí, không cần gói thiết kế. Người dùng xác nhận ngày 25/09/2026; Story và BR tạo, quản lý công trình chưa được soạn và sẽ chuẩn bị riêng.
 - [Tổng hợp quyết định và bảng truy vết](../discovery/payment-packages.md).

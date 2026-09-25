@@ -45,15 +45,15 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Owner**: [Chưa xác định]
 - **Reviewer**: [Chưa xác định]
 - **Approver**: [Chưa xác định]
-- **Source**: Người dùng xác nhận hết hạn vẫn xem, tải kết quả cũ và xuất PDF; không sửa/lưu thông tin hoặc bắt đầu tác vụ mới cần gói. Tác vụ đã bắt đầu hợp lệ được tiếp tục. Tạo/lưu dự án cần gói còn hiệu lực, quyền tạo thiết kế và lượt sẵn dùng. Dùng hết hoặc toàn bộ lượt còn lại đang giữ đều chặn tạo/lưu. Nếu tác vụ lỗi và trả lượt, khách được tiếp tục khi gói, quyền còn hợp lệ.
+- **Source**: Người dùng xác nhận hết hạn vẫn xem, tải kết quả cũ và xuất PDF; không sửa/lưu thông tin hoặc bắt đầu tác vụ mới cần gói. Tác vụ đã bắt đầu hợp lệ được tiếp tục. Tạo/lưu dự án cần gói còn hiệu lực, quyền tạo thiết kế và lượt sẵn dùng. Dùng hết hoặc toàn bộ lượt còn lại đang giữ đều chặn tạo/lưu. Nếu tác vụ lỗi và trả lượt, khách được tiếp tục khi gói, quyền còn hợp lệ. Ngày 25/09/2026, người dùng xác nhận chỉ tên dự án được đổi bất cứ lúc nào; thông tin đầu vào giữ nguyên điều kiện gói, quyền và lượt.
 
 ## Statement
 
 Quy tắc này chỉ áp dụng cho subscription thiết kế. Gói giám sát không có chu kỳ hoặc ngày hết hạn; xem [BR-SUB-011](BR-SUB-011.md).
 
-Khách chỉ được tạo hoặc lưu thông tin dự án khi có gói thiết kế còn hiệu lực, có quyền tạo thiết kế và còn ít nhất một lượt sẵn dùng hoặc được cấp không giới hạn lượt. Khách mới chưa có gói, khách dùng gói chỉ có tra cứu và khách không còn lượt tạo thiết kế sẵn dùng do đã dùng hết hoặc đang giữ hết đều không được tạo/lưu dự án, kể cả lưu nháp.
+Khách chỉ được tạo hoặc lưu thông tin dự án khi có gói thiết kế còn hiệu lực, có quyền tạo thiết kế và còn ít nhất một lượt sẵn dùng hoặc được cấp không giới hạn lượt. Khách mới chưa có gói, khách dùng gói chỉ có tra cứu và khách không còn lượt tạo thiết kế sẵn dùng do đã dùng hết hoặc đang giữ hết đều không được tạo/lưu dự án, kể cả lưu nháp. Riêng đổi tên dự án đã có không cần các điều kiện này, theo khoản 11.
 
-Khi subscription hết hạn và chưa gia hạn, tài khoản vẫn xem được dự án và kết quả đã tạo mà tài khoản có quyền truy cập, đồng thời được tải xuống tệp kết quả đã có sẵn trước khi hết hạn và xuất PDF từ kết quả thiết kế cũ, kể cả chưa có PDF trước đó. Khách không được sửa hoặc lưu thông tin dự án khi gói đã hết hạn. Hệ thống không cho bắt đầu thao tác mới cần quyền subscription, kể cả khi kỳ đã hết hạn còn lượt chưa dùng.
+Khi subscription hết hạn và chưa gia hạn, tài khoản vẫn xem được dự án và kết quả đã tạo mà tài khoản có quyền truy cập, đồng thời được tải xuống tệp kết quả đã có sẵn trước khi hết hạn và xuất PDF từ kết quả thiết kế cũ, kể cả chưa có PDF trước đó. Khách không được sửa hoặc lưu thông tin đầu vào của dự án khi gói đã hết hạn; riêng tên dự án được đổi bất cứ lúc nào theo khoản 11. Hệ thống không cho bắt đầu thao tác mới cần quyền subscription, kể cả khi kỳ đã hết hạn còn lượt chưa dùng.
 
 ## When
 
@@ -64,32 +64,34 @@ Khách yêu cầu tạo/lưu dự án, hoặc truy cập dự án, kết quả c
 1. Cho phép xem dự án, kết quả đã tạo và tải tệp kết quả đã có sẵn trước khi hết hạn, theo quyền truy cập dữ liệu của tài khoản. Không yêu cầu gia hạn chỉ để tải lại tệp này; tải tệp đã có không phải tạo thiết kế, mở chi tiết mẫu để tra cứu.
 2. Khi subscription đã hết hạn và chưa có kỳ mới hợp lệ, từ chối bắt đầu thao tác mới cần quyền subscription; không giữ hoặc tính lượt cho yêu cầu bị từ chối.
 3. Cho phép yêu cầu xuất PDF từ kết quả thiết kế cũ có quyền truy cập dù subscription đã hết hạn; không yêu cầu PDF phải được xuất sẵn trước khi hết hạn. Đây là xuất tệp từ kết quả đã có, không phải yêu cầu AI tạo thiết kế.
-4. Từ chối yêu cầu của khách sửa/lưu tên dự án, ghi chú hoặc thông tin đầu vào khi subscription thiết kế đã hết hạn và chưa có kỳ mới hợp lệ. Giữ nguyên dữ liệu đã lưu; kiểm tra tại nơi xử lý yêu cầu, không chỉ khóa biểu mẫu trên giao diện.
+4. Từ chối yêu cầu của khách sửa/lưu ghi chú hoặc thông tin đầu vào khi subscription thiết kế đã hết hạn và chưa có kỳ mới hợp lệ. Đổi tên dự án theo khoản 11. Giữ nguyên dữ liệu đã lưu; kiểm tra tại nơi xử lý yêu cầu, không chỉ khóa biểu mẫu trên giao diện.
 5. Không tự cấp kỳ mới hoặc làm mới hạn mức chỉ vì khách xem, tải hoặc xuất PDF từ kết quả cũ.
 6. Với khách mới chưa từng có gói thiết kế, từ chối tạo dự án và lưu thông tin dự án, kể cả lưu nháp hoặc gửi yêu cầu trực tiếp. Báo cần có gói còn hiệu lực; không tạo bản ghi dự án hay lưu thông tin từ yêu cầu bị từ chối, không giữ/trừ lượt hoặc tự cấp gói. Điều kiện quyền tạo thiết kế và lượt sẵn dùng khi bấm Gen AI vẫn giữ nguyên.
 
 7. Từ chối tạo/lưu thông tin dự án nếu gói đang hiệu lực chỉ có tra cứu, không có quyền tạo thiết kế. Áp dụng cho lưu nháp và yêu cầu gửi trực tiếp; báo cần quyền tạo thiết kế, không tạo dự án hoặc ghi thay đổi từ yêu cầu bị từ chối, không giữ/trừ lượt. Kiểm tra quyền theo bản đã cấp, không theo bản nháp hoặc tên gói. Quyền tra cứu hiện có của tài khoản không bị thay đổi.
 
-8. Với quyền tạo thiết kế có hạn mức hữu hạn, khi đã dùng hết lượt trong kỳ thì từ chối tạo dự án hoặc lưu thông tin dự án, dù gói vẫn còn hiệu lực. Áp dụng cả lưu nháp, yêu cầu gửi trực tiếp và biểu mẫu mở trước khi hết lượt. Báo đã hết lượt tạo thiết kế; không tạo bản ghi, không ghi thay đổi từ yêu cầu bị từ chối, giữ nguyên thông tin đã lưu. Không giữ/trừ thêm lượt hoặc tự cấp lượt.
+8. Với quyền tạo thiết kế có hạn mức hữu hạn, khi đã dùng hết lượt trong kỳ thì từ chối tạo dự án hoặc lưu thông tin dự án, dù gói vẫn còn hiệu lực. Áp dụng cả lưu nháp, yêu cầu gửi trực tiếp và biểu mẫu mở trước khi hết lượt. Báo đã hết lượt tạo thiết kế; không tạo bản ghi, không ghi thay đổi từ yêu cầu bị từ chối, giữ nguyên thông tin đã lưu. Không giữ/trừ thêm lượt hoặc tự cấp lượt. Điều kiện lượt ở khoản này không áp dụng cho đổi tên theo khoản 11.
 
-9. Khi toàn bộ lượt tạo thiết kế còn lại đang được giữ cho tác vụ chạy, tạm chặn tạo/lưu dự án vì không còn lượt sẵn dùng. Lượt đang giữ chưa phải lượt đã dùng. Nếu tác vụ thất bại/quá thời gian và giải phóng lượt, khách được gửi lại yêu cầu tạo/lưu khi có ít nhất một lượt sẵn dùng, gói còn hiệu lực và còn quyền tạo thiết kế; không tự lưu lại yêu cầu từng bị từ chối. Nếu tác vụ thành công dùng hết lượt, tiếp tục chặn theo khoản 8.
+9. Khi toàn bộ lượt tạo thiết kế còn lại đang được giữ cho tác vụ chạy, tạm chặn tạo/lưu dự án vì không còn lượt sẵn dùng. Lượt đang giữ chưa phải lượt đã dùng. Nếu tác vụ thất bại/quá thời gian và giải phóng lượt, khách được gửi lại yêu cầu tạo/lưu khi có ít nhất một lượt sẵn dùng, gói còn hiệu lực và còn quyền tạo thiết kế; không tự lưu lại yêu cầu từng bị từ chối. Nếu tác vụ thành công dùng hết lượt, tiếp tục chặn theo khoản 8. Khoản này không chặn đổi tên theo khoản 11.
 
-10. Khi gói thiết kế hết hạn, chủ sở hữu bản dự toán vẫn được xuất PDF/Excel, tạo link chia sẻ và QR, gửi email chứa link, chọn ngày hết hạn và thu hồi link của hồ sơ đã có. Không yêu cầu gia hạn hoặc còn lượt tạo thiết kế cho các thao tác này; không giữ/trừ lượt hay gọi AI tạo thiết kế mới. Link, QR và email tuân theo BR-PROJ-006. Người nhận dùng link còn hiệu lực được xem/tải không cần đăng nhập hoặc có subscription.
+10. Khi gói thiết kế hết hạn, chủ sở hữu bản dự toán vẫn được đổi tên bản dự toán theo khoản 11, xuất PDF/Excel, tạo link chia sẻ và QR, gửi email chứa link, chọn ngày hết hạn và thu hồi link của hồ sơ đã có. Không yêu cầu gia hạn hoặc còn lượt tạo thiết kế cho các thao tác này; không giữ/trừ lượt hay gọi AI tạo thiết kế mới. Link, QR và email tuân theo BR-PROJ-006. Người nhận dùng link còn hiệu lực được xem/tải không cần đăng nhập hoặc có subscription.
+
+11. Chủ sở hữu được đổi tên dự án bất cứ lúc nào, kể cả khi gói đã hết hạn, đã dùng hết lượt, toàn bộ lượt còn lại đang được giữ hoặc AI đang xử lý dự án đó. Tên vẫn phải hợp lệ theo BR-PROJ-003 và chỉ chủ sở hữu được đổi. Tên không phải đầu vào gửi AI; đổi tên không giữ/trừ lượt, không gọi AI và không mở quyền sửa thông tin đầu vào. Cách hiển thị tên mới trên hồ sơ chia sẻ và tệp đã xuất theo BR-PROJ-007.
 
 ## Except
 
-Tác vụ đã bắt đầu hợp lệ trước khi hết hạn được tiếp tục đến khi hoàn thành dù chưa gia hạn. Với tạo thiết kế, thành công tính lượt vào kỳ đã giữ; lỗi giải phóng lượt giữ nhưng không cho dùng lại lượt đã hết hạn, theo [BR-SUB-003](BR-SUB-003.md). Xuất PDF từ kết quả cũ là thao tác được phép sau hết hạn. Quyết định này không mở quyền Gen AI tạo mới, không thay đổi kết quả nguồn. Sửa/lưu thông tin dự án cần subscription còn hiệu lực, có quyền tạo thiết kế và còn lượt sẵn dùng hoặc được cấp không giới hạn. Xuất Excel dự toán và quản lý chia sẻ hồ sơ cũ áp dụng khoản 10 theo xác nhận bổ sung của người dùng.
+Tác vụ đã bắt đầu hợp lệ trước khi hết hạn được tiếp tục đến khi hoàn thành dù chưa gia hạn. Với tạo thiết kế, thành công tính lượt vào kỳ đã giữ; lỗi giải phóng lượt giữ nhưng không cho dùng lại lượt đã hết hạn, theo [BR-SUB-003](BR-SUB-003.md). Xuất PDF từ kết quả cũ là thao tác được phép sau hết hạn. Quyết định này không mở quyền Gen AI tạo mới, không thay đổi kết quả nguồn. Sửa/lưu thông tin đầu vào của dự án cần subscription còn hiệu lực, có quyền tạo thiết kế và còn lượt sẵn dùng hoặc được cấp không giới hạn; đổi tên theo khoản 11 không cần các điều kiện này. Xuất Excel dự toán và quản lý chia sẻ hồ sơ cũ áp dụng khoản 10 theo xác nhận bổ sung của người dùng.
 
 ## Notes
 
-- Nhóm STORY-PROJ-*** đã được người dùng đổi tên thành “Tạo dự toán”. Khi áp dụng quy tắc này cho nhóm đó, các thao tác tạo/lưu và truy cập kết quả trước đây gọi là “dự án” được hiểu là thao tác trên bản dự toán. Đây là đối chiếu thuật ngữ, không thay đổi quyền/gói/lượt và không quy định tính năng quản lý dự án trong tương lai.
+- Nhóm STORY-PROJ-*** đã được người dùng đổi tên thành “Tạo dự toán”. Khi áp dụng quy tắc này cho nhóm đó, các thao tác tạo/lưu và truy cập kết quả trước đây gọi là “dự án” được hiểu là thao tác trên bản dự toán. Đây là đối chiếu thuật ngữ, không thay đổi quyền/gói/lượt và không quy định tính năng quản lý dự án trong tương lai. Gói giám sát không gắn với bản dự toán mà gắn với công trình, một thực thể riêng do khách tự tạo; hai thực thể này không liên kết trong đợt này (người dùng xác nhận ngày 25/09/2026).
 
 - Quyền xem/tải hồ sơ cũ không tự mở quyền xem dữ liệu của tài khoản khác. Chủ dự án có thể cấp quyền xem/tải hồ sơ qua link còn hiệu lực theo BR-PROJ-006; quyền chia sẻ này không cấp quyền sửa hoặc tạo thiết kế.
 - Đã chốt tạo/lưu dự án cần gói còn hiệu lực và quyền tạo thiết kế; gói chỉ có tra cứu không đủ điều kiện. Đã chốt dùng hết lượt tạo thiết kế thì chặn tạo/lưu thông tin dự án. Quyền không giới hạn không bị coi là hết lượt vì số lần đã dùng. Đã chốt toàn bộ lượt còn lại đang giữ cũng tạm chặn tạo/lưu dự án. Khi giải phóng lượt về kỳ còn hiệu lực, kiểm tra lại gói, quyền và lượt ở yêu cầu tiếp theo. Giải phóng lượt thuộc kỳ đã hết hạn không mở quyền tạo/lưu trở lại. Quy tắc này không thay đổi thao tác của Admin/nhân viên đối với gói giám sát.
 - [ST-SUB-074](../systemtest/ST-SUB-074.md) kiểm tra gói chỉ có tra cứu không được tạo/lưu dự án.
 - [ST-SUB-073](../systemtest/ST-SUB-073.md) kiểm tra khách mới chưa có gói bị từ chối tạo/lưu dự án.
 - Chính sách lưu trữ dữ liệu dài hạn chưa được chốt; không suy ra lưu vĩnh viễn từ quyền xem dữ liệu cũ.
-- Luồng nhận gói và gia hạn sẽ thiết kế cùng thanh toán sau.
+- Luồng mua và nhận gói theo STORY-PAY-001; mua lại trước hạn theo BR-SUB-021.
 - Tham chiếu [STORY-SUB-001](../userstory/STORY-SUB-001.md), [BR-SUB-003](BR-SUB-003.md), [ST-SUB-013](../systemtest/ST-SUB-013.md) và [ST-SUB-014](../systemtest/ST-SUB-014.md).
 - [ST-SUB-055](../systemtest/ST-SUB-055.md) kiểm tra tải tệp kết quả đã có sau khi hết hạn.
 - [ST-SUB-056](../systemtest/ST-SUB-056.md) kiểm tra xuất PDF từ kết quả cũ chưa từng có PDF sau khi hết hạn.

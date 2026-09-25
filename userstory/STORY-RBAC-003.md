@@ -40,8 +40,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Metadata
 
-- **Story**: Là người quản trị có quyền phân công, tôi muốn giao khách hàng hoặc dự án cho nhân viên phụ trách và chuyển giao khi cần, để mỗi tài nguyên luôn có người chịu trách nhiệm và chỉ người đó thao tác được.
-- **Context**: BR-SUB-011 và BR-SUB-012 đã chốt chỉ Admin hoặc nhân viên phụ trách dự án mới được hoàn thành hoặc mở lại gói giám sát, nhưng ghi rõ cách quản lý phân công để lại cho bước thiết kế. Story này dựng cơ chế phân công chung theo loại tài nguyên, dùng được cho khách hàng và dự án ngay bây giờ và cho lead sau này mà không phải thêm cơ chế mới.
+- **Story**: Là người quản trị có quyền phân công, tôi muốn giao công trình cho một nhân viên phụ trách và chuyển giao khi cần, để mỗi công trình luôn có người chịu trách nhiệm và chỉ người đó thao tác được.
+- **Context**: BR-SUB-011 và BR-SUB-012 đã chốt chỉ Admin hoặc nhân viên phụ trách công trình mới được hoàn thành hoặc mở lại gói giám sát, nhưng để cách quản lý phân công cho bước thiết kế. Story này dựng cơ chế phân công chung theo loại tài nguyên. Theo quyết định người dùng xác nhận ngày 25/09/2026, đợt này chỉ có một loại tài nguyên là công trình, mỗi công trình một người phụ trách và không có phân công mức khách hàng; loại khác như lead thêm sau bằng cùng cơ chế.
 - **Sprint**:
 - **Priority**:
 - **Status**: Todo
@@ -57,22 +57,22 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 ### Preconditions
 
 - Người thao tác đã đăng nhập bằng tài khoản nhân viên đang hoạt động và có quyền `assignment.manage`.
-- Nhân viên nhận phân công là tài khoản nhân viên đang hoạt động, đã kích hoạt và không bị khóa.
-- Tài nguyên được phân công đã tồn tại. Đợt này có hai loại tài nguyên là khách hàng và dự án.
+- Nhân viên nhận phân công là tài khoản nhân viên đang hoạt động, không bị khóa và đang có quyền `supervision.complete`.
+- Công trình được phân công đã tồn tại. Công trình là thực thể riêng, khác với bản dự toán; cách tạo và quản lý công trình chưa được đặc tả và sẽ chuẩn bị riêng.
 
 ### Trigger
 
-Người quản trị mở màn hình phân công để giao một tài nguyên cho nhân viên, chuyển giao sang người khác, hoặc gỡ phân công.
+Người quản trị mở màn hình phân công để giao một công trình cho nhân viên, chuyển giao sang người khác, hoặc gỡ phân công.
 
 ## Flow
 
 ### Main Flow
 
-1. Người quản trị chọn một tài nguyên và chọn nhân viên phụ trách.
-2. Hệ thống kiểm tra người nhận là tài khoản nhân viên đang hoạt động theo BR-RBAC-013; từ chối nếu là tài khoản khách hàng hoặc tài khoản đang bị khóa.
-3. Hệ thống ghi phân công gồm nhân viên, loại tài nguyên, định danh tài nguyên và thời điểm bắt đầu hiệu lực.
-4. Từ thời điểm đó, nhân viên thao tác được trên tài nguyên đó với các quyền có gắn phân công mà mình đang có, theo BR-RBAC-010.
-5. Hệ thống ghi nhật ký người thao tác, người nhận, tài nguyên và thời điểm theo BR-RBAC-012.
+1. Người quản trị chọn một công trình chưa có người phụ trách và chọn nhân viên phụ trách.
+2. Hệ thống kiểm tra theo BR-RBAC-013: người nhận là tài khoản nhân viên đang hoạt động và đang có quyền `supervision.complete`, và công trình chưa có người phụ trách. Từ chối nếu người nhận là tài khoản khách hàng, đang bị khóa hoặc thiếu quyền.
+3. Hệ thống ghi phân công gồm nhân viên, loại tài nguyên, định danh công trình và thời điểm bắt đầu hiệu lực.
+4. Từ thời điểm đó, nhân viên thao tác được trên công trình đó với các quyền có gắn phân công mà mình đang có, theo BR-RBAC-010.
+5. Hệ thống ghi nhật ký người thao tác, người nhận, công trình và thời điểm theo BR-RBAC-012.
 
 ### Alternative Flow
 
@@ -80,42 +80,41 @@ Người quản trị mở màn hình phân công để giao một tài nguyên 
 
 Người quản trị chuyển giao một phân công đang hiệu lực sang nhân viên khác.
 
-1. Người quản trị chọn phân công đang hiệu lực và chọn người nhận.
+1. Người quản trị chọn phân công đang hiệu lực và chọn người nhận. Người nhận phải đáp ứng cùng điều kiện ở bước 2 của Main Flow.
 2. Hệ thống kết thúc hiệu lực phân công cũ và tạo phân công mới cho người nhận tại cùng thời điểm.
-3. Người bàn giao mất quyền thao tác trên tài nguyên đó kể từ thời điểm chuyển giao; người nhận có quyền thao tác từ thời điểm đó.
+3. Người bàn giao mất quyền thao tác trên công trình đó kể từ thời điểm chuyển giao; người nhận có quyền thao tác từ thời điểm đó.
 4. Hệ thống ghi nhật ký cả việc kết thúc phân công cũ và việc tạo phân công mới.
 
 #### ALT-02
 
 Người quản trị chuyển giao để gỡ vướng khi việc thu hồi vai trò bị chặn.
 
-1. Việc thu hồi vai trò ở STORY-RBAC-002 bị từ chối vì nhân viên còn phân công đang hiệu lực theo BR-RBAC-007.
-2. Người quản trị xem danh sách tài nguyên người đó đang phụ trách.
+1. Việc thu hồi vai trò ở STORY-RBAC-002 bị từ chối vì sau khi thu hồi, nhân viên sẽ không còn quyền `supervision.complete` trong khi vẫn đang phụ trách công trình, theo BR-RBAC-007.
+2. Người quản trị xem danh sách công trình người đó đang phụ trách.
 3. Người quản trị chuyển từng phần hoặc toàn bộ sang nhân viên khác theo ALT-01, hoặc gỡ phân công theo ALT-04.
-4. Khi người đó không còn phân công đang hiệu lực dựa trên vai trò bị thu hồi, việc thu hồi vai trò thực hiện được.
+4. Khi người đó không còn phụ trách công trình nào, việc thu hồi vai trò thực hiện được.
 
 #### ALT-03
 
-Nhân viên được phân công ở mức khách hàng thao tác trên dự án của khách hàng đó.
+Người quản trị muốn đổi người phụ trách của một công trình đang có người phụ trách.
 
-1. Hệ thống xác định dự án đích thuộc khách hàng nào.
-2. Nếu nhân viên đang được phân công chính khách hàng đó, coi như đã được phân công dự án đó theo BR-RBAC-013; không đòi phân công riêng từng dự án.
-3. Nếu dự án đó còn có phân công riêng cho một nhân viên khác, cả hai người đều thao tác được; hệ thống không tự gỡ phân công nào.
+1. Hệ thống không cho tạo thêm phân công mới trên công trình này, vì mỗi công trình tại một thời điểm chỉ có một người phụ trách theo BR-RBAC-013.
+2. Người quản trị dùng thao tác chuyển giao theo ALT-01; phân công hiện tại giữ nguyên cho tới khi chuyển giao thành công.
 
 #### ALT-04
 
 Người quản trị gỡ một phân công mà không chuyển cho ai.
 
 1. Hệ thống kết thúc hiệu lực phân công và ghi nhật ký.
-2. Tài nguyên chuyển về danh sách chưa có người phụ trách để người quản trị chia lại.
-3. Người vừa bị gỡ mất quyền thao tác trên tài nguyên đó ngay khi phân công hết hiệu lực.
+2. Công trình chuyển về danh sách cần chia lại để người quản trị giao cho người khác.
+3. Người vừa bị gỡ mất quyền thao tác trên công trình đó ngay khi phân công hết hiệu lực.
 
 #### ALT-05
 
-Người quản trị chia lại các tài nguyên của một nhân viên đã bị khóa tài khoản.
+Người quản trị chia lại các công trình của một nhân viên đã bị khóa tài khoản.
 
-1. Các phân công của người bị khóa vẫn còn bản ghi theo BR-RBAC-008, nên người quản trị tra được người đó đang phụ trách những gì.
-2. Người quản trị chuyển từng tài nguyên sang nhân viên khác theo ALT-01.
+1. Các phân công của người bị khóa vẫn còn bản ghi theo BR-RBAC-008, và các công trình đó hiện trong danh sách cần chia lại theo BR-RBAC-013, nên người quản trị thấy được người đó đang phụ trách những gì.
+2. Người quản trị chuyển từng công trình sang nhân viên khác theo ALT-01.
 3. Việc khóa tài khoản trước đó không bị hủy bỏ vì thao tác chia lại này.
 
 ### Exception Flow
@@ -125,7 +124,7 @@ Người quản trị chia lại các tài nguyên của một nhân viên đã 
 Người quản trị phân công cho tài khoản đang bị khóa.
 
 1. Hệ thống từ chối theo BR-RBAC-013 và không tạo bản ghi phân công.
-2. Các phân công đang có của những người khác trên tài nguyên đó giữ nguyên.
+2. Phân công hiện có trên công trình đó, nếu có, giữ nguyên.
 3. Tài khoản bị khóa vẫn giữ các phân công cũ theo BR-RBAC-008; quy tắc này chỉ chặn phân công mới.
 
 #### EXC-02
@@ -148,56 +147,70 @@ Người gọi không có quyền `assignment.manage` yêu cầu tạo, chuyển
 1. Hệ thống từ chối với mã 403 theo BR-RBAC-011, kể cả yêu cầu gửi trực tiếp tới API.
 2. Không tạo, không đổi và không gỡ phân công nào.
 
+#### EXC-05
+
+Người quản trị giao trực tiếp một công trình đang có người phụ trách cho nhân viên khác, kể cả gửi trực tiếp tới API.
+
+1. Hệ thống từ chối theo BR-RBAC-013 và không tạo phân công thứ hai.
+2. Phân công hiện tại giữ nguyên; muốn đổi người thì dùng chuyển giao theo ALT-01.
+
+#### EXC-06
+
+Người quản trị giao hoặc chuyển giao công trình cho nhân viên không có quyền `supervision.complete`.
+
+1. Hệ thống từ chối theo BR-RBAC-013 và không tạo phân công cho người đó.
+2. Khi chuyển giao, phân công của người đang phụ trách giữ nguyên.
+
 ## Acceptance Criteria
 
 #### AC-001
 
-- **Given**: Nhân viên A đang hoạt động, có quyền `supervision.complete` và chưa được phân công dự án P.
-- **When**: Người quản trị phân công dự án P cho A, rồi A yêu cầu hoàn thành gói giám sát của P.
+- **Given**: Nhân viên A đang hoạt động, có quyền `supervision.complete` và chưa được phân công công trình P.
+- **When**: Người quản trị phân công công trình P cho A, rồi A yêu cầu hoàn thành gói giám sát của P.
 - **Then**: Hệ thống chấp nhận yêu cầu của A.
 - **And**: Trước khi được phân công, cùng yêu cầu đó của A bị từ chối dù A có quyền `supervision.complete`.
 
 #### AC-002
 
-- **Given**: Nhân viên B có quyền `supervision.complete` nhưng không được phân công dự án P và cũng không phụ trách khách hàng sở hữu P.
-- **When**: B yêu cầu hoàn thành gói giám sát của dự án P.
+- **Given**: Nhân viên B có quyền `supervision.complete` nhưng không được phân công công trình P.
+- **When**: B yêu cầu hoàn thành gói giám sát của công trình P.
 - **Then**: Hệ thống từ chối với mã 403.
 - **And**: B vẫn xem được dữ liệu nằm trong phạm vi các quyền xem mà B có.
 
 #### AC-003
 
-- **Given**: Nhân viên A đang phụ trách dự án P; nhân viên C đang hoạt động và có quyền `supervision.complete`.
-- **When**: Người quản trị chuyển giao phân công dự án P từ A sang C.
+- **Given**: Nhân viên A đang phụ trách công trình P; nhân viên C đang hoạt động và có quyền `supervision.complete`.
+- **When**: Người quản trị chuyển giao phân công công trình P từ A sang C.
 - **Then**: C thao tác được trên P kể từ thời điểm chuyển giao.
 - **And**: A không còn thao tác được trên P kể từ thời điểm đó.
 
 #### AC-004
 
-- **Given**: Khách hàng K có hai dự án P1 và P2; nhân viên A được phân công phụ trách khách hàng K và có quyền `supervision.complete`.
-- **When**: A yêu cầu thao tác trên gói giám sát của P1 và của P2.
-- **Then**: Cả hai yêu cầu đều được chấp nhận.
-- **And**: Không cần tạo thêm phân công riêng cho P1 hoặc P2.
+- **Given**: Công trình P đang do nhân viên A phụ trách; nhân viên C đang hoạt động và có quyền `supervision.complete`.
+- **When**: Người quản trị giao trực tiếp P cho C mà không dùng chuyển giao, kể cả gửi trực tiếp tới API.
+- **Then**: Hệ thống từ chối và không tạo phân công thứ hai cho P.
+- **And**: A vẫn là người phụ trách duy nhất của P; muốn đổi sang C phải dùng chuyển giao.
 
 #### AC-005
 
-- **Given**: Nhân viên A đang phụ trách dự án P và không có người nào khác phụ trách P.
+- **Given**: Nhân viên A đang phụ trách công trình P.
 - **When**: Người quản trị gỡ phân công của A trên P mà không chuyển cho ai.
-- **Then**: P nằm trong danh sách tài nguyên chưa có người phụ trách.
+- **Then**: P nằm trong danh sách công trình cần chia lại, với trạng thái chưa có người phụ trách.
 - **And**: A không còn thao tác được trên P.
 
 #### AC-006
 
-- **Given**: Nhân viên E đang bị khóa tài khoản và trước đó đã được phân công dự án Q.
-- **When**: Người quản trị phân công thêm dự án P cho E.
+- **Given**: Nhân viên E đang bị khóa tài khoản và trước đó đã được phân công công trình Q.
+- **When**: Người quản trị phân công thêm công trình P cho E.
 - **Then**: Hệ thống từ chối yêu cầu và không tạo bản ghi phân công cho E trên P.
-- **And**: Phân công cũ của E trên dự án Q vẫn còn hiệu lực; khóa tài khoản chỉ chặn phân công mới.
+- **And**: Phân công cũ của E trên công trình Q vẫn còn hiệu lực; khóa tài khoản chỉ chặn phân công mới.
 
 #### AC-007
 
-- **Given**: Nhân viên A giữ vai trò "Nhân viên giám sát" và đang phụ trách hai dự án dựa trên vai trò đó; việc thu hồi vai trò đã bị từ chối.
-- **When**: Người quản trị chuyển cả hai dự án sang nhân viên khác, rồi thu hồi lại vai trò của A.
+- **Given**: Nhân viên A chỉ có quyền `supervision.complete` từ vai trò "Nhân viên giám sát" và đang phụ trách hai công trình; việc thu hồi vai trò đó đã bị từ chối.
+- **When**: Người quản trị chuyển cả hai công trình sang nhân viên khác có quyền `supervision.complete`, rồi thu hồi lại vai trò của A.
 - **Then**: Việc thu hồi vai trò thực hiện được.
-- **And**: Hai dự án đó có người phụ trách mới; không có dự án nào rơi vào trạng thái chưa có người phụ trách.
+- **And**: Hai công trình đó có người phụ trách mới; không có công trình nào rơi vào danh sách cần chia lại.
 
 #### AC-008
 
@@ -205,6 +218,20 @@ Người gọi không có quyền `assignment.manage` yêu cầu tạo, chuyển
 - **When**: Người quản trị tạo, chuyển giao hoặc gỡ một phân công.
 - **Then**: Mỗi thao tác tạo ra một bản ghi nhật ký có người thao tác, nhân viên liên quan, tài nguyên, thời điểm và nội dung thay đổi.
 - **And**: Chuyển giao tạo bản ghi cho cả việc kết thúc phân công cũ và việc tạo phân công mới.
+
+#### AC-009
+
+- **Given**: Nhân viên D đang hoạt động nhưng không có quyền `supervision.complete`; công trình P chưa có người phụ trách; công trình R đang do nhân viên A phụ trách.
+- **When**: Người quản trị giao P cho D, rồi chuyển giao R từ A sang D, kể cả gửi trực tiếp tới API.
+- **Then**: Hệ thống từ chối cả hai yêu cầu và không tạo phân công nào cho D.
+- **And**: P vẫn chưa có người phụ trách; R vẫn do A phụ trách.
+
+#### AC-010
+
+- **Given**: Nhân viên E đang phụ trách công trình Q; công trình R chưa có người phụ trách.
+- **When**: Người quản trị khóa tài khoản của E, rồi mở danh sách công trình cần chia lại.
+- **Then**: Danh sách có cả R và Q; Q được đánh dấu là người phụ trách đang bị khóa.
+- **And**: Phân công của E trên Q vẫn còn bản ghi; hệ thống không tự gỡ hay tự chuyển Q cho người khác.
 
 ## References
 
@@ -225,8 +252,8 @@ Người gọi không có quyền `assignment.manage` yêu cầu tạo, chuyển
 ### Dependencies
 
 - STORY-RBAC-002/Exception Flow: thu hồi vai trò bị chặn khi còn phân công đang hiệu lực.
-- BR-SUB-011/Then: quyền hoàn thành gói giám sát dựa trên phân công hiện tại của dự án.
-- BR-SUB-012/Then: quyền mở lại gói giám sát dựa trên phân công hiện tại của dự án.
+- BR-SUB-011/Then: quyền hoàn thành gói giám sát dựa trên phân công hiện tại của công trình.
+- BR-SUB-012/Then: quyền mở lại gói giám sát dựa trên phân công hiện tại của công trình.
 
 ## Non-Functional
 
@@ -235,7 +262,8 @@ Người gọi không có quyền `assignment.manage` yêu cầu tạo, chuyển
 
 ## Out of Scope
 
+- Phân công theo khách hàng; đợt này chỉ giao công trình.
 - Tính năng chia lead, gồm cả chia thủ công và chia tự động. Story này chỉ bảo đảm cơ chế phân công dùng lại được cho loại tài nguyên mới.
 - Tự động chia lại tài nguyên khi nhân viên bị khóa hoặc nghỉ việc.
 - Quy tắc cân bằng số lượng tài nguyên giữa các nhân viên.
-- Định nghĩa schema của module khách hàng và module dự án. Phân công chỉ tham chiếu tới chúng theo định danh.
+- Đặc tả và schema của Công trình; phần này sẽ chuẩn bị riêng. Phân công chỉ tham chiếu tới công trình theo định danh.

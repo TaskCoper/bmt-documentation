@@ -37,7 +37,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Rule Info
 
-- **Name**: Gói giám sát theo dự án, hoàn thành bằng thao tác thủ công.
+- **Name**: Gói giám sát theo công trình, hoàn thành bằng thao tác thủ công.
 - **Category**: Gói giám sát
 - **Status**: Draft
 - **Version**:
@@ -45,42 +45,42 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Owner**: [Chưa xác định]
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
-- **Source**: Người dùng yêu cầu hoãn quản lý lịch và lượt đang vận hành offline; gói giám sát không có chu kỳ, theo dự án cố định và có nút bấm hoàn thành cho khách hàng cụ thể khi dự án xong. Người dùng chọn Admin và nhân viên phụ trách được bấm hoàn thành; nhân viên phụ trách được xác định theo phân công dự án, không theo từng gói.
+- **Source**: Người dùng yêu cầu hoãn quản lý lịch và lượt đang vận hành offline; gói giám sát không có chu kỳ, theo công trình cố định và có nút bấm hoàn thành cho khách hàng cụ thể khi công trình xong. Người dùng chọn Admin và nhân viên phụ trách được bấm hoàn thành; nhân viên phụ trách được xác định theo phân công công trình, không theo từng gói.
 
 ## Statement
 
-**Cập nhật 24/09/2026:** Hoàn thành vẫn thuộc phạm vi và áp dụng trên vòng đời mới: chỉ gói đã gán dự án mới được hoàn thành. Người bấm phải có quyền `supervision.complete`; Admin có quyền này thì không cần phân công, nhân viên có quyền này phải được phân công trực tiếp dự án. Gói đã hoàn thành vẫn giữ chỗ trên dự án và không được sửa dự án.
+**Cập nhật 24/09/2026:** Hoàn thành vẫn thuộc phạm vi và áp dụng trên vòng đời mới: chỉ gói đã gán công trình mới được hoàn thành. Người bấm phải có quyền `supervision.complete`; Admin có quyền này thì không cần phân công, nhân viên có quyền này phải được phân công trực tiếp công trình. Gói đã hoàn thành vẫn giữ chỗ trên công trình và không được đổi công trình.
 
-**Giới hạn áp dụng từ 19/09/2026:** Nội dung hoàn thành thủ công dưới đây là luồng đã thiết kế trước, không phải thao tác hủy gói. Phạm vi thanh toán hiện chỉ quản lý gói gán vào dự án nào, không thêm điều kiện hoạt động khảo sát/giám sát. Quy định “không ngày hết hạn” chỉ còn áp dụng sau khi gán đúng hạn; gói chưa gán có hạn một năm theo BR-SUB-022. Nhân viên được sửa liên kết theo BR-SUB-023; không dùng “gắn cố định” để cấm ngoại lệ mới. Hủy/khôi phục theo BR-SUB-024/BR-SUB-025.
+**Giới hạn áp dụng từ 19/09/2026:** Nội dung hoàn thành thủ công dưới đây là luồng đã thiết kế trước, không phải thao tác hủy gói. Phạm vi thanh toán hiện chỉ quản lý gói gán vào công trình nào, không thêm điều kiện hoạt động khảo sát/giám sát. Quy định “không ngày hết hạn” chỉ còn áp dụng sau khi gán đúng hạn; gói chưa gán có hạn một năm theo BR-SUB-022. Nhân viên được sửa liên kết theo BR-SUB-023; không dùng “gắn cố định” để cấm ngoại lệ mới. Hủy/khôi phục theo BR-SUB-024/BR-SUB-025.
 
-Gói giám sát của khách hàng gắn cố định với một dự án, không có chu kỳ tháng/năm hoặc ngày hết hạn. Khi dự án xong, Admin hoặc nhân viên phụ trách dự án đó được bấm Hoàn thành gói giám sát để ghi nhận gói đã hoàn thành.
+Gói giám sát của khách hàng gắn cố định với một công trình, không có chu kỳ tháng/năm hoặc ngày hết hạn. Khi công trình xong, Admin hoặc nhân viên phụ trách công trình đó được bấm Hoàn thành gói giám sát để ghi nhận gói đã hoàn thành.
 
 ## When
 
-Admin hoặc nhân viên phụ trách chọn đúng khách hàng, dự án và gói đã gán dự án đó, rồi bấm Hoàn thành gói giám sát khi dự án đã xong.
+Admin hoặc nhân viên phụ trách chọn đúng khách hàng, công trình và gói đã gán công trình đó, rồi bấm Hoàn thành gói giám sát khi công trình đã xong.
 
 ## Then
 
 1. Chuyển gói được chọn từ đã gán sang đã hoàn thành. Không bắt nhập lý do; lưu người thao tác và thời điểm. Từ chối nếu gói chưa gán hoặc đang bị hủy.
-2. Giữ đúng liên kết khách hàng và dự án của gói; không hoàn thành các gói khác của khách hàng, không thay đổi subscription thiết kế.
+2. Giữ đúng liên kết khách hàng và công trình của gói; không hoàn thành các gói khác của khách hàng, không thay đổi subscription thiết kế.
 3. Không yêu cầu nhập số lượt đã dùng, trừ hết lượt hoặc đóng các lịch hẹn trên nền tảng để hoàn thành gói, vì các phần này đang vận hành offline.
 4. Gói không tự hết hạn hoặc hoàn thành chỉ do thời gian trôi qua; không tự gia hạn, tạo kỳ mới hoặc làm mới hạn mức giám sát.
 
 5. Khách hàng và nhân viên không phụ trách không được hoàn thành gói. Hệ thống kiểm tra quyền trên yêu cầu xử lý, không chỉ ẩn nút trên giao diện.
-6. Người thao tác phải có quyền `supervision.complete`. Admin có quyền này thì không cần phân công. Nhân viên có quyền này phải đang được phân công trực tiếp dự án; phân công ở mức khách hàng sở hữu dự án không tính.
-7. Gói đã hoàn thành vẫn gắn với dự án và vẫn giữ chỗ theo [BR-SUB-006](BR-SUB-006.md). Không được sửa dự án của gói đã hoàn thành; phải mở lại trước theo [BR-SUB-012](BR-SUB-012.md). Khách vẫn xem được trạng thái đã hoàn thành của gói mình.
+6. Người thao tác phải có quyền `supervision.complete`. Admin có quyền này thì không cần phân công. Nhân viên có quyền này phải đang được phân công công trình đó theo [BR-RBAC-013](BR-RBAC-013.md); đợt này không có phân công mức khách hàng.
+7. Gói đã hoàn thành vẫn gắn với công trình và vẫn giữ chỗ theo [BR-SUB-006](BR-SUB-006.md). Không được đổi công trình của gói đã hoàn thành; phải mở lại trước theo [BR-SUB-012](BR-SUB-012.md). Khách vẫn xem được trạng thái đã hoàn thành của gói mình.
 
 ## Except
 
-Nếu bấm hoàn thành nhầm, Admin hoặc nhân viên phụ trách được mở lại và phải ghi lý do theo [BR-SUB-012](BR-SUB-012.md). Chưa yêu cầu tự chuyển trạng thái dự án hoặc tự hoàn thành gói theo sự kiện khác.
+Nếu bấm hoàn thành nhầm, Admin hoặc nhân viên phụ trách được mở lại và phải ghi lý do theo [BR-SUB-012](BR-SUB-012.md). Chưa yêu cầu tự chuyển trạng thái công trình hoặc tự hoàn thành gói theo sự kiện khác.
 
 ## Notes
 
-- Đây là ngoại lệ của [BR-RBAC-013](BR-RBAC-013.md) điểm 3: phân công mức khách hàng không có hiệu lực xuống dự án cho thao tác hoàn thành và mở lại gói giám sát.
-- Quyền nhân viên phụ trách chỉ áp dụng cho gói giám sát của dự án được phân công. Dùng phân công hiện tại của dự án để kiểm tra quyền hoàn thành hoặc mở lại, không tạo phân công riêng cho từng gói. Cách lưu dữ liệu, quản lý phân công và ánh xạ vai trò backend sẽ làm rõ trong thiết kế; không mặc định mọi nhân viên có quyền trên mọi khách hàng.
+- Người dùng xác nhận ngày 25/09/2026: gói giám sát gắn với công trình, một thực thể riêng khác bản dự toán; đợt này bỏ phân công mức khách hàng, nên ngoại lệ trước đây ở [BR-RBAC-013](BR-RBAC-013.md) cho hoàn thành và mở lại gói giám sát không còn cần thiết.
+- Quyền nhân viên phụ trách chỉ áp dụng cho gói giám sát của công trình được phân công. Dùng phân công hiện tại của công trình để kiểm tra quyền hoàn thành hoặc mở lại, không tạo phân công riêng cho từng gói. Cách lưu dữ liệu, quản lý phân công và ánh xạ vai trò backend sẽ làm rõ trong thiết kế; không mặc định mọi nhân viên có quyền trên mọi khách hàng.
 - [ST-SUB-028](../systemtest/ST-SUB-028.md) kiểm tra từ chối người không có quyền.
 - Đang thực hiện/đã hoàn thành là trạng thái nghiệp vụ đề xuất cách gọi; mã trạng thái và API sẽ thiết kế sau.
 - Không thêm thao tác gửi thông báo hoặc thanh toán vào nút hoàn thành.
-- [BR-SUB-006](BR-SUB-006.md) quy định tối đa một gói giám sát đang thực hiện trên mỗi dự án; [BR-SUB-009](BR-SUB-009.md) quy định phạm vi dự án.
+- [BR-SUB-006](BR-SUB-006.md) quy định tối đa một gói giám sát đang thực hiện trên mỗi công trình; [BR-SUB-009](BR-SUB-009.md) quy định phạm vi công trình.
 - Tham chiếu [STORY-SUB-003](../userstory/STORY-SUB-003.md), [ST-SUB-026](../systemtest/ST-SUB-026.md), [ST-SUB-027](../systemtest/ST-SUB-027.md) và [nợ nghiệp vụ](../debt/supervision-offline.md).
 - Bản nháp còn thiếu metadata; chưa được phê duyệt.

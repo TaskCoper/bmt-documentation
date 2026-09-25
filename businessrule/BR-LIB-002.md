@@ -56,7 +56,7 @@ Người quản lý cấu hình thư viện hoặc khách tìm kiếm, mở và 
 
 ## Then
 
-1. Người có quyền quản lý thư viện được thêm, sửa, công bố, ẩn và hiện lại mẫu; không có bước người khác phê duyệt. Khách chỉ tham khảo.
+1. Người có quyền quản lý thư viện mẫu theo STORY-RBAC-001 được thêm, sửa, công bố, ẩn và hiện lại mẫu; không có bước người khác phê duyệt. Khách chỉ tham khảo.
 2. Người quản lý được sửa mọi nội dung của phiên bản hiện tại, kể cả phân loại, kích thước, ảnh và tệp. Thao tác Sửa không đổi phiên bản và không phát sinh lượt mới; người đã xem mở lại từ lịch sử sẽ thấy nội dung đã sửa.
 3. Để chuẩn bị phiên bản mới, tạo bản nháp riêng và chỉnh sửa trước khi Công bố phiên bản mới. Khách vẫn xem phiên bản đang công bố trong lúc chuẩn bị. Công bố chỉ thành công khi nội dung đáp ứng BR-LIB-001.
 4. Sau khi công bố phiên bản mới, thư viện hiển thị phiên bản mới nhất. Phiên bản đã được thay thế bị khóa sửa, giữ nguyên nội dung và tệp để người đã mở xem lại. Không cho sửa phiên bản cũ.

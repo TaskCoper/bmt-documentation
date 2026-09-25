@@ -39,8 +39,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Metadata
 
-- **Story**: Là khách hàng, tôi muốn gán gói giám sát đã mua cho dự án của mình; khi gán nhầm, nhân viên có quyền sửa giúp.
-- **Context**: Tách việc mua/cấp gói khỏi gán dự án. Gói chưa gán có hạn một năm; đã gán đúng hạn tiếp tục phục vụ sau mốc này. Chỉ quản lý liên kết gói–dự án, chưa quản lý hoạt động khảo sát/giám sát.
+- **Story**: Là khách hàng, tôi muốn gán gói giám sát đã mua cho công trình của mình; khi gán nhầm, nhân viên có quyền sửa giúp.
+- **Context**: Tách việc mua/cấp gói khỏi gán công trình. Gói chưa gán có hạn một năm; đã gán đúng hạn tiếp tục phục vụ sau mốc này. Chỉ quản lý liên kết gói–công trình, chưa quản lý hoạt động khảo sát/giám sát.
 - **Sprint**:
 - **Priority**:
 - **Status**: Todo
@@ -55,21 +55,22 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ### Preconditions
 
-- Khách có gói giám sát đã cấp. Có nguồn xác minh chủ sở hữu dự án và quyền riêng của nhân viên; chưa coi nguồn này đã triển khai.
+- Khách có gói giám sát đã cấp và có công trình của mình. Công trình là thực thể riêng, khác với bản dự toán; khách tự tạo công trình miễn phí, không cần gói thiết kế (người dùng xác nhận ngày 25/09/2026). Story và BR tạo, quản lý công trình chưa được soạn và sẽ chuẩn bị riêng.
+- Quyền riêng của nhân viên theo STORY-RBAC-001. Chưa coi nguồn dữ liệu công trình và quyền này đã triển khai.
 
 ### Trigger
 
-Khách yêu cầu gán lần đầu hoặc nhân viên có quyền yêu cầu sửa dự án đã gán.
+Khách yêu cầu gán lần đầu hoặc nhân viên có quyền yêu cầu đổi công trình đã gán.
 
 ## Flow
 
 ### Main Flow
 
 1. Khách mở một gói giám sát đã mua chưa gán.
-2. Khách chọn dự án thuộc mình.
-3. Hệ thống kiểm tra gói chưa bị hủy, còn hạn gán lần đầu và dự án chưa có gói giám sát hiệu lực.
-4. Hệ thống gán gói cho dự án và ghi nhận đã sử dụng; không thu tiền thêm.
-5. Gói tiếp tục phục vụ dự án sau mốc một năm nếu đã gán đúng hạn.
+2. Khách chọn công trình thuộc mình.
+3. Hệ thống kiểm tra gói chưa bị hủy, còn hạn gán lần đầu và công trình chưa có gói giám sát hiệu lực.
+4. Hệ thống gán gói cho công trình và ghi nhận đã sử dụng; không thu tiền thêm.
+5. Gói tiếp tục phục vụ công trình sau mốc một năm nếu đã gán đúng hạn.
 
 ### Alternative Flow
 
@@ -83,10 +84,10 @@ Gán đúng hạn vẫn phục vụ sau một năm.
 
 #### ALT-02
 
-Sửa dự án sau một năm.
+Đổi công trình sau một năm.
 
 1. Ngày 02/10/2027 nhân viên có quyền đổi sang B và nhập lý do.
-2. Cho sửa dự án.
+2. Cho đổi công trình.
 3. Không tạo gói mới hoặc làm mới hạn; không yêu cầu dữ liệu khảo sát/giám sát.
 
 ### Exception Flow
@@ -101,11 +102,11 @@ Quá hạn chưa từng gán.
 
 #### EXC-02
 
-Chặn dự án đã có gói.
+Chặn công trình đã có gói.
 
 1. Khách gán B vào A.
 2. Từ chối; A giữ gói cũ, B vẫn chưa gán.
-3. B còn được gán cho dự án khác trong hạn ban đầu.
+3. B còn được gán cho công trình khác trong hạn ban đầu.
 
 #### EXC-03
 
@@ -125,7 +126,7 @@ Từ chối sửa thiếu quyền hoặc lý do.
 
 #### EXC-05
 
-Từ chối đổi sang dự án khác khách hoặc đã có gói.
+Từ chối đổi sang công trình khác khách hoặc đã có gói.
 
 1. Nhân viên có quyền và lý do lần lượt thử đổi sang B và C.
 2. Cả hai yêu cầu bị từ chối.
@@ -133,7 +134,7 @@ Từ chối đổi sang dự án khác khách hoặc đã có gói.
 
 #### EXC-06
 
-Không gán lần đầu sang dự án người khác.
+Không gán lần đầu sang công trình người khác.
 
 1. U1 yêu cầu gán gói cho B.
 2. Từ chối vì không cùng chủ sở hữu.
@@ -143,7 +144,7 @@ Không gán lần đầu sang dự án người khác.
 
 #### AC-001
 
-- **Given**: Khách có gói giám sát đã cấp 01/10/2026, chưa gán; dự án A thuộc khách và chưa có gói.
+- **Given**: Khách có gói giám sát đã cấp 01/10/2026, chưa gán; công trình A thuộc khách và chưa có gói.
 - **When**: Ngày 01/11/2026 khách gán gói cho A.
 - **Then**: Gán thành công, gói được coi là đã sử dụng.
 - **And**: Không tạo đơn hoặc yêu cầu thanh toán lại.
@@ -164,14 +165,14 @@ Không gán lần đầu sang dự án người khác.
 
 #### AC-004
 
-- **Given**: Dự án A đang có gói hiệu lực; khách có gói B chưa gán và còn hạn.
+- **Given**: Công trình A đang có gói hiệu lực; khách có gói B chưa gán và còn hạn.
 - **When**: Khách gán B vào A.
 - **Then**: Từ chối; A giữ gói cũ, B vẫn chưa gán.
-- **And**: B còn được gán cho dự án khác trong hạn ban đầu.
+- **And**: B còn được gán cho công trình khác trong hạn ban đầu.
 
 #### AC-005
 
-- **Given**: Gói đã gán cho A; B là dự án khác của cùng khách.
+- **Given**: Gói đã gán cho A; B là công trình khác của cùng khách.
 - **When**: Khách gửi yêu cầu gỡ gói hoặc đổi sang B, kể cả yêu cầu trực tiếp.
 - **Then**: Từ chối và hướng dẫn liên hệ nhân viên.
 - **And**: Gói vẫn gắn với A, không tạo thêm gói.
@@ -179,7 +180,7 @@ Không gán lần đầu sang dự án người khác.
 #### AC-006
 
 - **Given**: Nhân viên có quyền riêng; gói đã gán A; B cùng khách và chưa có gói hiệu lực.
-- **When**: Nhân viên đổi sang B với lý do “Gán nhầm dự án”.
+- **When**: Nhân viên đổi sang B với lý do “Gán nhầm công trình”.
 - **Then**: Gói chuyển liên kết sang B, lưu lý do.
 - **And**: Giữ chủ gói, quyền lợi và hạn ban đầu; không kiểm tra trạng thái khảo sát.
 
@@ -187,12 +188,12 @@ Không gán lần đầu sang dự án người khác.
 
 - **Given**: Gói cấp 01/10/2026, gán A đúng hạn; B cùng khách chưa có gói.
 - **When**: Ngày 02/10/2027 nhân viên có quyền đổi sang B và nhập lý do.
-- **Then**: Cho sửa dự án.
+- **Then**: Cho đổi công trình.
 - **And**: Không tạo gói mới hoặc làm mới hạn; không yêu cầu dữ liệu khảo sát/giám sát.
 
 #### AC-008
 
-- **Given**: Gói đang gán A; dự án B đủ điều kiện.
+- **Given**: Gói đang gán A; công trình B đủ điều kiện.
 - **When**: Nhân viên thiếu quyền thử sửa; nhân viên có quyền thử sửa với lý do trống.
 - **Then**: Cả hai yêu cầu đều bị từ chối.
 - **And**: Liên kết gói không thay đổi.
@@ -206,7 +207,7 @@ Không gán lần đầu sang dự án người khác.
 
 #### AC-010
 
-- **Given**: Khách U1 có gói chưa gán còn hạn; dự án B thuộc U2.
+- **Given**: Khách U1 có gói chưa gán còn hạn; công trình B thuộc U2.
 - **When**: U1 yêu cầu gán gói cho B.
 - **Then**: Từ chối vì không cùng chủ sở hữu.
 - **And**: Gói vẫn chưa gán, giữ hạn ban đầu.
@@ -248,5 +249,5 @@ Không gán lần đầu sang dự án người khác.
 
 ## Out of Scope
 
-- Quản lý khảo sát, tiến độ giám sát, lịch và lượt kiểm tra; khách tự gỡ/đổi dự án; nhân viên gỡ về chưa gán hoặc chuyển gói sang khách khác; thiết kế module dự án đầy đủ.
+- Quản lý khảo sát, tiến độ giám sát, lịch và lượt kiểm tra; khách tự gỡ/đổi công trình; nhân viên gỡ về chưa gán hoặc chuyển gói sang khách khác; tạo và quản lý công trình (chuẩn bị ở phiên riêng).
 - Chưa triển khai, chạy test hoặc phê duyệt tài liệu. Sprint, Priority, Creator và người thực hiện chưa được phân công; không lấy ví dụ trong template làm giá trị thật.
