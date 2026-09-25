@@ -55,13 +55,14 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 STORY-SUB-005 cho nhân viên có quyền riêng hủy/khôi phục gói thiết kế hoặc giám sát, giữ nguyên thời hạn/quyền lợi/lượt và không thực hiện hoàn tiền. Thiết kế cũ chỉ có đóng kỳ khi đổi gói hoặc hoàn thành giám sát, không thể dùng các trạng thái đó thay cho hủy thủ công.
 
-Nguồn quyền nhân viên nay do [TDD-RBAC-001](TDD-RBAC-001.md) cung cấp theo mô hình RBAC chuẩn `User` → `UserRole` → `Role` → `RolePermission` → `Permission`. Bản trước của tài liệu này tự định nghĩa `StaffAccessProfile` và `StaffPermission` gán quyền thẳng cho từng người; mô hình đó đã bị thay. Bốn mã quyền giữ nguyên tên, chỉ đổi chỗ gắn quyền từ người sang vai trò. Vẫn giữ nguyên tắc không suy ra nhân viên từ việc tài khoản có vai trò khác Khách hàng; tư cách nhân viên nay xác định bằng `User.AccountKind = 'Staff'`. Khi soạn bản đầu, tất cả entity/handler được nêu dưới đây là phần dự kiến.
+Nguồn quyền nhân viên nay do [TDD-RBAC-001](TDD-RBAC-001.md) cung cấp theo mô hình RBAC chuẩn `User` → `UserRole` → `Role` → `RolePermission` → `Permission`. Bản trước của tài liệu này tự định nghĩa `StaffAccessProfile` và `StaffPermission` gán quyền thẳng cho từng người; mô hình đó đã bị thay. Các mã quyền giữ nguyên tên, chỉ đổi chỗ gắn quyền từ người sang vai trò; riêng `supervision.reassign` đã bỏ ngày 25/09/2026 cùng thao tác đổi công trình (BR-SUB-009). Vẫn giữ nguyên tắc không suy ra nhân viên từ việc tài khoản có vai trò khác Khách hàng; tư cách nhân viên nay xác định bằng `User.AccountKind = 'Staff'`. Khi soạn bản đầu, tất cả entity/handler được nêu dưới đây là phần dự kiến.
 
 Hiện trạng code đã kiểm tra ngày 25/09/2026: đã có migration `PackageLifecycle`, `CancelPackageCommandHandler`, `RestorePackageCommandHandler` và `PackageLifecyclePolicy`. Hủy gói giám sát nhận mọi trạng thái trừ `CanceledByStaff`; khôi phục đọc `FromState` của sự kiện hủy và kiểm chỗ theo tập giữ chỗ `Assigned`/`Completed`. Các thao tác vẫn khóa dòng `User` qua `LockAccountAsync` và vẫn dùng tên `ProjectId`. Gói giám sát gắn với công trình (`ConstructionSite`), thực thể riêng khác bản dự toán; đổi tên sang công trình theo [TDD-SUB-004](TDD-SUB-004.md) là thay đổi dự kiến.
 
 ### Goals
 
-- Quyền hủy, restore và đổi công trình độc lập với quyền xem; bắt buộc lý do và lưu audit cùng thay đổi. Ba quyền này không gắn phân công (BR-RBAC-010 khoản 4).
+- Quyền hủy và restore độc lập với quyền xem; bắt buộc lý do và lưu audit cùng thay đổi. Hai quyền này không gắn phân công (BR-RBAC-010 khoản 4).
+- Hủy và khôi phục gói giám sát không đụng tới phân công của gói: người đang phụ trách vẫn phụ trách (BR-SUB-024 và BR-SUB-025 khoản 7).
 - Không có hai gói thiết kế hiệu lực trên account hoặc hai gói giám sát giữ chỗ (`Assigned` hoặc `Completed`) trên một công trình sau restore.
 - Giữ ScheduledEndsAt, AssignmentDeadline, revision và quota khi restore; tác vụ AI đã tiếp nhận trước hủy tiếp tục theo kỳ cũ.
 
@@ -108,8 +109,8 @@ flowchart LR
 **Notes**:
 
 - Default session policy phải bao gồm verified và không phải reset-password token như JwtExtensions hiện tại. Permission policy mới thêm yêu cầu nghiệp vụ, không thay default bằng policy role yếu hơn. Admin có quyền xem quản trị theo BR-PAY-005; với mutation vẫn yêu cầu quyền riêng được cấp, không auto-bypass chỉ dựa role.
-- Tư cách nhân viên xác định bằng `User.AccountKind = 'Staff'` và `User.Status = 'Active'`; quyền xác định bằng các vai trò trong `UserRole`, theo [TDD-RBAC-001](TDD-RBAC-001.md#data-model). Bốn mã quyền giữ nguyên: commerce.read, supervision.reassign, package.cancel, package.restore. Quyền được nhúng vào access token lúc phát hành nên handler không truy vấn lại khi xử lý; đổi lại phải chấp nhận độ trễ của [BR-RBAC-009](../businessrule/BR-RBAC-009.md). Cấp và thu hồi vai trò là chức năng của [TDD-RBAC-002](TDD-RBAC-002.md), không thêm API tự cấp quyền trong tính năng thanh toán. Tài khoản chưa được gán vai trò nào thì không có claim `perm` nào và bị từ chối.
-- Việc kiểm quyền không còn khóa dòng nào, vì quyền đọc từ token chứ không đọc database. Thứ tự khóa của mutation vì vậy bắt đầu thẳng từ dữ liệu nghiệp vụ: lock AccountCommerceState chủ gói, rồi các công trình theo Id (khi module Công trình có bảng thật), rồi subscription/grant và audit receipt. Hiện trạng code còn khóa dòng `User`; đổi sang AccountCommerceState cùng lúc với các luồng quota theo TDD-SUB-002. Nếu nhân viên khác khách, không khóa toàn bộ User hai bên theo thứ tự tùy ý. Bỏ khóa trên bản ghi quyền cũng bỏ luôn cam kết cũ rằng một lần thu hồi đã commit chắc chắn chặn được yêu cầu kế tiếp; cam kết đó nay thuộc về cơ chế dấu phiên ở [TDD-RBAC-001](TDD-RBAC-001.md#architecture).
+- Tư cách nhân viên xác định bằng `User.AccountKind = 'Staff'` và `User.Status = 'Active'`; quyền xác định bằng các vai trò trong `UserRole`, theo [TDD-RBAC-001](TDD-RBAC-001.md#data-model). Ba mã quyền liên quan: commerce.read, package.cancel, package.restore; mã supervision.reassign đã bỏ ngày 25/09/2026. Quyền được nhúng vào access token lúc phát hành nên handler không truy vấn lại khi xử lý; đổi lại phải chấp nhận độ trễ của [BR-RBAC-009](../businessrule/BR-RBAC-009.md). Cấp và thu hồi vai trò là chức năng của [TDD-RBAC-002](TDD-RBAC-002.md), không thêm API tự cấp quyền trong tính năng thanh toán. Tài khoản chưa được gán vai trò nào thì không có claim `perm` nào và bị từ chối.
+- Việc kiểm quyền không còn khóa dòng nào, vì quyền đọc từ token chứ không đọc database. Thứ tự khóa của mutation vì vậy bắt đầu thẳng từ dữ liệu nghiệp vụ: lock AccountCommerceState chủ gói, rồi subscription/grant và audit receipt. Hủy và khôi phục không khóa dòng `ConstructionSite`: gói luôn giữ `ConstructionSiteId`, nên khóa ngoại của [TDD-SUB-004](TDD-SUB-004.md#data-model) đã chặn xóa công trình; xung đột giữ chỗ khi khôi phục do index giữ chỗ chặn, và mọi gói trên một công trình cùng thuộc một khách nên đã xếp hàng qua khóa AccountCommerceState. Hiện trạng code còn khóa dòng `User`; đổi sang AccountCommerceState cùng lúc với các luồng quota theo TDD-SUB-002. Nếu nhân viên khác khách, không khóa toàn bộ User hai bên theo thứ tự tùy ý. Bỏ khóa trên bản ghi quyền cũng bỏ luôn cam kết cũ rằng một lần thu hồi đã commit chắc chắn chặn được yêu cầu kế tiếp; cam kết đó nay thuộc về cơ chế dấu phiên ở [TDD-RBAC-001](TDD-RBAC-001.md#architecture).
 - Kiểm quyền/ownership trước replay. Cùng Idempotency-Key + fingerprint trả kết quả thao tác cũ, không thực hiện lại dù trạng thái hiện tại đã đổi; trả operationId/resultVersion và client đọc trạng thái mới bằng GET. Khác hash 409. ExpectedVersion là optimistic concurrency; timeout mất response không tạo audit thứ hai khi retry cùng key.
 
 **Hủy thiết kế**:
@@ -119,7 +120,7 @@ flowchart LR
 3. Không sửa Used, Reserved, UsageOperation hoặc revision. Tác vụ Accepted trước hủy tiếp tục theo snapshot/quota đã giữ. Hoàn tất/lỗi/timeout quyết toán vào chính kỳ đó, không làm sống lại kỳ hoặc chuyển quota sang kỳ khác. Quy tắc timeout/kết quả muộn ở TDD-SUB-002 vẫn giữ.
 4. Lưu audit và receipt cùng transaction. Nếu ghi audit lỗi, rollback state; không có gói hủy mà không có lý do.
 
-**Hủy giám sát**: Cho Unassigned, Assigned hoặc Completed (BR-SUB-024 khoản 2); ghi CanceledByStaff, giữ ConstructionSiteId và FirstAssignedAt nếu có. Partial unique index chỉ xét tập giữ chỗ `Assigned`/`Completed` ([TDD-SUB-004](TDD-SUB-004.md#data-model)), nên gói vừa hủy nằm ngoài điều kiện và công trình được nhận gói khác sau commit. Ví dụ G1 `Completed` trên CS1 bị hủy thì khách gán được G2 vào CS1 ngay sau đó. Không gỡ liên kết lịch sử hoặc khôi phục tiền. Gói chưa gán đã quá hạn không trở thành có thể sử dụng chỉ vì có record hủy.
+**Hủy giám sát**: Cho Unassigned, Assigned hoặc Completed (BR-SUB-024 khoản 2); ghi CanceledByStaff, giữ ConstructionSiteId và FirstAssignedAt nếu có. Partial unique index chỉ xét tập giữ chỗ `Assigned`/`Completed` ([TDD-SUB-004](TDD-SUB-004.md#data-model)), nên gói vừa hủy nằm ngoài điều kiện và công trình được nhận gói khác sau commit. Ví dụ G1 `Completed` trên CS1 bị hủy thì khách gán được G2 vào CS1 ngay sau đó. Không gỡ liên kết lịch sử hoặc khôi phục tiền. Handler hủy không đọc hay ghi bảng `Assignment`: nếu NV2 đang phụ trách G1 thì phân công đó giữ nguyên (BR-SUB-024 khoản 7, BR-RBAC-013 khoản 9). G2 là gói khác nên cần phân công riêng theo [TDD-RBAC-003](TDD-RBAC-003.md). Gói chưa gán đã quá hạn không trở thành có thể sử dụng chỉ vì có record hủy.
 
 **Khôi phục**:
 
@@ -127,10 +128,11 @@ flowchart LR
 - Thiết kế: now<ScheduledEndsAtUtc, chưa bị một lần mua mới thay thế, không có kỳ hiệu lực khác. Khóa account/subscription và đặt về Active cùng CurrentPeriodId; giữ hạn cũ, quota và counters hiện tại. Không nạp lại counters từ snapshot lúc hủy vì tác vụ cũ có thể đã hoàn tất trong thời gian bị hủy.
 - Giám sát: trạng thái đích lấy từ `FromState` của sự kiện hủy mà `CancelEventId` trỏ tới. Gói `Completed` bị hủy thì khôi phục về `Completed` (BR-SUB-025 khoản 5), cùng điều kiện công trình chưa có gói khác giữ chỗ ([TDD-SUB-006](TDD-SUB-006.md#data-model)).
 - Giám sát chưa từng gán: now<AssignmentDeadlineUtc, restore Unassigned. Đã gán (`FromState` là `Assigned` hoặc `Completed`): FirstAssignedAt đúng hạn và công trình chưa có gói giữ chỗ khác (`Assigned` hoặc `Completed`); restore về đúng `FromState` dù đã qua một năm. Không tự đổi công trình để né xung đột.
+- Giám sát, phân công: handler khôi phục không tạo, sửa hay kết thúc dòng `Assignment` nào. Người phụ trách gói trước khi hủy tiếp tục phụ trách mà không cần giao lại (BR-SUB-025 khoản 7); không có bản ghi nhật ký phân công mới.
 - Đổi gói khi kỳ hiện tại bị nhân viên hủy vẫn là lần mua mới: fulfillment đánh dấu kỳ cũ Superseded nếu bị thay thế, không giữ đường restore vào nó. `CanceledByStaff` cần có lịch sử, không ghi đè mất việc từng bị hủy.
 - Hệ thống không tự quay về gói trước khi hủy gói mới. Sửa thứ tự do thông tin giao dịch đến muộn không dùng endpoint restore.
 
-**Ánh xạ và ranh giới test**: BR-SUB-024 ở CancelPackageHandler/policy/audit; BR-SUB-025 ở RestorePackageHandler/period-state/deadline/index giữ chỗ trên công trình. UT kiểm điều kiện và side effects dự kiến, ST-PAY-034–046 kiểm luồng; các test PostgreSQL phải chứng minh hủy–gán–restore đồng thời, rollback audit và quota settlement chạy qua mốc hủy.
+**Ánh xạ và ranh giới test**: BR-SUB-024 ở CancelPackageHandler/policy/audit; BR-SUB-025 ở RestorePackageHandler/period-state/deadline/index giữ chỗ trên công trình. UT kiểm điều kiện và side effects dự kiến, ST-PAY-034–046 kiểm luồng, ST-PAY-073 kiểm phân công giữ nguyên qua hủy và khôi phục; các test PostgreSQL phải chứng minh hủy–gán–restore đồng thời, rollback audit và quota settlement chạy qua mốc hủy.
 
 ## Sequence Diagram
 
@@ -142,7 +144,7 @@ sequenceDiagram
     participant D as PostgreSQL
     S->>A: cancel/restore + reason + version + key
     A->>H: Command với actor từ phiên
-    H->>D: Khóa AccountCommerceState, công trình/gói (quyền đọc từ claim)
+    H->>D: Khóa AccountCommerceState rồi gói (quyền đọc từ claim)
     H->>H: Kiểm quyền, replay, version, hạn và conflict
     alt Cho phép
       H->>D: State + event + receipt trong cùng transaction
@@ -226,7 +228,7 @@ Nhánh giám sát dùng cùng cơ chế audit: G1 đang Assigned vào CS1 → h�
 
 | Bảng/thay đổi | Trường và ràng buộc |
 | --- | --- |
-| UserRole, RolePermission, Permission | Dùng lại nguyên schema ở [TDD-RBAC-001](TDD-RBAC-001.md#data-model). Tài liệu này không định nghĩa lại để tránh hai bản dễ lệch nhau. Bốn mã quyền của tính năng hủy và khôi phục nằm trong danh mục `Permission`, trong đó không mã nào có `RequiresAssignment = true`. |
+| UserRole, RolePermission, Permission | Dùng lại nguyên schema ở [TDD-RBAC-001](TDD-RBAC-001.md#data-model). Tài liệu này không định nghĩa lại để tránh hai bản dễ lệch nhau. Các mã quyền của tính năng hủy và khôi phục nằm trong danh mục `Permission`, trong đó không mã nào có `RequiresAssignment = true`. |
 | User, các cột liên quan | `AccountKind` và `Status` quyết định tài khoản có phải nhân viên đang hoạt động không; `SecurityStamp` phục vụ cắt phiên. Cả ba định nghĩa ở [TDD-RBAC-001](TDD-RBAC-001.md#data-model). Cột `Role` kiểu chuỗi của bản trước đã bị bỏ, không còn dùng để suy ra quyền. |
 | DesignPeriod bổ sung | LifecycleState varchar(24) NN=Active/CanceledByStaff/Superseded; Version bigint NN; CancelEventId uuid NULL. Giữ ClosedAtUtc chỉ cho đóng vì thay thế, không dùng đóng tạm; giữ ScheduledEndsAt và quota cũ. |
 | SupervisionGrant bổ sung | CancelEventId uuid NULL, State/Version như TDD-SUB-004 (gồm `Completed` theo TDD-SUB-006). Không xóa ConstructionSiteId/FirstAssignedAt khi hủy. |
@@ -330,21 +332,25 @@ Active trong ví dụ restore là thiết kế. Giám sát trả trạng thái t
 - BR-SUB-003/Then
 - BR-SUB-016/Then
 - BR-RBAC-010/Then
+- BR-RBAC-013/Then
 
 ### Use Cases
 
 - STORY-SUB-005/Main Flow
 - STORY-SUB-003/ALT-04
 - STORY-SUB-003/EXC-09
+- STORY-RBAC-003/ALT-06
 
 ### Others
 
 - [Kỳ và thao tác sử dụng](TDD-SUB-002.md), [giám sát](TDD-SUB-004.md), [hoàn thành và mở lại](TDD-SUB-006.md), [thanh toán](TDD-PAY-001.md), [quản trị](TDD-PAY-002.md).
 - Mô hình vai trò và quyền: [TDD-RBAC-001](TDD-RBAC-001.md); cấp và thu hồi vai trò, khóa tài khoản: [TDD-RBAC-002](TDD-RBAC-002.md).
-- Hiện trạng mã nguồn: [RoleNames](../../bmt-be/src/bmt-be.contract/constants/RoleNames.cs), [JwtExtensions](../../bmt-be/src/bmt-be.api/dependencyInjection/extensions/JwtExtensions.cs), [DbContext](../../bmt-be/src/bmt-be.persistence/ApplicationDbContext.cs).
+- Hiện trạng mã nguồn: [PermissionNames](../../bmt-be/src/bmt-be.contract/constants/PermissionNames.cs), [RoleCodes](../../bmt-be/src/bmt-be.contract/constants/RoleCodes.cs), [JwtExtensions](../../bmt-be/src/bmt-be.api/dependencyInjection/extensions/JwtExtensions.cs), [DbContext](../../bmt-be/src/bmt-be.persistence/ApplicationDbContext.cs).
 - [Bảng truy vết kiểm thử](../discovery/payment-technical-design.md). Không có External API: các thao tác này không gọi ngân hàng hoặc SePay.
+- Đặc tả Unit Test: UT-PAY-049 đến UT-PAY-062; UT-PAY-078 và UT-PAY-079 kiểm hủy và khôi phục gói giám sát không đọc hay ghi `Assignment`. Chưa có mã test hoặc kết quả chạy.
 
 ## Change Log
 
+- 2026-09-25 (lần 2): Bỏ `supervision.reassign` và thao tác đổi công trình khỏi mô tả quyền (BR-SUB-009). Ghi rõ hủy và khôi phục gói giám sát không đụng tới `Assignment` (BR-SUB-024/025 khoản 7), gói mới trên cùng công trình cần phân công riêng; bỏ bước khóa công trình khỏi thứ tự khóa vì khóa ngoại và index đã bảo vệ. Thêm ST-PAY-073; sửa liên kết mã nguồn `RoleNames` đã bị xóa.
 - 2026-09-25: Cập nhật theo nghiệp vụ đã chốt ngày 25/09/2026. Cho hủy gói giám sát `Completed`; partial unique index và kiểm xung đột khi khôi phục tính tập giữ chỗ `Assigned`/`Completed`; phản hồi khôi phục giám sát có thể trả `Completed`. Đổi "dự án"/`ProjectId` sang công trình (`ConstructionSite`). Hoàn thành/mở lại không còn là "luồng lịch sử" mà thuộc TDD-SUB-006. Bỏ bước khóa "profile quyền" khỏi Sequence Diagram cho khớp thứ tự khóa AccountCommerceState. Ghi hiện trạng code. Bổ sung tham chiếu STORY-SUB-003/AC-014, AC-015, ALT-04, EXC-09 và BR-RBAC-010.
 - 2026-09-20: Thay mô hình quyền `StaffAccessProfile` và `StaffPermission` bằng mô hình RBAC chuẩn ở [TDD-RBAC-001](TDD-RBAC-001.md). Giữ nguyên bốn mã quyền và toàn bộ nghiệp vụ hủy, khôi phục, audit và chống xử lý lặp. Bỏ khóa `FOR SHARE`/`FOR UPDATE` trên bản ghi quyền; việc chặn tức thì nay do dấu phiên và buộc đăng xuất đảm nhiệm, còn thu hồi vai trò có độ trễ theo [BR-RBAC-009](../businessrule/BR-RBAC-009.md).

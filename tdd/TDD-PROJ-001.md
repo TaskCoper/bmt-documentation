@@ -72,7 +72,7 @@ Hiện trạng đã kiểm tra: .NET 8, EF Core/Npgsql 8.0.0, PostgreSQL 15 tron
 ### Non-goals
 
 - Viết frontend, triển khai code/migration, tạo phong cách mẫu, chạy AI hoặc gửi email thật trong tác vụ thiết kế.
-- Liên kết bản dự toán với Công trình (`ConstructionSite`, thực thể riêng do khách tạo cho gói giám sát, chưa có đặc tả) hoặc với gói giám sát; xóa/ngừng dùng danh mục; chuyển bản cũ sang danh mục mới.
+- Liên kết bản dự toán với Công trình (`ConstructionSite`, thực thể riêng do khách tạo cho gói giám sát, đặc tả ở STORY-SITE-001 và [TDD-SITE-001](TDD-SITE-001.md); STORY-SITE-001/Out of Scope không gắn công trình với bản dự toán) hoặc với gói giám sát; xóa/ngừng dùng danh mục; chuyển bản cũ sang danh mục mới.
 - Nhật ký riêng cho thao tác đổi tên bản dự toán (chưa có yêu cầu).
 - Thêm ghi chú riêng, bảng đơn giá, công thức dự toán hoặc quyền AI theo cờ phong cách.
 
@@ -451,4 +451,5 @@ Upload/lấy danh mục chạy ngoài transaction ghi. Lỗi trước khi object
 
 ## Change Log
 
+- 2026-09-25 (lần 2): Non-goals dẫn tới đặc tả Công trình (STORY-SITE-001, TDD-SITE-001) thay cho ghi chú "chưa có đặc tả". Không đổi thiết kế bản dự toán.
 - 2026-09-25: Tách đổi tên bản dự toán khỏi lưu đầu vào theo BR-SUB-007 khoản 11 và BR-PROJ-003 khoản 9. Thêm `PATCH /api/v1/estimates/{estimateId}/name` với body `{name,nameVersion}`, trả `{name,nameVersion}`; thêm cột `Estimate.NameVersion` và mã lỗi `EstimateNameVersionConflict` (409). Đổi tên chỉ kiểm phiên Customer, quyền sở hữu và tên hợp lệ; không kiểm gói, lượt hay khóa AI, không tăng InputVersion và không dùng receipt. PUT /input bỏ `name`; GET trả thêm `name`, `nameVersion`, `canRename`; POST tạo trả thêm `nameVersion`. Ghi rõ các lỗi gói/lượt/khóa AI chỉ áp cho tạo và lưu đầu vào. Quyền quản trị danh mục kiểm theo mã `estimate.catalog.manage` (RequiresAssignment=false), không theo tên vai trò; thao tác khách kiểm AccountKind=Customer. Ghi đúng quan hệ với Công trình (`ConstructionSite`), bổ sung tham chiếu RBAC và ghi chú ST-PROJ-015 cần cập nhật.

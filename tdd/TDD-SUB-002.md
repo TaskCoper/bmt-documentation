@@ -84,7 +84,7 @@ Hiện trạng code đã kiểm tra ngày 25/09/2026: đã có migration `Design
 
 ## Architecture
 
-**Thay đổi tra cứu theo LIB:** phần TemplateDetail áp dụng [TDD-LIB-002](TDD-LIB-002.md): một lượt cho mỗi tài khoản/phiên bản, quyền xem lại độc lập kỳ; sửa tại chỗ đọc nội dung mới. Các thiết kế tạo AI/cấp kỳ không đổi. Bản sửa TDD này đang được bàn giao cùng TDD LIB, chưa viết/cập nhật Unit Test theo thiết kế mới.
+**Thay đổi tra cứu theo LIB:** phần TemplateDetail áp dụng [TDD-LIB-002](TDD-LIB-002.md): một lượt cho mỗi tài khoản/phiên bản, quyền xem lại độc lập kỳ; sửa tại chỗ đọc nội dung mới. Các thiết kế tạo AI/cấp kỳ không đổi. Đặc tả Unit Test cho phần tra cứu nằm ở UT-LIB-033 đến UT-LIB-050 theo TDD-LIB-002; chưa có mã test hoặc kết quả chạy.
 
 Luồng chính gồm ba việc: cấp kỳ sau khi giao dịch được xác minh; giữ một lượt khi nhận yêu cầu tạo thiết kế; chốt lượt khi tác vụ thành công, thất bại hoặc hết thời gian chờ. Tra cứu mẫu chỉ tính lượt sau khi đã chuẩn bị được nội dung và lưu kết quả thành công.
 

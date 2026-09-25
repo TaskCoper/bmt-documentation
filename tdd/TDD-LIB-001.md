@@ -53,7 +53,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ### Problem
 
-Người dùng đã chốt STORY-LIB-001–003 và BR-LIB-001–003; có 27 đặc tả ST-LIB-001–027. Việc tách tài liệu không thay nghiệp vụ, schema hoặc API đã đề xuất. Đây là thiết kế để chốt, chưa phải implementation hoặc kết quả kiểm thử.
+Người dùng đã chốt STORY-LIB-001–003 và BR-LIB-001–003; có 28 đặc tả ST-LIB-001–028. Việc tách tài liệu không thay nghiệp vụ, schema hoặc API đã đề xuất. Đây là thiết kế để chốt, chưa phải implementation hoặc kết quả kiểm thử.
 
 Tài liệu này sở hữu năm bảng nội dung/quản trị và các API quản lý, danh sách công khai. Quyền xem, tính lượt, lịch sử và tải nội dung bảo vệ nằm ở [TDD-LIB-002](TDD-LIB-002.md).
 
@@ -67,7 +67,7 @@ Tài liệu này sở hữu năm bảng nội dung/quản trị và các API qu�
 
 - Không thiết kế lại quota hoặc LibraryAccess; tham chiếu TDD-LIB-002.
 - Không yêu thích, xoay 3D, tìm kích thước, phân công mẫu, sửa bản đã thay thế hoặc xóa bản đã công bố.
-- Chưa triển khai code/migration, chưa viết Unit Test.
+- Chưa triển khai code/migration hoặc viết mã test. Đặc tả Unit Test UT-LIB-001–032 đã có nhưng chưa thực thi.
 
 ## Architecture
 
@@ -148,13 +148,13 @@ Chi tiết triển khai nội dung/quản trị thuộc tài liệu này; bướ
 
 **Nơi thực hiện quy tắc và kiểm chứng**
 
-| Quy tắc | Nơi thực hiện | Đặc tả hệ thống |
-|---|---|---|
-| BR-LIB-001: nội dung, kích thước, file | Validator, LibraryContentPolicy, asset verifier và CHECK | ST-LIB-001–005 |
-| BR-LIB-001: catalog và filter | ILibraryCatalogReader, FKs ghép, query projections | ST-LIB-010, ST-LIB-012–016 |
-| BR-LIB-002: sửa/công bố/ẩn/xóa | VersionService, mutex Template, receipt, state guard | ST-LIB-006–009, ST-LIB-011 |
+| Quy tắc | Nơi thực hiện | Đặc tả hệ thống | Đặc tả Unit Test |
+|---|---|---|---|
+| BR-LIB-001: nội dung, kích thước, file | Validator, LibraryContentPolicy, asset verifier và CHECK | ST-LIB-001–005 | UT-LIB-001–005, UT-LIB-009–011, UT-LIB-025 |
+| BR-LIB-001: catalog và filter | ILibraryCatalogReader, FKs ghép, query projections | ST-LIB-010, ST-LIB-012–016 | UT-LIB-006–008, UT-LIB-028–032 |
+| BR-LIB-002: sửa/công bố/ẩn/xóa | VersionService, mutex Template, receipt, state guard | ST-LIB-006–009, ST-LIB-011 | UT-LIB-012–024, UT-LIB-026–027 |
 
-Unit test sau khi TDD được chốt sẽ kiểm validator và policy; không dùng mock để kết luận mutex/UNIQUE/rollback đúng. Integration dùng PostgreSQL 15 thật và hai connection cho lượt cuối, cùng phiên bản, đổi kỳ, sửa/công bố chen lúc mở. Storage contract test kiểm object bất biến, lỗi trước/sau metadata, tải Range và định dạng thật. Bổ sung thực nghiệm công bố lúc xác nhận và upload lớn theo cấu hình hạ tầng; không báo đạt từ việc viết đặc tả.
+Đặc tả UT-LIB-001–032 kiểm validator, policy, service quản trị, receipt, thứ tự gọi khóa và truy vấn công khai ở biên unit; chưa có mã test hoặc kết quả chạy. Không dùng mock để kết luận mutex/UNIQUE/rollback đúng. Integration dùng PostgreSQL 15 thật và hai connection cho lượt cuối, cùng phiên bản, đổi kỳ, sửa/công bố chen lúc mở. Storage contract test kiểm object bất biến, lỗi trước/sau metadata, tải Range và định dạng thật. Bổ sung thực nghiệm công bố lúc xác nhận và upload lớn theo cấu hình hạ tầng; không báo đạt từ việc viết đặc tả.
 
 **Notes**:
 
@@ -261,7 +261,7 @@ LibraryAccess và phần mở rộng UsageOperation có nguồn duy nhất tại
 Ràng buộc bổ sung:
 
 - FK Version(TemplateId,BaseVersionId) → Version(TemplateId,Id), NULL với phiên bản đầu. Base phải là bản đã công bố của cùng mẫu tại thời điểm tạo nháp; kiểm trong handler.
-- CatalogRevisionId/BuildingTypeId cùng NULL hoặc cùng có giá trị. FK ghép tới CatalogBuildingType; FK ba cột (CatalogRevisionId,BuildingTypeId,FloorCount) tới CatalogFloor. Chưa có loại thì FloorCount và HasTum NULL. Policy kiểm cờ bật/tắt. Công bố kiểm đủ trường, trim Name có nội dung, cover là Image của phiên bản và có ít nhất một Image.
+- CatalogRevisionId/BuildingTypeId cùng NULL hoặc cùng có giá trị. FK ghép tới CatalogBuildingType; FK ba cột (CatalogRevisionId,BuildingTypeId,FloorCount) tới CatalogFloor. Chưa có loại thì FloorCount và HasTum NULL. Policy kiểm cờ bật/tắt: trường bị tắt phải để trống; gửi 0 tầng hoặc Không tum cho trường bị tắt bị từ chối 422 InvalidLibraryContent, không tự quy đổi về NULL (BR-LIB-001 khoản 4). Công bố kiểm đủ trường, trim Name có nội dung, cover là Image của phiên bản và có ít nhất một Image.
 - FK Version(Id,CoverAssetId) → VersionAsset(VersionId,AssetId), CoverAssetId NULL khi nháp chưa có cover. Tạo version trước với cover NULL, tạo link rồi gán cover trước công bố. Thay cover tạo link mới trước, đổi pointer rồi bỏ link cũ; không cần xóa toàn bộ link bằng SaveChanges một lần tùy ý.
 - CHECK Published dùng các điều kiện IS NOT NULL rõ ràng cho các trường bắt buộc, không dựa so sánh với NULL để chặn dữ liệu. CHECK Published yêu cầu Name có nội dung, DrawingKind, cả ba kích thước, catalog/type và cover NN. Chuỗi kiểm whitespace ở domain; không tự đặt max tên/mô tả nghiệp vụ. Giá trị có mặt trong nháp vẫn phải đúng định dạng/miền giá trị. Người dùng đã xác nhận cho lưu nháp thiếu thông tin; chỉ yêu cầu đủ trường trước công bố. NULL biểu diễn thông tin chưa nhập trong Draft, không dùng giá trị 0 hoặc chuỗi rỗng thay cho thiếu dữ liệu.
 - Reorder dùng vị trí tạm không trùng trong transaction rồi ghi vị trí đích trước commit; không dựa thứ tự UPDATE của EF để tránh UNIQUE. Có thể đổi hai bước SaveChanges trong cùng UoW, không commit giữa chừng.
@@ -422,7 +422,9 @@ Upload hoàn tất nhưng metadata lỗi để lại object chưa gắn, không 
 
 - [TDD-LIB-002](TDD-LIB-002.md): LibraryAccess, quota, lịch sử, tải có quyền và thứ tự khóa chung.
 
-- [Bảng System Test LIB](../discovery/library-system-test-coverage.md) — 27 đặc tả chưa thực thi.
+- Unit Test: UT-LIB-001 đến UT-LIB-032 cho nội dung, phiên bản, quyền quản trị và danh sách công khai; UT-LIB-033 đến UT-LIB-050 thuộc TDD-LIB-002. Đặc tả chưa thực thi, chưa có mã test.
+
+- [Bảng System Test LIB](../discovery/library-system-test-coverage.md) — đặc tả System Test chưa thực thi.
 - [TDD-PROJ-001](TDD-PROJ-001.md) — catalog revision, kiểu số, UoW và storage đề xuất.
 - [TDD-SUB-001](TDD-SUB-001.md) — BenefitDefinition và mã catalog.detail.
 - [TDD-SUB-002](TDD-SUB-002.md) — kỳ/quota; phần tra cứu được cập nhật theo TDD-LIB-002.

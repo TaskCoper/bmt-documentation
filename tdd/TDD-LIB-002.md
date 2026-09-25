@@ -53,7 +53,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ### Problem
 
-Người dùng đã chốt STORY-LIB-001–003 và BR-LIB-001–003; có 27 đặc tả ST-LIB-001–027. Việc tách tài liệu không thay nghiệp vụ, schema hoặc API đã đề xuất. Đây là thiết kế để chốt, chưa phải implementation hoặc kết quả kiểm thử.
+Người dùng đã chốt STORY-LIB-001–003 và BR-LIB-001–003; có 28 đặc tả ST-LIB-001–028. Việc tách tài liệu không thay nghiệp vụ, schema hoặc API đã đề xuất. Đây là thiết kế để chốt, chưa phải implementation hoặc kết quả kiểm thử.
 
 Tài liệu này sở hữu LibraryAccess, phần bổ sung UsageOperation và các API tra cứu/lịch sử/tải file. Định nghĩa nội dung, file, phiên bản và catalog được dùng lại từ [TDD-LIB-001](TDD-LIB-001.md). Phần tra cứu cũ của TDD-SUB-002 được thay bằng hợp đồng ở đây.
 
@@ -67,7 +67,7 @@ Tài liệu này sở hữu LibraryAccess, phần bổ sung UsageOperation và c
 
 - Không định nghĩa lại nội dung hoặc quản trị phiên bản của TDD-LIB-001.
 - Không thay thiết kế AI/cấp kỳ ngoài phần TemplateDetail.
-- Không tự đặt hạn lưu quyền xem, vận hành storage hoặc triển khai code/Unit Test.
+- Không tự đặt hạn lưu quyền xem, vận hành storage hoặc triển khai code/mã test. Đặc tả Unit Test UT-LIB-033–050 đã có nhưng chưa thực thi.
 
 ## Architecture
 
@@ -145,12 +145,12 @@ Upload, kiểm định dạng và schema asset do TDD-LIB-001 định nghĩa. TD
 
 **Nơi thực hiện quy tắc và kiểm chứng**
 
-| Quy tắc | Nơi thực hiện | Đặc tả hệ thống |
-|---|---|---|
-| BR-LIB-003: lượt/quyền/lịch sử | AccessReader + quota service + transaction | ST-LIB-017–023, ST-LIB-026–027 |
-| BR-LIB-003: tài nguyên và cách ly | Download policy; account từ phiên | ST-LIB-024–025 |
+| Quy tắc | Nơi thực hiện | Đặc tả hệ thống | Đặc tả Unit Test |
+|---|---|---|---|
+| BR-LIB-003: lượt/quyền/lịch sử | AccessReader + quota service + transaction | ST-LIB-017–023, ST-LIB-026–028 | UT-LIB-033–043, UT-LIB-047–049 |
+| BR-LIB-003: tài nguyên và cách ly | Download policy; account từ phiên | ST-LIB-024–025 | UT-LIB-044–046, UT-LIB-050 |
 
-Unit test sau khi TDD được chốt sẽ kiểm validator và policy; không dùng mock để kết luận mutex/UNIQUE/rollback đúng. Integration dùng PostgreSQL 15 thật và hai connection cho lượt cuối, cùng phiên bản, đổi kỳ, sửa/công bố chen lúc mở. Storage contract test kiểm object bất biến, lỗi trước/sau metadata, tải Range và định dạng thật. Bổ sung thực nghiệm công bố lúc xác nhận và upload lớn theo cấu hình hạ tầng; không báo đạt từ việc viết đặc tả.
+Đặc tả UT-LIB-033–050 kiểm luồng mở, quyền xem, lượt, lịch sử và tải tài nguyên ở biên unit; chưa có mã test hoặc kết quả chạy. Không dùng mock để kết luận mutex/UNIQUE/rollback đúng. Integration dùng PostgreSQL 15 thật và hai connection cho lượt cuối, cùng phiên bản, đổi kỳ, sửa/công bố chen lúc mở. Storage contract test kiểm object bất biến, lỗi trước/sau metadata, tải Range và định dạng thật. Bổ sung thực nghiệm công bố lúc xác nhận và upload lớn theo cấu hình hạ tầng; không báo đạt từ việc viết đặc tả.
 
 **Notes**:
 
@@ -295,8 +295,8 @@ Route đề xuất; AccountId lấy từ phiên. POST mở cần CSRF/Origin nh�
 - **POST** `/api/v1/design-templates/{templateId}/open` — Phiên khách; `{versionId,expectedEditVersion,confirmUse}`. Trả `{templateId,versionId,number,editVersion,charged,detailUrl}`. Đã có Access thì charged=false, không yêu cầu confirmUse hoặc gói; chưa có phải confirmUse=true và điều kiện hiện hành.
 - **GET** `/api/v1/me/library-history` — Phiên khách; phân trang các version có Access, sort ngày mở đầu tiên DESC rồi VersionId DESC; mỗi version một dòng, có tên/cover theo nội dung version đó, kể cả hidden/old. Không dùng public thumbnail route cho cover cũ, dùng route file có quyền.
 - **GET** `/api/v1/library-versions/{versionId}` — Phiên khách có Access hoặc Staff có library.manage; trả metadata, cover reference và URL trang assets. Không tự mua quyền xem qua GET.
-- **GET** `/api/v1/library-versions/{versionId}/assets` — Cùng quyền đọc version, query pageIndex/pageSize/expectedEditVersion, phân trang theo Position,AssetId; trả editVersion và assetId,kind,name,size,contentUrl; không trả storage key.
-- **GET** `/api/v1/library-versions/{versionId}/assets/{assetId}/content` — Kiểm quyền version và membership; stream ảnh hoặc download attachment, hỗ trợ Range hợp lệ. Không tính lượt.
+- **GET** `/api/v1/library-versions/{versionId}/assets` — Cùng quyền đọc version, query pageIndex/pageSize/expectedEditVersion, phân trang theo Position,AssetId; trả editVersion và assetId,kind,name,size,contentUrl; không trả storage key. expectedEditVersion khác EditVersion hiện tại thì trả 409 LibraryVersionChanged để client tải lại từ trang đầu, không ghép danh sách của hai lần sửa.
+- **GET** `/api/v1/library-versions/{versionId}/assets/{assetId}/content` — Kiểm quyền version và membership; stream ảnh hoặc download attachment, hỗ trợ Range hợp lệ. Không tính lượt. AssetId không thuộc phiên bản, kể cả tài nguyên đã gỡ khi sửa tại chỗ, trả 404 LibraryNotFound trước khi gọi storage.
 
 ### Examples
 
@@ -319,9 +319,9 @@ Mở lại cùng VersionId trả charged=false kể cả key khác và gói hế
 
 - **Unauthorized** (401): Phiên thiếu/không hợp lệ; dùng mã xác thực hiện có khi tích hợp.
 - **AccessForbidden** (403): Thiếu library.manage hoặc không có Access cho đọc nội dung; không trả tài nguyên bảo vệ.
-- **LibraryNotFound** (404): Mẫu/version không tồn tại hoặc không có bản public trong route công khai.
+- **LibraryNotFound** (404): Mẫu/version không tồn tại, không có bản public trong route công khai, hoặc tài nguyên không thuộc phiên bản được yêu cầu.
 - **LibraryHidden** (409): Mẫu bị ẩn khi mở mới; không áp dụng để chặn Access đã có.
-- **LibraryVersionChanged** (409): Current hoặc EditVersion đổi từ lúc chuẩn bị/xác nhận.
+- **LibraryVersionChanged** (409): Current hoặc EditVersion đổi từ lúc chuẩn bị/xác nhận, hoặc đổi giữa hai lần tải trang tài nguyên.
 - **LibraryConfirmationRequired** (409): Mở phiên bản chưa xem mà chưa xác nhận dùng lượt.
 - **LibraryStorageUnavailable** (503): Không chuẩn bị/upload/đọc được tài nguyên; không tính lượt nếu trước commit mở đầu.
 - **QuotaUnavailable** (409): Kỳ có quyền nhưng không còn lượt sẵn dùng; dùng hợp đồng SUB.
@@ -379,7 +379,9 @@ Chuẩn bị nội dung lỗi trước commit không tính lượt. Lỗi tải 
 
 - [TDD-LIB-001](TDD-LIB-001.md): nguồn duy nhất cho nội dung, phiên bản, asset, receipt và API quản trị/công khai.
 
-- [Bảng System Test LIB](../discovery/library-system-test-coverage.md) — 27 đặc tả chưa thực thi.
+- Unit Test: UT-LIB-033 đến UT-LIB-050 cho mở mẫu, quyền xem, lượt, lịch sử và tải tài nguyên; UT-LIB-001 đến UT-LIB-032 thuộc TDD-LIB-001. Đặc tả chưa thực thi, chưa có mã test.
+
+- [Bảng System Test LIB](../discovery/library-system-test-coverage.md) — đặc tả System Test chưa thực thi.
 - [TDD-PROJ-001](TDD-PROJ-001.md) — catalog revision, kiểu số, UoW và storage đề xuất.
 - [TDD-SUB-001](TDD-SUB-001.md) — BenefitDefinition và mã catalog.detail.
 - [TDD-SUB-002](TDD-SUB-002.md) — kỳ/quota; phần tra cứu được cập nhật theo TDD này.
