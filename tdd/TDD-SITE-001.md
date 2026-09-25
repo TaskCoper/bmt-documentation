@@ -55,9 +55,9 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 Người dùng đã chốt nghiệp vụ Công trình ngày 25/09/2026 trong STORY-SITE-001, STORY-SITE-002 và BR-SITE-001 đến BR-SITE-003. Công trình là nơi thi công thật mà khách muốn được giám sát, là thực thể riêng, khác bản dự toán. Khách tự tạo công trình miễn phí, chỉ nhập tên và địa chỉ, sửa được lúc nào cũng được và chỉ xóa được công trình chưa từng có gói giám sát gắn vào. Nhân viên không tạo, sửa hay xóa hộ; họ chỉ xem theo phạm vi quyền.
 
-Công trình là điểm neo của hai tính năng đã có code: gói giám sát gắn cố định vào một công trình (BR-SUB-009, BR-SUB-022) và nhân viên phụ trách theo từng gói (BR-RBAC-013). Hiện chưa có bảng công trình nào, nên hai tính năng đó đang tham chiếu tới một định danh không kiểm được.
+Công trình là điểm neo của hai tính năng đã có code: gói giám sát gắn cố định vào một công trình (BR-SUB-009, BR-SUB-022) và nhân viên phụ trách theo từng gói (BR-RBAC-013). Trước đợt này chưa có bảng công trình nào, nên hai tính năng đó tham chiếu tới một định danh không kiểm được. Thiết kế dưới đây đã được triển khai ngày 25/09/2026 trên nhánh `feature/construction-site` của `bmt-be`.
 
-Hiện trạng code đã kiểm ngày 25/09/2026:
+Hiện trạng code trước khi triển khai, đã kiểm ngày 25/09/2026:
 
 | Thành phần | Hiện trạng và ảnh hưởng |
 |---|---|
@@ -67,8 +67,24 @@ Hiện trạng code đã kiểm ngày 25/09/2026:
 | `SupervisionAssignmentFlow` | Khóa tài khoản chủ gói bằng `IDesignSubscriptionStore.LockAccountAsync`, tức `SELECT ... FROM "User" ... FOR UPDATE`, rồi mới đọc chủ công trình qua cổng trên. TDD-SUB-004 đổi khóa này sang `AccountCommerceState` theo TDD-PAY-001. |
 | Route và policy (`src/bmt-be.presentation/apis/`, `JwtExtensions.cs`) | Tài nguyên của khách dùng tiền tố `/api/v1/me/...`; màn hình nhân viên dùng `/api/v1/admin/...`. Policy mặc định đòi phiên đã xác minh; mỗi mã quyền có một policy cùng tên. Chưa có policy "có một trong hai quyền". |
 | Lỗi và ánh xạ (`ExceptionHandlingMiddleware.cs`, `ApiEndpoint.cs`) | Validator trả 422 dạng ProblemDetails. `NotFoundException` → 404, `NotPermissionException` → 403, `ConflictException` → 409. Vi phạm unique `23505` rơi vào một nhánh 409 chung với mã `ServerError`; chưa có ánh xạ theo tên ràng buộc và chưa bắt lỗi khóa ngoại `23503`. |
-| Quy ước chuẩn hóa tên | `User.NormalizedFirstName`, `NormalizedLastName` lưu bản chữ hoa do ứng dụng tính. |
+| Quy ước chuẩn hóa tên | `User.NormalizedFirstName`, `NormalizedLastName` do `IProcessText.NormalizeText` tính: chuyển chữ thường và bỏ dấu. Không dùng làm tiền lệ cho tên công trình, vì bỏ dấu sẽ làm "Nhà phố" trùng "Nha pho", trái BR-SITE-001. |
 | `Assignment` (`AssignmentConfiguration.cs`) | CHECK `ResourceType IN ('Customer','Project')`. Việc đổi sang loại tài nguyên gói giám sát thuộc TDD-RBAC-003. |
+
+Đã triển khai ngày 25/09/2026 ở commit `182e2a8` trên nhánh `feature/construction-site` (đường dẫn tính từ `bmt-be/src/`):
+
+| Thành phần | Nơi đặt |
+|---|---|
+| Entity `ConstructionSite`, hàm `ConstructionSite.NormalizeName` | `bmt-be.domain/entities/ConstructionSite.cs` |
+| Cổng `IConstructionSiteOwnershipReader`, `IConstructionSiteRowLocker`, `IDatabaseErrorReader` | `bmt-be.domain/abstractions/repositories/` |
+| Cài đặt `ConstructionSiteLocks` (cả hai cổng khóa), `NpgsqlDatabaseErrorReader` | `bmt-be.persistence/repositories/` |
+| Cấu hình EF `ConstructionSiteConfiguration`; tên ràng buộc `DatabaseConstraintNames` | `bmt-be.persistence/configurations/`; `bmt-be.contract/constants/DatabaseConstraintNames.cs` |
+| Contract, validator, `ConstructionSiteText`, `ConstructionSiteErrorCodes` | `bmt-be.contract/services/constructionSite/`; `bmt-be.contract/constants/ConstructionSiteErrorCodes.cs` |
+| Handler lệnh và truy vấn | `bmt-be.application/usecases/commands/constructionSite/`, `usecases/queries/constructionSite/` |
+| Lớp ánh xạ lỗi `ConstraintViolationPipelineBehavior` | `bmt-be.application/behaviors/` |
+| Module Carter `ConstructionSiteApi`, `ConstructionSiteAdminApi` | `bmt-be.presentation/apis/constructionSite/ConstructionSiteApi.cs` |
+| Migration | `bmt-be.persistence/Migrations/20260925074152_ConstructionSiteAndPackageAssignment.cs`, gộp với thay đổi của TDD-SUB-004, TDD-RBAC-001 và TDD-RBAC-003 |
+
+`IProjectOwnershipReader` và bản tạm `UnavailableProjectOwnershipReader` đã xóa.
 
 Các yêu cầu khó của thiết kế:
 
@@ -91,7 +107,7 @@ Các yêu cầu khó của thiết kế:
 - Trạng thái công trình, nhân viên tạo, sửa hoặc xóa hộ, hiện tên nhân viên phụ trách cho khách, địa chỉ tách cấp hành chính, liên kết với bản dự toán, giới hạn số công trình. Các mục này nằm trong Out of Scope của STORY-SITE-001 và STORY-SITE-002.
 - Phân trang, thứ tự sắp xếp, bộ lọc và tìm kiếm theo nghiệp vụ: chưa được chốt. Phân trang dưới đây là quyết định kỹ thuật theo khuôn `PagedResult` hiện có.
 - Gán gói vào công trình và đổi tên cột của `SupervisionGrant`: thuộc [TDD-SUB-004](TDD-SUB-004.md). Phân công theo gói và danh sách gói cần chia lại: thuộc [TDD-RBAC-003](TDD-RBAC-003.md). Tài liệu này chỉ mô tả phần các thiết kế đó cần từ bảng công trình.
-- Chưa triển khai code và chưa tạo migration. Người dùng chốt TDD ngày 25/09/2026; đã có đặc tả Unit Test UT-SITE-001 đến UT-SITE-025, chưa có mã test hoặc kết quả chạy.
+- Người dùng chốt TDD ngày 25/09/2026. Code, migration và mã test đã có; kết quả chạy ngày 25/09/2026: unit test 338/338 và integration test 149/149 trên PostgreSQL 15 đạt. Chưa chạy System Test và chưa áp dụng migration lên môi trường dev hay production.
 
 ## Architecture
 
@@ -105,43 +121,47 @@ flowchart LR
     SQ --> PG
     SQ --> AS[(Assignment<br/>SupervisionGrant)]
     CH --> SG[(SupervisionGrant)]
-    GA[SupervisionAssignmentFlow<br/>TDD-SUB-004] --> OR[IConstructionSiteOwnershipReader]
+    GA[AssignSupervisionGrantCommandHandler<br/>TDD-SUB-004] --> OR[IConstructionSiteOwnershipReader]
     OR --> PG
-    CH -.->|23505, 23503| TR[Anh xa loi theo ten rang buoc<br/>TDD-RBAC-003]
+    CH -.->|23505, 23503| TR[ConstraintViolationPipelineBehavior<br/>anh xa loi theo ten rang buoc]
 ```
 
 ### Thành phần và trách nhiệm
 
-| Thành phần (dự kiến) | Trách nhiệm |
+| Thành phần | Trách nhiệm |
 |---|---|
-| `ConstructionSiteApi` (`presentation/apis/construction-site/`) | Năm route của khách dưới `/api/v1/me/construction-sites`, policy mặc định. |
-| `ConstructionSiteAdminApi` | Hai route chỉ đọc cho nhân viên dưới `/api/v1/admin/construction-sites`, policy mặc định; phạm vi xem được xác định trong handler. |
-| `CreateConstructionSiteCommandHandler`, `UpdateConstructionSiteCommandHandler`, `DeleteConstructionSiteCommandHandler` | Kiểm người gọi là tài khoản khách hàng, kiểm chủ sở hữu, chuẩn hóa dữ liệu, kiểm trùng tên, kiểm version, kiểm điều kiện xóa. |
+| `ConstructionSiteApi` (`presentation/apis/constructionSite/`) | Năm route của khách dưới `/api/v1/me/construction-sites`, policy mặc định. |
+| `ConstructionSiteAdminApi` (cùng file) | Hai route chỉ đọc cho nhân viên dưới `/api/v1/admin/construction-sites`, policy mặc định; phạm vi xem được xác định trong handler. |
+| `CreateConstructionSiteCommandHandler`, `UpdateConstructionSiteCommandHandler`, `DeleteConstructionSiteCommandHandler` | Kiểm người gọi là tài khoản khách hàng qua `ConstructionSiteAccess.RequireCustomerAsync`, kiểm chủ sở hữu, chuẩn hóa dữ liệu, kiểm trùng tên, kiểm version, kiểm điều kiện xóa. |
 | `GetMyConstructionSitesQueryHandler`, `GetMyConstructionSiteQueryHandler` | Chỉ đọc công trình của chính khách, kèm các gói đã gắn và trạng thái gói; không đọc bảng phân công. |
-| `GetConstructionSitesForStaffQueryHandler`, `GetConstructionSiteForStaffQueryHandler` | Xác định phạm vi từ claim quyền, rồi đọc danh sách hoặc chi tiết trong phạm vi đó. |
-| `ConstructionSiteText` (`contract/services/construction-site/`) | Một hàm chuẩn hóa dùng chung cho validator và handler: chuẩn Unicode NFC, bỏ khoảng trắng đầu và cuối, tính `NormalizedName`. |
-| `IConstructionSiteOwnershipReader` (`application/abstractions/`) và bản cài ở `persistence/repositories/` | Đọc chủ công trình và giữ khóa để gói không gắn vào công trình đang bị xóa. Thay `IProjectOwnershipReader`. |
+| `GetConstructionSitesForStaffQueryHandler`, `GetConstructionSiteForStaffQueryHandler` | Xác định phạm vi từ claim quyền bằng `ConstructionSiteStaffScope`, rồi đọc danh sách hoặc chi tiết trong phạm vi đó. Phần đọc gói kèm tên gói dùng chung `ConstructionSiteReadModel`. |
+| `ConstructionSiteText.Clean` (`contract/services/constructionSite/`) | Hàm làm sạch dùng chung cho validator và handler: chuẩn Unicode NFC rồi bỏ khoảng trắng đầu và cuối. |
+| `ConstructionSite.NormalizeName` (entity ở domain) | Tính khóa so trùng `NormalizedName` bằng `ToUpperInvariant`. Handler tạo và sửa luôn gán `Name` và `NormalizedName` từ cùng một giá trị đã làm sạch. |
+| `IConstructionSiteOwnershipReader`, `IConstructionSiteRowLocker` (`domain/abstractions/repositories/`), cài chung trong `persistence/repositories/ConstructionSiteLocks.cs` | Đọc chủ công trình và giữ khóa để gói không gắn vào công trình đang bị xóa; khóa dòng công trình trước khi xóa. Thay `IProjectOwnershipReader`. Cổng đặt ở domain vì persistence hiện thực nó mà không tham chiếu application, giống `IAssignmentRowLocker` và `IDesignSubscriptionStore`. |
+| `ConstraintViolationPipelineBehavior` (`application/behaviors/`), `IDatabaseErrorReader` (domain) và `NpgsqlDatabaseErrorReader` (persistence) | Đổi lỗi `23505`, `23503` và lỗi concurrency token thành mã lỗi nghiệp vụ, theo tên ràng buộc và theo lệnh đang chạy. Xem mục "Ánh xạ lỗi database". |
 | `ConstructionSiteErrorCodes` (`contract/constants/`) | Các mã lỗi ở mục Error Codes. |
 
-Tên thư mục tính năng là `construction-site` ở cả bốn tầng contract, application, presentation và test, theo quy ước một tính năng một tên thư mục.
+Tên thư mục tính năng là `constructionSite` ở cả bốn tầng contract, application, presentation và test, theo quy ước một tính năng một tên thư mục. Không dùng `construction-site` vì namespace C# không có dấu gạch; repo đã đặt thư mục nhiều từ theo camelCase như `processText`, `backgroundJobs`.
 
 ### Chuẩn hóa tên và kiểm trùng
 
 BR-SITE-001 đòi tên không trùng giữa các công trình của cùng khách, so sau khi bỏ khoảng trắng đầu và cuối, không phân biệt chữ hoa, chữ thường. Thiết kế lưu thêm cột `NormalizedName` và đặt index duy nhất `UX_ConstructionSite_OwnerNormalizedName` trên `(OwnerUserId, NormalizedName)`.
 
-`ConstructionSiteText` tính giá trị theo đúng một thứ tự, dùng cho cả validator lẫn handler:
+Tên và địa chỉ đi qua các bước dưới đây theo đúng thứ tự. Bước 1–2 do `ConstructionSiteText.Clean` làm, dùng chung cho validator và handler; bước 4 do `ConstructionSite.NormalizeName` làm:
 
 1. Đưa chuỗi về dạng Unicode NFC. Bàn phím tiếng Việt có thể gửi "à" thành một ký tự hoặc thành "a" cộng dấu huyền rời; hai cách gõ trông giống nhau nhưng khác mã. NFC gộp về một dạng để hai tên nhìn giống nhau thì so bằng nhau, và độ dài đếm đúng số chữ người dùng thấy.
 2. Bỏ khoảng trắng đầu và cuối bằng `string.Trim()`. Khoảng trắng ở giữa giữ nguyên, nên "Nhà  phố" (hai dấu cách) khác "Nhà phố", đúng BR-SITE-001/Notes.
 3. Kiểm có nội dung và độ dài: tên 1–200, địa chỉ 1–500, tính theo `string.Length` sau hai bước trên. Không tự cắt ngắn.
-4. `NormalizedName = Name.ToUpperInvariant()`, theo cùng cách `User.NormalizedFirstName` đang dùng. Chữ có dấu vẫn giữ dấu: "Nhà phố" thành "NHÀ PHỐ", còn "Nha pho" thành "NHA PHO", nên hai tên này khác nhau.
+4. `NormalizedName = Name.ToUpperInvariant()`. Chữ có dấu vẫn giữ dấu: "Nhà phố" thành "NHÀ PHỐ", còn "Nha pho" thành "NHA PHO", nên hai tên này khác nhau. Không dùng `IProcessText.NormalizeText` mà `User.NormalizedFirstName` đang dùng, vì hàm đó bỏ dấu. `ToUpperInvariant` không phụ thuộc culture của máy chủ và giữ nguyên độ dài chuỗi.
 
-Vì sao không dùng index trên biểu thức `upper("Name")` của PostgreSQL: hàm đó phụ thuộc collation của database, còn phép kiểm trước ở handler chạy bằng .NET. Hai bên có thể lệch nhau ở một vài ký tự, và khi đó handler báo "chưa trùng" nhưng index lại chặn, hoặc ngược lại. Lưu kết quả do ứng dụng tính thì hai lớp kiểm dùng đúng một hàm. Đánh đổi là cột `NormalizedName` là dữ liệu suy ra từ `Name`; nó chỉ được ghi ở một chỗ là phương thức đặt tên của entity, và mỗi lần đổi `Name` đều tính lại.
+`ConstructionSiteText.Clean` trả `null` khi chuỗi có ký tự thay thế lẻ không chuẩn hóa được; validator coi đó là giá trị không hợp lệ.
+
+Vì sao không dùng index trên biểu thức `upper("Name")` của PostgreSQL: hàm đó phụ thuộc collation của database, còn phép kiểm trước ở handler chạy bằng .NET. Hai bên có thể lệch nhau ở một vài ký tự, và khi đó handler báo "chưa trùng" nhưng index lại chặn, hoặc ngược lại. Lưu kết quả do ứng dụng tính thì hai lớp kiểm dùng đúng một hàm. Đánh đổi là cột `NormalizedName` là dữ liệu suy ra từ `Name`; nó chỉ được tính ở `ConstructionSite.NormalizeName`, và handler tạo, sửa tính lại mỗi lần gán `Name`.
 
 Kiểm trùng có hai lớp, giống cách TDD-RBAC-003 làm với phân công:
 
 1. Handler tạo và sửa truy vấn trước xem khách đã có công trình khác cùng `NormalizedName` chưa. Có thì trả 409 `ConstructionSiteNameTaken`. Khi sửa, điều kiện loại chính công trình đang sửa (`Id <> @siteId`), nên khách đổi "nhà phố" thành "Nhà Phố" của chính công trình đó vẫn được (STORY-SITE-001/AC-013).
-2. Index duy nhất là lớp chặn cuối. Tình huống: khách bấm tạo "Nhà mẹ" hai lần liên tiếp trên hai thiết bị. Cả hai handler cùng thấy chưa có tên này và cùng chèn. PostgreSQL chặn câu `INSERT` đến sau bằng lỗi `23505`. Lớp ánh xạ lỗi theo tên ràng buộc mà TDD-RBAC-003 dự kiến đặt bao ngoài `TransactionPipelineBehavior` nhận tên `UX_ConstructionSite_OwnerNormalizedName` và trả 409 `ConstructionSiteNameTaken`, thay vì nhánh 409 chung của middleware. Kết quả đúng ST-SITE-019: chỉ một công trình "Nhà mẹ".
+2. Index duy nhất là lớp chặn cuối. Tình huống: khách bấm tạo "Nhà mẹ" hai lần liên tiếp trên hai thiết bị. Cả hai handler cùng thấy chưa có tên này và cùng chèn. PostgreSQL chặn câu `INSERT` đến sau bằng lỗi `23505`. `ConstraintViolationPipelineBehavior`, đăng ký bọc ngoài `TransactionPipelineBehavior`, nhận tên `UX_ConstructionSite_OwnerNormalizedName` và trả 409 `ConstructionSiteNameTaken`, thay vì nhánh 409 chung của middleware. Kết quả đúng ST-SITE-019: chỉ một công trình "Nhà mẹ".
 
 Công trình bị xóa là xóa cứng, nên dòng biến mất khỏi index và khách tạo lại được tên cũ, đúng BR-SITE-001/Except. Khách khác nhau được trùng tên vì `OwnerUserId` là cột đầu của index.
 
@@ -160,14 +180,14 @@ Vì sao ghép thêm chủ sở hữu thay vì chỉ trỏ tới `Id`: khóa ngo�
 Tài liệu này dựa vào khóa ngoại đó theo ba cách:
 
 1. **Kiểm trước ở handler xóa** để trả mã lỗi rõ nghĩa 409 `ConstructionSiteInUse`.
-2. **Khóa ngoại là lớp chặn cuối.** Nếu một đường ghi nào đó bỏ qua bước kiểm, PostgreSQL vẫn từ chối câu `DELETE` bằng lỗi `23503`. Cùng một khóa ngoại cho ra lỗi `23503` ở hai tình huống khác nhau: khi xóa công trình còn gói (công trình đang được dùng) và khi ghi gói vào công trình không tồn tại hoặc khác chủ (không thấy công trình). Vì vậy lớp ánh xạ lỗi phải xét cả tên ràng buộc lẫn lệnh đang chạy: `DeleteConstructionSiteCommand` đổi thành 409 `ConstructionSiteInUse`, còn lệnh gán gói đổi thành 404 `ConstructionSiteNotFound` theo TDD-SUB-004.
+2. **Khóa ngoại là lớp chặn cuối.** Nếu một đường ghi nào đó bỏ qua bước kiểm, PostgreSQL vẫn từ chối câu `DELETE` bằng lỗi `23503`. Cùng một khóa ngoại cho ra lỗi `23503` ở hai tình huống khác nhau: khi xóa công trình còn gói (công trình đang được dùng) và khi ghi gói vào công trình không tồn tại hoặc khác chủ (không thấy công trình). Vì vậy `ConstraintViolationPipelineBehavior` xét cả tên ràng buộc lẫn lệnh đang chạy: `DeleteConstructionSiteCommand` đổi thành 409 `ConstructionSiteInUse`, còn lệnh gán gói đổi thành 404 `ConstructionSiteNotFound` theo TDD-SUB-004.
 3. **Khóa ngoại tự tạo khóa dòng giữa xóa và gắn gói.** Khi một câu lệnh ghi `ConstructionSiteId = X` vào `SupervisionGrant`, PostgreSQL kiểm dòng cha còn tồn tại và giữ khóa `FOR KEY SHARE` trên dòng X tới hết transaction. Khóa này xung đột với khóa mà `DELETE` cần, nên hai thao tác không thể cùng thành công.
 
-**Thứ tự khóa.** Luồng gán gói ở TDD-SUB-004 khóa theo thứ tự `AccountCommerceState` của chủ gói → dòng `ConstructionSite` đích (`FOR KEY SHARE`, qua `IConstructionSiteOwnershipReader`) → `SupervisionGrant` (`FOR UPDATE`) → biên nhận. Handler xóa công trình chỉ khóa đúng một dòng `ConstructionSite` (`FOR UPDATE`), không khóa `AccountCommerceState` và không khóa gói; việc kiểm gói tham chiếu do câu kiểm và khóa ngoại làm. Hai chuỗi khóa chỉ gặp nhau ở dòng công trình, nên không tạo vòng chờ.
+**Thứ tự khóa.** Luồng gán gói ở TDD-SUB-004 khóa theo thứ tự tài khoản chủ gói → dòng `ConstructionSite` đích (`FOR KEY SHARE`, qua `IConstructionSiteOwnershipReader`) → gói → biên nhận. Code hiện khóa dòng `User` của chủ gói qua `IDesignSubscriptionStore.LockAccountAsync`, vì bảng `AccountCommerceState` của TDD-PAY-001 chưa có; gói được đọc lại có theo dõi thay đổi sau khóa tài khoản (TDD-SUB-004/Architecture). Handler xóa công trình chỉ khóa đúng một dòng `ConstructionSite` (`FOR UPDATE`, qua `IConstructionSiteRowLocker`), không khóa tài khoản và không khóa gói; việc kiểm gói tham chiếu do câu kiểm và khóa ngoại làm. Hai chuỗi khóa chỉ gặp nhau ở dòng công trình, nên không tạo vòng chờ.
 
 Tình huống của ST-SITE-020: công trình B của U1 chưa từng có gói; U1 xóa B trong lúc gắn gói G4 vào B.
 
-- Nếu gắn gói chạy trước: luồng gán khóa `AccountCommerceState` của U1, rồi cổng `IConstructionSiteOwnershipReader` đọc B kèm `FOR KEY SHARE`. Handler xóa khóa B bằng `FOR UPDATE` thì phải chờ. Sau khi gắn gói commit, câu kiểm của handler xóa chạy sau khi lấy được khóa, thấy G4 đã trỏ vào B, và trả 409 `ConstructionSiteInUse`.
+- Nếu gắn gói chạy trước: luồng gán khóa tài khoản của U1, rồi cổng `IConstructionSiteOwnershipReader` đọc B kèm `FOR KEY SHARE`. Handler xóa khóa B bằng `FOR UPDATE` thì phải chờ. Sau khi gắn gói commit, câu kiểm của handler xóa chạy sau khi lấy được khóa, thấy G4 đã trỏ vào B, và trả 409 `ConstructionSiteInUse`.
 - Nếu xóa chạy trước: handler xóa giữ `FOR UPDATE` trên B. Cổng đọc chủ công trình phải chờ; khi xóa commit, dòng B không còn, cổng trả "không có công trình", và luồng gán trả 404 `ConstructionSiteNotFound`. G4 vẫn chưa gán.
 
 Ở mức cô lập `READ COMMITTED` mặc định, mỗi câu lệnh thấy dữ liệu đã commit tại lúc câu lệnh bắt đầu. Vì vậy câu kiểm "có gói nào trỏ vào B không" phải chạy **sau** khi handler xóa đã lấy khóa dòng B, không chạy trước.
@@ -185,15 +205,16 @@ Task<Guid?> LockOwnerAccountIdAsync(Guid constructionSiteId, CancellationToken c
 - Trả `OwnerUserId` của công trình, hoặc `null` nếu không có công trình đó.
 - Chạy `SELECT "OwnerUserId" FROM "ConstructionSite" WHERE "Id" = @id FOR KEY SHARE` trên cùng `DbContext` và cùng transaction của handler gọi. Khóa giữ tới hết transaction.
 - Dùng `FOR KEY SHARE` chứ không dùng `FOR SHARE`. `FOR KEY SHARE` chỉ chặn xóa dòng hoặc sửa cột khóa; khách đổi địa chỉ công trình cùng lúc không phải chờ. Chủ sở hữu không bao giờ đổi, nên chặn xóa là đủ để kết quả đọc đúng tới lúc commit.
-- Bản cài `ConstructionSiteOwnershipReader` đặt ở `persistence/repositories/` vì dùng SQL thô, giống `DesignSubscriptionStore.LockAccountAsync`. Đăng ký thay `UnavailableProjectOwnershipReader` và xóa bản tạm đó.
+- Bản cài `ConstructionSiteLocks` đặt ở `persistence/repositories/` vì dùng SQL thô qua `Database.SqlQuery`, giống `DesignSubscriptionStore.LockAccountAsync`. Cùng lớp này cài `IConstructionSiteRowLocker.LockOwnedForUpdateAsync(siteId, ownerUserId)` cho handler xóa: `SELECT "Id" ... WHERE "Id" = @id AND "OwnerUserId" = @owner FOR UPDATE`, trả `false` khi không có dòng khớp. `UnavailableProjectOwnershipReader` đã xóa.
+- Cổng đặt ở `bmt-be.domain/abstractions/repositories/`, không ở application, vì persistence không tham chiếu application.
 
-Luồng gán gói vẫn tự so `OwnerUserId` với chủ gói và trả cùng một mã 404 cho "không có công trình" và "công trình của người khác", như `SupervisionAssignmentFlow` đang làm. Cổng không nhận hay tin `ownerId` do client gửi.
+`AssignSupervisionGrantCommandHandler` tự so `OwnerUserId` với chủ gói và trả cùng một mã 404 `ConstructionSiteNotFound` cho "không có công trình" và "công trình của người khác". Cổng không nhận hay tin `ownerId` do client gửi.
 
 ### Phạm vi xem của khách và nhân viên
 
 Hai nhóm route tách riêng vì hai nhóm người dùng xem dữ liệu khác nhau.
 
-**Route của khách `/api/v1/me/construction-sites`.** Mọi handler đọc dòng `User` của người gọi và kiểm `AccountKind = 'Customer'`. Tài khoản nhân viên, kể cả Admin, nhận 403 `AccessForbidden`, đúng BR-SITE-002 khoản 1–2 và STORY-SITE-002/EXC-03. Đọc từ database chứ không từ token vì token không mang loại tài khoản. Truy vấn luôn có điều kiện `OwnerUserId = người gọi`. Công trình không tồn tại và công trình của khách khác trả cùng 404 `ConstructionSiteNotFound`, cùng một thông báo. Nếu tách thành hai mã, người gọi dò được công trình nào có thật chỉ bằng cách so hai câu trả lời; `SupervisionAssignmentFlow` đang theo đúng cách này với gói.
+**Route của khách `/api/v1/me/construction-sites`.** Mọi handler đọc dòng `User` của người gọi và kiểm `AccountKind = 'Customer'`. Tài khoản nhân viên, kể cả Admin, nhận 403 `AccessForbidden`, đúng BR-SITE-002 khoản 1–2 và STORY-SITE-002/EXC-03. Đọc từ database chứ không từ token vì token không mang loại tài khoản. Truy vấn luôn có điều kiện `OwnerUserId = người gọi`. Công trình không tồn tại và công trình của khách khác trả cùng 404 `ConstructionSiteNotFound`, cùng một thông báo. Nếu tách thành hai mã, người gọi dò được công trình nào có thật chỉ bằng cách so hai câu trả lời; luồng gán gói cũng theo đúng cách này.
 
 **Route của nhân viên `/api/v1/admin/construction-sites`.** Policy mặc định cho phép mọi phiên đã xác minh đi tiếp; handler xác định phạm vi từ claim `perm`:
 
@@ -219,15 +240,31 @@ EXISTS (
     AND g."ConstructionSiteId" = s."Id")
 ```
 
-Điều kiện không lọc theo trạng thái gói. Gói đang bị hủy mà phân công còn hiệu lực thì nhân viên vẫn xem được công trình (STORY-SITE-002/ALT-02, BR-RBAC-013 khoản 9). Khi phân công kết thúc hoặc được chuyển giao, dòng phân công có `EffectiveToUtc`, nên yêu cầu xem tiếp theo không còn thấy công trình đó (ST-SITE-026). Giá trị loại tài nguyên `SupervisionGrant` là giá trị dự kiến; tên cuối cùng do TDD-RBAC-003 chốt.
+Điều kiện không lọc theo trạng thái gói. Gói đang bị hủy mà phân công còn hiệu lực thì nhân viên vẫn xem được công trình (STORY-SITE-002/ALT-02, BR-RBAC-013 khoản 9). Khi phân công kết thúc hoặc được chuyển giao, dòng phân công có `EffectiveToUtc`, nên yêu cầu xem tiếp theo không còn thấy công trình đó (ST-SITE-026). Giá trị loại tài nguyên là `ResourceTypes.SupervisionGrant` theo TDD-RBAC-003. Code viết điều kiện này bằng LINQ trong `ConstructionSiteStaffScope.ApplyAssigned` (hai truy vấn con `IN` thay cho `EXISTS`), cho cùng kết quả.
 
 Phạm vi xem theo phân công là trường hợp riêng mà BR-RBAC-010/Notes đã ghi: `supervision.complete` là quyền thao tác, không phải quyền xem, nên phạm vi đọc công trình của người chỉ có quyền này bị giới hạn theo gói được giao.
 
 ### Sửa có kiểm version
 
-Khách gửi tên, địa chỉ và `expectedVersion`. Handler đọc công trình của khách, so `Version` với `expectedVersion`; lệch thì trả 409 `ConstructionSiteVersionConflict`. Khớp thì gán giá trị mới, tính lại `NormalizedName`, tăng `Version` và đặt `UpdatedAtUtc`. `Version` được cấu hình là concurrency token của EF Core, nên câu `UPDATE` có thêm điều kiện `"Version" = @old`. Nếu một yêu cầu khác đã sửa giữa lúc đọc và lúc lưu, `UPDATE` không khớp dòng nào, EF ném `DbUpdateConcurrencyException`, và handler đổi thành cùng mã 409.
+Khách gửi tên, địa chỉ và `expectedVersion`. Handler đọc công trình của khách, so `Version` với `expectedVersion`; lệch thì trả 409 `ConstructionSiteVersionConflict`. Khớp thì gán giá trị mới, tính lại `NormalizedName`, tăng `Version` và đặt `UpdatedAtUtc`. `Version` được cấu hình là concurrency token của EF Core, nên câu `UPDATE` có thêm điều kiện `"Version" = @old`. Nếu một yêu cầu khác đã sửa giữa lúc đọc và lúc lưu, `UPDATE` không khớp dòng nào và EF ném `DbUpdateConcurrencyException` lúc commit, sau khi handler đã trả về. `ConstraintViolationPipelineBehavior` đổi lỗi này thành cùng mã 409 cho `UpdateConstructionSiteCommand`.
 
 Kiểm version giúp tránh mất dữ liệu khi khách mở hai màn hình: màn hình A sửa địa chỉ, màn hình B vẫn giữ địa chỉ cũ rồi sửa tên. Không có version thì lần lưu của B ghi đè địa chỉ A vừa sửa. Sửa không đụng tới gói hay phân công (BR-SITE-002 khoản 3).
+
+### Ánh xạ lỗi database
+
+Lỗi `23505`, `23503` và `DbUpdateConcurrencyException` ném ra lúc lưu hoặc commit, tức sau khi handler đã trả về, nên handler không tự bắt được. `ConstraintViolationPipelineBehavior` đăng ký giữa Caching và Transaction trong pipeline MediatR, tức bọc ngoài `TransactionPipelineBehavior`: khi lỗi tới lớp này, transaction đã rollback và lớp này không chạy thêm câu SQL nào. Application không tham chiếu Npgsql, nên việc đọc `SqlState` và tên ràng buộc đi qua cổng `IDatabaseErrorReader`; `NpgsqlDatabaseErrorReader` tìm `PostgresException` trong chuỗi `InnerException`. Tên ràng buộc lấy từ `DatabaseConstraintNames`, cùng hằng mà cấu hình EF dùng để đặt tên, nên tên trong migration và trong lớp ánh xạ không lệch nhau.
+
+| Lệnh | Lỗi database | Mã trả về |
+|---|---|---|
+| `CreateConstructionSiteCommand`, `UpdateConstructionSiteCommand` | `23505` trên `UX_ConstructionSite_OwnerNormalizedName` | 409 `ConstructionSiteNameTaken` |
+| `UpdateConstructionSiteCommand` | `DbUpdateConcurrencyException` | 409 `ConstructionSiteVersionConflict` |
+| `DeleteConstructionSiteCommand` | `23503` trên `FK_SupervisionGrant_ConstructionSite` | 409 `ConstructionSiteInUse` |
+| `AssignSupervisionGrantCommand` (TDD-SUB-004) | `23503` trên `FK_SupervisionGrant_ConstructionSite` | 404 `ConstructionSiteNotFound` |
+| `AssignSupervisionGrantCommand` | `23505` trên `UX_SupervisionGrant_ConstructionSiteHolder` | 409 `ConstructionSiteAlreadyHasSupervision` |
+| `RestorePackageCommand`, `ReopenSupervisionGrantCommand` | `23505` trên `UX_SupervisionGrant_ConstructionSiteHolder` | 409 `AnotherPackageActive` |
+| `CreateAssignmentCommand`, `TransferAssignmentCommand` (TDD-RBAC-003) | `23505` trên `UX_Assignment_ActiveResource` | 409 `ResourceAlreadyAssigned` |
+
+Lỗi không có trong bảng được ném nguyên, và `ExceptionHandlingMiddleware` xử lý như trước.
 
 ### Không dùng khóa chống gửi lặp cho các thao tác của khách
 
@@ -243,8 +280,8 @@ Các thao tác gói hiện đòi header `Idempotency-Key` và lưu biên nhận 
 
 | Quy tắc | Nơi thực hiện | Đặc tả Unit Test |
 |---|---|---|
-| BR-SITE-001 khoản 1–3 | `ConstructionSiteText` (NFC, trim) dùng trong validator 422 và trong phương thức đặt tên của entity; CHECK không rỗng trong database | UT-SITE-001 đến UT-SITE-008 |
-| BR-SITE-001 khoản 4 | Kiểm trước ở handler tạo và sửa; index `UX_ConstructionSite_OwnerNormalizedName`; ánh xạ `23505` theo tên index | UT-SITE-002, UT-SITE-011, UT-SITE-013, UT-SITE-018 |
+| BR-SITE-001 khoản 1–3 | `ConstructionSiteText.Clean` (NFC, trim) dùng trong validator 422 và trong handler; CHECK không rỗng trong database | UT-SITE-001 đến UT-SITE-008 |
+| BR-SITE-001 khoản 4 | `ConstructionSite.NormalizeName`; kiểm trước ở handler tạo và sửa; index `UX_ConstructionSite_OwnerNormalizedName`; `ConstraintViolationPipelineBehavior` ánh xạ `23505` theo tên index | UT-SITE-002, UT-SITE-011, UT-SITE-013, UT-SITE-018 |
 | BR-SITE-001 khoản 5–6, Except | Không có kiểm số lượng; xóa cứng nên tên cũ dùng lại được; lỗi ném exception để transaction rollback | UT-SITE-009; tạo lại tên đã xóa kiểm ở ST-SITE-017 |
 | BR-SITE-002 khoản 1–2 | Handler khách kiểm `User.AccountKind = 'Customer'` từ database; `OwnerUserId` lấy từ phiên, không nhận từ body; route nhân viên không có thao tác ghi | UT-SITE-009, UT-SITE-010, UT-SITE-015 |
 | BR-SITE-002 khoản 3 | Handler sửa chỉ đổi `Name`, `NormalizedName`, `Address`, `Version`, `UpdatedAtUtc` | UT-SITE-012, UT-SITE-014 |
@@ -259,7 +296,7 @@ Các thao tác gói hiện đòi header `Idempotency-Key` và lưu biên nhận 
 **Notes**:
 - Công trình nằm trong cùng database và cùng monolith với gói và phân công, nên đọc chéo bằng join và cùng transaction, không qua message bus. Bảng `ConstructionSite` chỉ được ghi bởi các handler của tính năng này; tính năng khác chỉ đọc hoặc khóa qua cổng.
 - Không thêm policy "có một trong hai quyền". Phạm vi xem phụ thuộc quyền nào người gọi có, nên phải quyết định trong handler; một policy chỉ cho biết đạt hay không.
-- Các tên lớp, route và mã lỗi ở tài liệu này là thiết kế dự kiến, chưa có trong code.
+- Tên lớp, route và mã lỗi ở tài liệu này đã có trong code ngày 25/09/2026.
 
 ## Sequence Diagram
 
@@ -271,7 +308,7 @@ sequenceDiagram
     participant API as ConstructionSiteApi
     participant CH as Create handler
     participant DH as Delete handler
-    participant GA as SupervisionAssignmentFlow
+    participant GA as AssignSupervisionGrantCommandHandler
     participant OR as IConstructionSiteOwnershipReader
     participant PG as PostgreSQL
 
@@ -288,10 +325,10 @@ sequenceDiagram
     end
 
     par Gan goi G4 vao B
-        GA->>PG: Khoa AccountCommerceState cua chu goi
+        GA->>PG: Khoa tai khoan chu goi (dong User, thay AccountCommerceState)
         GA->>OR: LockOwnerAccountIdAsync(B)
         OR->>PG: SELECT OwnerUserId ... FOR KEY SHARE
-        GA->>PG: Khoa SupervisionGrant G4 FOR UPDATE
+        GA->>PG: Doc lai goi G4 co theo doi thay doi
         GA->>PG: UPDATE SupervisionGrant SET ConstructionSiteId = B, ghi bien nhan
         GA->>PG: COMMIT
     and Xoa B
@@ -380,7 +417,7 @@ Không có cột xóa mềm. Entity kế thừa `Entity<Guid>` và cấu hình `
 
 ### Bảng dùng lại và phần thay đổi thuộc tài liệu khác
 
-- `SupervisionGrant` ([TDD-SUB-004](TDD-SUB-004.md#data-model)): một dòng là một quyền dùng gói giám sát. Cặp `(ConstructionSiteId, AccountId)` (code hiện là `ProjectId`, chưa có khóa ngoại) trỏ tới `ConstructionSite(Id, OwnerUserId)` bằng `FK_SupervisionGrant_ConstructionSite` với `ON DELETE RESTRICT`, có index `IX_SupervisionGrant_ConstructionSiteId_AccountId`. `ConstructionSiteId` NULL khi gói chưa gán; hủy gói vẫn giữ giá trị này. Quan hệ: một công trình có nhiều gói theo thời gian, nhưng tối đa một gói giữ chỗ cùng lúc theo `UX_SupervisionGrant_ConstructionSiteHolder`.
+- `SupervisionGrant` ([TDD-SUB-004](TDD-SUB-004.md#data-model)): một dòng là một quyền dùng gói giám sát. Cặp `(ConstructionSiteId, AccountId)` trỏ tới `ConstructionSite(Id, OwnerUserId)` bằng `FK_SupervisionGrant_ConstructionSite` với `ON DELETE RESTRICT`, có index `IX_SupervisionGrant_ConstructionSiteId_AccountId`. `ConstructionSiteId` NULL khi gói chưa gán; hủy gói vẫn giữ giá trị này. Quan hệ: một công trình có nhiều gói theo thời gian, nhưng tối đa một gói giữ chỗ cùng lúc theo `UX_SupervisionGrant_ConstructionSiteHolder`.
 - `SupervisionAssignmentEvent`: bị bỏ trong migration của [TDD-SUB-004](TDD-SUB-004.md#data-model); không được dùng làm căn cứ ở tài liệu này.
 - `Assignment` ([TDD-RBAC-003](TDD-RBAC-003.md#data-model)): một dòng là một khoảng thời gian một nhân viên phụ trách một gói. Bảng này không trỏ trực tiếp tới công trình; phạm vi xem của nhân viên đi qua gói.
 - `User`: chủ công trình. Không thêm cột.
@@ -450,7 +487,7 @@ Mermaid ER không biểu diễn được khóa ngoại ghép, hành vi khi xóa 
 
 **Notes**:
 
-- **DDL dự kiến, chưa chạy:**
+- **DDL tương ứng với migration đã tạo** (bản rút gọn để đọc; câu lệnh thật do EF sinh):
 
 ```sql
 CREATE TABLE "ConstructionSite" (
@@ -461,7 +498,7 @@ CREATE TABLE "ConstructionSite" (
     "Address" varchar(500) NOT NULL,
     "CreatedAtUtc" timestamptz NOT NULL,
     "UpdatedAtUtc" timestamptz NOT NULL,
-    "Version" bigint NOT NULL DEFAULT 1,
+    "Version" bigint NOT NULL,
     CONSTRAINT "CK_ConstructionSite_Name" CHECK ("Name" ~ '[^[:space:]]'),
     CONSTRAINT "CK_ConstructionSite_NormalizedName" CHECK ("NormalizedName" ~ '[^[:space:]]'),
     CONSTRAINT "CK_ConstructionSite_Address" CHECK ("Address" ~ '[^[:space:]]'),
@@ -477,15 +514,18 @@ CREATE INDEX "IX_ConstructionSite_CreatedAt"
     ON "ConstructionSite" ("CreatedAtUtc", "Id");
 ```
 
-- CHECK không rỗng dùng biểu thức so khớp `~ '[^[:space:]]'` như `CK_SupervisionAssignmentEvent_Reason` trong code hiện tại, vì `btrim` mặc định chỉ cắt dấu cách nên chuỗi toàn tab vẫn lọt. Database không kiểm được "đã bỏ khoảng trắng đầu/cuối" theo đúng định nghĩa của .NET; phần đó do `ConstructionSiteText` bảo đảm.
+- CHECK không rỗng dùng biểu thức so khớp `~ '[^[:space:]]'` như `CK_SupervisionAssignmentEvent_Reason` trước đây, vì `btrim` mặc định chỉ cắt dấu cách nên chuỗi toàn tab vẫn lọt. Database không kiểm được "đã bỏ khoảng trắng đầu/cuối" theo đúng định nghĩa của .NET; phần đó do `ConstructionSiteText` bảo đảm.
 - Độ dài: `string.Length` của .NET đếm đơn vị UTF-16, còn `varchar(n)` của PostgreSQL đếm ký tự. Chữ tiếng Việt sau NFC là một đơn vị UTF-16 nên hai cách đếm trùng nhau; với emoji, .NET đếm 2 còn PostgreSQL đếm 1. Validator vì vậy chặt hơn database, không có trường hợp validator cho qua mà database từ chối.
 - `AK_ConstructionSite_Id_OwnerUserId` khai báo bằng `HasAlternateKey(x => new { x.Id, x.OwnerUserId })`, tên theo quy ước `AK_<Bảng>_<Cột>` mà EF đang sinh cho `AK_PlanRevision_Id_Kind`. Ràng buộc này dư về mặt duy nhất (đã có khóa chính `Id`) nhưng bắt buộc để khóa ngoại ghép trỏ được, vì PostgreSQL chỉ cho khóa ngoại trỏ tới khóa chính hoặc ràng buộc duy nhất khớp đúng các cột.
-- **Rà soát chuẩn hóa:** khóa ứng viên là `{Id}` và `{OwnerUserId, NormalizedName}`. `NormalizedName` phụ thuộc hàm vào `Name`, một cột không phải khóa, nên về hình thức là phụ thuộc bắc cầu vi phạm 3NF. Đây là dư thừa có chủ đích để index kiểm trùng dùng đúng hàm của ứng dụng, với một đường ghi duy nhất ở entity; cùng cách với `User.NormalizedFirstName`. Không có cờ "đã từng có gói" hay số gói trên công trình, nên không có sự thật nào bị lưu hai nơi.
-- **Kế hoạch migration** (chưa tạo, chưa chạy). Thứ tự thống nhất với [TDD-SUB-004](TDD-SUB-004.md#data-model); có thể gộp thành một migration nếu giữ đúng thứ tự:
-  1. Migration của tài liệu này tạo bảng `ConstructionSite` cùng CHECK, `AK_ConstructionSite_Id_OwnerUserId`, `UX_ConstructionSite_OwnerNormalizedName` và hai index danh sách. Bảng mới nên không cần kiểm dữ liệu trước. Down: xóa bảng.
-  2. Migration của TDD-SUB-004 chạy sau: kiểm trước `SELECT count(*) FROM "SupervisionGrant" WHERE "ProjectId" IS NOT NULL` và `SELECT count(*) FROM "SupervisionAssignmentEvent"`. Dự kiến cả hai bằng 0 vì endpoint gán luôn trả 503. Nếu khác 0 thì dừng migration; người chạy chọn xóa dữ liệu test đó hoặc dựng lại database dev. Migration không tự xóa dữ liệu.
-  3. Vẫn trong migration của TDD-SUB-004: `DROP TABLE "SupervisionAssignmentEvent"`, đổi `ProjectId` thành `ConstructionSiteId`, đổi tên index giữ chỗ, tạo `IX_SupervisionGrant_ConstructionSiteId_AccountId`, rồi thêm `FK_SupervisionGrant_ConstructionSite` tới `ConstructionSite(Id, OwnerUserId)` với `ON DELETE RESTRICT`. Khóa ngoại cần bảng và ràng buộc của bước 1 nên phải chạy sau bước đó.
-  4. Kiểm sau migration: `pg_constraint` có `AK_ConstructionSite_Id_OwnerUserId` và khóa ngoại ghép với `confdeltype = 'r'`; trong môi trường test, xóa một công trình còn gói phải nhận lỗi `23503`, và ghi gói của U1 vào công trình của U2 cũng phải nhận lỗi `23503`.
+- **Rà soát chuẩn hóa:** khóa ứng viên là `{Id}` và `{OwnerUserId, NormalizedName}`. `NormalizedName` phụ thuộc hàm vào `Name`, một cột không phải khóa, nên về hình thức là phụ thuộc bắc cầu vi phạm 3NF. Đây là dư thừa có chủ đích để index kiểm trùng dùng đúng hàm của ứng dụng, với một chỗ tính duy nhất là `ConstructionSite.NormalizeName`. `User.NormalizedFirstName` cũng là cột suy ra kiểu này, nhưng hàm tính khác vì bỏ dấu. Không có cờ "đã từng có gói" hay số gói trên công trình, nên không có sự thật nào bị lưu hai nơi.
+- **Migration đã tạo:** `20260925074152_ConstructionSiteAndPackageAssignment`, một migration gộp thay đổi của tài liệu này với TDD-SUB-004, TDD-RBAC-001 và TDD-RBAC-003. Các bước trong `Up` theo đúng thứ tự:
+  1. Kiểm dữ liệu: khối `DO` báo lỗi và dừng migration nếu còn `SupervisionGrant` có `ProjectId` hoặc còn dòng `SupervisionAssignmentEvent`. Migration không tự xóa dữ liệu gói; người chạy tự xóa dữ liệu thử hoặc dựng lại database dev.
+  2. `PlanOffer`: đổi mã lựa chọn giá giám sát `Project` thành `ConstructionSite` (TDD-SUB-001).
+  3. Tạo bảng `ConstructionSite` cùng CHECK, `AK_ConstructionSite_Id_OwnerUserId`, `UX_ConstructionSite_OwnerNormalizedName` và hai index danh sách.
+  4. `SupervisionGrant`: bỏ bảng `SupervisionAssignmentEvent`, đổi `ProjectId` thành `ConstructionSiteId`, đổi tên index giữ chỗ, tạo `IX_SupervisionGrant_ConstructionSiteId_AccountId`, rồi thêm `FK_SupervisionGrant_ConstructionSite` với `ON DELETE RESTRICT`. Khóa ngoại cần bảng và ràng buộc của bước 3 nên chạy sau bước đó.
+  5. `Assignment`: xóa phân công cũ theo `Customer`, `Project`, đổi CHECK loại tài nguyên thành chỉ `SupervisionGrant`, tạo `UX_Assignment_ActiveResource` (TDD-RBAC-003).
+  6. `Permission`: gỡ `supervision.reassign` khỏi mọi vai trò rồi xóa mã này (TDD-RBAC-001).
+- **Đã kiểm ngày 25/09/2026** trên PostgreSQL 15 tạm: áp dụng `Up` lên database có dữ liệu cũ (lựa chọn giá `Project`, phân công `Project`, vai trò tự tạo có `supervision.reassign`), sau đó `pg_constraint` có khóa ngoại ghép với `confdeltype = 'r'`; `Down` đưa schema về như cũ nhưng không khôi phục dữ liệu đã xóa (phân công cũ, mã `supervision.reassign` trong vai trò tự tạo, công trình); bước kiểm dừng migration khi có gói gắn `ProjectId`; script idempotent do CI sinh chạy được hai lần liên tiếp trên database mới. Integration test cũng xác nhận xóa công trình còn gói và ghi gói vào công trình khác chủ đều nhận lỗi `23503`.
 - Đây là bảng mới trong database chỉ có dữ liệu dev/test (xác nhận ngày 25/09/2026), nên không cần chia lô hay tạo index `CONCURRENTLY`.
 
 ## Internal API
@@ -494,7 +534,7 @@ CREATE INDEX "IX_ConstructionSite_CreatedAt"
 
 Tất cả route dùng `NewVersionedApi` và `HasApiVersion(1)`, policy mặc định (phiên đã xác minh, không phải phiên quên mật khẩu, không bị bắt đổi mật khẩu). Phản hồi thành công bọc trong `Result` như các API hiện có. Phân trang theo `pageIndex` (từ 1) và `pageSize` (1–100, ngoài khoảng thì dùng 20) là quyết định kỹ thuật; nghiệp vụ chưa chốt phân trang, sắp xếp hay tìm kiếm. Thứ tự mặc định là mới tạo trước (`CreatedAtUtc DESC, Id DESC`).
 
-- **POST** `/api/v1/me/construction-sites` — Khách tạo công trình. Body `{name, address}`. Trả 201 với `{constructionSiteId, name, address, version, createdAtUtc}`. Tài khoản nhân viên nhận 403.
+- **POST** `/api/v1/me/construction-sites` — Khách tạo công trình. Body `{name, address}`. Trả 201 với `{constructionSiteId, name, address, version, createdAtUtc, updatedAtUtc}`. Tài khoản nhân viên nhận 403.
 - **GET** `/api/v1/me/construction-sites` — Danh sách công trình của chính khách. Mỗi mục có `constructionSiteId`, `name`, `address`, `version`, `createdAtUtc`, `updatedAtUtc` và `supervisionGrants` gồm mọi gói từng gắn vào công trình, mỗi gói có `grantId`, `planName`, `state` (`Assigned`, `Completed` hoặc `CanceledByStaff`), `firstAssignedAtUtc`. Không có trường nào về nhân viên.
 - **GET** `/api/v1/me/construction-sites/{siteId}` — Chi tiết một công trình của khách, cùng dữ liệu như một mục của danh sách.
 - **PUT** `/api/v1/me/construction-sites/{siteId}` — Sửa tên và địa chỉ. Body `{name, address, expectedVersion}`; gửi đủ cả hai trường, kể cả khi chỉ đổi một trường. Trả 200 với dữ liệu mới và `version` mới.
@@ -511,10 +551,10 @@ Request:
 {"name":"  Nhà vườn  ","address":"  Củ Chi, TP.HCM  "}
 
 Response 201:
-{"value":{"constructionSiteId":"a1a1a1a1-0000-4000-8000-000000000002","name":"Nhà vườn","address":"Củ Chi, TP.HCM","version":1,"createdAtUtc":"2026-10-01T02:05:00+00:00"},"isSuccess":true,"isFailure":false,"error":{"code":"","message":""}}
+{"value":{"constructionSiteId":"a1a1a1a1-0000-4000-8000-000000000002","name":"Nhà vườn","address":"Củ Chi, TP.HCM","version":1,"createdAtUtc":"2026-10-01T02:05:00+00:00","updatedAtUtc":"2026-10-01T02:05:00+00:00"},"isSuccess":true,"isFailure":false,"error":{"code":"","message":""}}
 
 Error Response:
-{"title":"Conflict","code":"ConstructionSiteNameTaken","status":409,"detail":"Bạn đã có một công trình khác cùng tên.","messageCode":"ConstructionSiteNameTaken","errors":null}
+{"title":"Conflict","code":"Conflict","status":409,"detail":"Bạn đã có một công trình khác cùng tên.","messageCode":"ConstructionSiteNameTaken","errors":null}
 ```
 
 #### GET /api/v1/me/construction-sites
@@ -527,7 +567,7 @@ Response 200:
 {"value":{"items":[{"constructionSiteId":"a1a1a1a1-0000-4000-8000-000000000001","name":"Nhà phố Quận 7","address":"12 Nguyễn Thị Thập, Quận 7, TP.HCM","version":1,"createdAtUtc":"2026-10-01T02:00:00+00:00","updatedAtUtc":"2026-10-01T02:00:00+00:00","supervisionGrants":[{"grantId":"b2b2b2b2-0000-4000-8000-000000000001","planName":"Giám sát cơ bản","state":"Assigned","firstAssignedAtUtc":"2026-10-02T01:00:00+00:00"}]}],"pageIndex":1,"pageSize":20,"totalCount":1,"hasNextPage":false,"hasPreviousPage":false},"isSuccess":true,"isFailure":false,"error":{"code":"","message":""}}
 
 Error Response:
-{"title":"Forbidden","code":"AccessForbidden","status":403,"detail":"Chức năng này dành cho tài khoản khách hàng.","messageCode":"AccessForbidden","errors":null}
+{"title":"Forbidden","code":"Forbidden","status":403,"detail":"Chức năng này dành cho tài khoản khách hàng.","messageCode":"AccessForbidden","errors":null}
 ```
 
 #### PUT /api/v1/me/construction-sites/{siteId}
@@ -537,7 +577,7 @@ Request:
 {"name":"Nhà phố mới","address":"12 Nguyễn Thị Thập, Quận 7, TP.HCM","expectedVersion":1}
 
 Response 200:
-{"value":{"constructionSiteId":"a1a1a1a1-0000-4000-8000-000000000001","name":"Nhà phố mới","address":"12 Nguyễn Thị Thập, Quận 7, TP.HCM","version":2,"updatedAtUtc":"2026-10-05T03:00:00+00:00"},"isSuccess":true,"isFailure":false,"error":{"code":"","message":""}}
+{"value":{"constructionSiteId":"a1a1a1a1-0000-4000-8000-000000000001","name":"Nhà phố mới","address":"12 Nguyễn Thị Thập, Quận 7, TP.HCM","version":2,"createdAtUtc":"2026-10-01T02:00:00+00:00","updatedAtUtc":"2026-10-05T03:00:00+00:00"},"isSuccess":true,"isFailure":false,"error":{"code":"","message":""}}
 
 Error Response:
 {"title":"Validation Error","type":"Validation Error","status":422,"detail":"A validation error occured","errors":[{"code":"Name","message":"Tên công trình tối đa 200 ký tự.","messageCode":"ConstructionSiteNameTooLong"}]}
@@ -553,7 +593,7 @@ Response 204:
 (không có thân phản hồi)
 
 Error Response:
-{"title":"Conflict","code":"ConstructionSiteInUse","status":409,"detail":"Công trình đã từng có gói giám sát gắn vào nên không xóa được.","messageCode":"ConstructionSiteInUse","errors":null}
+{"title":"Conflict","code":"Conflict","status":409,"detail":"Công trình đã từng có gói giám sát gắn vào nên không xóa được.","messageCode":"ConstructionSiteInUse","errors":null}
 ```
 
 #### GET /api/v1/admin/construction-sites/{siteId}
@@ -566,10 +606,10 @@ Response 200:
 {"value":{"constructionSiteId":"a1a1a1a1-0000-4000-8000-000000000001","name":"Nhà phố mới","address":"12 Nguyễn Thị Thập, Quận 7, TP.HCM","version":2,"createdAtUtc":"2026-10-01T02:00:00+00:00","updatedAtUtc":"2026-10-05T03:00:00+00:00","owner":{"userId":"c3c3c3c3-0000-4000-8000-000000000001","fullName":"Khách U1","email":"u1@example.test"},"supervisionGrants":[{"grantId":"b2b2b2b2-0000-4000-8000-000000000001","planName":"Giám sát cơ bản","state":"Assigned","firstAssignedAtUtc":"2026-10-02T01:00:00+00:00"}]},"isSuccess":true,"isFailure":false,"error":{"code":"","message":""}}
 
 Error Response:
-{"title":"Forbidden","code":"ConstructionSiteNotInScope","status":403,"detail":"Bạn không phụ trách gói nào trên công trình này.","messageCode":"ConstructionSiteNotInScope","errors":null}
+{"title":"Forbidden","code":"Forbidden","status":403,"detail":"Bạn không phụ trách gói nào trên công trình này.","messageCode":"ConstructionSiteNotInScope","errors":null}
 ```
 
-Ví dụ dùng UUID và dữ liệu giả định; tên gói "Giám sát cơ bản" chỉ minh họa, không phải danh mục gói thật.
+Ví dụ dùng UUID và dữ liệu giả định; tên gói "Giám sát cơ bản" chỉ minh họa, không phải danh mục gói thật. Trong thân lỗi, `code` là loại lỗi chung do `ExceptionHandlingMiddleware` lấy từ tiêu đề ngoại lệ (`Conflict`, `NotFound`, `Forbidden`); mã nghiệp vụ nằm ở `messageCode`, và client đọc trường này.
 
 ### Error Codes
 
@@ -586,7 +626,7 @@ Ví dụ dùng UUID và dữ liệu giả định; tên gói "Giám sát cơ b�
 - **ConstructionSiteAddressTooLong** (422): Địa chỉ dài hơn 500 ký tự sau chuẩn hóa.
 - **ConstructionSiteVersionRequired** (422): `expectedVersion` thiếu hoặc nhỏ hơn 1 khi sửa.
 
-Các mã 422 là `messageCode` của từng lỗi trong mảng `errors`, do validator trả qua `ValidationPipelineBehavior`. Các mã 403, 404, 409 là mã mới dự kiến trong `ConstructionSiteErrorCodes`, trừ `AccessForbidden` đã có ở cơ chế phân quyền.
+Các mã 422 là `messageCode` của từng lỗi trong mảng `errors`, do validator trả qua `ValidationPipelineBehavior`. Các mã 403, 404, 409 nằm trong `ConstructionSiteErrorCodes`, trừ `AccessForbidden` nằm trong `AccessErrorCodes`.
 
 ## References
 
@@ -655,10 +695,10 @@ Các mã 422 là `messageCode` của từng lỗi trong mảng `errors`, do vali
 
 ### Others
 
-- Unit test: đặc tả UT-SITE-001 đến UT-SITE-025, gồm `ConstructionSiteText` và validator (UT-SITE-001 đến UT-SITE-008); handler tạo, sửa, xóa với repository giả (UT-SITE-009 đến UT-SITE-017); ánh xạ `23505`, `23503` theo tên ràng buộc và lệnh đang chạy (UT-SITE-018, UT-SITE-019); query của khách (UT-SITE-020); phạm vi xem của nhân viên (UT-SITE-021 đến UT-SITE-024); cổng đọc chủ công trình (UT-SITE-025). Đặc tả chưa thực thi, chưa có mã test. Unit test không chứng minh hành vi của index, khóa ngoại và khóa dòng PostgreSQL; các phần đó thuộc integration test và System Test bên dưới.
-- Integration test với PostgreSQL thật, không dùng EF InMemory: index trùng tên với hai connection chèn song song; khóa ngoại ghép `RESTRICT` chặn xóa công trình còn gói và chặn gói trỏ vào công trình khác chủ, cùng cách ánh xạ `23503` theo lệnh đang chạy; tranh chấp xóa và gắn gói theo cả hai thứ tự; `FOR KEY SHARE` không chặn sửa địa chỉ; concurrency token của `Version`; truy vấn phạm vi của nhân viên trên dữ liệu `Assignment` thật.
+- Unit test: đặc tả UT-SITE-001 đến UT-SITE-025, gồm `ConstructionSiteText` và validator (UT-SITE-001 đến UT-SITE-008); handler tạo, sửa, xóa với repository giả (UT-SITE-009 đến UT-SITE-017); ánh xạ `23505`, `23503` theo tên ràng buộc và lệnh đang chạy (UT-SITE-018, UT-SITE-019); query của khách (UT-SITE-020); phạm vi xem của nhân viên (UT-SITE-021 đến UT-SITE-024); cổng đọc chủ công trình (UT-SITE-025). Mã test ở `test/bmt-be.application.tests/usecases/constructionSite/ConstructionSiteTests.cs` và `test/bmt-be.application.tests/behaviors/ConstraintViolationPipelineBehaviorTests.cs`; UT-SITE-025 chạy SQL thật nên nằm ở integration test. Chạy đạt ngày 25/09/2026. Unit test không chứng minh hành vi của index, khóa ngoại và khóa dòng PostgreSQL; các phần đó thuộc integration test và System Test bên dưới.
+- Integration test với PostgreSQL thật, không dùng EF InMemory: index trùng tên với hai connection chèn song song; khóa ngoại ghép `RESTRICT` chặn xóa công trình còn gói và chặn gói trỏ vào công trình khác chủ, cùng cách ánh xạ `23503` theo lệnh đang chạy; tranh chấp xóa và gắn gói theo cả hai thứ tự; `FOR KEY SHARE` không chặn sửa địa chỉ; concurrency token của `Version`; truy vấn phạm vi của nhân viên trên dữ liệu `Assignment` thật. Mã test ở `test/bmt-be.integration.tests/ConstructionSiteConstraintTests.cs` và `SupervisionGrantConstraintTests.cs`, chạy đạt ngày 25/09/2026 trên PostgreSQL 15 (Testcontainers). Truy vấn phạm vi nhân viên hiện mới được kiểm ở unit test với EF InMemory.
 - System test: ST-SITE-001 đến ST-SITE-018 cho STORY-SITE-001; ST-SITE-019 (tạo trùng tên đồng thời) và ST-SITE-020 (xóa và gắn gói đồng thời); ST-SITE-021 đến ST-SITE-029 cho STORY-SITE-002.
-- Tài liệu liên quan: [TDD-SUB-004](TDD-SUB-004.md) cho gán gói và đổi tên cột, [TDD-RBAC-003](TDD-RBAC-003.md) cho phân công theo gói và cơ chế ánh xạ lỗi theo tên ràng buộc, [TDD-PAY-002](TDD-PAY-002.md) cho màn hình tra cứu gói hiện tên công trình.
+- Tài liệu liên quan: [TDD-SUB-004](TDD-SUB-004.md) cho gán gói và đổi tên cột, [TDD-RBAC-003](TDD-RBAC-003.md) cho phân công theo gói và các mã lỗi phân công đi qua cùng lớp ánh xạ lỗi, [TDD-PAY-002](TDD-PAY-002.md) cho màn hình tra cứu gói hiện tên công trình.
 - Không gọi dịch vụ bên ngoài nên không có External API trong TDD này.
 
 ## Change Log

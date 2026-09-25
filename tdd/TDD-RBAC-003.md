@@ -65,7 +65,7 @@ Các yêu cầu khó của thiết kế:
 - Hủy và khôi phục gói không đổi phân công (`BR-RBAC-013` khoản 9). Gói mới gắn vào cùng công trình không kế thừa người phụ trách của gói cũ (khoản 3).
 - Thu hồi vai trò hoặc bỏ quyền khỏi vai trò không được làm người đang phụ trách gói mất `supervision.complete` (`BR-RBAC-007`). Khóa tài khoản thì không bị chặn, và các gói đang gán của người bị khóa vào danh sách cần chia lại (`BR-RBAC-008` khoản 4, `BR-RBAC-013` khoản 6).
 
-Hiện trạng code đã kiểm ngày 25/09/2026:
+Hiện trạng code trước đợt thay đổi ngày 25/09/2026:
 
 - Bảng `Assignment` được tạo ở migration `20260923152830_InitialRbac`, với CHECK `ResourceType IN ('Customer', 'Project')` và index duy nhất có lọc trên `(StaffUserId, ResourceType, ResourceId)`.
 - Bốn endpoint phân công, `AssignmentAuthorizer` (gồm nhánh kế thừa từ khách hàng xuống dự án qua `IResourceHierarchyReader`), bản tạm `UnavailableResourceHierarchyReader` và `AssignmentRowLocker` đã có. `AssignmentRowLocker` khóa dòng phân công bằng `FOR UPDATE` khi chuyển giao và bằng `FOR SHARE` khi kiểm phân công.
@@ -73,7 +73,7 @@ Hiện trạng code đã kiểm ngày 25/09/2026:
 - Bảng `SupervisionGrant` đã có theo TDD-SUB-004, với cột `State` nhận `Unassigned`, `Assigned`, `CanceledByStaff`, `Completed`. Cột công trình của gói hiện còn tên `ProjectId`. Gói không có đường xóa: nghiệp vụ chỉ hủy, và cấu hình EF bỏ qua `IsDeleted` (`src/bmt-be.persistence/configurations/SupervisionGrantConfiguration.cs`).
 - `SupervisionCompletionAccess` gọi `IsDirectlyAssignedAsync` với `ResourceTypes.Project` và `grant.ProjectId`.
 
-Mọi thay đổi ngày 25/09/2026 dưới đây là **thiết kế dự kiến**, chưa có trong code.
+Các thay đổi ngày 25/09/2026 dưới đây **đã có trong code**, ở commit `182e2a8` trên nhánh `feature/construction-site` của `bmt-be`, cùng migration `20260925074152_ConstructionSiteAndPackageAssignment`. Chỗ nào code còn khác thiết kế thì ghi ngay tại mục đó.
 
 ### Goals
 
@@ -136,7 +136,7 @@ Một dòng còn hiệu lực khi `EffectiveToUtc IS NULL`. Không dùng `Effect
 1. **Handler giao việc** (`POST /assignments`) kiểm gói đã có dòng đang hiệu lực chưa. Có thì trả 409 `ResourceAlreadyAssigned`, không tạo dòng thứ hai, và phản hồi kèm mã phân công hiện tại để giao diện đưa người quản trị sang chuyển giao (`STORY-RBAC-003/EXC-05`, `AC-004`). Kiểm này áp dụng cả khi người nhận chính là người đang phụ trách.
 2. **Index duy nhất có lọc** `UX_Assignment_ActiveResource` trên `(ResourceType, ResourceId) WHERE "EffectiveToUtc" IS NULL` là lớp chặn cuối ở database. "Có lọc" nghĩa là index chỉ chứa các dòng đang hiệu lực, nên một gói vẫn có nhiều dòng đã kết thúc làm lịch sử.
 
-Cần cả hai lớp vì lớp 1 cho mã lỗi rõ nghĩa nhưng không chặn được hai yêu cầu song song. Ví dụ hai người quản trị cùng giao gói G3 cho hai nhân viên khác nhau: cả hai handler đều thấy G3 chưa có ai và cùng cho qua. Khi đó index chặn câu `INSERT` đến sau bằng lỗi PostgreSQL `23505`. Lỗi này có thể ném ra lúc lưu hoặc lúc commit, nên phải bắt ở lớp bao ngoài `TransactionPipelineBehavior`, sau khi transaction đã rollback. Lớp đó nhận đúng tên index `UX_Assignment_ActiveResource` và trả 409 `ResourceAlreadyAssigned` như lớp 1, thay vì mã 409 chung của middleware. Không chạy thêm câu SQL nào trong transaction PostgreSQL đã lỗi.
+Cần cả hai lớp vì lớp 1 cho mã lỗi rõ nghĩa nhưng không chặn được hai yêu cầu song song. Ví dụ hai người quản trị cùng giao gói G3 cho hai nhân viên khác nhau: cả hai handler đều thấy G3 chưa có ai và cùng cho qua. Khi đó index chặn câu `INSERT` đến sau bằng lỗi PostgreSQL `23505`. Lỗi này có thể ném ra lúc lưu hoặc lúc commit, nên phải bắt ở lớp bao ngoài `TransactionPipelineBehavior`, sau khi transaction đã rollback. Lớp này là `ConstraintViolationPipelineBehavior`, bảng ánh xạ đầy đủ ở [TDD-SITE-001](TDD-SITE-001.md#architecture). Nó nhận đúng tên index `UX_Assignment_ActiveResource` và trả 409 `ResourceAlreadyAssigned` như lớp 1, thay vì mã 409 chung của middleware. Không chạy thêm câu SQL nào trong transaction PostgreSQL đã lỗi.
 
 Index này thay index duy nhất cũ `IX_Assignment_StaffUserId_ResourceType_ResourceId` trên `(StaffUserId, ResourceType, ResourceId)`. Index cũ chỉ chặn một người được giao hai lần cùng một tài nguyên, và cố ý cho nhiều người cùng phụ trách theo bản BR trước; bản BR hiện tại đã bỏ điều đó.
 
@@ -148,7 +148,7 @@ Phân công gắn vào `Id` của gói, không gắn vào công trình. Vì vậ
 
 ### Chỉ giao gói đang giữ chỗ trên công trình
 
-`BR-RBAC-013` khoản 8 chỉ cho giao mới và chuyển giao gói đang giữ chỗ trên công trình. Handler giao và handler chuyển giao đọc dòng gói bằng câu lệnh có tham số:
+`BR-RBAC-013` khoản 8 chỉ cho giao mới và chuyển giao gói đang giữ chỗ trên công trình. Handler giao và handler chuyển giao đọc dòng gói bằng câu lệnh có tham số, qua `IAssignmentRowLocker.LockSupervisionGrantStateForShareAsync`:
 
 ```sql
 SELECT "State" FROM "SupervisionGrant" WHERE "Id" = @grantId FOR SHARE
@@ -156,7 +156,7 @@ SELECT "State" FROM "SupervisionGrant" WHERE "Id" = @grantId FOR SHARE
 
 - Không có dòng: trả 404 `AssignmentResourceNotFound`.
 - `State` là `Unassigned` hoặc `CanceledByStaff`: trả 409 `ResourceNotAssignable`, không tạo phân công. Gói chưa gán đã quá hạn gán lần đầu vẫn có `State = Unassigned` (trạng thái `ExpiredUnassigned` chỉ tính khi đọc), nên cũng bị từ chối.
-- `State` là `Assigned` hoặc `Completed`: đi tiếp. Handler dùng đúng hằng tập giữ chỗ của TDD-SUB-004 (`SupervisionStates.HoldingProject`, dự kiến đổi thành `HoldingConstructionSite`) thay vì tự viết lại danh sách, để không lệch với partial unique index của bảng gói.
+- `State` là `Assigned` hoặc `Completed`: đi tiếp. Handler dùng đúng hằng tập giữ chỗ của TDD-SUB-004 (`SupervisionStates.HoldingConstructionSite`) thay vì tự viết lại danh sách, để không lệch với partial unique index của bảng gói.
 
 Dùng 409 vì yêu cầu đúng khuôn và người gọi có quyền, nhưng xung đột với trạng thái hiện tại của gói; cùng yêu cầu đó có thể thành công sau khi gói được khôi phục. Đây cũng là lý do `ResourceAlreadyAssigned` dùng 409. Mã 422 dành cho người nhận không thỏa điều kiện của yêu cầu (`AssigneeLacksPermission`), còn 404 dành cho gói không tồn tại.
 
@@ -213,14 +213,14 @@ Không khóa tài khoản chủ gói như các thao tác trên gói vì phân c�
 
 `IAssignmentAuthorizer.IsDirectlyAssignedAsync(staffUserId, resourceType, resourceId)` làm việc này và giữ khóa `FOR SHARE` trên dòng khớp tới hết transaction, để việc gỡ hoặc chuyển giao song song phải chờ, như [TDD-SUB-006](TDD-SUB-006.md) mô tả. Mỗi gói có tối đa một dòng đang hiệu lực, nên truy vấn dùng index `UX_Assignment_ActiveResource` và đọc nhiều nhất một dòng. Người gọi giữ vai trò hệ thống có mã `admin` thì đạt ngay, xem Activity Diagram.
 
-Thay đổi dự kiến so với code hiện tại:
+Các thay đổi so với code ngày 23/09/2026, đã có trong code:
 
-- Bỏ `IsAssignedAsync` cùng nhánh kế thừa từ khách hàng xuống dự án. Hàm này hiện không có nơi gọi.
+- Bỏ `IsAssignedAsync` cùng nhánh kế thừa từ khách hàng xuống dự án. Hàm này không có nơi gọi.
 - Bỏ `IResourceHierarchyReader` và bản tạm `UnavailableResourceHierarchyReader`, vì không còn câu hỏi "dự án thuộc khách hàng nào".
 - `SupervisionCompletionAccess` truyền `ResourceTypes.SupervisionGrant` và `grant.Id`, thay cho `ResourceTypes.Project` và `grant.ProjectId`. Không còn trường hợp truyền `Guid.Empty` cho gói chưa gán: gói chưa gán không thể có phân công theo khoản 8, nên người không phải Admin nhận 403 như trước. Mã lỗi thiếu phân công do TDD-SUB-006 đặt.
 - `ResourceTypes` chỉ còn `SupervisionGrant`; bỏ `ResourceTypes.Customer` và `ResourceTypes.Project`.
-- `AssignmentRowLocker.LockActiveForShareAsync` giữ nguyên điều kiện lọc, nhưng sau migration sẽ dùng `UX_Assignment_ActiveResource` thay cho index cũ trên `(StaffUserId, ResourceType, ResourceId)`, rồi lọc `StaffUserId` trên tối đa một dòng.
-- Handler giao và chuyển giao thêm cổng khóa dòng gói bằng SQL có tham số, cùng kiểu với `AssignmentRowLocker` hiện có.
+- `AssignmentRowLocker.LockActiveForShareAsync` giữ nguyên điều kiện lọc, nhưng sau migration dùng `UX_Assignment_ActiveResource` thay cho index cũ trên `(StaffUserId, ResourceType, ResourceId)`, rồi lọc `StaffUserId` trên tối đa một dòng.
+- Handler giao và chuyển giao khóa dòng gói qua hàm mới `LockSupervisionGrantStateForShareAsync` của `IAssignmentRowLocker`, cài bằng SQL có tham số trong `AssignmentRowLocker`. Các bước kiểm gói, người nhận và người đang phụ trách dùng chung trong `AssignmentLookup`.
 
 ### Phạm vi xem công trình theo gói đang phụ trách
 
@@ -236,7 +236,7 @@ WHERE a."ResourceType" = 'SupervisionGrant'
   AND g."ConstructionSiteId" IS NOT NULL
 ```
 
-Câu truy vấn đi từ index `(StaffUserId, EffectiveToUtc) WHERE "EffectiveToUtc" IS NULL` để lấy các gói người đó đang phụ trách, rồi nối khóa chính của `SupervisionGrant`. Không lọc `State`, vì gói bị hủy mà phân công còn thì nhân viên vẫn xem được công trình. Tên cột `ConstructionSiteId` theo TDD-SUB-004; code hiện còn `ProjectId`. Để kiểm một công trình cụ thể, dùng cùng điều kiện với thêm `g."ConstructionSiteId" = @siteId` trong `EXISTS`. Đây là thao tác đọc nên không khóa: chuyển giao hoặc gỡ vừa commit có hiệu lực từ yêu cầu xem tiếp theo, đúng `STORY-SITE-002/Non-Functional`.
+Câu truy vấn đi từ index `(StaffUserId, EffectiveToUtc) WHERE "EffectiveToUtc" IS NULL` để lấy các gói người đó đang phụ trách, rồi nối khóa chính của `SupervisionGrant`. Không lọc `State`, vì gói bị hủy mà phân công còn thì nhân viên vẫn xem được công trình. Code viết điều kiện này bằng LINQ trong `ConstructionSiteStaffScope.ApplyAssigned` ([TDD-SITE-001](TDD-SITE-001.md#architecture)), cho cùng kết quả. Để kiểm một công trình cụ thể, dùng cùng điều kiện với thêm `g."ConstructionSiteId" = @siteId` trong `EXISTS`. Đây là thao tác đọc nên không khóa: chuyển giao hoặc gỡ vừa commit có hiệu lực từ yêu cầu xem tiếp theo, đúng `STORY-SITE-002/Non-Functional`.
 
 ### Thu hồi vai trò và sửa quyền vai trò
 
@@ -273,7 +273,7 @@ ORDER BY g."FirstAssignedAtUtc", g."Id"
 LIMIT @pageSize OFFSET @offset
 ```
 
-Phép nối `Assignment` dùng `UX_Assignment_ActiveResource`. Sắp theo `FirstAssignedAtUtc` để gói gán lâu nhất mà chưa có người lên đầu; `Id` giữ thứ tự ổn định khi phân trang. Chưa thêm index riêng cho `SupervisionGrant.State`, vì số gói hiện nhỏ và việc đọc danh sách chỉ do người quản trị thực hiện. Nếu đo thấy chậm thì thêm partial index `(FirstAssignedAtUtc, Id) WHERE "State" = 'Assigned'` ở bảng gói theo TDD-SUB-004. Tên công trình và tên khách hàng trong phản hồi được nối thêm từ bảng công trình và bảng `User` lúc đọc.
+Phép nối `Assignment` dùng `UX_Assignment_ActiveResource`. Sắp theo `FirstAssignedAtUtc` để gói gán lâu nhất mà chưa có người lên đầu; `Id` giữ thứ tự ổn định khi phân trang. Chưa thêm index riêng cho `SupervisionGrant.State`, vì số gói hiện nhỏ và việc đọc danh sách chỉ do người quản trị thực hiện. Nếu đo thấy chậm thì thêm partial index `(FirstAssignedAtUtc, Id) WHERE "State" = 'Assigned'` ở bảng gói theo TDD-SUB-004. Tên công trình được nối thêm từ bảng công trình lúc đọc, bằng một câu truy vấn cho cả trang. Phản hồi trả `customerUserId`, không kèm tên khách hàng, như ví dụ ở Internal API. Code viết truy vấn bằng LINQ trong `GetNeedsReassignmentQueryHandler`, cho cùng kết quả với câu SQL trên.
 
 Mở khóa tài khoản thì gói ở nhóm thứ hai tự rời danh sách, vì trạng thái được tính từ `User.Status` hiện tại. Gói đã hoàn thành của người bị khóa không vào danh sách nhưng vẫn chuyển giao được theo khoản 8; người quản trị tra các gói của một người qua `GET /assignments?staffUserId=...&activeOnly=true`, đúng `STORY-RBAC-003/ALT-05`.
 
@@ -294,10 +294,10 @@ Mở khóa tài khoản thì gói ở nhóm thứ hai tự rời danh sách, vì
 
 **Notes**:
 - Chặng kiểm phân công đặt trong handler chứ không thành một pipeline behavior của MediatR, vì tài nguyên đích thường phải đọc từ database mới biết. Ví dụ phạm vi xem công trình phải đi từ phân công sang gói rồi mới tới công trình; một behavior chạy trước handler không có sẵn thông tin này mà không tự đi truy vấn thêm.
-- `IAssignmentAuthorizer` khai báo ở `src/bmt-be.application/abstractions/`; `AssignmentAuthorizer` nằm ở `src/bmt-be.application/services/`, đã triển khai ngày 23/09/2026. Việc bỏ `IsAssignedAsync`, `IResourceHierarchyReader` và `UnavailableResourceHierarchyReader` là thay đổi dự kiến.
+- `IAssignmentAuthorizer` khai báo ở `src/bmt-be.application/abstractions/`; `AssignmentAuthorizer` nằm ở `src/bmt-be.application/services/`, đã triển khai ngày 23/09/2026. `IsAssignedAsync`, `IResourceHierarchyReader` và `UnavailableResourceHierarchyReader` đã bỏ ngày 25/09/2026.
 - Phần hoàn thành/mở lại của `TDD-SUB-003` đã được `TDD-SUB-006` thay thế. `TDD-SUB-006` dùng `IAssignmentAuthorizer.IsDirectlyAssignedAsync` làm nguồn sự thật duy nhất về việc ai phụ trách gói nào.
-- Code hiện ghi nhật ký từ chối cho `AssignmentTargetInvalid` và `DuplicateAssignment`. Theo `BR-RBAC-012/Notes`, người dùng xác nhận ngày 25/09/2026: **không ghi nhật ký** khi phân công bị từ chối vì gói đã có người phụ trách, gói chưa gán công trình hoặc đang bị hủy, hoặc người nhận thiếu `supervision.complete`. Đó là lỗi nghiệp vụ, không phải từ chối vì rào chắn quyền theo `BR-RBAC-012` khoản 2, nên theo `BR-RBAC-011` khoản 4 yêu cầu bị từ chối không để lại dòng nào, kể cả trong `AccessAuditLog`. `AssignmentResourceNotFound` cũng là lỗi đầu vào nên không ghi. Khi triển khai phải bỏ việc ghi nhật ký từ chối đang có cho `AssignmentTargetInvalid` và `DuplicateAssignment`. Trường hợp index chặn yêu cầu song song cũng không ghi gì, vì transaction đã rollback.
-- `TargetLabel` của nhật ký phân công hiện ghép loại và mã tài nguyên (`AssignmentLookup.Label`). Thiết kế dự kiến ghi tên công trình của gói tại thời điểm thao tác, ví dụ "Gói giám sát · Nhà phố Quận 7", để nhật ký vẫn đọc được khi khách đổi tên công trình (`BR-RBAC-012` khoản 3). Việc này cần bảng công trình; trước đó giữ cách ghi hiện tại.
+- Giao và chuyển giao không ghi nhật ký từ chối nào. Theo `BR-RBAC-012/Notes`, người dùng xác nhận ngày 25/09/2026: **không ghi nhật ký** khi phân công bị từ chối vì gói đã có người phụ trách, gói chưa gán công trình hoặc đang bị hủy, hoặc người nhận thiếu `supervision.complete`. Đó là lỗi nghiệp vụ, không phải từ chối vì rào chắn quyền theo `BR-RBAC-012` khoản 2, nên theo `BR-RBAC-011` khoản 4 yêu cầu bị từ chối không để lại dòng nào, kể cả trong `AccessAuditLog`. `AssignmentResourceNotFound` cũng là lỗi đầu vào nên không ghi. Việc ghi nhật ký từ chối trước đây cho `AssignmentTargetInvalid` và `DuplicateAssignment` đã bỏ. Trường hợp index chặn yêu cầu song song cũng không ghi gì, vì transaction đã rollback.
+- `TargetLabel` của nhật ký phân công ghi tên công trình của gói tại thời điểm thao tác, ví dụ "Gói giám sát · Nhà phố Quận 7", để nhật ký vẫn đọc được khi khách đổi tên công trình (`BR-RBAC-012` khoản 3). Đã triển khai ở `AssignmentLookup.GrantLabelAsync` (commit `1c58c38`); gói chưa có công trình thì ghi mã gói.
 
 ## Sequence Diagram
 
@@ -447,7 +447,7 @@ erDiagram
     SupervisionGrant {
         uuid Id PK
         uuid AccountId FK "chu goi"
-        uuid ConstructionSiteId "NULL khi chua gan, code hien la ProjectId"
+        uuid ConstructionSiteId "NULL khi chua gan"
         varchar State "Unassigned Assigned CanceledByStaff Completed"
     }
     Assignment {
@@ -544,20 +544,20 @@ Chị Lan chuyển G1 sang người khác theo `ALT-05`; mỗi lần chuyển gi
 - **Index** `(StaffUserId, EffectiveToUtc) WHERE "EffectiveToUtc" IS NULL` giữ nguyên, phục vụ đếm gói đang phụ trách khi thu hồi vai trò hoặc sửa quyền vai trò, liệt kê gói một người đang phụ trách, và truy vấn phạm vi xem công trình. `(ResourceType, ResourceId, EffectiveToUtc)` giữ nguyên, phục vụ tra lịch sử của một gói gồm cả dòng đã kết thúc.
 - **Khóa khi chuyển giao**: handler đọc dòng phân công dưới khóa `FOR UPDATE`, để hai yêu cầu chuyển giao cùng một phân công phải nối đuôi nhau. Index đã chặn được hai dòng mới cho hai người nhận khác nhau, nhưng khóa dòng vẫn giữ để yêu cầu đến sau nhận `AssignmentAlreadyEnded` rõ nghĩa thay vì lỗi vi phạm index. Thứ tự khóa đầy đủ ở mục "Thứ tự khóa giữa các luồng".
 - **Transaction**: đóng dòng cũ, lưu, rồi chèn dòng mới nằm trong cùng một transaction do `TransactionPipelineBehavior` mở, cùng với dòng nhật ký ghi bằng `RecordAsync`. Không có trạng thái trung gian nào được commit mà gói vừa mất người cũ vừa chưa có người mới.
-- **Migration — thay đổi dự kiến ngày 25/09/2026**: một migration mới, đổi schema và xóa dữ liệu dev/test. Database hiện chỉ có dữ liệu dev/test, nên không ánh xạ dữ liệu cũ sang gói thật. Thứ tự:
-  1. Kiểm trước: đếm dòng theo `ResourceType` và xác nhận môi trường chỉ có dữ liệu dev/test. Nếu phát hiện database có dữ liệu thật thì dừng và lập kế hoạch khác.
-  2. Bỏ CHECK `CK_Assignment_ResourceType` cũ.
-  3. Xóa mọi dòng có `ResourceType` là `Customer` hoặc `Project`. Không đổi nhãn các dòng này thành `SupervisionGrant`: `ResourceId` của chúng là mã khách hàng hoặc mã dự án, không phải mã gói, nên đổi nhãn sẽ tạo dòng trỏ tới gói không tồn tại. Cũng không ánh xạ qua `SupervisionGrant.ProjectId`, vì dòng đã kết thúc không xác định được gói nào đang ở dự án tại thời điểm đó. `AccessAuditLog` giữ nguyên, vì `TargetId` của nhật ký không có khóa ngoại.
-  4. Thêm CHECK mới `"ResourceType" IN ('SupervisionGrant')`.
-  5. Bỏ index `IX_Assignment_StaffUserId_ResourceType_ResourceId`, tạo `UX_Assignment_ActiveResource`.
-  6. Kiểm sau: không còn dòng `Customer` hay `Project`; không có gói nào có hơn một dòng đang hiệu lực; CHECK và index mới có trong `pg_constraint` và `pg_indexes`.
+- **Migration — đã triển khai ngày 25/09/2026**: là bước 5 của migration gộp `20260925074152_ConstructionSiteAndPackageAssignment`; danh sách đủ các bước ở [TDD-SITE-001](TDD-SITE-001.md#data-model). Database hiện chỉ có dữ liệu dev/test, nên không ánh xạ dữ liệu cũ sang gói thật. Thứ tự trong migration:
+  1. Bỏ CHECK `CK_Assignment_ResourceType` cũ và index `IX_Assignment_StaffUserId_ResourceType_ResourceId`.
+  2. Xóa mọi dòng có `ResourceType` là `Customer` hoặc `Project`. Không đổi nhãn các dòng này thành `SupervisionGrant`: `ResourceId` của chúng là mã khách hàng hoặc mã dự án, không phải mã gói, nên đổi nhãn sẽ tạo dòng trỏ tới gói không tồn tại. Cũng không ánh xạ qua `SupervisionGrant.ProjectId`, vì dòng đã kết thúc không xác định được gói nào đang ở dự án tại thời điểm đó. `AccessAuditLog` giữ nguyên, vì `TargetId` của nhật ký không có khóa ngoại.
+  3. Thêm CHECK mới `"ResourceType" IN ('SupervisionGrant')`.
+  4. Tạo `UX_Assignment_ActiveResource`.
 
-  Bảng nhỏ nên tạo index ngay trong transaction của migration, không cần `CREATE INDEX CONCURRENTLY`; bảng chỉ bị khóa ghi trong thời gian ngắn. Migration phải triển khai cùng phiên bản code có `ResourceTypes.SupervisionGrant`, vì code cũ còn ghi `Project` sẽ vi phạm CHECK mới. Sau migration, nhân viên trên môi trường dev/test cần được giao lại gói. Down migration dựng lại được CHECK và index cũ nhưng không lấy lại được các dòng đã xóa ở bước 3; muốn có lại dữ liệu đó thì khôi phục từ bản sao lưu của môi trường dev/test. Migration này không phụ thuộc việc đổi tên `ProjectId` thành `ConstructionSiteId` ở TDD-SUB-004, vì phân công trỏ vào `Id` của gói. Riêng danh sách cần chia lại và truy vấn phạm vi xem công trình đọc cột công trình của gói và bảng công trình, nên triển khai cùng hoặc sau migration của hai phần đó. Không áp dụng migration ở bước thiết kế này.
+  Migration không tự đếm dữ liệu trước và sau. Việc xác nhận môi trường chỉ có dữ liệu dev/test là bước vận hành trước khi chạy; có dữ liệu thật thì dừng và lập kế hoạch khác. Ngày 25/09/2026 đã chạy thử `Up` trên PostgreSQL có phân công `Project` cũ: sau migration không còn dòng `Customer` hay `Project`. Chưa áp dụng lên môi trường dev dùng chung hay production.
+
+  Bảng nhỏ nên tạo index ngay trong transaction của migration, không cần `CREATE INDEX CONCURRENTLY`; bảng chỉ bị khóa ghi trong thời gian ngắn. Migration phải triển khai cùng phiên bản code có `ResourceTypes.SupervisionGrant`, vì code cũ còn ghi `Project` sẽ vi phạm CHECK mới. Sau migration, nhân viên trên môi trường dev/test cần được giao lại gói. Down migration xóa các phân công `SupervisionGrant` rồi dựng lại CHECK và index cũ, nhưng không lấy lại được các dòng đã xóa ở bước 2; muốn có lại dữ liệu đó thì khôi phục từ bản sao lưu của môi trường dev/test. Vì cùng một migration với TDD-SUB-004 và TDD-SITE-001, danh sách cần chia lại và truy vấn phạm vi xem công trình luôn có sẵn cột `ConstructionSiteId` và bảng công trình để đọc.
 - **Không còn dòng mồ côi do tài nguyên bị xóa**: phân công chỉ được tạo cho gói có thật, và gói không bao giờ bị xóa. Nếu sau này thêm loại tài nguyên có thể bị xóa, phải thiết kế cách xử lý phân công của tài nguyên đó trước khi mở loại mới.
 
 ## Internal API
 
-Bốn endpoint `GET`, `POST`, chuyển giao và `DELETE` đã triển khai ngày 23/09/2026 theo mô hình cũ, với hai loại tài nguyên và nhiều người cùng phụ trách. Thay đổi dự kiến ngày 25/09/2026:
+Bốn endpoint `GET`, `POST`, chuyển giao và `DELETE` đã triển khai ngày 23/09/2026 theo mô hình cũ, với hai loại tài nguyên và nhiều người cùng phụ trách. Các thay đổi ngày 25/09/2026, đã có trong code:
 
 - `resourceType` chỉ nhận `SupervisionGrant`.
 - Giao và chuyển giao khóa và kiểm trạng thái gói, rồi kiểm `supervision.complete` của người nhận.
@@ -584,10 +584,10 @@ Response 201:
 {"id": "asg-1", "staffUserId": "user-tu", "resourceType": "SupervisionGrant", "resourceId": "grant-g1", "effectiveFromUtc": "2026-09-22T02:00:00Z", "effectiveToUtc": null}
 
 Error Response:
-{"code": "ResourceAlreadyAssigned", "detail": "Gói này đang có người phụ trách. Dùng chuyển giao để đổi người.", "currentAssignmentId": "asg-1"}
+{"title": "Conflict", "code": "Conflict", "status": 409, "detail": "Gói này đang có người phụ trách. Dùng chuyển giao để đổi người.", "messageCode": "ResourceAlreadyAssigned", "errors": null, "currentAssignmentId": "asg-1"}
 ```
 
-`currentAssignmentId` là phân công đang hiệu lực của gói, để giao diện mở thẳng thao tác chuyển giao. Khi index chặn yêu cầu song song, phản hồi vẫn mang mã `ResourceAlreadyAssigned` nhưng có thể không kèm `currentAssignmentId`, vì transaction đã lỗi và handler không đọc thêm được. Giao gói chưa gán công trình như G4 ở Bước 2 trả `{"code": "ResourceNotAssignable", "detail": "Chỉ giao được gói đã gán công trình hoặc đã hoàn thành."}`.
+`currentAssignmentId` là phân công đang hiệu lực của gói, để giao diện mở thẳng thao tác chuyển giao. Khi index chặn yêu cầu song song, phản hồi vẫn mang mã `ResourceAlreadyAssigned` nhưng không kèm `currentAssignmentId`, vì transaction đã lỗi và `ConstraintViolationPipelineBehavior` không đọc thêm được. Giao gói chưa gán công trình như G4 ở Bước 2 trả `{"title": "Conflict", "code": "Conflict", "status": 409, "detail": "Chỉ giao được gói giám sát đã gán công trình hoặc đã hoàn thành.", "messageCode": "ResourceNotAssignable", "errors": null}`.
 
 #### POST /api/v1/assignments/{assignmentId}/transfer
 
@@ -599,7 +599,7 @@ Response 200:
 {"endedAssignmentId": "asg-1", "newAssignmentId": "asg-4", "effectiveAtUtc": "2026-09-25T05:00:00Z"}
 
 Error Response:
-{"code": "ResourceNotAssignable", "detail": "Gói đang bị hủy nên không chuyển giao được. Có thể gỡ phân công."}
+{"title": "Conflict", "code": "Conflict", "status": 409, "detail": "Chỉ giao được gói giám sát đã gán công trình hoặc đã hoàn thành.", "messageCode": "ResourceNotAssignable", "errors": null}
 ```
 
 #### GET /api/v1/assignments?staffUserId=user-nam&activeOnly=true
@@ -622,6 +622,8 @@ Dữ liệu khớp Bước 7 ở Data Model; tên công trình là dữ liệu g
 
 ### Error Codes
 
+Mỗi mã dưới đây là giá trị `messageCode` trong thân lỗi; trường `code` chỉ là loại lỗi chung như `Forbidden`, `Conflict`, `NotFound`.
+
 - **AccessForbidden** (403): Thiếu quyền `assignment.manage`, hoặc thiếu điều kiện phân công khi dùng quyền có gắn phân công.
 - **AssignmentTargetInvalid** (409): Người nhận không phải tài khoản nhân viên đang hoạt động, gồm cả tài khoản khách hàng và tài khoản đang bị khóa.
 - **AssigneeLacksPermission** (422): Người nhận khi giao hoặc chuyển giao không có `supervision.complete`, đọc từ `UserRole` và `RolePermission` trong database.
@@ -633,7 +635,7 @@ Dữ liệu khớp Bước 7 ở Data Model; tên công trình là dữ liệu g
 - **AssignmentAlreadyEnded** (409): Phân công đã kết thúc hiệu lực, không chuyển giao hoặc gỡ lại được.
 - **ResourceTypeUnknown** (422): `resourceType` khác `SupervisionGrant`. Kiểm ở validator nên trả 422, cùng nhánh với các lỗi đầu vào khác.
 
-`AssigneeLacksPermission`, `ResourceAlreadyAssigned`, `ResourceNotAssignable` và `AssignmentResourceNotFound` là mã mới dự kiến, chưa có trong `AccessErrorCodes.cs`. `AssigneeLacksPermission` ném bằng kiểu ngoại lệ đã ánh xạ 422 trong `ExceptionHandlingMiddleware`. `ResourceAlreadyAssigned` và `ResourceNotAssignable` dùng `ConflictException`; `ResourceAlreadyAssigned` còn được ánh xạ riêng theo tên index khi lỗi đến từ vi phạm `23505`. `AssignmentResourceNotFound` dùng `NotFoundException`.
+`AssigneeLacksPermission`, `ResourceAlreadyAssigned`, `ResourceNotAssignable` và `AssignmentResourceNotFound` là mã mới ngày 25/09/2026, đã có trong `AccessErrorCodes.cs`. `AssigneeLacksPermission` ném bằng `ValidationException` của tầng application, nên trả 422 với một phần tử trong `errors` cho trường `StaffUserId`. `ResourceAlreadyAssigned` và `ResourceNotAssignable` dùng `ConflictException`; `ResourceAlreadyAssigned` còn được `ConstraintViolationPipelineBehavior` ánh xạ theo tên index khi lỗi đến từ vi phạm `23505`. `AssignmentResourceNotFound` dùng `NotFoundException`. Số `currentAssignmentId` đi qua `DomainException.Extensions` và thành trường cùng cấp trong thân lỗi.
 
 ## References
 
@@ -671,10 +673,11 @@ Dữ liệu khớp Bước 7 ở Data Model; tên công trình là dữ liệu g
 - Tài liệu kỹ thuật: [TDD-SITE-001](TDD-SITE-001.md) dùng truy vấn phạm vi xem ở mục Architecture và cung cấp bảng công trình cho tên công trình trong danh sách cần chia lại.
 - System Test liên quan: ST-RBAC-023 đến ST-RBAC-030 (AC-001 đến AC-008), ST-RBAC-053 (AC-009), ST-RBAC-054 (AC-010), ST-RBAC-055 (giao song song), ST-RBAC-058 (AC-011, EXC-07), ST-RBAC-059 và ST-RBAC-060 (AC-012, ALT-06, ALT-07), ST-RBAC-061 (gói đã hoàn thành), ST-RBAC-062 (thu hồi vai trò khi còn gói bị hủy); ST-SITE-023 đến ST-SITE-026 cho phạm vi xem công trình theo phân công.
 - [Nợ kỹ thuật](../debt/assignment-resource-check.md) về việc kiểm tài nguyên tồn tại: đóng được khi handler giao việc kiểm gói theo thiết kế này.
-- Đặc tả Unit Test: UT-RBAC-048 đến UT-RBAC-061, UT-RBAC-068 đến UT-RBAC-073 và UT-RBAC-081 đến UT-RBAC-090, UT-RBAC-092. UT-RBAC-051 đã rút khỏi nghiệm thu. Chưa có mã test hoặc kết quả chạy.
+- Đặc tả Unit Test: UT-RBAC-048 đến UT-RBAC-061, UT-RBAC-068 đến UT-RBAC-073 và UT-RBAC-081 đến UT-RBAC-090, UT-RBAC-092. UT-RBAC-051 đã rút khỏi nghiệm thu. Mã test ở `test/bmt-be.application.tests/usecases/assignment/` và `test/bmt-be.application.tests/behaviors/ConstraintViolationPipelineBehaviorTests.cs`; integration test khóa dòng và index ở `test/bmt-be.integration.tests/AssignmentConcurrencyTests.cs`. Chạy đạt ngày 25/09/2026: unit 338/338, integration 149/149. Chưa có mã test cho UT-RBAC-089 (phạm vi xem công trình, nay kiểm qua UT-SITE ở [TDD-SITE-001](TDD-SITE-001.md)) và UT-RBAC-090 (migration). Các ca UT-RBAC-049, UT-RBAC-050, UT-RBAC-052, UT-RBAC-053 chưa được ghi mã truy vết trong test.
 
 ## Change Log
 
+- 2026-09-25 (đồng bộ code): Đồng bộ với code đã triển khai ở commit `182e2a8`: phân công theo gói, kiểm gói có thật và đang giữ chỗ, kiểm quyền người nhận, `UX_Assignment_ActiveResource`, danh sách cần chia lại và `ConstraintViolationPipelineBehavior` đã có. Viết lại mục migration theo migration gộp đã chạy thử. Ghi rõ `TargetLabel` chưa đổi sang tên công trình; phản hồi danh sách cần chia lại không kèm tên khách hàng.
 - 2026-09-25: Cập nhật theo US/BR chốt lần hai trong ngày 25/09/2026, khi chuẩn bị tính năng Công trình. Đối tượng phân công đổi từ công trình sang gói giám sát: `ResourceType` duy nhất là `SupervisionGrant`, `ResourceId` là `SupervisionGrant.Id`. Giao và chuyển giao khóa dòng gói bằng `FOR SHARE` và chỉ nhận gói `Assigned`/`Completed`, thêm lỗi 409 `ResourceNotAssignable` và 404 `AssignmentResourceNotFound` (`BR-RBAC-013` khoản 8, `EXC-07`, `AC-011`). Hủy và khôi phục gói không đổi phân công; gói mới gắn vào cùng công trình không kế thừa người phụ trách (khoản 3, 9; `ALT-06`, `ALT-07`, `AC-012`). Thêm mục thứ tự khóa giữa các luồng. Danh sách cần chia lại nay triển khai được, chỉ gồm gói `Assigned`, trạng thái đổi tên thành `NoAssignee`/`AssigneeLocked`. Thêm truy vấn phạm vi xem công trình theo gói đang phụ trách cho `BR-SITE-003`. Kế hoạch migration xóa toàn bộ dòng `Customer`/`Project` của dữ liệu dev/test thay vì đổi nhãn. Viết lại dữ liệu mẫu theo gói.
 - 2026-09-25: Cập nhật theo US/BR đã chốt ngày 25/09/2026. Chỉ còn một loại tài nguyên `ConstructionSite`; bỏ phân công mức khách hàng, nhánh kế thừa, `IsAssignedAsync` và `IResourceHierarchyReader`. Mỗi công trình một người phụ trách: index duy nhất có lọc chuyển sang `(ResourceType, ResourceId) WHERE EffectiveToUtc IS NULL`; giao công trình đã có người trả 409 `ResourceAlreadyAssigned` (`EXC-05`, `AC-004`), kể cả khi hai yêu cầu chạy song song; chuyển giao đóng dòng cũ trước khi chèn dòng mới. Người nhận phải có `supervision.complete` đọc từ database, thiếu thì 422 `AssigneeLacksPermission` (`EXC-06`, `AC-009`); giao và chuyển giao khóa dòng `User` của người nhận. Thu hồi vai trò và sửa quyền vai trò theo `BR-RBAC-007` mới. Thay `GET /assignments/unassigned` bằng danh sách cần chia lại gồm công trình chưa có người và công trình có người phụ trách bị khóa (`AC-010`), vẫn chờ đặc tả Công trình. Nhánh Admin nhận diện theo mã vai trò hệ thống `admin`; lỗi thiếu phân công khi hoàn thành gói là `ConstructionSiteNotAssignedToActor` theo TDD-SUB-006; tham chiếu chuyển từ TDD-SUB-003 (đã bị thay thế) sang TDD-SUB-004/005/006. Viết lại dữ liệu mẫu và thêm kế hoạch migration schema cho dữ liệu dev/test; bổ sung tham chiếu `BR-RBAC-001`.
 - 2026-09-23: Sửa Sequence Diagram cho khớp bảng BR-RBAC-012: chuyển giao ghi một dòng nhật ký `AssignmentTransferred` với người cũ ở `BeforeJson` và người mới ở `AfterJson`, thay vì hai dòng `AssignmentEnded` và `AssignmentCreated`. Hai dòng sẽ làm hành động `AssignmentTransferred` trong bảng không bao giờ được dùng.

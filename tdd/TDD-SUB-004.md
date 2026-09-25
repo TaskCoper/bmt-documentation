@@ -59,9 +59,9 @@ Ngày 25/09/2026 người dùng xác nhận **gói đã gắn công trình thì 
 
 **Công trình** là thực thể riêng, khác bản dự toán; khách tự tạo miễn phí theo STORY-SITE-001. Bảng `ConstructionSite`, cổng đọc `IConstructionSiteOwnershipReader` và quy tắc xóa công trình được thiết kế ở [TDD-SITE-001](TDD-SITE-001.md). Tài liệu này chỉ mô tả cách luồng gán gói đọc và khóa công trình.
 
-Hiện trạng code đã kiểm tra ngày 25/09/2026:
+Hiện trạng code trước và sau đợt thay đổi ngày 25/09/2026:
 
-| Thành phần | Hiện trạng | Thay đổi dự kiến |
+| Thành phần | Trước ngày 25/09/2026 | Đã đổi ngày 25/09/2026 |
 | --- | --- | --- |
 | `SupervisionGrant` (`domain/entities`), `SupervisionGrantConfiguration` | Cột `ProjectId` không có khóa ngoại; index `UX_SupervisionGrant_ProjectHolder` lọc `State IN ('Assigned','Completed')`. | Đổi cột thành `ConstructionSiteId`, thêm khóa ngoại ghép tới `ConstructionSite`, đổi tên index. |
 | `SupervisionAssignmentEvent` + `SupervisionAssignmentEventConfiguration` | Ghi mỗi lần gán hoặc đổi, có `OldProjectId`, `NewProjectId`, `Reason`, CHECK `CK_SupervisionAssignmentEvent_Reason`. | Bỏ bảng, xem Data Model. |
@@ -70,7 +70,7 @@ Hiện trạng code đã kiểm tra ngày 25/09/2026:
 | `IProjectOwnershipReader` + `UnavailableProjectOwnershipReader` | Bản tạm luôn ném 503 `ProjectModuleUnavailable`, nên endpoint gán chưa từng thành công. | Thay bằng `IConstructionSiteOwnershipReader` đọc bảng thật theo TDD-SITE-001; bỏ mã 503. |
 | `SupervisionStates.HoldingProject`, `SubscriptionErrorCodes.Project*` | Tên theo "dự án". | Đổi sang tên công trình; bỏ `NoProjectChange`, `ProjectModuleUnavailable`. |
 
-Các migration đã có: `SupervisionGrant`, `SupervisionGrantFirstAssignedWindow`, `SupervisionGrantCompleted`, `SupervisionAssignmentEventReasonNotNull`. Mọi thay đổi trong bảng trên là thiết kế dự kiến, chưa có trong code. Không quản lý trạng thái khảo sát/giám sát.
+Các migration đã có: `SupervisionGrant`, `SupervisionGrantFirstAssignedWindow`, `SupervisionGrantCompleted`, `SupervisionAssignmentEventReasonNotNull`. Mọi thay đổi ở cột cuối đã có trong code ở commit `182e2a8` trên nhánh `feature/construction-site` của `bmt-be`, cùng migration `20260925074152_ConstructionSiteAndPackageAssignment`. Không quản lý trạng thái khảo sát/giám sát.
 
 ### Goals
 
@@ -99,33 +99,36 @@ Các migration đã có: `SupervisionGrant`, `SupervisionGrantFirstAssignedWindo
 | Thời hạn theo lịch địa phương | Đổi mốc cấp sang giờ Việt Nam, cộng một năm theo lịch rồi đổi về UTC. | Ngày 29/02 sang 28/02 năm không nhuận; không cộng cố định 365 ngày. |
 | Trạng thái hiệu lực tính khi đọc | Dựa trên `State`, `FirstAssignedAtUtc` và hạn gán để trả `EffectiveState`. | Gói chưa gán đến hạn bị chặn dù chưa có tác vụ nền cập nhật. |
 
-| Thành phần dự kiến | Trách nhiệm |
+| Thành phần | Trách nhiệm |
 | --- | --- |
 | `SupervisionGrantApi` ở `presentation/apis/subscription/` | Đọc gói của khách và gán lần đầu. Không còn module `SupervisionReassignApi`. |
 | `AssignSupervisionGrantCommandHandler` | Kiểm sở hữu, khóa, version, hạn; ghi liên kết và biên nhận trong cùng transaction. |
-| `SupervisionAssignmentPolicy` | Hàm thuần kiểm gói `Unassigned`, trước hạn gán và version khớp. |
-| `AssignmentDeadlineCalculator` | Convert UTC→Asia/Ho_Chi_Minh, `AddYears(1)`, giữ giờ/phút/giây, 29/02→28/02 nếu cần, convert về UTC. |
-| `IConstructionSiteOwnershipReader` | Định nghĩa và hiện thực theo TDD-SITE-001; dùng cùng `DbContext` và transaction của handler. |
-| `SupervisionStore` | Truy vấn/ghi gói và index giữ chỗ trên công trình. |
+| `ISupervisionPolicy.EnsureCanAssign` (`SupervisionPolicy`) | Hàm thuần kiểm gói `Unassigned`, trước hạn gán và version khớp. |
+| `ISupervisionPolicy.ComputeAssignmentDeadline` | Convert UTC→Asia/Ho_Chi_Minh, `AddYears(1)`, giữ giờ/phút/giây, 29/02→28/02 nếu cần, convert về UTC. |
+| `IConstructionSiteOwnershipReader` | Định nghĩa và hiện thực theo TDD-SITE-001 (`ConstructionSiteLocks`); dùng cùng `DbContext` và transaction của handler. |
+| `IDesignSubscriptionStore.LockAccountAsync` và repository của `IUnitOfWork` | Khóa dòng tài khoản chủ gói; truy vấn, ghi gói và biên nhận. |
 
 ```mermaid
 flowchart LR
     C[Khách hàng] --> A[SupervisionGrantApi]
     A --> H[AssignSupervisionGrantCommandHandler]
     H --> P[IConstructionSiteOwnershipReader<br/>TDD-SITE-001]
-    H --> R[SupervisionAssignmentPolicy]
+    H --> R[ISupervisionPolicy]
     H --> D[(SupervisionGrant, ConstructionSite<br/>và biên nhận trong PostgreSQL)]
 ```
 
 **Notes**:
 
 - Dùng transaction pipeline hiện có; lỗi kiểm tra sau khi đã đổi dữ liệu phải ném exception để rollback. Quy ước chung từ TDD-PAY-001.
-- Thứ tự khóa: AccountCommerceState của chủ gói → dòng `ConstructionSite` đích (`FOR KEY SHARE`) → `SupervisionGrant` (`FOR UPDATE`) → biên nhận. Cấp, hủy, khôi phục, hoàn thành và mở lại cũng khóa AccountCommerceState nên không chạy xen làm sai liên kết. Xóa công trình theo TDD-SITE-001 chỉ khóa dòng công trình rồi để khóa ngoại kiểm gói tham chiếu, không khóa gói, nên hai chuỗi khóa không tạo vòng chờ. Hiện trạng code: `LockAccountAsync` đang khóa dòng `User`; đổi sang AccountCommerceState theo TDD-PAY-001.
+- Thứ tự khóa: AccountCommerceState của chủ gói → dòng `ConstructionSite` đích (`FOR KEY SHARE`) → `SupervisionGrant` (`FOR UPDATE`) → biên nhận. Cấp, hủy, khôi phục, hoàn thành và mở lại cũng khóa AccountCommerceState nên không chạy xen làm sai liên kết. Xóa công trình theo TDD-SITE-001 chỉ khóa dòng công trình rồi để khóa ngoại kiểm gói tham chiếu, không khóa gói, nên hai chuỗi khóa không tạo vòng chờ.
+- Code hiện làm khác thứ tự khóa trên ở hai điểm, nhưng cho cùng kết quả:
+  - Khóa tài khoản là khóa dòng `User` của chủ gói (`IDesignSubscriptionStore.LockAccountAsync`, `SELECT ... FOR UPDATE`), vì bảng `AccountCommerceState` của TDD-PAY-001 chưa có. Khi có bảng đó thì đổi sang khóa dòng của bảng đó.
+  - Không có câu khóa riêng `FOR UPDATE` trên dòng gói. Sau khi giữ khóa tài khoản, handler đọc lại gói có theo dõi thay đổi (`FindByIdAsync`). Cách này tương đương vì mọi luồng đổi `State` hoặc cột công trình của gói — gán, hủy, khôi phục, hoàn thành, mở lại — đều khóa tài khoản chủ gói trước khi đọc gói. Khi luồng gán đang giữ khóa tài khoản, không luồng nào khác đổi được gói, nên bản vừa đọc là bản mới nhất và không bị ghi đè lúc commit. Câu `UPDATE` lúc commit tự lấy khóa dòng gói; nếu luồng phân công theo [TDD-RBAC-003](TDD-RBAC-003.md#architecture) đang giữ `FOR SHARE` trên gói thì câu này chờ luồng đó xong. Ví dụ: khách gán G1 đúng lúc nhân viên hủy G1. Bên nào lấy khóa tài khoản trước thì chạy xong trước; bên sau đọc lại G1, thấy version đã tăng và nhận 409.
 - Đọc lại gói sau khóa; đối chiếu `expectedVersion`. Sai version trả 409, không tự thay version rồi lặp lại quyết định của người dùng. Idempotency-Key có phạm vi người thao tác + thao tác + gói; cùng yêu cầu gửi lại không sửa lần hai, quyền và sở hữu được kiểm lại trước khi trả kết quả cũ.
 - Khách: lấy `AccountId` từ phiên; kiểm gói thuộc khách trước khi lộ dữ liệu; request chỉ có `constructionSiteId` và `expectedVersion`. Tài khoản nhân viên không sở hữu gói theo BR-RBAC-005, nên gọi route `me` chỉ nhận 404 như gói không tồn tại.
 - Gán lần đầu: `State = Unassigned`, `FirstAssignedAtUtc = NULL`, `now < AssignmentDeadlineUtc`; công trình thuộc chủ gói và chưa có gói giữ chỗ khác. Ghi `FirstAssignedAtUtc = now`, `ConstructionSiteId` và `State = Assigned`. Đây là mốc đã sử dụng, không gọi thanh toán.
 - Gói không ở trạng thái `Unassigned` (đã gán, đã hoàn thành, đang bị hủy) trả 409 `GrantStateConflict`. Đây cũng là kết quả khi khách gọi lại route gán để "đổi" sang công trình khác (STORY-SUB-004/AC-005). Không có route gỡ về chưa gán hay đổi công trình; route cũ `/admin/supervision-grants/{grantId}/reassign` bị bỏ, yêu cầu tới đó nhận 404 của routing (STORY-SUB-004/AC-013).
-- Công trình bị xóa giữa lúc handler đọc sở hữu và lúc commit không xảy ra, vì dòng đã bị khóa `FOR KEY SHARE`. Nếu công trình đã bị xóa trước khi handler khóa, cổng đọc trả NULL và handler trả 404 `ConstructionSiteNotFound`. Lỗi khóa ngoại `23503` chỉ còn là lớp chặn cuối, ánh xạ về cùng mã 404 ở lớp bao ngoài `TransactionPipelineBehavior`.
+- Công trình bị xóa giữa lúc handler đọc sở hữu và lúc commit không xảy ra, vì dòng đã bị khóa `FOR KEY SHARE`. Nếu công trình đã bị xóa trước khi handler khóa, cổng đọc trả NULL và handler trả 404 `ConstructionSiteNotFound`. Lỗi khóa ngoại `23503` chỉ còn là lớp chặn cuối; `ConstraintViolationPipelineBehavior`, lớp bao ngoài `TransactionPipelineBehavior`, ánh xạ lỗi này về cùng mã 404. Vi phạm `UX_SupervisionGrant_ConstructionSiteHolder` (`23505`) được ánh xạ về 409 `ConstructionSiteAlreadyHasSupervision` theo cùng cách.
 - Chạy đến hạn chỉ làm gói chưa từng gán mất quyền gán. GET tính `EffectiveState = ExpiredUnassigned` khi `now >= deadline`; không cần job đúng giây. Gói đã gán đúng hạn tiếp tục `Assigned` sau hạn. Hủy/khôi phục theo TDD-SUB-005 giữ `FirstAssignedAtUtc`, hạn gán và `ConstructionSiteId`.
 
 ## Sequence Diagram
@@ -139,10 +142,10 @@ sequenceDiagram
     participant D as PostgreSQL
     U->>A: POST assign {constructionSiteId, expectedVersion}, Idempotency-Key
     A->>H: Command, AccountId từ phiên
-    H->>D: Khóa AccountCommerceState của chủ gói
+    H->>D: Khóa tài khoản chủ gói (code hiện khóa dòng User)
     H->>O: LockOwnerAccountIdAsync(constructionSiteId)
     O->>D: SELECT OwnerUserId FROM ConstructionSite FOR KEY SHARE
-    H->>D: Khóa SupervisionGrant FOR UPDATE, tra biên nhận
+    H->>D: Đọc lại gói có theo dõi thay đổi, tra biên nhận
     H->>H: Kiểm sở hữu, trạng thái Unassigned, hạn, version
     H->>D: Kiểm công trình chưa có gói Assigned hoặc Completed
     alt Hợp lệ
@@ -210,7 +213,7 @@ stateDiagram-v2
 | Version sau khi gán, kết quả trả về | `PackageMutationReceipt.ResultVersion`, `ResultBody` |
 | `OldProjectId`, `Reason` | Luôn NULL vì không còn thao tác đổi |
 
-Giữ bảng thì mỗi lần gán ghi cùng một sự thật hai nơi, và code phải giữ hai nơi khớp nhau mà không có lợi ích tra cứu nào thêm. Vì endpoint gán luôn trả 503 do `UnavailableProjectOwnershipReader`, bảng chưa từng có dòng nào ngoài dữ liệu test, nên bỏ bảng không mất lịch sử thật. Trường `eventId` trong phản hồi gán bỏ theo; chưa client nào từng nhận phản hồi gán thành công.
+Giữ bảng thì mỗi lần gán ghi cùng một sự thật hai nơi, và code phải giữ hai nơi khớp nhau mà không có lợi ích tra cứu nào thêm. Vì endpoint gán cũ luôn trả 503 do `UnavailableProjectOwnershipReader`, bảng chưa từng có dòng nào ngoài dữ liệu test, nên bỏ bảng không mất lịch sử thật. Trường `eventId` trong phản hồi gán bỏ theo; chưa client nào từng nhận phản hồi gán thành công.
 
 **Dữ liệu lưu trữ minh họa — mua trước, gán sau**
 
@@ -234,9 +237,9 @@ Nhánh hết hạn: G2 có cùng hạn nhưng chưa từng gán. Tại `2027-09-
 
 Tài liệu này là định nghĩa gốc của `SupervisionGrant`, thay schema cũ của TDD-SUB-003; không tạo bảng giám sát khác cạnh bảng này. Bảng dưới ghi schema đích; mọi thời điểm lưu UTC; khóa ngoại lịch sử `RESTRICT`.
 
-| Bảng | Trường và ràng buộc dự kiến |
+| Bảng | Trường và ràng buộc |
 | --- | --- |
-| SupervisionGrant | Id uuid PK; AccountId uuid NN FK User; RevisionId uuid NN FK PlanRevision; Kind varchar(16) NN CHECK='Supervision'; ConstructionSiteId uuid NULL (code hiện: `ProjectId`); State varchar(24) NN =Unassigned/Assigned/CanceledByStaff/Completed; GrantedAtUtc timestamptz NN; AssignmentDeadlineUtc timestamptz NN; FirstAssignedAtUtc timestamptz NULL; Version bigint NN; CancelEventId uuid NULL; UNIQUE(AccountId,Id); FK(RevisionId,Kind) → UNIQUE(Id,Kind) của PlanRevision; FK `FK_SupervisionGrant_ConstructionSite` (ConstructionSiteId,AccountId) → UNIQUE(Id,OwnerUserId) của ConstructionSite, ON DELETE RESTRICT, MATCH SIMPLE. Giá trị `Completed` và quy tắc hoàn thành/mở lại thuộc [TDD-SUB-006](TDD-SUB-006.md#data-model). |
+| SupervisionGrant | Id uuid PK; AccountId uuid NN FK User; RevisionId uuid NN FK PlanRevision; Kind varchar(16) NN CHECK='Supervision'; ConstructionSiteId uuid NULL; State varchar(24) NN =Unassigned/Assigned/CanceledByStaff/Completed; GrantedAtUtc timestamptz NN; AssignmentDeadlineUtc timestamptz NN; FirstAssignedAtUtc timestamptz NULL; Version bigint NN; CancelEventId uuid NULL; UNIQUE(AccountId,Id); FK(RevisionId,Kind) → UNIQUE(Id,Kind) của PlanRevision; FK `FK_SupervisionGrant_ConstructionSite` (ConstructionSiteId,AccountId) → UNIQUE(Id,OwnerUserId) của ConstructionSite, ON DELETE RESTRICT, MATCH SIMPLE. Giá trị `Completed` và quy tắc hoàn thành/mở lại thuộc [TDD-SUB-006](TDD-SUB-006.md#data-model). |
 | PackageMutationReceipt | Schema dùng chung ở TDD-SUB-005; kết quả thao tác gán không phải giao dịch tiền. |
 
 Cột `Kind` lặp lại loại gói và luôn bằng `Supervision`. Khóa ngoại ghép `(RevisionId,Kind)` trỏ tới `UNIQUE(Id,Kind)` của `PlanRevision` mới là phần bắt phiên bản được tham chiếu phải thuộc gói giám sát thật; cùng kỹ thuật [TDD-SUB-001](TDD-SUB-001.md#data-model) dùng cho `PlanOffer`.
@@ -245,7 +248,7 @@ Khóa ngoại ghép tới công trình dùng cùng ý tưởng. Nó cần `Const
 
 CHECK: AssignmentDeadlineUtc > GrantedAtUtc; FirstAssignedAtUtc nếu có phải GrantedAtUtc <= first < deadline. Unassigned đòi ConstructionSiteId và FirstAssignedAtUtc NULL; Assigned hoặc Completed đòi cả hai NOT NULL. CanceledByStaff giữ nguyên liên kết trước hủy, có thể NULL hoặc có công trình; không dùng hủy để xóa FirstAssignedAtUtc.
 
-Partial unique index `UX_SupervisionGrant_ConstructionSiteHolder(ConstructionSiteId) WHERE State IN ('Assigned','Completed')` (code hiện: `UX_SupervisionGrant_ProjectHolder` trên `ProjectId`). Index này bảo đảm mỗi công trình có tối đa một gói giữ chỗ. Gói `Unassigned` có cột công trình NULL nên không bị index xét; gói `CanceledByStaff` nằm ngoài điều kiện nên nhả chỗ ngay sau commit. Mọi chỗ kiểm trong code dùng chung hằng tập giữ chỗ (`SupervisionStates.HoldingProject`, dự kiến đổi thành `HoldingConstructionSite`) để không lệch với index.
+Partial unique index `UX_SupervisionGrant_ConstructionSiteHolder(ConstructionSiteId) WHERE State IN ('Assigned','Completed')`. Index này bảo đảm mỗi công trình có tối đa một gói giữ chỗ. Gói `Unassigned` có cột công trình NULL nên không bị index xét; gói `CanceledByStaff` nằm ngoài điều kiện nên nhả chỗ ngay sau commit. Mọi chỗ kiểm trong code dùng chung hằng tập giữ chỗ (`SupervisionStates.HoldingConstructionSite`) để không lệch với index.
 
 Index thường `IX_SupervisionGrant_ConstructionSiteId_AccountId(ConstructionSiteId, AccountId)` phục vụ ba việc: PostgreSQL tìm gói tham chiếu khi xóa công trình (không có index thì mỗi lần xóa quét cả bảng), TDD-SITE-001 kiểm "công trình từng có gói", và danh sách công trình kèm gói.
 
@@ -261,34 +264,36 @@ erDiagram
 **Notes**:
 
 - Index `(AccountId,GrantedAtUtc DESC,Id)` cho danh sách của khách. Hạn được lưu một lần khi cấp và không tính lại khi hủy hoặc khôi phục.
-- Mapping C# `DateTimeOffset` UTC; calculator dùng `TimeZoneInfo` Asia/Ho_Chi_Minh và lịch, không `AddDays(365)`. Clock được inject để test trước/đúng/sau hạn và ngày 29/02.
+- Mapping C# `DateTimeOffset` UTC; `ComputeAssignmentDeadline` dùng `TimeZoneInfo` Asia/Ho_Chi_Minh và lịch, không `AddDays(365)`. Policy nhận thời điểm hiện tại làm tham số để test trước/đúng/sau hạn và ngày 29/02; handler lấy `DateTimeOffset.UtcNow`.
 - Hai yêu cầu gán cùng version chỉ một lần thành công; khách gửi lại cùng key nhận kết quả đã lưu, không đổi `FirstAssignedAtUtc`.
-- Khóa ngoại tới công trình, khóa `FOR KEY SHARE` và index giữ chỗ phải được kiểm bằng PostgreSQL thật; EF InMemory không chứng minh được.
+- Khóa ngoại tới công trình, khóa `FOR KEY SHARE` và index giữ chỗ phải được kiểm bằng PostgreSQL thật; EF InMemory không chứng minh được. Integration test ở `test/bmt-be.integration.tests/SupervisionGrantConstraintTests.cs` và `ConstructionSiteConstraintTests.cs` kiểm các điểm này.
 
-**Kế hoạch migration** (theo skill database-migration-planner; chưa tạo, chưa chạy)
+**Migration đã tạo**: `20260925074152_ConstructionSiteAndPackageAssignment`, gộp chung với phần của TDD-SITE-001, TDD-SUB-001, TDD-RBAC-001 và TDD-RBAC-003; thứ tự đầy đủ ở [TDD-SITE-001](TDD-SITE-001.md#data-model).
 
-Database hiện chỉ có dữ liệu dev/test (người dùng xác nhận ngày 25/09/2026). Migration này chạy sau migration tạo bảng `ConstructionSite` của TDD-SITE-001, hoặc gộp chung một migration với thứ tự tương ứng.
+Database hiện chỉ có dữ liệu dev/test (người dùng xác nhận ngày 25/09/2026). Trong migration gộp, bước kiểm chạy đầu tiên; các bước 2–4 dưới đây chạy sau bước tạo bảng `ConstructionSite`.
 
 | Bước | Việc làm | Kiểm tra / điều kiện dừng |
 | --- | --- | --- |
-| 1. Kiểm trước | `SELECT count(*) FROM "SupervisionGrant" WHERE "ProjectId" IS NOT NULL;` và `SELECT count(*) FROM "SupervisionAssignmentEvent";` | Dự kiến cả hai bằng 0, vì endpoint gán và đổi luôn trả 503. Nếu khác 0, các dòng đó là dữ liệu test ghi tay, trỏ tới công trình không có thật. Dừng migration; người chạy chọn xóa các gói test đó (kèm biên nhận và sự kiện vòng đời của chúng) hoặc dựng lại database dev. Migration không tự xóa dữ liệu. |
+| 1. Kiểm trước | Khối `DO` trong migration kiểm có gói nào có `ProjectId` khác NULL hoặc có dòng `SupervisionAssignmentEvent` không; có thì `RAISE EXCEPTION`. | Bình thường không có dòng nào, vì endpoint gán và đổi cũ luôn trả 503. Nếu có, các dòng đó là dữ liệu test ghi tay, trỏ tới công trình không có thật. Dừng migration; người chạy chọn xóa các gói test đó (kèm biên nhận và sự kiện vòng đời của chúng) hoặc dựng lại database dev. Migration không tự xóa dữ liệu. |
 | 2. Bỏ bảng lịch sử đổi | `DROP TABLE "SupervisionAssignmentEvent"` (bỏ luôn CHECK, index và các khóa ngoại của bảng). | Bảng không còn trong `information_schema.tables`. |
-| 3. Đổi tên | `ALTER TABLE "SupervisionGrant" RENAME COLUMN "ProjectId" TO "ConstructionSiteId"`; đổi tên index giữ chỗ thành `UX_SupervisionGrant_ConstructionSiteHolder`. EF sẽ bỏ và tạo lại `CK_SupervisionGrant_AssignedColumns` vì chuỗi SQL trong model đổi. | Index giữ chỗ vẫn có điều kiện `State IN ('Assigned','Completed')`. |
+| 3. Đổi tên | `ALTER TABLE "SupervisionGrant" RENAME COLUMN "ProjectId" TO "ConstructionSiteId"`; đổi tên index giữ chỗ thành `UX_SupervisionGrant_ConstructionSiteHolder`. EF bỏ và tạo lại `CK_SupervisionGrant_AssignedColumns` vì chuỗi SQL trong model đổi. | Index giữ chỗ vẫn có điều kiện `State IN ('Assigned','Completed')`. |
 | 4. Thêm index và khóa ngoại | Tạo `IX_SupervisionGrant_ConstructionSiteId_AccountId`; thêm `FK_SupervisionGrant_ConstructionSite` tới `ConstructionSite(Id, OwnerUserId)` với `ON DELETE RESTRICT`. | Bảng nhỏ và cột toàn NULL sau bước 1, nên thêm khóa ngoại trực tiếp; không cần `NOT VALID` rồi `VALIDATE`. Kiểm `pg_constraint` có khóa ngoại với `confdeltype = 'r'`. |
 
 Triển khai cùng lúc code và migration: code cũ đọc `ProjectId` và bảng sự kiện nên không chạy được sau bước 2–3; với môi trường dev/test chấp nhận dừng ngắn. Down migration tạo lại bảng `SupervisionAssignmentEvent` rỗng, đổi tên ngược, bỏ index và khóa ngoại mới; dữ liệu của bảng sự kiện nếu có sẽ không lấy lại được, nên bước 1 phải xác nhận bảng rỗng trước. Việc bỏ mã quyền `supervision.reassign` khỏi bảng `Permission`/`RolePermission` thuộc TDD-RBAC-001.
+
+Đã chạy thử ngày 25/09/2026 trên PostgreSQL: bước kiểm dừng migration khi có gói gắn `ProjectId`; sau `Up`, `pg_constraint` có `FK_SupervisionGrant_ConstructionSite` với `confdeltype = 'r'`; `Down` chạy được. Chưa áp dụng lên môi trường dev dùng chung hay production.
 
 ## Internal API
 
 ### Endpoints
 
-Các route đã có trong code với tên trường `projectId`. Hợp đồng dưới đây dùng `constructionSiteId`; đổi tên trường là thay đổi hợp đồng API, client đang dùng phải cập nhật cùng lúc. Các mã lỗi `ConstructionSite*` thay các mã `Project*` đang có trong `SubscriptionErrorCodes`.
+Từ ngày 25/09/2026 các route dùng tên trường `constructionSiteId`, thay `projectId` trước đó; đây là thay đổi hợp đồng API, client đang dùng phải cập nhật cùng lúc. Mã `ConstructionSiteNotFound` nằm trong `ConstructionSiteErrorCodes`, `ConstructionSiteAlreadyHasSupervision` nằm trong `SubscriptionErrorCodes`; các mã `Project*` của luồng gán và đổi đã bỏ.
 
 - **GET** `/api/v1/me/supervision-grants` — Phiên đã xác minh; chỉ gói của chính khách, gồm chưa gán, quá hạn, bị hủy, đã hoàn thành. PageIndex/PageSize theo PagedResult, sắp `GrantedAtUtc DESC, Id DESC`. Mỗi gói đã gán kèm `constructionSiteId` và tên công trình.
 - **GET** `/api/v1/me/supervision-grants/{grantId}` — Đọc gói thuộc khách: revision, `constructionSiteId`, tên công trình, `firstAssignedAtUtc`, `assignmentDeadlineUtc`, `effectiveState` và `version`. `state`/`effectiveState` có thể là `Completed` theo TDD-SUB-006.
 - **POST** `/api/v1/me/supervision-grants/{grantId}/assign` — `{constructionSiteId,expectedVersion}`, header Idempotency-Key; chỉ gán lần đầu. Phản hồi gồm `grantId`, `constructionSiteId`, `state`, `version` và `wasAlreadyApplied` (true khi trả lại kết quả của lần gửi trước). Muốn biết `firstAssignedAtUtc` và `assignmentDeadlineUtc`, client gọi GET chi tiết gói.
 
-Không có endpoint đổi công trình. Route `POST /api/v1/admin/supervision-grants/{grantId}/reassign` và policy `supervision.reassign` bị bỏ khỏi code.
+Không có endpoint đổi công trình. Route `POST /api/v1/admin/supervision-grants/{grantId}/reassign` và policy `supervision.reassign` đã bỏ khỏi code.
 
 ### Examples
 
@@ -303,17 +308,19 @@ Response 200:
 {"value":{"grantId":"44444444-4444-4444-4444-444444444444","constructionSiteId":"33333333-3333-3333-3333-333333333333","state":"Assigned","version":2,"wasAlreadyApplied":false},"isSuccess":true,"isFailure":false,"error":{"code":"","message":""}}
 
 Error Response:
-{"title":"Conflict","code":"ConstructionSiteAlreadyHasSupervision","status":409,"detail":"Công trình đã có gói giám sát đang giữ chỗ.","messageCode":"ConstructionSiteAlreadyHasSupervision","errors":null}
+{"title":"Conflict","code":"Conflict","status":409,"detail":"Công trình này đã có một gói giám sát đang gắn.","messageCode":"ConstructionSiteAlreadyHasSupervision","errors":null}
 ```
 
 Gọi lại route này cho gói đã gán, với một công trình khác:
 
 ```
 Error Response:
-{"title":"Conflict","code":"GrantStateConflict","status":409,"detail":"Gói đã gắn công trình nên không gán lại hoặc đổi công trình được.","messageCode":"GrantStateConflict","errors":null}
+{"title":"Conflict","code":"Conflict","status":409,"detail":"Gói này không ở trạng thái gán lần đầu.","messageCode":"GrantStateConflict","errors":null}
 ```
 
 ### Error Codes
+
+Mỗi mã dưới đây là giá trị `messageCode` trong thân lỗi; trường `code` chỉ là loại lỗi chung như `Conflict`, `NotFound`.
 
 - **Unauthorized** (401): phiên không hợp lệ.
 - **SupervisionGrantNotFound** (404): không có gói trong phạm vi của khách; gói của người khác trả cùng mã.
@@ -369,10 +376,11 @@ Bỏ các mã `NoConstructionSiteChange` (thay `NoProjectChange`) và `Construct
 - [TDD-SUB-003](TDD-SUB-003.md) là bản cũ đã bị thay; tài liệu này thay phần gán của nó. Không gọi service bên ngoài nên không có External API trong TDD này.
 - System Test hiện hành: ST-PAY-024–028, ST-PAY-033, ST-PAY-071 (không ai đổi được công trình), ST-SUB-118, ST-SUB-119 và ST-SITE-020 (xóa công trình đua với gán gói). ST-PAY-029–032 kiểm việc đổi công trình và đã rút khỏi nghiệm thu ngày 25/09/2026. Bảng truy vết đầy đủ ở [discovery](../discovery/payment-technical-design.md).
 - STORY-SUB-004 AC-006 đến AC-009 và ALT-02, EXC-04, EXC-05 được ghi "Không nghiệm thu" nên không còn trong tham chiếu.
-- Đặc tả Unit Test: UT-PAY-037 đến UT-PAY-042, UT-PAY-044, UT-PAY-046 đến UT-PAY-048, UT-PAY-075 đến UT-PAY-077, UT-SUB-069. UT-PAY-043 và UT-PAY-045 kiểm việc đổi công trình và đã rút khỏi nghiệm thu ngày 25/09/2026. Chưa có mã test hoặc kết quả chạy.
+- Đặc tả Unit Test: UT-PAY-037 đến UT-PAY-042, UT-PAY-044, UT-PAY-046 đến UT-PAY-048, UT-PAY-075 đến UT-PAY-077, UT-SUB-069. UT-PAY-043 và UT-PAY-045 kiểm việc đổi công trình và đã rút khỏi nghiệm thu ngày 25/09/2026. Mã test ở `test/bmt-be.application.tests/usecases/subscription/` (`SupervisionCommandHandlerTests.cs`, `SupervisionPolicyTests.cs`), chạy đạt ngày 25/09/2026 cùng bộ unit 338/338; trong danh sách trên, mới UT-PAY-040, UT-PAY-044, UT-PAY-075, UT-PAY-076 và UT-SUB-069 được ghi mã truy vết trong test.
 
 ## Change Log
 
+- 2026-09-25 (đồng bộ code): Đồng bộ với code đã triển khai ở commit `182e2a8`: cột `ConstructionSiteId`, khóa ngoại ghép, bỏ `reassign` và bảng sự kiện, cổng đọc chủ công trình thật đã có. Giải thích hai điểm code làm khác thứ tự khóa (khóa dòng `User` thay `AccountCommerceState`; đọc lại gói sau khóa tài khoản thay `FOR UPDATE`) và vì sao cho cùng kết quả. Thay kế hoạch migration bằng migration gộp đã chạy thử.
 - 2026-09-25 (lần 2): Theo quyết định người dùng ngày 25/09/2026, bỏ đổi công trình của gói đã gắn (BR-SUB-023 và `supervision.reassign` bỏ; BR-SUB-009 gắn cố định). Gỡ endpoint `reassign`, handler, policy, lý do đổi, mã `NoConstructionSiteChange`; bỏ bảng `SupervisionAssignmentEvent` và trường `eventId` vì mọi thông tin đã có ở gói và biên nhận. Cổng `IConstructionSiteOwnershipReader` đọc bảng `ConstructionSite` thật theo TDD-SITE-001 với khóa `FOR KEY SHARE`; thêm khóa ngoại ghép `(ConstructionSiteId, AccountId)` `ON DELETE RESTRICT` và index hỗ trợ; bỏ mã 503. Thêm kế hoạch migration có bước kiểm dữ liệu dev/test. Cập nhật truy vết ST-PAY-071, bỏ ST-PAY-029–032.
 - 2026-09-25: Cập nhật theo nghiệp vụ đã chốt ngày 25/09/2026. Gói giám sát gắn với công trình (`ConstructionSite`), thực thể riêng khác bản dự toán và chưa có đặc tả; đổi "dự án"/`ProjectId`/`IProjectOwnershipReader`/mã lỗi `Project*` sang tên công trình dự kiến, ghi rõ tên hiện có trong code. Kiểm chỗ trống và partial unique index tính cả gói `Completed` (tập giữ chỗ `Assigned`/`Completed`); bổ sung `Completed` vào State, CHECK và State Diagram, đổi công trình của gói `Completed` bị từ chối. Bỏ Non-goal "luồng hoàn thành lịch sử" và ghi chú ánh xạ `Completed` cũ vì database chỉ có dữ liệu dev/test; migration chỉ đổi tên. Bỏ khóa bản ghi quyền của người thao tác khỏi thứ tự khóa. Dữ liệu mẫu dùng `SR1`, `CS1`, `CS2`. Bổ sung tham chiếu AC của STORY-SUB-004 và STORY-SUB-003/AC-012, AC-013.
 - 2026-09-24: Cập nhật Internal API cho khớp code: mã lỗi 503 đổi thành `ProjectModuleUnavailable`; ví dụ phản hồi gán và sửa dự án thêm `eventId`, `wasAlreadyApplied` và bỏ hai mốc thời gian (đọc qua GET chi tiết gói). Nghiệp vụ không đổi.

@@ -57,7 +57,7 @@ STORY-SUB-005 cho nhân viên có quyền riêng hủy/khôi phục gói thiết
 
 Nguồn quyền nhân viên nay do [TDD-RBAC-001](TDD-RBAC-001.md) cung cấp theo mô hình RBAC chuẩn `User` → `UserRole` → `Role` → `RolePermission` → `Permission`. Bản trước của tài liệu này tự định nghĩa `StaffAccessProfile` và `StaffPermission` gán quyền thẳng cho từng người; mô hình đó đã bị thay. Các mã quyền giữ nguyên tên, chỉ đổi chỗ gắn quyền từ người sang vai trò; riêng `supervision.reassign` đã bỏ ngày 25/09/2026 cùng thao tác đổi công trình (BR-SUB-009). Vẫn giữ nguyên tắc không suy ra nhân viên từ việc tài khoản có vai trò khác Khách hàng; tư cách nhân viên nay xác định bằng `User.AccountKind = 'Staff'`. Khi soạn bản đầu, tất cả entity/handler được nêu dưới đây là phần dự kiến.
 
-Hiện trạng code đã kiểm tra ngày 25/09/2026: đã có migration `PackageLifecycle`, `CancelPackageCommandHandler`, `RestorePackageCommandHandler` và `PackageLifecyclePolicy`. Hủy gói giám sát nhận mọi trạng thái trừ `CanceledByStaff`; khôi phục đọc `FromState` của sự kiện hủy và kiểm chỗ theo tập giữ chỗ `Assigned`/`Completed`. Các thao tác vẫn khóa dòng `User` qua `LockAccountAsync` và vẫn dùng tên `ProjectId`. Gói giám sát gắn với công trình (`ConstructionSite`), thực thể riêng khác bản dự toán; đổi tên sang công trình theo [TDD-SUB-004](TDD-SUB-004.md) là thay đổi dự kiến.
+Hiện trạng code đã kiểm tra ngày 25/09/2026: đã có migration `PackageLifecycle`, `CancelPackageCommandHandler`, `RestorePackageCommandHandler` và `PackageLifecyclePolicy`. Hủy gói giám sát nhận mọi trạng thái trừ `CanceledByStaff`; khôi phục đọc `FromState` của sự kiện hủy và kiểm chỗ theo tập giữ chỗ `Assigned`/`Completed`. Các thao tác vẫn khóa dòng `User` qua `LockAccountAsync`, vì bảng `AccountCommerceState` chưa có. Gói giám sát gắn với công trình (`ConstructionSite`), thực thể riêng khác bản dự toán. Từ commit `182e2a8` ngày 25/09/2026 trên nhánh `feature/construction-site` của `bmt-be`, code dùng cột `ConstructionSiteId` và index `UX_SupervisionGrant_ConstructionSiteHolder` theo [TDD-SUB-004](TDD-SUB-004.md); khi hai lần khôi phục song song cùng vượt bước kiểm chỗ, `ConstraintViolationPipelineBehavior` đổi vi phạm index thành 409 `AnotherPackageActive`.
 
 ### Goals
 
@@ -255,7 +255,7 @@ erDiagram
 **Notes**:
 
 - [TDD-SUB-006](TDD-SUB-006.md#data-model) dùng lại `PackageLifecycleEvent` cho hoàn thành và mở lại gói giám sát: thêm `Action` `Complete`/`Reopen`, chỉ cho `PackageKind = Supervision`, và cho `Reason` NULL riêng với `Complete`.
-- Tất cả FK lịch sử RESTRICT; index `(AccountId,AtUtc DESC,Id)` và theo từng target phục vụ tra cứu. `Reason` là cột bắt buộc ở cả hủy và khôi phục, khác `SupervisionAssignmentEvent` nơi lần gán đầu được để trống. CancelEventId tham chiếu event Cancel đúng target bằng kiểm tra transaction; để DEFERRABLE hoặc lưu event trước set pointer, không mở transaction lồng.
+- Tất cả FK lịch sử RESTRICT; index `(AccountId,AtUtc DESC,Id)` và theo từng target phục vụ tra cứu. `Reason` là cột bắt buộc ở cả hủy và khôi phục. CancelEventId tham chiếu event Cancel đúng target bằng kiểm tra transaction; để DEFERRABLE hoặc lưu event trước set pointer, không mở transaction lồng.
 - `LifecycleState=Superseded` cần ClosedAtUtc NOT NULL. Active/CanceledByStaff không có ClosedAtUtc do thay thế. Period đã hết hạn có thể còn trạng thái lưu Active nhưng effective state là Expired; restore luôn kiểm clock trực tiếp.
 - Kỳ chỉ dùng khi đúng CurrentPeriodId, LifecycleState Active và trong [StartsAt,ScheduledEndsAt). Partial unique nếu bổ sung cờ current phải được update nguyên tử; con trỏ chung dưới khóa là nguồn xác định hiện hành, không dùng unique với NOW().
 - Khi migrate kỳ cũ, phân loại ClosedAt từ nguồn mua thay thế, không coi mọi closed period là nhân viên hủy. Nếu không có bằng chứng lý do thì không tạo CancelEvent giả để cho restore.
@@ -283,7 +283,7 @@ Response 200:
 {"value":{"operationId":"77777777-7777-7777-7777-777777777777","state":"CanceledByStaff","resultVersion":3},"isSuccess":true,"isFailure":false,"error":{"code":"","message":""}}
 
 Error Response:
-{"title":"Forbidden","code":"AccessForbidden","status":403,"detail":"Không có quyền hủy gói.","messageCode":"AccessForbidden","errors":null}
+{"title":"Forbidden","code":"Forbidden","status":403,"detail":"Không có quyền hủy gói.","messageCode":"AccessForbidden","errors":null}
 ```
 
 #### POST /api/v1/admin/packages/{kind}/{packageId}/restore
@@ -297,7 +297,7 @@ Response 200:
 {"value":{"operationId":"88888888-8888-8888-8888-888888888888","state":"Active","resultVersion":4},"isSuccess":true,"isFailure":false,"error":{"code":"","message":""}}
 
 Error Response:
-{"title":"Conflict","code":"AnotherPackageActive","status":409,"detail":"Đã có gói khác đang hiệu lực.","messageCode":"AnotherPackageActive","errors":null}
+{"title":"Conflict","code":"Conflict","status":409,"detail":"Đã có gói khác đang hiệu lực.","messageCode":"AnotherPackageActive","errors":null}
 ```
 
 Active trong ví dụ restore là thiết kế. Giám sát trả trạng thái trước khi hủy: Unassigned, Assigned hoặc Completed. Không trả “đã hoàn tiền” từ cancel.
@@ -347,10 +347,11 @@ Active trong ví dụ restore là thiết kế. Giám sát trả trạng thái t
 - Mô hình vai trò và quyền: [TDD-RBAC-001](TDD-RBAC-001.md); cấp và thu hồi vai trò, khóa tài khoản: [TDD-RBAC-002](TDD-RBAC-002.md).
 - Hiện trạng mã nguồn: [PermissionNames](../../bmt-be/src/bmt-be.contract/constants/PermissionNames.cs), [RoleCodes](../../bmt-be/src/bmt-be.contract/constants/RoleCodes.cs), [JwtExtensions](../../bmt-be/src/bmt-be.api/dependencyInjection/extensions/JwtExtensions.cs), [DbContext](../../bmt-be/src/bmt-be.persistence/ApplicationDbContext.cs).
 - [Bảng truy vết kiểm thử](../discovery/payment-technical-design.md). Không có External API: các thao tác này không gọi ngân hàng hoặc SePay.
-- Đặc tả Unit Test: UT-PAY-049 đến UT-PAY-062; UT-PAY-078 và UT-PAY-079 kiểm hủy và khôi phục gói giám sát không đọc hay ghi `Assignment`. Chưa có mã test hoặc kết quả chạy.
+- Đặc tả Unit Test: UT-PAY-049 đến UT-PAY-062; UT-PAY-078 và UT-PAY-079 kiểm hủy và khôi phục gói giám sát không đọc hay ghi `Assignment`. Mã test hủy và khôi phục ở `test/bmt-be.application.tests/usecases/subscription/PackageLifecycleTests.cs`, chạy đạt ngày 25/09/2026 cùng bộ unit 338/338, nhưng chưa ghi mã truy vết UT-PAY; chưa đối chiếu từng ca với đặc tả.
 
 ## Change Log
 
+- 2026-09-25 (đồng bộ code): Đồng bộ với code đã triển khai ở commit `182e2a8`: cột `ConstructionSiteId` và ánh xạ vi phạm index giữ chỗ khi khôi phục thành `AnotherPackageActive`. Ví dụ lỗi ghi mã nghiệp vụ ở `messageCode`.
 - 2026-09-25 (lần 2): Bỏ `supervision.reassign` và thao tác đổi công trình khỏi mô tả quyền (BR-SUB-009). Ghi rõ hủy và khôi phục gói giám sát không đụng tới `Assignment` (BR-SUB-024/025 khoản 7), gói mới trên cùng công trình cần phân công riêng; bỏ bước khóa công trình khỏi thứ tự khóa vì khóa ngoại và index đã bảo vệ. Thêm ST-PAY-073; sửa liên kết mã nguồn `RoleNames` đã bị xóa.
 - 2026-09-25: Cập nhật theo nghiệp vụ đã chốt ngày 25/09/2026. Cho hủy gói giám sát `Completed`; partial unique index và kiểm xung đột khi khôi phục tính tập giữ chỗ `Assigned`/`Completed`; phản hồi khôi phục giám sát có thể trả `Completed`. Đổi "dự án"/`ProjectId` sang công trình (`ConstructionSite`). Hoàn thành/mở lại không còn là "luồng lịch sử" mà thuộc TDD-SUB-006. Bỏ bước khóa "profile quyền" khỏi Sequence Diagram cho khớp thứ tự khóa AccountCommerceState. Ghi hiện trạng code. Bổ sung tham chiếu STORY-SUB-003/AC-014, AC-015, ALT-04, EXC-09 và BR-RBAC-010.
 - 2026-09-20: Thay mô hình quyền `StaffAccessProfile` và `StaffPermission` bằng mô hình RBAC chuẩn ở [TDD-RBAC-001](TDD-RBAC-001.md). Giữ nguyên bốn mã quyền và toàn bộ nghiệp vụ hủy, khôi phục, audit và chống xử lý lặp. Bỏ khóa `FOR SHARE`/`FOR UPDATE` trên bản ghi quyền; việc chặn tức thì nay do dấu phiên và buộc đăng xuất đảm nhiệm, còn thu hồi vai trò có độ trễ theo [BR-RBAC-009](../businessrule/BR-RBAC-009.md).

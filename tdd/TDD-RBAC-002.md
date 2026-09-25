@@ -170,7 +170,7 @@ Bản ghi phân công không lưu vai trò nào làm căn cứ, nên phép kiể
 
 Bước 2 cần vì kiểm tra này đọc hai thứ có thể đổi song song. Không khóa thì một yêu cầu giao gói giám sát cho chính người này có thể chạy cùng lúc: thu hồi thấy chưa có gói nào nên cho qua, còn giao việc thấy người đó vẫn có `supervision.complete` nên cũng cho qua. Hai bên cùng commit và người đó phụ trách gói mà không còn quyền. Giao, chuyển giao ([TDD-RBAC-003](TDD-RBAC-003.md#architecture)) và sửa quyền vai trò ([TDD-RBAC-001](TDD-RBAC-001.md#architecture)) cũng khóa cùng dòng `User` đó, nên các thao tác này nối đuôi nhau; bên đến sau đọc lại dữ liệu sau khi lấy được khóa. Dùng `FOR NO KEY UPDATE` để không chặn các lệnh chèn cần khóa ngoại tới `User`.
 
-Hiện trạng code: `RevokeRoleCommandHandler` đã tính quyền còn lại theo cờ `RequiresAssignment`, cho kết quả như bước 3–4, nhưng chưa khóa dòng `User` và thông báo lỗi còn gọi là "tài nguyên". Khóa dòng và đổi thông báo sang "gói giám sát" là thay đổi dự kiến.
+Đã có trong code (commit `182e2a8`, nhánh `feature/construction-site` của `bmt-be`): `RevokeRoleCommandHandler` khóa dòng `User` bằng `IAccessRowLocker.LockUsersForNoKeyUpdateAsync`, rồi đọc quyền còn lại và đếm phân công qua `StaffPermissionQueries`, dùng chung với handler sửa quyền vai trò. Thông báo lỗi nói "gói giám sát". Số gói gửi về qua `DomainException.Extensions` với khóa `activeAssignmentCount`, và middleware đưa khóa này thành trường cùng cấp trong thân lỗi.
 
 Ví dụ theo `STORY-RBAC-002/AC-004`: nhân viên A chỉ có `supervision.complete` từ vai trò "Nhân viên giám sát" và đang phụ trách 2 gói giám sát. Thu hồi vai trò này bị từ chối, phản hồi báo còn 2 gói. Theo `AC-011`: nhân viên B có `supervision.complete` từ cả "Nhân viên giám sát" lẫn "Trưởng nhóm giám sát" và cũng phụ trách 2 gói. Thu hồi "Nhân viên giám sát" của B được chấp nhận, vì bước 4 thấy B vẫn còn quyền này từ vai trò kia; hai phân công của B giữ nguyên.
 
@@ -182,7 +182,7 @@ Ví dụ: anh Nam nghỉ đột ngột khi đang phụ trách 30 gói giám sát
 
 `BR-RBAC-008` khoản 7 cấm người thao tác khóa tài khoản của chính mình. Handler của thao tác khóa tài khoản so `ActorUserId` với `userId` đích ngay sau khi tìm thấy tài khoản đích, trước rào chắn Admin cuối cùng. Trùng thì trả 409 `CannotLockSelf`, ghi nhật ký từ chối bằng `RecordRejectionAsync` với `Action = StaffLocked`, không đổi `Status`, không đổi dấu phiên và không hủy phiên nào. Người thao tác vẫn đang đăng nhập bình thường, đúng `STORY-RBAC-002/AC-012`.
 
-Đây là quy tắc riêng về khóa tài khoản, không phải tự nâng quyền, nên không dùng `SelfPrivilegeEscalation`. Dùng 409 vì yêu cầu hợp lệ về quyền nhưng xung đột với quy tắc nghiệp vụ, cùng nhóm với `LastAdminProtected`. Hiện trạng code: `LockStaffCommandHandler` đang trả 403 `SelfPrivilegeEscalation` cho trường hợp này; đổi sang `CannotLockSelf` là thay đổi dự kiến.
+Đây là quy tắc riêng về khóa tài khoản, không phải tự nâng quyền, nên không dùng `SelfPrivilegeEscalation`. Dùng 409 vì yêu cầu hợp lệ về quyền nhưng xung đột với quy tắc nghiệp vụ, cùng nhóm với `LastAdminProtected`. Đã có trong code: `LockStaffCommandHandler` trả 409 `CannotLockSelf` cho trường hợp này, không còn dùng 403 `SelfPrivilegeEscalation`.
 
 ### Ba rào chắn khi đổi quyền
 
@@ -391,11 +391,11 @@ Cũng lúc 09:00, nếu chị Lan bấm nhầm khóa chính tài khoản `user-l
 - **Khóa dòng `User` khi thu hồi vai trò**: handler thu hồi khóa dòng `User` của nhân viên bị thu hồi bằng `SELECT ... FOR NO KEY UPDATE` trước khi đọc quyền còn lại và đếm phân công. Giao, chuyển giao và sửa quyền vai trò khóa cùng dòng theo cùng cách, nên không lọt trường hợp một gói giám sát được giao cho người vừa mất `supervision.complete`. Tình huống: chị Lan thu hồi vai trò giám sát của anh Sơn đúng lúc một người quản trị khác giao gói G cho anh Sơn. Yêu cầu nào lấy khóa trước thì chạy trước; yêu cầu sau đọc lại dữ liệu mới và bị từ chối, hoặc vì anh Sơn đã phụ trách gói G, hoặc vì anh đã mất quyền. Giới hạn: thao tác trên cùng một nhân viên phải chờ nhau trong thời gian ngắn của một transaction.
 - **Sinh mật khẩu**: dùng bộ sinh số ngẫu nhiên an toàn mật mã của .NET, không dùng `Random`. Độ dài và bộ ký tự phải đủ để vượt ràng buộc độ mạnh mà validator đổi mật khẩu hiện có đang áp dụng; giá trị cụ thể chốt khi triển khai, không đặt trong tài liệu nghiệp vụ.
 - **Không ghi bản rõ ra log**: phản hồi tạo tài khoản chứa mật khẩu bản rõ, nên endpoint này phải được loại khỏi mọi cơ chế ghi log nội dung phản hồi. Nếu sau này thêm middleware ghi log request/response, phải chừa endpoint này ra.
-- **Migration**: cột `MustChangePassword` đã có trong migration `20260923152830_InitialRbac`, giá trị mặc định `false`, cùng các bảng của [TDD-RBAC-001](TDD-RBAC-001.md). Các thay đổi ngày 25/09/2026 của tài liệu này không đổi schema: mã lỗi `CannotLockSelf`, hành động nhật ký `StaffCreated` và việc khóa dòng `User` khi thu hồi vai trò đều chỉ là sửa code. Không áp dụng migration ở bước thiết kế này.
+- **Migration**: cột `MustChangePassword` đã có trong migration `20260923152830_InitialRbac`, giá trị mặc định `false`, cùng các bảng của [TDD-RBAC-001](TDD-RBAC-001.md). Các thay đổi ngày 25/09/2026 của tài liệu này không đổi schema: mã lỗi `CannotLockSelf`, hành động nhật ký `StaffCreated` và việc khóa dòng `User` khi thu hồi vai trò đều chỉ là sửa code và đã có trong code. Migration gộp `20260925074152_ConstructionSiteAndPackageAssignment` chỉ đổi nhãn quyền `user.manage` theo [TDD-RBAC-001](TDD-RBAC-001.md#data-model), không đổi bảng của tài liệu này.
 
 ## Internal API
 
-Các endpoint dưới đây đã có trong `src/bmt-be.presentation/apis/staff/StaffApi.cs`. Thay đổi dự kiến ngày 25/09/2026: thu hồi vai trò khóa dòng `User` và báo số gói giám sát, khóa tài khoản trả `CannotLockSelf` khi tự khóa.
+Các endpoint dưới đây đã có trong `src/bmt-be.presentation/apis/staff/StaffApi.cs`. Thay đổi ngày 25/09/2026 đã có trong code: thu hồi vai trò khóa dòng `User` và báo số gói giám sát, khóa tài khoản trả `CannotLockSelf` khi tự khóa, `POST /staff` đòi cả `user.manage` lẫn `role.manage`.
 
 ### Endpoints
 
@@ -420,7 +420,7 @@ Response 201:
 {"userId": "user-son", "email": "son@example.com", "status": "Active", "mustChangePassword": true, "generatedPassword": "K7m-tR9x-Qe2v", "roles": [{"id": "role-finance", "name": "Nhân viên tra cứu thanh toán"}]}
 
 Error Response:
-{"code": "EmailAlreadyUsed", "detail": "Địa chỉ email này đã thuộc một tài khoản khác"}
+{"title": "Conflict", "code": "Conflict", "status": 409, "detail": "Địa chỉ email này đã thuộc một tài khoản khác.", "messageCode": "EmailAlreadyUsed", "errors": null}
 ```
 
 `generatedPassword` chỉ xuất hiện trong phản hồi này. Không endpoint nào khác trả nó, và hệ thống không lưu bản rõ nên cũng không trả lại được.
@@ -429,7 +429,7 @@ Error Response:
 
 ```
 Response 403:
-{"title":"Forbidden","code":"MustChangePassword","status":403,"detail":"Bạn cần đổi mật khẩu trước khi dùng chức năng này.","messageCode":"MustChangePassword"}
+{"title":"Forbidden","code":"Forbidden","status":403,"detail":"Bạn cần đổi mật khẩu trước khi dùng chức năng này.","messageCode":"MustChangePassword"}
 ```
 
 #### DELETE /api/v1/staff/{userId}/roles/{roleId}
@@ -438,7 +438,7 @@ Response 403:
 Response 204:
 
 Error Response:
-{"code": "StaffHasActiveAssignments", "detail": "Sau khi thu hồi, người này không còn quyền supervision.complete nhưng vẫn phụ trách 2 gói giám sát", "activeAssignmentCount": 2}
+{"title": "Conflict", "code": "Conflict", "status": 409, "detail": "Sau khi thu hồi, người này không còn quyền supervision.complete nhưng vẫn phụ trách 2 gói giám sát.", "messageCode": "StaffHasActiveAssignments", "errors": null, "activeAssignmentCount": 2}
 ```
 
 `activeAssignmentCount` là số gói giám sát người đó đang phụ trách, vì mỗi phân công đang hiệu lực ứng với đúng một gói. Lỗi này chỉ xảy ra khi vai trò bị thu hồi là nguồn duy nhất của `supervision.complete`; còn quyền này từ vai trò khác thì trả 204 như `STORY-RBAC-002/AC-011`.
@@ -450,14 +450,16 @@ Response 200:
 {"userId": "user-son", "status": "Locked", "sessionsRevoked": true, "activeAssignmentCount": 2}
 
 Error Response:
-{"code": "LastAdminProtected", "detail": "Hệ thống phải còn ít nhất một Admin đang hoạt động"}
+{"title": "Conflict", "code": "Conflict", "status": 409, "detail": "Hệ thống phải còn ít nhất một Admin đang hoạt động.", "messageCode": "LastAdminProtected", "errors": null}
 ```
 
 `activeAssignmentCount` trả về để giao diện nhắc người quản trị chia lại, chứ không phải điều kiện chặn — khóa tài khoản vẫn thành công khi số này lớn hơn 0. Những gói đang gán trong số này hiện trong danh sách cần chia lại theo [TDD-RBAC-003](TDD-RBAC-003.md#internal-api).
 
-Khi `userId` là chính người gọi, phản hồi là 409 `{"code": "CannotLockSelf", "detail": "Không tự khóa tài khoản của chính mình"}`. Tài khoản và phiên đăng nhập của người gọi giữ nguyên.
+Khi `userId` là chính người gọi, phản hồi là 409 `{"title": "Conflict", "code": "Conflict", "status": 409, "detail": "Không tự khóa tài khoản của chính mình.", "messageCode": "CannotLockSelf", "errors": null}`. Tài khoản và phiên đăng nhập của người gọi giữ nguyên.
 
 ### Error Codes
+
+Mỗi mã dưới đây là giá trị `messageCode` trong thân lỗi; trường `code` chỉ là loại lỗi chung như `Forbidden`, `Conflict`, `NotFound`.
 
 - **AccessForbidden** (403): Thiếu quyền `user.manage` hoặc `role.manage` theo từng endpoint.
 - **MustChangePassword** (403): Tài khoản chưa đổi mật khẩu lần đầu nhưng gọi một chức năng khác ngoài đổi mật khẩu.
@@ -496,10 +498,11 @@ Khi `userId` là chính người gọi, phản hồi là 409 `{"code": "CannotLo
 
 - Tài liệu kỹ thuật: [TDD-RBAC-001](TDD-RBAC-001.md) mô hình vai trò – quyền, dấu phiên và nhật ký; [TDD-RBAC-003](TDD-RBAC-003.md) phân công và chuyển giao.
 - Hiện trạng mã nguồn dùng lại: [JwtExtensions](../../bmt-be/src/bmt-be.api/dependencyInjection/extensions/JwtExtensions.cs) cho `DefaultPolicy`, [ChangePasswordCommandHandler](../../bmt-be/src/bmt-be.application/usecases/commands/user/ChangePasswordCommandHandler.cs) cho luồng đổi mật khẩu, [ISessionTokenStore](../../bmt-be/src/bmt-be.application/abstractions/ISessionTokenStore.cs) cho việc hủy phiên.
-- Đặc tả Unit Test: UT-RBAC-029 đến UT-RBAC-046 và UT-RBAC-063 đến UT-RBAC-067. Chưa có mã test hoặc kết quả chạy.
+- Đặc tả Unit Test: UT-RBAC-029 đến UT-RBAC-046 và UT-RBAC-063 đến UT-RBAC-067. Mã test nằm ở `test/bmt-be.application.tests/usecases/staff/` và `usecases/user/`; bộ unit test chạy đạt 338/338 ngày 25/09/2026. Các ca UT-RBAC-063 đến UT-RBAC-067 chưa được ghi mã truy vết trong test; riêng ca tự khóa có test `Lock_ActorLocksSelf_Throws409CannotLockSelf`.
 
 ## Change Log
 
+- 2026-09-25 (đồng bộ code): Đồng bộ với code đã triển khai ở commit `182e2a8`: thu hồi vai trò khóa dòng `User`, `CannotLockSelf`, `StaffCreated` và `POST /staff` cần hai mã quyền đã có. Ví dụ lỗi ghi mã nghiệp vụ ở `messageCode`, `code` là loại lỗi chung.
 - 2026-09-25: Cập nhật theo US/BR chốt lần hai trong ngày 25/09/2026: phân công tính theo gói giám sát thay cho công trình. Thu hồi vai trò đếm số gói đang phụ trách, kể cả gói đang bị hủy mà phân công còn; khóa tài khoản chỉ đưa gói đang gán vào danh sách cần chia lại. Không đổi luồng hay mã lỗi.
 - 2026-09-25: Cập nhật theo US/BR đã chốt ngày 25/09/2026. Thu hồi vai trò chỉ bị chặn khi sau thu hồi nhân viên không còn `supervision.complete` mà vẫn phụ trách công trình (`BR-RBAC-007`), không còn khái niệm "phân công dựa trên vai trò"; lỗi báo số công trình, thêm ví dụ `STORY-RBAC-002/AC-011`, và khóa dòng `User` để không chạy lẫn với giao hoặc chuyển giao. Chặn tự khóa tài khoản bằng mã riêng 409 `CannotLockSelf` có ghi nhật ký (`BR-RBAC-008` khoản 7, `EXC-07`, `AC-012`), thay cho 403 `SelfPrivilegeEscalation`. Công trình của người bị khóa hiện trong danh sách cần chia lại; đổi các ví dụ "khách hàng" sang công trình. Ghi rõ hiện trạng code với thay đổi dự kiến; bổ sung tham chiếu `BR-RBAC-001`, `BR-RBAC-011`.
 - 2026-09-20: Bỏ toàn bộ luồng mời qua email theo quyết định mới. Xóa bảng `StaffInvitation`, ba endpoint lời mời và mục External API/SMTP; bỏ trạng thái `PendingActivation`. Thay bằng việc người quản trị tạo tài khoản kèm mật khẩu do hệ thống sinh và hiển thị một lần, cộng cờ `User.MustChangePassword` bắt đổi mật khẩu ở lần đăng nhập đầu, mượn đúng cơ chế claim và policy đã có của luồng quên mật khẩu.

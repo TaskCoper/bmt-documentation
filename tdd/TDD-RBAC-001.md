@@ -62,9 +62,11 @@ Lúc bắt đầu thiết kế, có hai chỗ trong mã cản trở việc nhún
 - `JwtExtensions.cs` — `OnTokenValidated` là no-op có chủ đích, nên access token chỉ được kiểm chữ ký và hạn. Không có bất kỳ kiểm tra nào mỗi request, nên khóa tài khoản không cắt được token đã cấp.
 - `GetTokenQueryHandler.cs` — mỗi lần làm mới token, hệ thống đọc claim từ access token cũ rồi phát hành lại nguyên si. Nếu nhúng quyền vào token mà giữ cách này, bộ quyền cũ sẽ sống mãi qua mọi lần refresh.
 
-Hiện trạng code đã kiểm ngày 25/09/2026: phần lớn thiết kế này đã có trong mã nguồn. Migration `20260923152830_InitialRbac` tạo bảng `User` với bốn cột mới ở Data Model, năm bảng vai trò – quyền – nhật ký, và seed chín mã quyền khởi tạo cùng hai vai trò hệ thống. `OnTokenValidated` đã gọi `ISecurityStampValidator` để so dấu phiên. `PermissionNames` có 10 mã, gồm `plan.manage` do migration `20260923165324_PlanCatalog` seed; `PermissionCatalogGuard` đối chiếu danh mục này với bảng `Permission` lúc khởi động.
+Hiện trạng code đã kiểm ngày 25/09/2026: phần lớn thiết kế này đã có trong mã nguồn. Migration `20260923152830_InitialRbac` tạo bảng `User` với bốn cột mới ở Data Model, năm bảng vai trò – quyền – nhật ký, và seed chín mã quyền khởi tạo cùng hai vai trò hệ thống. `OnTokenValidated` đã gọi `ISecurityStampValidator` để so dấu phiên. `PermissionNames` có 9 mã, gồm `plan.manage` do migration `20260923165324_PlanCatalog` seed; `PermissionCatalogGuard` đối chiếu danh mục này với bảng `Permission` lúc khởi động.
 
-Các thay đổi ngày 25/09/2026 trong tài liệu này là **thiết kế dự kiến, chưa có trong code**: bỏ mã `supervision.reassign` và bổ sung bốn mã quyền quản trị theo từng module để danh mục có 13 mã, đổi hành động nhật ký `StaffInvited`/`StaffActivated` thành `StaffCreated`, và thêm hai kiểm tra khi sửa danh sách quyền của vai trò — rào chắn "thêm quyền vào vai trò mình đang giữ" của `BR-RBAC-004` và điều kiện của `BR-RBAC-007` khoản 6.
+Các thay đổi ngày 25/09/2026 trong tài liệu này **đã có trong code**, ở commit `182e2a8` trên nhánh `feature/construction-site` của `bmt-be`: bỏ mã `supervision.reassign` bằng migration `20260925074152_ConstructionSiteAndPackageAssignment`, đổi hành động nhật ký `StaffInvited`/`StaffActivated` thành `StaffCreated`, và thêm hai kiểm tra khi sửa danh sách quyền của vai trò — rào chắn "thêm quyền vào vai trò mình đang giữ" của `BR-RBAC-004` và điều kiện của `BR-RBAC-007` khoản 6.
+
+Phần **chưa có trong code**: bốn mã quyền quản trị theo từng module (`estimate.catalog.manage`, `library.manage`, `news.manage`, `consultation.manage`). Mỗi mã được thêm cùng module có chỗ kiểm nó, nên danh mục hiện có 9 mã và đủ 13 mã khi bốn module đó được dựng.
 
 ### Goals
 
@@ -155,13 +157,13 @@ Dòng nhật ký từ chối là ngoại lệ duy nhất của `BR-RBAC-011` kho
 
 ### Sửa danh sách quyền của vai trò
 
-`PUT /roles/{roleId}` là thao tác duy nhất có thể làm nhiều người đổi quyền cùng lúc, nên có thêm hai kiểm tra so với tạo vai trò. Cả hai là **thay đổi dự kiến**: `UpdateRoleCommandHandler` hiện chỉ kiểm rào chắn thứ hai trên phần quyền được thêm, gọi `EnsureCanGrant` với `targetUserId = null`.
+`PUT /roles/{roleId}` là thao tác duy nhất có thể làm nhiều người đổi quyền cùng lúc, nên có thêm hai kiểm tra so với tạo vai trò. Cả hai đã có trong `UpdateRoleCommandHandler`, bên cạnh rào chắn thứ hai trên phần quyền được thêm (`EnsureCanGrant` với `targetUserId = null`).
 
 **Thêm quyền vào vai trò mình đang giữ.** `BR-RBAC-004` khoản 1 coi việc này là tự nâng quyền. Handler tính phần quyền được thêm (`added`), rồi kiểm người thao tác có dòng `UserRole` với vai trò đó không. Có giữ và `added` không rỗng thì trả 403 `SelfPrivilegeEscalation`, ghi nhật ký từ chối bằng `RecordRejectionAsync`, không lưu gì. Bỏ bớt quyền khỏi vai trò mình đang giữ vẫn được, theo khoản 4.
 
 **Bỏ `supervision.complete` khỏi vai trò đang có người phụ trách gói giám sát.** `BR-RBAC-007` khoản 6 chặn trường hợp một người vẫn phụ trách gói giám sát nhưng không còn quyền làm việc trên đó. Kiểm tra chỉ chạy khi phần quyền bị bỏ (`removed`) có `supervision.complete`, là quyền duy nhất có `RequiresAssignment = true`. Thứ tự trong transaction của handler:
 
-1. Khóa dòng `Role` đang sửa bằng `SELECT ... FOR UPDATE`. Khóa này chặn việc gán vai trò đó cho người mới trong lúc đang xét, vì lệnh chèn `UserRole` phải kiểm khóa ngoại tới `Role` bằng khóa `FOR KEY SHARE`, mà khóa này phải chờ `FOR UPDATE`.
+1. Khóa dòng `Role` đang sửa bằng `SELECT ... FOR UPDATE`. Code lấy khóa này ở mọi lần sửa vai trò tự tạo, ngay trước khi đọc danh sách quyền hiện tại, nên hai lần sửa cùng một vai trò luôn nối đuôi nhau. Khóa này chặn việc gán vai trò đó cho người mới trong lúc đang xét, vì lệnh chèn `UserRole` phải kiểm khóa ngoại tới `Role` bằng khóa `FOR KEY SHARE`, mà khóa này phải chờ `FOR UPDATE`.
 2. Đọc danh sách người giữ vai trò, **kể cả tài khoản đang bị khóa**, rồi khóa các dòng `User` của họ theo thứ tự `Id` tăng dần bằng `SELECT ... FOR NO KEY UPDATE`.
 3. Với từng người, tính bộ quyền sau thay đổi: hợp quyền của các vai trò khác mà người đó giữ, cộng danh sách quyền mới của vai trò đang sửa. Không còn `supervision.complete` thì đếm phân công đang hiệu lực của người đó theo [TDD-RBAC-003](TDD-RBAC-003.md#data-model).
 4. Có ít nhất một người mất `supervision.complete` mà vẫn phụ trách từ một gói giám sát trở lên thì từ chối **toàn bộ** thay đổi: trả 409 `StaffHasActiveAssignments` kèm danh sách người bị ảnh hưởng và số gói của từng người, ghi nhật ký từ chối ngoài transaction, không lưu tên mới hay phần quyền nào.
@@ -172,7 +174,9 @@ Vì sao phải khóa dòng `User`: kiểm tra này đọc hai thứ có thể đ
 
 Dùng `FOR NO KEY UPDATE` chứ không dùng `FOR UPDATE` cho dòng `User`, vì `FOR UPDATE` cũng chặn khóa `FOR KEY SHARE` mà mọi lệnh chèn có khóa ngoại tới `User` đều cần, ví dụ ghi nhật ký hay tạo phân công do chính người đó thực hiện. Khóa theo thứ tự `Id` để hai lần sửa hai vai trò có chung người giữ không chờ vòng lẫn nhau.
 
-Giới hạn: vai trò có nhiều người giữ thì handler khóa nhiều dòng `User` trong một transaction, và các thao tác giao việc cho những người đó phải chờ tới khi sửa vai trò xong. Việc sửa vai trò hiếm nên chấp nhận đánh đổi này. Bỏ các quyền khác, không phải `supervision.complete`, không chạy bước 1–4.
+Giới hạn: vai trò có nhiều người giữ thì handler khóa nhiều dòng `User` trong một transaction, và các thao tác giao việc cho những người đó phải chờ tới khi sửa vai trò xong. Việc sửa vai trò hiếm nên chấp nhận đánh đổi này. Bỏ các quyền khác, không phải `supervision.complete`, chỉ lấy khóa ở bước 1 và không chạy bước 2–4.
+
+Hai khóa trên đi qua cổng `IAccessRowLocker` (`bmt-be.domain/abstractions/repositories/`), cài bằng SQL có tham số trong `AccessRowLocker` (`bmt-be.persistence/repositories/`): `LockRoleForUpdateAsync` và `LockUsersForNoKeyUpdateAsync`. Phần đọc quyền của người giữ vai trò và đếm phân công đang hiệu lực dùng chung `StaffPermissionQueries` với handler thu hồi vai trò. Danh sách người bị ảnh hưởng gửi về qua `DomainException.Extensions`; `ExceptionHandlingMiddleware` đưa từng khóa trong đó thành một trường cùng cấp trong thân lỗi.
 
 ### Nơi từng Business Rule được thực hiện
 
@@ -192,7 +196,7 @@ Giới hạn: vai trò có nhiều người giữ thì handler khóa nhiều dò
 
 **Notes**:
 - Dùng policy của ASP.NET Core thay vì thêm một pipeline behavior của MediatR cho chặng 2, vì Carter endpoint đã quen với `RequireAuthorization(tên policy)` (`src/bmt-be.presentation/apis/user/UserApi.cs:33-40`) và vì quyền cần biết trước khi MediatR chạy. Chặng 3 thì ngược lại, phải nằm trong handler vì chỉ ở đó mới biết tài nguyên đích.
-- `RoleNames` cũ trộn tên vai trò với tên policy. Thiết kế này tách thành `RoleCodes` cho mã vai trò, `PolicyNames` cho tên policy xác thực sẵn có, và `PermissionNames` cho danh mục mã quyền; cả ba đã có trong `src/bmt-be.contract/constants/`. `PermissionNames` hiện có 10 mã. Theo Data Model, bỏ `supervision.reassign` thì còn 9 mã, và đủ 13 mã khi bốn module chưa có code được dựng.
+- `RoleNames` cũ trộn tên vai trò với tên policy. Thiết kế này tách thành `RoleCodes` cho mã vai trò, `PolicyNames` cho tên policy xác thực sẵn có, và `PermissionNames` cho danh mục mã quyền; cả ba đã có trong `src/bmt-be.contract/constants/`. `PermissionNames` hiện có 9 mã, sau khi bỏ `supervision.reassign`; đủ 13 mã khi bốn module chưa có code được dựng.
 - Danh mục quyền lấy code làm nguồn sự thật, vì mỗi mã quyền phải có chỗ kiểm trong code mới có tác dụng. Bảng `Permission` là bản sao được migration seed lại, phục vụ khóa ngoại và nhãn hiển thị. Rủi ro lệch giữa code và bảng được xử lý bằng một kiểm tra lúc khởi động, nêu ở Data Model/Notes.
 - Kiểm quyền luôn theo mã quyền, không theo tên hay mã vai trò. Ngoại lệ duy nhất theo vai trò là Admin hoàn thành hoặc mở lại gói giám sát mà không cần được phân công gói đó; ngoại lệ này nhận diện bằng mã vai trò hệ thống `admin` (`RoleCodes.Admin`), không bằng tên hiển thị, và chỉ bỏ qua chặng 3 sau khi người gọi đã qua policy `supervision.complete` ở chặng 2. Chi tiết ở [TDD-RBAC-003](TDD-RBAC-003.md#activity-diagram).
 - Luồng phân quyền không dùng outbox, MassTransit hay Quartz. Các thành phần này đã được đưa trở lại mã nguồn ngày 23/09/2026 cho việc gửi email và tác vụ nền (MassTransit 8.4.1 với outbox có sẵn của thư viện, xem `bmt-be/CLAUDE.md`), nhưng thiết kế này không cần tới chúng.
@@ -308,9 +312,9 @@ Danh mục gồm 13 mã: tám mã khởi tạo theo `STORY-RBAC-001/Precondition
 | `package.cancel` | Hủy hiệu lực gói | false | Đã seed ở `InitialRbac` |
 | `package.restore` | Khôi phục gói bị hủy | false | Đã seed ở `InitialRbac` |
 | `supervision.complete` | Hoàn thành và mở lại gói giám sát | true | Đã seed ở `InitialRbac` |
-| `user.manage` | Tạo, khóa, mở khóa và buộc đăng xuất tài khoản nhân viên | false | Đã seed ở `InitialRbac` |
+| `user.manage` | Tạo, khóa, mở khóa và buộc đăng xuất tài khoản nhân viên | false | Đã seed ở `InitialRbac`; nhãn đổi ở `20260925074152_ConstructionSiteAndPackageAssignment` |
 | `role.manage` | Tạo, sửa, xóa vai trò và gán vai trò cho người | false | Đã seed ở `InitialRbac` |
-| `assignment.manage` | Phân công và chuyển giao tài nguyên | false | Đã seed ở `InitialRbac` |
+| `assignment.manage` | Phân công và chuyển giao gói giám sát | false | Đã seed ở `InitialRbac`; nhãn đổi ở `20260925074152_ConstructionSiteAndPackageAssignment` |
 | `audit.read` | Xem nhật ký thay đổi quyền | false | Đã seed ở `InitialRbac` |
 | `plan.manage` | Cấu hình gói | false | Đã seed ở `PlanCatalog` |
 | `estimate.catalog.manage` | Quản lý danh mục loại công trình và phong cách | false | Dự kiến, thêm cùng module theo [TDD-PROJ-001](TDD-PROJ-001.md) |
@@ -377,7 +381,7 @@ Một dòng là **một lần thao tác liên quan tới vai trò, quyền hoặ
 
 `TargetLabel` là dữ liệu chép lại chứ không phải khóa ngoại. Cố tình chấp nhận trùng lặp ở đây, vì mục đích là giữ nguyên tên tại thời điểm thao tác kể cả khi vai trò đã bị xóa hoặc đổi tên.
 
-`StaffCreated` ghi việc người quản trị tạo tài khoản nhân viên theo `BR-RBAC-012`; không còn luồng mời và kích hoạt nên không có hành động `StaffInvited` hay `StaffActivated`. Hiện trạng code: `AuditActions` vẫn còn hai hằng số cũ và `CreateStaffCommandHandler` đang ghi `StaffActivated`. Thay đổi dự kiến là thêm `StaffCreated`, bỏ hai hằng số cũ và đổi handler sang ghi `StaffCreated`. Cột `Action` không có CHECK nên việc này chỉ sửa code, không cần migration. Các dòng `StaffActivated` đã ghi trong dữ liệu dev/test giữ nguyên, vì nhật ký chỉ ghi thêm.
+`StaffCreated` ghi việc người quản trị tạo tài khoản nhân viên theo `BR-RBAC-012`; không còn luồng mời và kích hoạt nên không có hành động `StaffInvited` hay `StaffActivated`. Đã có trong code: `AuditActions` có `StaffCreated`, không còn hai hằng số cũ, và `CreateStaffCommandHandler` ghi `StaffCreated`. Cột `Action` không có CHECK nên việc này chỉ sửa code, không cần migration. Các dòng `StaffActivated` đã ghi trong dữ liệu dev/test giữ nguyên, vì nhật ký chỉ ghi thêm.
 
 ### `User` — bảng sẵn có, được sửa
 
@@ -449,7 +453,7 @@ Toàn bộ mẫu dưới đây là **dữ liệu giả định để giải thí
 
 Tình huống xuyên suốt: chị Lan là người quản trị đang giữ vai trò Admin. Chị tạo vai trò "Nhân viên vận hành gói" rồi gán cho anh Nam.
 
-Khi đủ các migration theo thiết kế, `Permission` có 13 dòng; hiện code seed 10 dòng, trong đó có `supervision.reassign` sẽ bị xóa. Trích bốn dòng:
+Khi đủ các migration theo thiết kế, `Permission` có 13 dòng; hiện có 9 dòng sau khi migration `20260925074152_ConstructionSiteAndPackageAssignment` xóa `supervision.reassign`. Trích bốn dòng, trong đó `consultation.manage` là mã chưa có:
 
 | Code | Label | RequiresAssignment |
 |---|---|---|
@@ -511,19 +515,20 @@ Danh sách người bị ảnh hưởng chỉ có trong phản hồi API, không
 - **Truy vấn gộp quyền** chạy đúng một lần mỗi khi phát hành token, không phải mỗi request: nối `UserRole` với `RolePermission` rồi lấy các `PermissionCode` khác nhau. Với một người giữ vài vai trò, đây là một truy vấn dùng PK, không cần index thêm.
 - **Chặn lệch giữa code và bảng `Permission`**: lúc khởi động, ứng dụng đối chiếu danh sách mã trong `PermissionNames` với bảng `Permission`. Có mã trong bảng mà code không biết, hoặc ngược lại, thì ghi log mức cảnh báo và từ chối khởi động. Làm vậy để không rơi vào tình huống một vai trò mang mã quyền mà không chỗ nào kiểm, tức là quyền tồn tại trên giấy nhưng không có tác dụng.
 - **Migration — hiện trạng**: `20260923152830_InitialRbac` là migration đầu tiên trong repo. Nó tạo bảng `User` đã có sẵn bốn cột mới và không có cột `Role`, cùng năm bảng của tài liệu này, bảng `Assignment` của [TDD-RBAC-003](TDD-RBAC-003.md) và ba bảng outbox của MassTransit. Dữ liệu seed gồm chín dòng `Permission`, hai vai trò hệ thống, chín dòng `RolePermission` của `admin` và một tài khoản Admin khởi tạo. Vì database được tạo mới từ migration này, bước backfill `UserRole` từ cột `Role` cũ mà bản thiết kế trước mô tả không còn cần. Migration `20260923165324_PlanCatalog` seed thêm `plan.manage` cho `admin`.
-- **Migration — thay đổi dự kiến ngày 25/09/2026**: bốn mã `estimate.catalog.manage`, `library.manage`, `news.manage` và `consultation.manage` được thêm vào `PermissionNames.All`, bảng `Permission` (`RequiresAssignment = false`) và `RolePermission` của vai trò `admin` (Id cố định `00000000-0000-0000-0000-0000000000a1`). Mỗi mã đi cùng migration của module có chỗ kiểm nó, như `plan.manage` đã làm; không thêm mã trước khi có endpoint kiểm, để không có quyền chỉ tồn tại trên giấy. Vì `PermissionCatalogGuard` từ chối khởi động khi code và bảng lệch nhau, migration seed và phiên bản code có hằng số mới phải triển khai cùng lúc. Cùng dịp, nhãn của `user.manage` đổi theo cột "Chức năng" ở bảng danh mục trên; đây chỉ là sửa dữ liệu hiển thị. Database hiện chỉ có dữ liệu dev/test nên không cần chuyển đổi dữ liệu. Không áp dụng migration ở bước thiết kế này.
-- **Migration — bỏ `supervision.reassign`, thay đổi dự kiến ngày 25/09/2026**: một migration riêng, triển khai cùng phiên bản code đã bỏ hằng `PermissionNames.SupervisionReassign` và bỏ endpoint đổi công trình theo [TDD-SUB-004](TDD-SUB-004.md). Hai phần phải đi cùng nhau vì `PermissionCatalogGuard` từ chối khởi động khi code và bảng `Permission` lệch nhau. Thứ tự:
-  1. Kiểm trước: liệt kê các vai trò đang có mã này bằng câu nối `RolePermission` với `Role` theo `PermissionCode = 'supervision.reassign'`. Vai trò `admin` luôn có mã này; vai trò tự tạo có thể có trên môi trường dev/test. Xác nhận database chỉ có dữ liệu dev/test; có dữ liệu thật thì dừng và báo người dùng, vì vai trò đang dùng sẽ mất một quyền.
-  2. Xóa các dòng `RolePermission` có `PermissionCode = 'supervision.reassign'`, gồm cả dòng của `admin`.
-  3. Xóa dòng `Permission` có `Code = 'supervision.reassign'`. Bước 2 phải chạy trước vì `RolePermission` có khóa ngoại tới `Permission`.
-  4. Kiểm sau: không còn dòng nào mang mã này ở cả hai bảng; `Permission` có 9 dòng khớp `PermissionNames.All`.
+- **Migration — thay đổi dự kiến ngày 25/09/2026**: bốn mã `estimate.catalog.manage`, `library.manage`, `news.manage` và `consultation.manage` được thêm vào `PermissionNames.All`, bảng `Permission` (`RequiresAssignment = false`) và `RolePermission` của vai trò `admin` (Id cố định `00000000-0000-0000-0000-0000000000a1`). Mỗi mã đi cùng migration của module có chỗ kiểm nó, như `plan.manage` đã làm; không thêm mã trước khi có endpoint kiểm, để không có quyền chỉ tồn tại trên giấy. Vì `PermissionCatalogGuard` từ chối khởi động khi code và bảng lệch nhau, migration seed và phiên bản code có hằng số mới phải triển khai cùng lúc. Database hiện chỉ có dữ liệu dev/test nên không cần chuyển đổi dữ liệu. Chưa có migration nào cho bốn mã này.
+- **Migration — bỏ `supervision.reassign`, đã triển khai ngày 25/09/2026**: là bước cuối của migration gộp `20260925074152_ConstructionSiteAndPackageAssignment`, cùng phiên bản code đã bỏ hằng `PermissionNames.SupervisionReassign` và bỏ endpoint đổi công trình theo [TDD-SUB-004](TDD-SUB-004.md). Hai phần phải đi cùng nhau vì `PermissionCatalogGuard` từ chối khởi động khi code và bảng `Permission` lệch nhau. Thứ tự trong migration:
+  1. Xóa các dòng `RolePermission` có `PermissionCode = 'supervision.reassign'`, gồm cả dòng của `admin` và của vai trò tự tạo.
+  2. Xóa dòng `Permission` có `Code = 'supervision.reassign'`. Bước 1 phải chạy trước vì `RolePermission` có khóa ngoại tới `Permission`.
+  3. Đổi nhãn của `assignment.manage` và `user.manage` theo cột "Chức năng" ở bảng danh mục trên; đây chỉ là sửa dữ liệu hiển thị.
+
+  Migration không tự kiểm dữ liệu trước khi xóa. Việc xác nhận database chỉ có dữ liệu dev/test là bước vận hành trước khi chạy: nếu có dữ liệu thật thì dừng và báo người dùng, vì vai trò đang dùng sẽ mất một quyền. Sau migration, `PermissionCatalogGuard` bảo đảm `Permission` có đúng 9 dòng khớp `PermissionNames.All`, nếu không ứng dụng từ chối khởi động. Ngày 25/09/2026 đã chạy thử `Up` và `Down` trên PostgreSQL có vai trò tự tạo mang mã này; integration test `AccessConstraintTests` đối chiếu bảng `Permission` với `PermissionNames.All`.
 
   Migration không ghi `AccessAuditLog` (người dùng xác nhận ngày 25/09/2026): đây là thay đổi danh mục do hệ thống thực hiện khi triển khai, không có người thao tác để ghi vào `ActorUserId`, và quyền bị gỡ không còn chỗ nào kiểm trong code. Vai trò tự tạo từng có mã này không đổi tên hay các quyền khác. Access token đã cấp trước đó có thể còn claim `perm` mang mã này tới khi hết hạn; claim đó vô hại vì không còn policy hay endpoint nào dùng. Down migration thêm lại dòng `Permission` và dòng `RolePermission` của `admin`, nhưng không khôi phục mã này cho vai trò tự tạo.
-- **`IUnitOfWork`** đã expose các repository cho `Role`, `RolePermission`, `UserRole`, `Permission` và `AccessAuditLog` (`src/bmt-be.domain/abstractions/repositories/IUnitOfWork.cs`). Hai kiểm tra mới khi sửa vai trò cần thêm một cổng khóa dòng `Role` và `User` bằng SQL có tham số, cùng kiểu với `AssignmentRowLocker` hiện có; đây là thay đổi dự kiến.
+- **`IUnitOfWork`** đã expose các repository cho `Role`, `RolePermission`, `UserRole`, `Permission` và `AccessAuditLog` (`src/bmt-be.domain/abstractions/repositories/IUnitOfWork.cs`). Hai kiểm tra khi sửa vai trò dùng cổng khóa dòng `IAccessRowLocker` với bản cài `AccessRowLocker`, cùng kiểu với `AssignmentRowLocker`.
 
 ## Internal API
 
-Các đường dẫn dưới đây đã có trong mã nguồn, ở `src/bmt-be.presentation/apis/role/RoleApi.cs` và `src/bmt-be.presentation/apis/audit/AccessAuditApi.cs`. Thay đổi dự kiến ngày 25/09/2026 chỉ nằm ở `PUT /roles/{roleId}`: thêm rào chắn thêm quyền vào vai trò mình đang giữ và điều kiện của `BR-RBAC-007` khoản 6. Route theo quy ước `/api/v{version:apiVersion}/...` với `NewVersionedApi` và `HasApiVersion(1)` như `UserApi.cs`.
+Các đường dẫn dưới đây đã có trong mã nguồn, ở `src/bmt-be.presentation/apis/role/RoleApi.cs` và `src/bmt-be.presentation/apis/audit/AccessAuditApi.cs`. Thay đổi ngày 25/09/2026 chỉ nằm ở `PUT /roles/{roleId}`: thêm rào chắn thêm quyền vào vai trò mình đang giữ và điều kiện của `BR-RBAC-007` khoản 6; cả hai đã có trong code. Route theo quy ước `/api/v{version:apiVersion}/...` với `NewVersionedApi` và `HasApiVersion(1)` như `UserApi.cs`.
 
 ### Endpoints
 
@@ -547,7 +552,7 @@ Response 201:
 {"id": "role-ops", "name": "Nhân viên vận hành gói", "kind": "Custom", "permissions": ["package.cancel", "package.restore"], "memberCount": 0}
 
 Error Response:
-{"code": "PermissionNotHeldByActor", "detail": "Không cấp được quyền mà bạn không có: audit.read"}
+{"title": "Forbidden", "code": "Forbidden", "status": 403, "detail": "Không cấp được quyền mà bạn không có: audit.read", "messageCode": "PermissionNotHeldByActor", "errors": null}
 ```
 
 #### PUT /api/v1/roles/{roleId}
@@ -560,12 +565,12 @@ Response 200:
 {"id": "role-ops", "name": "Nhân viên vận hành gói", "kind": "Custom", "permissions": ["package.cancel"], "memberCount": 2, "effectiveWithinMinutes": 15}
 
 Error Response:
-{"code": "RoleIsSystem", "detail": "Vai trò hệ thống không sửa được"}
+{"title": "Conflict", "code": "Conflict", "status": 409, "detail": "Vai trò hệ thống không sửa được.", "messageCode": "RoleIsSystem", "errors": null}
 ```
 
 `effectiveWithinMinutes` trả về hạn access token đang cấu hình, để giao diện hiển thị cảnh báo thay đổi chưa có hiệu lực ngay theo `STORY-RBAC-001/AC-005`. Đây là giá trị đọc từ cấu hình, không phải cột trong database.
 
-Khi bỏ `supervision.complete` bị chặn theo `BR-RBAC-007` khoản 6 (`STORY-RBAC-001/EXC-06`), phản hồi 409 liệt kê từng người bị ảnh hưởng và số gói giám sát người đó đang phụ trách, ví dụ `{"code": "StaffHasActiveAssignments", "detail": "2 người sẽ mất quyền supervision.complete trong khi còn phụ trách gói giám sát", "affectedStaff": [{"userId": "user-tu", "displayName": "Lê Văn Tú", "activeAssignmentCount": 2}, {"userId": "user-mai", "displayName": "Đỗ Thị Mai", "activeAssignmentCount": 1}]}`. Danh sách có cả tài khoản đang bị khóa. Khi người thao tác thêm quyền vào vai trò mình đang giữ, phản hồi 403 mang mã `SelfPrivilegeEscalation`.
+Khi bỏ `supervision.complete` bị chặn theo `BR-RBAC-007` khoản 6 (`STORY-RBAC-001/EXC-06`), phản hồi 409 liệt kê từng người bị ảnh hưởng và số gói giám sát người đó đang phụ trách, ví dụ `{"title": "Conflict", "code": "Conflict", "status": 409, "detail": "2 người sẽ mất quyền supervision.complete trong khi còn phụ trách gói giám sát.", "messageCode": "StaffHasActiveAssignments", "errors": null, "affectedStaff": [{"userId": "user-tu", "displayName": "Lê Văn Tú", "activeAssignmentCount": 2}, {"userId": "user-mai", "displayName": "Đỗ Thị Mai", "activeAssignmentCount": 1}]}`. Danh sách có cả tài khoản đang bị khóa. Khi người thao tác thêm quyền vào vai trò mình đang giữ, phản hồi 403 mang mã `SelfPrivilegeEscalation`.
 
 #### DELETE /api/v1/roles/{roleId}
 
@@ -573,8 +578,10 @@ Khi bỏ `supervision.complete` bị chặn theo `BR-RBAC-007` khoản 6 (`STORY
 Response 204:
 
 Error Response:
-{"code": "RoleInUse", "detail": "Còn 3 người đang giữ vai trò này", "memberCount": 3}
+{"title": "Conflict", "code": "Conflict", "status": 409, "detail": "Còn 3 người đang giữ vai trò này.", "messageCode": "RoleInUse", "errors": null, "memberCount": 3}
 ```
+
+Code hiện chưa trả trường `memberCount` khi xóa vai trò đang có người giữ; số người chỉ nằm trong `detail`.
 
 #### GET /api/v1/access-audit
 
@@ -584,6 +591,8 @@ Response 200:
 ```
 
 ### Error Codes
+
+Mỗi mã dưới đây là giá trị `messageCode` trong thân lỗi. Trường `code` chỉ là loại lỗi chung: `Unauthorized`, `Forbidden`, `NotFound`, `Conflict`, lấy từ tiêu đề ngoại lệ.
 
 - **MissingAccessToken** (401): Yêu cầu không kèm token và cũng không có cookie `accessToken`.
 - **InvalidAccessToken** (401): Token sai chữ ký, hoặc dấu phiên trong token lệch với dấu phiên hiện tại của tài khoản.
@@ -600,7 +609,7 @@ Response 200:
 
 Ba mã 401 và `AccessForbidden` có trong `JwtExtensions.cs`. Các mã khác, trừ `AuditLogImmutable`, đã có trong `src/bmt-be.contract/constants/AccessErrorCodes.cs` và được handler ném bằng các kiểu ngoại lệ miền nghiệp vụ. Ngày 25/09/2026, `StaffHasActiveAssignments` có thêm nghĩa mới cho sửa quyền vai trò; `SelfPrivilegeEscalation` có thêm trường hợp thêm quyền vào vai trò mình đang giữ.
 
-Cách ánh xạ bám đúng bảng đã có trong `ExceptionHandlingMiddleware.cs`, không thêm nhánh mới: `NotPermissionException` cho 403, `BadRequestException` cho 400, `NotFoundException` cho 404, `ConflictException` cho 409, `ValidationException` cho 422. Vi phạm ràng buộc duy nhất (`DbUpdateException` với mã PostgreSQL `23505`) cũng ra 409 nhưng mang mã chung; muốn trả mã lỗi riêng thì handler phải kiểm trước hoặc bắt lỗi theo tên ràng buộc.
+Cách ánh xạ bám đúng bảng đã có trong `ExceptionHandlingMiddleware.cs`, không thêm nhánh mới: `NotPermissionException` cho 403, `BadRequestException` cho 400, `NotFoundException` cho 404, `ConflictException` cho 409, `ValidationException` cho 422. Dữ liệu kèm lỗi như `affectedStaff` đi qua `DomainException.Extensions`; middleware đưa vào thân lỗi thành trường cùng cấp và không cho ghi đè các trường chuẩn. Vi phạm ràng buộc duy nhất (`DbUpdateException` với mã PostgreSQL `23505`) ra 409 với mã chung, trừ các ràng buộc có trong bảng ánh xạ của `ConstraintViolationPipelineBehavior` ([TDD-SITE-001](TDD-SITE-001.md#architecture)); các bảng của tài liệu này chưa có ràng buộc nào cần ánh xạ riêng.
 
 ## References
 
@@ -631,11 +640,12 @@ Cách ánh xạ bám đúng bảng đã có trong `ExceptionHandlingMiddleware.c
 
 - Tài liệu kỹ thuật: [TDD-RBAC-002](TDD-RBAC-002.md) vòng đời tài khoản nhân viên và cắt phiên; [TDD-RBAC-003](TDD-RBAC-003.md) phân công tài nguyên.
 - Tài liệu kỹ thuật dùng năm mã quyền quản trị: [TDD-SUB-001](TDD-SUB-001.md) cho `plan.manage`, [TDD-PROJ-001](TDD-PROJ-001.md) cho `estimate.catalog.manage`, [TDD-LIB-001](TDD-LIB-001.md) cho `library.manage`, [TDD-NEWS-001](TDD-NEWS-001.md) cho `news.manage`, [TDD-CONSULT-001](TDD-CONSULT-001.md) cho `consultation.manage`.
-- Tài liệu kỹ thuật: [TDD-SUB-005](TDD-SUB-005.md), [TDD-SUB-004](TDD-SUB-004.md) và [TDD-PAY-002](TDD-PAY-002.md) đang dựa trên mô hình gán quyền thẳng cho từng người; ba tài liệu này cần cập nhật sang mô hình vai trò, giữ nguyên ba mã quyền `commerce.read`, `package.cancel`, `package.restore`; mã `supervision.reassign` đã bỏ ngày 25/09/2026.
-- Đặc tả Unit Test: UT-RBAC-001 đến UT-RBAC-028, UT-RBAC-047, UT-RBAC-062, UT-RBAC-074 đến UT-RBAC-080 và UT-RBAC-091 (migration gỡ `supervision.reassign`). Chưa có mã test hoặc kết quả chạy.
+- Tài liệu kỹ thuật: [TDD-SUB-005](TDD-SUB-005.md), [TDD-SUB-004](TDD-SUB-004.md) và [TDD-PAY-002](TDD-PAY-002.md) đã chuyển sang mô hình vai trò, giữ nguyên ba mã quyền `commerce.read`, `package.cancel`, `package.restore`; mã `supervision.reassign` đã bỏ ngày 25/09/2026.
+- Đặc tả Unit Test: UT-RBAC-001 đến UT-RBAC-028, UT-RBAC-047, UT-RBAC-062, UT-RBAC-074 đến UT-RBAC-080 và UT-RBAC-091 (migration gỡ `supervision.reassign`). Mã test nằm ở `test/bmt-be.application.tests/usecases/role/`, `usecases/authorization/` và `usecases/audit/`; bộ unit test chạy đạt 338/338 ngày 25/09/2026. Chưa có mã test cho UT-RBAC-080, vì ca này đòi đủ 13 mã trong khi code mới có 9, và cho UT-RBAC-091; migration gỡ mã được kiểm bằng lần chạy thử `Up`/`Down` nêu ở Data Model.
 
 ## Change Log
 
+- 2026-09-25 (đồng bộ code): Đồng bộ với code đã triển khai ở commit `182e2a8`: danh mục còn 9 mã sau migration `20260925074152_ConstructionSiteAndPackageAssignment`, hai kiểm tra khi sửa quyền vai trò, `StaffCreated` và cổng `IAccessRowLocker` đã có; bốn mã quyền theo module vẫn chưa có. Ví dụ lỗi ghi mã nghiệp vụ ở `messageCode`, `code` là loại lỗi chung. Ghi rõ `RoleInUse` chưa trả `memberCount`.
 - 2026-09-25: Cập nhật theo US/BR chốt lần hai trong ngày 25/09/2026. Bỏ mã `supervision.reassign` cùng chức năng đổi công trình của gói: danh mục còn 13 mã (tám mã khởi tạo và năm mã quản trị); thêm kế hoạch migration xóa mã này khỏi `RolePermission` và `Permission` trên dữ liệu dev/test, không ghi nhật ký. Phân công tính theo gói giám sát thay cho công trình trong kiểm tra `BR-RBAC-007` khoản 6 và ví dụ đi kèm.
 - 2026-09-25: Cập nhật theo US/BR đã chốt ngày 25/09/2026. Danh mục quyền tăng từ chín lên 14 mã: thêm `plan.manage` (đã có trong code), `estimate.catalog.manage`, `library.manage`, `news.manage` và `consultation.manage`, cùng `RequiresAssignment = false` và seed cho `admin`. Thêm mục sửa danh sách quyền của vai trò: chặn thêm quyền vào vai trò mình đang giữ (`BR-RBAC-004` khoản 1) và chặn bỏ `supervision.complete` khi có người giữ vai trò còn phụ trách công trình (`BR-RBAC-007` khoản 6), dưới khóa dòng `Role` và `User`. Đổi hành động nhật ký `StaffInvited`/`StaffActivated` thành `StaffCreated`; sửa "thêm ba cột" thành bốn cột; ghi rõ ngoại lệ Admin nhận diện theo mã vai trò `admin`. Tách hiện trạng code (migration `InitialRbac`, MassTransit đã đưa lại ngày 23/09) với thay đổi dự kiến; bổ sung tham chiếu `BR-RBAC-005`, `BR-RBAC-007`, `BR-RBAC-008`.
 - 2026-09-20: Bỏ giá trị `PendingActivation` khỏi `User.Status` và thêm cột `User.MustChangePassword`, theo quyết định bỏ luồng mời qua email ở [TDD-RBAC-002](TDD-RBAC-002.md). Mô hình vai trò – quyền, dấu phiên và nhật ký không đổi.

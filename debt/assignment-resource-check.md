@@ -1,10 +1,10 @@
 # Nợ kỹ thuật: phân công không kiểm tài nguyên có thật
 
-**Trạng thái: Đóng được khi triển khai thiết kế mới — trả nợ bằng bước kiểm gói giám sát trong handler giao việc.**
+**Trạng thái: Đã trả phần code ngày 25/09/2026, chưa đóng — còn chờ migration chạy trên các môi trường thật (điều kiện 2).**
 
 Theo mô hình người dùng chốt ngày 25/09/2026, phân công chỉ có một loại tài nguyên là gói giám sát (`ResourceType = 'SupervisionGrant'`, `ResourceId` là `SupervisionGrant.Id`). Mỗi gói có tối đa một người phụ trách, người nhận phải là nhân viên đang hoạt động có quyền `supervision.complete`, và chỉ giao được gói đã gán công trình hoặc đã hoàn thành. Bản thiết kế trước trong cùng ngày phân công theo công trình, nên khoản nợ khi đó phải chờ module Công trình; bản đó đã được thay.
 
-Hiện trạng code đã kiểm ngày 25/09/2026: code vẫn chạy mô hình cũ, với hai loại tài nguyên `Customer` và `Project`, cho nhiều người cùng phụ trách, chưa kiểm quyền của người nhận và **không đối chiếu `resourceId` với tài nguyên có thật**. Đây là khoản nợ của tài liệu này. Mô hình mới là thiết kế dự kiến trong [TDD-RBAC-003](../tdd/TDD-RBAC-003.md), chưa triển khai.
+Trước ngày 25/09/2026, code chạy mô hình cũ, với hai loại tài nguyên `Customer` và `Project`, cho nhiều người cùng phụ trách, chưa kiểm quyền của người nhận và **không đối chiếu `resourceId` với tài nguyên có thật**. Đó là khoản nợ của tài liệu này. Mô hình mới của [TDD-RBAC-003](../tdd/TDD-RBAC-003.md) đã được triển khai ở commit `182e2a8` trên nhánh `feature/construction-site` của `bmt-be`; tình trạng từng điều kiện đóng nợ ghi ở mục "Điều kiện đóng nợ".
 
 ## Vì sao từng chấp nhận
 
@@ -22,7 +22,9 @@ Tài nguyên được phân công nay là gói giám sát, và bảng `Supervisi
 
 Vẫn không thêm khóa ngoại, vì cột `ResourceId` dùng chung cho nhiều loại tài nguyên. Lý do và mốc xem lại ghi ở mục "Một bảng cho nhiều loại tài nguyên" của TDD-RBAC-003.
 
-## Hệ quả trong lúc chưa triển khai
+## Hệ quả trước khi triển khai
+
+Các hệ quả dưới đây đúng với code trước ngày 25/09/2026, và vẫn đúng với môi trường nào chưa chạy migration mới:
 
 - Gõ nhầm `resourceId` vẫn tạo được dòng phân công trỏ tới tài nguyên không tồn tại, và không có gì báo.
 - Phép kiểm quyền vẫn an toàn. `IAssignmentAuthorizer.IsDirectlyAssignedAsync` hỏi "người này có đang phụ trách tài nguyên kia không" chứ không hỏi ngược lại, nên một dòng mồ côi không cấp quyền cho ai trên tài nguyên có thật.
@@ -30,24 +32,24 @@ Vẫn không thêm khóa ngoại, vì cột `ResourceId` dùng chung cho nhiều
 
 ## Cách trả nợ
 
-Làm cùng đợt triển khai mô hình phân công theo gói của TDD-RBAC-003:
+Đã làm cùng đợt triển khai mô hình phân công theo gói của TDD-RBAC-003, ngày 25/09/2026:
 
-1. Handler giao việc (`CreateAssignmentCommandHandler`) và handler chuyển giao (`TransferAssignmentCommandHandler`) thêm bước khóa và đọc dòng `SupervisionGrant` như trên, trước khi kiểm người nhận.
-2. Migration của TDD-RBAC-003 xóa mọi dòng `Assignment` loại `Customer` và `Project` trên dữ liệu dev/test, rồi đổi CHECK sang `('SupervisionGrant')`. Vì các dòng cũ bị xóa chứ không đổi nhãn, không còn dòng nào trỏ tới tài nguyên không có thật.
-3. Thêm Unit Test cho nhánh gói không tồn tại và gói không giao được, cùng System Test tương ứng. ST-RBAC-058 đã kiểm nhánh gói chưa gán và gói đang bị hủy.
+1. Handler giao việc (`CreateAssignmentCommandHandler`) và handler chuyển giao (`TransferAssignmentCommandHandler`) gọi `AssignmentLookup.RequireAssignableGrantAsync`: khóa và đọc dòng `SupervisionGrant` qua `IAssignmentRowLocker.LockSupervisionGrantStateForShareAsync` như trên, trước khi kiểm người nhận.
+2. Migration `20260925074152_ConstructionSiteAndPackageAssignment` xóa mọi dòng `Assignment` loại `Customer` và `Project`, rồi đổi CHECK sang `('SupervisionGrant')`. Vì các dòng cũ bị xóa chứ không đổi nhãn, không còn dòng nào trỏ tới tài nguyên không có thật.
+3. Unit Test ở `test/bmt-be.application.tests/usecases/assignment/AssignmentCommandHandlerTests.cs`: `Create_GrantMissing_Throws404` (UT-RBAC-084), `Create_GrantNotHoldingASite_Throws409ResourceNotAssignable` (UT-RBAC-082) và `Transfer_CanceledGrant_Throws409AndKeepsCurrentHolder` (UT-RBAC-083). Integration test `AssignmentLocker_ReadsGrantStateForShare` kiểm câu khóa `FOR SHARE` trên PostgreSQL thật. Bộ unit 338/338 và integration 149/149 chạy đạt ngày 25/09/2026. ST-RBAC-058 kiểm nhánh gói chưa gán và gói đang bị hủy; chưa chạy.
 
 ## Điều kiện đóng nợ
 
-Đóng nợ khi đủ ba điều kiện:
+Đóng nợ khi đủ ba điều kiện. Tình trạng ngày 25/09/2026:
 
-1. Handler giao việc và chuyển giao từ chối gói không tồn tại (404 `AssignmentResourceNotFound`) và gói chưa gán hoặc đang bị hủy (409 `ResourceNotAssignable`), có Unit Test cho cả hai nhánh.
-2. Migration của TDD-RBAC-003 đã chạy trên mọi môi trường: CHECK chỉ nhận `SupervisionGrant`, không còn dòng `Customer` hay `Project`.
-3. Không còn đường xóa nào cho `SupervisionGrant`. Nếu sau này thêm đường xóa gói, hoặc thêm một loại tài nguyên có thể bị xóa, phải thiết kế cách xử lý phân công của tài nguyên đó trước khi mở, nếu không khoản nợ mở lại.
+1. **Đạt.** Handler giao việc và chuyển giao từ chối gói không tồn tại (404 `AssignmentResourceNotFound`) và gói chưa gán hoặc đang bị hủy (409 `ResourceNotAssignable`), có Unit Test cho cả hai nhánh. Chuyển giao dùng chung bước kiểm với giao việc; nhánh 404 riêng của chuyển giao chưa có test, vì phân công đang có luôn trỏ tới gói có thật.
+2. **Chưa đạt.** Migration mới chỉ chạy thử trên PostgreSQL tạm có dữ liệu cũ: sau `Up`, CHECK chỉ nhận `SupervisionGrant` và không còn dòng `Customer` hay `Project`. Chưa chạy trên môi trường dev dùng chung hay production. Đóng điều kiện này khi đã chạy trên mọi môi trường và kiểm lại hai điểm trên.
+3. **Đạt.** Code không có đường xóa nào cho `SupervisionGrant`. Nếu sau này thêm đường xóa gói, hoặc thêm một loại tài nguyên có thể bị xóa, phải thiết kế cách xử lý phân công của tài nguyên đó trước khi mở, nếu không khoản nợ mở lại.
 
 ## Tài liệu liên quan
 
-- [TDD-RBAC-003](../tdd/TDD-RBAC-003.md): mục Architecture nêu đánh đổi, bước kiểm gói và thứ tự khóa; mục Data Model nêu kế hoạch migration.
+- [TDD-RBAC-003](../tdd/TDD-RBAC-003.md): mục Architecture nêu đánh đổi, bước kiểm gói và thứ tự khóa; mục Data Model nêu migration đã tạo.
 - [TDD-SUB-004](../tdd/TDD-SUB-004.md): bảng `SupervisionGrant` và tập trạng thái giữ chỗ.
 - [STORY-RBAC-003](../userstory/STORY-RBAC-003.md) và [BR-RBAC-013](../businessrule/BR-RBAC-013.md): luồng và quy tắc phân công gói giám sát.
 
-Chưa có thời hạn hay người phụ trách được giao. Mốc trả nợ là đợt triển khai mô hình phân công theo gói.
+Chưa có thời hạn hay người phụ trách được giao cho việc chạy migration trên các môi trường. Khi điều kiện 2 đạt thì đổi trạng thái ở đầu tài liệu thành đã đóng.

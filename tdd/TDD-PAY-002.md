@@ -55,7 +55,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 STORY-PAY-002 cần Admin và nhân viên có quyền tra cứu riêng xem ai mua gói nào, các đơn và từng khoản chuyển. Dữ liệu gồm cả giao dịch chưa khớp đơn, đơn hết hạn/hủy, gói bị hủy hoặc bị thay thế. Không thể chỉ lấy CurrentPeriodId hoặc join bắt buộc transaction→order vì sẽ làm mất lịch sử và giao dịch chưa khớp.
 
-Module quản trị này chưa có trong mã nguồn. Thiết kế dùng projection trực tiếp từ các bảng ở TDD-PAY-001, TDD-SUB-004/005, không thêm database báo cáo hoặc copy trạng thái sang bảng tổng hợp khác.
+Module quản trị này chưa có trong mã nguồn. Phần nó phụ thuộc đã có từ commit `182e2a8` ngày 25/09/2026 trên nhánh `feature/construction-site` của `bmt-be`: bảng `ConstructionSite` theo [TDD-SITE-001](TDD-SITE-001.md), cột `SupervisionGrant.ConstructionSiteId` theo [TDD-SUB-004](TDD-SUB-004.md). API của khách `GET /api/v1/me/supervision-grants` đã trả `constructionSiteName`: `GetMySupervisionGrantsQueryHandler` đọc tên công trình của cả trang bằng một câu truy vấn theo danh sách `ConstructionSiteId`. Projection của tài liệu này có thể dùng cùng cách, cho kết quả như LEFT JOIN ở Data Model. Thiết kế dùng projection trực tiếp từ các bảng ở TDD-PAY-001, TDD-SUB-004/005, không thêm database báo cáo hoặc copy trạng thái sang bảng tổng hợp khác.
 
 ### Goals
 
@@ -297,10 +297,11 @@ Payload minh họa trích trường chính; DTO chi tiết gồm code/referenceC
 - [Nguồn đơn/giao dịch](TDD-PAY-001.md), [giám sát](TDD-SUB-004.md), [quyền riêng/lifecycle](TDD-SUB-005.md), [công trình](TDD-SITE-001.md).
 - [PagedResult](../../bmt-be/src/bmt-be.contract/abstractions/shared/PagedResult.cs), [Result](../../bmt-be/src/bmt-be.contract/abstractions/shared/Result.cs), [JwtExtensions](../../bmt-be/src/bmt-be.api/dependencyInjection/extensions/JwtExtensions.cs).
 - [Bảng truy vết kiểm thử](../discovery/payment-technical-design.md); ST-PAY-047–054 (ST-PAY-048, ST-PAY-053 đã bỏ phần quyền đổi công trình ngày 25/09/2026) và ST-PAY-072. Không có External API: tra cứu từ dữ liệu nội bộ, không gọi SePay ở mỗi lần mở màn hình.
-- Đặc tả Unit Test: UT-PAY-063 đến UT-PAY-070, UT-PAY-080 (tên công trình của gói giám sát, null khi chưa gán) và UT-PAY-081 (mốc gán lấy từ `FirstAssignedAtUtc`). Chưa có mã test hoặc kết quả chạy.
+- Đặc tả Unit Test: UT-PAY-063 đến UT-PAY-070, UT-PAY-080 (tên công trình của gói giám sát, null khi chưa gán) và UT-PAY-081 (mốc gán lấy từ `FirstAssignedAtUtc`). Chưa có mã test hoặc kết quả chạy, vì module này chưa có code.
 
 ## Change Log
 
+- 2026-09-25 (đồng bộ code): Ghi hiện trạng phụ thuộc: bảng công trình và cột `ConstructionSiteId` đã có từ commit `182e2a8`, API gói giám sát của khách đã trả tên công trình; module tra cứu quản trị vẫn chưa có code.
 - 2026-09-25 (lần 2): Bỏ quyền và lịch sử đổi công trình (BR-SUB-009, BR-SUB-023 đã bỏ); lịch sử gán lấy từ `FirstAssignedAtUtc` thay `SupervisionAssignmentEvent`. Projection gói giám sát trả thêm `constructionSiteName` qua LEFT JOIN `ConstructionSite` (TDD-SITE-001); ghi rõ `commerce.read` không có API công trình (BR-PAY-005 khoản 2, BR-SITE-003/Except). Thêm STORY-PAY-002/AC-009, ST-PAY-072.
 - 2026-09-25: Cập nhật theo US/BR đã chốt ngày 25/09/2026. Quyền tra cứu ghi là "có `commerce.read`; Admin có qua vai trò", bỏ cách viết "Admin hoặc commerce.read" ở Sequence/State Diagram và Internal API. Thời điểm hiệu lực khi thu hồi quyền theo BR-RBAC-009 (chậm nhất khi access token hết hạn, ngay khi khóa hoặc buộc đăng xuất), thay câu "thu hồi có hiệu lực ở request tiếp theo"; cập nhật hiện trạng nguồn quyền RBAC đã có trong code. Đổi `Project`/`projectId`/"dự án" trong projection, mẫu dữ liệu và ERD sang `ConstructionSite`/`constructionSiteId`/công trình, ghi rõ phụ thuộc đặc tả Công trình chưa soạn. Bổ sung tham chiếu BR-RBAC-009.
 - 2026-09-20: Đổi nguồn quyền tra cứu từ `StaffAccessProfile`/`StaffPermission` sang policy theo mã quyền của [TDD-RBAC-001](TDD-RBAC-001.md). Mã `commerce.read` giữ nguyên tên; Admin xem được vì vai trò Admin chứa mã này, không phải vì có đường tắt theo vai trò. Nghiệp vụ tra cứu quản trị không đổi.
