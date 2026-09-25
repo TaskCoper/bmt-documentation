@@ -41,7 +41,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Document Info
 
-- **Feature**: Hoàn thành và mở lại gói giám sát trên vòng đời gán dự án
+- **Feature**: Hoàn thành và mở lại gói giám sát trên vòng đời gán công trình
 - **Author**: Claude
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
@@ -53,28 +53,35 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ### Problem
 
-STORY-SUB-003 cần hai thao tác nhân viên: **Hoàn thành** gói giám sát khi dự án xong, và **Mở lại** gói đã hoàn thành khi bấm nhầm. [TDD-SUB-003](TDD-SUB-003.md) từng thiết kế hai thao tác này trên vòng đời cũ, khi gói luôn gắn dự án lúc cấp và chỉ có hai trạng thái `InProgress`/`Completed`. Vòng đời hiện tại lại theo [TDD-SUB-004](TDD-SUB-004.md) (`Unassigned`/`Assigned`) và [TDD-SUB-005](TDD-SUB-005.md) (`CanceledByStaff`), nên bản cũ không dùng được nữa.
+STORY-SUB-003 cần hai thao tác nhân viên: **Hoàn thành** gói giám sát khi công trình xong, và **Mở lại** gói đã hoàn thành khi bấm nhầm. [TDD-SUB-003](TDD-SUB-003.md) từng thiết kế hai thao tác này trên vòng đời cũ, khi gói luôn gắn công trình lúc cấp và chỉ có hai trạng thái `InProgress`/`Completed`. Vòng đời hiện tại lại theo [TDD-SUB-004](TDD-SUB-004.md) (`Unassigned`/`Assigned`) và [TDD-SUB-005](TDD-SUB-005.md) (`CanceledByStaff`), nên bản cũ không dùng được nữa.
 
 Người dùng đã chốt nghiệp vụ ngày 24/09/2026, ghi trong STORY-SUB-003 và BR-SUB-006/011/012/023/024/025, BR-RBAC-013. Tài liệu này thay toàn bộ phần hoàn thành/mở lại của TDD-SUB-003.
 
-Hiện trạng đã kiểm tra trong code:
-- `SupervisionStates` chỉ có ba giá trị.
-- Quyền `supervision.complete` đã được seed nhưng chưa endpoint nào kiểm.
-- `AssignmentAuthorizer` luôn tính cả phân công kế thừa từ khách hàng xuống dự án.
-- Luồng hủy/khôi phục gói giám sát (`SupervisionMutationFlow`) đã có đủ khóa tài khoản, `expectedVersion`, `Idempotency-Key` và biên nhận.
+**Cập nhật 25/09/2026 theo nghiệp vụ đã chốt:**
+- Gói giám sát gắn với công trình (`ConstructionSite`), thực thể riêng khác bản dự toán; đặc tả Công trình chưa soạn. Tên kỹ thuật `ConstructionSite`/`ConstructionSiteId` là tên dự kiến, có thể chỉnh khi soạn đặc tả đó.
+- Đợt này không có phân công mức khách hàng. Mỗi công trình có một người phụ trách, và người nhận phân công phải có `supervision.complete` (BR-RBAC-013). STORY-SUB-003 EXC-08 và AC-016 về phân công mức khách hàng đã rút.
+- Người hoàn thành/mở lại phải có `supervision.complete`. Sau đó, người giữ vai trò hệ thống có mã `admin` được miễn phân công; đây là ngoại lệ duy nhất theo vai trò. Người khác phải đang được phân công công trình của gói.
+
+Hiện trạng đã kiểm tra trong code ngày 25/09/2026 (thiết kế trong tài liệu này đã được triển khai với tên cũ):
+- `SupervisionStates` có `Completed` và tập giữ chỗ `HoldingProject` (`Assigned`, `Completed`); migration `SupervisionGrantCompleted` đã đổi CHECK và tạo index `UX_SupervisionGrant_ProjectHolder`.
+- Route `complete`/`reopen` trong `SupervisionGrantApi`, `CompleteSupervisionGrantCommandHandler`, `ReopenSupervisionGrantCommandHandler` và `SupervisionCompletionAccess` đã có.
+- `AssignmentAuthorizer.IsDirectlyAssignedAsync` nhận diện Admin bằng `Role.Code == RoleCodes.Admin` trong database, rồi mới đọc dòng phân công bằng `FOR SHARE`. `SupervisionCompletionAccess` đang gọi hàm này với `ResourceTypes.Project` và `grant.ProjectId`, lỗi `ProjectNotAssignedToActor`.
+- `LockAccountAsync` vẫn khóa dòng `User`. `AssignmentAuthorizer.IsAssignedAsync` còn nhánh kế thừa từ khách hàng; nhánh này không được dùng cho hoàn thành/mở lại và thuộc phạm vi TDD-RBAC-003.
+
+Thay đổi dự kiến của lần cập nhật này: đổi `ResourceType` của phân công thành `ConstructionSite`, cột `ProjectId` thành `ConstructionSiteId` theo TDD-SUB-004, mã lỗi `ProjectNotAssignedToActor` thành `ConstructionSiteNotAssignedToActor`, và khóa `AccountCommerceState` thay dòng `User`.
 
 ### Goals
 
-- Thêm trạng thái lưu `Completed`. Chỉ gói `Assigned` mới được hoàn thành; mở lại đưa gói `Completed` về `Assigned` trên đúng dự án cũ.
-- Gói `Completed` vẫn giữ chỗ trên dự án: database chặn dự án có hai gói `Assigned`/`Completed` cùng lúc.
-- Chỉ người có claim `supervision.complete` mới gọi được. Admin không cần phân công; nhân viên phải đang được phân công **trực tiếp** dự án, không tính phân công mức khách hàng.
-- Hủy gói `Completed` thì nhả chỗ; khôi phục thì về lại `Completed`, trừ khi dự án đã có gói khác giữ chỗ.
-- Sửa dự án của gói `Completed` bị từ chối. Mọi thao tác ghi lịch sử và biên nhận chống gửi lặp trong cùng transaction.
+- Thêm trạng thái lưu `Completed`. Chỉ gói `Assigned` mới được hoàn thành; mở lại đưa gói `Completed` về `Assigned` trên đúng công trình cũ.
+- Gói `Completed` vẫn giữ chỗ trên công trình: database chặn công trình có hai gói `Assigned`/`Completed` cùng lúc.
+- Chỉ người có claim `supervision.complete` mới gọi được. Sau khi đạt mã quyền, người giữ vai trò hệ thống mã `admin` được miễn phân công; nhân viên khác phải đang được phân công công trình của gói.
+- Hủy gói `Completed` thì nhả chỗ; khôi phục thì về lại `Completed`, trừ khi công trình đã có gói khác giữ chỗ.
+- Đổi công trình của gói `Completed` bị từ chối. Mọi thao tác ghi lịch sử và biên nhận chống gửi lặp trong cùng transaction.
 
 ### Non-goals
 
 - Lịch, lượt kiểm tra, điều phối kỹ sư và tự hoàn thành theo thời gian hay theo sự kiện khác.
-- Module công trình. Không cần tra dự án thuộc khách nào, vì không dùng phân công kế thừa.
+- Tạo và quản lý công trình (chưa có đặc tả). Không cần tra công trình thuộc khách nào, vì đợt này không có phân công mức khách hàng.
 - Thông báo cho khách, thêm cột thời điểm hoàn thành trên gói, hay màn hình quản trị.
 
 ## Architecture
@@ -84,18 +91,20 @@ Hiện trạng đã kiểm tra trong code:
 | `SupervisionCompletionApi` trong `presentation/apis/subscription/SupervisionGrantApi.cs` | Mới | Hai route `complete` và `reopen`, gắn policy `supervision.complete`, đọc `Idempotency-Key`. |
 | `CompleteSupervisionGrantCommandHandler`, `ReopenSupervisionGrantCommandHandler` | Mới | Gọi `SupervisionMutationFlow` với hàm quyết định trạng thái riêng. |
 | `SupervisionMutationFlow` | Sửa | Nhận `reason` nullable và một bước kiểm phân công tùy chọn chạy sau khi khóa và trước replay. |
-| `IAssignmentAuthorizer.IsDirectlyAssignedAsync` | Thêm hàm | Admin đạt ngay; nhân viên chỉ đạt khi có dòng `Assignment` đang hiệu lực đúng `Project` đó, đọc bằng `FOR SHARE`. |
+| `IAssignmentAuthorizer.IsDirectlyAssignedAsync` | Thêm hàm | Chỉ chạy sau khi đã đạt `supervision.complete`. Người giữ vai trò mã `admin` đạt ngay; người khác chỉ đạt khi có dòng `Assignment` đang hiệu lực với `ResourceType = ConstructionSite` đúng công trình của gói, đọc bằng `FOR SHARE`. |
 | `IAssignmentRowLocker.LockActiveForShareAsync` | Thêm hàm | Câu SQL `SELECT … FOR SHARE` trên phân công đang hiệu lực. |
 | `ISupervisionPolicy.EnsureCanComplete/EnsureCanReopen` | Thêm hàm | Hàm thuần kiểm version, trạng thái và lý do. |
 | `IPackageLifecyclePolicy.EnsureCanRestoreSupervision` | Sửa | Nhận trạng thái trước khi hủy; trả `Completed` khi gói đã hoàn thành lúc bị hủy. |
-| `SupervisionAssignmentFlow`, `RestorePackageCommandHandler` | Sửa | Khi kiểm dự án đã có gói hay chưa, tính cả `Completed`. |
+| `SupervisionAssignmentFlow`, `RestorePackageCommandHandler` | Sửa | Khi kiểm công trình đã có gói hay chưa, tính cả `Completed`. |
+
+Cột Trạng thái ghi loại thay đổi so với lúc thiết kế ban đầu. Theo kiểm tra ngày 25/09/2026, mọi thành phần trong bảng đã có trong code với tên cũ (`Project`, `ProjectId`); phần đổi sang công trình là thay đổi dự kiến.
 
 ```mermaid
 flowchart LR
     S[Admin hoặc nhân viên] --> A[SupervisionCompletionApi<br/>policy supervision.complete]
     A --> H[Complete hoặc Reopen Handler]
     H --> F[SupervisionMutationFlow<br/>khóa, version, receipt]
-    F --> Z[IAssignmentAuthorizer<br/>chỉ phân công trực tiếp]
+    F --> Z[IAssignmentAuthorizer<br/>admin hoặc phân công công trình]
     F --> P[SupervisionPolicy]
     F --> D[(SupervisionGrant, PackageLifecycleEvent,<br/>PackageMutationReceipt)]
     Z --> D
@@ -103,30 +112,30 @@ flowchart LR
 
 **1. Kiểm quyền ba chặng.** Mỗi chặng chặn một kiểu truy cập sai khác nhau.
 
-1. Policy `supervision.complete` ở endpoint đọc claim `perm` trong access token. Thiếu claim thì trả 403 trước khi vào handler. Chặng này chặn cả Admin thiếu mã quyền (STORY-SUB-003/AC-008).
-2. `PackageMutationFlow.EnsureActorIsActiveStaffAsync` kiểm `AccountKind = Staff` và `Status = Active` trong database. Tài khoản khách bị gán nhầm vai trò có quyền vẫn bị chặn ở đây. Admin là tài khoản Staff nên vẫn qua được.
-3. `IsDirectlyAssignedAsync` kiểm phân công. Người giữ vai trò `admin` đạt ngay, theo phần Except của BR-RBAC-013. Người khác phải có dòng `Assignment` đang hiệu lực với `ResourceType = Project` và `ResourceId = ProjectId` của gói. Hàm cố ý **không** gọi `IResourceHierarchyReader`, nên nhân viên chỉ phụ trách khách hàng K bị từ chối (BR-SUB-011/Then 6, STORY-SUB-003/AC-016). Nhờ vậy hàm cũng không đụng tới `UnavailableResourceHierarchyReader`, bản tạm đang ném `NotImplementedException`.
+1. Policy `supervision.complete` ở endpoint đọc claim `perm` trong access token. Thiếu claim thì trả 403 trước khi vào handler. Chặng này chặn cả người giữ vai trò `admin` nếu vai trò đó bị thiếu mã quyền (BR-SUB-011/Then khoản 6: người thao tác phải có `supervision.complete`).
+2. `PackageMutationFlow.EnsureActorIsActiveStaffAsync` kiểm `AccountKind = Staff` và `Status = Active` trong database. Tài khoản khách bị gán nhầm vai trò có quyền vẫn bị chặn ở đây. Tài khoản giữ vai trò `admin` là tài khoản Staff nên vẫn qua được.
+3. `IsDirectlyAssignedAsync` kiểm phân công. Người giữ vai trò hệ thống có mã `admin` (`RoleCodes.Admin`) đạt ngay, theo phần Except của BR-RBAC-013 và BR-SUB-011/Then khoản 6. Hàm nhận diện theo **mã** vai trò đọc từ database, không theo tên hiển thị của vai trò, và đây là ngoại lệ duy nhất theo vai trò. Người khác phải có dòng `Assignment` đang hiệu lực với `ResourceType = ConstructionSite` và `ResourceId = ConstructionSiteId` của gói (BR-RBAC-013/Then khoản 3). Đợt này không có phân công mức khách hàng nên hàm chỉ khớp đúng công trình, không gọi `IResourceHierarchyReader`.
 
-Ví dụ: Mai có quyền `supervision.complete` và được phân công khách hàng K, còn Lan được phân công dự án A của K. Lan hoàn thành được gói trên A; Mai nhận 403 `ProjectNotAssignedToActor`. Hàm `IsAssignedAsync` hiện có vẫn giữ nhánh kế thừa cho các tính năng khác.
+Ví dụ: Lan có quyền `supervision.complete` và đang được phân công công trình CS1; Mai cũng có quyền này nhưng không được phân công CS1. Lan hoàn thành được gói trên CS1; Mai nhận 403 `ConstructionSiteNotAssignedToActor`. Tài khoản giữ vai trò `admin` hoàn thành được gói trên CS1 dù không có dòng phân công nào. Một vai trò tự tạo có tên hiển thị "Admin" nhưng mã khác `admin` không được miễn phân công.
 
 **2. Khóa đọc chung (`FOR SHARE`) trên dòng phân công.** Việc gỡ phân công (`EndAssignmentCommandHandler`, `TransferAssignmentCommandHandler`) khóa dòng `Assignment` bằng `FOR UPDATE`. Chặng 3 đọc chính dòng đó bằng `SELECT … WHERE EffectiveToUtc IS NULL FOR SHARE`, nên hai thao tác xếp hàng với nhau:
 
 - Nếu việc gỡ phân công đã commit trước, câu `FOR SHARE` chờ xong rồi đọc lại dòng. Lúc này dòng không còn khớp `EffectiveToUtc IS NULL`, nên nhân viên bị từ chối (ST-SUB-116).
 - Nếu handler giữ `FOR SHARE` trước, việc gỡ phân công phải chờ handler commit xong.
 
-Thay cho khóa bản ghi công trình của TDD-SUB-003: bảng công trình chưa tồn tại, còn dòng phân công thì có thật. Giới hạn: khóa chỉ có tác dụng trong transaction của handler, do `TransactionPipelineBehavior` mở. Admin không đọc dòng phân công nên không bị khóa này ảnh hưởng.
+Thay cho khóa bản ghi công trình của TDD-SUB-003: bảng công trình chưa tồn tại, còn dòng phân công thì có thật. Giới hạn: khóa chỉ có tác dụng trong transaction của handler, do `TransactionPipelineBehavior` mở. Người giữ vai trò `admin` không đọc dòng phân công nên không bị khóa này ảnh hưởng.
 
 **3. Thứ tự khóa và bảo vệ đồng thời.** Dùng lại thứ tự trong `SupervisionMutationFlow`:
 
 1. Kiểm tư cách nhân viên.
 2. Đọc `AccountId` của gói (không tracking).
-3. `LockAccountAsync` khóa trạng thái thương mại của chủ gói.
+3. `LockAccountAsync` khóa `AccountCommerceState` của chủ gói (TDD-PAY-001). Hiện trạng code còn khóa dòng `User`; đổi cùng lúc với các luồng quota theo TDD-SUB-002.
 4. Nạp gói có tracking.
 5. Kiểm phân công bằng `FOR SHARE`.
 6. Tra biên nhận để replay.
 7. Gọi policy, rồi ghi.
 
-Hoàn thành, hủy, khôi phục, gán và sửa dự án trên cùng khách đều khóa tài khoản ở bước 3, nên không chạy xen nhau (ST-SUB-115). Việc gỡ phân công không lấy khóa tài khoản, nên hai chuỗi khóa không tạo vòng chờ.
+Không khóa bản ghi quyền của người thao tác, vì quyền đọc từ claim. Hoàn thành, hủy, khôi phục, gán và đổi công trình trên cùng khách đều khóa tài khoản ở bước 3, nên không chạy xen nhau (ST-SUB-115). Việc gỡ phân công không lấy khóa tài khoản, nên hai chuỗi khóa không tạo vòng chờ.
 
 **4. Optimistic concurrency bằng `Version`.** Client gửi `expectedVersion` đã đọc. Policy so với `SupervisionGrant.Version` sau khi đã khóa. Không khớp thì trả 409 `PackageVersionConflict`, không ghi gì. Khớp thì tăng `Version`, và dòng lịch sử lưu `PackageVersion` mới.
 
@@ -142,14 +151,15 @@ Kiểm quyền (chặng 2, 3) chạy **trước** replay: nhân viên đã bị 
 
 - Thực hiện từng BR:
   - BR-SUB-011/Then 1 (chỉ `Assigned`, không bắt lý do) và BR-SUB-012/Then 2–3 (lý do, về `Assigned`) nằm ở `SupervisionPolicy` và validator.
-  - BR-SUB-011/Then 5–6 và BR-SUB-012/Then 1 (quyền, phân công trực tiếp) nằm ở policy endpoint, `EnsureActorIsActiveStaffAsync` và `IsDirectlyAssignedAsync`.
+  - BR-SUB-011/Then 5–6, BR-SUB-012/Then 1 và BR-RBAC-013/Then 3 (quyền, miễn phân công cho vai trò mã `admin`, phân công công trình) nằm ở policy endpoint, `EnsureActorIsActiveStaffAsync` và `IsDirectlyAssignedAsync`.
+  - BR-RBAC-010/Then 3–4 (`supervision.complete` là quyền gắn phân công; `supervision.reassign`, `package.cancel`, `package.restore` thì không) nằm ở việc chỉ hai route `complete`/`reopen` gọi bước kiểm phân công.
   - BR-SUB-006 (giữ chỗ) nằm ở kiểm tra trong handler và partial unique index.
-  - BR-SUB-023/Except (không sửa dự án gói `Completed`) đã có sẵn nhờ `EnsureCanReassign` chỉ nhận `Assigned`.
+  - BR-SUB-023/Except (không đổi công trình của gói `Completed`) đã có sẵn nhờ `EnsureCanReassign` chỉ nhận `Assigned`.
   - BR-SUB-024/Then 2 (hủy `Completed`) đã có sẵn nhờ `EnsureCanCancelSupervision` nhận mọi trạng thái trừ `CanceledByStaff`.
   - BR-SUB-025/Then 5 nằm ở `EnsureCanRestoreSupervision`, xem Data Model.
 - Chọn dùng lại `PackageLifecycleEvent` thay vì tạo bảng lịch sử mới. Hoàn thành/mở lại có cùng hình dạng với hủy/khôi phục (trạng thái trước/sau, người thao tác, version, biên nhận). Gộp chung còn giúp đọc lịch sử vòng đời của một gói theo đúng thứ tự `PackageVersion` trong một bảng. Đánh đổi: phải nới ràng buộc `Reason` cho riêng `Complete`.
 - Không thêm cột `CompletedAtUtc` vào `SupervisionGrant`. Thời điểm hoàn thành đọc từ dòng `Complete` mới nhất của gói. Nghiệp vụ hiện chỉ cần hiển thị trạng thái (AC-017).
-- Mở lại khi dự án đã có gói khác giữ chỗ (BR-SUB-012/Except) vẫn được kiểm trong handler, dù theo quy tắc mới trạng thái này chỉ xuất hiện khi dữ liệu sai. Database cũng chặn nó bằng index (ST-SUB-032).
+- Mở lại khi công trình đã có gói khác giữ chỗ (BR-SUB-012/Except) vẫn được kiểm trong handler, dù theo quy tắc mới trạng thái này chỉ xuất hiện khi dữ liệu sai. Database cũng chặn nó bằng index (ST-SUB-032).
 
 ## Sequence Diagram
 
@@ -168,8 +178,8 @@ sequenceDiagram
     A->>F: CompleteSupervisionGrantCommand, actor từ phiên
     F->>D: Kiểm User Staff và Active
     F->>D: Đọc AccountId của gói, khóa tài khoản, nạp gói
-    F->>Z: IsDirectlyAssignedAsync(actor, Project, ProjectId)
-    Z->>D: Admin? hoặc Assignment đang hiệu lực FOR SHARE
+    F->>Z: IsDirectlyAssignedAsync(actor, ConstructionSite, ConstructionSiteId)
+    Z->>D: Vai trò mã admin? hoặc Assignment đang hiệu lực FOR SHARE
     alt Không đạt
       F-->>S: 403, rollback
     else Đạt
@@ -178,7 +188,7 @@ sequenceDiagram
         F-->>S: 200 kết quả cũ, wasAlreadyApplied true
       else Chưa có
         F->>P: EnsureCanComplete(grant, expectedVersion)
-        F->>D: Kiểm dự án không có gói khác giữ chỗ
+        F->>D: Kiểm công trình không có gói khác giữ chỗ
         F->>D: State Completed, Version+1, event và receipt
         D-->>A: Commit
         A-->>S: 200 PackageMutated
@@ -197,8 +207,8 @@ flowchart TD
     C -->|Có| D{Có gói?}
     D -->|Không| X404[404 PackageNotFound]
     D -->|Có| E[Khóa tài khoản, nạp gói]
-    E --> F{Admin, hoặc phân công trực tiếp ProjectId?}
-    F -->|Không, kể cả ProjectId NULL| X403
+    E --> F{Vai trò mã admin, hoặc được phân công ConstructionSiteId?}
+    F -->|Không, kể cả ConstructionSiteId NULL| X403
     F -->|Có| G{Receipt cùng key?}
     G -->|Cùng nội dung| R[Trả kết quả cũ]
     G -->|Khác nội dung| X409a[409 IdempotencyConflict]
@@ -211,14 +221,14 @@ flowchart TD
     I -->|Reopen| K{State Completed và lý do có nội dung?}
     K -->|Sai trạng thái| X409c
     K -->|Thiếu lý do| X422[422 PackageMutationInvalid]
-    K -->|Có| L{Dự án có gói khác giữ chỗ?}
+    K -->|Có| L{Công trình có gói khác giữ chỗ?}
     L -->|Có| X409d[409 AnotherPackageActive]
     L -->|Không| N[State Assigned]
     M --> W[Version+1, event, receipt, commit]
     N --> W
 ```
 
-Khi `ProjectId` là NULL (gói chưa gán), người không phải Admin nhận 403 thay vì 409. Như vậy nhân viên không phụ trách không dò được trạng thái của gói qua mã lỗi.
+Khi `ConstructionSiteId` là NULL (gói chưa gán), người không giữ vai trò mã `admin` nhận 403 thay vì 409. Như vậy nhân viên không phụ trách không dò được trạng thái của gói qua mã lỗi.
 
 ## State Diagram
 
@@ -228,18 +238,18 @@ Vòng đời lưu trong database sau thay đổi. `ExpiredUnassigned` vẫn là 
 stateDiagram-v2
     [*] --> Unassigned: Thanh toán cấp gói
     Unassigned --> Assigned: Khách gán trước hạn
-    Assigned --> Assigned: Nhân viên sửa dự án
+    Assigned --> Assigned: Nhân viên đổi công trình
     Assigned --> Completed: Hoàn thành, có quyền và phân công
-    Completed --> Assigned: Mở lại, có lý do, dự án không có gói khác
+    Completed --> Assigned: Mở lại, có lý do, công trình không có gói khác
     Unassigned --> CanceledByStaff: Hủy
     Assigned --> CanceledByStaff: Hủy
-    Completed --> CanceledByStaff: Hủy, nhả chỗ trên dự án
+    Completed --> CanceledByStaff: Hủy, nhả chỗ trên công trình
     CanceledByStaff --> Unassigned: Khôi phục, trước hủy là Unassigned, còn hạn
-    CanceledByStaff --> Assigned: Khôi phục, trước hủy là Assigned, dự án trống
-    CanceledByStaff --> Completed: Khôi phục, trước hủy là Completed, dự án trống
+    CanceledByStaff --> Assigned: Khôi phục, trước hủy là Assigned, công trình trống
+    CanceledByStaff --> Completed: Khôi phục, trước hủy là Completed, công trình trống
 ```
 
-Không có mũi tên `Completed → Assigned` qua sửa dự án, và không có `Unassigned → Completed`. Thời gian trôi qua không tạo chuyển trạng thái nào (STORY-SUB-003/AC-007).
+Không có mũi tên `Completed → Assigned` qua đổi công trình, và không có `Unassigned → Completed`. Thời gian trôi qua không tạo chuyển trạng thái nào (STORY-SUB-003/AC-007).
 
 ## Data Model
 
@@ -249,36 +259,38 @@ Không có bảng mới. Hai bảng dưới đây được sửa ràng buộc; b
 
 | Bảng | Một dòng đại diện cho gì? | Thay đổi trong TDD này |
 | --- | --- | --- |
-| `SupervisionGrant` | Một gói giám sát khách đã mua, định nghĩa ở [TDD-SUB-004](TDD-SUB-004.md#data-model). | Thêm giá trị `Completed` cho `State`. Gói `Completed` bắt buộc có `ProjectId` và `FirstAssignedAtUtc`, và giữ chỗ trên dự án như gói `Assigned`. |
+| `SupervisionGrant` | Một gói giám sát khách đã mua, định nghĩa ở [TDD-SUB-004](TDD-SUB-004.md#data-model). | Thêm giá trị `Completed` cho `State`. Gói `Completed` bắt buộc có `ConstructionSiteId` (code hiện: `ProjectId`) và `FirstAssignedAtUtc`, và giữ chỗ trên công trình như gói `Assigned`. |
 | `PackageLifecycleEvent` | Một lần thay đổi vòng đời gói do nhân viên thực hiện, định nghĩa ở [TDD-SUB-005](TDD-SUB-005.md#data-model). | Thêm `Action = Complete` và `Reopen`, chỉ dùng cho `PackageKind = Supervision`. `Reason` được NULL khi và chỉ khi `Action = Complete`. |
 | `PackageMutationReceipt` | Kết quả của một yêu cầu đã xử lý, dùng khi client gửi lại, định nghĩa ở TDD-SUB-005. | Không đổi schema. Thêm hai giá trị `Operation`: `CompleteSupervision`, `ReopenSupervision`. |
 
 Khôi phục biết đưa gói về trạng thái nào mà **không cần cột mới**. `SupervisionGrant.CancelEventId` trỏ tới dòng `Cancel` gần nhất, và dòng đó đã lưu `FromState`. Handler khôi phục đọc `FromState` này:
 - `Unassigned`: giữ luật cũ (còn hạn gán mới khôi phục được).
-- `Assigned` hoặc `Completed`: trả về đúng giá trị đó, nếu dự án chưa có gói khác giữ chỗ.
+- `Assigned` hoặc `Completed`: trả về đúng giá trị đó, nếu công trình chưa có gói khác giữ chỗ.
 
 Dòng `Cancel` cũ đều có `FromState` là `Unassigned` hoặc `Assigned`, nên dữ liệu hiện có vẫn khôi phục đúng như trước.
 
 **Dữ liệu lưu trữ minh họa: hoàn thành, hủy, khôi phục, mở lại**
 
-Dữ liệu dưới đây là giả định và chỉ trích các cột cần giải thích. G1, U1, PR1, NV2, L1–L4, M3–M6 là bí danh UUID. Mọi giờ đều là UTC. Tình huống nối tiếp ví dụ ở TDD-SUB-004: G1 của U1 đã gán PR1 ở `Version = 2`. NV2 có quyền `supervision.complete`, `package.cancel`, `package.restore` và đang được phân công trực tiếp PR1.
+Dữ liệu dưới đây là giả định và chỉ trích các cột cần giải thích. G1, U1, CS1, NV2, A1, L1–L4, M3–M6 là bí danh UUID. Mọi giờ đều là UTC. Tình huống nối tiếp ví dụ ở TDD-SUB-004, ngay sau lần gán đầu: G1 của U1 đã gán công trình CS1 ở `Version = 2`. NV2 có quyền `supervision.complete`, `package.cancel`, `package.restore`, không giữ vai trò `admin`, và đang được phân công CS1 qua dòng `Assignment` A1 (`StaffUserId=NV2`, `ResourceType=ConstructionSite`, `ResourceId=CS1`, `EffectiveToUtc=NULL`; schema bảng theo TDD-RBAC-003). Tên cột công trình dùng tên dự kiến; code hiện là `ProjectId` và `ResourceType=Project`.
 
 | Bảng / thời điểm | Các giá trị lưu | Ý nghĩa |
 | --- | --- | --- |
-| SupervisionGrant, trước | Id=G1; AccountId=U1; ProjectId=PR1; State=Assigned; FirstAssignedAtUtc=2026-10-01T02:00:00Z; Version=2; CancelEventId=NULL | Gói đang gắn PR1. |
-| SupervisionGrant, sau hoàn thành | State=Completed; Version=3 | PR1 vẫn có G1 giữ chỗ. `ProjectId`, `FirstAssignedAtUtc` và hạn gán không đổi. |
+| SupervisionGrant, trước | Id=G1; AccountId=U1; ConstructionSiteId=CS1; State=Assigned; FirstAssignedAtUtc=2026-10-01T02:00:00Z; Version=2; CancelEventId=NULL | Gói đang gắn CS1. |
+| SupervisionGrant, sau hoàn thành | State=Completed; Version=3 | CS1 vẫn có G1 giữ chỗ. `ConstructionSiteId`, `FirstAssignedAtUtc` và hạn gán không đổi. Bước kiểm phân công đọc A1 bằng `FOR SHARE`; A1 không đổi. |
 | PackageLifecycleEvent L1 | Action=Complete; SupervisionGrantId=G1; FromState=Assigned; ToState=Completed; ActorId=NV2; AtUtc=2027-03-01T03:00:00Z; Reason=NULL; PackageVersion=3; ReceiptId=M3 | Hoàn thành không bắt lý do nên `Reason` NULL. |
 | PackageMutationReceipt M3 | ActorId=NV2; Operation=CompleteSupervision; TargetId=G1; RequestKey=complete-g1-1; ResultVersion=3 | Gửi lại cùng key thì trả kết quả này, không tạo L1 thứ hai. |
-| SupervisionGrant, sau hủy | State=CanceledByStaff; Version=4; CancelEventId=L2 | PR1 được nhả chỗ vì index chỉ tính `Assigned`/`Completed`. |
+| SupervisionGrant, sau hủy | State=CanceledByStaff; Version=4; CancelEventId=L2 | CS1 được nhả chỗ vì index chỉ tính `Assigned`/`Completed`. |
 | PackageLifecycleEvent L2 | Action=Cancel; FromState=Completed; ToState=CanceledByStaff; Reason=Khách tạm dừng; PackageVersion=4; ReceiptId=M4 | `FromState=Completed` là dữ kiện mà bước khôi phục sẽ đọc. |
 | SupervisionGrant, sau khôi phục | State=Completed; Version=5; CancelEventId=NULL | Khôi phục đọc L2.FromState, nên gói về `Completed` chứ không về `Assigned`. |
 | PackageLifecycleEvent L3 | Action=Restore; FromState=CanceledByStaff; ToState=Completed; Reason=Khách tiếp tục; PackageVersion=5; ReceiptId=M5 | |
-| SupervisionGrant, sau mở lại | State=Assigned; Version=6 | Về lại PR1. Hạn gán và mốc gán đầu không đổi. |
+| SupervisionGrant, sau mở lại | State=Assigned; Version=6 | Về lại CS1. Hạn gán và mốc gán đầu không đổi. |
 | PackageLifecycleEvent L4 | Action=Reopen; FromState=Completed; ToState=Assigned; Reason=Bấm hoàn thành nhầm; PackageVersion=6; ReceiptId=M6 | Mở lại bắt buộc có lý do. |
 
 Đọc bảng `PackageLifecycleEvent` theo `PackageVersion` của G1 sẽ thấy đủ chuỗi 3→6: hoàn thành, hủy, khôi phục, mở lại. Lần gán đầu (version 2) nằm ở `SupervisionAssignmentEvent` của TDD-SUB-004.
 
-Nhánh bị chặn: nếu trong lúc G1 bị hủy (version 4), khách gán gói G2 vào PR1, thì bước khôi phục G1 trả 409 `AnotherPackageActive`. Khi đó không có L3, G1 vẫn ở version 4.
+Nhánh bị chặn: nếu trong lúc G1 bị hủy (version 4), khách gán gói G2 vào CS1, thì bước khôi phục G1 trả 409 `AnotherPackageActive`. Khi đó không có L3, G1 vẫn ở version 4.
+
+Nhánh không được phân công: nếu người gửi yêu cầu hoàn thành ở version 2 là nhân viên NV3 có `supervision.complete` nhưng không có dòng `Assignment` đang hiệu lực trên CS1, handler trả 403 `ConstructionSiteNotAssignedToActor` trước bước replay. Không có L1, M3; G1 vẫn `Assigned`, version 2. Nếu người gửi giữ vai trò mã `admin` thì qua được bước này dù không có dòng phân công.
 
 **Thay đổi ràng buộc**
 
@@ -291,6 +303,8 @@ Nhánh bị chặn: nếu trong lúc G1 bị hủy (version 4), khách gán gói
 | PackageLifecycleEvent | Mới: `CK_PackageLifecycleEvent_SupervisionOnlyActions` | — | `Action NOT IN ('Complete','Reopen') OR PackageKind = 'Supervision'` |
 | PackageLifecycleEvent | `CK_PackageLifecycleEvent_Reason`; cột `Reason` | `Reason` NOT NULL, phải có ký tự không phải khoảng trắng | Cột được NULL. CHECK: `(Action = 'Complete' AND Reason IS NULL) OR (Reason IS NOT NULL AND Reason ~ '[^[:space:]]')`. Phải có `IS NOT NULL`, vì với `Reason` NULL phép so khớp trả NULL, và CHECK coi NULL là đạt |
 
+Các thay đổi ràng buộc trong bảng trên đã chạy ở migration `SupervisionGrantCompleted` với tên cột cũ `ProjectId`. Việc đổi tên cột và index sang `ConstructionSite` theo [TDD-SUB-004, Data Model](TDD-SUB-004.md#data-model); index giữ chỗ khi đó mang tên `UX_SupervisionGrant_ConstructionSiteHolder`, điều kiện không đổi.
+
 ```mermaid
 erDiagram
     User ||--o{ SupervisionGrant : owns
@@ -298,19 +312,19 @@ erDiagram
     User ||--o{ PackageLifecycleEvent : actor
     PackageMutationReceipt ||--o| PackageLifecycleEvent : dedupe
     SupervisionGrant o|--o| PackageLifecycleEvent : "CancelEventId, lần hủy gần nhất"
-    User ||--o{ Assignment : "phụ trách Project"
+    User ||--o{ Assignment : "phụ trách ConstructionSite"
 ```
 
 **Notes**:
 
-- **Partial unique index giữ chỗ.** Index chỉ áp tính duy nhất cho các dòng thỏa điều kiện lọc. Với `WHERE State IN ('Assigned','Completed')`, một dự án có thể có nhiều gói `CanceledByStaff` hoặc gói cũ khác trong lịch sử, nhưng chỉ một gói đang giữ chỗ. Kiểm tra trong handler trả mã lỗi dễ đọc; index là lớp bảo vệ cuối khi hai giao dịch lọt qua cùng lúc hoặc khi có đường ghi khác (ST-SUB-032). Phải đổi cả ba chỗ kiểm trong code sang cùng tập trạng thái:
+- **Partial unique index giữ chỗ.** Index chỉ áp tính duy nhất cho các dòng thỏa điều kiện lọc. Với `WHERE State IN ('Assigned','Completed')`, một công trình có thể có nhiều gói `CanceledByStaff` hoặc gói cũ khác trong lịch sử, nhưng chỉ một gói đang giữ chỗ. Kiểm tra trong handler trả mã lỗi dễ đọc; index là lớp bảo vệ cuối khi hai giao dịch lọt qua cùng lúc hoặc khi có đường ghi khác (ST-SUB-032). Cả ba chỗ kiểm trong code dùng cùng tập trạng thái:
   - `SupervisionAssignmentFlow.EnsureProjectHasNoOtherGrantAsync`;
   - truy vấn `projectTaken` của `RestorePackageCommandHandler`;
-  - kiểm tra mới khi mở lại.
+  - kiểm tra khi mở lại.
 
-  Nên gom tập trạng thái này thành hằng `SupervisionStates.HoldingProject` dùng chung, để ba chỗ không lệch nhau.
-- **Migration** (dùng `database-migration-planner` khi triển khai). Thứ tự: nới cột `Reason` → thay các CHECK → drop index cũ → tạo index mới.
-  - Chưa có dòng `Completed` nào, vì CHECK hiện tại cấm. Vì vậy việc mở rộng tập trạng thái và tạo lại index không đụng dữ liệu cũ.
+  Tập này đã được gom thành hằng `SupervisionStates.HoldingProject` dùng chung; dự kiến đổi tên theo công trình cùng lúc với cột.
+- **Migration** (dùng `database-migration-planner` khi triển khai). Thứ tự: nới cột `Reason` → thay các CHECK → drop index cũ → tạo index mới. Migration `SupervisionGrantCompleted` đã có trong code theo đúng thứ tự này.
+  - Khi viết migration này chưa có dòng `Completed` nào, vì CHECK cũ cấm. Vì vậy việc mở rộng tập trạng thái và tạo lại index không đụng dữ liệu cũ. Database hiện chỉ có dữ liệu dev/test.
   - Trước khi tạo index trên môi trường có dữ liệu, vẫn chạy `SELECT "ProjectId", count(*) FROM "SupervisionGrant" WHERE "State" IN ('Assigned','Completed') GROUP BY 1 HAVING count(*) > 1;`. Kết quả phải rỗng.
   - Rollback: xóa hoặc chuyển các dòng `Completed` và các sự kiện `Complete`/`Reopen` trước, rồi mới trả lại ràng buộc cũ. Nếu đã có dữ liệu thật thì cần quyết định nghiệp vụ; không tự rollback.
 - Chưa thêm CHECK giới hạn `PackageMutationReceipt.Operation`, giữ đúng hiện trạng đã ghi ở `PackageOperations`.
@@ -320,7 +334,7 @@ erDiagram
 
 ### Endpoints
 
-- **POST** `/api/v1/admin/supervision-grants/{grantId}/complete` — Hoàn thành gói `Assigned`. Cần phiên hợp lệ, claim `supervision.complete`, tài khoản Staff đang hoạt động, và là Admin hoặc được phân công trực tiếp dự án của gói. Body `{expectedVersion}`, header `Idempotency-Key` (1–100 ký tự). Không nhận lý do.
+- **POST** `/api/v1/admin/supervision-grants/{grantId}/complete` — Hoàn thành gói `Assigned`. Cần phiên hợp lệ, claim `supervision.complete`, tài khoản Staff đang hoạt động, và giữ vai trò mã `admin` hoặc đang được phân công công trình của gói. Body `{expectedVersion}`, header `Idempotency-Key` (1–100 ký tự). Không nhận lý do.
 - **POST** `/api/v1/admin/supervision-grants/{grantId}/reopen` — Mở lại gói `Completed` về `Assigned`. Cùng điều kiện quyền. Body `{expectedVersion, reason}`; `reason` sau khi bỏ khoảng trắng đầu/cuối phải dài 1–2.000 ký tự.
 - Không đổi hợp đồng của `GET /api/v1/me/supervision-grants` và `GET /api/v1/me/supervision-grants/{grantId}`. Hai route này sẽ trả thêm giá trị `Completed` ở `state` và `effectiveState` (AC-017). Client đang dùng phải chấp nhận giá trị mới này.
 
@@ -337,7 +351,7 @@ Response 200:
 {"value":{"packageId":"44444444-4444-4444-4444-444444444444","packageKind":"Supervision","lifecycleState":"Completed","version":3,"eventId":"99999999-9999-9999-9999-999999999999","wasAlreadyApplied":false},"isSuccess":true,"isFailure":false,"error":{"code":"","message":""}}
 
 Error Response:
-{"title":"Forbidden","code":"ProjectNotAssignedToActor","status":403,"detail":"Bạn không được phân công dự án của gói này.","messageCode":"ProjectNotAssignedToActor","errors":null}
+{"title":"Forbidden","code":"ConstructionSiteNotAssignedToActor","status":403,"detail":"Bạn không được phân công công trình của gói này.","messageCode":"ConstructionSiteNotAssignedToActor","errors":null}
 ```
 
 #### POST /api/v1/admin/supervision-grants/{grantId}/reopen
@@ -359,11 +373,11 @@ Error Response:
 - **Unauthorized** (401): phiên không hợp lệ.
 - **AccessForbidden** (403): thiếu claim `supervision.complete`, bị chặn ở policy endpoint.
 - **PermissionNotHeldByActor** (403): tài khoản không phải Staff đang hoạt động.
-- **ProjectNotAssignedToActor** (403): không phải Admin và không có phân công trực tiếp đang hiệu lực trên dự án của gói, kể cả khi gói chưa gán dự án. Mã mới trong `SubscriptionErrorCodes`.
+- **ConstructionSiteNotAssignedToActor** (403): không giữ vai trò mã `admin` và không có phân công đang hiệu lực trên công trình của gói, kể cả khi gói chưa gán công trình. Thay mã `ProjectNotAssignedToActor` đang có trong `SubscriptionErrorCodes`.
 - **PackageNotFound** (404): không có gói giám sát với mã này.
 - **PackageVersionConflict** (409): `expectedVersion` không khớp.
 - **PackageStateConflict** (409): hoàn thành gói không ở `Assigned`, hoặc mở lại gói không ở `Completed`.
-- **AnotherPackageActive** (409): mở lại khi dự án đã có gói khác giữ chỗ.
+- **AnotherPackageActive** (409): mở lại khi công trình đã có gói khác giữ chỗ.
 - **IdempotencyConflict** (409): cùng `Idempotency-Key` nhưng khác nội dung.
 - **PackageMutationInvalid** (422): thiếu hoặc sai `expectedVersion`, `Idempotency-Key`, hoặc lý do mở lại không có nội dung hay quá 2.000 ký tự.
 
@@ -381,7 +395,6 @@ Error Response:
 - STORY-SUB-003/AC-013
 - STORY-SUB-003/AC-014
 - STORY-SUB-003/AC-015
-- STORY-SUB-003/AC-016
 - STORY-SUB-003/AC-017
 
 ### Business Rules
@@ -393,17 +406,23 @@ Error Response:
 - BR-SUB-023/Except
 - BR-SUB-024/Then
 - BR-SUB-025/Then
+- BR-RBAC-013/Then
 - BR-RBAC-013/Except
+- BR-RBAC-010/Then
 
 ### Use Cases
 
 - STORY-SUB-003/Main Flow
+- STORY-SUB-003/ALT-03
 
 ### Others
 
 - Thay phần hoàn thành/mở lại của [TDD-SUB-003](TDD-SUB-003.md). Vòng đời gán theo [TDD-SUB-004](TDD-SUB-004.md); hủy, khôi phục và biên nhận theo [TDD-SUB-005](TDD-SUB-005.md); phân công theo [TDD-RBAC-003](TDD-RBAC-003.md).
+- EXC-08 và AC-016 của STORY-SUB-003 về phân công mức khách hàng đã rút ngày 25/09/2026, nên không còn trong tham chiếu. UT-SUB-061 và ST-SUB-122 đã được viết lại ngày 25/09/2026 thành ca nhân viên chỉ phụ trách công trình khác của cùng khách bị từ chối; UT-SUB-074 kiểm vai trò tự tạo tên "Admin" nhưng mã khác `admin` không được miễn phân công.
 - System Test: ST-SUB-026 đến ST-SUB-032, ST-SUB-115 đến ST-SUB-123.
 - Đặc tả Unit Test: UT-SUB-051 đến UT-SUB-073.
 - Hiện trạng mã nguồn: [SupervisionMutationFlow](../../bmt-be/src/bmt-be.application/usecases/commands/subscription/SupervisionMutationFlow.cs), [AssignmentAuthorizer](../../bmt-be/src/bmt-be.application/services/AssignmentAuthorizer.cs), [AssignmentRowLocker](../../bmt-be/src/bmt-be.persistence/repositories/AssignmentRowLocker.cs), [SupervisionGrantConfiguration](../../bmt-be/src/bmt-be.persistence/configurations/SupervisionGrantConfiguration.cs), [PackageLifecycleEventConfiguration](../../bmt-be/src/bmt-be.persistence/configurations/PackageLifecycleEventConfiguration.cs).
 
 ## Change Log
+
+- 2026-09-25: Cập nhật theo nghiệp vụ đã chốt ngày 25/09/2026. Gói giám sát gắn với công trình (`ConstructionSite`): đổi "dự án"/`Project`/`ProjectId` trong luồng giám sát, `ResourceType` phân công và mã lỗi sang tên công trình dự kiến. Miễn phân công chỉ cho người giữ vai trò hệ thống mã `admin` sau khi đã có `supervision.complete`, nhận diện theo mã chứ không theo tên hiển thị. Bỏ ví dụ phân công mức khách hàng, nhánh kế thừa của `IsAssignedAsync` và tham chiếu STORY-SUB-003/AC-016 (đã rút); dẫn BR-RBAC-013/Then khoản 3, BR-SUB-011/Then khoản 6 và BR-RBAC-010. Thứ tự khóa dùng `AccountCommerceState`, không khóa bản ghi quyền. Cập nhật hiện trạng code (thiết kế đã được triển khai với tên cũ) và ghi UT-SUB-061, ST-SUB-122 cần cập nhật.

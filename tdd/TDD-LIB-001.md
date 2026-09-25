@@ -99,7 +99,7 @@ flowchart LR
 
 **Quyền và biên dữ liệu**
 
-Đề xuất mã kỹ thuật `library.manage`, RequiresAssignment=false, seed cho vai trò hệ thống Admin; các vai trò khác được cấp bằng RBAC hiện có. Bổ sung cả PermissionNames, migration seed và policy registry để PermissionCatalogGuard không từ chối khởi động. Quyền này khác quyền lợi gói `catalog.detail`: một bên là quản trị, một bên là quyền khách mở mẫu mới. Không tái dùng `assignment.manage` hoặc bắt phân công nhân viên vào mẫu.
+Mã quyền `library.manage` là quyền quản lý thư viện mẫu đã chốt tên theo STORY-RBAC-001/Preconditions, RequiresAssignment=false, seed cho vai trò hệ thống Admin; các vai trò khác được cấp bằng RBAC hiện có. Policy kiểm theo mã quyền này, không kiểm tên vai trò "Admin" (BR-RBAC-001, BR-RBAC-011); thiếu quyền trả 403 và không ghi dữ liệu nghiệp vụ. Bổ sung cả PermissionNames, migration seed và policy registry để PermissionCatalogGuard không từ chối khởi động. Quyền này khác quyền lợi gói `catalog.detail`: một bên là quản trị, một bên là quyền khách mở mẫu mới. Không tái dùng `assignment.manage` hoặc bắt phân công nhân viên vào mẫu.
 
 Mutation dùng cookie phải kiểm antiforgery token và Origin theo nền tảng PROJ/RBAC, không dùng CORS thay CSRF. Endpoint công khai chỉ trả summary và ảnh đại diện của phiên bản hiện hành không ẩn. Endpoint thumbnail kiểm lại current/visibility, không để URL asset thô tồn tại công khai sau ẩn/thay ảnh. Ảnh đã tải xuống trước đó không thể thu hồi khỏi máy khách.
 
@@ -242,8 +242,8 @@ LibraryAccess và phần mở rộng UsageOperation có nguồn duy nhất tại
 
 | Bảng | Một dòng đại diện cho gì; ai ghi; quan hệ |
 |---|---|
-| LibraryTemplate | Một mẫu ổn định. Admin tạo; CurrentVersionId NULL trước công bố, IsHidden dùng chung cho mẫu. Không lưu tên/kích thước tại đây. |
-| LibraryVersion | Một phiên bản nội dung tính lượt, thuộc một Template. Admin sửa khi Draft/current; Published cũ không sửa. Number NULL trước công bố. EditVersion khác Number. |
+| LibraryTemplate | Một mẫu ổn định. Người có `library.manage` tạo; CurrentVersionId NULL trước công bố, IsHidden dùng chung cho mẫu. Không lưu tên/kích thước tại đây. |
+| LibraryVersion | Một phiên bản nội dung tính lượt, thuộc một Template. Người có `library.manage` sửa khi Draft/current; Published cũ không sửa. Number NULL trước công bố. EditVersion khác Number. |
 | LibraryAsset | Một object đã xác minh, thuộc một Template; uploader tạo sau upload thành công. Metadata bất biến, dùng lại được giữa các phiên bản cùng mẫu. |
 | LibraryVersionAsset | Một liên kết Version–Asset với vị trí hiển thị. Cho phép cùng asset ở nhiều phiên bản; không lặp metadata file. |
 | LibraryMutationReceipt | Một mutation quản trị đã commit, dùng nhận diện key gửi lại; lưu hash và kết quả ID/version, không chứa bytes tài nguyên. |
@@ -402,6 +402,7 @@ Upload hoàn tất nhưng metadata lỗi để lại object chưa gắn, không 
 - STORY-LIB-002
 - STORY-LIB-003
 - STORY-PROJ-005
+- STORY-RBAC-001/Preconditions
 
 ### Business Rules
 
@@ -409,6 +410,7 @@ Upload hoàn tất nhưng metadata lỗi để lại object chưa gắn, không 
 - BR-LIB-002/Then
 - BR-LIB-003/Then
 - BR-PROJ-004/Then
+- BR-RBAC-001/Then
 - BR-RBAC-010/Then
 - BR-RBAC-011/Then
 
@@ -430,3 +432,5 @@ Upload hoàn tất nhưng metadata lỗi để lại object chưa gắn, không 
 - Chưa hoàn tất rà soát toàn bộ chuỗi phụ thuộc ngoài LIB; các UT-SUB và phần TDD-SUB lịch sử về bytes replay cần đối chiếu khi cập nhật thiết kế được chốt. Không dùng ghi chú cũ để ghi đè BR-LIB-003.
 
 ## Change Log
+
+- 2026-09-25: Ghi `library.manage` là tên quyền đã chốt theo STORY-RBAC-001 (RequiresAssignment=false, vai trò Admin có quyền), policy kiểm theo mã quyền chứ không theo tên vai trò. Bảng ý nghĩa dữ liệu đổi “Admin tạo/sửa” thành “người có `library.manage`”. Bổ sung tham chiếu STORY-RBAC-001 và BR-RBAC-001. Thiết kế nội dung, phiên bản và API không đổi.

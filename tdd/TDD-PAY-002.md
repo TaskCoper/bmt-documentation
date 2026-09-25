@@ -60,7 +60,7 @@ Module quản trị này chưa có trong mã nguồn. Thiết kế dùng project
 ### Goals
 
 - Danh sách và chi tiết truy được khách–gói–đơn–giao dịch đúng, không làm mất gói chưa gán hoặc lần mua bị thay thế trước kích hoạt.
-- Kiểm quyền ở server cho mọi query; quyền xem độc lập với sửa dự án/hủy/restore.
+- Kiểm quyền ở server cho mọi query; quyền xem độc lập với đổi công trình/hủy/restore.
 - Giao dịch chưa khớp hiện “Chưa xác định đơn”; không đoán người mua và không có thao tác gán tay.
 - Phân trang ổn định, không N+1, phân biệt tổng tiền thực nhận và tiền đủ điều kiện.
 
@@ -81,7 +81,7 @@ Module quản trị này chưa có trong mã nguồn. Thiết kế dùng project
 | Phân trang trên tập gốc, sort có khóa phụ | Đếm/lấy đơn trước khi đọc các collection; sắp thời gian rồi Id. | Hai khoản chuyển của O1 không thành hai đơn; cùng giây vẫn có thứ tự xác định. Giao dịch mới giữa hai lần gọi có thể làm dịch trang. |
 | Tránh N+1 và tích nhân khi join | N+1 là mỗi dòng lại gọi thêm query; nhiều nhánh collection join có thể nhân số dòng. Dùng các query theo tập ID và giới hạn collection. | Trang 10 đơn không tự phát sinh 10 lần đọc giao dịch; hai khoản chuyển và ba event không bị hiểu thành sáu giao dịch. |
 | RepeatableRead khi cần phản hồi nhất quán | Count và items có thể đọc cùng ảnh dữ liệu trong một read transaction. | Tránh totalCount ở một thời điểm và items ở thời điểm khác trong cùng phản hồi. Không giữ ảnh dữ liệu đó cho tất cả các trang ở các request sau. |
-| Trạng thái tính khi đọc, quyền kiểm mỗi request | Dùng dữ liệu lifecycle/hạn và quyền hiện hành để dựng phản hồi. | Đọc gói hết hạn không ghi trạng thái vào DB hoặc chạy lại cấp gói; thu hồi quyền ảnh hưởng request tiếp theo. |
+| Trạng thái tính khi đọc, quyền kiểm mỗi request | Dùng dữ liệu lifecycle/hạn để dựng phản hồi; policy kiểm claim `perm` trong access token ở mỗi request. | Đọc gói hết hạn không ghi trạng thái vào DB hoặc chạy lại cấp gói. Theo BR-RBAC-009, thu hồi quyền có hiệu lực chậm nhất khi access token hết hạn; khóa tài khoản hoặc buộc đăng xuất thì cắt ngay nhờ dấu phiên. |
 
 
 | Thành phần dự kiến | Trách nhiệm |
@@ -94,7 +94,7 @@ Module quản trị này chưa có trong mã nguồn. Thiết kế dùng project
 
 ```mermaid
 flowchart LR
-    A[Admin hoặc nhân viên có quyền] --> API[CommerceAdminApi]
+    A[Người có commerce.read] --> API[CommerceAdminApi]
     API --> P[CommerceReadAuthorization]
     P --> H[Query handlers]
     H --> S[EF read projections]
@@ -108,7 +108,7 @@ flowchart LR
 - API mặc định theo PagedResult hiện có: pageIndex 1, pageSize 10, tối đa 100. Chuẩn hóa giá trị <=0 về mặc định theo lớp hiện có; chặn offset tràn số trước query. Sort cố định (thời điểm DESC, Id DESC); không nhận tên cột SQL từ client. Giữa các trang có thể có giao dịch mới; nếu cần snapshot xuyên nhiều lần gọi sẽ bổ sung sau, không tự hứa không dịch trang.
 - Bộ lọc đề xuất: customerId, planId, kind, state, orderId, paymentCode và khoảng UTC from/to; transaction có thêm matchState. Các lọc exact id/code và thời gian áp dụng server-side. Chưa triển khai tìm nội dung tùy ý với contains không index; không lấy toàn bộ dữ liệu về rồi lọc.
 - Từ gói sang đơn dùng PaymentFulfillment.OrderId; từ đơn sang transaction dùng BankTransaction.OrderId. Không join bằng số tiền hoặc tên gói. PaymentOrder giữ snapshot giá/revision; thông tin tài khoản khách là hiện tại trừ khi có snapshot danh tính đã được thiết kế riêng.
-- `purchaseId` dùng OrderId của lần mua đã hoàn tất; `packageId` nullable nếu SupersededBeforeActivation, để vẫn hiển thị lần mua mà không bịa DesignPeriod/quota. Mọi dòng gồm kind, buyerId, buyerDisplayName, planId, revisionId, planNameAtPurchase, paidAtUtc, fulfillmentAtUtc, disposition, current effective state; projectId NULL được phép cho giám sát chưa gán.
+- `purchaseId` dùng OrderId của lần mua đã hoàn tất; `packageId` nullable nếu SupersededBeforeActivation, để vẫn hiển thị lần mua mà không bịa DesignPeriod/quota. Mọi dòng gồm kind, buyerId, buyerDisplayName, planId, revisionId, planNameAtPurchase, paidAtUtc, fulfillmentAtUtc, disposition, current effective state; constructionSiteId NULL được phép cho giám sát chưa gán.
 - Transaction DTO có id nội bộ, providerTransactionId, occurredAtUtc, receivedAtUtc, amountVnd, direction, code, content, referenceCode, matchState, processingState, orderId/buyerId/packageId nullable. Không trả raw body, signature, secret, accumulated hoặc toàn bộ cấu hình bank connection. Chỉ người có quyền xem nội dung chuyển khoản.
 - Đơn DTO tách receivedAmountVnd, eligibleAmountVnd, remainingAmountVnd và extraReceivedAmountVnd. Khoản muộn vẫn trong danh sách transaction, không cộng vào eligible. Khoản trùng webhook chỉ một transaction. Khi xử lý cấp gói đang retry, hiển thị processingState và fulfillment chưa có, không báo khách chưa trả tiền chỉ vì grant chưa hoàn tất.
 - Chi tiết nhiều collection dùng các query riêng có giới hạn, không Include nhiều nhánh tạo tích Descartes. Count không tính sau join one-to-many làm nhân số đơn/gói. Không dùng GET để đánh dấu đã hoàn tiền, sửa trạng thái hoặc chạy lại cấp gói.
@@ -124,7 +124,7 @@ sequenceDiagram
     participant Q as Read store
     participant D as PostgreSQL
     U->>A: GET danh sách hoặc chi tiết
-    A->>P: Kiểm verified và Admin hoặc commerce.read
+    A->>P: Kiểm verified và claim perm có commerce.read
     alt Không có quyền
       P-->>A: Denied
       A-->>U: 401 hoặc 403, không dữ liệu
@@ -160,7 +160,7 @@ Sơ đồ mô tả phiên tra cứu, không tạo thêm trạng thái nghiệp v
 stateDiagram-v2
     [*] --> CheckingAccess
     CheckingAccess --> Denied: Thiếu phiên hoặc quyền
-    CheckingAccess --> Querying: Admin hoặc nhân viên có commerce.read
+    CheckingAccess --> Querying: Có commerce.read, Admin có qua vai trò
     Querying --> Displayed: Có dữ liệu
     Querying --> Empty: Không có kết quả trong bộ lọc
     Displayed --> CheckingAccess: Yêu cầu tra cứu tiếp theo
@@ -180,7 +180,7 @@ Module này không tạo thêm bảng. Một projection là kết quả chọn/g
 | PaymentOrder / PlanRevision | Một đơn mua và bản quyền lợi đã chốt cho đơn. | Ai đặt gói nào, giá tại lúc mua, trạng thái đơn; không lấy giá mới từ danh mục hiện hành. |
 | BankTransaction | Một giao dịch ngân hàng đã được hệ thống tiếp nhận. | Từng khoản chuyển, thời điểm, số tiền, tình trạng khớp/xử lý, kể cả không có OrderId. |
 | PaymentFulfillment | Một kết quả cấp quyền của lần mua. | Lịch sử mua thành công; có thể không có packageId nếu SupersededBeforeActivation. |
-| DesignPeriod / SupervisionGrant / Project | Một kỳ thiết kế, một gói giám sát đã cấp và dự án liên quan nếu có. | Hiệu lực hiện tại, hạn/lượt, dự án đã gán; vắng dự án không làm mất lần mua. |
+| DesignPeriod / SupervisionGrant / ConstructionSite | Một kỳ thiết kế, một gói giám sát đã cấp và công trình liên quan nếu có. | Hiệu lực hiện tại, hạn/lượt, công trình đã gán; vắng công trình không làm mất lần mua. Bảng công trình phụ thuộc đặc tả Công trình chưa soạn; trong lúc chờ, projection chỉ trả `constructionSiteId` từ `SupervisionGrant`, chưa có tên công trình. |
 | PaymentEvent / SupervisionAssignmentEvent / PackageLifecycleEvent | Một mốc thanh toán, một lần gán/sửa và một lần hủy/restore. | Ghép lịch sử để giải thích quá trình sử dụng, không thêm trạng thái “đã hoàn tiền”. |
 | UserRole / RolePermission | Một lần một người giữ một vai trò, và một mã quyền thuộc vai trò đó. | Bảng dùng lại, định nghĩa ở [TDD-RBAC-001](TDD-RBAC-001.md#data-model). Thay cho `StaffAccessProfile` và `StaffPermission` của bản trước. Chúng quyết định request hiện tại có được đọc các dữ liệu trên không, nhưng ở đường chạy thực tế thì quyền đọc từ claim `perm` trong access token chứ không truy vấn lại hai bảng này. Không trả hồ sơ quyền trong DTO giao dịch. |
 
@@ -194,7 +194,7 @@ Các ID dưới đây là bí danh UUID, dữ liệu giả định. Cột “K�
 | T1.OrderId=O1, AmountVnd=500000; T2.OrderId=O1, AmountVnd=1600000 | Hai dòng giao dịch T1/T2, cùng orderId=O1 và buyerId=U1 | Đếm giao dịch riêng với đếm đơn; không cộng thêm lần nữa vì join ra hai dòng. |
 | T3.OrderId=NULL; MatchState=Unmatched; AmountVnd=300000 | orderId=null; buyerId=null; packageId=null; matchLabel="Chưa xác định đơn" | Không có liên kết thì giữ null. Inner join sẽ làm mất T3 khỏi màn hình. |
 | Fulfillment O4: Kind=Design; Disposition=SupersededBeforeActivation; DesignPeriodId=NULL; SupervisionGrantId=NULL | purchaseId=O4; packageId=null; disposition=SupersededBeforeActivation | Vẫn có lần mua được ghi nhận dù không tạo kỳ hiệu lực. |
-| Fulfillment O5 trỏ G5; G5.State=Unassigned; G5.ProjectId=NULL; còn hạn gán | purchaseId=O5; packageId=G5; projectId=null; effectiveState=Unassigned | Khách đã mua gói giám sát nhưng chưa dùng cho dự án nào. |
+| Fulfillment O5 trỏ G5; G5.State=Unassigned; G5.ConstructionSiteId=NULL; còn hạn gán | purchaseId=O5; packageId=G5; constructionSiteId=null; effectiveState=Unassigned | Khách đã mua gói giám sát nhưng chưa dùng cho công trình nào. |
 | O6.PaidAtUtc được hiệu chỉnh; O6.OrderingDiscrepancy=true; fulfillment vẫn giữ AppliedPaidAtUtc cũ | Chi tiết đơn có dấu lệch thứ tự và lịch sử thay đổi; gói hiện hành giữ nguyên | Tra cứu giúp nhân viên hiểu lý do xử lý bên ngoài, không kích hoạt sửa gói khi mở màn hình. |
 
 NULL biểu diễn “không có liên kết”, không phải lỗi hệ thống hoặc số tiền bằng 0. EffectiveState được tính từ dữ liệu hiện tại và đồng hồ server; nếu chưa triển khai cache thì không lưu thêm một bản trạng thái để tự đồng bộ.
@@ -216,7 +216,7 @@ erDiagram
     PaymentOrder ||--o| PaymentFulfillment : purchase
     PaymentFulfillment o|--o| DesignPeriod : optional_design
     PaymentFulfillment o|--o| SupervisionGrant : optional_supervision
-    Project o|--o{ SupervisionGrant : optional_project
+    ConstructionSite o|--o{ SupervisionGrant : optional_construction_site
 ```
 
 **Notes**:
@@ -225,20 +225,20 @@ erDiagram
 - Đếm và phân trang trên tập gốc trước khi lấy collection giao dịch/audit. Một order có ba giao dịch vẫn là một order, không ba dòng order. Giao dịch dùng (OccurredAtUtc DESC,Id DESC) để thứ tự ổn định khi cùng giây.
 - Dữ liệu VNĐ trả chuỗi nguyên như TDD-PAY-001. DateTimeOffset trả ISO 8601 UTC, UI hiển thị giờ Việt Nam; nội dung chuyển khoản phải render text, không render HTML.
 - Query xuyên khách là chủ ý của quyền quản trị; query khách ở TDD-PAY-001 luôn có account predicate. Không dùng cùng handler rồi bật cờ `ignoreOwnership=true` từ client.
-- Nguồn quyền nhân viên chưa có dữ liệu provision trong repo; không coi danh sách tên vai trò là chứng minh quyền. Kiểm quyền ở mỗi request để thu hồi có hiệu lực ở request tiếp theo.
+- Nguồn quyền nhân viên đã có trong code theo [TDD-RBAC-001](TDD-RBAC-001.md): bảng `UserRole`/`RolePermission`, claim `perm`, và migration `20260923152830_InitialRbac` seed `commerce.read` cho vai trò `admin`. Không coi tên vai trò là chứng minh quyền. Policy kiểm claim `perm` ở mỗi request. Theo BR-RBAC-009, thay đổi vai trò hoặc thu hồi quyền có hiệu lực chậm nhất khi access token hiện tại hết hạn; khóa tài khoản hoặc buộc đăng xuất cắt phiên ngay nhờ dấu phiên, không chờ token hết hạn.
 
 ## Internal API
 
 ### Endpoints
 
-Tất cả route dưới đây là read-only, verified session và Admin hoặc nhân viên có commerce.read. DTO dùng Result<T>/PagedResult<T> hiện có, không bọc một success envelope khác.
+Tất cả route dưới đây là read-only, cần verified session và claim `commerce.read`; Admin có mã này qua vai trò `admin`, không có đường tắt theo vai trò. DTO dùng Result<T>/PagedResult<T> hiện có, không bọc một success envelope khác.
 
 - **GET** `/api/v1/admin/payment-orders` — Lọc customerId/planId/kind/state/paymentCode/fromUtc/toUtc, pageIndex/pageSize; trả một dòng mỗi đơn.
 - **GET** `/api/v1/admin/payment-orders/{orderId}` — Snapshot, tổng thực nhận/hợp lệ, fulfillment, OrderingDiscrepancy và liên kết trang transaction/audit. Collection lớn lấy riêng, không nhét vô hạn vào detail.
 - **GET** `/api/v1/admin/bank-transactions` — Lọc orderId/matchState/fromUtc/toUtc/providerTransactionId; Unmatched không cần customerId. Nếu lọc customerId thì chỉ các transaction đã khớp khách đó.
 - **GET** `/api/v1/admin/bank-transactions/{transactionId}` — Thông tin giao dịch đã chuẩn hóa và liên kết nullable; không có thao tác gán tay.
 - **GET** `/api/v1/admin/package-purchases` — Lọc customerId/planId/kind/disposition/effectiveState, phân trang; nguồn Fulfillment+Order, gồm lịch sử bị thay thế và giám sát chưa gán.
-- **GET** `/api/v1/admin/package-purchases/{orderId}` — Chi tiết lần mua, target nullable, hạn/lượt/dự án nếu có; trả liên kết history.
+- **GET** `/api/v1/admin/package-purchases/{orderId}` — Chi tiết lần mua, target nullable, hạn/lượt/công trình nếu có; trả liên kết history.
 - **GET** `/api/v1/admin/package-purchases/{orderId}/history` — Audit tạo/cấp, gán/sửa, hủy/restore, sắp AtUtc DESC,Id DESC có page; không tạo lịch sử hoàn tiền.
 
 ### Examples
@@ -277,6 +277,7 @@ Payload minh họa trích trường chính; DTO chi tiết gồm code/referenceC
 - BR-PAY-001/Then
 - BR-PAY-002/Then
 - BR-PAY-004/Then
+- BR-RBAC-009/Then
 - BR-SUB-023/Then
 - BR-SUB-024/Then
 - BR-SUB-025/Then
@@ -293,4 +294,5 @@ Payload minh họa trích trường chính; DTO chi tiết gồm code/referenceC
 
 ## Change Log
 
+- 2026-09-25: Cập nhật theo US/BR đã chốt ngày 25/09/2026. Quyền tra cứu ghi là "có `commerce.read`; Admin có qua vai trò", bỏ cách viết "Admin hoặc commerce.read" ở Sequence/State Diagram và Internal API. Thời điểm hiệu lực khi thu hồi quyền theo BR-RBAC-009 (chậm nhất khi access token hết hạn, ngay khi khóa hoặc buộc đăng xuất), thay câu "thu hồi có hiệu lực ở request tiếp theo"; cập nhật hiện trạng nguồn quyền RBAC đã có trong code. Đổi `Project`/`projectId`/"dự án" trong projection, mẫu dữ liệu và ERD sang `ConstructionSite`/`constructionSiteId`/công trình, ghi rõ phụ thuộc đặc tả Công trình chưa soạn. Bổ sung tham chiếu BR-RBAC-009.
 - 2026-09-20: Đổi nguồn quyền tra cứu từ `StaffAccessProfile`/`StaffPermission` sang policy theo mã quyền của [TDD-RBAC-001](TDD-RBAC-001.md). Mã `commerce.read` giữ nguyên tên; Admin xem được vì vai trò Admin chứa mã này, không phải vì có đường tắt theo vai trò. Nghiệp vụ tra cứu quản trị không đổi.

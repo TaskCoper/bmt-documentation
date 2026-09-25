@@ -53,7 +53,18 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ### Problem
 
-**Cập nhật 24/09/2026:** Hoàn thành và mở lại vẫn thuộc phạm vi. Thiết kế hiện hành của hai thao tác này là [TDD-SUB-006](TDD-SUB-006.md): trạng thái `Completed` nằm trên vòng đời `Unassigned`/`Assigned`/`CanceledByStaff`, và nhân viên phải được phân công trực tiếp dự án. Không dùng Architecture, sơ đồ, Internal API hay Data Model của tài liệu này để triển khai.
+**Tài liệu đã bị thay thế (ghi chú 25/09/2026).** Toàn bộ thiết kế gói giám sát đã cấp trong tài liệu này, gồm gán, đổi công trình, hủy, khôi phục, hoàn thành và mở lại, đã được thay bằng ba TDD dưới đây. Nội dung bên dưới được giữ nguyên chỉ để tra cứu lịch sử; không dùng Architecture, sơ đồ, Data Model hay Internal API của tài liệu này để triển khai hoặc viết migration.
+
+| Phần | Thiết kế hiện hành |
+| --- | --- |
+| Cấp gói chưa gán sau thanh toán, hạn gán lần đầu một năm, khách gán công trình, nhân viên đổi công trình có lý do, schema `SupervisionGrant` và `SupervisionAssignmentEvent` | [TDD-SUB-004](TDD-SUB-004.md) |
+| Nhân viên hủy và khôi phục gói, `PackageLifecycleEvent`, `PackageMutationReceipt` | [TDD-SUB-005](TDD-SUB-005.md) |
+| Hoàn thành và mở lại, trạng thái `Completed`, gói `Completed` vẫn giữ chỗ trên công trình, quyền `supervision.complete` cùng phân công công trình | [TDD-SUB-006](TDD-SUB-006.md) |
+| Mua gói và nguồn cấp gói từ đơn đã thanh toán | [TDD-PAY-001](TDD-PAY-001.md) |
+
+Hai quyết định ngày 25/09/2026 cũng làm phần còn lại của tài liệu này lỗi thời: gói giám sát gắn với công trình (`ConstructionSite`), một thực thể riêng khác bản dự toán; và đợt này chỉ có phân công theo công trình, mỗi công trình một người phụ trách (BR-RBAC-013). Các chỗ ghi `Project`/`ProjectId` bên dưới là tên của bản cũ.
+
+**Cập nhật 24/09/2026:** Hoàn thành và mở lại vẫn thuộc phạm vi. Thiết kế hiện hành của hai thao tác này là [TDD-SUB-006](TDD-SUB-006.md): trạng thái `Completed` nằm trên vòng đời `Unassigned`/`Assigned`/`CanceledByStaff`, và nhân viên phải được phân công công trình đó. Không dùng Architecture, sơ đồ, Internal API hay Data Model của tài liệu này để triển khai.
 
 **Cập nhật hợp đồng khi bổ sung thanh toán:** TDD-SUB-004 thay mô hình luôn bắt buộc ProjectId bằng gói chưa gán, hạn gán một năm và sửa liên kết có quyền riêng. TDD-SUB-005 bổ sung hủy/restore, khác hoàn thành/mở lại. Không áp dụng cấm sửa ProjectId hoặc thiếu hạn gán của schema cũ cho luồng mới. Các API hoàn thành/mở lại lịch sử không tự trở thành chức năng quản lý khảo sát của đợt này. Xem [bàn giao thiết kế mới](../discovery/payment-technical-design.md). Các phần còn lại giữ làm nguồn thiết kế; nội dung bị thay phải đọc theo TDD mới trước khi triển khai.
 
@@ -250,7 +261,7 @@ Ví dụ: hai người cùng xem Version=2. Người thứ nhất cập nhật t
 
 ## Data Model
 
-**Phần này đã bị thay thế, chỉ giữ để tra cứu.** Thiết kế hiện hành của `SupervisionGrant` là [TDD-SUB-004, Data Model](TDD-SUB-004.md#data-model), bổ sung hủy và khôi phục tại [TDD-SUB-005, Data Model](TDD-SUB-005.md#data-model). Luồng hiện hành là mua trước rồi gán công trình sau: `ProjectId` được phép NULL và trạng thái là `Unassigned`/`Assigned`/`CanceledByStaff`, không còn `InProgress`/`Completed` và không còn `CompletedAtUtc`. Lịch sử thay đổi được ghi ở `SupervisionAssignmentEvent` (TDD-SUB-004) và `PackageLifecycleEvent` (TDD-SUB-005), nên `SupervisionTransition` dưới đây không được tạo mới. Không dùng phần này để viết migration.
+**Phần này đã bị thay thế, chỉ giữ để tra cứu.** Thiết kế hiện hành của `SupervisionGrant` là [TDD-SUB-004, Data Model](TDD-SUB-004.md#data-model), bổ sung hủy và khôi phục tại [TDD-SUB-005, Data Model](TDD-SUB-005.md#data-model). Luồng hiện hành là mua trước rồi gán công trình sau: cột công trình được phép NULL và trạng thái là `Unassigned`/`Assigned`/`CanceledByStaff`, cộng `Completed` do [TDD-SUB-006](TDD-SUB-006.md#data-model) bổ sung lại trên vòng đời mới; không còn `InProgress` và không còn `CompletedAtUtc`. Lịch sử thay đổi được ghi ở `SupervisionAssignmentEvent` (TDD-SUB-004) và `PackageLifecycleEvent` (TDD-SUB-005, TDD-SUB-006), nên `SupervisionTransition` dưới đây không được tạo mới. Không dùng phần này để viết migration.
 
 Các model dưới đây mô tả gói giám sát đã cấp cho một công trình và lịch sử thay đổi trạng thái. Đây là thiết kế dự kiến, chưa phải các bảng hoặc class đã triển khai.
 
@@ -384,9 +395,11 @@ Error Response:
 
 ### Others
 
+- Tài liệu này đã bị thay thế, chỉ giữ để tra cứu: gán và đổi công trình theo [TDD-SUB-004](TDD-SUB-004.md); hủy và khôi phục theo [TDD-SUB-005](TDD-SUB-005.md); hoàn thành và mở lại theo [TDD-SUB-006](TDD-SUB-006.md); cấp gói từ thanh toán theo [TDD-PAY-001](TDD-PAY-001.md). Các tham chiếu User Story, Business Rule và kiểm thử bên dưới là của bản cũ; truy vết hiện hành xem ở ba TDD trên.
+
 Đặc tả kiểm thử mới (Draft, chưa thực thi):
 
-- [UT-SUB-050](../unittest/UT-SUB-050.md)
+- [UT-SUB-050](../unittest/UT-SUB-050.md) (đã rút khỏi nghiệm thu ngày 25/09/2026)
 - [UT-SUB-051](../unittest/UT-SUB-051.md)
 - [UT-SUB-052](../unittest/UT-SUB-052.md)
 - [UT-SUB-053](../unittest/UT-SUB-053.md)
@@ -417,4 +430,5 @@ Error Response:
 
 ## Change Log
 
+- 2026-09-25: Thêm ghi chú ở đầu Context & Goals và References rằng toàn bộ thiết kế gói giám sát đã cấp của tài liệu này đã được thay: gán/đổi công trình theo TDD-SUB-004, hủy/khôi phục theo TDD-SUB-005, hoàn thành/mở lại theo TDD-SUB-006, cấp gói theo TDD-PAY-001. Ghi rõ gói giám sát gắn với công trình (`ConstructionSite`) và phân công chỉ theo công trình. Sửa ghi chú Data Model: `Completed` đã được TDD-SUB-006 bổ sung lại. Không xóa nội dung cũ.
 - 2026-09-20: Tách `IProjectAssignmentReader` thành `IProjectOwnershipReader` cho quyền sở hữu công trình và `IAssignmentAuthorizer` cho phân công, theo [TDD-RBAC-003](TDD-RBAC-003.md). Bỏ cờ `IsEmployee` vì tư cách nhân viên nay đọc từ `User.AccountKind` và quyền `supervision.complete`. Nghiệp vụ hoàn thành và mở lại gói giám sát không đổi.

@@ -55,19 +55,21 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 STORY-SUB-005 cho nhân viên có quyền riêng hủy/khôi phục gói thiết kế hoặc giám sát, giữ nguyên thời hạn/quyền lợi/lượt và không thực hiện hoàn tiền. Thiết kế cũ chỉ có đóng kỳ khi đổi gói hoặc hoàn thành giám sát, không thể dùng các trạng thái đó thay cho hủy thủ công.
 
-Nguồn quyền nhân viên nay do [TDD-RBAC-001](TDD-RBAC-001.md) cung cấp theo mô hình RBAC chuẩn `User` → `UserRole` → `Role` → `RolePermission` → `Permission`. Bản trước của tài liệu này tự định nghĩa `StaffAccessProfile` và `StaffPermission` gán quyền thẳng cho từng người; mô hình đó đã bị thay. Bốn mã quyền giữ nguyên tên, chỉ đổi chỗ gắn quyền từ người sang vai trò. Vẫn giữ nguyên tắc không suy ra nhân viên từ việc tài khoản có vai trò khác Khách hàng; tư cách nhân viên nay xác định bằng `User.AccountKind = 'Staff'`. Tất cả entity/handler được nêu dưới đây là phần dự kiến.
+Nguồn quyền nhân viên nay do [TDD-RBAC-001](TDD-RBAC-001.md) cung cấp theo mô hình RBAC chuẩn `User` → `UserRole` → `Role` → `RolePermission` → `Permission`. Bản trước của tài liệu này tự định nghĩa `StaffAccessProfile` và `StaffPermission` gán quyền thẳng cho từng người; mô hình đó đã bị thay. Bốn mã quyền giữ nguyên tên, chỉ đổi chỗ gắn quyền từ người sang vai trò. Vẫn giữ nguyên tắc không suy ra nhân viên từ việc tài khoản có vai trò khác Khách hàng; tư cách nhân viên nay xác định bằng `User.AccountKind = 'Staff'`. Khi soạn bản đầu, tất cả entity/handler được nêu dưới đây là phần dự kiến.
+
+Hiện trạng code đã kiểm tra ngày 25/09/2026: đã có migration `PackageLifecycle`, `CancelPackageCommandHandler`, `RestorePackageCommandHandler` và `PackageLifecyclePolicy`. Hủy gói giám sát nhận mọi trạng thái trừ `CanceledByStaff`; khôi phục đọc `FromState` của sự kiện hủy và kiểm chỗ theo tập giữ chỗ `Assigned`/`Completed`. Các thao tác vẫn khóa dòng `User` qua `LockAccountAsync` và vẫn dùng tên `ProjectId`. Gói giám sát gắn với công trình (`ConstructionSite`), thực thể riêng khác bản dự toán; đổi tên sang công trình theo [TDD-SUB-004](TDD-SUB-004.md) là thay đổi dự kiến.
 
 ### Goals
 
-- Quyền hủy, restore và sửa dự án độc lập với quyền xem; bắt buộc lý do và lưu audit cùng thay đổi.
-- Không có hai gói thiết kế hiệu lực trên account hoặc hai gói giám sát hiệu lực trên project sau restore.
+- Quyền hủy, restore và đổi công trình độc lập với quyền xem; bắt buộc lý do và lưu audit cùng thay đổi. Ba quyền này không gắn phân công (BR-RBAC-010 khoản 4).
+- Không có hai gói thiết kế hiệu lực trên account hoặc hai gói giám sát giữ chỗ (`Assigned` hoặc `Completed`) trên một công trình sau restore.
 - Giữ ScheduledEndsAt, AssignmentDeadline, revision và quota khi restore; tác vụ AI đã tiếp nhận trước hủy tiếp tục theo kỳ cũ.
 
 ### Non-goals
 
 - Chuyển tiền, xác nhận đã hoàn tiền, cấp gói thủ công hoặc khôi phục kỳ đã bị lần mua khác thay thế.
 - Giao diện quản trị cấp quyền nhân viên đầy đủ; không tự gán quyền cho toàn bộ Admin/nhân viên khi thêm schema.
-- Hoàn thành/mở lại giám sát của luồng lịch sử, thay đổi ownership dự án hoặc hủy tác vụ AI đã bắt đầu hợp lệ.
+- Hoàn thành và mở lại gói giám sát (thuộc [TDD-SUB-006](TDD-SUB-006.md)), thay đổi chủ sở hữu công trình hoặc hủy tác vụ AI đã bắt đầu hợp lệ.
 
 ## Architecture
 
@@ -86,7 +88,7 @@ Nguồn quyền nhân viên nay do [TDD-RBAC-001](TDD-RBAC-001.md) cung cấp th
 | Thành phần mới | Trách nhiệm |
 | --- | --- |
 | PackageLifecycleApi | Endpoint cancel/restore cho type Design/Supervision; actor luôn lấy từ session. |
-| CancelPackageHandler / RestorePackageHandler | Khóa quyền/account/gói, kiểm version và idempotency, gọi policy, cập nhật audit. |
+| CancelPackageHandler / RestorePackageHandler | Khóa AccountCommerceState rồi gói, kiểm version và idempotency, gọi policy, cập nhật audit. Quyền đọc từ claim, không khóa dòng quyền. |
 | PackageLifecyclePolicy | Kiểm loại trạng thái, nguồn hủy, thời hạn và xung đột; không gọi chuyển tiền. |
 | Policy `package.cancel` và `package.restore` | Hai policy riêng gắn ở endpoint, kiểm claim `perm` do server phát hành khi đăng nhập hoặc làm mới token. Client không tự khai được claim vì token có chữ ký. Định nghĩa policy thuộc [TDD-RBAC-001](TDD-RBAC-001.md#internal-api). |
 | PackageMutationReceiptStore | Ghi kết quả thao tác theo key/body để request lặp không đổi gói lần nữa. |
@@ -107,7 +109,7 @@ flowchart LR
 
 - Default session policy phải bao gồm verified và không phải reset-password token như JwtExtensions hiện tại. Permission policy mới thêm yêu cầu nghiệp vụ, không thay default bằng policy role yếu hơn. Admin có quyền xem quản trị theo BR-PAY-005; với mutation vẫn yêu cầu quyền riêng được cấp, không auto-bypass chỉ dựa role.
 - Tư cách nhân viên xác định bằng `User.AccountKind = 'Staff'` và `User.Status = 'Active'`; quyền xác định bằng các vai trò trong `UserRole`, theo [TDD-RBAC-001](TDD-RBAC-001.md#data-model). Bốn mã quyền giữ nguyên: commerce.read, supervision.reassign, package.cancel, package.restore. Quyền được nhúng vào access token lúc phát hành nên handler không truy vấn lại khi xử lý; đổi lại phải chấp nhận độ trễ của [BR-RBAC-009](../businessrule/BR-RBAC-009.md). Cấp và thu hồi vai trò là chức năng của [TDD-RBAC-002](TDD-RBAC-002.md), không thêm API tự cấp quyền trong tính năng thanh toán. Tài khoản chưa được gán vai trò nào thì không có claim `perm` nào và bị từ chối.
-- Việc kiểm quyền không còn khóa dòng nào, vì quyền đọc từ token chứ không đọc database. Thứ tự khóa của mutation vì vậy bắt đầu thẳng từ dữ liệu nghiệp vụ: lock AccountCommerceState chủ gói, rồi các project theo Id, rồi subscription/grant và audit receipt. Nếu nhân viên khác khách, không khóa toàn bộ User hai bên theo thứ tự tùy ý. Bỏ khóa trên bản ghi quyền cũng bỏ luôn cam kết cũ rằng một lần thu hồi đã commit chắc chắn chặn được yêu cầu kế tiếp; cam kết đó nay thuộc về cơ chế dấu phiên ở [TDD-RBAC-001](TDD-RBAC-001.md#architecture).
+- Việc kiểm quyền không còn khóa dòng nào, vì quyền đọc từ token chứ không đọc database. Thứ tự khóa của mutation vì vậy bắt đầu thẳng từ dữ liệu nghiệp vụ: lock AccountCommerceState chủ gói, rồi các công trình theo Id (khi module Công trình có bảng thật), rồi subscription/grant và audit receipt. Hiện trạng code còn khóa dòng `User`; đổi sang AccountCommerceState cùng lúc với các luồng quota theo TDD-SUB-002. Nếu nhân viên khác khách, không khóa toàn bộ User hai bên theo thứ tự tùy ý. Bỏ khóa trên bản ghi quyền cũng bỏ luôn cam kết cũ rằng một lần thu hồi đã commit chắc chắn chặn được yêu cầu kế tiếp; cam kết đó nay thuộc về cơ chế dấu phiên ở [TDD-RBAC-001](TDD-RBAC-001.md#architecture).
 - Kiểm quyền/ownership trước replay. Cùng Idempotency-Key + fingerprint trả kết quả thao tác cũ, không thực hiện lại dù trạng thái hiện tại đã đổi; trả operationId/resultVersion và client đọc trạng thái mới bằng GET. Khác hash 409. ExpectedVersion là optimistic concurrency; timeout mất response không tạo audit thứ hai khi retry cùng key.
 
 **Hủy thiết kế**:
@@ -117,18 +119,18 @@ flowchart LR
 3. Không sửa Used, Reserved, UsageOperation hoặc revision. Tác vụ Accepted trước hủy tiếp tục theo snapshot/quota đã giữ. Hoàn tất/lỗi/timeout quyết toán vào chính kỳ đó, không làm sống lại kỳ hoặc chuyển quota sang kỳ khác. Quy tắc timeout/kết quả muộn ở TDD-SUB-002 vẫn giữ.
 4. Lưu audit và receipt cùng transaction. Nếu ghi audit lỗi, rollback state; không có gói hủy mà không có lý do.
 
-**Hủy giám sát**: Cho Unassigned hoặc Assigned; ghi CanceledByStaff, giữ ProjectId và FirstAssignedAt nếu có. Partial unique index chỉ xét Assigned nên project được nhận gói khác sau commit. Không gỡ liên kết lịch sử hoặc khôi phục tiền. Gói chưa gán đã quá hạn không trở thành có thể sử dụng chỉ vì có record hủy.
+**Hủy giám sát**: Cho Unassigned, Assigned hoặc Completed (BR-SUB-024 khoản 2); ghi CanceledByStaff, giữ ConstructionSiteId và FirstAssignedAt nếu có. Partial unique index chỉ xét tập giữ chỗ `Assigned`/`Completed` ([TDD-SUB-004](TDD-SUB-004.md#data-model)), nên gói vừa hủy nằm ngoài điều kiện và công trình được nhận gói khác sau commit. Ví dụ G1 `Completed` trên CS1 bị hủy thì khách gán được G2 vào CS1 ngay sau đó. Không gỡ liên kết lịch sử hoặc khôi phục tiền. Gói chưa gán đã quá hạn không trở thành có thể sử dụng chỉ vì có record hủy.
 
 **Khôi phục**:
 
 - Chỉ nguồn CanceledByStaff. Thiết kế đã ClosedAt/Superseded do mua mới không được restore, kể cả gói mua sau bị hủy.
 - Thiết kế: now<ScheduledEndsAtUtc, chưa bị một lần mua mới thay thế, không có kỳ hiệu lực khác. Khóa account/subscription và đặt về Active cùng CurrentPeriodId; giữ hạn cũ, quota và counters hiện tại. Không nạp lại counters từ snapshot lúc hủy vì tác vụ cũ có thể đã hoàn tất trong thời gian bị hủy.
-- Giám sát: trạng thái đích lấy từ `FromState` của sự kiện hủy mà `CancelEventId` trỏ tới. Gói `Completed` bị hủy thì khôi phục về `Completed`, cùng điều kiện dự án chưa có gói khác giữ chỗ ([TDD-SUB-006](TDD-SUB-006.md#data-model)).
-- Giám sát chưa từng gán: now<AssignmentDeadlineUtc, restore Unassigned. Đã gán: FirstAssignedAt đúng hạn và project chưa có Assigned grant khác, restore Assigned dù đã qua một năm. Không tự sửa project để né xung đột.
+- Giám sát: trạng thái đích lấy từ `FromState` của sự kiện hủy mà `CancelEventId` trỏ tới. Gói `Completed` bị hủy thì khôi phục về `Completed` (BR-SUB-025 khoản 5), cùng điều kiện công trình chưa có gói khác giữ chỗ ([TDD-SUB-006](TDD-SUB-006.md#data-model)).
+- Giám sát chưa từng gán: now<AssignmentDeadlineUtc, restore Unassigned. Đã gán (`FromState` là `Assigned` hoặc `Completed`): FirstAssignedAt đúng hạn và công trình chưa có gói giữ chỗ khác (`Assigned` hoặc `Completed`); restore về đúng `FromState` dù đã qua một năm. Không tự đổi công trình để né xung đột.
 - Đổi gói khi kỳ hiện tại bị nhân viên hủy vẫn là lần mua mới: fulfillment đánh dấu kỳ cũ Superseded nếu bị thay thế, không giữ đường restore vào nó. `CanceledByStaff` cần có lịch sử, không ghi đè mất việc từng bị hủy.
 - Hệ thống không tự quay về gói trước khi hủy gói mới. Sửa thứ tự do thông tin giao dịch đến muộn không dùng endpoint restore.
 
-**Ánh xạ và ranh giới test**: BR-SUB-024 ở CancelPackageHandler/policy/audit; BR-SUB-025 ở RestorePackageHandler/period-state/deadline/project unique. UT kiểm điều kiện và side effects dự kiến, ST-PAY-034–046 kiểm luồng; các test PostgreSQL phải chứng minh hủy–gán–restore đồng thời, rollback audit và quota settlement chạy qua mốc hủy.
+**Ánh xạ và ranh giới test**: BR-SUB-024 ở CancelPackageHandler/policy/audit; BR-SUB-025 ở RestorePackageHandler/period-state/deadline/index giữ chỗ trên công trình. UT kiểm điều kiện và side effects dự kiến, ST-PAY-034–046 kiểm luồng; các test PostgreSQL phải chứng minh hủy–gán–restore đồng thời, rollback audit và quota settlement chạy qua mốc hủy.
 
 ## Sequence Diagram
 
@@ -140,7 +142,7 @@ sequenceDiagram
     participant D as PostgreSQL
     S->>A: cancel/restore + reason + version + key
     A->>H: Command với actor từ phiên
-    H->>D: Khóa profile quyền, account, project/gói
+    H->>D: Khóa AccountCommerceState, công trình/gói (quyền đọc từ claim)
     H->>H: Kiểm quyền, replay, version, hạn và conflict
     alt Cho phép
       H->>D: State + event + receipt trong cùng transaction
@@ -164,9 +166,9 @@ flowchart TD
     D -->|Không| H[CanceledByStaff, giữ quota và tác vụ cũ]
     D -->|Có| E{Nguồn hủy thủ công, còn hạn nếu áp dụng?}
     E -->|Không| X
-    E -->|Có| F{Có gói khác đang hiệu lực?}
+    E -->|Có| F{Có kỳ khác hiệu lực, hoặc gói khác giữ chỗ công trình?}
     F -->|Có| X
-    F -->|Không| G[Khôi phục không làm mới quyền hoặc hạn]
+    F -->|Không| G[Khôi phục về trạng thái trước hủy, không làm mới quyền hoặc hạn]
     G --> I[Lưu audit và receipt]
     H --> I
 ```
@@ -184,7 +186,7 @@ stateDiagram-v2
     CanceledByStaff --> Expired: Đến ScheduledEndsAt, không restore
 ```
 
-Đây là hiệu lực thiết kế; giám sát dùng sơ đồ TDD-SUB-004. Expired là trạng thái hiệu lực tính từ thời gian, giữ source hủy/đổi trong audit. Không có mũi tên Superseded→Active qua chức năng khôi phục nhân viên.
+Đây là hiệu lực thiết kế. Giám sát dùng sơ đồ TDD-SUB-004; vòng đời đầy đủ gồm `Completed`, hủy gói `Completed` và khôi phục về `Completed` ở [TDD-SUB-006, State Diagram](TDD-SUB-006.md#state-diagram). Expired là trạng thái hiệu lực tính từ thời gian, giữ source hủy/đổi trong audit. Không có mũi tên Superseded→Active qua chức năng khôi phục nhân viên.
 
 ## Data Model
 
@@ -195,7 +197,7 @@ stateDiagram-v2
 | UserRole | Một lần một người đang giữ một vai trò. | Bảng dùng lại, định nghĩa ở [TDD-RBAC-001](TDD-RBAC-001.md#data-model). Thay cho StaffAccessProfile của bản trước: tư cách nhân viên nay đọc ở `User.AccountKind` và `User.Status`, còn quyền đọc qua các vai trò trong bảng này. |
 | RolePermission | Một mã quyền được gắn vào một vai trò. | Bảng dùng lại, định nghĩa ở [TDD-RBAC-001](TDD-RBAC-001.md#data-model). Thay cho StaffPermission của bản trước: quyền gắn vào vai trò chứ không gắn thẳng vào người. Quyền xem vẫn không kéo theo quyền hủy hoặc khôi phục, vì đó là ba mã quyền khác nhau. |
 | DesignPeriod | Một kỳ thiết kế đã cấp, gồm hạn và trạng thái hiệu lực. | Hủy/khôi phục đổi LifecycleState và Version của kỳ cũ; không tạo kỳ mới. |
-| SupervisionGrant | Một gói giám sát đã cấp, cùng dự án và dấu vết gán đầu nếu có. | Hủy/khôi phục thay State của cùng gói, giữ các mốc và liên kết lịch sử. |
+| SupervisionGrant | Một gói giám sát đã cấp, cùng công trình và dấu vết gán đầu nếu có. | Hủy/khôi phục thay State của cùng gói, giữ các mốc và liên kết lịch sử. Khôi phục đưa gói về đúng trạng thái trước hủy, kể cả `Completed`. |
 | PackageLifecycleEvent | Một lần nhân viên hủy hoặc khôi phục gói có lý do. | Ghi thêm sự kiện theo target và PackageVersion, gồm actor và trạng thái trước/sau; sự kiện cũ không bị ghi đè khi restore. |
 | PackageMutationReceipt | Kết quả của một thao tác đã hoàn tất, dùng khi client gửi lại. | Giữ RequestKey, hash và ResultVersion/ResultBody. Không phải giao dịch ngân hàng hoặc bằng chứng đã hoàn tiền. |
 | PeriodQuota / UsageOperation | Bộ đếm của một quyền trong kỳ và một lần sử dụng đã được tiếp nhận. | Tái sử dụng TDD-SUB-002. Tác vụ tiếp tục quyết toán vào kỳ đã giữ lượt, dù LifecycleState đã bị hủy. |
@@ -219,7 +221,7 @@ stateDiagram-v2
 | DesignPeriod, sau restore | Id=P1; LifecycleState=Active; Version=3; ClosedAtUtc=NULL | Cùng kỳ, cùng hạn, bộ đếm vẫn Used=3 và Reserved=0. Không khôi phục bộ đếm Used=2, Reserved=1 của lúc hủy. |
 | PackageLifecycleEvent, dòng mới | Id=L2; DesignPeriodId=P1; Action=Restore; FromState=CanceledByStaff; ToState=Active; ActorId=NV1; Reason=Khôi phục theo yêu cầu khách; PackageVersion=3; ReceiptId=M2 | Tạo L2/M2; giữ L1/M1 để truy lịch sử. Ví dụ không quy định thêm cách dùng con trỏ CancelEventId sau restore. |
 
-Nhánh giám sát dùng cùng cơ chế audit: G1 đang Assigned vào PR1 → hủy thành CanceledByStaff nhưng vẫn giữ ProjectId=PR1 và FirstAssignedAtUtc. Nếu gói khác đã Assigned vào PR1, restore G1 bị từ chối, không xóa gói khác hoặc chuyển G1 sang dự án khác để né xung đột.
+Nhánh giám sát dùng cùng cơ chế audit: G1 đang Assigned vào CS1 → hủy thành CanceledByStaff nhưng vẫn giữ ConstructionSiteId=CS1 và FirstAssignedAtUtc. Nếu gói khác đã giữ chỗ trên CS1 (`Assigned` hoặc `Completed`), restore G1 bị từ chối với `AnotherPackageActive`, không xóa gói khác hoặc chuyển G1 sang công trình khác để né xung đột. Dữ liệu mẫu hủy gói `Completed` rồi khôi phục về `Completed` (các dòng L2, L3) nằm ở [TDD-SUB-006](TDD-SUB-006.md#data-model).
 
 
 | Bảng/thay đổi | Trường và ràng buộc |
@@ -227,7 +229,7 @@ Nhánh giám sát dùng cùng cơ chế audit: G1 đang Assigned vào PR1 → h�
 | UserRole, RolePermission, Permission | Dùng lại nguyên schema ở [TDD-RBAC-001](TDD-RBAC-001.md#data-model). Tài liệu này không định nghĩa lại để tránh hai bản dễ lệch nhau. Bốn mã quyền của tính năng hủy và khôi phục nằm trong danh mục `Permission`, trong đó không mã nào có `RequiresAssignment = true`. |
 | User, các cột liên quan | `AccountKind` và `Status` quyết định tài khoản có phải nhân viên đang hoạt động không; `SecurityStamp` phục vụ cắt phiên. Cả ba định nghĩa ở [TDD-RBAC-001](TDD-RBAC-001.md#data-model). Cột `Role` kiểu chuỗi của bản trước đã bị bỏ, không còn dùng để suy ra quyền. |
 | DesignPeriod bổ sung | LifecycleState varchar(24) NN=Active/CanceledByStaff/Superseded; Version bigint NN; CancelEventId uuid NULL. Giữ ClosedAtUtc chỉ cho đóng vì thay thế, không dùng đóng tạm; giữ ScheduledEndsAt và quota cũ. |
-| SupervisionGrant bổ sung | CancelEventId uuid NULL, State/Version như TDD-SUB-004. Không xóa ProjectId/FirstAssignedAt khi hủy. |
+| SupervisionGrant bổ sung | CancelEventId uuid NULL, State/Version như TDD-SUB-004 (gồm `Completed` theo TDD-SUB-006). Không xóa ConstructionSiteId/FirstAssignedAt khi hủy. |
 | PackageLifecycleEvent | Id uuid PK; AccountId uuid NN; PackageKind varchar(16) NN CHECK=Design/Supervision; DesignPeriodId uuid NULL; SupervisionGrantId uuid NULL; Action varchar(16) NN CHECK=Cancel/Restore; FromState varchar(24) NN; ToState varchar(24) NN; ActorId uuid NN FK User; AtUtc timestamptz NN; Reason text NN CHECK trim length>0; PackageVersion bigint NN; ReceiptId uuid NN UNIQUE FK PackageMutationReceipt. CHECK đúng một target đúng kind, FK ghép target+AccountId; UNIQUE target+PackageVersion qua hai partial index. |
 | PackageMutationReceipt | Id uuid PK; ActorId uuid NN FK User; Operation varchar(32) NN; TargetId uuid NN; RequestKey varchar(100) NN; RequestHash char(64) NN; ResultVersion bigint NN; ResultBody jsonb NN; AtUtc timestamptz NN. UNIQUE(ActorId,Operation,TargetId,RequestKey). Danh sách giá trị của Operation chưa được chốt, xem [TDD-SUB-004](TDD-SUB-004.md#data-model); khi chốt phải thêm CHECK giới hạn đúng tập đó như các cột enum khác. Target được kiểm theo operation trong transaction; `TargetId` không phải khóa ngoại, lý do xem đoạn dưới bảng. Bảng audit trỏ ngược bằng `ReceiptId uuid NN UNIQUE FK`. |
 
@@ -296,7 +298,7 @@ Error Response:
 {"title":"Conflict","code":"AnotherPackageActive","status":409,"detail":"Đã có gói khác đang hiệu lực.","messageCode":"AnotherPackageActive","errors":null}
 ```
 
-Active trong ví dụ restore là thiết kế. Giám sát trả Unassigned hoặc Assigned. Không trả “đã hoàn tiền” từ cancel.
+Active trong ví dụ restore là thiết kế. Giám sát trả trạng thái trước khi hủy: Unassigned, Assigned hoặc Completed. Không trả “đã hoàn tiền” từ cancel.
 
 ### Error Codes
 
@@ -307,7 +309,7 @@ Active trong ví dụ restore là thiết kế. Giám sát trả Unassigned ho�
 - **PackageStateConflict** (409): không được cancel/restore trạng thái này.
 - **PackageExpired** (409): đã hết kỳ thiết kế hoặc hạn gán lần đầu.
 - **PackageSuperseded** (409): gói đã bị lần mua mới thay thế.
-- **AnotherPackageActive** (409): account/project có gói khác hiệu lực.
+- **AnotherPackageActive** (409): tài khoản có kỳ thiết kế khác hiệu lực, hoặc công trình đã có gói giám sát khác giữ chỗ (`Assigned` hoặc `Completed`).
 - **IdempotencyConflict** (409): cùng key khác nội dung.
 - **PackageMutationInvalid** (422): kind/version/key/lý do không hợp lệ.
 
@@ -316,6 +318,8 @@ Active trong ví dụ restore là thiết kế. Giám sát trả Unassigned ho�
 ### User Stories
 
 - STORY-SUB-005
+- STORY-SUB-003/AC-014
+- STORY-SUB-003/AC-015
 
 ### Business Rules
 
@@ -325,18 +329,22 @@ Active trong ví dụ restore là thiết kế. Giám sát trả Unassigned ho�
 - BR-SUB-006/Then
 - BR-SUB-003/Then
 - BR-SUB-016/Then
+- BR-RBAC-010/Then
 
 ### Use Cases
 
 - STORY-SUB-005/Main Flow
+- STORY-SUB-003/ALT-04
+- STORY-SUB-003/EXC-09
 
 ### Others
 
-- [Kỳ và thao tác sử dụng](TDD-SUB-002.md), [giám sát](TDD-SUB-004.md), [thanh toán](TDD-PAY-001.md), [quản trị](TDD-PAY-002.md).
+- [Kỳ và thao tác sử dụng](TDD-SUB-002.md), [giám sát](TDD-SUB-004.md), [hoàn thành và mở lại](TDD-SUB-006.md), [thanh toán](TDD-PAY-001.md), [quản trị](TDD-PAY-002.md).
 - Mô hình vai trò và quyền: [TDD-RBAC-001](TDD-RBAC-001.md); cấp và thu hồi vai trò, khóa tài khoản: [TDD-RBAC-002](TDD-RBAC-002.md).
 - Hiện trạng mã nguồn: [RoleNames](../../bmt-be/src/bmt-be.contract/constants/RoleNames.cs), [JwtExtensions](../../bmt-be/src/bmt-be.api/dependencyInjection/extensions/JwtExtensions.cs), [DbContext](../../bmt-be/src/bmt-be.persistence/ApplicationDbContext.cs).
 - [Bảng truy vết kiểm thử](../discovery/payment-technical-design.md). Không có External API: các thao tác này không gọi ngân hàng hoặc SePay.
 
 ## Change Log
 
+- 2026-09-25: Cập nhật theo nghiệp vụ đã chốt ngày 25/09/2026. Cho hủy gói giám sát `Completed`; partial unique index và kiểm xung đột khi khôi phục tính tập giữ chỗ `Assigned`/`Completed`; phản hồi khôi phục giám sát có thể trả `Completed`. Đổi "dự án"/`ProjectId` sang công trình (`ConstructionSite`). Hoàn thành/mở lại không còn là "luồng lịch sử" mà thuộc TDD-SUB-006. Bỏ bước khóa "profile quyền" khỏi Sequence Diagram cho khớp thứ tự khóa AccountCommerceState. Ghi hiện trạng code. Bổ sung tham chiếu STORY-SUB-003/AC-014, AC-015, ALT-04, EXC-09 và BR-RBAC-010.
 - 2026-09-20: Thay mô hình quyền `StaffAccessProfile` và `StaffPermission` bằng mô hình RBAC chuẩn ở [TDD-RBAC-001](TDD-RBAC-001.md). Giữ nguyên bốn mã quyền và toàn bộ nghiệp vụ hủy, khôi phục, audit và chống xử lý lặp. Bỏ khóa `FOR SHARE`/`FOR UPDATE` trên bản ghi quyền; việc chặn tức thì nay do dấu phiên và buộc đăng xuất đảm nhiệm, còn thu hồi vai trò có độ trễ theo [BR-RBAC-009](../businessrule/BR-RBAC-009.md).

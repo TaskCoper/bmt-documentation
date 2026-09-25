@@ -55,7 +55,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 STORY-PAY-001 cần giữ giá/quyền lợi lúc tạo đơn, cộng dồn chuyển thiếu trong 15 phút và tự cấp gói. Webhook có thể trùng, đến muộn hoặc đảo thứ tự. Phải phân biệt tiền thực nhận, tiền hợp lệ theo thời gian và việc cấp quyền để không mất giao dịch hoặc cấp trùng.
 
-Đây là thiết kế mới, chưa có module thanh toán trong mã C# đã kiểm tra. Dùng lại kiến trúc .NET 8, Carter, MediatR, FluentValidation, EF Core/Npgsql. Danh mục/kỳ thiết kế ở TDD-SUB-001/002 cũng là thiết kế, chưa phải thành phần đã triển khai. Không tự khôi phục RabbitMQ, Quartz hoặc outbox lịch sử.
+Đây là thiết kế mới; mã C# đã kiểm tra ngày 25/09/2026 chưa có module thanh toán. Dùng lại kiến trúc .NET 8, Carter, MediatR, FluentValidation, EF Core/Npgsql. Danh mục gói, kỳ thiết kế và gói giám sát ở TDD-SUB-001/002/004 đã có một phần trong code qua các migration `PlanCatalog`, `DesignSubscription` và `SupervisionGrant`; phần thay đổi ngày 25/09/2026 của các tài liệu đó vẫn là dự kiến. RabbitMQ, MassTransit 8.4.1 với outbox có sẵn của thư viện và Quartz đã được đưa lại vào mã nguồn ngày 23/09/2026 cho gửi email và tác vụ nền (xem `bmt-be/CLAUDE.md`). Luồng thanh toán không cần chúng: bảng BankTransaction đóng vai trò hộp thư bền vững cho worker, như mô tả ở Architecture.
 
 ### Goals
 
@@ -123,14 +123,14 @@ flowchart LR
 - TransactionPipelineBehavior hiện commit khi handler trả bình thường, kể cả Result.Failure. Lệnh mới phải dùng ITransactionalRequest, kiểm tra trước khi sửa và ném domain exception nếu cần rollback; không bắt lỗi sau ghi rồi trả Failure. Bổ sung ánh xạ ConflictException 409 và lỗi phụ thuộc 503 vì middleware hiện chưa xử lý chúng. Không mở nested transaction trong handler.
 - Chỉ gửi ACK sau khi RecordBankTransactionHandler đã commit. DB lỗi trả 503; không trả success trước khi dữ liệu bền vững. Worker xử lý lỗi ở DbContext/scope mới, không tái sử dụng transaction đã abort.
 - Worker lấy việc bằng UPDATE/SELECT FOR UPDATE SKIP LOCKED với lease token, LeaseUntilUtc và NextAttemptAtUtc; mặc định kỹ thuật đề xuất poll 2 giây, lease 60 giây, backoff 5 giây tăng đến 5 phút. Lease chỉ điều phối công việc; khóa/constraint vẫn là lớp bảo vệ cuối. Mất lease không được đánh dấu việc của worker khác đã xong. Không bỏ việc sau một số lần lỗi; lưu Attempts/LastErrorCode, cảnh báo vận hành sau ngưỡng cấu hình. Đây không phải SLA nghiệp vụ.
-- Thứ tự khóa thống nhất: quyền người thao tác nếu có → AccountCommerceState → Plan (chỉ tạo đơn) → các PaymentOrder theo Id → DesignSubscription/DesignPeriod hoặc SupervisionGrant → quota/operation. Mọi luồng liên quan cùng tài khoản dùng AccountCommerceState trước khi sửa gói. Chức năng gán thêm khóa dự án theo thứ tự Id ở TDD-SUB-004. Ingress chỉ ghi transaction, không giữ khóa bank transaction rồi chờ khóa tài khoản.
+- Thứ tự khóa thống nhất: AccountCommerceState → Plan (chỉ tạo đơn) → các PaymentOrder theo Id → DesignSubscription/DesignPeriod hoặc SupervisionGrant → quota/operation. Mọi luồng liên quan cùng tài khoản dùng AccountCommerceState trước khi sửa gói. Chức năng gán thêm khóa công trình theo thứ tự Id ở TDD-SUB-004. Ingress chỉ ghi transaction, không giữ khóa bank transaction rồi chờ khóa tài khoản. Không khóa dòng quyền của người thao tác: quyền đọc từ claim `perm` theo TDD-RBAC-001, giống TDD-SUB-004/005/006.
 - HMAC timestamp dùng chống phát lại request, khác transactionDate dùng xét 15 phút. Payload được gửi lại hợp lệ với chữ ký mới không bị loại chỉ vì giao dịch ngân hàng đã cũ.
 
 **Tạo đơn và snapshot**:
 
-1. Dùng accountId từ phiên đã xác minh, không từ body. Khóa AccountCommerceState, kiểm tra idempotency trước giới hạn đơn chờ. Cùng key/body trả lại đơn cũ kể cả đã hết hạn; khác body trả 409.
+1. Dùng accountId từ phiên đã xác minh, không từ body. Chỉ tài khoản có `AccountKind = Customer` được tạo đơn; tài khoản nhân viên bị từ chối 403 trước mọi thao tác ghi, theo BR-RBAC-005 khoản 5. Khóa AccountCommerceState, kiểm tra idempotency trước giới hạn đơn chờ. Cùng key/body trả lại đơn cũ kể cả đã hết hạn; khác body trả 409.
 2. Đóng các đơn thiết kế chờ đã hết hạn trong transaction; kiểm tra không còn đơn chờ trước khi tạo. Partial unique index bảo vệ cả hai request tạo đồng thời. Không đặt NOW() trong điều kiện partial index.
-3. Khóa Plan theo cùng quy ước công bố/ngừng bán. Đọc PublishedRevision và offer, kiểm tra đang bán; lưu RevisionId, OfferKey, PriceVnd, Currency và tài khoản nhận vào đơn. Bản công bố bất biến giữ quyền lợi/tư vấn; không sao chép một JSON quyền lợi khác có thể lệch với revision.
+3. Khóa Plan theo cùng quy ước công bố/ngừng bán. Đọc PublishedRevision và offer, kiểm tra đang bán; lưu RevisionId, OfferKey, PriceVnd, Currency và tài khoản nhận vào đơn. Bản công bố bất biến giữ giá, quyền lợi, nội dung tư vấn và mô tả dịch vụ đã chốt cho đơn theo BR-PAY-001; không sao chép một JSON quyền lợi khác có thể lệch với revision. Gói giám sát không dùng danh mục quyền lợi: revision của gói giám sát được công bố với tên, giá và mô tả dịch vụ theo BR-SUB-008 khoản 7, và đơn giám sát chốt đúng các nội dung đó qua RevisionId.
 4. CreatedAtUtc lấy từ clock server sau khóa; ExpiresAtUtc=CreatedAtUtc+15 phút. AccountOrderSequence tăng dưới khóa để phân xử trường hợp cùng độ chính xác thời gian tạo. PaymentCode ngẫu nhiên đủ entropy, unique, không dùng email/điện thoại.
 5. QR được tạo từ số tiền còn thiếu và mã đơn đã commit. API trả thêm thông tin chuyển khoản dạng chữ; lỗi tải ảnh QR không hủy hoặc tạo đơn mới.
 
@@ -144,14 +144,14 @@ flowchart LR
 - Khi eligible < price và đơn còn mở: status PartiallyPaid nếu đã nhận tiền, Remaining=max(price-eligible,0); QR giữ PaymentCode và cập nhật amount. Hết hạn/hủy thì không đưa QR thanh toán tiếp, nhưng không giả định ảnh QR khách đã lưu ngăn được chuyển tiền.
 - Recompute prefix sum các khoản hợp lệ theo (OccurredAtUtc,ProviderTransactionId). PaidAtUtc là thời điểm sớm nhất tổng đạt price; ProviderTransactionId chỉ ổn định thứ tự trong cùng giây, không làm thay đổi thời điểm đủ tiền.
 - Khi đủ tiền, cập nhật order và fulfillment trong transaction xử lý. CanceledAtUtc/ExpiredAtUtc là dấu lịch sử, không xóa khi webhook chứng minh đủ tiền trước mốc. Paid hợp lệ được ưu tiên hơn trạng thái hủy/hết hạn từng hiển thị.
-- Hủy đơn khóa cùng account/order, kiểm tra cả các giao dịch tiền vào đã lưu chờ worker qua ConnectionId+PaymentCode (OrderId có thể chưa gán), không chỉ cột tổng có thể chậm. Có tiền đã nhận thì từ chối hủy. Ingress đến sau lúc hủy vẫn được xử lý theo thời gian thực tế; đây là ngoại lệ đã chốt, không phải lỗi khóa.
+- Hủy đơn chỉ nhận tài khoản `AccountKind = Customer` là chủ đơn; tài khoản nhân viên nhận 403 theo BR-RBAC-005. Hủy đơn khóa cùng account/order, kiểm tra cả các giao dịch tiền vào đã lưu chờ worker qua ConnectionId+PaymentCode (OrderId có thể chưa gán), không chỉ cột tổng có thể chậm. Có tiền đã nhận thì từ chối hủy. Ingress đến sau lúc hủy vẫn được xử lý theo thời gian thực tế; đây là ngoại lệ đã chốt, không phải lỗi khóa.
 
 **Cấp gói và thứ tự mua**:
 
 - Dùng Fulfillment.OrderId làm khóa duy nhất. ActivationKey của DesignPeriod là `payment:{orderId}` và ActivationHash từ snapshot bất biến; retry cùng đơn không đổi giá, kỳ hoặc lượt.
 - So sánh khóa mua `(PaidAtUtc, AccountOrderSequence)` trong cùng account. AccountOrderSequence thể hiện thứ tự tạo dưới khóa. Gói thiết kế mua trước đến muộn vẫn có Fulfillment disposition SupersededBeforeActivation, không tạo kỳ/quota giả và không đổi CurrentPeriodId. API quản trị vẫn hiển thị lần mua đã bị thay thế.
 - Nếu đây là lần mua sau: kết thúc kỳ cũ theo TDD-SUB-002, tạo kỳ mới với StartsAtUtc tại lúc cấp quyền, ngày kết thúc theo BR-SUB-014, quota từ revision đã chốt. CurrentPeriodId và Fulfillment cùng commit. Giữ LatestPurchaseOrderId kể cả khi gói mới bị hủy/hết hạn để webhook cũ không làm sống lại gói trước.
-- Giám sát luôn tạo một SupervisionGrant chưa gán, hạn một năm theo TDD-SUB-004. Không kiểm tra dự án hoặc nhân viên tiếp nhận khi cấp.
+- Giám sát luôn tạo một SupervisionGrant chưa gán, hạn một năm theo TDD-SUB-004. Không kiểm tra công trình hoặc nhân viên tiếp nhận khi cấp; khách không cần có công trình để mua (BR-PAY-001 khoản 4).
 - Nhận khoản mới cho đơn đã trả tiền không tạo fulfillment thứ hai. Recompute PaidAtUtc để phản ánh dữ liệu thật. Nếu khoản cũ đến muộn làm đảo thứ tự giữa các lần mua đã cấp, giữ gói đang hiệu lực theo xác nhận của người dùng; không tự quay lại gói đã bị thay thế. Lưu OrderingDiscrepancy=true và PaymentEvent ghi old/new PaidAt, các order liên quan; nhân viên xử lý bên ngoài, không thêm trạng thái hoàn tiền.
 - PaymentFulfillment lưu AppliedPaidAtUtc và AppliedOrderSequence bất biến tại quyết định cấp/bỏ kích hoạt. AccountCommerceState.LatestPurchaseOrderId giữ quyết định đã áp dụng, kể cả gói bị hủy. Order.PaidAtUtc có thể được hiệu chỉnh từ giao dịch đến muộn nhưng không tự ghi đè thứ tự quyền đã áp dụng; PurchaseOrderingPolicy so với khóa đã áp dụng, phát hiện lệch và không đảo lại gói. Một lần mua mới sau đó vẫn được xử lý bình thường nếu khóa mua mới lớn hơn khóa đã áp dụng. Dữ liệu trái thứ tự trong khoảng đã có sai lệch được ghi nhận cùng discrepancy, không tự khôi phục quyền hoặc làm mới quota.
 - Phân biệt hai ca: đơn A chưa từng xử lý đến sau B thì SupersededBeforeActivation nếu A mua trước; còn A đã cấp thay B rồi mới hiệu chỉnh thời điểm thì giữ A và ghi discrepancy. Không dùng cùng nhánh để vô tình cấp lại B.
@@ -164,6 +164,7 @@ flowchart LR
 | BR-PAY-002 | verifier/mapper, PaymentEligibilityPolicy, transaction unique | UT tiền/giờ/dedupe; ST-PAY-006–014 |
 | BR-PAY-003 | CancelPaymentOrderHandler và policy cutoff | UT thời điểm hủy; ST-PAY-015–018, ST-PAY-022 |
 | BR-PAY-004 / BR-SUB-021 | PurchaseOrderingPolicy, FulfillmentService | ST-PAY-019–021, ST-PAY-023; integration worker retry/cấp quota |
+| BR-RBAC-005 | Kiểm `AccountKind = Customer` trong CreatePaymentOrderHandler và CancelPaymentOrderHandler trước khi ghi | ST-PAY-070 (STORY-PAY-001/AC-028, EXC-08); UT-PAY-071, UT-PAY-072 |
 
 ## Sequence Diagram
 
@@ -247,7 +248,7 @@ stateDiagram-v2
 | PaymentFulfillment | Một kết quả quyết định cấp quyền của một đơn đã đủ điều kiện. | Tạo một lần cùng transaction cấp gói. Activated trỏ tới kỳ thiết kế hoặc gói giám sát; SupersededBeforeActivation ghi lần mua thiết kế đến muộn mà không tạo kỳ/quota giả. Không thêm dòng khi webhook lặp. |
 | PaymentOperation | Kết quả nhận diện một yêu cầu hủy đơn để gửi lại không hủy lần nữa. | Tạo khi thao tác hủy hoàn tất; khóa theo khách, loại thao tác và RequestKey. Khác PaymentEvent: bảng này phục vụ trả lại kết quả yêu cầu cũ. Tạo đơn dùng CreateKey/CreateHash ngay trên PaymentOrder. |
 | PaymentEvent | Một mốc lịch sử giải thích điều gì đã xảy ra với đơn. | Ghi khi tạo, hủy, hết hạn, đủ tiền, cấp gói hoặc phát hiện lệch thứ tự. Có thể liên kết giao dịch/nhân viên gây ra sự kiện; không phải bản sao từng webhook và không ghi xác nhận hoàn tiền. |
-| Plan / PlanRevision / PlanOffer | Lần lượt là danh tính gói bán, một bản quyền lợi và một mức giá theo lựa chọn mua của bản đó. | Là nguồn danh mục trong TDD-SUB-001. Đơn giữ RevisionId và OfferKey đã chọn; sửa danh mục tạo bản mới, không sửa bản đã chốt cho đơn. Project là lựa chọn giá giám sát, không phải ID công trình. |
+| Plan / PlanRevision / PlanOffer | Lần lượt là danh tính gói bán, một bản quyền lợi và một mức giá theo lựa chọn mua của bản đó. | Là nguồn danh mục trong TDD-SUB-001. Đơn giữ RevisionId và OfferKey đã chọn; sửa danh mục tạo bản mới, không sửa bản đã chốt cho đơn. `ConstructionSite` là mã lựa chọn giá giám sát, không phải ID công trình; code hiện vẫn dùng mã `Project` (xem TDD-SUB-001). |
 | DesignSubscription / DesignPeriod / PeriodQuota | Lần lượt là đầu mối gói thiết kế của khách, một kỳ đã cấp và bộ đếm của một quyền trong kỳ. | Nguồn quyền ở TDD-SUB-002; fulfillment tạo kỳ/quota rồi cập nhật kỳ hiện hành. Không lưu lại quota trong đơn thanh toán. |
 | SupervisionGrant | Một gói giám sát đã cấp cho khách, có thể chưa gán công trình. | Fulfillment tạo gói; thao tác gán/hủy/khôi phục sử dụng cùng dòng tại TDD-SUB-004/005. |
 
@@ -271,30 +272,30 @@ stateDiagram-v2
 
 Các bảng quyền được cấp và mẫu bộ đếm xem [TDD-SUB-005 — Data Model](TDD-SUB-005.md#data-model); dữ liệu giám sát chưa gán rồi gán xem [TDD-SUB-004 — Data Model](TDD-SUB-004.md#data-model). Các bảng User/Plan/Revision làm cha phải tồn tại trước các bản ghi con; ví dụ trích cột không thay thế ràng buộc FK bên dưới.
 
-Dữ liệu mẫu bổ sung dưới đây mô tả PackageMutationReceipt của luồng sử dụng gói sau khi được cấp. Bảng này lưu kết quả yêu cầu gán, đổi dự án, hủy hoặc khôi phục gói theo [TDD-SUB-004](TDD-SUB-004.md#data-model) và [TDD-SUB-005](TDD-SUB-005.md#data-model). Hủy đơn thanh toán dùng PaymentOperation như O2 ở trên; hủy gói đã cấp dùng PackageMutationReceipt. Nhận webhook và cấp gói vẫn dùng BankTransaction/PaymentFulfillment theo thiết kế của tài liệu này.
+Dữ liệu mẫu bổ sung dưới đây mô tả PackageMutationReceipt của luồng sử dụng gói sau khi được cấp. Bảng này lưu kết quả yêu cầu gán, đổi công trình, hủy hoặc khôi phục gói theo [TDD-SUB-004](TDD-SUB-004.md#data-model) và [TDD-SUB-005](TDD-SUB-005.md#data-model). Hủy đơn thanh toán dùng PaymentOperation như O2 ở trên; hủy gói đã cấp dùng PackageMutationReceipt. Nhận webhook và cấp gói vẫn dùng BankTransaction/PaymentFulfillment theo thiết kế của tài liệu này.
 
-Đây là tình huống giả định độc lập với đơn thiết kế O1: U1 đã mua gói giám sát G1, đang Unassigned ở version=1 và còn hạn gán. PR1/PR2 cùng thuộc U1, chưa có gói Assigned khác khi được chọn. NV1 là nhân viên có các quyền supervision.reassign, package.cancel và package.restore. Các ID là bí danh UUID; H1–H4 thay cho RequestHash dài 64 ký tự. Tên Operation dưới đây chỉ minh họa loại thao tác, chưa chốt enum triển khai. ResultBody chỉ trích các trường kết quả; mọi thời điểm đều là UTC.
+Đây là tình huống giả định độc lập với đơn thiết kế O1: U1 đã mua gói giám sát G1, đang Unassigned ở version=1 và còn hạn gán. CS1/CS2 là hai công trình do U1 tự tạo, chưa có gói Assigned khác khi được chọn. Công trình là thực thể riêng, khác bản dự toán; đặc tả Công trình chưa soạn nên tên cột theo tên kỹ thuật dự kiến ở TDD-SUB-004. NV1 là nhân viên có các quyền supervision.reassign, package.cancel và package.restore. Các ID là bí danh UUID; H1–H4 thay cho RequestHash dài 64 ký tự. Tên Operation dưới đây chỉ minh họa loại thao tác, chưa chốt enum triển khai. ResultBody chỉ trích các trường kết quả; mọi thời điểm đều là UTC.
 
 | Bảng | Giá trị minh họa được lưu | Cách đọc |
 | --- | --- | --- |
-| PackageMutationReceipt M1 — gán lần đầu | Id=M1; ActorId=U1; Operation=Assign; TargetId=G1; RequestKey=assign-g1-1; RequestHash=H1; ResultVersion=2; ResultBody={"grantId":"G1","projectId":"PR1","state":"Assigned","version":2}; AtUtc=2026-10-01T02:00:00Z | Yêu cầu có projectId=PR1, expectedVersion=1. Cập nhật G1 sang PR1, version=2; tạo AssignmentEvent E1 với OldProjectId=NULL, NewProjectId=PR1, ActorId=U1, Reason=NULL, GrantVersion=2, ReceiptId=M1. |
-| PackageMutationReceipt M2 — đổi dự án | Id=M2; ActorId=NV1; Operation=Reassign; TargetId=G1; RequestKey=reassign-g1-1; RequestHash=H2; ResultVersion=3; ResultBody={"grantId":"G1","projectId":"PR2","state":"Assigned","version":3}; AtUtc=2026-10-02T02:00:00Z | Yêu cầu có expectedVersion=2 và lý do “Sửa dự án đã gán nhầm”. Cập nhật G1 sang PR2, version=3; tạo AssignmentEvent E2 với OldProjectId=PR1, NewProjectId=PR2, ActorId=NV1, lý do trên, GrantVersion=3, ReceiptId=M2. Giữ E1/M1. |
-| PackageMutationReceipt M3 — hủy gói | Id=M3; ActorId=NV1; Operation=Cancel; TargetId=G1; RequestKey=cancel-g1-1; RequestHash=H3; ResultVersion=4; ResultBody={"state":"CanceledByStaff","resultVersion":4}; AtUtc=2026-10-03T02:00:00Z | Yêu cầu có expectedVersion=3 và lý do “Hủy theo yêu cầu khách”. G1 chuyển Assigned → CanceledByStaff, giữ PR2; tạo LifecycleEvent L1 với Action=Cancel, ActorId=NV1, lý do trên, PackageVersion=4, ReceiptId=M3. |
-| PackageMutationReceipt M4 — khôi phục gói | Id=M4; ActorId=NV1; Operation=Restore; TargetId=G1; RequestKey=restore-g1-1; RequestHash=H4; ResultVersion=5; ResultBody={"state":"Assigned","resultVersion":5}; AtUtc=2026-10-04T02:00:00Z | Yêu cầu có expectedVersion=4 và lý do “Khôi phục gói đã hủy nhầm”. Giả định PR2 chưa có gói Assigned khác, G1 chuyển CanceledByStaff → Assigned; tạo LifecycleEvent L2 với Action=Restore, ActorId=NV1, lý do trên, PackageVersion=5, ReceiptId=M4. Giữ L1/M3. |
+| PackageMutationReceipt M1 — gán lần đầu | Id=M1; ActorId=U1; Operation=Assign; TargetId=G1; RequestKey=assign-g1-1; RequestHash=H1; ResultVersion=2; ResultBody={"grantId":"G1","constructionSiteId":"CS1","state":"Assigned","version":2}; AtUtc=2026-10-01T02:00:00Z | Yêu cầu có constructionSiteId=CS1, expectedVersion=1. Cập nhật G1 sang CS1, version=2; tạo AssignmentEvent E1 với OldConstructionSiteId=NULL, NewConstructionSiteId=CS1, ActorId=U1, Reason=NULL, GrantVersion=2, ReceiptId=M1. |
+| PackageMutationReceipt M2 — đổi công trình | Id=M2; ActorId=NV1; Operation=Reassign; TargetId=G1; RequestKey=reassign-g1-1; RequestHash=H2; ResultVersion=3; ResultBody={"grantId":"G1","constructionSiteId":"CS2","state":"Assigned","version":3}; AtUtc=2026-10-02T02:00:00Z | Yêu cầu có expectedVersion=2 và lý do “Sửa công trình đã gán nhầm”. Cập nhật G1 sang CS2, version=3; tạo AssignmentEvent E2 với OldConstructionSiteId=CS1, NewConstructionSiteId=CS2, ActorId=NV1, lý do trên, GrantVersion=3, ReceiptId=M2. Giữ E1/M1. |
+| PackageMutationReceipt M3 — hủy gói | Id=M3; ActorId=NV1; Operation=Cancel; TargetId=G1; RequestKey=cancel-g1-1; RequestHash=H3; ResultVersion=4; ResultBody={"state":"CanceledByStaff","resultVersion":4}; AtUtc=2026-10-03T02:00:00Z | Yêu cầu có expectedVersion=3 và lý do “Hủy theo yêu cầu khách”. G1 chuyển Assigned → CanceledByStaff, giữ CS2; tạo LifecycleEvent L1 với Action=Cancel, ActorId=NV1, lý do trên, PackageVersion=4, ReceiptId=M3. |
+| PackageMutationReceipt M4 — khôi phục gói | Id=M4; ActorId=NV1; Operation=Restore; TargetId=G1; RequestKey=restore-g1-1; RequestHash=H4; ResultVersion=5; ResultBody={"state":"Assigned","resultVersion":5}; AtUtc=2026-10-04T02:00:00Z | Yêu cầu có expectedVersion=4 và lý do “Khôi phục gói đã hủy nhầm”. Giả định CS2 chưa có gói Assigned khác, G1 chuyển CanceledByStaff → Assigned; tạo LifecycleEvent L2 với Action=Restore, ActorId=NV1, lý do trên, PackageVersion=5, ReceiptId=M4. Giữ L1/M3. |
 
 AssignmentEvent trong bảng là tên viết gọn của SupervisionAssignmentEvent; LifecycleEvent là PackageLifecycleEvent. E1/E2 đều có GrantId=G1; L1/L2 đều có AccountId=U1, PackageKind=Supervision, SupervisionGrantId=G1 và DesignPeriodId=NULL. Mỗi sự kiện có AtUtc trùng receipt tương ứng; FromState/ToState của L1/L2 là cặp trạng thái mô tả trong bảng. Gán đầu lưu FirstAssignedAtUtc=2026-10-01T02:00:00Z; các bước sau giữ mốc này và hạn gán ban đầu.
 
-Sau bốn thao tác thành công, có một dòng G1 ở version=5, hai sự kiện gán/đổi dự án E1/E2, hai sự kiện hủy/khôi phục L1/L2 và bốn receipt M1–M4. Mỗi sự kiện trỏ tới đúng một receipt. Một receipt có 0 hoặc 1 PackageLifecycleEvent: M1/M2 đi kèm SupervisionAssignmentEvent, M3/M4 đi kèm PackageLifecycleEvent. Receipt lưu kết quả yêu cầu; sự kiện lưu thay đổi nghiệp vụ và lý do.
+Sau bốn thao tác thành công, có một dòng G1 ở version=5, hai sự kiện gán/đổi công trình E1/E2, hai sự kiện hủy/khôi phục L1/L2 và bốn receipt M1–M4. Mỗi sự kiện trỏ tới đúng một receipt. Một receipt có 0 hoặc 1 PackageLifecycleEvent: M1/M2 đi kèm SupervisionAssignmentEvent, M3/M4 đi kèm PackageLifecycleEvent. Receipt lưu kết quả yêu cầu; sự kiện lưu thay đổi nghiệp vụ và lý do.
 
-Hủy/khôi phục kỳ thiết kế cũng tạo receipt với TargetId là DesignPeriod.Id và lifecycle event có PackageKind=Design, DesignPeriodId tương ứng, SupervisionGrantId=NULL. Hai thao tác này vẫn thuộc nhóm Cancel/Restore; không có thao tác gán dự án cho gói thiết kế.
+Hủy/khôi phục kỳ thiết kế cũng tạo receipt với TargetId là DesignPeriod.Id và lifecycle event có PackageKind=Design, DesignPeriodId tương ứng, SupervisionGrantId=NULL. Hai thao tác này vẫn thuộc nhóm Cancel/Restore; không có thao tác gán công trình cho gói thiết kế.
 
 | Tình huống | Dữ liệu minh họa | Kết quả lưu |
 | --- | --- | --- |
-| Yêu cầu mới thành công | U1 gán G1 vào PR1 với key assign-g1-1 | Lưu thay đổi G1, E1 và M1 trong cùng transaction; hoặc thành công cả ba, hoặc hoàn tác cả ba. |
+| Yêu cầu mới thành công | U1 gán G1 vào CS1 với key assign-g1-1 | Lưu thay đổi G1, E1 và M1 trong cùng transaction; hoặc thành công cả ba, hoặc hoàn tác cả ba. |
 | Máy chủ đã lưu nhưng ứng dụng mất phản hồi | M1 đã được commit; ứng dụng chưa nhận được kết quả | Giữ M1. Mất phản hồi không làm mất kết quả đã lưu. |
-| Gửi lại cùng key và nội dung | U1 gửi lại assign-g1-1, projectId=PR1, expectedVersion=1 | Kiểm lại quyền/sở hữu rồi trả M1; không thêm receipt/event hoặc tăng version. Nếu G1 đã sang PR2 thì vẫn giữ PR2, chỉ trả kết quả cũ của M1; ứng dụng GET để đọc trạng thái hiện tại. |
-| Cùng key nhưng đổi nội dung | U1 dùng assign-g1-1 nhưng đổi projectId thành PR2 | Trả 409 IdempotencyConflict; không sửa M1 và không thay đổi gói. |
-| Yêu cầu mới bị từ chối | Thiếu quyền, hết hạn gán, sai version hoặc dự án đích đã có gói hiệu lực | Không tạo receipt thành công hoặc sự kiện thay đổi. |
+| Gửi lại cùng key và nội dung | U1 gửi lại assign-g1-1, constructionSiteId=CS1, expectedVersion=1 | Kiểm lại quyền/sở hữu rồi trả M1; không thêm receipt/event hoặc tăng version. Nếu G1 đã sang CS2 thì vẫn giữ CS2, chỉ trả kết quả cũ của M1; ứng dụng GET để đọc trạng thái hiện tại. |
+| Cùng key nhưng đổi nội dung | U1 dùng assign-g1-1 nhưng đổi constructionSiteId thành CS2 | Trả 409 IdempotencyConflict; không sửa M1 và không thay đổi gói. |
+| Yêu cầu mới bị từ chối | Thiếu quyền, hết hạn gán, sai version hoặc công trình đích đã có gói hiệu lực | Không tạo receipt thành công hoặc sự kiện thay đổi. |
 | Ghi dữ liệu lỗi | Gán G1 nhưng không ghi được E1 hoặc M1 | Rollback toàn bộ transaction; không giữ thay đổi G1 hoặc receipt/sự kiện của lần thử đó. |
 
 PackageMutationReceipt chỉ lưu kết quả các thao tác thành công nêu trên, không phải nhật ký mọi request. Đọc dữ liệu, sử dụng lượt AI, tự hết hạn, tạo/hủy đơn thanh toán và nhận webhook không tạo receipt thuộc bảng này theo phạm vi hiện tại.
@@ -308,13 +309,13 @@ Bảng dưới là schema mới/điều chỉnh dự kiến. Dùng PostgreSQL uu
 | --- | --- |
 | PaymentConnection | Id uuid PK; Provider varchar(16)=SePay; Environment varchar(8)=Test/Live; Gateway varchar(100), AccountNumber varchar(100), SubAccount varchar(100) NULL; QrBankCode varchar(100); SecretReference text (chỉ trỏ secret store); Enabled bool. Connection đã có đơn không đổi tài khoản nhận; thay tài khoản tạo connection mới. |
 | AccountCommerceState | AccountId uuid PK FK User; NextOrderSequence bigint >0; LatestPurchaseOrderId uuid NULL; Version bigint. Tạo một lần bằng INSERT ON CONFLICT DO NOTHING rồi khóa hàng. FK ghép (AccountId,LatestPurchaseOrderId) bảo đảm đơn cùng khách. |
-| PaymentOrder | Id uuid PK; AccountId FK User; AccountOrderSequence bigint; PlanId, RevisionId uuid; OfferKey varchar(8)=Month/Year/Project; Kind varchar(16)=Design/Supervision; PriceVnd numeric(20,0)>0; Currency char(3)=VND; ConnectionId FK; PaymentCode varchar(32) UNIQUE; CreatedAtUtc, ExpiresAtUtc; CanceledAtUtc/ExpiredAtUtc/PaidAtUtc NULL; State varchar(16); ReceivedAmountVnd/EligibleAmountVnd numeric(20,0)>=0; Version bigint; OrderingDiscrepancy boolean NN DEFAULT false; CreateKey varchar(100); CreateHash char(64). UNIQUE(AccountId,Id), UNIQUE(AccountId,AccountOrderSequence), UNIQUE(AccountId,CreateKey); FK(PlanId,RevisionId) cùng plan; FK(RevisionId,OfferKey) tới PlanOffer đã mở rộng. |
+| PaymentOrder | Id uuid PK; AccountId FK User; AccountOrderSequence bigint; PlanId, RevisionId uuid; OfferKey varchar(24)=Month/Year/ConstructionSite; Kind varchar(16)=Design/Supervision; PriceVnd numeric(20,0)>0; Currency char(3)=VND; ConnectionId FK; PaymentCode varchar(32) UNIQUE; CreatedAtUtc, ExpiresAtUtc; CanceledAtUtc/ExpiredAtUtc/PaidAtUtc NULL; State varchar(16); ReceivedAmountVnd/EligibleAmountVnd numeric(20,0)>=0; Version bigint; OrderingDiscrepancy boolean NN DEFAULT false; CreateKey varchar(100); CreateHash char(64). UNIQUE(AccountId,Id), UNIQUE(AccountId,AccountOrderSequence), UNIQUE(AccountId,CreateKey); FK(PlanId,RevisionId) cùng plan; FK(RevisionId,OfferKey) tới PlanOffer đã mở rộng. |
 | BankTransaction | Id uuid PK; ConnectionId FK; ProviderTransactionId bigint>0; OccurredAtUtc, ReceivedAtUtc timestamptz; Direction varchar(3); AmountVnd numeric(20,0)>0; Code varchar(100) NULL; Content text; ReferenceCode text NULL; AccountNumber/Gateway/SubAccount đã nhận; CanonicalHash char(64); OrderId uuid NULL FK; MatchState varchar(24)=Pending/Matched/Unmatched/IgnoredDirection/ConnectionMismatch; ProcessingState varchar(16)=Pending/Retry/Completed; Attempts int>=0; NextAttemptAtUtc/LeaseUntilUtc NULL; LeaseToken uuid NULL; LastErrorCode varchar(100) NULL. UNIQUE(ConnectionId,ProviderTransactionId). |
 | PaymentFulfillment | OrderId uuid PK FK PaymentOrder; AccountId uuid NN; Kind varchar(16); Disposition varchar(32)=Activated/SupersededBeforeActivation; DesignPeriodId uuid NULL UNIQUE; SupervisionGrantId uuid NULL UNIQUE; CompletedAtUtc timestamptz; AppliedPaidAtUtc timestamptz NN; AppliedOrderSequence bigint NN. Activated đòi đúng một target đúng loại; SupersededBeforeActivation chỉ Design và hai target NULL. FK ghép tới đơn/target cùng AccountId; không cho một đơn vừa thiết kế vừa giám sát. |
 | PaymentOperation | AccountId uuid, OperationKind varchar(32), RequestKey varchar(100), RequestHash char(64), OrderId uuid FK, ResultVersion bigint; PK(AccountId,OperationKind,RequestKey). Dùng replay hủy; kết quả gắn lịch sử thao tác, trạng thái hiện tại đọc lại riêng. |
 | PaymentEvent | Id uuid PK; OrderId FK; EventKind varchar(32); AtUtc timestamptz; ActorId uuid NULL FK User; TransactionId uuid NULL FK; Detail jsonb không chứa secret. Ghi tạo/hủy/hết hạn/đủ tiền/cấp/sửa thứ tự, không chứa sự kiện đã hoàn tiền. |
 
-**Mở rộng danh mục cũ**: PlanOffer dùng OfferKey thay ý nghĩa chỉ Cycle; Month/Year cho Design, Project cho Supervision. Có thể giữ tên cột Cycle để giảm thay đổi nhưng DTO mới gọi OfferKey, cần một tên thống nhất lúc triển khai. Quyết định ở TDD này chọn đổi cột thành OfferKey. Giá giám sát là offer Project của revision bất biến, không giả định chu kỳ giám sát. OfferQuota chỉ Month/Year của Design. Bổ sung định nghĩa kiểu gói/offer bằng CHECK với Kind cùng dòng và FK ghép xuyên revision; điều kiện đủ hai offer thiết kế kiểm tra khi công bố. TDD-SUB-001 cần áp dụng phụ lục này trước khi triển khai.
+**Mở rộng danh mục cũ**: PlanOffer dùng OfferKey thay ý nghĩa chỉ Cycle; Month/Year cho Design, ConstructionSite cho Supervision. Có thể giữ tên cột Cycle để giảm thay đổi nhưng DTO mới gọi OfferKey, cần một tên thống nhất lúc triển khai. Quyết định ở TDD này chọn đổi cột thành OfferKey. Giá giám sát là offer ConstructionSite của revision bất biến, không giả định chu kỳ giám sát. Mã `ConstructionSite` thay `Project` từ ngày 25/09/2026 vì gói giám sát gắn với công trình, không gắn với bản dự toán; đây là mã lựa chọn giá, không phải ID công trình. Code hiện vẫn dùng `OfferKeys.Project` và cột `PlanOffer.OfferKey` dài 8 ký tự; TDD-SUB-001 mô tả migration nới cột lên `varchar(24)` và đổi giá trị. `PaymentOrder.OfferKey` dùng cùng độ dài và cùng tập giá trị khi bảng này được tạo. OfferQuota chỉ Month/Year của Design. Bổ sung định nghĩa kiểu gói/offer bằng CHECK với Kind cùng dòng và FK ghép xuyên revision; điều kiện đủ hai offer thiết kế kiểm tra khi công bố. TDD-SUB-001 cần áp dụng phụ lục này trước khi triển khai.
 
 ```mermaid
 erDiagram
@@ -337,14 +338,15 @@ erDiagram
 - Index Order(AccountId,CreatedAtUtc DESC,Id), Order(State,ExpiresAtUtc), BankTransaction(OrderId,OccurredAtUtc,ProviderTransactionId), BankTransaction(ProcessingState,NextAttemptAtUtc) và BankTransaction(MatchState,OccurredAtUtc DESC,Id). Eligible/PaidAt là projection có thể dựng lại từ transaction; không sửa bằng UI.
 - Constrain ExpiresAtUtc=CreatedAtUtc+15 phút, Eligible<=Received; số tiền vượt numeric20 hoặc không nguyên từ provider phải bị từ chối, không overflow/silent round. Kind/offer/connection/account consistency được kiểm dưới transaction, đồng thời bảo vệ bằng composite FK nơi có đủ cột.
 - Thiết kế thời điểm mua trước đến muộn không tạo DesignPeriod giả. Danh sách gói đã mua của quản trị lấy fulfillment cùng order nên vẫn có lịch sử bị thay thế trước kích hoạt.
-- Trước migration cần kiểm database thật. Nếu đã có schema theo TDD cũ thì chuyển Cycle→OfferKey cùng FK, bổ sung Project offer, backfill từ nguồn giá đã xác minh; không tự đặt giá giám sát hoặc tạo đơn thanh toán giả cho grant cũ. Lịch sử không có đơn được ghi Origin=Legacy ở adapter đọc, không bắt buộc bịa giao dịch.
+- Kế hoạch schema cho `OfferKey` (database hiện chỉ có dữ liệu dev/test, không chuyển đổi dữ liệu thật): `PaymentOrder` chưa có trong database nên được tạo mới với `OfferKey varchar(24)` và CHECK chỉ nhận `Month`/`Year`/`ConstructionSite`. `PlanOffer.OfferKey` được nới từ `varchar(8)` lên `varchar(24)` và đổi `Project` thành `ConstructionSite` theo migration của TDD-SUB-001. Khóa ngoại `(RevisionId, OfferKey)` từ `PaymentOrder` tới `PlanOffer` đòi hai cột cùng kiểu, nên migration tạo `PaymentOrder` phải chạy sau migration đó. Kiểm sau: không còn dòng `OfferKey = 'Project'` ở cả hai bảng.
+- Trước migration cần kiểm database thật. Nếu đã có schema theo TDD cũ thì chuyển Cycle→OfferKey cùng FK, bổ sung offer ConstructionSite, backfill từ nguồn giá đã xác minh; không tự đặt giá giám sát hoặc tạo đơn thanh toán giả cho grant cũ. Lịch sử không có đơn được ghi Origin=Legacy ở adapter đọc, không bắt buộc bịa giao dịch.
 - Account/bank/secret thật chưa được cung cấp. Validate cấu hình và chỉ bật checkout Live khi connection/giá/quyền lợi và worker đã sẵn sàng. Không đưa credentials vào tài liệu.
 
 ## Internal API
 
 ### Endpoints
 
-Các route là đề xuất mới; Carter đăng ký `/api/v{version:apiVersion}`. API khách dùng default verified-session policy hiện có và kiểm ownership. Body không có accountId, price hoặc quyền lợi. Customer GET không bao giờ cho sửa trạng thái.
+Các route là đề xuất mới; Carter đăng ký `/api/v{version:apiVersion}`. API khách dùng default verified-session policy hiện có và kiểm ownership. Tạo và hủy đơn còn kiểm `AccountKind = Customer` trước khi ghi: tài khoản nhân viên không được mua gói theo BR-RBAC-005 khoản 5, nên nhận 403 `AccessForbidden` kể cả khi gọi thẳng API. Kiểm theo loại tài khoản, không theo tên vai trò. Body không có accountId, price hoặc quyền lợi. Customer GET không bao giờ cho sửa trạng thái.
 
 - **POST** `/api/v1/payment-orders` — `{planId,offerKey}`; header Idempotency-Key bắt buộc. Trả 201 Result<OrderDetail>, replay 200. Server chọn connection; lỗi thiếu cấu hình 503, gói ngừng bán 409.
 - **GET** `/api/v1/payment-orders` — Đơn của chính khách, pageIndex/pageSize theo PagedResult hiện có (mặc định 1/10, tối đa 100); sắp CreatedAtUtc DESC,Id DESC.
@@ -391,7 +393,7 @@ Error Response webhook tương ứng HTTP 401. Các số/tài khoản là dữ l
 ### Error Codes
 
 - **Unauthorized** (401): phiên khách không hợp lệ.
-- **AccessForbidden** (403): phiên không đạt policy hoặc không có quyền.
+- **AccessForbidden** (403): phiên không đạt policy, không có quyền, hoặc tài khoản nhân viên (`AccountKind = Staff`) gọi API tạo hay hủy đơn.
 - **PaymentOrderNotFound** (404): không có đơn thuộc khách; không lộ đơn người khác.
 - **PlanNotPurchasable** (409): gói chưa bán/ngừng bán tại lúc tạo đơn mới.
 - **PendingDesignOrderExists** (409): đã có đơn thiết kế chờ.
@@ -440,14 +442,17 @@ SePay cần HTTP 200/201 và JSON `{"success":true}` trong 30 giây; BMT chọn 
 - BR-PAY-002/Then
 - BR-PAY-003/Then
 - BR-PAY-004/Then
+- BR-RBAC-005/Then
 - BR-SUB-004/Then
 - BR-SUB-006/Then
+- BR-SUB-008/Then
 - BR-SUB-014/Then
 - BR-SUB-021/Then
 
 ### Use Cases
 
 - STORY-PAY-001/Main Flow
+- STORY-PAY-001/EXC-08
 
 ### Others
 
@@ -456,3 +461,5 @@ SePay cần HTTP 200/201 và JSON `{"success":true}` trong 30 giây; BMT chọn 
 - [Bảng truy vết và kiểm thử kỹ thuật](../discovery/payment-technical-design.md).
 
 ## Change Log
+
+- 2026-09-25: Cập nhật theo US/BR đã chốt ngày 25/09/2026. Đổi "dự án" sang công trình trong luồng sau khi cấp gói giám sát: mẫu PackageMutationReceipt dùng `constructionSiteId`, `OldConstructionSiteId`/`NewConstructionSiteId` và bí danh CS1/CS2; mã lựa chọn giá giám sát `Project` đổi thành `ConstructionSite`, `PaymentOrder.OfferKey` dùng `varchar(24)` theo TDD-SUB-001, kèm kế hoạch schema ở Data Model/Notes. Thứ tự khóa bỏ bước khóa quyền người thao tác, bắt đầu từ AccountCommerceState như TDD-SUB-004/005/006. Ghi rõ đơn chốt giá, quyền lợi và mô tả dịch vụ theo revision (BR-PAY-001); gói giám sát không dùng danh mục quyền lợi (BR-SUB-008 khoản 7). API tạo và hủy đơn kiểm `AccountKind = Customer`, chặn tài khoản nhân viên (BR-RBAC-005 khoản 5). Cập nhật hiện trạng: MassTransit/outbox đã được đưa lại ngày 23/09/2026 nhưng luồng thanh toán không dùng; bổ sung tham chiếu BR-RBAC-005, BR-SUB-008.

@@ -53,6 +53,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ### Problem
 
+**Trạng thái quyết định:** đã chốt tạm hoãn thông báo website; trạng thái Pending — technical debt được ghi tại STORY-PUSH-001/Out of Scope. Expo chưa được chốt; các sơ đồ, trường dữ liệu và contract liên quan Expo dưới đây là phương án để review, chưa phải căn cứ triển khai đã duyệt. Cần kiểm tra source mobile trước khi chọn dịch vụ push.
+
 STORY-PUSH-001 và BR-PUSH-001..003 đã được người dùng chốt trong hội thoại. Một khách hàng có thể nhận push trên nhiều thiết bị; logout hoặc đổi tài khoản phải ngừng gửi cho phiên/tài khoản cũ. Đợt này chưa chọn loại thông báo nghiệp vụ. Đây là thiết kế đề xuất để review, chưa phải code đã triển khai hoặc kiểm thử đã chạy.
 
 Hiện trạng đã kiểm tra trong backend:
@@ -76,6 +78,8 @@ Chưa tìm thấy mã nguồn mobile trong workspace đã khảo sát. Phiên b�
 - Giữ tương thích API web hiện có; kiểm chứng dữ liệu bằng PostgreSQL/Redis thật và adapter Expo có thể điều khiển lỗi.
 
 ### Non-goals
+
+- Thông báo website: **Pending — technical debt**, đã được người dùng xác nhận ngày 2026-09-25 và ghi tại STORY-PUSH-001/Out of Scope. Đợt này chỉ thiết kế cho mobile Customer Android/iOS; chưa chốt loại thông báo website, lịch triển khai hoặc mở rộng schema để hỗ trợ website.
 
 - Push cho Staff, web push, thông báo marketing, hộp thông báo/đã đọc, danh sách thiết bị cho người dùng tự quản lý.
 - Tự chọn sự kiện nghiệp vụ, người được nhận theo từng nghiệp vụ, nội dung thật hoặc thời gian lưu lịch sử.
@@ -117,11 +121,15 @@ Chưa tìm thấy mã nguồn mobile trong workspace đã khảo sát. Phiên b�
 - Login mobile có thể gửi cặp InstallationId/bí mật của bản cài đã đăng ký. Sau xác thực tài khoản B, backend khóa đăng ký, thu hồi sid cũ gắn bản cài, liên kết sid B và tạm tắt gửi cho tới khi app đồng bộ quyền/token. Không thu hồi phiên A ở thiết bị khác.
 - Nếu chưa có đăng ký, login không phụ thuộc lấy Expo token; app đăng ký sau. Mã phiên có `LoginOrder` tăng từ sequence SQL, không so thứ tự bằng giờ client. Khi bind một đăng ký tồn tại, sid mới phải có LoginOrder lớn hơn sid cũ; sid cũ không được chiếm lại đăng ký bằng request đến muộn.
 - Trong cùng sid, app gửi `ClientSequence` tăng dần và `RequestId`; lưu last sequence/hash để cùng nội dung được replay, cùng sequence khác nội dung trả 409. Sequence nhỏ hơn bị từ chối. Version của đăng ký tăng khi đổi token, quyền hoặc sid; receipt và công việc cũ dùng version để không tác động nhầm.
-- Mỗi token/project chỉ có một registration hiện hành. Nếu cài lại app làm mất bí mật nhưng Expo trả token đã được đăng ký: không tự chuyển người nhận chỉ vì client đưa token. Đề xuất khôi phục bằng challenge ngắn hạn chứa nonce ngẫu nhiên gửi tới chính token (không có dữ liệu tài khoản), app nhận nonce và xác nhận bằng phiên mới. Challenge lưu Redis với TTL, chỉ dùng một lần và giới hạn tần suất; chưa kích hoạt đường khôi phục trước khi kiểm chứng trên cả hai nền tảng. Đề xuất này cần review cùng TDD; mất bí mật không được xử lý bằng cách bỏ ràng buộc token duy nhất.
+- **Chuyển token khi cài lại app**: mỗi token/project chỉ có một registration hiện hành (UNIQUE(ExpoProjectId,TokenHash)). Khi phiên Login của Customer đăng ký một token đang gắn với registration của bản cài khác — thường gặp khi cài lại app: app có InstallationId và bí mật mới nhưng Expo trả lại token cũ — backend chuyển token sang registration của bản cài đang gọi và ngừng registration cũ (BR-PUSH-001 khoản 6, STORY-PUSH-001/AC-010). Trường hợp này không trả lỗi (bỏ mã PushTokenAlreadyBound trước đây) và không cần bước xác minh bổ sung; ràng buộc token duy nhất vẫn giữ nên không có hai đích gửi cho cùng token.
+  - Cách chạy: đọc registration đang giữ TokenHash chỉ để biết userId/installationId cần khóa; lấy khóa điều phối cho cả hai bản cài theo giao thức ở mục dưới (userId rồi installationId tăng dần), rồi đọc lại trong transaction. Nếu vẫn qua rào chắn bên dưới: đặt registration cũ ExpoPushToken=NULL, TokenHash=NULL, DisabledAtUtc=now, DisabledReason=TokenMovedToNewInstallation và tăng Version; sau đó mới ghi token vào registration của bản cài đang gọi (tạo mới hoặc cập nhật, tăng Version). Hai lệnh ghi đi đúng thứ tự trong cùng transaction để unique theo TokenHash không báo trùng, rồi commit một lần.
+  - Rào chắn yêu cầu đến muộn: chỉ chuyển khi sid của yêu cầu có LoginOrder lớn hơn sid đang gắn registration giữ token. Bản cài mới luôn phải đăng nhập lại nên có LoginOrder lớn hơn. Yêu cầu đến muộn từ phiên cũ của bản cài cũ có LoginOrder nhỏ hơn nên bị từ chối 409 PushRegistrationStale, không kéo token về đăng ký cũ. Các kiểm tra bí mật, sid và ClientSequence của chính bản cài đang gọi vẫn áp dụng như trên.
+  - Ảnh hưởng tới gửi: delivery đã tạo cho registration cũ giữ RegistrationVersion cũ nên worker đánh Skipped khi kiểm lại. Receipt DeviceNotRegistered của attempt cũ chỉ tắt đúng RegistrationId+Version+TokenHash đã gửi, không tắt registration mới. Delivery tạo sau khi chuyển chỉ chọn registration mới.
+  - Rủi ro cần biết: nếu token của một thiết bị bị lộ, một phiên Customer hợp lệ khác có thể chuyển token đó về bản cài của mình; khi đó thiết bị bị lộ token sẽ nhận thông báo của tài khoản vừa chuyển token, còn đăng ký cũ ngừng nhận. Đây là hệ quả của quy tắc đã chốt. Giảm rủi ro bằng cách không trả token ra API, không ghi token vào log/telemetry và giới hạn tần suất đăng ký theo tài khoản và bản cài.
 
 **Chọn đích gửi và ranh giới logout**
 
-Đăng ký đủ điều kiện khi token có giá trị, PermissionStatus cho phép, DisabledAtUtc=NULL, sid tồn tại/không revoked/chưa hết hạn, sid thuộc đúng Customer, user còn Active/không bị xóa và stamp sid bằng User.SecurityStamp. Chỉ mục sid trong Redis cũng phải còn tồn tại và khớp; không có key thì bỏ qua phiên, lỗi truy cập Redis thì hoãn gửi có giới hạn. Đọc đúng thời điểm trước mỗi lần gọi Expo, không chỉ lúc enqueue.
+Đăng ký đủ điều kiện khi token có giá trị, PermissionStatus cho phép, DisabledAtUtc=NULL, sid tồn tại/không revoked/chưa hết hạn, sid thuộc đúng user có AccountKind=Customer (không kiểm theo tên vai trò), user còn Active/không bị xóa và stamp sid bằng User.SecurityStamp. Chỉ mục sid trong Redis cũng phải còn tồn tại và khớp; không có key thì bỏ qua phiên, lỗi truy cập Redis thì hoãn gửi có giới hạn. Đọc đúng thời điểm trước mỗi lần gọi Expo, không chỉ lúc enqueue.
 
 Để kiểm tra rồi gửi không bị logout chen giữa, đề xuất dùng **khóa điều phối theo tài khoản và bản cài** bằng PostgreSQL session advisory lock trên connection riêng của bước gửi. Logout, rebind, cập nhật token và thay stamp sử dụng cùng giao thức. Thứ tự: các userId sắp tăng dần, rồi các installationId sắp tăng dần; đọc lại chủ sở hữu sau khóa, nếu khác tập khóa thì nhả và thử lại. Không khóa ngược thứ tự ở đường cập nhật. Khóa có timeout và luôn nhả/dispose connection trong finally.
 
@@ -157,14 +165,14 @@ flowchart LR
 
 **Notes**:
 
-- **Đã xác nhận:** phạm vi Customer Android/iOS, nhiều thiết bị, dừng gửi sau logout, chống yêu cầu A đến muộn và nền tảng gửi chưa gắn sự kiện nghiệp vụ. Reviewer/Approver: Tân Trần.
-- **Đề xuất chưa chốt:** bốn bảng, API mobile trả token riêng, khóa điều phối qua bước gọi Expo, ngân sách retry và cơ chế khôi phục bản cài. Bản TDD này cần review trước khi làm căn cứ viết Unit Test.
-- **Cần làm rõ trước triển khai:** phiên bản SDK/project/credentials mobile, thời gian lưu dữ liệu; khôi phục khi mất bí mật bản cài cần thử trên thiết bị thật và đặc tả API riêng trước khi bật. Hiện trả PushTokenAlreadyBound cho trường hợp đó; đây là khoảng trống tích hợp đã nhận diện, chưa coi luồng cài lại hoàn tất.
+- **Đã xác nhận:** phạm vi Customer Android/iOS, nhiều thiết bị, dừng gửi sau logout, chống yêu cầu A đến muộn, chuyển token sang bản cài mới khi cài lại app (BR-PUSH-001 khoản 6, xác nhận ngày 25/09/2026) và nền tảng gửi chưa gắn sự kiện nghiệp vụ. Reviewer/Approver: Tân Trần.
+- **Đề xuất chưa chốt:** bốn bảng, API mobile trả token riêng, khóa điều phối qua bước gọi Expo, ngân sách retry. Rào chắn LoginOrder khi chuyển token giữa hai bản cài đã được người dùng chốt ngày 25/09/2026 và ghi vào BR-PUSH-001 khoản 6. Bản TDD này cần review trước khi làm căn cứ viết Unit Test.
+- **Cần làm rõ trước triển khai:** phiên bản SDK/project/credentials mobile, thời gian lưu dữ liệu. Luồng cài lại app cần thử trên thiết bị Android/iOS thật để xác nhận Expo có trả lại token cũ hay cấp token mới; cả hai trường hợp đều được thiết kế xử lý.
 - **Thứ tự triển khai đề xuất:** migration thêm bảng → điều phối phiên và API mobile → đăng ký/token rotation/logout → dispatcher/outbox/worker → receipt/retry → tích hợp Android/iOS → kiểm chứng staging rồi bật feature. Chưa thực hiện bước nào trong giai đoạn tài liệu này.
 - **Transaction auth:** thêm command/coordinator cho mobile; không dùng nguyên login query hiện tại để giả định có transaction. Mỗi bước SQL phải commit rõ trước bước Redis theo thứ tự trên; pipeline không được trì hoãn commit đến sau khi trả token. Refresh dùng cùng thứ tự khóa user, installation, session với các writer khác.
 - **Lease:** đề xuất lease 60 giây, HTTP timeout 10 giây; sau khi lấy khóa điều phối phải kiểm lại lease và expiry. Worker hết lease không được gọi mới hoặc ghi kết quả bằng claim cũ. Khóa điều phối vẫn cần thiết vì lease riêng không chặn được hai cuộc gọi ngoài hệ thống. Ngân sách kiểm tra điều kiện do lỗi hạ tầng đề xuất tối đa 10 lần, đồng thời bị chặn bởi ExpiresAtUtc.
 - **Chiến lược kiểm chứng:** unit test cho validation, điều kiện phiên, chuyển trạng thái và phân loại lỗi; integration test dùng PostgreSQL/Redis thật cho unique/FK, rotate/revoke, transaction, khóa và lease; system test dùng adapter Expo điều khiển lỗi rồi smoke trên thiết bị Android/iOS thật. Chưa viết đặc tả Unit Test hoặc chạy test.
-- **Truy vết:** BR-PUSH-001 → đăng ký và FK/unique → ST-PUSH-001..004,008..009; BR-PUSH-002 → phiên/khóa/chọn đích → ST-PUSH-005..007,010..012,018; BR-PUSH-003 → delivery/attempt/receipt → ST-PUSH-013..017.
+- **Truy vết:** BR-PUSH-001 → đăng ký và FK/unique → ST-PUSH-001..004,008..009; khoản 6 và STORY-PUSH-001/AC-010 → chuyển token giữa bản cài → ST-PUSH-019..020; BR-PUSH-002 → phiên/khóa/chọn đích → ST-PUSH-005..007,010..012,018; BR-PUSH-003 → delivery/attempt/receipt → ST-PUSH-013..017.
 
 ## Sequence Diagram
 
@@ -184,6 +192,7 @@ sequenceDiagram
     M->>M: Xin quyền, lấy ExpoPushToken
     M->>P: Đăng ký token với phiên và bí mật bản cài
     P->>DB: Khóa, kiểm sid/sequence, lưu registration
+    Note over P,DB: Token đang gắn bản cài khác thì chuyển sang registration này và tắt registration cũ trong cùng transaction
     P-->>M: RegistrationId, Version
     Note over DB,W: Yêu cầu gửi nội bộ tạo delivery và outbox
     W->>DB: Claim và lấy khóa điều phối
@@ -254,7 +263,7 @@ Mọi tên bảng/cột dưới đây là đề xuất. UUID dùng `uuid`, thờ
 | Bảng | Một dòng đại diện cho gì | Cột chính và ràng buộc |
 |---|---|---|
 | AuthSession | Một phiên mobile được backend cấp; giữ nguyên qua refresh | `Id uuid PK`, `UserId uuid NN FK User RESTRICT`, `LoginOrder bigint NN UNIQUE` do sequence server cấp, `Purpose varchar(20) NN`, `SecurityStamp uuid NN` snapshot, `CreatedAtUtc timestamptz NN`, `ExpiresAtUtc timestamptz NN`, `RevokedAtUtc timestamptz NULL`, `Version bigint NN`; CHECK Version>=1, ExpiresAtUtc>CreatedAtUtc, RevokedAtUtc NULL hoặc >=CreatedAtUtc, Purpose chỉ Login/PasswordReset. UNIQUE(UserId,Id). |
-| DevicePushRegistration | Một bản cài app trong một project/environment, giữ token và phiên sở hữu hiện tại | `Id uuid PK`, `AppScope varchar(100) NN`, `ExpoProjectId uuid NN`, `InstallationId uuid NN`, `InstallationSecretHash bytea NN` dài 32, `Platform varchar(10) NN` Android/iOS, `UserId uuid NN`, `SessionId uuid NN`, `ExpoPushToken varchar(512) NULL`, `TokenHash bytea NULL` dài 32, `PermissionStatus varchar(20) NN` Unknown/Denied/Granted/Provisional, `DisabledAtUtc timestamptz NULL`, `DisabledReason varchar(40) NULL`, `Version bigint NN`, `ClientSequence bigint NN`, `LastRequestId uuid NN`, `LastRequestHash bytea NN`, `CreatedAtUtc/UpdatedAtUtc/LastRegisteredAtUtc timestamptz NN`. FK(UserId,SessionId) tới AuthSession(UserId,Id) RESTRICT. |
+| DevicePushRegistration | Một bản cài app trong một project/environment, giữ token và phiên sở hữu hiện tại | `Id uuid PK`, `AppScope varchar(100) NN`, `ExpoProjectId uuid NN`, `InstallationId uuid NN`, `InstallationSecretHash bytea NN` dài 32, `Platform varchar(10) NN` Android/iOS, `UserId uuid NN`, `SessionId uuid NN`, `ExpoPushToken varchar(512) NULL`, `TokenHash bytea NULL` dài 32, `PermissionStatus varchar(20) NN` Unknown/Denied/Granted/Provisional, `DisabledAtUtc timestamptz NULL`, `DisabledReason varchar(40) NULL` (ví dụ TokenMovedToNewInstallation khi token chuyển sang bản cài khác), `Version bigint NN`, `ClientSequence bigint NN`, `LastRequestId uuid NN`, `LastRequestHash bytea NN`, `CreatedAtUtc/UpdatedAtUtc/LastRegisteredAtUtc timestamptz NN`. FK(UserId,SessionId) tới AuthSession(UserId,Id) RESTRICT. |
 | PushDelivery | Một thông điệp nội bộ gửi tới một registration đã được chọn | `Id uuid PK`, `MessageId uuid NN`, `RegistrationId uuid NN FK DevicePushRegistration RESTRICT`, `RecipientUserId uuid NN FK User RESTRICT`, `SessionId uuid NN FK AuthSession RESTRICT`, `RegistrationVersion bigint NN`, `Payload jsonb NN`, `PayloadHash bytea NN`, `State varchar(24) NN`, `AttemptCount int NN default 0`, `EligibilityCheckCount int NN default 0`, `NextAttemptAtUtc timestamptz NULL`, `ExpiresAtUtc timestamptz NN`, `LeaseToken uuid NULL`, `LeaseUntilUtc timestamptz NULL`, `CreatedAtUtc/UpdatedAtUtc timestamptz NN`, `LastErrorCode varchar(100) NULL`. UNIQUE(MessageId,RegistrationId); CHECK counts>=0, lease token/thời hạn cùng NULL hoặc cùng có giá trị. |
 | PushAttempt | Một lần gọi Expo cho delivery, giữ dấu vết độc lập của lần thử | `Id uuid PK`, `DeliveryId uuid NN FK PushDelivery RESTRICT`, `Number int NN`, `RegistrationVersion bigint NN`, `TokenSnapshot varchar(512) NN`, `TokenHash bytea NN`, `State varchar(24) NN`, `TicketId varchar(200) NULL`, `SentAtUtc timestamptz NN`, `CompletedAtUtc timestamptz NULL`, `ReceiptNextCheckAtUtc timestamptz NULL`, `ReceiptDeadlineUtc timestamptz NULL`, `HttpStatus int NULL`, `ErrorCode varchar(100) NULL`. UNIQUE(DeliveryId,Number), Number>=1; ticketId unique khi khác NULL. |
 
@@ -288,6 +297,17 @@ Quan hệ registration–session chỉ mô tả liên kết hiện tại, không
 
 Sau logout S1, RevokedAtUtc có giá trị và D1 bị tắt. U2 đăng nhập tạo S2/LoginOrder=102; bind lại D1 đổi UserId=U2, SessionId=S2, Version tăng, quyền/token phải được đồng bộ lại. L1 vẫn thuộc U1/S1 và phải Skipped nếu chưa gửi; không chuyển L1 sang U2. Nếu A1 đã gửi T1 rồi D1 đổi sang T2/H2/version mới, receipt lỗi H1 không được tắt T2. AuthSession không thay stamp K1 thành K2; đó là hai phiên khác nhau.
 
+**Nhánh cài lại app** (tách khỏi nhánh logout/U2 ở trên, bắt đầu từ dữ liệu ban đầu): U1 xóa app trên thiết bị D1 mà không logout, cài lại và đăng nhập. App mới có InstallationId=I3, bí mật mới và Expo trả lại token T1. D3, S3 và L2 cũng là bí danh UUID giả.
+
+| Bảng | Dữ liệu sau khi PUT I3 với token T1 thành công |
+|---|---|
+| AuthSession | S3: UserId=U1, LoginOrder=103, Purpose=Login, SecurityStamp=K1, CreatedAtUtc=2026-09-24T04:00:00Z, ExpiresAtUtc=2026-09-24T06:00:00Z, RevokedAtUtc=NULL, Version=1. S1 vẫn chưa bị thu hồi vì app cũ bị xóa mà không logout. |
+| DevicePushRegistration — D1 bị chuyển token | D1: InstallationId=I1, UserId=U1, SessionId=S1, ExpoPushToken=NULL, TokenHash=NULL, PermissionStatus=Granted, DisabledAtUtc=2026-09-24T04:01:00Z, DisabledReason=TokenMovedToNewInstallation, Version=2. |
+| DevicePushRegistration — D3 mới | D3: AppScope=customer-production, InstallationId=I3, UserId=U1, SessionId=S3, Platform=iOS, ExpoPushToken=T1, TokenHash=H1, PermissionStatus=Granted, DisabledAtUtc=NULL, Version=1, ClientSequence=1. |
+| PushDelivery | L2: MessageId=M2, RegistrationId=D1, RecipientUserId=U1, SessionId=S1, RegistrationVersion=1, State=Pending, tạo trước lúc chuyển. Worker thấy D1.Version=2 nên đổi L2 sang Skipped, không gọi Expo. Thông điệp tạo sau đó cho U1 chỉ có delivery tới D3. |
+
+D1 và D3 không cùng giữ H1 tại bất kỳ thời điểm commit nào. Nếu yêu cầu PUT của I1 với sid S1 (LoginOrder=101) đến muộn sau đó và gửi T1, backend trả 409 PushRegistrationStale vì 101 < 103; D3 giữ nguyên.
+
 **Notes**:
 
 Migration và triển khai an toàn:
@@ -308,7 +328,7 @@ Các route dưới đây là đề xuất mới. Tên contract/handler tuân CQR
 - **POST** `/api/v1/mobile-auth/login` — Customer xác thực email/password; tạo AuthSession và token có sid. Có thể nhận InstallationId/installation secret của bản cài đã biết để bind lại. Push permission/token không phải tham số bắt buộc. Lỗi xử lý đăng ký push được trả thành trạng thái pending riêng, không làm mất kết quả xác thực thành công; không được coi bind đã thành công nếu transaction bind lỗi.
 - **POST** `/api/v1/mobile-auth/refresh` — Body refreshToken; giữ sid, kiểm SQL/Redis/stamp và rotate một lần. Không nhận UserId từ client.
 - **POST** `/api/v1/mobile-auth/logout` — Thu hồi đúng sid từ access token hợp lệ hoặc refresh token đã được tra và đối chiếu chủ sở hữu. Cookie không bắt buộc cho mobile. Logout idempotent; không cho sid từ body vô hiệu hóa phiên của người khác.
-- **PUT** `/api/v1/me/push-installations/{installationId}` — Customer Login session; header `X-Installation-Secret`; body token/quyền/platform/sequence/requestId. Lần đầu tạo registration; các lần sau kiểm secret, sid/LoginOrder và sequence. Lấy project từ cấu hình app/environment được server cho phép.
+- **PUT** `/api/v1/me/push-installations/{installationId}` — Customer Login session; header `X-Installation-Secret`; body token/quyền/platform/sequence/requestId. Lần đầu tạo registration; các lần sau kiểm secret, sid/LoginOrder và sequence. Token đang gắn với bản cài khác thì được chuyển sang registration này và registration cũ bị tắt, khi sid gọi có LoginOrder lớn hơn sid đang giữ token; ngược lại trả 409 PushRegistrationStale. Lấy project từ cấu hình app/environment được server cho phép.
 - **DELETE** `/api/v1/me/push-installations/{installationId}` — Tắt nhận push của registration đang thuộc sid gọi; không logout và không tác động phiên khác. Cần bí mật bản cài, điều kiện phiên và header If-Match chứa Version hiện tại; version cũ trả PushRegistrationStale, không tắt đăng ký mới.
 
 Cổng nội bộ `EnqueueAsync(MessageId, RecipientUserId, Title, Body, Data, ExpiresAtUtc, CancellationToken)` không phải endpoint public. Cùng MessageId/đích cùng payload replay; payload khác trả xung đột. Module gọi chịu trách nhiệm xác minh quyền nhận nội dung. Đề xuất snapshot người nhận lúc enqueue; không gửi bù cho thiết bị mới sau đó.
@@ -393,11 +413,10 @@ Error Response:
 - **Unauthorized** (401): không có phiên xác thực hợp lệ.
 - **InvalidCredentials** (401): thông tin đăng nhập không hợp lệ; không tiết lộ tài khoản có tồn tại.
 - **InvalidRefreshToken** (401): token/sid hết hạn, revoked hoặc stamp không khớp.
-- **CustomerOnly** (403): tài khoản không phải Customer.
+- **CustomerOnly** (403): tài khoản có User.AccountKind khác Customer; kiểm theo AccountKind, không theo tên vai trò. Tài khoản nhân viên không đăng ký và không nhận push khách hàng.
 - **SessionUpgradeRequired** (409): phiên cũ không có sid phù hợp để đăng ký push.
-- **PushRegistrationStale** (409): sid/sequence/version cũ hoặc cùng RequestId với nội dung khác.
+- **PushRegistrationStale** (409): sid/sequence/version cũ, cùng RequestId với nội dung khác, hoặc yêu cầu từ sid có LoginOrder nhỏ hơn sid đang giữ token muốn chuyển token về.
 - **PushRegistrationNotFound** (404): đăng ký không thuộc phạm vi phiên; dùng cùng lỗi khi bí mật bản cài không khớp để không tiết lộ chủ sở hữu.
-- **PushTokenAlreadyBound** (409): token thuộc bản cài khác, cần quy trình khôi phục có bằng chứng thay vì tự chuyển.
 - **PushRegistrationInvalid** (422): platform/quyền/token/sequence không hợp lệ.
 - **PushDependencyUnavailable** (503): không xác minh/lưu được đăng ký do hạ tầng; lỗi endpoint push không đổi kết quả login đã thành công.
 
@@ -423,7 +442,7 @@ Bật bảo vệ access token của Expo cho môi trường production nếu c�
 
 ### Quirks
 
-- Token Expo không phải refresh token và không dùng làm danh tính user. Token có thể thay đổi hoặc vẫn giữ sau cài lại tùy nền tảng; cần cơ chế cập nhật/khôi phục thay vì suy ra một token là một user. [FAQ Expo](https://docs.expo.dev/push-notifications/faq/).
+- Token Expo không phải refresh token và không dùng làm danh tính user. Token có thể thay đổi hoặc vẫn giữ sau cài lại tùy nền tảng; token đổi thì cập nhật như đồng bộ thường, token giữ nguyên thì chuyển sang bản cài mới theo BR-PUSH-001 khoản 6. Không suy ra một token là một user. [FAQ Expo](https://docs.expo.dev/push-notifications/faq/).
 - Native push token callback có thể trả token APNs/FCM; khi callback báo thay đổi, app lấy lại ExpoPushToken, không gửi nhầm native token vào backend.
 - Tắt quyền trong hệ điều hành hoặc logout cục bộ khi offline không tự gửi sự kiện tức thì đến backend. App đồng bộ khi hoạt động lại; backend không hứa biết trạng thái thiết bị ngay khi offline.
 - Expo/FCM/APNs có thể giao trùng hoặc không giao; không có trạng thái Delivered/Read nếu chưa thiết kế xác nhận từ app.
@@ -473,5 +492,9 @@ Bật bảo vệ access token của Expo cho môi trường production nếu c�
 - [ST-PUSH-016](../systemtest/ST-PUSH-016.md)
 - [ST-PUSH-017](../systemtest/ST-PUSH-017.md)
 - [ST-PUSH-018](../systemtest/ST-PUSH-018.md)
+- [ST-PUSH-019](../systemtest/ST-PUSH-019.md)
+- [ST-PUSH-020](../systemtest/ST-PUSH-020.md)
 
 ## Change Log
+
+- 2026-09-25: Theo BR-PUSH-001 khoản 6 và STORY-PUSH-001/AC-010, token đang gắn với bản cài khác được chuyển sang registration của bản cài mới và registration cũ bị tắt (DisabledReason=TokenMovedToNewInstallation) trong cùng transaction; bỏ mã lỗi `PushTokenAlreadyBound` và phương án challenge khôi phục. Giữ rào chắn yêu cầu đến muộn bằng LoginOrder (sid cũ hơn nhận 409 PushRegistrationStale); thêm mẫu dữ liệu nhánh cài lại app. `CustomerOnly` và điều kiện chọn đích ghi rõ kiểm User.AccountKind=Customer. Câu về thông báo website trỏ tới STORY-PUSH-001/Out of Scope thay cho ghi nhận technical debt riêng.

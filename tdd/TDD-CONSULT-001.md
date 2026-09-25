@@ -72,6 +72,7 @@ Checkout khảo sát có .NET 8, Carter/MediatR/FluentValidation, EF Core/Npgsql
 
 - Upload hoặc proxy ảnh, thư viện media, tài khoản riêng của KTS, phê duyệt hồ sơ.
 - Lịch rảnh, giữ chỗ, thanh toán, quyền lợi gói, tư vấn trực tuyến trong ứng dụng.
+- Liên kết với cam kết tư vấn của gói. Yêu cầu tư vấn KTS miễn phí là kênh riêng, không thay cam kết tư vấn offline đã chốt cho gói theo BR-SUB-004 và BR-SUB-008 (BR-CONSULT-002/Notes, người dùng xác nhận ngày 25/09/2026). Module này không đọc, không trừ và không ghi dữ liệu gói.
 - Trang khách theo dõi/sửa/hủy đơn, email khi admin đổi trạng thái hoặc email thông báo admin.
 - Xóa hồ sơ KTS hoặc yêu cầu tư vấn; chính sách lưu trữ/xóa dữ liệu dài hạn chưa được giao.
 - Triển khai code, migration thực thi, triển khai dịch vụ hoặc đặc tả Unit Test trong lần bàn giao TDD này.
@@ -88,8 +89,8 @@ Checkout khảo sát có .NET 8, Carter/MediatR/FluentValidation, EF Core/Npgsql
 | `src/bmt-be.application/usecases/commands/user/RegisterCommandHandler.cs` | Mẫu publish `SendEmailEvent` qua scoped `IPublishEndpoint` trong transaction. Dùng mẫu này thay domain-event/outbox tự viết từng có trong khảo sát trước. |
 | `src/bmt-be.contract/services/messaging/EmailMessages.cs` | Message hiện có `To`, `Subject`, `Body`, `Purpose`; không còn `IdEvent`. MessageId nằm ở envelope của MassTransit. |
 | `src/bmt-be.contract/services/user/Response.cs` và `src/bmt-be.application/usecases/queries/user/GetMeHandler.cs` | `GetMeBasic` chưa có `PhoneNumber`. Cần thêm thuộc tính nullable và mapping, không đổi ý nghĩa trường khác. |
-| `src/bmt-be.api/dependencyInjection/extensions/JwtExtensions.cs` | Policy mặc định đòi email đã xác minh; `AuthenticatedOnly` chỉ đòi đăng nhập. Policy theo quyền và kiểm dấu phiên chưa hoàn thành trong checkout; `OnTokenValidated` đang no-op. |
-| `src/bmt-be.contract/constants/PermissionNames.cs` và `src/bmt-be.api/startup/PermissionCatalogGuard.cs` | Có chín mã quyền ban đầu; startup từ chối nếu tập mã code khác DB, kể cả DB có mã mới hơn code. |
+| `src/bmt-be.api/dependencyInjection/extensions/JwtExtensions.cs` | Policy mặc định đòi email đã xác minh; `AuthenticatedOnly` chỉ đòi đăng nhập. Kiểm tra lại ngày 25/09/2026: policy theo mã quyền (claim `perm`) và bước so dấu phiên trong `OnTokenValidated` đã có theo [TDD-RBAC-001](TDD-RBAC-001.md). |
+| `src/bmt-be.contract/constants/PermissionNames.cs` và `src/bmt-be.api/startup/PermissionCatalogGuard.cs` | Kiểm tra lại ngày 25/09/2026: có 10 mã, gồm chín mã khởi tạo và `plan.manage`. Danh mục theo [TDD-RBAC-001](TDD-RBAC-001.md#data-model) gồm 14 mã; `consultation.manage` là mã module này thêm. Startup từ chối nếu tập mã code khác DB, kể cả DB có mã mới hơn code. |
 | `src/bmt-be.persistence/repositories/RepositoryBase.cs` | Generic repository đòi kế thừa `Entity<TKey>`, kéo theo `IsDeleted`. Module mới dùng repository chuyên biệt để không mang thêm xóa mềm ngoài vòng đời đã chốt. |
 | `src/bmt-be.api/middlewares/ExceptionHandlingMiddleware.cs` | Có 400/401/403/404/422, 409 cho unique violation; chưa có ánh xạ xung đột phiên bản và lỗi tạm thời dành cho module này. |
 
@@ -125,13 +126,13 @@ flowchart LR
 
 **Quyền và phiên**:
 
-Bốn mã mới là đề xuất kỹ thuật, `RequiresAssignment=false`: `architect.manage` quản lý hồ sơ; `architect_category.manage` quản lý category; `consultation.read` xem yêu cầu; `consultation.update` sửa trạng thái/ghi chú. Seed các mã vào Permission và RolePermission của vai trò hệ thống admin. Không tự cấp cho các vai trò khác. Người có quyền tạo hồ sơ không cần người khác duyệt. Không thêm OrganizationId, tenant hoặc phân công KTS theo nhân viên vì chưa có nghiệp vụ đó.
+Toàn bộ chức năng quản trị tư vấn KTS dùng một mã quyền `consultation.manage`, `RequiresAssignment=false`: quản lý hồ sơ KTS, quản lý category chuyên môn, xem yêu cầu và cập nhật trạng thái/ghi chú của yêu cầu. Đây là một trong năm mã quản trị người dùng xác nhận ngày 25/09/2026, mỗi chức năng quản trị một mã (STORY-RBAC-001/Preconditions, BR-RBAC-010 khoản 4). Seed mã vào Permission và RolePermission của vai trò hệ thống admin. Không tự cấp cho các vai trò khác; người quản trị gán cho vai trò khác qua quản lý vai trò. Người có quyền tạo hồ sơ không cần người khác duyệt. Không thêm OrganizationId, tenant hoặc phân công KTS theo nhân viên vì chưa có nghiệp vụ đó.
 
-Policy quản trị dùng bộ quyền của vai trò qua cơ chế RBAC chung, không kiểm tên hiển thị vai trò hoặc tin nút ẩn trên frontend. Thiết kế cần hoàn tất đường phát hành/refresh claim quyền và policy tương ứng trước khi mở API; hiện chỉ có các bảng nền. Không tự xây một bộ phân quyền riêng chỉ cho tư vấn. Phiên reset mật khẩu không được dùng để gọi API nghiệp vụ; tài khoản khóa/xóa hoặc phiên đã bị thu hồi phải bị chặn bởi cơ chế xác thực chung. Đây là phụ thuộc triển khai cần kiểm chứng, không phải chức năng đang có đủ trong source.
+Policy quản trị kiểm theo mã quyền qua cơ chế RBAC chung, không kiểm tên hay mã vai trò và không tin nút ẩn trên frontend. Đường phát hành và làm mới claim quyền, policy theo mã quyền và kiểm dấu phiên đã có theo TDD-RBAC-001; module này chỉ thêm mã `consultation.manage` và gắn policy vào endpoint. Không tự xây một bộ phân quyền riêng chỉ cho tư vấn. Thiếu quyền trả 403 theo BR-RBAC-011; yêu cầu bị từ chối không ghi dữ liệu nào của module. Phiên reset mật khẩu không được dùng để gọi API nghiệp vụ; tài khoản khóa/xóa hoặc phiên đã bị thu hồi bị chặn bởi cơ chế xác thực chung. Khi triển khai vẫn phải kiểm chứng các điều kiện này trên endpoint mới.
 
 Gửi yêu cầu dùng policy riêng `ConsultationCustomer`: phiên đăng nhập thông thường hợp lệ, User tồn tại và thuộc Customer; không thêm điều kiện `IsVerified=true` hay có gói dịch vụ. Đọc số và email từ User theo UserId lấy từ phiên. Không nhận customerId, email nhận thư, trạng thái hoặc ghi chú từ body khách. `GET /users/me` tiếp tục policy hiện có; chỉ thêm phoneNumber nullable để điền form.
 
-Đường đọc hồ sơ cùng category gắn trên hồ sơ cho trang tư vấn là dữ liệu công khai; hồ sơ ẩn trả 404 tại đường public. Đường quản trị không dùng bộ lọc `IsVisible` để đọc hồ sơ hoặc đơn cũ. Quyền đọc và sửa yêu cầu tách riêng; PATCH trả xác nhận tối thiểu, không trả dữ liệu cá nhân cho người chỉ có quyền sửa.
+Đường đọc hồ sơ cùng category gắn trên hồ sơ cho trang tư vấn là dữ liệu công khai; hồ sơ ẩn trả 404 tại đường public. Đường quản trị không dùng bộ lọc `IsVisible` để đọc hồ sơ hoặc đơn cũ. Xem và cập nhật yêu cầu dùng chung `consultation.manage`; PATCH vẫn chỉ trả xác nhận tối thiểu (id, version), không trả lại dữ liệu cá nhân.
 
 **Bảo vệ request và dữ liệu**:
 
@@ -168,7 +169,7 @@ Các hợp đồng kỹ thuật mới cần được kiểm chứng thêm khi tr
 | Model và cấu hình | `src/bmt-be.domain/entities/{Architect,ArchitectCategory,ArchitectCategoryLink,ConsultationRequest}.cs`; các configuration cùng tên trong `src/bmt-be.persistence/configurations/`; `ApplicationDbContext.cs`, `constants/TableNames.cs`; migration mới sau mốc đang có |
 | Repository | Ba interface tương ứng trong `domain/abstractions/repositories/`, ba implementation trong `persistence/repositories/`; đăng ký scoped trong persistence DI. Inject trực tiếp repository chuyên biệt, không thêm vào generic GetRepository<TEntity> đòi Entity<Guid>. |
 | API/use case | Các thư mục services, usecases/commands, usecases/queries và apis cho architect, architectCategory, consultationRequest; handler command kết thúc tên bằng Command để vào transaction pipeline |
-| Quyền và bảo vệ request | `PermissionNames.cs`, cấu hình Permission/RolePermission và migration seed; policy/claim/kiểm phiên thuộc hạ tầng RBAC chung; filter chống cross-site cho các endpoint ghi mới |
+| Quyền và bảo vệ request | Hằng `consultation.manage` trong `PermissionNames.cs`, migration seed Permission/RolePermission cho admin; policy/claim/kiểm phiên dùng hạ tầng RBAC chung đã có; filter chống cross-site cho các endpoint ghi mới |
 | Tài khoản và email | `contract/services/user/Response.cs`, `GetMeHandler.cs`; `contract/templates/ConsultationEmailTemplate.cs`; log người nhận ở `SendEmailConsumer.cs`; cấu hình timeout ở MailOption/MailService nếu chọn đề xuất 30 giây |
 | Lỗi | Kiểu conflict/service-unavailable và ánh xạ có kiểm soát trong `ExceptionHandlingMiddleware.cs`; không đổi envelope của endpoint cũ |
 
@@ -180,7 +181,7 @@ Các hợp đồng kỹ thuật mới cần được kiểm chứng thêm khi tr
 - Lý do khách không còn nhu cầu được ghi trong note theo quy trình đã chốt. Backend không thể suy ra nội dung cuộc gọi, nên không tự yêu cầu note ở mọi lần đánh dấu Đã xử lý và không thêm enum lý do.
 - API receipt gửi lại chỉ trả id, receivedAtUtc và message tiếp nhận cố định; không trả trạng thái xử lý hiện tại để tránh vô tình tạo API theo dõi cho khách.
 - Chiến lược kiểm thử: Unit kiểm tra validation, ánh xạ và quyết định handler sau khi TDD được chốt; PostgreSQL thật kiểm FK, lock, version, idempotency và rollback đơn/outbox; RabbitMQ/SMTP thử kiểm email. Không viết đặc tả Unit Test ở giai đoạn này.
-- Thứ tự triển khai dự kiến: hoàn tất phụ thuộc xác thực/quyền → cấu hình schema/repository → quản trị hồ sơ/category → đọc public và bổ sung phoneNumber → gửi đơn/outbox → quản trị đơn → tích hợp FE và kiểm chứng. Xem Data Model/Notes về cửa sổ nâng cấp quyền.
+- Thứ tự triển khai dự kiến: thêm mã `consultation.manage` và policy → cấu hình schema/repository → quản trị hồ sơ/category → đọc public và bổ sung phoneNumber → gửi đơn/outbox → quản trị đơn → tích hợp FE và kiểm chứng. Xem Data Model/Notes về cửa sổ nâng cấp quyền.
 
 ## Sequence Diagram
 
@@ -391,9 +392,9 @@ ERD thể hiện tối thiểu một chuyên môn theo nghiệp vụ; FK chỉ b
 | Architect | Id=A1; FullName=Nguyễn An; Title=KTS; AvatarUrl=`https://images.example.test/kts/an.jpg`; YearsExperience=5; ProjectCount=12; Introduction=Tư vấn thiết kế nhà phố; IsVisible=true; Version=V2; CreatedOnUtc=2026-09-23T01:10:00Z; ModifiedOnUtc=NULL. |
 | ArchitectCategoryLink | Hai dòng (A1,C1) và (A1,C2); không có thêm bản sao tên chuyên môn. |
 | ConsultationRequest | Id=R1; CustomerId=U1; ArchitectId=A1; DesiredAtUtc=2026-09-24T02:00:00Z; ContactPhone=0900000002; Message=NULL; Status=Pending; InternalNote=NULL; SubmissionKey=K1; PayloadHash=H1; Version=V3; CreatedOnUtc=2026-09-23T02:00:00Z; ModifiedOnUtc=NULL. H1 là bí danh chuỗi SHA-256 64 ký tự được tính từ input. |
-| Permission (dùng lại, thêm seed) | Code=`consultation.read`; Label=Xem yêu cầu tư vấn; RequiresAssignment=false; Description=NULL. Ba mã còn lại theo bảng quyền. Schema: [PermissionConfiguration.cs](../../bmt-be/src/bmt-be.persistence/configurations/PermissionConfiguration.cs). |
-| RolePermission (dùng lại, thêm seed) | RoleId là Id vai trò hệ thống có Code=admin; PermissionCode=`consultation.read`; thêm tương tự ba quyền còn lại. Không tự sinh lại vai trò admin. |
-| OutboxMessage/OutboxState (MassTransit dùng lại) | Sau commit có message M1 với envelope MessageId do MassTransit quản lý; Body chứa To=`customer@example.test`, Subject=Đã nhận yêu cầu tư vấn, Body=HTML đã encode giờ 09:00 ngày 24/09/2026 và số 0900000002, Purpose=`ConsultationRequestReceived`. OutboxState và số thứ tự do thư viện sinh, không tự insert thủ công. Schema dùng lại trong [migration hiện có](../../bmt-be/src/bmt-be.persistence/Migrations/20260923140447_InitialRbac.cs). |
+| Permission (dùng lại, thêm seed) | Code=`consultation.manage`; Label=Quản lý tư vấn KTS; RequiresAssignment=false; Description=NULL. Chỉ thêm đúng một dòng. Schema: [PermissionConfiguration.cs](../../bmt-be/src/bmt-be.persistence/configurations/PermissionConfiguration.cs). |
+| RolePermission (dùng lại, thêm seed) | RoleId là Id vai trò hệ thống có Code=admin (`00000000-0000-0000-0000-0000000000a1` trong migration hiện có); PermissionCode=`consultation.manage`. Một dòng duy nhất. Không tự sinh lại vai trò admin. |
+| OutboxMessage/OutboxState (MassTransit dùng lại) | Sau commit có message M1 với envelope MessageId do MassTransit quản lý; Body chứa To=`customer@example.test`, Subject=Đã nhận yêu cầu tư vấn, Body=HTML đã encode giờ 09:00 ngày 24/09/2026 và số 0900000002, Purpose=`ConsultationRequestReceived`. OutboxState và số thứ tự do thư viện sinh, không tự insert thủ công. Schema dùng lại trong [migration hiện có](../../bmt-be/src/bmt-be.persistence/Migrations/20260923152830_InitialRbac.cs). |
 | InboxState (MassTransit dùng lại) | Khi consumer chạy, cặp MessageId=M1 và ConsumerId của SendEmailConsumer theo dõi xử lý. Cấu hình/schema do `AddInboxStateEntity` và migration hiện tại quản lý; không tạo bảng inbox thứ hai cho tư vấn. |
 
 User vẫn giữ số 0900000001. Ngày 24/09 lúc 09:00 Việt Nam chính là 02:00Z trên đơn. Admin ghi “Đã gọi, khách đồng ý trao đổi”, chuyển R1 sang Resolved: chỉ Status, InternalNote, ModifiedOnUtc và Version đổi; dữ liệu khách gửi giữ nguyên. Mở lại chuyển Pending, giữ hoặc sửa note theo payload, đổi Version lần nữa; không tạo M2. KTS A1 bị ẩn vẫn giữ R1 và cả hai link; muốn xóa C1 thì đổi tập chuyên môn A1 còn C2 trước. Gửi lại K1 và cùng input trả R1; không thêm dòng request hay email.
@@ -459,9 +460,9 @@ CREATE INDEX "IX_ConsultationRequest_ArchitectId" ON "ConsultationRequest" ("Arc
 ```
 
 - **EF mapping:** ba entity chính ánh xạ `Version.IsConcurrencyToken()`, Guid ValueGeneratedNever, varchar/length/nullability/check/FK theo DDL; link có HasKey hai cột. Có DbSet riêng và configuration assembly scan hiện có. Repository lock dùng SQL có tham số, không ghép Id vào SQL. Khởi tạo Version/Id trong handler; khi cập nhật kiểm expectedVersion và đặt OriginalValue của token theo bản client đã đọc. Catch lỗi concurrency sau SaveChanges phải ở biên bao ngoài TransactionPipelineBehavior, vì CompleteAsync có thể là nơi ném. Chuyển thành 409 sau rollback; không chạy tiếp SELECT trong transaction PostgreSQL đã lỗi.
-- **Migration:** thêm bốn bảng và index, không backfill KTS/category từ dữ liệu minh họa website. User không đổi schema; chỉ đổi DTO me. Bảng Outbox/Inbox đã có trong migration hiện tại nên không tạo lại. Thêm bốn Permission và RolePermission admin, cập nhật PermissionNames.All cùng phiên bản ứng dụng. Schema của RolePermission xem [RolePermissionConfiguration.cs](../../bmt-be/src/bmt-be.persistence/configurations/RolePermissionConfiguration.cs); seed dùng Id admin đã có, không tự gán quyền cho khách.
+- **Migration:** thêm bốn bảng và index, không backfill KTS/category từ dữ liệu minh họa website. User không đổi schema; chỉ đổi DTO me. Bảng Outbox/Inbox đã có trong migration hiện tại nên không tạo lại. Thêm một Permission `consultation.manage` và một RolePermission cho admin, cập nhật PermissionNames.All cùng phiên bản ứng dụng. Schema của RolePermission xem [RolePermissionConfiguration.cs](../../bmt-be/src/bmt-be.persistence/configurations/RolePermissionConfiguration.cs); seed dùng Id admin đã có, không tự gán quyền cho khách.
 - **Triển khai có kiểm soát:** kiểm migration history và catalog quyền hiện tại; xác định đúng phiên bản source/schema. Tạm dừng nhận ghi và drain app/worker cũ trước khi thêm mã quyền, vì bản cũ khởi động lại sẽ bị PermissionCatalogGuard chặn bởi mã mới. Chạy migration bằng bước riêng; triển khai bản mới có đúng catalog, policy, claims và kiểm phiên; khởi động, kiểm guard rồi mở traffic. Không mô tả đây là rolling deployment không gián đoạn. Muốn rolling cần một thiết kế tương thích catalog riêng, ngoài TDD này.
-- **Kiểm trước/sau:** thử migration trên PostgreSQL 15 riêng; đối chiếu bốn bảng, FK/check/index, số Permission tăng đúng bốn và các grant admin; kiểm không có hồ sơ thiếu link, category mồ côi hoặc hai receipt cùng khách/key. Thử race ẩn/gửi, gán/xóa category, sửa phiên bản và rollback request/outbox. Chưa thực hiện các kiểm tra runtime này.
+- **Kiểm trước/sau:** thử migration trên PostgreSQL 15 riêng; đối chiếu bốn bảng, FK/check/index, số Permission tăng đúng một (mã `consultation.manage`) và có đúng một grant admin cho mã này; kiểm không có hồ sơ thiếu link, category mồ côi hoặc hai receipt cùng khách/key. Thử race ẩn/gửi, gán/xóa category, sửa phiên bản và rollback request/outbox. Chưa thực hiện các kiểm tra runtime này.
 - **Phục hồi:** nếu chưa mở traffic thì có thể revert riêng seed mới và schema rỗng theo migration được review. Nếu đã có đơn/outbox thì không chạy Down xóa bảng; ưu tiên sửa tiến hoặc giữ dữ liệu và quay lại code tương thích. Quay về binary cũ vẫn phải xử lý catalog mới một cách có kiểm soát; không tắt guard để lách. Bản sao lưu phải gồm DB và hạ tầng lưu message; chưa có RPO/RTO hoặc thời hạn giữ PII được người dùng đặt ra, không tự tạo job xóa.
 
 ## Internal API
@@ -473,12 +474,12 @@ Tất cả đường dẫn dưới đây là hợp đồng đề xuất v1; Cart
 | Nhóm | Quyền/policy |
 | --- | --- |
 | Đọc hồ sơ public | AllowAnonymous; chỉ KTS đang hiện |
-| Quản trị hồ sơ | architect.manage |
-| Đọc category để chọn | architect.manage hoặc architect_category.manage |
-| Tạo/sửa/xóa category | architect_category.manage |
+| Quản trị hồ sơ | consultation.manage |
+| Đọc category để chọn | consultation.manage |
+| Tạo/sửa/xóa category | consultation.manage |
 | Gửi đơn | ConsultationCustomer, không đòi mua gói hoặc xác minh email bổ sung |
-| Đọc đơn quản trị | consultation.read |
-| Cập nhật đơn | consultation.update |
+| Đọc đơn quản trị | consultation.manage |
+| Cập nhật đơn | consultation.manage |
 
 - **GET** `/api/v1/architects` — Trang hồ sơ đang hiển thị; trả id, fullName, title, avatarUrl, yearsExperience, projectCount, introduction, categories[{id,name}].
 - **GET** `/api/v1/architects/{id}` — Hồ sơ đang hiển thị; 404 nếu không tồn tại hoặc bị ẩn.
@@ -685,6 +686,7 @@ Mặc định source hiện là 3 lần retry, khoảng đầu 5 giây, mỗi l�
 - STORY-CONSULT-001
 - STORY-CONSULT-002
 - STORY-CONSULT-003
+- STORY-RBAC-001
 
 ### Business Rules
 
@@ -693,6 +695,8 @@ Mặc định source hiện là 3 lần retry, khoảng đầu 5 giây, mỗi l�
 - BR-CONSULT-003
 - BR-CONSULT-004
 - BR-CONSULT-005
+- BR-RBAC-010
+- BR-RBAC-011
 
 ### Use Cases
 
@@ -708,3 +712,5 @@ Mặc định source hiện là 3 lần retry, khoảng đầu 5 giây, mỗi l�
 - Bằng chứng source và file dự kiến thay đổi nằm ở Architecture; DDL trong Data Model là đề xuất chưa thực thi.
 
 ## Change Log
+
+- 2026-09-25: Cập nhật theo US/BR đã chốt ngày 25/09/2026. Gộp bốn mã đề xuất `architect.manage`, `architect_category.manage`, `consultation.read`, `consultation.update` thành một mã `consultation.manage` (`RequiresAssignment=false`, seed cho admin) cho toàn bộ quản trị tư vấn KTS; sửa bảng quyền, mẫu dữ liệu Permission/RolePermission, migration và câu kiểm "số Permission tăng đúng bốn" thành tăng đúng một. Thêm Non-goal: tư vấn KTS miễn phí là kênh riêng, không thay cam kết tư vấn của gói (BR-CONSULT-002/Notes). Cập nhật hiện trạng code: 10 mã quyền, policy theo mã quyền và kiểm dấu phiên đã có; sửa liên kết migration `InitialRbac`. Bổ sung tham chiếu STORY-RBAC-001, BR-RBAC-010, BR-RBAC-011.

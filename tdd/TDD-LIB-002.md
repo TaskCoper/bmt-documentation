@@ -99,7 +99,7 @@ flowchart LR
 
 **Quyền và biên dữ liệu**
 
-Admin preview bản nháp/current/old khi có library.manage không tính quota và không tạo lịch sử khách. Không dùng preview quản trị để cấp quyền xem cho tài khoản khách. Khách mở chi tiết/history phải có phiên Customer hợp lệ; AccountId lấy từ phiên, không nhận từ body. Phiên bị khóa/thu hồi vẫn bị từ chối: xem lại miễn gói không có nghĩa bỏ kiểm xác thực.
+Người có `library.manage` (kiểm theo mã quyền, không theo tên vai trò Admin; BR-RBAC-001, BR-RBAC-011) preview bản nháp/current/old không tính quota và không tạo lịch sử khách. Không dùng preview quản trị để cấp quyền xem cho tài khoản khách. Khách mở chi tiết/history phải có phiên Customer hợp lệ; AccountId lấy từ phiên, không nhận từ body. Phiên bị khóa/thu hồi vẫn bị từ chối: xem lại miễn gói không có nghĩa bỏ kiểm xác thực.
 
 Permission library.manage được định nghĩa tại TDD-LIB-001; endpoint khách lấy AccountId từ phiên, không từ body. POST mở dùng cookie cần CSRF/Origin như nền tảng chung. Danh sách và thumbnail công khai theo TDD-LIB-001 không được trả manifest bảo vệ.
 
@@ -112,7 +112,7 @@ Luồng mở lần đầu:
 1. Xác thực. Đọc Access trước: nếu đã có thì mở đúng phiên bản miễn lượt, không kiểm IsHidden/gói/current như điều kiện mở mới. Không lấy bytes phản hồi cũ từ UsageOperation; đọc nội dung hiện tại của VersionId đó.
 2. Nếu chưa có Access: cần `confirmUse=true`, VersionId cụ thể và expectedEditVersion lấy từ access-info. Không tự thay bằng phiên bản mới nhất sau khi khách xác nhận. Kiểm sơ bộ gói/quyền để tránh chuẩn bị cho yêu cầu chắc chắn bị từ chối.
 3. Chuẩn bị manifest nội dung và kiểm tài nguyên sẵn sàng ngoài transaction ghi; chỉ đọc metadata theo trang và thăm dò object, không tải hết bytes vào RAM. Tất cả asset tham chiếu phải có metadata Ready và object có thể đọc khi chuẩn bị. Có thể xử lý theo lô; không áp giới hạn nghiệp vụ số file. Lỗi chuẩn bị chưa cấp Access, chưa trừ lượt. Chưa gửi nội dung bảo vệ cho khách.
-4. CommitLibraryOpenCommand dùng transaction ngắn, thứ tự khóa bên dưới. Đọc lại Access sau khi lấy khóa account; nếu đã có do yêu cầu khác thắng thì không tính thêm; kết thúc transaction và đọc lại manifest theo EditVersion mới nếu bản chuẩn bị đã cũ, không gửi dữ liệu chuẩn bị lỗi thời. Nếu chưa có, kiểm gói current còn hiệu lực, LifecycleState cho phép dùng, quyền `catalog.detail`, số dư hữu hạn `Limit-Used-Reserved>0` hoặc unlimited; kiểm Template vẫn công khai và VersionId vẫn current, EditVersion vẫn khớp dữ liệu đã chuẩn bị.
+4. CommitLibraryOpenCommand dùng transaction ngắn, thứ tự khóa bên dưới. Đọc lại Access sau khi lấy khóa AccountCommerceState của khách; nếu đã có do yêu cầu khác thắng thì không tính thêm; kết thúc transaction và đọc lại manifest theo EditVersion mới nếu bản chuẩn bị đã cũ, không gửi dữ liệu chuẩn bị lỗi thời. Nếu chưa có, kiểm gói current còn hiệu lực, LifecycleState cho phép dùng, quyền `catalog.detail`, số dư hữu hạn `Limit-Used-Reserved>0` hoặc unlimited; kiểm Template vẫn công khai và VersionId vẫn current, EditVersion vẫn khớp dữ liệu đã chuẩn bị.
 5. Ghi UsageOperation Succeeded cho TemplateDetail, tăng Used đúng 1 và tạo Access trong cùng transaction. Unlimited vẫn ghi Used phục vụ thống kê nhưng không bị chặn bởi Limit; Reserved không đổi. Commit trước khi trả chi tiết.
 6. Mất phản hồi sau commit: lần sau Access đã tồn tại nên mở miễn lượt, kể cả khác key, khác kỳ, hết hạn hoặc mẫu đã ẩn. Không thêm API trình duyệt xác nhận nhận đủ bytes rồi mới tính lượt.
 
@@ -126,12 +126,14 @@ Mọi ghi dùng PostgreSQL READ COMMITTED và cùng connection/UoW. Cách lấy 
 
 | Luồng | Thứ tự khóa, đọc lại và commit |
 |---|---|
-| Mở mới | User khách FOR UPDATE → dữ liệu kỳ/quota theo thứ tự TDD-SUB-002 → Template FOR SHARE → Version FOR SHARE. Đọc lại quyền Access ngay sau khóa User; không lấy khóa catalog vì phân loại version đã ghim. |
+| Mở mới | AccountCommerceState của khách FOR UPDATE (tạo trước bằng INSERT ON CONFLICT DO NOTHING nếu chưa có, theo TDD-PAY-001) → dữ liệu kỳ/quota theo thứ tự TDD-SUB-002 → Template FOR SHARE → Version FOR SHARE. Đọc lại quyền Access ngay sau khóa AccountCommerceState; không lấy khóa catalog vì phân loại version đã ghim. |
 | Mutation quản trị | User người thao tác FOR UPDATE để tuần tự receipt → EstimateCatalog FOR SHARE khi cần revalidate → Template FOR UPDATE → Version theo Id tăng dần. Không lấy khóa account khách hoặc quota sau Template. |
 | Thay đổi catalog | Theo PROJ, khóa singleton catalog và tạo revision mới; không quay ngược đọc/khóa Template của LIB. |
 | Xem lại/đọc nội dung | SELECT projection nhất quán; nhiều truy vấn metadata dùng read-only REPEATABLE READ ngắn hoặc một truy vấn; commit trước mở stream. Không giữ transaction lúc truyền file. |
 
-Khóa SHARE trên Template/Version cho nhiều khách mở cùng mẫu nhưng chặn sửa/ẩn/công bố chen vào đoạn commit. Hai lần mở cùng tài khoản nối đuôi ở User; lần sau thấy Access, không bị báo hết lượt chỉ vì lần đầu vừa dùng lượt cuối. Hai phiên bản khác nhau tranh lượt cuối vẫn theo mutex account. UNIQUE bảo vệ lớp cuối nếu một đường ghi sai quy ước khóa.
+**Vì sao khóa AccountCommerceState thay cho User**: AccountCommerceState (TDD-PAY-001/Data Model) là điểm tuần tự hóa chung cho mọi thao tác đụng tới gói và lượt của một khách: mua, gán, hủy, khôi phục gói (TDD-PAY-001), nhận/chốt tác vụ AI (TDD-PROJ-002) và mở mẫu ở đây. Nếu luồng mở mẫu chỉ khóa User, một lần hủy/đổi gói khóa AccountCommerceState có thể chạy song song với lần trừ lượt tra cứu mà không phải chờ nhau, dẫn tới trừ lượt trên kỳ vừa bị thay. Khi mọi luồng lấy AccountCommerceState trước rồi mới tới kỳ/quota, các thao tác của cùng khách nối đuôi nhau và không tạo vòng chờ khóa. Luồng mở mẫu chỉ lấy khóa, không đổi cột nào của AccountCommerceState. Đánh đổi: mở mẫu phải chờ nếu cùng lúc khách đang thanh toán hoặc nhận AI; các transaction đều ngắn và không giữ khóa khi gọi kho tệp.
+
+Khóa SHARE trên Template/Version cho nhiều khách mở cùng mẫu nhưng chặn sửa/ẩn/công bố chen vào đoạn commit. Hai lần mở cùng tài khoản nối đuôi ở AccountCommerceState; lần sau thấy Access, không bị báo hết lượt chỉ vì lần đầu vừa dùng lượt cuối. Hai phiên bản khác nhau tranh lượt cuối vẫn theo mutex account. UNIQUE bảo vệ lớp cuối nếu một đường ghi sai quy ước khóa.
 
 Chuẩn bị xong nhưng EditVersion/current đổi: trả 409 LibraryVersionChanged trước ghi và không trừ lượt; UI tải access-info mới và yêu cầu xác nhận lại, không âm thầm mua bản khác. Nếu Access đã tồn tại thì không cần xác nhận mới; trả dữ liệu phiên bản đã có quyền. Khi rollback/deadlock, không thử lại riêng câu tăng Used; retry toàn transaction bằng cùng định danh mở, theo chính sách vận hành sẽ cấu hình. Không đặt retry vô hạn.
 
@@ -175,7 +177,7 @@ sequenceDiagram
         alt Chuẩn bị lỗi
             API-->>C: 503, chưa tính lượt
         else Sẵn sàng
-            API->>DB: Begin; khóa User và đọc lại Access
+            API->>DB: Begin, khóa AccountCommerceState và đọc lại Access
             alt Yêu cầu khác đã cấp quyền
                 API->>DB: Commit không ghi lượt
             else Chưa có quyền
@@ -202,7 +204,7 @@ flowchart TD
     D -->|Có| E[Chuẩn bị nội dung ngoài transaction]
     E --> F{Sẵn sàng?}
     F -->|Không| X
-    F -->|Có| G[Khóa account; đọc lại Access]
+    F -->|Có| G[Khóa AccountCommerceState, đọc lại Access]
     G --> H{Access vừa được tạo?}
     H -->|Có| R
     H -->|Không| I{Kỳ quota current edit visibility hợp lệ?}
@@ -228,7 +230,7 @@ Sơ đồ áp dụng riêng từng cặp AccountId/VersionId; không thêm cột
 
 **Quy ước và bảng dùng lại**
 
-UUID, timestamptz/UTC, PascalCase, NN là NOT NULL; FK ON DELETE RESTRICT. Dùng lại LibraryTemplate/Version/Asset/VersionAsset theo [TDD-LIB-001/Data Model](TDD-LIB-001.md#data-model), gồm dữ liệu mẫu M1/V1/V2 và F1/F2/F3. Không định nghĩa lại các bảng nội dung. User từ RBAC; DesignPeriod/PeriodQuota/UsageOperation từ TDD-SUB-002 cùng LifecycleState TDD-SUB-005. Tài khoản từ phiên là biên cách ly, không thêm tenant.
+UUID, timestamptz/UTC, PascalCase, NN là NOT NULL; FK ON DELETE RESTRICT. Dùng lại LibraryTemplate/Version/Asset/VersionAsset theo [TDD-LIB-001/Data Model](TDD-LIB-001.md#data-model), gồm dữ liệu mẫu M1/V1/V2 và F1/F2/F3. Không định nghĩa lại các bảng nội dung. User từ RBAC; DesignPeriod/PeriodQuota/UsageOperation từ TDD-SUB-002 cùng LifecycleState TDD-SUB-005. AccountCommerceState theo [TDD-PAY-001/Data Model](TDD-PAY-001.md#data-model): luồng mở mẫu chỉ dùng dòng của khách làm khóa tuần tự hóa, không ghi cột nào. Tài khoản từ phiên là biên cách ly, không thêm tenant.
 
 **LibraryAccess — quyền xem của tài khoản**
 
@@ -265,6 +267,7 @@ Dữ liệu giả định, bí danh thay UUID, lược cột; không phải SQL 
 
 | Bảng | Dòng dữ liệu lưu thực tế (cột chọn lọc) |
 |---|---|
+| AccountCommerceState (dùng lại) | AccountId=U1; các cột thứ tự đơn giữ nguyên trước và sau khi mở mẫu. Luồng mở chỉ khóa FOR UPDATE dòng này; mẫu cột đầy đủ tại TDD-PAY-001/Data Model. |
 | UsageOperation | Id=OP1; AccountId=U1; PeriodId=DP1; BenefitId=quyền catalog.detail; UsageKind=TemplateDetail; ResourceId=M1; TemplateVersionId=V1; OperationKey=lib-open:V1 (V1 thực tế là UUID); State=Succeeded; AcceptedAtUtc=SettledAtUtc=T2; ContentVersion=1; ResponseBody/ResponseContentType/DeadlineUtc=NULL. RequestHash là SHA-256 bộ định danh. |
 | LibraryAccess | AccountId=U1; VersionId=V1; UsageOperationId=OP1. Không có cột số dư hoặc nội dung. |
 
@@ -355,6 +358,7 @@ Chuẩn bị nội dung lỗi trước commit không tính lượt. Lỗi tải 
 - STORY-LIB-002
 - STORY-LIB-003
 - STORY-SUB-001
+- STORY-RBAC-001/Preconditions
 
 ### Business Rules
 
@@ -363,6 +367,7 @@ Chuẩn bị nội dung lỗi trước commit không tính lượt. Lỗi tải 
 - BR-LIB-003/Then
 - BR-SUB-005/Then
 - BR-SUB-017/Then
+- BR-RBAC-001/Then
 - BR-RBAC-010/Then
 - BR-RBAC-011/Then
 
@@ -380,7 +385,10 @@ Chuẩn bị nội dung lỗi trước commit không tính lượt. Lỗi tải 
 - [TDD-SUB-002](TDD-SUB-002.md) — kỳ/quota; phần tra cứu được cập nhật theo TDD này.
 - [TDD-SUB-005](TDD-SUB-005.md) — LifecycleState khi kiểm hiệu lực kỳ.
 - [TDD-RBAC-001](TDD-RBAC-001.md) — policy/permission; LIB thêm quyền không cần Assignment.
+- [TDD-PAY-001](TDD-PAY-001.md) — AccountCommerceState và thứ tự khóa thống nhất; [TDD-PROJ-002](TDD-PROJ-002.md) dùng cùng thứ tự khi nhận AI.
 - Hiện trạng code: `bmt-be/src/bmt-be.persistence/ApplicationDbContext.cs`, `bmt-be/src/bmt-be.application/behaviors/TransactionPipelineBehavior.cs`, `bmt-be/src/bmt-be.persistence/repositories/EFUnitOfWork.cs`, `bmt-be/src/bmt-be.persistence/dependencyInjection/extensions/ServiceCollectionExtensions.cs`, `bmt-be/src/bmt-be.contract/constants/PermissionNames.cs`.
 - Chưa hoàn tất rà soát toàn bộ chuỗi phụ thuộc ngoài LIB; các UT-SUB và phần TDD-SUB lịch sử về bytes replay cần đối chiếu khi cập nhật thiết kế được chốt. Không dùng ghi chú cũ để ghi đè BR-LIB-003.
 
 ## Change Log
+
+- 2026-09-25: Đổi khóa đầu tiên của luồng mở mẫu lần đầu từ User khách sang AccountCommerceState, theo thứ tự thống nhất AccountCommerceState → kỳ/quota → Template/Version như TDD-PROJ-002 và TDD-PAY-001; cập nhật sơ đồ, mẫu dữ liệu và giải thích lý do. Ghi rõ quyền preview là `library.manage`, kiểm theo mã quyền; bổ sung tham chiếu STORY-RBAC-001, BR-RBAC-001 và TDD-PAY-001. Quy tắc tra cứu BR-LIB-003 không đổi.

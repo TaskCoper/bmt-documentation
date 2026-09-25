@@ -77,7 +77,7 @@ Dùng cùng hiện trạng .NET 8, EF Core/Npgsql 8, PostgreSQL 15 và các thi�
 
 | Thành phần dự kiến | Trách nhiệm |
 | --- | --- |
-| NewsCategoryApi | API đọc công khai và quản trị; quản trị dùng cùng news.manage, không Assignment. |
+| NewsCategoryApi | API đọc công khai và quản trị; quản trị dùng cùng news.manage (tên quyền đã chốt theo STORY-RBAC-001), không Assignment. Policy kiểm theo mã quyền, không theo tên vai trò "Admin" (BR-RBAC-001, BR-RBAC-011). |
 | NewsCategoryService | Tạo, đổi tên, chuyển cha, đổi thứ tự, xóa; kiểm cây, tên và Version. |
 | NewsCategoryNamePolicy | Chuẩn hóa tên để so trùng, giữ dấu tiếng Việt và kiểm tên bắt buộc. |
 | INewsTreeLock | Lấy advisory transaction lock cùng key: exclusive khi ghi cây, shared khi ghi bài/liên kết. |
@@ -145,7 +145,7 @@ Contract INewsCategoryReader.GetDescendantIdsQuery(categoryId) trả truy vấn 
 
 Mô tả SQL để triển khai trong NewsReadRepository, không phải kết quả đã thực thi: `WITH RECURSIVE subtree AS (SELECT "Id" FROM "NewsCategory" WHERE "Id"=@categoryId UNION SELECT c."Id" FROM "NewsCategory" c JOIN subtree s ON c."ParentId"=s."Id") SELECT a."Id",a."Title",a."FirstPublishedAtUtc" FROM "NewsArticle" a WHERE a."State"='Published' AND EXISTS (SELECT 1 FROM "NewsArticleCategory" ac JOIN subtree s ON s."Id"=ac."CategoryId" WHERE ac."ArticleId"=a."Id") ORDER BY a."FirstPublishedAtUtc" DESC,a."Id" DESC LIMIT @take OFFSET @skip`.
 
-Predicate tìm title được thêm trước ORDER BY; count dùng cùng subtree/EXISTS/keyword. Không có categoryId thì bỏ CTE/EXISTS; không tự thay bằng cây gốc nào. Dùng UNION/EXISTS nên bài N1 gắn C1 và C2 vẫn chỉ có một dòng trước phân trang. Lọc C2 không kéo bài chỉ gắn C1 vào. Sau chuyển C2 sang C3, lần truy vấn mới dùng ParentId mới, không chờ dựng lại bản sao cây.
+Predicate tìm title được thêm trước ORDER BY; count dùng cùng subtree/EXISTS/keyword. Không có categoryId thì bỏ CTE/EXISTS; không tự thay bằng cây gốc nào. categoryId không tồn tại làm subtree rỗng nên kết quả là danh sách rỗng, không phải lỗi 404 (BR-NEWS-003 khoản 5, TDD-NEWS-001/Architecture). Dùng UNION/EXISTS nên bài N1 gắn C1 và C2 vẫn chỉ có một dòng trước phân trang. Lọc C2 không kéo bài chỉ gắn C1 vào. Sau chuyển C2 sang C3, lần truy vấn mới dùng ParentId mới, không chờ dựng lại bản sao cây.
 
 **Kiểm chứng và triển khai**
 
@@ -227,7 +227,7 @@ NewsCategory lưu một danh mục hiện tại trong cây Tin tức, tạo/cậ
 | --- | --- |
 | NewsCategory | Id uuid PK; ParentId uuid NULL FK NewsCategory ON DELETE RESTRICT; Name varchar(200) NN; NameKey varchar(200) COLLATE "C" NN; SortOrder bigint NN DEFAULT 0 CHECK >=0; Version bigint NN DEFAULT 1 CHECK >0; CreatedBy,ModifiedBy uuid NN FK User ON DELETE RESTRICT; CreatedAtUtc,ModifiedAtUtc timestamptz NN. CHECK ParentId IS NULL OR ParentId<>Id; CHECK btrim(Name)<>'' AND btrim(NameKey)<>''. |
 
-Giới hạn kỹ thuật đã được người dùng chốt cùng TDD: tên danh mục tối đa 200 ký tự Unicode sau trim/chuẩn hóa; validator FE và BE đếm Unicode scalar, kiểm cả Name và NameKey trước ghi, quá dài trả 422 và không cắt ngắn. Giới hạn này giúp unique index có kích thước an toàn và không liên quan đến số cấp của cây. Người dùng đã xác nhận giới hạn này trong lượt chốt TDD.
+Tên danh mục tối đa 200 ký tự sau trim/chuẩn hóa theo BR-NEWS-002 khoản 1 và STORY-NEWS-002/AC-008; tên vượt giới hạn bị từ chối, không tự cắt ngắn. Validator FE và BE đếm Unicode scalar, kiểm cả Name và NameKey trước ghi, quá dài trả 422 InvalidNewsCategory. Ví dụ tên 200 ký tự được lưu; tên 201 ký tự bị từ chối và danh mục giữ nguyên tên, vị trí. Giới hạn này cũng giúp unique index có kích thước an toàn và không liên quan đến số cấp của cây.
 
 Đề xuất unique index `UX_NewsCategory_Parent_NameKey` trên (ParentId,NameKey) NULLS NOT DISTINCT để cả gốc ParentId=NULL cũng duy nhất. PostgreSQL 15 hỗ trợ tùy chọn này; nếu EF mapping không sinh đúng thì migration dùng SQL chỉ cho index này. Không dùng UNIQUE mặc định rồi bỏ lọt trùng tên gốc. [PostgreSQL 15 unique constraints](https://www.postgresql.org/docs/15/ddl-constraints.html).
 
@@ -338,18 +338,24 @@ Error Response:
 - STORY-NEWS-002
 - STORY-NEWS-001
 - STORY-NEWS-003
+- STORY-RBAC-001/Preconditions
 
 ### Business Rules
 
 - BR-NEWS-001/Then
 - BR-NEWS-002/Then
 - BR-NEWS-003/Then
+- BR-RBAC-001/Then
+- BR-RBAC-011/Then
 
 ### Use Cases
 
+- STORY-NEWS-002/EXC-01
+- STORY-NEWS-002/AC-008
+
 ### Others
 
-- Xác nhận thiết kế: Người dùng đã chốt hai TDD Tin tức trong hội thoại, gồm tên danh mục tối đa 200 ký tự Unicode. Status Draft vẫn giữ theo quy trình import; không thay cho phê duyệt trên hệ thống.
+- Xác nhận thiết kế: Người dùng đã chốt hai TDD Tin tức trong hội thoại. Giới hạn tên danh mục tối đa 200 ký tự sau trim lấy theo BR-NEWS-002 khoản 1 và STORY-NEWS-002/AC-008. Status Draft vẫn giữ theo quy trình import; không thay cho phê duyệt trên hệ thống.
 - Unit Test: [Độ phủ kiểm thử đơn vị Tin tức](../discovery/news-unit-test-coverage.md).
 
 - Bài viết: [TDD-NEWS-001](TDD-NEWS-001.md).
@@ -360,3 +366,5 @@ Error Response:
 - Code nguồn: `bmt-be/src/bmt-be.persistence/ApplicationDbContext.cs`, `bmt-be/src/bmt-be.contract/abstractions/shared/PagedResult.cs`, `bmt-be/src/bmt-be.contract/constants/PermissionNames.cs`; nền tảng transaction và auth đã đối chiếu tại TDD-NEWS-001/Architecture.
 
 ## Change Log
+
+- 2026-09-25: Giới hạn tên danh mục 200 ký tự dẫn căn cứ BR-NEWS-002 khoản 1 và STORY-NEWS-002/AC-008 thay cho ghi chú “người dùng chốt cùng TDD”; thêm ví dụ biên 200/201 ký tự. Ghi rõ lọc theo categoryId không tồn tại trả danh sách rỗng. Ghi `news.manage` là tên quyền đã chốt, kiểm theo mã quyền; bổ sung tham chiếu STORY-RBAC-001, BR-RBAC-001, BR-RBAC-011 và Use Cases của STORY-NEWS-002. Schema và API không đổi.

@@ -106,7 +106,7 @@ flowchart LR
 
 **Quyền và biên dữ liệu**
 
-Đề xuất mã `news.manage`, RequiresAssignment=false. Thêm PermissionNames, bản ghi Permission qua migration và policy có hiệu lực tại backend; cấp cho Admin theo cơ chế vai trò hệ thống, các vai trò khác qua quản lý quyền hiện có. Không tạo quyền danh mục riêng, không yêu cầu Assignment. ActorId lấy từ phiên; client không được đặt CreatedBy, thời điểm công bố hoặc trạng thái qua DTO lưu nội dung.
+Mã quyền `news.manage` là quyền quản lý tin tức đã chốt tên theo STORY-RBAC-001/Preconditions, RequiresAssignment=false; vai trò Admin có quyền này. Policy kiểm theo mã quyền, không kiểm tên vai trò "Admin" (BR-RBAC-001, BR-RBAC-011); thiếu quyền trả 403 và không ghi dữ liệu nghiệp vụ. Thêm PermissionNames, bản ghi Permission qua migration và policy có hiệu lực tại backend; cấp cho Admin theo cơ chế vai trò hệ thống, các vai trò khác qua quản lý quyền hiện có. Không tạo quyền danh mục riêng, không yêu cầu Assignment. ActorId lấy từ phiên; client không được đặt CreatedBy, thời điểm công bố hoặc trạng thái qua DTO lưu nội dung.
 
 Quản trị phải có phiên hợp lệ, tài khoản không bị khóa/buộc đổi mật khẩu và quyền hiện hành. Khi chưa có cơ chế RBAC hoàn chỉnh, cần bổ sung trước mở route; không thay kiểm quyền bằng việc chỉ kiểm đăng nhập. Public API dùng AllowAnonymous và chỉ truy vấn Published; cookie hết hạn/không có gói không biến việc đọc công khai thành yêu cầu đăng nhập. Mutation dùng cookie phải kiểm antiforgery token và Origin được cấu hình, không dùng CORS thay cho chống CSRF. Đây là phần bổ sung nền tảng chưa được xác minh là đã tồn tại.
 
@@ -140,7 +140,7 @@ POST tạo bài không tự động retry: FE khóa nút khi đang gửi; nếu 
 
 GET danh sách chỉ chọn Id, Title, Summary, CoverImageUrl, FirstPublishedAtUtc và các danh mục được gắn; không lấy ContentHtml hoặc audit actor. Detail chọn cùng metadata và ContentHtml; không chấp nhận tham số trạng thái để vượt Published. Không gọi quota, không tạo Access hoặc lượt đọc.
 
-Tìm title bằng ILIKE có tham số và escape ký tự %, _, backslash để từ khóa là văn bản thường; không tìm mô tả/nội dung. Lọc một categoryId dùng tập con TDD-NEWS-002 rồi EXISTS trên bảng liên kết, vì EXISTS không nhân bản bài như JOIN nhiều danh mục. CategoryId không tồn tại trả 404 NewsCategoryNotFound để FE bỏ bộ lọc cũ; tồn tại nhưng không có bài trả trang rỗng.
+Tìm title bằng ILIKE có tham số và escape ký tự %, _, backslash để từ khóa là văn bản thường; không tìm mô tả/nội dung. Lọc một categoryId dùng tập con TDD-NEWS-002 rồi EXISTS trên bảng liên kết, vì EXISTS không nhân bản bài như JOIN nhiều danh mục. CategoryId không tồn tại (ví dụ danh mục vừa bị xóa khi người đọc còn giữ bộ lọc cũ) được xử lý như không có bài khớp: CTE chỉ có tập rỗng nên trả trang rỗng với TotalCount=0, không trả 404, theo BR-NEWS-003 khoản 5. Danh mục tồn tại nhưng không có bài cũng trả trang rỗng. FE có thể gọi `GET /api/v1/news/categories/{id}` của TDD-NEWS-002 nếu cần biết nhãn bộ lọc còn tồn tại hay không.
 
 Sort FirstPublishedAtUtc DESC, Id DESC. PageIndex mặc định 1, PageSize 10, tối đa 100 theo PagedResult hiện có; <=0 về mặc định, vượt 100 clamp về 100. Kiểm phép tính offset không tràn Int32; input không biểu diễn được trả 422. Count và items phải dùng cùng predicate và snapshot: read-only REPEATABLE READ ngắn nếu hai truy vấn, không giữ transaction khi trả response. Projection danh mục có thể truy vấn theo tập ID của trang, không N+1 và không bị JOIN làm tăng TotalCount. Không hứa snapshot xuyên nhiều lần chuyển trang khi dữ liệu đang thay đổi.
 
@@ -289,7 +289,7 @@ Migration triển khai tạo Category trước, Article sau rồi link; dùng EF
 
 Các route dưới đây là contract đề xuất v1, không khẳng định endpoint presign hiện có trùng tên. Carter dùng /api/v{version:apiVersion}. Quản trị yêu cầu news.manage; mutation kiểm CSRF khi dùng cookie. JSON field camelCase; UUID dạng chuỗi. Response dưới đây mô tả payload; endpoint giữ envelope Result của repo nếu đang dùng, không bọc PagedResult thêm một lần.
 
-- **GET** `/api/v1/news/articles` — Public; query keyword, categoryId, pageIndex, pageSize. Trả PagedResult<ArticleSummary> chỉ Published; không có contentHtml hoặc thông tin người quản trị.
+- **GET** `/api/v1/news/articles` — Public; query keyword, categoryId, pageIndex, pageSize. Trả PagedResult<ArticleSummary> chỉ Published; không có contentHtml hoặc thông tin người quản trị. categoryId không tồn tại trả danh sách rỗng, không trả 404.
 - **GET** `/api/v1/news/articles/{id}` — Public; ArticleDetail gồm id,title,summary,coverImageUrl,contentHtml,firstPublishedAtUtc,categories. Không Published hoặc không tồn tại trả 404.
 - **GET** `/api/v1/admin/news/articles` — Có quyền; query keyword,state,pageIndex,pageSize. Trả metadata và version theo ModifiedAtUtc DESC,Id DESC; không trả toàn bộ rich text trong danh sách.
 - **GET** `/api/v1/admin/news/articles/{id}` — Có quyền; trả toàn bộ nội dung, state,version,categoryIds và metadata thời điểm để soạn/đối chiếu.
@@ -350,7 +350,6 @@ Error Response:
 - **AccessForbidden** (403): Không có news.manage; quyền đọc public không cho phép mutation.
 - **CsrfRejected** (403): Mutation dùng cookie không có antiforgery token/Origin hợp lệ.
 - **NewsArticleNotFound** (404): Không có bài; trên public còn áp dụng cho bài không Published.
-- **NewsCategoryNotFound** (404): Category bộ lọc không còn tồn tại.
 - **NewsVersionConflict** (409): expectedVersion cũ; giữ dữ liệu hiện hành.
 - **NewsStateConflict** (409): Thao tác trạng thái không được phép, ví dụ ẩn Draft.
 - **InvalidNewsContent** (422): Thiếu nội dung bắt buộc, URL không hợp lệ, danh mục lưu không tồn tại hoặc DTO sai định dạng.
@@ -395,7 +394,9 @@ Không mở SQL transaction khi gọi cloud. Upload xong nhưng lưu bài thất
 ### User Stories
 
 - STORY-NEWS-001
+- STORY-NEWS-002
 - STORY-NEWS-003
+- STORY-RBAC-001/Preconditions
 
 ### Business Rules
 
@@ -403,12 +404,14 @@ Không mở SQL transaction khi gọi cloud. Upload xong nhưng lưu bài thất
 - BR-NEWS-001/Except
 - BR-NEWS-002/Then
 - BR-NEWS-003/Then
+- BR-RBAC-001/Then
+- BR-RBAC-011/Then
 
 ### Use Cases
 
 ### Others
 
-- Xác nhận thiết kế: Người dùng đã chốt hai TDD Tin tức trong hội thoại, gồm tên danh mục tối đa 200 ký tự Unicode. Status Draft vẫn giữ theo quy trình import; không thay cho phê duyệt trên hệ thống.
+- Xác nhận thiết kế: Người dùng đã chốt hai TDD Tin tức trong hội thoại. Giới hạn tên danh mục tối đa 200 ký tự sau trim lấy theo BR-NEWS-002 khoản 1 và STORY-NEWS-002/AC-008. Status Draft vẫn giữ theo quy trình import; không thay cho phê duyệt trên hệ thống.
 - Unit Test: [Độ phủ kiểm thử đơn vị Tin tức](../discovery/news-unit-test-coverage.md).
 
 - Danh mục: [TDD-NEWS-002](TDD-NEWS-002.md).
@@ -419,3 +422,5 @@ Không mở SQL transaction khi gọi cloud. Upload xong nhưng lưu bài thất
 - An toàn rich text: [OWASP XSS Prevention](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html).
 
 ## Change Log
+
+- 2026-09-25: Lọc tin theo categoryId không tồn tại trả danh sách rỗng như BR-NEWS-003 khoản 5, không trả 404; bỏ mã lỗi `NewsCategoryNotFound` khỏi API bài viết (mã này vẫn dùng cho API danh mục ở TDD-NEWS-002). Ghi `news.manage` là tên quyền đã chốt theo STORY-RBAC-001, kiểm theo mã quyền. Giới hạn tên danh mục 200 ký tự dẫn căn cứ BR-NEWS-002 khoản 1 và STORY-NEWS-002/AC-008. Bổ sung tham chiếu STORY-NEWS-002, STORY-RBAC-001, BR-RBAC-001 và BR-RBAC-011.
