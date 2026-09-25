@@ -36,7 +36,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Rule Info
 
-- **Name**: Nhân viên có quyền riêng được hủy hiệu lực cả hai loại gói.
+- **Name**: Nhân viên có quyền riêng được hủy hiệu lực cả hai loại gói; hủy không hoàn tác được.
 - **Category**: Thanh toán và gói dịch vụ
 - **Status**: Draft
 - **Version**:
@@ -48,7 +48,9 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Statement
 
-Nhân viên có quyền riêng được hủy hiệu lực gói thiết kế hoặc giám sát, bắt buộc nhập lý do. Hủy có hiệu lực ngay và giữ lịch sử.
+**Cập nhật 25/09/2026:** Người dùng bỏ thao tác khôi phục cho cả gói thiết kế và gói giám sát; [BR-SUB-025](BR-SUB-025.md) không còn áp dụng. Hủy là thao tác cuối cùng. Hủy gói giám sát kết thúc phân công của gói, và gói đã hủy không còn khóa việc sửa hoặc xóa công trình.
+
+Nhân viên có quyền riêng được hủy hiệu lực gói thiết kế hoặc giám sát, bắt buộc nhập lý do. Hủy có hiệu lực ngay, không hoàn tác được và giữ lịch sử.
 
 ## When
 
@@ -57,12 +59,15 @@ Nhân viên yêu cầu hủy một gói đã cấp.
 ## Then
 
 1. Kiểm tra quyền riêng và lý do; không mặc định mọi nhân viên được hủy. Thiếu quyền hoặc lý do thì từ chối, giữ nguyên gói.
-2. Cho phép hủy gói giám sát chưa gán, đã gán hoặc đã hoàn thành, cũng như gói thiết kế. Gói bị hủy không còn cấp quyền sử dụng mới.
-3. Hủy gói giám sát đã gán hoặc đã hoàn thành thì công trình được nhận gói giám sát khác; giữ lịch sử gói, trạng thái trước khi hủy và thao tác hủy.
+2. Cho phép hủy gói giám sát chưa gán, đã gán hoặc đã hoàn thành, cũng như gói thiết kế. Gói đã hủy không còn cấp quyền sử dụng mới.
+3. Hủy gói giám sát đã gán hoặc đã hoàn thành thì gói nhả chỗ và công trình được nhận gói giám sát khác. Gói đã hủy không khóa việc sửa hoặc xóa công trình theo [BR-SITE-002](BR-SITE-002.md). Giữ lịch sử gói, trạng thái trước khi hủy, thao tác hủy, cùng tên và địa chỉ công trình tại lúc hủy.
 4. Hệ thống không chuyển tiền, không đánh dấu đã hoàn tiền và không tự cấp lại gói từ quyết định hoàn tiền bên ngoài.
-5. Nếu khảo sát sau mua thấy công trình không phù hợp, nhân viên xử lý hoàn tiền/bù trừ bên ngoài và hủy hiệu lực gói trong hệ thống.
+5. Nếu khảo sát sau mua thấy công trình không phù hợp, nhân viên hoàn tiền hoặc bù trừ với khách bên ngoài hệ thống, chẳng hạn qua điện thoại, và hủy hiệu lực gói trong hệ thống.
 6. Hủy gói thiết kế mới không tự khôi phục gói cũ đã bị lần mua mới thay thế.
-7. Hủy gói giám sát không gỡ phân công của gói; nhân viên đang phụ trách vẫn giữ phân công theo [BR-RBAC-013](BR-RBAC-013.md) khoản 9 (người dùng xác nhận ngày 25/09/2026). Gói mới gắn vào cùng công trình sau đó cần phân công riêng.
+7. Hủy gói giám sát kết thúc ngay phân công đang hiệu lực của gói và ghi nhật ký phân công theo [BR-RBAC-013](BR-RBAC-013.md) khoản 9. Gói mới gắn vào cùng công trình sau đó cần phân công riêng.
+8. Không có thao tác khôi phục gói đã hủy, cho cả gói thiết kế và gói giám sát. Nếu hủy nhầm, nhân viên xử lý tiền với khách bên ngoài hệ thống; khách còn nhu cầu thì mua gói mới theo [STORY-PAY-001](../userstory/STORY-PAY-001.md).
+9. Khách vẫn thấy gói đã hủy trong danh sách gói của mình với trạng thái đã hủy. Nếu công trình của gói đã bị xóa, hiện tên công trình tại lúc hủy.
+10. Trước khi gửi yêu cầu hủy, giao diện hiện hộp xác nhận nói rõ việc hủy không hoàn tác được; nhân viên nhập lý do trong hộp này. Hệ thống vẫn kiểm tra quyền và lý do trên yêu cầu xử lý theo khoản 1, không chỉ dựa vào hộp xác nhận.
 
 ## Except
 
@@ -72,5 +77,7 @@ Tác vụ AI đã bắt đầu hợp lệ trước khi hủy được tiếp t�
 
 Hủy hiệu lực gói khác với hủy đơn chưa nhận tiền. Việc hoàn tiền không cần API hoặc màn hình xác nhận hoàn tiền trong phạm vi này.
 
+- Người dùng xác nhận ngày 25/09/2026: bỏ khôi phục cho cả hai loại gói; hủy nhầm thì xử lý tiền bên ngoài và khách mua lại nếu cần; có hộp xác nhận trước khi hủy; hủy gói giám sát kết thúc phân công; gói đã hủy không khóa sửa hoặc xóa công trình; trạng thái hiển thị là "đã hủy". Khoản 7 đổi từ “giữ phân công khi hủy” sang “kết thúc phân công khi hủy”; khôi phục theo BR-SUB-025 không còn áp dụng. Khoản 8 đến 10 thêm cùng ngày.
+- Hủy khác gỡ gói: gỡ theo [BR-SUB-026](BR-SUB-026.md) giữ gói dùng được để khách gán lại, còn hủy chấm dứt gói.
 - Bản nháp nghiệp vụ, chưa triển khai hoặc chạy kiểm thử. Tên Reviewer/Approver lấy theo xác nhận cho các bản nháp mới trong discovery/subscription-entitlements.md; không phải bằng chứng phê duyệt. Owner và ngày hiệu lực chưa được phân công/xác nhận.
 - [Tổng hợp quyết định và bảng truy vết](../discovery/payment-packages.md).

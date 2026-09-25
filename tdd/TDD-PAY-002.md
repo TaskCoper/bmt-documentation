@@ -57,10 +57,17 @@ STORY-PAY-002 cần Admin và nhân viên có quyền tra cứu riêng xem ai mu
 
 Module quản trị này chưa có trong mã nguồn. Phần nó phụ thuộc đã có từ commit `182e2a8` ngày 25/09/2026 trên nhánh `feature/construction-site` của `bmt-be`: bảng `ConstructionSite` theo [TDD-SITE-001](TDD-SITE-001.md), cột `SupervisionGrant.ConstructionSiteId` theo [TDD-SUB-004](TDD-SUB-004.md). API của khách `GET /api/v1/me/supervision-grants` đã trả `constructionSiteName`: `GetMySupervisionGrantsQueryHandler` đọc tên công trình của cả trang bằng một câu truy vấn theo danh sách `ConstructionSiteId`. Projection của tài liệu này có thể dùng cùng cách, cho kết quả như LEFT JOIN ở Data Model. Thiết kế dùng projection trực tiếp từ các bảng ở TDD-PAY-001, TDD-SUB-004/005, không thêm database báo cáo hoặc copy trạng thái sang bảng tổng hợp khác.
 
+**Cập nhật ngày 25/09/2026 (lần 3), chưa có trong code** (`bmt-be` nhánh `develop`, commit `1ffdfbf`). Người dùng chốt ba điểm ảnh hưởng tới phần tra cứu:
+
+- Nhân viên được gỡ gói giám sát khỏi công trình khi khách gán nhầm ([TDD-SUB-007](TDD-SUB-007.md), BR-SUB-026). Lịch sử gỡ (người gỡ, thời điểm, lý do, tên và địa chỉ công trình cũ) chỉ nhân viên có `commerce.read` xem được, cùng chỗ tra cứu gói đã mua (BR-PAY-005 khoản 4, BR-SUB-026 khoản 7). Quyền `supervision.unassign` không kèm quyền xem lịch sử này.
+- Bỏ thao tác khôi phục gói (BR-SUB-025 đã bỏ). Lịch sử không còn dòng khôi phục mới; dòng `Restore` cũ trong dữ liệu dev/test, nếu có, vẫn hiện.
+- Khách xóa được công trình chỉ còn gói đã hủy; khi đó gói mất liên kết công trình. Tên công trình của gói đã hủy lấy từ bản lưu trong sự kiện hủy ([TDD-SUB-005](TDD-SUB-005.md#data-model)).
+
 ### Goals
 
 - Danh sách và chi tiết truy được khách–gói–đơn–giao dịch đúng, không làm mất gói chưa gán hoặc lần mua bị thay thế trước kích hoạt.
-- Kiểm quyền ở server cho mọi query; quyền xem độc lập với hủy/restore. Hệ thống không có thao tác đổi công trình của gói (BR-SUB-009).
+- Kiểm quyền ở server cho mọi query; quyền xem độc lập với quyền hủy (`package.cancel`) và quyền gỡ gói (`supervision.unassign`). Hệ thống không có thao tác đổi thẳng công trình của gói (BR-SUB-009) hay khôi phục gói (BR-SUB-025 đã bỏ).
+- Lịch sử gói giám sát cho biết từng lần gỡ khỏi công trình, kèm tên và địa chỉ công trình cũ, kể cả khi công trình đó đã bị xóa (BR-PAY-005 khoản 4, STORY-SUB-006/AC-005).
 - Gói giám sát đã gán hiện tên công trình; `commerce.read` không mở quyền xem danh sách công trình của khách (BR-PAY-005 khoản 2).
 - Giao dịch chưa khớp hiện “Chưa xác định đơn”; không đoán người mua và không có thao tác gán tay.
 - Phân trang ổn định, không N+1, phân biệt tổng tiền thực nhận và tiền đủ điều kiện.
@@ -181,8 +188,8 @@ Module này không tạo thêm bảng. Một projection là kết quả chọn/g
 | PaymentOrder / PlanRevision | Một đơn mua và bản quyền lợi đã chốt cho đơn. | Ai đặt gói nào, giá tại lúc mua, trạng thái đơn; không lấy giá mới từ danh mục hiện hành. |
 | BankTransaction | Một giao dịch ngân hàng đã được hệ thống tiếp nhận. | Từng khoản chuyển, thời điểm, số tiền, tình trạng khớp/xử lý, kể cả không có OrderId. |
 | PaymentFulfillment | Một kết quả cấp quyền của lần mua. | Lịch sử mua thành công; có thể không có packageId nếu SupersededBeforeActivation. |
-| DesignPeriod / SupervisionGrant / ConstructionSite | Một kỳ thiết kế, một gói giám sát đã cấp và công trình liên quan nếu có. | Hiệu lực hiện tại, hạn/lượt, công trình đã gán; vắng công trình không làm mất lần mua. Projection LEFT JOIN `ConstructionSite` ([TDD-SITE-001](TDD-SITE-001.md#data-model)) theo `SupervisionGrant.ConstructionSiteId` để trả `constructionSiteId` và `constructionSiteName` là tên hiện tại. Chỉ lấy tên, không trả địa chỉ; gói chưa gán thì cả hai là null. |
-| PaymentEvent / PackageLifecycleEvent | Một mốc thanh toán; một lần hủy, khôi phục, hoàn thành hoặc mở lại. | Ghép lịch sử để giải thích quá trình sử dụng, không thêm trạng thái “đã hoàn tiền”. Mốc gán công trình lấy từ `SupervisionGrant.FirstAssignedAtUtc`, vì TDD-SUB-004 đã bỏ `SupervisionAssignmentEvent` (mỗi gói chỉ gán một lần, không đổi công trình). |
+| DesignPeriod / SupervisionGrant / ConstructionSite | Một kỳ thiết kế, một gói giám sát đã cấp và công trình liên quan nếu có. | Hiệu lực hiện tại, hạn/lượt, công trình đã gán; vắng công trình không làm mất lần mua. Projection LEFT JOIN `ConstructionSite` ([TDD-SITE-001](TDD-SITE-001.md#data-model)) theo `SupervisionGrant.ConstructionSiteId` để trả `constructionSiteId` và `constructionSiteName` là tên hiện tại. Gói đã hủy mà công trình đã bị xóa (`ConstructionSiteId` NULL) thì `constructionSiteName` lấy từ `PackageLifecycleEvent.ConstructionSiteName` của sự kiện mà `CancelEventId` trỏ tới. Gói chưa gán, kể cả gói vừa bị gỡ, thì cả hai là null. Chỉ lấy tên, không trả địa chỉ ở danh sách và chi tiết. |
+| PaymentEvent / PackageLifecycleEvent | Một mốc thanh toán; một lần nhân viên hủy, hoàn thành, mở lại hoặc gỡ gói khỏi công trình. Dòng `Restore` chỉ còn ở dữ liệu cũ. | Ghép lịch sử để giải thích quá trình sử dụng, không thêm trạng thái “đã hoàn tiền”. Dòng `Unassign` và dòng `Cancel` của gói giám sát có công trình mang bản lưu `ConstructionSiteId`, `ConstructionSiteName`, `ConstructionSiteAddress` tại lúc thao tác ([TDD-SUB-005](TDD-SUB-005.md#data-model)); lịch sử trả nguyên bản lưu này, không join lại `ConstructionSite`. Mốc gán lấy từ `SupervisionGrant.FirstAssignedAtUtc` (lần gán đầu) và `AssignedAtUtc` (lần gán hiện tại, NULL khi chưa gán) theo [TDD-SUB-004](TDD-SUB-004.md#data-model). Các lần gán nằm giữa hai lần gỡ không có dòng lịch sử riêng, chỉ có biên nhận `Assign`; mỗi lần gỡ đã lưu công trình cũ nên vẫn đủ để biết gói từng ở đâu. |
 | UserRole / RolePermission | Một lần một người giữ một vai trò, và một mã quyền thuộc vai trò đó. | Bảng dùng lại, định nghĩa ở [TDD-RBAC-001](TDD-RBAC-001.md#data-model). Thay cho `StaffAccessProfile` và `StaffPermission` của bản trước. Chúng quyết định request hiện tại có được đọc các dữ liệu trên không, nhưng ở đường chạy thực tế thì quyền đọc từ claim `perm` trong access token chứ không truy vấn lại hai bảng này. Không trả hồ sơ quyền trong DTO giao dịch. |
 
 **Mẫu dữ liệu nguồn → dữ liệu màn hình**
@@ -197,6 +204,8 @@ Các ID dưới đây là bí danh UUID, dữ liệu giả định. Cột “K�
 | Fulfillment O4: Kind=Design; Disposition=SupersededBeforeActivation; DesignPeriodId=NULL; SupervisionGrantId=NULL | purchaseId=O4; packageId=null; disposition=SupersededBeforeActivation | Vẫn có lần mua được ghi nhận dù không tạo kỳ hiệu lực. |
 | Fulfillment O5 trỏ G5; G5.State=Unassigned; G5.ConstructionSiteId=NULL; còn hạn gán | purchaseId=O5; packageId=G5; constructionSiteId=null; constructionSiteName=null; effectiveState=Unassigned | Khách đã mua gói giám sát nhưng chưa dùng cho công trình nào. |
 | Fulfillment O7 trỏ G7 của U2; G7.State=Assigned; G7.ConstructionSiteId=CS7; CS7.Name=Nhà Thủ Đức; U2 còn công trình CS8 “Nhà Gò Vấp” chưa có gói | purchaseId=O7; packageId=G7; constructionSiteId=CS7; constructionSiteName="Nhà Thủ Đức" | Nhân viên có `commerce.read` biết gói phục vụ công trình nào (STORY-PAY-002/AC-009). CS8 không xuất hiện ở đâu trong API này vì không có gói nào trỏ tới. |
+| Fulfillment O8 trỏ G8; G8.State=Unassigned; G8.ConstructionSiteId=NULL; G8.FirstAssignedAtUtc=2026-10-01T02:00:00Z; G8.AssignedAtUtc=NULL; PackageLifecycleEvent L8: Action=Unassign; ActorId=NV3; AtUtc=2026-10-05T03:00:00Z; Reason=Khách gán nhầm công trình; ConstructionSiteName=Nhà Thủ Đức; ConstructionSiteAddress=12 Võ Văn Ngân, TP. Thủ Đức | Chi tiết: packageId=G8; constructionSiteId=null; constructionSiteName=null. Lịch sử: một dòng gỡ với người gỡ NV3, thời điểm, lý do, công trình cũ "Nhà Thủ Đức" và địa chỉ | Gói đang chưa gán nên chi tiết không có công trình; công trình cũ chỉ hiện trong lịch sử, đúng STORY-SUB-006/AC-005. Khách xem gói của mình qua TDD-SUB-004 thì không thấy dòng lịch sử này. |
+| Fulfillment O9 trỏ G9; G9.State=CanceledByStaff; G9.ConstructionSiteId=NULL (khách đã xóa công trình); G9.CancelEventId=L9; L9: Action=Cancel; ConstructionSiteName=Nhà Gò Vấp | constructionSiteId=null; constructionSiteName="Nhà Gò Vấp"; effectiveState=CanceledByStaff | Công trình đã bị xóa cứng nên không join được; tên lấy từ bản lưu của sự kiện hủy (BR-SUB-024 khoản 9). |
 | O6.PaidAtUtc được hiệu chỉnh; O6.OrderingDiscrepancy=true; fulfillment vẫn giữ AppliedPaidAtUtc cũ | Chi tiết đơn có dấu lệch thứ tự và lịch sử thay đổi; gói hiện hành giữ nguyên | Tra cứu giúp nhân viên hiểu lý do xử lý bên ngoài, không kích hoạt sửa gói khi mở màn hình. |
 
 NULL biểu diễn “không có liên kết”, không phải lỗi hệ thống hoặc số tiền bằng 0. EffectiveState được tính từ dữ liệu hiện tại và đồng hồ server; nếu chưa triển khai cache thì không lưu thêm một bản trạng thái để tự đồng bộ.
@@ -209,7 +218,7 @@ Không thêm bảng nghiệp vụ mới. Các DTO không phải nguồn dữ li�
 | AdminOrderSummary/Detail | PaymentOrder → User, PlanRevision; nullable Fulfillment | Tất cả trạng thái đơn; không đọc giá hiện hành từ Plan.PublishedRevisionId. |
 | AdminPurchaseSummary/Detail | PaymentFulfillment → PaymentOrder → User; left join DesignPeriod/SupervisionGrant | Mua trước đến muộn có thể không có target; giám sát chưa gán không bị loại. |
 | AdminTransactionSummary/Detail | BankTransaction left join PaymentOrder và Fulfillment | Unmatched có buyer/order/package NULL; không dùng inner join. |
-| PackageHistory | PaymentEvent, SupervisionAssignmentEvent, PackageLifecycleEvent | Ghép theo định danh/loại, không suy trạng thái hoàn tiền. |
+| PackageHistory | PaymentEvent, PackageLifecycleEvent (kèm bản lưu công trình), mốc `FirstAssignedAtUtc`/`AssignedAtUtc` của SupervisionGrant | Ghép theo định danh/loại, không suy trạng thái hoàn tiền. Bảng `SupervisionAssignmentEvent` đã bỏ theo TDD-SUB-004. |
 
 ```mermaid
 erDiagram
@@ -240,10 +249,10 @@ Tất cả route dưới đây là read-only, cần verified session và claim `
 - **GET** `/api/v1/admin/bank-transactions` — Lọc orderId/matchState/fromUtc/toUtc/providerTransactionId; Unmatched không cần customerId. Nếu lọc customerId thì chỉ các transaction đã khớp khách đó.
 - **GET** `/api/v1/admin/bank-transactions/{transactionId}` — Thông tin giao dịch đã chuẩn hóa và liên kết nullable; không có thao tác gán tay.
 - **GET** `/api/v1/admin/package-purchases` — Lọc customerId/planId/kind/disposition/effectiveState, phân trang; nguồn Fulfillment+Order, gồm lịch sử bị thay thế và giám sát chưa gán.
-- **GET** `/api/v1/admin/package-purchases/{orderId}` — Chi tiết lần mua, target nullable, hạn/lượt; với gói giám sát đã gán trả `constructionSiteId` và `constructionSiteName`; trả liên kết history.
-- **GET** `/api/v1/admin/package-purchases/{orderId}/history` — Audit tạo/cấp, gán (một mốc từ `FirstAssignedAtUtc`), hủy/restore, hoàn thành/mở lại, sắp AtUtc DESC,Id DESC có page; không tạo lịch sử hoàn tiền.
+- **GET** `/api/v1/admin/package-purchases/{orderId}` — Chi tiết lần mua, target nullable, hạn/lượt; với gói giám sát đã gán trả `constructionSiteId` và `constructionSiteName`; gói đã hủy mà công trình đã bị xóa trả `constructionSiteName` từ bản lưu của sự kiện hủy; trả liên kết history.
+- **GET** `/api/v1/admin/package-purchases/{orderId}/history` — Audit tạo/cấp; gán (mốc `FirstAssignedAtUtc` và `AssignedAtUtc`); hủy, hoàn thành, mở lại; gỡ gói khỏi công trình kèm người gỡ, thời điểm, lý do, tên và địa chỉ công trình cũ; dòng `Restore` cũ nếu có. Sắp AtUtc DESC,Id DESC có page; không tạo lịch sử hoàn tiền.
 
-Nhóm route này không có API danh sách hay chi tiết công trình. Nhân viên chỉ có `commerce.read` gọi API công trình của [TDD-SITE-001](TDD-SITE-001.md#internal-api) nhận 403 theo BR-SITE-003/Except (ST-PAY-072). Cũng không có route đổi công trình; ST-PAY-053 kiểm các yêu cầu ghi còn lại (hủy, khôi phục) đều bị từ chối khi chỉ có quyền xem.
+Nhóm route này không có API danh sách hay chi tiết công trình. Nhân viên chỉ có `commerce.read` gọi API công trình của [TDD-SITE-001](TDD-SITE-001.md#internal-api) nhận 403 theo BR-SITE-003/Except (ST-PAY-072). Cũng không có route đổi thẳng công trình hay khôi phục gói; ST-PAY-053 kiểm các yêu cầu ghi còn lại (hủy gói, gỡ gói) đều bị từ chối khi chỉ có quyền xem. Lịch sử gỡ gói chỉ trả qua route history ở trên, nên chỉ người có `commerce.read` xem được; nhân viên chỉ có `supervision.unassign` gọi route này nhận 403 (STORY-SUB-006/AC-005, ST-PAY-078).
 
 ### Examples
 
@@ -275,6 +284,7 @@ Payload minh họa trích trường chính; DTO chi tiết gồm code/referenceC
 
 - STORY-PAY-002
 - STORY-PAY-002/AC-009
+- STORY-SUB-006/AC-005
 
 ### Business Rules
 
@@ -286,7 +296,7 @@ Payload minh họa trích trường chính; DTO chi tiết gồm code/referenceC
 - BR-SUB-009/Except
 - BR-SITE-003/Except
 - BR-SUB-024/Then
-- BR-SUB-025/Then
+- BR-SUB-026/Then
 
 ### Use Cases
 
@@ -294,13 +304,15 @@ Payload minh họa trích trường chính; DTO chi tiết gồm code/referenceC
 
 ### Others
 
-- [Nguồn đơn/giao dịch](TDD-PAY-001.md), [giám sát](TDD-SUB-004.md), [quyền riêng/lifecycle](TDD-SUB-005.md), [công trình](TDD-SITE-001.md).
+- [Nguồn đơn/giao dịch](TDD-PAY-001.md), [giám sát](TDD-SUB-004.md), [quyền riêng/lifecycle](TDD-SUB-005.md), [gỡ gói khỏi công trình](TDD-SUB-007.md), [công trình](TDD-SITE-001.md).
+- [BR-SUB-025](../businessrule/BR-SUB-025.md) đã bỏ ngày 25/09/2026, không còn là căn cứ thiết kế.
 - [PagedResult](../../bmt-be/src/bmt-be.contract/abstractions/shared/PagedResult.cs), [Result](../../bmt-be/src/bmt-be.contract/abstractions/shared/Result.cs), [JwtExtensions](../../bmt-be/src/bmt-be.api/dependencyInjection/extensions/JwtExtensions.cs).
-- [Bảng truy vết kiểm thử](../discovery/payment-technical-design.md); ST-PAY-047–054 (ST-PAY-048, ST-PAY-053 đã bỏ phần quyền đổi công trình ngày 25/09/2026) và ST-PAY-072. Không có External API: tra cứu từ dữ liệu nội bộ, không gọi SePay ở mỗi lần mở màn hình.
-- Đặc tả Unit Test: UT-PAY-063 đến UT-PAY-070, UT-PAY-080 (tên công trình của gói giám sát, null khi chưa gán) và UT-PAY-081 (mốc gán lấy từ `FirstAssignedAtUtc`). Chưa có mã test hoặc kết quả chạy, vì module này chưa có code.
+- [Bảng truy vết kiểm thử](../discovery/payment-technical-design.md); ST-PAY-047–054 (ST-PAY-048, ST-PAY-053 đã bỏ phần quyền đổi công trình ngày 25/09/2026 và đổi phần khôi phục thành gỡ gói), ST-PAY-072 và ST-PAY-078 (lịch sử gỡ chỉ người có `commerce.read` xem). Không có External API: tra cứu từ dữ liệu nội bộ, không gọi SePay ở mỗi lần mở màn hình.
+- Đặc tả Unit Test: UT-PAY-063 đến UT-PAY-070, UT-PAY-080 (tên công trình của gói giám sát, null khi chưa gán), UT-PAY-081 (viết lại ở lần 3: lịch sử có sự kiện gỡ, hủy kèm bản lưu công trình, mốc `FirstAssignedAtUtc` và `AssignedAtUtc`, dòng `Restore` cũ), UT-PAY-107 (tên công trình của gói đã gỡ và gói đã hủy), UT-PAY-108 (chỉ `commerce.read` xem lịch sử gỡ). UT-PAY-064 sửa ở lần 3 (không cần quyền hủy hay gỡ). Chưa có mã test hoặc kết quả chạy, vì module này chưa có code.
 
 ## Change Log
 
+- 2026-09-25 (lần 3): Theo quyết định người dùng ngày 25/09/2026: lịch sử gói gồm sự kiện gỡ gói khỏi công trình (TDD-SUB-007) với bản lưu tên, địa chỉ công trình cũ; chỉ `commerce.read` xem, `supervision.unassign` không kèm quyền xem. Bỏ khôi phục khỏi mô tả hành vi (BR-SUB-025 đã bỏ); dòng `Restore` cũ vẫn hiện. Mốc gán dùng `FirstAssignedAtUtc` và `AssignedAtUtc`. Gói đã hủy mà công trình đã bị xóa lấy tên từ bản lưu của sự kiện hủy. Bỏ `SupervisionAssignmentEvent` khỏi nguồn `PackageHistory`. Thêm mẫu dữ liệu G8 (đã gỡ), G9 (đã hủy, công trình đã xóa), STORY-SUB-006/AC-005, BR-SUB-026, ST-PAY-078. Thiết kế chưa có trong code.
 - 2026-09-25 (đồng bộ code): Ghi hiện trạng phụ thuộc: bảng công trình và cột `ConstructionSiteId` đã có từ commit `182e2a8`, API gói giám sát của khách đã trả tên công trình; module tra cứu quản trị vẫn chưa có code.
 - 2026-09-25 (lần 2): Bỏ quyền và lịch sử đổi công trình (BR-SUB-009, BR-SUB-023 đã bỏ); lịch sử gán lấy từ `FirstAssignedAtUtc` thay `SupervisionAssignmentEvent`. Projection gói giám sát trả thêm `constructionSiteName` qua LEFT JOIN `ConstructionSite` (TDD-SITE-001); ghi rõ `commerce.read` không có API công trình (BR-PAY-005 khoản 2, BR-SITE-003/Except). Thêm STORY-PAY-002/AC-009, ST-PAY-072.
 - 2026-09-25: Cập nhật theo US/BR đã chốt ngày 25/09/2026. Quyền tra cứu ghi là "có `commerce.read`; Admin có qua vai trò", bỏ cách viết "Admin hoặc commerce.read" ở Sequence/State Diagram và Internal API. Thời điểm hiệu lực khi thu hồi quyền theo BR-RBAC-009 (chậm nhất khi access token hết hạn, ngay khi khóa hoặc buộc đăng xuất), thay câu "thu hồi có hiệu lực ở request tiếp theo"; cập nhật hiện trạng nguồn quyền RBAC đã có trong code. Đổi `Project`/`projectId`/"dự án" trong projection, mẫu dữ liệu và ERD sang `ConstructionSite`/`constructionSiteId`/công trình, ghi rõ phụ thuộc đặc tả Công trình chưa soạn. Bổ sung tham chiếu BR-RBAC-009.

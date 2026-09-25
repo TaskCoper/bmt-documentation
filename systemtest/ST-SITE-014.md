@@ -44,7 +44,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SITE-014 | STORY-SITE-001 | ALT | REGRESSION | P1 | Công trình B của khách U1 chưa từng có gói giám sát gắn vào. U1 có gói giám sát G4 chưa gán, còn hạn gán lần đầu. | 1. U1 xóa công trình B.<br>2. U1 mở lại danh sách công trình.<br>3. U1 gửi thẳng yêu cầu gắn G4 vào B tới API. | B “Nhà vườn Củ Chi”; G4 là gói giám sát thử. | Bước 1 thành công. B không còn trong danh sách của U1. Yêu cầu ở bước 3 bị từ chối; G4 vẫn chưa gán và giữ nguyên hạn gán ban đầu. | STORY-SITE-001/AC-014<br>STORY-SITE-001/ALT-03<br>BR-SITE-002/Then<br>BR-SUB-022/Then | Công trình chưa từng có gói thì xóa được; công trình đã xóa không nhận gói. Đặc tả chưa chạy. | [Chưa xác định] | Draft |
+| ST-SITE-014 | STORY-SITE-001 | ALT | REGRESSION | P1 | Công trình B của khách U1 chưa từng có gói giám sát gắn vào. U1 có gói giám sát G4 chưa gán, còn hạn gán. | 1. U1 xóa công trình B.<br>2. U1 mở lại danh sách công trình.<br>3. U1 gửi thẳng yêu cầu gắn G4 vào B tới API. | B “Nhà vườn Củ Chi”; G4 là gói giám sát thử. | Bước 1 thành công. B không còn trong danh sách của U1. Yêu cầu ở bước 3 bị từ chối; G4 vẫn chưa gán và giữ nguyên hạn gán ban đầu. | STORY-SITE-001/AC-014<br>STORY-SITE-001/ALT-03<br>BR-SITE-002/Then<br>BR-SUB-022/Then | Công trình không có gói giữ chỗ thì xóa được, ở đây là công trình chưa từng có gói; công trình đã xóa không nhận gói. Đặc tả chưa chạy. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

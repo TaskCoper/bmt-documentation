@@ -59,7 +59,7 @@ Người có quyền `user.manage` yêu cầu khóa một tài khoản nhân vi�
 1. Khóa tài khoản không kiểm tra người đó còn phân công hay không.
 2. Hủy toàn bộ phiên đăng nhập của tài khoản bị khóa. Từ thời điểm này, mọi yêu cầu của người đó bị từ chối, kể cả khi access token cấp trước đó chưa hết hạn.
 3. Giữ nguyên các vai trò và các bản ghi phân công của người đó. Không tự gỡ, không tự chuyển cho người khác.
-4. Người bị khóa không thao tác được trên các gói giám sát đang phân công cho mình. Những gói đang ở trạng thái đã gán hiện trong danh sách cần chia lại theo [BR-RBAC-013](BR-RBAC-013.md) để người quản trị chuyển giao; gói đã hoàn thành hoặc đang bị hủy không vào danh sách. Hệ thống không tự gỡ hay tự chuyển phân công.
+4. Người bị khóa không thao tác được trên các gói giám sát đang phân công cho mình. Những gói đang ở trạng thái đã gán hiện trong danh sách cần chia lại theo [BR-RBAC-013](BR-RBAC-013.md) để người quản trị chuyển giao; gói đã hoàn thành không vào danh sách; gói đã hủy không còn phân công theo BR-RBAC-013 khoản 9. Hệ thống không tự gỡ hay tự chuyển phân công.
 5. Mở khóa thì tài khoản dùng lại đúng các vai trò và phân công như trước khi khóa; người đó phải đăng nhập lại.
 6. Ghi nhật ký việc khóa và mở khóa theo [BR-RBAC-012](BR-RBAC-012.md).
 7. Người thao tác không được khóa tài khoản của chính mình. Yêu cầu tự khóa bị từ chối, trạng thái tài khoản giữ nguyên và yêu cầu bị từ chối được ghi nhật ký theo [BR-RBAC-012](BR-RBAC-012.md).

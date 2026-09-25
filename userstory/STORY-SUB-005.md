@@ -39,8 +39,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Metadata
 
-- **Story**: Là nhân viên được phân quyền, tôi muốn hủy hoặc khôi phục gói đã cấp có ghi lý do để xử lý đúng hiệu lực gói của khách.
-- **Context**: Áp dụng cho thiết kế và giám sát, gồm giám sát chưa gán. Tiền hoàn/bù trừ xử lý bên ngoài. Khôi phục không phải cấp gói mới và không áp dụng cho kỳ thiết kế đã bị thay thế bởi lần mua sau.
+- **Story**: Là nhân viên được phân quyền, tôi muốn hủy gói đã cấp có ghi lý do để chấm dứt đúng gói của khách khi cần hoàn tiền.
+- **Context**: Áp dụng cho thiết kế và giám sát, gồm giám sát chưa gán. Tiền hoàn/bù trừ xử lý bên ngoài, chẳng hạn qua điện thoại. Người dùng xác nhận ngày 25/09/2026: bỏ thao tác khôi phục cho cả hai loại gói; hủy không hoàn tác được và có hộp xác nhận trước khi hủy; hủy gói giám sát kết thúc phân công; hủy nhầm thì khách mua lại nếu cần. Các nhánh và AC về khôi phục giữ để tra lịch sử, không nghiệm thu.
 - **Sprint**:
 - **Priority**:
 - **Status**: Todo
@@ -59,17 +59,17 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ### Trigger
 
-Nhân viên gửi yêu cầu hủy hoặc khôi phục gói.
+Nhân viên gửi yêu cầu hủy gói.
 
 ## Flow
 
 ### Main Flow
 
 1. Nhân viên chọn đúng khách hàng và gói đã cấp.
-2. Nhân viên chọn hủy hoặc khôi phục và nhập lý do.
-3. Hệ thống kiểm tra quyền riêng tương ứng; khi khôi phục còn kiểm tra nguồn hủy, thời hạn và xung đột với gói hiệu lực khác.
-4. Hủy hợp lệ có hiệu lực ngay; khôi phục hợp lệ giữ nguyên hạn, quyền lợi và lượt. Lưu lịch sử cùng lý do.
-5. Giữ nguyên các gói khác và không thực hiện hoặc ghi nhận hoàn tiền.
+2. Nhân viên chọn hủy. Giao diện hiện hộp xác nhận nói rõ việc hủy không hoàn tác được; nhân viên nhập lý do trong hộp này rồi xác nhận.
+3. Hệ thống kiểm tra quyền riêng và lý do.
+4. Hủy hợp lệ có hiệu lực ngay và không hoàn tác được. Hệ thống lưu lịch sử cùng lý do. Với gói giám sát, gói nhả chỗ trên công trình, phân công của gói kết thúc, và hệ thống lưu tên, địa chỉ công trình tại lúc hủy.
+5. Giữ nguyên các gói khác và không thực hiện hoặc ghi nhận hoàn tiền; nhân viên xử lý tiền với khách bên ngoài hệ thống.
 
 ### Alternative Flow
 
@@ -83,11 +83,29 @@ Hủy giám sát đã gán giải phóng công trình.
 
 #### ALT-02
 
+**Không nghiệm thu trong phạm vi hiện tại:** người dùng xác nhận ngày 25/09/2026 bỏ thao tác khôi phục cho cả gói thiết kế và gói giám sát; thay bằng EXC-08. Nội dung giữ để tra lịch sử.
+
 Khôi phục giám sát đã gán sau một năm.
 
 1. Ngày 02/10/2027 nhân viên có quyền khôi phục và nhập lý do.
 2. Gói phục vụ A trở lại.
 3. Giữ nguyên quyền lợi và liên kết A dù đã qua một năm từ lúc cấp.
+
+#### ALT-03
+
+Nhân viên hủy nhầm và khách vẫn cần gói.
+
+1. Nhân viên hủy nhầm gói của khách.
+2. Hệ thống không có thao tác khôi phục; nhân viên xử lý tiền với khách bên ngoài hệ thống, chẳng hạn qua điện thoại.
+3. Nếu khách vẫn cần, khách mua gói mới theo STORY-PAY-001; gói mới có hạn và quyền lợi theo lần mua mới.
+
+#### ALT-04
+
+Công trình chỉ còn gói giám sát đã hủy.
+
+1. Gói giám sát của công trình A bị hủy; A không còn gói giữ chỗ.
+2. Khách sửa hoặc xóa được A theo STORY-SITE-001.
+3. Gói đã hủy vẫn hiện trong danh sách gói của khách, kèm tên công trình tại lúc hủy.
 
 ### Exception Flow
 
@@ -101,6 +119,8 @@ Chặn hủy thiếu quyền hoặc lý do.
 
 #### EXC-02
 
+**Không nghiệm thu trong phạm vi hiện tại:** người dùng xác nhận ngày 25/09/2026 bỏ thao tác khôi phục cho cả gói thiết kế và gói giám sát; thay bằng EXC-08. Nội dung giữ để tra lịch sử.
+
 Chặn khôi phục xung đột thiết kế.
 
 1. Nhân viên có quyền và lý do khôi phục A.
@@ -108,6 +128,8 @@ Chặn khôi phục xung đột thiết kế.
 3. Giữ B hiệu lực, không tự hủy B.
 
 #### EXC-03
+
+**Không nghiệm thu trong phạm vi hiện tại:** người dùng xác nhận ngày 25/09/2026 bỏ thao tác khôi phục cho cả gói thiết kế và gói giám sát; thay bằng EXC-08. Nội dung giữ để tra lịch sử.
 
 Chặn khôi phục xung đột giám sát.
 
@@ -117,6 +139,8 @@ Chặn khôi phục xung đột giám sát.
 
 #### EXC-04
 
+**Không nghiệm thu trong phạm vi hiện tại:** người dùng xác nhận ngày 25/09/2026 bỏ thao tác khôi phục cho cả gói thiết kế và gói giám sát; thay bằng EXC-08. Nội dung giữ để tra lịch sử.
+
 Chặn khôi phục thiết kế hết kỳ.
 
 1. Ngày 01/10 nhân viên có quyền và lý do khôi phục.
@@ -124,6 +148,8 @@ Chặn khôi phục thiết kế hết kỳ.
 3. Không gia hạn hoặc tạo kỳ mới.
 
 #### EXC-05
+
+**Không nghiệm thu trong phạm vi hiện tại:** người dùng xác nhận ngày 25/09/2026 bỏ thao tác khôi phục cho cả gói thiết kế và gói giám sát; thay bằng EXC-08. Nội dung giữ để tra lịch sử.
 
 Chặn khôi phục giám sát quá hạn chưa gán.
 
@@ -133,6 +159,8 @@ Chặn khôi phục giám sát quá hạn chưa gán.
 
 #### EXC-06
 
+**Không nghiệm thu trong phạm vi hiện tại:** người dùng xác nhận ngày 25/09/2026 bỏ thao tác khôi phục cho cả gói thiết kế và gói giám sát; thay bằng EXC-08. Nội dung giữ để tra lịch sử.
+
 Không khôi phục gói thiết kế đã bị thay thế.
 
 1. Nhân viên thử khôi phục A.
@@ -141,11 +169,20 @@ Không khôi phục gói thiết kế đã bị thay thế.
 
 #### EXC-07
 
+**Không nghiệm thu trong phạm vi hiện tại:** người dùng xác nhận ngày 25/09/2026 bỏ thao tác khôi phục cho cả gói thiết kế và gói giám sát; thay bằng EXC-08. Nội dung giữ để tra lịch sử.
+
 Chặn khôi phục thiếu quyền hoặc lý do.
 
 1. Người thiếu quyền thử khôi phục; người có quyền thử khôi phục không có lý do.
 2. Từ chối cả hai yêu cầu.
 3. Giữ nguyên trạng thái bị hủy và quyền lợi.
+
+#### EXC-08
+
+Có yêu cầu khôi phục gói đã hủy.
+
+1. Nhân viên, kể cả người có quyền hủy, gửi yêu cầu khôi phục gói đã hủy, kể cả gửi thẳng tới API.
+2. Hệ thống không có thao tác khôi phục; gói vẫn ở trạng thái đã hủy.
 
 ## Acceptance Criteria
 
@@ -179,12 +216,16 @@ Chặn khôi phục thiếu quyền hoặc lý do.
 
 #### AC-005
 
+**Không nghiệm thu trong phạm vi hiện tại:** người dùng xác nhận ngày 25/09/2026 bỏ thao tác khôi phục cho cả gói thiết kế và gói giám sát; thay bằng AC-017. Nội dung giữ để tra lịch sử.
+
 - **Given**: Gói có 10 lượt, đã dùng 3, hết hạn 30/9, bị nhân viên hủy 20/9; không có gói khác hiệu lực.
 - **When**: Ngày 22/9 nhân viên có quyền khôi phục và nhập lý do.
 - **Then**: Gói có hiệu lực lại, vẫn hết hạn 30/9, vẫn đã dùng 3 trên 10 lượt.
 - **And**: Không cộng hai ngày bị hủy hoặc lấy bản quyền lợi mới trong danh mục.
 
 #### AC-006
+
+**Không nghiệm thu trong phạm vi hiện tại:** người dùng xác nhận ngày 25/09/2026 bỏ thao tác khôi phục cho cả gói thiết kế và gói giám sát; thay bằng AC-017. Nội dung giữ để tra lịch sử.
 
 - **Given**: Gói cấp 01/10/2026, chưa từng gán, bị nhân viên hủy; chưa quá một năm.
 - **When**: Ngày 01/11/2026 nhân viên có quyền khôi phục với lý do.
@@ -193,12 +234,16 @@ Chặn khôi phục thiếu quyền hoặc lý do.
 
 #### AC-007
 
+**Không nghiệm thu trong phạm vi hiện tại:** người dùng xác nhận ngày 25/09/2026 bỏ thao tác khôi phục cho cả gói thiết kế và gói giám sát; thay bằng AC-017. Nội dung giữ để tra lịch sử.
+
 - **Given**: Gói cấp 01/10/2026, gán A đúng hạn, sau đó bị nhân viên hủy; A chưa có gói khác.
 - **When**: Ngày 02/10/2027 nhân viên có quyền khôi phục và nhập lý do.
 - **Then**: Gói phục vụ A trở lại.
 - **And**: Giữ nguyên quyền lợi và liên kết A dù đã qua một năm từ lúc cấp.
 
 #### AC-008
+
+**Không nghiệm thu trong phạm vi hiện tại:** người dùng xác nhận ngày 25/09/2026 bỏ thao tác khôi phục cho cả gói thiết kế và gói giám sát; thay bằng AC-017. Nội dung giữ để tra lịch sử.
 
 - **Given**: Gói A bị nhân viên hủy; tài khoản hiện có gói B đang hiệu lực.
 - **When**: Nhân viên có quyền và lý do khôi phục A.
@@ -207,12 +252,16 @@ Chặn khôi phục thiếu quyền hoặc lý do.
 
 #### AC-009
 
+**Không nghiệm thu trong phạm vi hiện tại:** người dùng xác nhận ngày 25/09/2026 bỏ thao tác khôi phục cho cả gói thiết kế và gói giám sát; thay bằng AC-017. Nội dung giữ để tra lịch sử.
+
 - **Given**: Gói G1 gán A bị hủy; A hiện có G2 hiệu lực.
 - **When**: Nhân viên có quyền và lý do khôi phục G1.
 - **Then**: Từ chối khôi phục.
 - **And**: Giữ nguyên G1 bị hủy và G2 hiệu lực.
 
 #### AC-010
+
+**Không nghiệm thu trong phạm vi hiện tại:** người dùng xác nhận ngày 25/09/2026 bỏ thao tác khôi phục cho cả gói thiết kế và gói giám sát; thay bằng AC-017. Nội dung giữ để tra lịch sử.
 
 - **Given**: Gói thiết kế bị nhân viên hủy, hết kỳ 30/9; không có gói khác.
 - **When**: Ngày 01/10 nhân viên có quyền và lý do khôi phục.
@@ -221,6 +270,8 @@ Chặn khôi phục thiếu quyền hoặc lý do.
 
 #### AC-011
 
+**Không nghiệm thu trong phạm vi hiện tại:** người dùng xác nhận ngày 25/09/2026 bỏ thao tác khôi phục cho cả gói thiết kế và gói giám sát; thay bằng AC-017. Nội dung giữ để tra lịch sử.
+
 - **Given**: Gói cấp 01/10/2026, chưa từng gán, bị nhân viên hủy.
 - **When**: Ngày 02/10/2027 nhân viên có quyền và lý do khôi phục.
 - **Then**: Từ chối vì quá hạn gán lần đầu.
@@ -228,12 +279,16 @@ Chặn khôi phục thiếu quyền hoặc lý do.
 
 #### AC-012
 
+**Không nghiệm thu trong phạm vi hiện tại:** người dùng xác nhận ngày 25/09/2026 bỏ thao tác khôi phục cho cả gói thiết kế và gói giám sát; thay bằng AC-017. Nội dung giữ để tra lịch sử.
+
 - **Given**: Khách mua A rồi B; B đã thay thế A. Sau đó nhân viên hủy B.
 - **When**: Nhân viên thử khôi phục A.
 - **Then**: Từ chối vì A bị thay thế bởi lần mua mới, không phải bị nhân viên hủy.
 - **And**: Không tự quay lại A khi hủy B; B chỉ được khôi phục nếu còn đủ điều kiện.
 
 #### AC-013
+
+**Không nghiệm thu trong phạm vi hiện tại:** người dùng xác nhận ngày 25/09/2026 bỏ thao tác khôi phục cho cả gói thiết kế và gói giám sát; thay bằng AC-017. Nội dung giữ để tra lịch sử.
 
 - **Given**: Gói bị nhân viên hủy, còn hạn và không có xung đột.
 - **When**: Người thiếu quyền thử khôi phục; người có quyền thử khôi phục không có lý do.
@@ -245,7 +300,35 @@ Chặn khôi phục thiếu quyền hoặc lý do.
 - **Given**: Một tác vụ AI đã bắt đầu hợp lệ và giữ 1 lượt của kỳ còn hiệu lực.
 - **When**: Nhân viên hủy gói đúng quyền/lý do; tác vụ cũ hoàn tất trước timeout, khách thử tạo tác vụ mới.
 - **Then**: Tác vụ cũ được hoàn tất theo quyền đã tiếp nhận, quyết toán lượt vào kỳ đã giữ; tác vụ mới bị chặn.
-- **And**: Không hoàn tác tác vụ cũ hoặc chuyển lượt sang kỳ khác. Restore nếu hợp lệ giữ bộ đếm hiện tại sau quyết toán.
+- **And**: Không hoàn tác tác vụ cũ hoặc chuyển lượt sang kỳ khác.
+
+#### AC-015
+
+- **Given**: Nhân viên có quyền `package.cancel` mở gói giám sát G của khách.
+- **When**: Nhân viên bấm Hủy gói, sau đó đóng hộp xác nhận mà không xác nhận; rồi bấm lại, nhập lý do có nội dung và xác nhận.
+- **Then**: Mỗi lần bấm Hủy, giao diện hiện hộp xác nhận nói rõ việc hủy không hoàn tác được và có ô nhập lý do. G chỉ bị hủy sau lần xác nhận có lý do.
+- **And**: Lần đóng hộp không xác nhận không làm thay đổi G.
+
+#### AC-016
+
+- **Given**: Gói giám sát G1 đã gán công trình A và do nhân viên N phụ trách; nhân viên C có quyền `package.cancel`.
+- **When**: C hủy G1 với lý do có nội dung.
+- **Then**: G1 ở trạng thái đã hủy và A không còn gói giữ chỗ; phân công của N trên G1 kết thúc và được ghi nhật ký phân công.
+- **And**: N không còn xem được A qua G1 và không hoàn thành được G1; G1 không vào danh sách cần chia lại.
+
+#### AC-017
+
+- **Given**: Gói G1 đã bị hủy; nhân viên C có quyền `package.cancel`.
+- **When**: C hoặc nhân viên khác gửi yêu cầu khôi phục G1, kể cả gửi thẳng tới API.
+- **Then**: Hệ thống không có thao tác khôi phục; yêu cầu không làm thay đổi G1.
+- **And**: G1 vẫn ở trạng thái đã hủy; khách muốn dùng tiếp thì mua gói mới.
+
+#### AC-018
+
+- **Given**: Gói giám sát G1 gắn công trình A bị hủy; sau đó khách xóa A.
+- **When**: Khách xem danh sách gói của mình.
+- **Then**: G1 hiện trạng thái đã hủy, kèm tên công trình A tại lúc hủy.
+- **And**: Khách không gán, hoàn thành hay dùng được G1.
 
 ## References
 
@@ -256,11 +339,15 @@ Chặn khôi phục thiếu quyền hoặc lý do.
 ### Rules
 
 - BR-SUB-024/Then
-- BR-SUB-025/Then
 - BR-SUB-006/Then
+- BR-RBAC-013/Then: Hủy gói giám sát kết thúc phân công của gói.
+- BR-SITE-002/Then: Công trình chỉ còn gói đã hủy thì sửa hoặc xóa được.
+- BR-SUB-025/Statement: Đã bỏ ngày 25/09/2026; chỉ để tra lịch sử các nhánh khôi phục.
 
 ### Dependencies
 
+- STORY-PAY-001: Khách mua gói mới khi vẫn cần sau khi gói bị hủy.
+- STORY-SITE-001: Khách sửa hoặc xóa công trình không còn gói giữ chỗ.
 - [Quyết định, hiện trạng và các điểm còn mở](../discovery/payment-packages.md).
 
 ## Non-Functional
@@ -270,5 +357,5 @@ Chặn khôi phục thiếu quyền hoặc lý do.
 
 ## Out of Scope
 
-- Chuyển tiền hoặc đánh dấu đã hoàn tiền; khôi phục kỳ thiết kế đã bị thay thế; tự gia hạn/bù thời gian; mở lại gói đã hoàn thành không thuộc Story này; thao tác đó theo STORY-SUB-003 và BR-SUB-012.
+- Chuyển tiền hoặc đánh dấu đã hoàn tiền; khôi phục gói đã hủy cho cả gói thiết kế và gói giám sát (đã bỏ ngày 25/09/2026); khôi phục kỳ thiết kế đã bị thay thế; tự gia hạn/bù thời gian. Mở lại gói đã hoàn thành theo STORY-SUB-003 và BR-SUB-012; gỡ gói khỏi công trình theo STORY-SUB-006.
 - Chưa triển khai, chạy test hoặc phê duyệt tài liệu. Sprint, Priority và người thực hiện chưa được phân công; không lấy ví dụ trong template làm giá trị thật.

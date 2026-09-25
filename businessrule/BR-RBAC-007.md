@@ -69,7 +69,7 @@ Khóa tài khoản không chịu điều kiện này. Khi cần cắt quyền g�
 
 ## Notes
 
-- Phân công trên gói đang bị hủy vẫn được tính theo [BR-RBAC-013](BR-RBAC-013.md) khoản 9. Gói đang bị hủy không chuyển giao được, nên người quản trị gỡ phân công của gói đó nếu cần thu hồi vai trò.
+- Hủy hoặc gỡ gói giám sát kết thúc phân công của gói theo [BR-RBAC-013](BR-RBAC-013.md) khoản 9, nên gói đã hủy hoặc đã gỡ không còn được tính khi xét thu hồi vai trò.
 - Quy tắc này giữ cho gói giám sát không rơi vào tình trạng có người phụ trách nhưng người đó không làm được việc, do một thao tác quản trị bình thường. Trường hợp gấp đã có đường thoát riêng ở phần Except.
 - Ví dụ: A đang phụ trách hai gói giám sát. Nếu A giữ hai vai trò cùng có `supervision.complete`, thu hồi một vai trò thì cho phép vì A vẫn còn quyền này. Thu hồi vai trò chỉ có `commerce.read` cũng không bị chặn. Nếu vai trò bị thu hồi là nguồn duy nhất của `supervision.complete`, từ chối cho tới khi hai gói được chuyển giao hoặc gỡ phân công.
 - Bản nháp nghiệp vụ, chưa triển khai hoặc chạy kiểm thử. Reviewer và Approver lấy theo xác nhận đang dùng cho các bản nháp mới, không phải bằng chứng đã phê duyệt. Owner và ngày hiệu lực chưa xác định.

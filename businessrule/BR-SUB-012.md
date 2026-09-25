@@ -51,7 +51,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 **Cập nhật 24/09/2026:** Mở lại dùng chung quyền `supervision.complete` với hoàn thành, cùng cách kiểm phân công gói ở [BR-SUB-011](BR-SUB-011.md). Mở lại đưa gói về đã gán trên đúng công trình cũ.
 
-**Phân biệt với thanh toán 19/09/2026:** Mở lại gói đã hoàn thành trong tài liệu này khác với khôi phục gói do nhân viên hủy. Khôi phục sau hủy dùng quyền riêng, điều kiện hạn và xung đột theo [BR-SUB-025](BR-SUB-025.md); không tự dùng quyền Admin/nhân viên phụ trách của luồng cũ thay thế quyền riêng đã chốt.
+**Phân biệt với thanh toán 19/09/2026:** Mở lại gói đã hoàn thành trong tài liệu này khác với khôi phục gói do nhân viên hủy. Khôi phục theo [BR-SUB-025](BR-SUB-025.md) đã bỏ ngày 25/09/2026, nên gói đã hủy không mở lại hay khôi phục được; mở lại chỉ áp dụng cho gói đã hoàn thành.
 
 Admin hoặc nhân viên phụ trách gói được mở lại gói giám sát đã hoàn thành để sửa thao tác nhầm. Người thao tác phải nhập lý do. Việc mở lại không được làm công trình có hai gói giám sát đang thực hiện.
 

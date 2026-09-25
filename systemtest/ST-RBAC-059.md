@@ -44,12 +44,11 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-RBAC-059 | STORY-RBAC-003 | ALT | REGRESSION | P1 | Gói giám sát G1 ở trạng thái đã gán trên công trình P, do nhân viên A phụ trách; A có supervision.complete. P không có gói nào khác. Nhân viên X có quyền package.cancel và package.restore. Người quản trị có quyền assignment.manage. | 1. Chuẩn bị G1, P, A và X theo Test data.<br>2. X hủy G1 kèm lý do.<br>3. Đọc lại phân công của G1 và danh sách gói cần chia lại.<br>4. X khôi phục G1 kèm lý do.<br>5. Đọc lại trạng thái, phân công của G1 và danh sách gói cần chia lại.<br>6. Để A gửi yêu cầu hoàn thành G1. | G1 đã gán P, do A phụ trách. Lý do hủy và khôi phục là chuỗi minh họa có nội dung. Dữ liệu minh họa. | Sau bước 2, G1 đang bị hủy nhưng phân công của A trên G1 vẫn còn hiệu lực; hệ thống không tự gỡ và G1 không có trong danh sách cần chia lại. Sau bước 4, G1 về trạng thái đã gán, A vẫn là người phụ trách mà không cần giao lại, và G1 không có trong danh sách cần chia lại. Ở bước 6, yêu cầu của A được chấp nhận. | STORY-RBAC-003/AC-012<br>STORY-RBAC-003/ALT-06<br>BR-RBAC-013/Then<br>BR-SUB-024/Then<br>BR-SUB-025/Then | Hủy và khôi phục gói không đổi người phụ trách (BR-RBAC-013 khoản 9, BR-SUB-024 khoản 7, BR-SUB-025 khoản 7). Đặc tả chưa chạy. | [Chưa xác định] | Draft |
+| ST-RBAC-059 | STORY-RBAC-003 | ALT | REGRESSION | P1 | Gói giám sát G1 ở trạng thái đã gán trên công trình P, do nhân viên A phụ trách; A có supervision.complete. P không có gói nào khác. Nhân viên X có quyền package.cancel. Người quản trị có quyền assignment.manage và audit.read. | 1. Chuẩn bị G1, P, A và X theo Test data.<br>2. X hủy G1 kèm lý do.<br>3. Đọc lại phân công của G1, danh sách gói cần chia lại và nhật ký thay đổi quyền.<br>4. Để A gửi yêu cầu hoàn thành G1. | G1 đã gán P, do A phụ trách. Lý do hủy là chuỗi minh họa có nội dung. Dữ liệu minh họa. | Sau bước 2, G1 ở trạng thái đã hủy và phân công của A trên G1 kết thúc ngay tại thời điểm hủy; người quản trị không phải gỡ tay. Nhật ký có bản ghi kết thúc phân công này. G1 không có trong danh sách cần chia lại. Yêu cầu ở bước 4 bị từ chối; G1 giữ trạng thái đã hủy. | STORY-RBAC-003/AC-012<br>STORY-RBAC-003/ALT-08<br>BR-RBAC-013/Then<br>BR-SUB-024/Then | Hủy gói kết thúc phân công ngay (BR-RBAC-013 khoản 9, BR-SUB-024 khoản 7); không còn thao tác khôi phục nên người cũ không phụ trách tiếp gói đã hủy. Thay kịch bản cũ về hủy rồi khôi phục (ALT-06 đã không nghiệm thu). Đặc tả chưa chạy. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-RBAC-003/AC-012
-- STORY-RBAC-003/ALT-06
+- STORY-RBAC-003/ALT-08
 - BR-RBAC-013/Then
 - BR-SUB-024/Then
-- BR-SUB-025/Then

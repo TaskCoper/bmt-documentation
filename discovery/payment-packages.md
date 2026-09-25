@@ -8,9 +8,23 @@ Các quyết định người dùng xác nhận ngày 25/09/2026 thay một số
 
 - **Gói giám sát gắn với công trình**, không gắn với bản dự toán. Công trình là thực thể riêng, khách tự tạo miễn phí và không cần gói thiết kế ([BR-SUB-022](../businessrule/BR-SUB-022.md)/Notes). Trong phần “Đã xác nhận” bên dưới, “dự án” của gói giám sát đọc là công trình, “sửa dự án” đọc là đổi công trình theo [BR-SUB-023](../businessrule/BR-SUB-023.md). Story, BR và TDD của Công trình chưa được soạn.
 - **Tài khoản nhân viên không mua gói**: không tạo hoặc hủy đơn, kể cả khi có quyền tra cứu ([BR-RBAC-005](../businessrule/BR-RBAC-005.md) khoản 5, STORY-PAY-001/EXC-08 và AC-028, ST-PAY-070).
-- **Quyền riêng của nhân viên** là mã quyền trong RBAC, không đòi phân công: `commerce.read` để tra cứu, `supervision.reassign` để đổi công trình, `package.cancel` và `package.restore` để hủy và khôi phục ([BR-RBAC-010](../businessrule/BR-RBAC-010.md) khoản 4). ST-PAY-069 kiểm việc thu hồi `commerce.read`.
+- **Quyền riêng của nhân viên** là mã quyền trong RBAC, không đòi phân công: `commerce.read` để tra cứu, `supervision.reassign` để đổi công trình, `package.cancel` và `package.restore` để hủy và khôi phục ([BR-RBAC-010](../businessrule/BR-RBAC-010.md) khoản 4). Phần bổ sung bên dưới đã bỏ `supervision.reassign` và `package.restore`, thêm `supervision.unassign`. ST-PAY-069 kiểm việc thu hồi `commerce.read`.
 - **Gói giám sát** chốt tên, giá và mô tả dịch vụ theo đơn; không dùng danh mục quyền lợi ([BR-SUB-004](../businessrule/BR-SUB-004.md) khoản 5, [BR-SUB-008](../businessrule/BR-SUB-008.md) khoản 7).
-- Điểm 4 ở mục “Cần làm rõ” vẫn chưa được xác nhận: nhân viên gỡ gói về chưa gán hoặc đổi công trình của gói đang bị hủy.
+- Điểm 4 ở mục “Cần làm rõ” đã được trả lời ở phần bổ sung ngay dưới đây.
+
+## Cập nhật ngày 25/09/2026 (bổ sung): gỡ gói giám sát và bỏ khôi phục
+
+Người dùng xác nhận thêm trong hội thoại bàn luận gói giám sát ngày 25/09/2026. Các điểm này thay các mô tả tương ứng ở trên và ở phần “Đã xác nhận” bên dưới.
+
+- **Gỡ gói khi khách gán nhầm** ([BR-SUB-026](../businessrule/BR-SUB-026.md), [STORY-SUB-006](../userstory/STORY-SUB-006.md)): khách không tự gỡ mà gọi tổng đài. Nhân viên có quyền `supervision.unassign` gỡ gói đang ở trạng thái đã gán về chưa gán, bắt buộc có lý do; không cần phân công và không có điều kiện nào khác. Khách tự gán lại, kể cả vào chính công trình cũ. Vẫn không có thao tác đổi thẳng công trình; `supervision.reassign` và BR-SUB-023 giữ trạng thái đã bỏ.
+- **Hạn gán khi gỡ**: gói giữ hạn gán ban đầu. Hệ thống chặn gỡ khi đã đến hoặc đã qua hạn; muốn chấm dứt gói thì hủy.
+- **Gói đã hoàn thành hoặc đã hủy** không gỡ được.
+- **Lịch sử gỡ**: lưu người gỡ, thời điểm, lý do và công trình cũ. Chỉ nhân viên có quyền `commerce.read` xem, cùng chỗ tra cứu gói ([BR-PAY-005](../businessrule/BR-PAY-005.md)); khách chỉ thấy gói chưa gán và hạn gán còn lại.
+- **Gói đã gỡ mà quá hạn gán** hiển thị trạng thái quá hạn gán, giống gói chưa từng gán đã quá hạn ([BR-SUB-022](../businessrule/BR-SUB-022.md) khoản 4).
+- **Bỏ khôi phục** cho cả gói thiết kế và gói giám sát ([BR-SUB-025](../businessrule/BR-SUB-025.md) đã bỏ; mã `package.restore` bỏ khỏi danh mục quyền). Hủy là thao tác cuối cùng, có hộp xác nhận trước khi hủy. Hủy nhầm thì nhân viên hoàn tiền bên ngoài hệ thống, chẳng hạn qua điện thoại; khách còn nhu cầu thì mua gói mới.
+- **Phân công**: gỡ hoặc hủy gói đều kết thúc phân công của gói ([BR-RBAC-013](../businessrule/BR-RBAC-013.md) khoản 9). Gói được khách gán lại vào danh sách cần chia lại.
+- **Công trình** ([BR-SITE-002](../businessrule/BR-SITE-002.md)): khi công trình có gói giữ chỗ (đã gán hoặc đã hoàn thành), khách không sửa và không xóa được công trình. Gói đã gỡ hoặc đã hủy không khóa. Gói đã hủy hiện trạng thái “đã hủy”, kèm tên công trình tại lúc hủy nếu công trình đã bị xóa.
+- **Điểm 4 ở mục “Cần làm rõ”** đã đóng: nhân viên chỉ gỡ được gói đang ở trạng thái đã gán; gói đã hủy không gỡ hay đổi công trình được.
 
 ## Đã xác nhận
 
@@ -91,7 +105,7 @@ Không cần hỏi lại các quyết định ở trên. Những điểm chưa c
 1. Đã giải quyết khi thiết kế TDD: chỉ chấp nhận giao dịch trước hạn/hủy; đúng mốc không hợp lệ. Cùng thời điểm đủ tiền thì đơn tạo sau được coi là mua sau.
 2. Đã giải quyết khi thiết kế TDD: hạn gán là cùng ngày/giờ năm sau theo giờ Việt Nam; 29/02 thành 28/02 ở năm không nhuận. Phải gán trước hạn, không gồm đúng mốc.
 3. Đã giải quyết khi thiết kế TDD: tác vụ AI bắt đầu hợp lệ trước hủy được hoàn tất theo quyền và lượt đã giữ; chỉ chặn tác vụ mới.
-4. Quyền nhân viên gỡ về chưa gán hoặc sửa dự án của gói đang bị hủy chưa được xác nhận; phạm vi đã chốt là sửa dự án đã gán hợp lệ.
+4. Đã đóng ngày 25/09/2026: nhân viên chỉ gỡ được gói đang ở trạng thái đã gán theo BR-SUB-026; gói đã hủy không gỡ hay đổi công trình được. Xem phần “Cập nhật ngày 25/09/2026 (bổ sung)”.
 5. Còn thiếu cấu hình tài khoản ngân hàng, connection và secret SePay của môi trường triển khai. Hợp đồng provider, cách lưu giao dịch và phục hồi khi cấp gói lỗi đã được thiết kế trong TDD-PAY-001.
 6. Sprint, Priority, Creator/Owner và người triển khai/kiểm thử chưa được phân công; ngày hiệu lực/phê duyệt chưa được xác nhận. Reviewer/Approver dùng Tân Trần theo xác nhận cho các bản nháp mới trong ghi chú subscription hiện có; tên metadata không đồng nghĩa đã duyệt.
 
@@ -100,11 +114,12 @@ Không cần hỏi lại các quyết định ở trên. Những điểm chưa c
 | Mục tiêu | User Story | Business Rule | System Test |
 | --- | --- | --- | --- |
 | Tạo đơn, thanh toán QR và cấp gói | [STORY-PAY-001](../userstory/STORY-PAY-001.md) | [BR-PAY-001](../businessrule/BR-PAY-001.md), [BR-PAY-002](../businessrule/BR-PAY-002.md), [BR-PAY-003](../businessrule/BR-PAY-003.md), [BR-PAY-004](../businessrule/BR-PAY-004.md) | ST-PAY-001–023, ST-PAY-070 |
-| Gán và đổi công trình của gói giám sát | [STORY-SUB-004](../userstory/STORY-SUB-004.md) | [BR-SUB-022](../businessrule/BR-SUB-022.md), [BR-SUB-023](../businessrule/BR-SUB-023.md) | ST-PAY-024–033 |
-| Hủy và khôi phục gói | [STORY-SUB-005](../userstory/STORY-SUB-005.md) | [BR-SUB-024](../businessrule/BR-SUB-024.md), [BR-SUB-025](../businessrule/BR-SUB-025.md) | ST-PAY-034–046 |
+| Gán công trình của gói giám sát | [STORY-SUB-004](../userstory/STORY-SUB-004.md) | [BR-SUB-022](../businessrule/BR-SUB-022.md), [BR-SUB-023](../businessrule/BR-SUB-023.md) (đã bỏ) | ST-PAY-024–028, ST-PAY-033, ST-PAY-059, ST-PAY-060, ST-PAY-071; ST-PAY-029–032 đã bỏ |
+| Gỡ gói giám sát khỏi công trình | [STORY-SUB-006](../userstory/STORY-SUB-006.md) | [BR-SUB-026](../businessrule/BR-SUB-026.md) | ST-PAY-074–084 |
+| Hủy gói | [STORY-SUB-005](../userstory/STORY-SUB-005.md) | [BR-SUB-024](../businessrule/BR-SUB-024.md), [BR-SUB-025](../businessrule/BR-SUB-025.md) (đã bỏ) | ST-PAY-034–037, ST-PAY-061, ST-PAY-073, ST-PAY-085–088; ST-PAY-038–046 đã bỏ |
 | Tra cứu quản trị người mua, gói và giao dịch | [STORY-PAY-002](../userstory/STORY-PAY-002.md) | [BR-PAY-005](../businessrule/BR-PAY-005.md) | ST-PAY-047–054, ST-PAY-069 |
 
-61 ca ban đầu và hai ca ST-PAY-069, ST-PAY-070 thêm ngày 25/09/2026 là đặc tả, chưa phải mã kiểm thử hoặc kết quả chạy. Mỗi ca có một file, đúng bảng 13 cột và liên kết Story/AC/BR. Các ví dụ giá/ngày/lượt là dữ liệu thử, không phải cấu hình bán thật.
+61 ca ban đầu, hai ca ST-PAY-069, ST-PAY-070 và các ca ST-PAY-073–088 thêm ngày 25/09/2026 là đặc tả, chưa phải mã kiểm thử hoặc kết quả chạy. ST-PAY-029–032 và ST-PAY-038–046 đã bỏ, giữ để tra lịch sử. Mỗi ca có một file, đúng bảng 13 cột và liên kết Story/AC/BR. Các ví dụ giá/ngày/lượt là dữ liệu thử, không phải cấu hình bán thật.
 
 ## Ảnh hưởng tới tài liệu cũ
 
@@ -179,21 +194,21 @@ Mọi AC mới có ít nhất một ca System Test bên dưới. Các ca từ ch
 | [ST-PAY-030](../systemtest/ST-PAY-030.md) | STORY-SUB-004/AC-007 | BR-SUB-023 | Đã rút ngày 25/09/2026: bỏ đổi công trình |
 | [ST-PAY-031](../systemtest/ST-PAY-031.md) | STORY-SUB-004/AC-008 | BR-SUB-023 | Đã rút ngày 25/09/2026: bỏ đổi công trình |
 | [ST-PAY-032](../systemtest/ST-PAY-032.md) | STORY-SUB-004/AC-009 | BR-SUB-023 | Đã rút ngày 25/09/2026: bỏ đổi công trình |
-| [ST-PAY-071](../systemtest/ST-PAY-071.md) | STORY-SUB-004/AC-013 | BR-SUB-009 | Không ai đổi được công trình của gói đã gán |
+| [ST-PAY-071](../systemtest/ST-PAY-071.md) | STORY-SUB-004/AC-013 | BR-SUB-009 | Không ai đổi thẳng công trình của gói đã gán |
 | [ST-PAY-033](../systemtest/ST-PAY-033.md) | STORY-SUB-004/AC-010 | BR-SUB-022 | Không gán lần đầu sang công trình người khác |
 | [ST-PAY-034](../systemtest/ST-PAY-034.md) | STORY-SUB-005/AC-001 | BR-SUB-024 | Hủy gói thiết kế |
 | [ST-PAY-035](../systemtest/ST-PAY-035.md) | STORY-SUB-005/AC-002 | BR-SUB-024 | Hủy giám sát chưa gán |
 | [ST-PAY-036](../systemtest/ST-PAY-036.md) | STORY-SUB-005/AC-003 | BR-SUB-024 | Hủy giám sát đã gán giải phóng công trình |
 | [ST-PAY-037](../systemtest/ST-PAY-037.md) | STORY-SUB-005/AC-004 | BR-SUB-024 | Chặn hủy thiếu quyền hoặc lý do |
-| [ST-PAY-038](../systemtest/ST-PAY-038.md) | STORY-SUB-005/AC-005 | BR-SUB-025 | Khôi phục thiết kế giữ nguyên thời hạn và lượt |
-| [ST-PAY-039](../systemtest/ST-PAY-039.md) | STORY-SUB-005/AC-006 | BR-SUB-025 | Khôi phục giám sát chưa gán còn hạn |
-| [ST-PAY-040](../systemtest/ST-PAY-040.md) | STORY-SUB-005/AC-007 | BR-SUB-025 | Khôi phục giám sát đã gán sau một năm |
-| [ST-PAY-041](../systemtest/ST-PAY-041.md) | STORY-SUB-005/AC-008 | BR-SUB-025 | Chặn khôi phục xung đột thiết kế |
-| [ST-PAY-042](../systemtest/ST-PAY-042.md) | STORY-SUB-005/AC-009 | BR-SUB-025 | Chặn khôi phục xung đột giám sát |
-| [ST-PAY-043](../systemtest/ST-PAY-043.md) | STORY-SUB-005/AC-010 | BR-SUB-025 | Chặn khôi phục thiết kế hết kỳ |
-| [ST-PAY-044](../systemtest/ST-PAY-044.md) | STORY-SUB-005/AC-011 | BR-SUB-025 | Chặn khôi phục giám sát quá hạn chưa gán |
-| [ST-PAY-045](../systemtest/ST-PAY-045.md) | STORY-SUB-005/AC-012 | BR-SUB-025 | Không khôi phục gói thiết kế đã bị thay thế |
-| [ST-PAY-046](../systemtest/ST-PAY-046.md) | STORY-SUB-005/AC-013 | BR-SUB-025 | Chặn khôi phục thiếu quyền hoặc lý do |
+| [ST-PAY-038](../systemtest/ST-PAY-038.md) | STORY-SUB-005/AC-005 | BR-SUB-025 | Đã bỏ ngày 25/09/2026: bỏ khôi phục — Khôi phục thiết kế giữ nguyên thời hạn và lượt |
+| [ST-PAY-039](../systemtest/ST-PAY-039.md) | STORY-SUB-005/AC-006 | BR-SUB-025 | Đã bỏ ngày 25/09/2026: bỏ khôi phục — Khôi phục giám sát chưa gán còn hạn |
+| [ST-PAY-040](../systemtest/ST-PAY-040.md) | STORY-SUB-005/AC-007 | BR-SUB-025 | Đã bỏ ngày 25/09/2026: bỏ khôi phục — Khôi phục giám sát đã gán sau một năm |
+| [ST-PAY-041](../systemtest/ST-PAY-041.md) | STORY-SUB-005/AC-008 | BR-SUB-025 | Đã bỏ ngày 25/09/2026: bỏ khôi phục — Chặn khôi phục xung đột thiết kế |
+| [ST-PAY-042](../systemtest/ST-PAY-042.md) | STORY-SUB-005/AC-009 | BR-SUB-025 | Đã bỏ ngày 25/09/2026: bỏ khôi phục — Chặn khôi phục xung đột giám sát |
+| [ST-PAY-043](../systemtest/ST-PAY-043.md) | STORY-SUB-005/AC-010 | BR-SUB-025 | Đã bỏ ngày 25/09/2026: bỏ khôi phục — Chặn khôi phục thiết kế hết kỳ |
+| [ST-PAY-044](../systemtest/ST-PAY-044.md) | STORY-SUB-005/AC-011 | BR-SUB-025 | Đã bỏ ngày 25/09/2026: bỏ khôi phục — Chặn khôi phục giám sát quá hạn chưa gán |
+| [ST-PAY-045](../systemtest/ST-PAY-045.md) | STORY-SUB-005/AC-012 | BR-SUB-025 | Đã bỏ ngày 25/09/2026: bỏ khôi phục — Không khôi phục gói thiết kế đã bị thay thế |
+| [ST-PAY-046](../systemtest/ST-PAY-046.md) | STORY-SUB-005/AC-013 | BR-SUB-025 | Đã bỏ ngày 25/09/2026: bỏ khôi phục — Chặn khôi phục thiếu quyền hoặc lý do |
 | [ST-PAY-047](../systemtest/ST-PAY-047.md) | STORY-PAY-002/AC-001 | BR-PAY-005 | Admin tra cứu người mua và gói |
 | [ST-PAY-048](../systemtest/ST-PAY-048.md) | STORY-PAY-002/AC-002 | BR-PAY-005 | Nhân viên có quyền tra cứu |
 | [ST-PAY-049](../systemtest/ST-PAY-049.md) | STORY-PAY-002/AC-003 | BR-PAY-005 | Từ chối người không có quyền |
@@ -211,6 +226,22 @@ Mọi AC mới có ít nhất một ca System Test bên dưới. Các ca từ ch
 | [ST-PAY-061](../systemtest/ST-PAY-061.md) | STORY-SUB-005/AC-014 | BR-SUB-024 | Biên/ngoại lệ bổ sung khi thiết kế kỹ thuật |
 | [ST-PAY-069](../systemtest/ST-PAY-069.md) | STORY-PAY-002/AC-003 | BR-RBAC-009 | Thu hồi quyền tra cứu có hiệu lực theo hạn token hoặc buộc đăng xuất |
 | [ST-PAY-070](../systemtest/ST-PAY-070.md) | STORY-PAY-001/AC-028 | BR-RBAC-005 | Tài khoản nhân viên không tạo hoặc hủy đơn mua gói |
+| [ST-PAY-073](../systemtest/ST-PAY-073.md) | STORY-SUB-005/AC-016 | BR-SUB-024 | Hủy gói giám sát kết thúc phân công |
+| [ST-PAY-074](../systemtest/ST-PAY-074.md) | STORY-SUB-006/AC-001 | BR-SUB-026 | Nhân viên gỡ gói đã gán, giữ hạn gán ban đầu |
+| [ST-PAY-075](../systemtest/ST-PAY-075.md) | STORY-SUB-006/AC-002 | BR-SUB-022 | Khách gán lại sang công trình đúng |
+| [ST-PAY-076](../systemtest/ST-PAY-076.md) | STORY-SUB-006/AC-003 | BR-SUB-022 | Khách gán lại vào chính công trình cũ |
+| [ST-PAY-077](../systemtest/ST-PAY-077.md) | STORY-SUB-006/AC-004 | BR-SUB-026 | Khách chỉ thấy gói chưa gán và hạn gán |
+| [ST-PAY-078](../systemtest/ST-PAY-078.md) | STORY-SUB-006/AC-005 | BR-SUB-026 | Lịch sử gỡ giữ công trình cũ sau khi công trình bị xóa |
+| [ST-PAY-079](../systemtest/ST-PAY-079.md) | STORY-SUB-006/AC-006 | BR-SUB-026 | Khách tự gỡ bị từ chối |
+| [ST-PAY-080](../systemtest/ST-PAY-080.md) | STORY-SUB-006/AC-007 | BR-SUB-026 | Chặn gỡ thiếu quyền hoặc lý do |
+| [ST-PAY-081](../systemtest/ST-PAY-081.md) | STORY-SUB-006/AC-008 | BR-SUB-026 | Chặn gỡ gói không ở trạng thái đã gán |
+| [ST-PAY-082](../systemtest/ST-PAY-082.md) | STORY-SUB-006/AC-009 | BR-SUB-026 | Chặn gỡ khi đã đến hoặc qua hạn gán |
+| [ST-PAY-083](../systemtest/ST-PAY-083.md) | STORY-SUB-006/AC-010, AC-012 | BR-SUB-022 | Gói đã gỡ không gán lại được sau hạn và hiện trạng thái quá hạn gán |
+| [ST-PAY-084](../systemtest/ST-PAY-084.md) | STORY-SUB-006/AC-011 | BR-SUB-026 | Gỡ nhiều lần, lịch sử lưu từng lần |
+| [ST-PAY-085](../systemtest/ST-PAY-085.md) | STORY-SUB-005/AC-015 | BR-SUB-024 | Hộp xác nhận trước khi hủy |
+| [ST-PAY-086](../systemtest/ST-PAY-086.md) | STORY-SUB-005/AC-017 | BR-SUB-024 | Không có thao tác khôi phục |
+| [ST-PAY-087](../systemtest/ST-PAY-087.md) | STORY-SUB-005/AC-018 | BR-SUB-024 | Khách thấy gói đã hủy; công trình chỉ còn gói đã hủy sửa, xóa được |
+| [ST-PAY-088](../systemtest/ST-PAY-088.md) | STORY-SUB-005/ALT-03 | BR-SUB-024 | Hủy nhầm thì khách mua gói mới |
 
 ## Bổ sung thiết kế kỹ thuật
 

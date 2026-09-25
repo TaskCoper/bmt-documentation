@@ -44,7 +44,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SITE-013 | STORY-SITE-001 | ALT | REGRESSION | P2 | Khách U1 có công trình A tên “nhà phố” và không có công trình nào khác cùng tên. | 1. U1 đổi tên A thành “Nhà Phố”.<br>2. Đọc lại tên của A. | Tên mới của A: “Nhà Phố”. | Lưu thành công; A có tên “Nhà Phố”. Khi sửa, tên chỉ được so với các công trình khác của U1, không so với chính A. | STORY-SITE-001/AC-013<br>STORY-SITE-001/ALT-02<br>BR-SITE-001/Then | Đổi hoa/thường của chính công trình không bị coi là trùng. Đặc tả chưa chạy. | [Chưa xác định] | Draft |
+| ST-SITE-013 | STORY-SITE-001 | ALT | REGRESSION | P2 | Khách U1 có công trình A tên “nhà phố” và không có công trình nào khác cùng tên. A không có gói giám sát giữ chỗ. | 1. U1 đổi tên A thành “Nhà Phố”.<br>2. Đọc lại tên của A. | Tên mới của A: “Nhà Phố”. | Lưu thành công; A có tên “Nhà Phố”. Khi sửa, tên chỉ được so với các công trình khác của U1, không so với chính A. | STORY-SITE-001/AC-013<br>STORY-SITE-001/ALT-02<br>BR-SITE-001/Then | Đổi hoa/thường của chính công trình không bị coi là trùng. Đặc tả chưa chạy. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

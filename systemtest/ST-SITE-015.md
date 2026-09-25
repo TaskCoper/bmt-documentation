@@ -44,10 +44,12 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SITE-015 | STORY-SITE-001 | EXC | REGRESSION | P1 | Công trình A của khách U1 có gói G1 đã hoàn thành. Công trình B từng có gói G2 gắn vào; G2 nay đang bị hủy và B không có gói giữ chỗ. | 1. U1 yêu cầu xóa A.<br>2. U1 yêu cầu xóa B.<br>3. Đọc phản hồi, danh sách công trình và trạng thái G1, G2. | A “Nhà phố Quận 7”, B “Nhà kho cũ”. | Cả hai yêu cầu bị từ chối. A, B vẫn còn trong danh sách; G1 vẫn đã hoàn thành trên A và G2 vẫn đang bị hủy, gắn B. | STORY-SITE-001/AC-015<br>STORY-SITE-001/EXC-03<br>BR-SITE-002/Then | Công trình từng có gói thì không xóa được, dù gói hiện đã hoàn thành hay đang bị hủy. Đặc tả chưa chạy. | [Chưa xác định] | Draft |
+| ST-SITE-015 | STORY-SITE-001 | EXC / ALT | REGRESSION | P1 | Công trình A của khách U1 có gói G1 đã hoàn thành. Công trình B của U1 từng có gói G2 gắn vào; G2 đã bị nhân viên hủy và B không còn gói giữ chỗ. | 1. U1 yêu cầu xóa A.<br>2. U1 yêu cầu xóa B.<br>3. Đọc phản hồi, danh sách công trình của U1 và trạng thái G1, G2.<br>4. U1 mở danh sách gói của mình.<br>5. Kiểm tra dữ liệu lịch sử hủy của G2. | A “Nhà phố Quận 7”. B “Nhà kho cũ”, địa chỉ “Bến Lức, Long An”. G1, G2 là gói giám sát thử. | Yêu cầu xóa A bị từ chối vì G1 đã hoàn thành vẫn giữ chỗ; A và G1 giữ nguyên. Yêu cầu xóa B thành công; B không còn trong danh sách công trình của U1. G2 vẫn ở trạng thái đã hủy; danh sách gói của U1 hiện G2 kèm tên “Nhà kho cũ” tại lúc hủy. Lịch sử hủy của G2 giữ tên “Nhà kho cũ” và địa chỉ “Bến Lức, Long An”. | STORY-SITE-001/AC-015<br>STORY-SITE-001/EXC-03<br>STORY-SITE-001/ALT-03<br>BR-SITE-002/Then<br>BR-SUB-024/Then | Chỉ gói giữ chỗ (đã gán hoặc đã hoàn thành) chặn xóa công trình; gói đã hủy không chặn, và lịch sử gói vẫn giữ thông tin công trình tại lúc hủy (quyết định ngày 25/09/2026). Đặc tả chưa chạy. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-SITE-001/AC-015
 - STORY-SITE-001/EXC-03
+- STORY-SITE-001/ALT-03
 - BR-SITE-002/Then
+- BR-SUB-024/Then

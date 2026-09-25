@@ -41,7 +41,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 ## Metadata
 
 - **Story**: Là người quản trị có quyền phân công, tôi muốn giao từng gói giám sát cho một nhân viên phụ trách và chuyển giao khi cần, để mỗi gói đang thực hiện luôn có người chịu trách nhiệm và chỉ người đó thao tác được.
-- **Context**: BR-SUB-011 và BR-SUB-012 chỉ cho Admin hoặc nhân viên phụ trách gói hoàn thành hoặc mở lại gói giám sát. Story này dựng cơ chế phân công chung theo loại tài nguyên. Theo quyết định người dùng xác nhận ngày 25/09/2026, đợt này chỉ có một loại tài nguyên là gói giám sát, mỗi gói một người phụ trách, không có phân công mức khách hàng hay mức công trình. Gói gắn cố định với một công trình nên người phụ trách gói cũng lo công trình đó trong thời gian gói còn ở đó. Loại khác như lead thêm sau bằng cùng cơ chế.
+- **Context**: BR-SUB-011 và BR-SUB-012 chỉ cho Admin hoặc nhân viên phụ trách gói hoàn thành hoặc mở lại gói giám sát. Story này dựng cơ chế phân công chung theo loại tài nguyên. Theo quyết định người dùng xác nhận ngày 25/09/2026, đợt này chỉ có một loại tài nguyên là gói giám sát, mỗi gói một người phụ trách, không có phân công mức khách hàng hay mức công trình. Gói gắn với một công trình cho tới khi bị gỡ theo STORY-SUB-006, nên người phụ trách gói cũng lo công trình đó trong thời gian gói còn ở đó. Loại khác như lead thêm sau bằng cùng cơ chế. Người dùng xác nhận thêm cùng ngày: hủy gói hoặc gỡ gói khỏi công trình đều kết thúc phân công; không còn thao tác khôi phục gói.
 - **Sprint**:
 - **Priority**:
 - **Status**: Todo
@@ -91,7 +91,7 @@ Người quản trị chuyển giao để gỡ vướng khi việc thu hồi vai
 
 1. Việc thu hồi vai trò ở STORY-RBAC-002 bị từ chối vì sau khi thu hồi, nhân viên sẽ không còn quyền `supervision.complete` trong khi vẫn đang phụ trách gói giám sát, theo BR-RBAC-007.
 2. Người quản trị xem danh sách gói người đó đang phụ trách.
-3. Người quản trị chuyển từng phần hoặc toàn bộ sang nhân viên khác theo ALT-01, hoặc gỡ phân công theo ALT-04. Gói đang bị hủy không chuyển giao được nên chỉ gỡ được.
+3. Người quản trị chuyển từng phần hoặc toàn bộ sang nhân viên khác theo ALT-01, hoặc gỡ phân công theo ALT-04. Gói đã hủy hoặc đã bị gỡ khỏi công trình không còn phân công nên không cần xử lý.
 4. Khi người đó không còn phụ trách gói nào, việc thu hồi vai trò thực hiện được.
 
 #### ALT-03
@@ -119,6 +119,8 @@ Người quản trị chia lại các gói của một nhân viên đã bị kh�
 
 #### ALT-06
 
+**Không nghiệm thu trong phạm vi hiện tại:** người dùng xác nhận ngày 25/09/2026 hủy gói kết thúc phân công và bỏ thao tác khôi phục; thay bằng ALT-08. Nội dung giữ để tra lịch sử.
+
 Gói đang có người phụ trách bị hủy rồi được khôi phục.
 
 1. Nhân viên có quyền hủy gói G1 do A phụ trách theo STORY-SUB-005.
@@ -130,8 +132,16 @@ Gói đang có người phụ trách bị hủy rồi được khôi phục.
 Khách gắn gói mới vào công trình từng có gói do người khác phụ trách.
 
 1. Gói G1 của công trình P do A phụ trách đã bị hủy; khách gắn gói G2 vào P theo STORY-SUB-004.
-2. G2 là gói riêng nên chưa có người phụ trách và nằm trong danh sách cần chia lại. Phân công của A trên G1 không tự chuyển sang G2.
+2. G2 là gói riêng nên chưa có người phụ trách và nằm trong danh sách cần chia lại. Phân công của A trên G1 đã kết thúc khi G1 bị hủy và không tự chuyển sang G2.
 3. Người quản trị giao G2 cho A hoặc người khác theo Main Flow.
+
+#### ALT-08
+
+Gói đang có người phụ trách bị hủy hoặc bị gỡ khỏi công trình.
+
+1. Nhân viên hủy gói G1 do A phụ trách theo STORY-SUB-005, hoặc gỡ G1 khỏi công trình theo STORY-SUB-006.
+2. Hệ thống kết thúc ngay phân công của A trên G1 và ghi nhật ký; người quản trị không phải gỡ tay.
+3. G1 đã hủy không vào danh sách cần chia lại. G1 đã gỡ về chưa gán nên cũng chưa vào danh sách; khi khách gán lại G1, gói chưa có người phụ trách và vào danh sách cần chia lại.
 
 ### Exception Flow
 
@@ -179,7 +189,7 @@ Người quản trị giao hoặc chuyển giao gói cho nhân viên không có 
 
 #### EXC-07
 
-Người quản trị giao hoặc chuyển giao một gói chưa gán công trình hoặc đang bị hủy, kể cả gửi trực tiếp tới API.
+Người quản trị giao hoặc chuyển giao một gói chưa gán công trình hoặc đã hủy, kể cả gửi trực tiếp tới API.
 
 1. Hệ thống từ chối theo BR-RBAC-013 khoản 8 và không tạo phân công.
 2. Khi chuyển giao, phân công hiện tại giữ nguyên.
@@ -258,17 +268,24 @@ Người quản trị giao hoặc chuyển giao một gói chưa gán công trì
 
 #### AC-011
 
-- **Given**: Gói GU chưa gán công trình; gói GC đang bị hủy và do nhân viên A phụ trách; nhân viên C đang hoạt động và có quyền `supervision.complete`.
-- **When**: Người quản trị giao GU cho C, chuyển giao GC từ A sang C, rồi gỡ phân công của A trên GC, kể cả gửi trực tiếp tới API.
-- **Then**: Yêu cầu giao GU và chuyển giao GC bị từ chối, không tạo phân công nào cho C; yêu cầu gỡ phân công của A trên GC thành công.
-- **And**: GU vẫn chưa có người phụ trách; GC không có người phụ trách và không vào danh sách cần chia lại vì đang bị hủy.
+- **Given**: Gói GU chưa gán công trình; gói GC đã hủy, và phân công của nhân viên A trên GC đã kết thúc khi hủy; nhân viên C đang hoạt động và có quyền `supervision.complete`.
+- **When**: Người quản trị lần lượt giao GU và GC cho C, kể cả gửi trực tiếp tới API.
+- **Then**: Cả hai yêu cầu bị từ chối, không tạo phân công nào cho C.
+- **And**: GU và GC đều không có người phụ trách; GC không vào danh sách cần chia lại vì đã hủy.
 
 #### AC-012
 
 - **Given**: Gói G1 của công trình P do nhân viên A phụ trách.
-- **When**: G1 bị hủy, sau đó được khôi phục về trạng thái đã gán; tiếp theo một tình huống khác, G1 bị hủy và khách gắn gói mới G2 vào P.
-- **Then**: Trong lúc G1 bị hủy và sau khi khôi phục, A vẫn phụ trách G1 mà không cần giao lại. G2 chưa có người phụ trách và nằm trong danh sách cần chia lại.
-- **And**: A không thao tác được trên G2 cho tới khi người quản trị giao G2 cho A.
+- **When**: G1 bị hủy, sau đó khách gắn gói mới G2 vào P.
+- **Then**: Phân công của A trên G1 kết thúc ngay khi hủy và có bản ghi nhật ký. G2 chưa có người phụ trách và nằm trong danh sách cần chia lại.
+- **And**: A không thao tác được trên G1 hay G2 cho tới khi người quản trị giao G2 cho A.
+
+#### AC-013
+
+- **Given**: Gói G đã gán công trình P và do nhân viên A phụ trách; nhân viên S có quyền `supervision.unassign`; công trình Q của cùng khách chưa có gói giữ chỗ.
+- **When**: S gỡ G khỏi P, sau đó khách gán G vào Q.
+- **Then**: Phân công của A trên G kết thúc ngay lúc gỡ và có bản ghi nhật ký. Sau khi gán lại, G chưa có người phụ trách và nằm trong danh sách cần chia lại.
+- **And**: A không thao tác được trên G cho tới khi người quản trị giao lại G cho A hoặc người khác.
 
 ## References
 
@@ -292,8 +309,9 @@ Người quản trị giao hoặc chuyển giao một gói chưa gán công trì
 - BR-SUB-006/Then: gói đã gán hoặc đã hoàn thành là gói giữ chỗ trên công trình.
 - BR-SUB-011/Then: quyền hoàn thành gói giám sát dựa trên phân công hiện tại của gói.
 - BR-SUB-012/Then: quyền mở lại gói giám sát dựa trên phân công hiện tại của gói.
-- BR-SUB-024/Then: hủy gói không gỡ phân công.
-- BR-SUB-025/Then: khôi phục gói giữ người phụ trách cũ.
+- BR-SUB-024/Then: hủy gói kết thúc phân công.
+- BR-SUB-026/Then: gỡ gói kết thúc phân công; gói được gán lại cần giao lại.
+- STORY-SUB-006: nhân viên gỡ gói khỏi công trình khi khách gán nhầm.
 - BR-SITE-003/Then: nhân viên phụ trách gói xem được công trình gắn với gói.
 
 ## Non-Functional

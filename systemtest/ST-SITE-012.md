@@ -44,7 +44,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SITE-012 | STORY-SITE-001 | EXC | REGRESSION | P1 | Khách U1 có công trình A tên “Nhà phố” và công trình B tên “Nhà vườn”. | 1. U1 đổi tên B thành “NHÀ PHỐ”.<br>2. Đọc phản hồi và tên hiện tại của A và B. | Tên mới của B: “NHÀ PHỐ”. | Yêu cầu bị từ chối vì trùng tên với A, không phân biệt hoa/thường. B giữ tên “Nhà vườn”; A không đổi. | STORY-SITE-001/AC-012<br>STORY-SITE-001/EXC-02<br>BR-SITE-001/Then | Kiểm tra trùng tên khi sửa. Đặc tả chưa chạy. | [Chưa xác định] | Draft |
+| ST-SITE-012 | STORY-SITE-001 | EXC | REGRESSION | P1 | Khách U1 có công trình A tên “Nhà phố” và công trình B tên “Nhà vườn”; A và B không có gói giám sát giữ chỗ. | 1. U1 đổi tên B thành “NHÀ PHỐ”.<br>2. Đọc phản hồi và tên hiện tại của A và B. | Tên mới của B: “NHÀ PHỐ”. | Yêu cầu bị từ chối vì trùng tên với A, không phân biệt hoa/thường. B giữ tên “Nhà vườn”; A không đổi. | STORY-SITE-001/AC-012<br>STORY-SITE-001/EXC-02<br>BR-SITE-001/Then | Kiểm tra trùng tên khi sửa. Đặc tả chưa chạy. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

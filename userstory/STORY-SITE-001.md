@@ -40,7 +40,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 ## Metadata
 
 - **Story**: Là khách hàng, tôi muốn tạo và quản lý các công trình của mình để gắn gói giám sát đúng nơi cần giám sát.
-- **Context**: Công trình là nơi thi công thật mà khách muốn được giám sát. Đây là thực thể riêng, khác với bản dự toán. Khách tự tạo công trình miễn phí, không cần gói thiết kế và không giới hạn số lượng. Mỗi công trình chỉ có tên và địa chỉ, không có trạng thái riêng. Gói giám sát được gắn cố định vào công trình theo STORY-SUB-004; nhân viên phụ trách theo từng gói. Người dùng xác nhận các quyết định này ngày 25/09/2026.
+- **Context**: Công trình là nơi thi công thật mà khách muốn được giám sát. Đây là thực thể riêng, khác với bản dự toán. Khách tự tạo công trình miễn phí, không cần gói thiết kế và không giới hạn số lượng. Mỗi công trình chỉ có tên và địa chỉ, không có trạng thái riêng. Gói giám sát được gắn vào công trình theo STORY-SUB-004; nhân viên chỉ gỡ được gói khi khách gán nhầm, theo STORY-SUB-006. Nhân viên phụ trách theo từng gói. Người dùng xác nhận các quyết định này ngày 25/09/2026, gồm quyết định bổ sung: khi công trình có gói giữ chỗ (đã gán hoặc đã hoàn thành), khách không sửa và không xóa được công trình; gói đã gỡ hoặc đã hủy không khóa.
 - **Sprint**:
 - **Priority**:
 - **Status**: Todo
@@ -83,19 +83,19 @@ Khách xem danh sách và chi tiết công trình của mình.
 
 #### ALT-02
 
-Khách sửa tên hoặc địa chỉ của công trình, kể cả khi công trình đã có gói.
+Khách sửa tên hoặc địa chỉ của công trình không có gói giữ chỗ.
 
 1. Khách sửa tên, địa chỉ hoặc cả hai của một công trình thuộc mình.
-2. Hệ thống kiểm tra lại theo BR-SITE-001. Tên mới không được trùng với công trình khác của khách.
-3. Hệ thống lưu thông tin mới. Gói đã gắn và người phụ trách gói giữ nguyên theo BR-SITE-002.
+2. Hệ thống kiểm tra công trình không có gói đã gán hoặc đã hoàn thành theo BR-SITE-002, rồi kiểm tra lại theo BR-SITE-001. Tên mới không được trùng với công trình khác của khách.
+3. Hệ thống lưu thông tin mới. Lịch sử của các gói đã gỡ hoặc đã hủy khỏi công trình vẫn giữ tên và địa chỉ tại lúc gỡ hoặc hủy.
 
 #### ALT-03
 
-Khách xóa công trình chưa từng có gói giám sát gắn vào.
+Khách xóa công trình không có gói giữ chỗ.
 
 1. Khách yêu cầu xóa công trình.
-2. Hệ thống kiểm tra công trình chưa từng có gói giám sát gắn vào theo BR-SITE-002.
-3. Hệ thống xóa công trình. Công trình không còn trong danh sách và không nhận gói giám sát được nữa.
+2. Hệ thống kiểm tra công trình không có gói đã gán hoặc đã hoàn thành theo BR-SITE-002. Công trình chưa từng có gói, hoặc chỉ có gói đã gỡ hay đã hủy, đều xóa được.
+3. Hệ thống xóa công trình. Công trình không còn trong danh sách và không nhận gói giám sát được nữa. Lịch sử của các gói đã gỡ hoặc đã hủy vẫn giữ tên và địa chỉ công trình tại lúc gỡ hoặc hủy.
 
 ### Exception Flow
 
@@ -115,10 +115,11 @@ Tên trùng với một công trình khác của cùng khách, không phân bi�
 
 #### EXC-03
 
-Khách xóa công trình từng có gói giám sát gắn vào, kể cả khi gói đó đã hoàn thành hoặc đang bị hủy.
+Khách sửa hoặc xóa công trình đang có gói giữ chỗ, tức gói đã gán hoặc đã hoàn thành.
 
-1. Hệ thống từ chối.
-2. Công trình và các gói đã gắn giữ nguyên.
+1. Hệ thống từ chối, kể cả khi yêu cầu gửi trực tiếp tới API.
+2. Công trình và gói giữ nguyên.
+3. Nếu khách gõ sai tên hoặc địa chỉ, khách liên hệ tổng đài để nhân viên gỡ gói theo STORY-SUB-006, rồi sửa và gán lại.
 
 #### EXC-04
 
@@ -192,16 +193,16 @@ Khách xem, sửa hoặc xóa công trình của khách khác, kể cả gửi y
 
 #### AC-010
 
-- **Given**: Công trình A của U1 có gói G1 đang bị hủy; sau đó U1 gắn gói G2 vào A và G2 ở trạng thái đã gán.
+- **Given**: Công trình A của U1 có gói G1 đã hủy; sau đó U1 gắn gói G2 vào A và G2 ở trạng thái đã gán.
 - **When**: U1 xem chi tiết A.
-- **Then**: U1 thấy G1 với trạng thái đang bị hủy và G2 với trạng thái đã gán.
+- **Then**: U1 thấy G1 với trạng thái đã hủy và G2 với trạng thái đã gán.
 
 #### AC-011
 
-- **Given**: Công trình A của U1 có gói G1 đã gán, do nhân viên N phụ trách.
-- **When**: U1 đổi tên A thành “Nhà phố mới” và đổi địa chỉ.
-- **Then**: Lưu thành công tên và địa chỉ mới.
-- **And**: G1 vẫn gắn với A và N vẫn phụ trách G1.
+- **Given**: Công trình A của U1 có gói G1 đã gán, do nhân viên N phụ trách; công trình C của U1 có gói G3 đã hoàn thành.
+- **When**: U1 đổi tên A thành “Nhà phố mới” và đổi địa chỉ A; sau đó đổi địa chỉ C; kể cả gửi yêu cầu trực tiếp tới API.
+- **Then**: Cả hai yêu cầu bị từ chối vì công trình đang có gói giữ chỗ.
+- **And**: A và C giữ tên, địa chỉ cũ; G1 vẫn gắn A và N vẫn phụ trách G1; G3 vẫn gắn C.
 
 #### AC-012
 
@@ -225,10 +226,10 @@ Khách xem, sửa hoặc xóa công trình của khách khác, kể cả gửi y
 
 #### AC-015
 
-- **Given**: Công trình A của U1 có gói G1 đã hoàn thành; công trình B từng có gói G2 gắn vào, nay G2 đang bị hủy và B không có gói giữ chỗ.
+- **Given**: Công trình A của U1 có gói G1 đã hoàn thành; công trình B từng có gói G2 gắn vào, nay G2 đã hủy và B không có gói giữ chỗ.
 - **When**: U1 lần lượt yêu cầu xóa A và B.
-- **Then**: Cả hai yêu cầu bị từ chối.
-- **And**: A, B và các gói G1, G2 giữ nguyên.
+- **Then**: Xóa A bị từ chối vì G1 đã hoàn thành vẫn giữ chỗ; xóa B thành công.
+- **And**: A và G1 giữ nguyên; G2 vẫn ở trạng thái đã hủy và lịch sử của G2 giữ tên, địa chỉ của B tại lúc hủy.
 
 #### AC-016
 
@@ -236,6 +237,13 @@ Khách xem, sửa hoặc xóa công trình của khách khác, kể cả gửi y
 - **When**: U1 xem chi tiết, sửa hoặc xóa C, kể cả gửi yêu cầu trực tiếp tới API.
 - **Then**: Cả ba yêu cầu bị từ chối và không tiết lộ tên, địa chỉ hay gói của C.
 - **And**: C giữ nguyên.
+
+#### AC-017
+
+- **Given**: Công trình A của U1 từng có gói G1 nay đã hủy; công trình B của U1 từng có gói G2 nay đã bị nhân viên gỡ; A và B không có gói giữ chỗ.
+- **When**: U1 đổi địa chỉ của A và đổi tên của B.
+- **Then**: Cả hai yêu cầu thành công.
+- **And**: Lịch sử của G1 và G2 vẫn giữ tên, địa chỉ công trình tại lúc hủy hoặc gỡ.
 
 ## References
 
@@ -252,15 +260,18 @@ Khách xem, sửa hoặc xóa công trình của khách khác, kể cả gửi y
 - BR-RBAC-011/Then
 - BR-SUB-022/Then
 - BR-SUB-006/Then
+- BR-SUB-024/Then: Gói đã hủy không khóa việc sửa hoặc xóa công trình.
+- BR-SUB-026/Then: Gói đã gỡ không còn giữ chỗ trên công trình cũ.
 
 ### Dependencies
 
 - STORY-SUB-004: Khách gắn gói giám sát vào công trình của mình.
+- STORY-SUB-006: Nhân viên gỡ gói khi khách gán nhầm hoặc cần sửa công trình.
 - STORY-SITE-002: Nhân viên xem công trình theo quyền.
 
 ## Non-Functional
 
-- Kiểm tra trùng tên và điều kiện xóa phải đúng cả khi có yêu cầu đồng thời. Hai yêu cầu tạo công trình trùng tên của cùng khách gửi cùng lúc thì chỉ một yêu cầu thành công. Yêu cầu xóa công trình và yêu cầu gắn gói vào chính công trình đó gửi cùng lúc không được để lại gói gắn vào công trình đã xóa. Cơ chế kỹ thuật thuộc TDD.
+- Kiểm tra trùng tên và điều kiện xóa phải đúng cả khi có yêu cầu đồng thời. Hai yêu cầu tạo công trình trùng tên của cùng khách gửi cùng lúc thì chỉ một yêu cầu thành công. Yêu cầu xóa công trình và yêu cầu gắn gói vào chính công trình đó gửi cùng lúc không được để lại gói gắn vào công trình đã xóa. Tương tự, yêu cầu sửa công trình và yêu cầu gắn gói gửi cùng lúc không được để công trình bị sửa sau khi đã có gói giữ chỗ. Cơ chế kỹ thuật thuộc TDD.
 - Mọi yêu cầu được kiểm quyền ở server, kể cả yêu cầu gửi trực tiếp tới API, theo BR-RBAC-011.
 - Chưa chốt chỉ tiêu hiệu năng, cách phân trang, thứ tự sắp xếp hay tìm kiếm trong danh sách công trình.
 
@@ -268,4 +279,4 @@ Khách xem, sửa hoặc xóa công trình của khách khác, kể cả gửi y
 
 - Trạng thái công trình (đang thi công, đã xong); nhân viên tạo, sửa hoặc xóa hộ khách; hiện tên nhân viên phụ trách cho khách; địa chỉ tách tỉnh/thành, quận/huyện, phường/xã; gắn công trình với bản dự toán hoặc tạo công trình từ bản dự toán; giới hạn số công trình.
 - Gắn gói giám sát vào công trình thuộc STORY-SUB-004; phân công nhân viên cho gói thuộc STORY-RBAC-003.
-- Đã có TDD-SITE-001 và bộ System Test ST-SITE. Code đã triển khai ở commit `182e2a8` của `bmt-be`; unit test và integration test chạy đạt ngày 25/09/2026, System Test chưa chạy. Tài liệu chưa được phê duyệt. Sprint, Priority và người thực hiện chưa được phân công.
+- Đã có TDD-SITE-001 và bộ System Test ST-SITE. Code đã triển khai ở commit `182e2a8` của `bmt-be`; unit test và integration test chạy đạt ngày 25/09/2026, System Test chưa chạy. Quy tắc khóa sửa và điều kiện xóa mới, chốt cùng ngày, đã có trong thiết kế TDD-SITE-001 nhưng chưa có trong code. Tài liệu chưa được phê duyệt. Sprint, Priority và người thực hiện chưa được phân công.

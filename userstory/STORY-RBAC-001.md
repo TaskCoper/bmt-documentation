@@ -57,7 +57,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 ### Preconditions
 
 - Người thao tác đã đăng nhập bằng tài khoản nhân viên đang hoạt động và có quyền `role.manage`.
-- Hệ thống đã có sẵn danh sách mã quyền do hệ thống định nghĩa. Người quản trị chọn trong danh sách này, không tự đặt mã quyền mới. Tám mã quyền khởi tạo gồm: `commerce.read` xem người mua, gói đã mua, đơn và giao dịch; `package.cancel` hủy hiệu lực gói; `package.restore` khôi phục gói bị hủy; `supervision.complete` hoàn thành và mở lại gói giám sát; `user.manage` tạo, khóa, mở khóa và buộc đăng xuất tài khoản nhân viên; `role.manage` tạo, sửa, xóa vai trò và gán vai trò cho người; `assignment.manage` phân công và chuyển giao tài nguyên; `audit.read` xem nhật ký thay đổi quyền. Mã `supervision.reassign` (đổi công trình của gói giám sát) trong danh sách ban đầu đã bỏ ngày 25/09/2026, vì người dùng xác nhận gói đã gắn công trình thì không đổi công trình; danh mục hiện có 13 mã.
+- Hệ thống đã có sẵn danh sách mã quyền do hệ thống định nghĩa. Người quản trị chọn trong danh sách này, không tự đặt mã quyền mới. Tám mã quyền khởi tạo gồm: `commerce.read` xem người mua, gói đã mua, đơn và giao dịch; `package.cancel` hủy hiệu lực gói; `supervision.unassign` gỡ gói giám sát khỏi công trình khi khách gán nhầm; `supervision.complete` hoàn thành và mở lại gói giám sát; `user.manage` tạo, khóa, mở khóa và buộc đăng xuất tài khoản nhân viên; `role.manage` tạo, sửa, xóa vai trò và gán vai trò cho người; `assignment.manage` phân công và chuyển giao tài nguyên; `audit.read` xem nhật ký thay đổi quyền. Mã `supervision.reassign` (đổi công trình của gói giám sát) trong danh sách ban đầu đã bỏ ngày 25/09/2026, vì người dùng xác nhận gói đã gắn công trình thì không đổi công trình. Cùng ngày, mã `package.restore` (khôi phục gói bị hủy) đã bỏ vì người dùng bỏ thao tác khôi phục, và mã `supervision.unassign` được thêm theo BR-SUB-026; danh mục hiện có 13 mã.
 - Ngày 25/09/2026, người dùng xác nhận bổ sung năm quyền cho chức năng quản trị, mỗi chức năng một quyền: cấu hình gói; quản lý danh mục loại công trình và phong cách; quản lý thư viện mẫu; quản lý tin tức; quản lý tư vấn KTS, gồm hồ sơ KTS và yêu cầu tư vấn. Năm quyền này không gắn phân công và vai trò Admin có đủ. Tên mã đặt ở bước thiết kế kỹ thuật.
 - Hai vai trò hệ thống Admin và Khách hàng đã tồn tại và không sửa được theo BR-RBAC-002.
 
@@ -149,8 +149,8 @@ Người quản trị bỏ quyền `supervision.complete` khỏi một vai trò,
 
 #### AC-001
 
-- **Given**: Người quản trị có quyền `role.manage`, `package.cancel` và `package.restore`; chưa có vai trò nào tên "Nhân viên vận hành gói".
-- **When**: Người quản trị tạo vai trò "Nhân viên vận hành gói" với hai quyền `package.cancel` và `package.restore`.
+- **Given**: Người quản trị có quyền `role.manage`, `package.cancel` và `supervision.unassign`; chưa có vai trò nào tên "Nhân viên vận hành gói".
+- **When**: Người quản trị tạo vai trò "Nhân viên vận hành gói" với hai quyền `package.cancel` và `supervision.unassign`.
 - **Then**: Vai trò được tạo với đúng hai quyền đó.
 - **And**: Nhân viên được gán vai trò này có hai quyền đó và không có thêm quyền nào khác từ vai trò này.
 

@@ -44,10 +44,11 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-PAY-053 | STORY-PAY-002 | EXC | REGRESSION | P1 | Nhân viên chỉ có quyền tra cứu, không có quyền hủy hoặc khôi phục gói. | 1. Chuẩn bị dữ liệu và quyền theo Test data.<br>2. Nhân viên xem gói rồi thử gửi các yêu cầu hủy và khôi phục.<br>3. Kiểm tra kết quả trả về và đọc lại dữ liệu gốc. | Nhân viên chỉ có quyền tra cứu, không có quyền hủy hoặc khôi phục gói. Dữ liệu minh họa, không phải cấu hình bán thật. | Xem được nhưng tất cả yêu cầu ghi đều bị từ chối. Gói, công trình và lịch sử thao tác thành công không thay đổi. | STORY-PAY-002/AC-007<br>STORY-PAY-002/EXC-02<br>BR-PAY-005/Then | Quyền xem không cấp quyền sửa. Cập nhật 25/09/2026: bỏ yêu cầu đổi công trình vì hệ thống không còn thao tác này. Đặc tả chưa chạy. | [Chưa xác định] | Draft |
+| ST-PAY-053 | STORY-PAY-002 | EXC | REGRESSION | P1 | Nhân viên chỉ có quyền tra cứu, không có quyền hủy hoặc gỡ gói. Khách có gói giám sát G đã gán công trình A. | 1. Chuẩn bị dữ liệu và quyền theo Test data.<br>2. Nhân viên xem gói G rồi thử gửi yêu cầu hủy G và yêu cầu gỡ G khỏi A.<br>3. Kiểm tra kết quả trả về và đọc lại dữ liệu gốc. | Nhân viên chỉ có quyền tra cứu, không có quyền hủy hoặc gỡ gói; G và A là dữ liệu thử. Dữ liệu minh họa, không phải cấu hình bán thật. | Xem được nhưng tất cả yêu cầu ghi đều bị từ chối. Gói, công trình và lịch sử thao tác thành công không thay đổi; G vẫn gắn A. | STORY-PAY-002/AC-007<br>STORY-PAY-002/EXC-02<br>BR-PAY-005/Then<br>BR-SUB-026/Then | Quyền xem không cấp quyền sửa. Cập nhật 25/09/2026: bỏ yêu cầu đổi công trình vì hệ thống không còn thao tác này. Cập nhật tiếp 25/09/2026: thay yêu cầu khôi phục đã bỏ bằng yêu cầu gỡ gói theo BR-SUB-026. Đặc tả chưa chạy. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-PAY-002/AC-007
 - STORY-PAY-002/EXC-02
 - BR-PAY-005/Then
+- BR-SUB-026/Then

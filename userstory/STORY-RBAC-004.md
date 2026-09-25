@@ -82,7 +82,7 @@ Yêu cầu chỉ để xem dữ liệu.
 
 1. Hệ thống kiểm tra người gọi có quyền xem tương ứng.
 2. Có quyền thì cho xem toàn bộ dữ liệu trong phạm vi của quyền đó, không đòi thêm phân công theo BR-RBAC-010.
-3. Quyền xem không cấp thêm quyền sửa, hủy hay khôi phục; các thao tác đó vẫn kiểm tra riêng.
+3. Quyền xem không cấp thêm quyền sửa, hủy hay gỡ; các thao tác đó vẫn kiểm tra riêng.
 
 #### ALT-02
 
@@ -170,10 +170,10 @@ Người gọi yêu cầu sửa hoặc xóa một bản ghi nhật ký.
 
 #### AC-005
 
-- **Given**: Nhân viên E đang có phiên đăng nhập và đang có quyền `package.restore`.
-- **When**: Người quản trị bỏ quyền `package.restore` khỏi vai trò của E nhưng không buộc đăng xuất E.
+- **Given**: Nhân viên E đang có phiên đăng nhập và đang có quyền `supervision.unassign`.
+- **When**: Người quản trị bỏ quyền `supervision.unassign` khỏi vai trò của E nhưng không buộc đăng xuất E.
 - **Then**: E còn dùng được quyền đó cho tới khi access token hiện tại hết hạn.
-- **And**: Sau khi token hết hạn và E nhận token mới, yêu cầu dùng quyền `package.restore` của E bị từ chối.
+- **And**: Sau khi token hết hạn và E nhận token mới, yêu cầu dùng quyền `supervision.unassign` của E bị từ chối.
 
 #### AC-006
 
@@ -216,7 +216,7 @@ Người gọi yêu cầu sửa hoặc xóa một bản ghi nhật ký.
 - STORY-RBAC-001/Main Flow: vai trò và danh sách quyền.
 - STORY-RBAC-002/Alternative Flow: khóa tài khoản và buộc đăng xuất.
 - STORY-RBAC-003/Main Flow: phân công tài nguyên làm căn cứ cho điều kiện sửa hẹp.
-- BR-PAY-005/Then: quyền tra cứu quản trị không kéo theo quyền sửa, hủy hoặc khôi phục.
+- BR-PAY-005/Then: quyền tra cứu quản trị không kéo theo quyền sửa, hủy hoặc gỡ.
 
 ## Non-Functional
 
@@ -226,7 +226,7 @@ Người gọi yêu cầu sửa hoặc xóa một bản ghi nhật ký.
 
 ## Out of Scope
 
-- Nhật ký cho các nghiệp vụ ngoài vai trò, quyền và phân công. Lý do bắt buộc khi hủy hoặc khôi phục gói vẫn theo BR-SUB-024 và BR-SUB-025.
+- Nhật ký cho các nghiệp vụ ngoài vai trò, quyền và phân công. Lý do bắt buộc khi hủy hoặc gỡ gói vẫn theo BR-SUB-024 và BR-SUB-026.
 - Cảnh báo tự động khi phát hiện nhiều yêu cầu bị từ chối liên tiếp.
 - Xuất nhật ký ra tệp và lưu trữ nhật ký dài hạn.
 - Phân quyền theo địa chỉ mạng, theo thiết bị hoặc theo khung giờ làm việc.

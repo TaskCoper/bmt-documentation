@@ -71,6 +71,8 @@ Người có quyền mở gói của khách hàng theo công trình hoặc bấm
 
 **Cập nhật phạm vi 25/09/2026:** Người dùng xác nhận gói đã gắn công trình thì không đổi sang công trình khác, kể cả nhân viên và Admin; phần đổi công trình của STORY-SUB-004 và BR-SUB-023 đã bỏ. Nhân viên phụ trách theo từng gói giám sát theo BR-RBAC-013, không theo công trình.
 
+**Cập nhật phạm vi 25/09/2026 (bổ sung):** Người dùng xác nhận thêm: nhân viên có quyền riêng được gỡ gói đang ở trạng thái đã gán về chưa gán khi khách gán nhầm, theo STORY-SUB-006 và BR-SUB-026; gói đã hoàn thành không gỡ được. Bỏ thao tác khôi phục gói đã hủy (BR-SUB-025); hủy kết thúc phân công của gói. ALT-04, EXC-09, AC-014 và AC-015 về khôi phục không còn nghiệm thu.
+
 ### Main Flow
 
 1. Xác định gói giám sát và công trình được gắn.
@@ -105,10 +107,19 @@ Admin hoặc nhân viên phụ trách mở lại gói đã hoàn thành do thao 
 
 #### ALT-04
 
+**Không nghiệm thu trong phạm vi hiện tại:** người dùng xác nhận ngày 25/09/2026 bỏ thao tác khôi phục gói đã hủy; thay bằng ALT-05. Nội dung giữ để tra lịch sử.
+
 Nhân viên có quyền hủy gói đã hoàn thành, sau đó khôi phục.
 
 1. Hủy theo STORY-SUB-005; gói nhả chỗ trên công trình để công trình có thể nhận gói khác.
 2. Khi khôi phục, nếu công trình chưa có gói khác giữ chỗ, gói về lại trạng thái đã hoàn thành trên đúng công trình cũ.
+
+#### ALT-05
+
+Nhân viên có quyền hủy gói đã hoàn thành.
+
+1. Nhân viên hủy gói theo STORY-SUB-005; gói nhả chỗ trên công trình và phân công của gói kết thúc.
+2. Công trình nhận được gói giám sát khác. Gói đã hủy không khôi phục được.
 
 ### Exception Flow
 
@@ -142,7 +153,7 @@ Yêu cầu mở lại thiếu quyền, thiếu lý do hoặc công trình đã c
 
 #### EXC-05
 
-Yêu cầu hoàn thành gói chưa gán công trình hoặc gói đang bị hủy.
+Yêu cầu hoàn thành gói chưa gán công trình hoặc gói đã hủy.
 
 1. Hệ thống từ chối; gói giữ nguyên trạng thái.
 
@@ -155,11 +166,13 @@ Yêu cầu gán một gói khác vào công trình đang có gói đã hoàn th�
 
 #### EXC-07
 
-Admin hoặc nhân viên yêu cầu đổi công trình của gói đã hoàn thành.
+Admin hoặc nhân viên yêu cầu đổi hoặc gỡ công trình của gói đã hoàn thành.
 
-1. Hệ thống từ chối như với mọi gói đã gắn công trình, theo BR-SUB-009. Mở lại gói cũng không cho đổi công trình.
+1. Hệ thống từ chối: không ai đổi thẳng công trình của gói theo BR-SUB-009, và gói đã hoàn thành không gỡ được theo BR-SUB-026. Sau khi mở lại, gói về đã gán và chỉ được gỡ theo STORY-SUB-006.
 
 #### EXC-09
+
+**Không nghiệm thu trong phạm vi hiện tại:** người dùng xác nhận ngày 25/09/2026 bỏ thao tác khôi phục gói đã hủy; thay bằng ALT-05. Nội dung giữ để tra lịch sử.
 
 Khôi phục gói đã hoàn thành bị hủy khi công trình đã có gói khác giữ chỗ.
 
@@ -243,7 +256,7 @@ Khôi phục gói đã hoàn thành bị hủy khi công trình đã có gói kh
 
 #### AC-011
 
-- **Given**: Gói giám sát chưa gán công trình, hoặc đang bị nhân viên hủy.
+- **Given**: Gói giám sát chưa gán công trình, hoặc đã bị nhân viên hủy.
 - **When**: Người có quyền gửi yêu cầu hoàn thành gói.
 - **Then**: Yêu cầu bị từ chối.
 - **And**: Gói giữ nguyên trạng thái.
@@ -258,11 +271,13 @@ Khôi phục gói đã hoàn thành bị hủy khi công trình đã có gói kh
 #### AC-013
 
 - **Given**: Gói G1 đã hoàn thành trên công trình A; công trình B của cùng khách chưa có gói.
-- **When**: Admin hoặc nhân viên yêu cầu đổi công trình của G1 sang B, kể cả sau khi mở lại G1.
-- **Then**: Yêu cầu bị từ chối vì gói đã gắn công trình thì không đổi công trình.
+- **When**: Admin hoặc nhân viên yêu cầu đổi thẳng công trình của G1 sang B, kể cả sau khi mở lại G1.
+- **Then**: Yêu cầu bị từ chối vì không có thao tác đổi thẳng công trình của gói đã gắn.
 - **And**: G1 vẫn gắn A với trạng thái như trước yêu cầu.
 
 #### AC-014
+
+**Không nghiệm thu trong phạm vi hiện tại:** người dùng xác nhận ngày 25/09/2026 bỏ thao tác khôi phục gói đã hủy; thay bằng AC-019. Nội dung giữ để tra lịch sử.
 
 - **Given**: Gói G1 đã hoàn thành trên công trình A; nhân viên có quyền hủy và khôi phục.
 - **When**: Nhân viên hủy G1, rồi khôi phục G1 khi A chưa có gói khác giữ chỗ.
@@ -270,6 +285,8 @@ Khôi phục gói đã hoàn thành bị hủy khi công trình đã có gói kh
 - **And**: Hạn gán, quyền lợi và lịch sử của G1 được giữ nguyên.
 
 #### AC-015
+
+**Không nghiệm thu trong phạm vi hiện tại:** người dùng xác nhận ngày 25/09/2026 bỏ thao tác khôi phục gói đã hủy; thay bằng AC-019. Nội dung giữ để tra lịch sử.
 
 - **Given**: Gói G1 đã hoàn thành trên công trình A và bị hủy; sau đó gói G2 được gán vào A.
 - **When**: Nhân viên khôi phục G1.
@@ -285,10 +302,17 @@ Khôi phục gói đã hoàn thành bị hủy khi công trình đã có gói kh
 
 #### AC-018
 
-- **Given**: Nhân viên N có quyền `supervision.complete` và phụ trách gói G1 trên công trình A; G1 bị hủy, N vẫn phụ trách G1; sau đó khách gắn gói G2 vào A.
+- **Given**: Nhân viên N có quyền `supervision.complete` và phụ trách gói G1 trên công trình A; G1 bị hủy nên phân công của N trên G1 kết thúc; sau đó khách gắn gói G2 vào A.
 - **When**: N yêu cầu hoàn thành G2 khi chưa được phân công G2.
 - **Then**: Yêu cầu bị từ chối vì N không phụ trách G2; phân công theo gói, không theo công trình.
 - **And**: G2 giữ trạng thái đã gán; sau khi người quản trị phân công G2 cho N, N hoàn thành được G2.
+
+#### AC-019
+
+- **Given**: Gói G1 đã hoàn thành trên công trình A và do nhân viên N phụ trách; nhân viên C có quyền `package.cancel`; khách có gói G2 chưa gán còn hạn.
+- **When**: C hủy G1 với lý do có nội dung, sau đó khách gán G2 vào A.
+- **Then**: G1 ở trạng thái đã hủy, phân công của N trên G1 kết thúc; A nhận G2.
+- **And**: Không có thao tác khôi phục G1; hạn gán, quyền lợi và lịch sử của G1 được giữ để tra cứu.
 
 ## References
 
@@ -296,7 +320,8 @@ Khôi phục gói đã hoàn thành bị hủy khi công trình đã có gói kh
 
 - [TDD-SUB-003](../tdd/TDD-SUB-003.md): Thiết kế cũ đã bị thay, chỉ giữ để tra cứu; không dùng để triển khai. Phần gán/đổi công trình thay bằng TDD-SUB-004, hủy/khôi phục thay bằng TDD-SUB-005, hoàn thành/mở lại thay bằng TDD-SUB-006.
 - [TDD-SUB-004](../tdd/TDD-SUB-004.md): Gán gói vào công trình; gói đã gắn không đổi công trình, gói đã hoàn thành vẫn giữ chỗ (AC-012, AC-013).
-- [TDD-SUB-005](../tdd/TDD-SUB-005.md): Hủy gói đã hoàn thành và khôi phục về lại đã hoàn thành (AC-014, AC-015).
+- [TDD-SUB-005](../tdd/TDD-SUB-005.md): Hủy gói đã hoàn thành và kết thúc phân công (AC-019); đã bỏ thiết kế khôi phục của AC-014, AC-015.
+- [TDD-SUB-007](../tdd/TDD-SUB-007.md): Gỡ gói đã gán; gói mở lại về đã gán thì gỡ được (EXC-07).
 - [TDD-SUB-006](../tdd/TDD-SUB-006.md): Thiết kế hoàn thành và mở lại trên vòng đời gán công trình; thay phần hoàn thành/mở lại của TDD-SUB-003.
 
 ### Rules
@@ -309,11 +334,11 @@ Khôi phục gói đã hoàn thành bị hủy khi công trình đã có gói kh
 
 - BR-SUB-012/Statement: Mở lại gói cần đúng quyền, có lý do và không chồng gói đang thực hiện.
 
-- BR-SUB-009/Except: Không ai đổi được công trình của gói đã gắn, kể cả gói đã hoàn thành.
+- BR-SUB-009/Except: Không ai đổi thẳng công trình của gói đã gắn; gói đã hoàn thành không gỡ được.
 
 - BR-SUB-024/Then: Hủy gói đã hoàn thành và nhả chỗ trên công trình.
 
-- BR-SUB-025/Then: Khôi phục gói đã hoàn thành về lại trạng thái đã hoàn thành.
+- BR-SUB-026/Then: Chỉ gỡ được gói đang ở trạng thái đã gán.
 
 - BR-RBAC-013/Then: Phân công theo từng gói giám sát, mỗi gói một nhân viên phụ trách.
 
@@ -321,7 +346,8 @@ Khôi phục gói đã hoàn thành bị hủy khi công trình đã có gói kh
 
 - STORY-SUB-001: Quy tắc subscription và quyền lợi thiết kế dùng chung.
 - STORY-SUB-004: Gán gói vào công trình.
-- STORY-SUB-005: Hủy và khôi phục gói.
+- STORY-SUB-005: Hủy gói; không còn thao tác khôi phục.
+- STORY-SUB-006: Nhân viên gỡ gói đã gán khi khách gán nhầm.
 
 ## Non-Functional
 
@@ -333,4 +359,4 @@ Khôi phục gói đã hoàn thành bị hủy khi công trình đã có gói kh
 - Tạo và quản lý công trình thuộc STORY-SITE-001; công trình là thực thể riêng, khác với bản dự toán.
 - EXC-08 và AC-016 về phân công mức khách hàng đã rút ngày 25/09/2026 vì đợt này không còn loại phân công này; không dùng lại hai mã.
 - Hoãn quản lý lịch và lượt trên nền tảng: số dư, giữ/trừ/hoàn lượt, đặt/hủy/đổi lịch, điều phối kỹ sư. Các phần này tiếp tục offline theo [nợ nghiệp vụ](../debt/supervision-offline.md).
-- Đổi công trình của gói đã gán: đã bỏ ngày 25/09/2026, kể cả nhân viên và Admin. Chưa thêm cơ chế tự động đóng công trình.
+- Đổi thẳng công trình của gói đã gán: đã bỏ ngày 25/09/2026, kể cả nhân viên và Admin; gỡ gói đã gán theo STORY-SUB-006. Khôi phục gói đã hủy: đã bỏ ngày 25/09/2026. Chưa thêm cơ chế tự động đóng công trình.

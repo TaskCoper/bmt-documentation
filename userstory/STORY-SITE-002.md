@@ -40,7 +40,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 ## Metadata
 
 - **Story**: Là nhân viên phụ trách phân công hoặc giám sát, tôi muốn xem công trình của khách trong phạm vi quyền của mình để giao gói đúng người và giám sát đúng nơi.
-- **Context**: Công trình do khách tự tạo và quản lý theo STORY-SITE-001; nhân viên chỉ xem, không tạo, sửa hay xóa hộ. Admin và nhân viên có quyền `assignment.manage` xem mọi công trình để phân công gói giám sát. Nhân viên có quyền `supervision.complete` chỉ xem công trình của những gói mình đang phụ trách. Nhân viên được phân công theo từng gói giám sát, không theo công trình. Không thêm mã quyền mới. Người dùng xác nhận các quyết định này ngày 25/09/2026.
+- **Context**: Công trình do khách tự tạo và quản lý theo STORY-SITE-001; nhân viên chỉ xem, không tạo, sửa hay xóa hộ. Admin và nhân viên có quyền `assignment.manage` xem mọi công trình để phân công gói giám sát. Nhân viên có quyền `supervision.complete` chỉ xem công trình của những gói mình đang phụ trách. Nhân viên được phân công theo từng gói giám sát, không theo công trình. Không thêm mã quyền mới. Người dùng xác nhận các quyết định này ngày 25/09/2026, gồm quyết định bổ sung: hủy gói hoặc gỡ gói khỏi công trình đều kết thúc phân công, nên nhân viên mất quyền xem công trình qua gói đó.
 - **Sprint**:
 - **Priority**:
 - **Status**: Todo
@@ -83,10 +83,20 @@ Nhân viên có quyền `supervision.complete` nhưng không có `assignment.man
 
 #### ALT-02
 
+**Không nghiệm thu trong phạm vi hiện tại:** người dùng xác nhận ngày 25/09/2026 hủy gói kết thúc phân công theo BR-RBAC-013 khoản 9; thay bằng ALT-03. Nội dung giữ để tra lịch sử.
+
 Gói do nhân viên phụ trách bị hủy nhưng phân công vẫn còn hiệu lực.
 
 1. Nhân viên mở chi tiết công trình của gói đang bị hủy.
 2. Hệ thống vẫn cho xem vì nhân viên vẫn phụ trách gói đó.
+
+#### ALT-03
+
+Gói do nhân viên phụ trách bị hủy hoặc bị gỡ khỏi công trình.
+
+1. Hủy theo STORY-SUB-005 hoặc gỡ theo STORY-SUB-006 kết thúc phân công của nhân viên trên gói đó.
+2. Từ yêu cầu xem tiếp theo, nhân viên chỉ có quyền `supervision.complete` không còn xem được công trình qua gói đó.
+3. Admin và nhân viên có quyền `assignment.manage` vẫn xem được công trình, kèm gói đã hủy nếu gói còn gắn với công trình.
 
 ### Exception Flow
 
@@ -140,6 +150,8 @@ Tài khoản nhân viên, kể cả Admin, gửi yêu cầu tạo công trình h
 
 #### AC-005
 
+**Không nghiệm thu trong phạm vi hiện tại:** người dùng xác nhận ngày 25/09/2026 hủy gói kết thúc phân công theo BR-RBAC-013 khoản 9; thay bằng AC-010. Nội dung giữ để tra lịch sử.
+
 - **Given**: N đang phụ trách gói G1 gắn công trình A; G1 bị hủy nhưng phân công của N với G1 vẫn còn hiệu lực.
 - **When**: N mở chi tiết A.
 - **Then**: N xem được A và thấy G1 với trạng thái đang bị hủy.
@@ -169,6 +181,13 @@ Tài khoản nhân viên, kể cả Admin, gửi yêu cầu tạo công trình h
 - **Then**: Mọi yêu cầu đều bị từ chối.
 - **And**: Không có công trình mới; A giữ tên cũ và C vẫn còn.
 
+#### AC-010
+
+- **Given**: N chỉ có quyền `supervision.complete`, đang phụ trách gói G1 gắn công trình A và gói G2 gắn công trình B; nhân viên M có quyền `assignment.manage`.
+- **When**: G1 bị hủy, G2 bị nhân viên gỡ khỏi B; sau đó N mở chi tiết A và B, rồi M mở chi tiết A.
+- **Then**: Cả hai yêu cầu của N bị từ chối vì phân công của N trên G1 và G2 đã kết thúc; M xem được A và thấy G1 với trạng thái đã hủy.
+- **And**: Không tiết lộ tên, địa chỉ hay gói của A và B cho N.
+
 ## References
 
 ### TDDs
@@ -183,6 +202,8 @@ Tài khoản nhân viên, kể cả Admin, gửi yêu cầu tạo công trình h
 - BR-RBAC-011/Then
 - BR-RBAC-013/Then
 - BR-PAY-005/Then
+- BR-SUB-024/Then: Hủy gói giám sát kết thúc phân công.
+- BR-SUB-026/Then: Gỡ gói kết thúc phân công.
 
 ### Dependencies
 
@@ -199,4 +220,4 @@ Tài khoản nhân viên, kể cả Admin, gửi yêu cầu tạo công trình h
 
 - Nhân viên tạo, sửa hoặc xóa hộ khách; hiện tên nhân viên phụ trách cho khách; thêm mã quyền riêng để xem công trình.
 - Thao tác phân công, chuyển giao và danh sách gói cần chia lại thuộc STORY-RBAC-003 và BR-RBAC-013. Tra cứu gói đã mua thuộc STORY-PAY-002.
-- Đã có TDD-SITE-001 và bộ System Test ST-SITE. Code đã triển khai ở commit `182e2a8` của `bmt-be`; unit test và integration test chạy đạt ngày 25/09/2026, System Test chưa chạy. Tài liệu chưa được phê duyệt. Sprint, Priority và người thực hiện chưa được phân công.
+- Đã có TDD-SITE-001 và bộ System Test ST-SITE. Code đã triển khai ở commit `182e2a8` của `bmt-be`; unit test và integration test chạy đạt ngày 25/09/2026, System Test chưa chạy. Việc kết thúc phân công khi hủy hoặc gỡ gói, chốt cùng ngày, chưa có trong code. Tài liệu chưa được phê duyệt. Sprint, Priority và người thực hiện chưa được phân công.

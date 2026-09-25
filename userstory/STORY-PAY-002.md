@@ -68,7 +68,7 @@ Người có quyền mở phần quản trị gói đã mua hoặc giao dịch.
 
 1. Người dùng mở danh sách gói đã mua, đơn hoặc giao dịch.
 2. Hệ thống kiểm tra quyền tra cứu trước khi trả dữ liệu.
-3. Người dùng xem ai đã mua gói nào và chọn gói cần đối chiếu. Với gói giám sát đã gán, hệ thống hiện tên công trình gắn với gói; quyền tra cứu không cho xem danh sách công trình của khách.
+3. Người dùng xem ai đã mua gói nào và chọn gói cần đối chiếu. Với gói giám sát đã gán, hệ thống hiện tên công trình gắn với gói; quyền tra cứu không cho xem danh sách công trình của khách. Với gói giám sát từng bị gỡ, hệ thống hiện lịch sử gỡ theo STORY-SUB-006.
 4. Hệ thống cung cấp liên kết đơn mua và các giao dịch thực tế của đơn, giữ đúng thông tin đã ghi nhận.
 5. Người dùng xem chi tiết; thao tác xem không thay đổi tiền, liên kết công trình hoặc hiệu lực gói.
 
@@ -101,7 +101,7 @@ Người truy cập không có quyền tra cứu.
 Nhân viên có quyền xem nhưng không có quyền thực hiện thao tác ghi.
 
 1. Cho xem dữ liệu theo quyền tra cứu.
-2. Từ chối hủy hoặc khôi phục nếu thiếu quyền riêng tương ứng; dữ liệu giữ nguyên. Hệ thống không có thao tác đổi công trình của gói.
+2. Từ chối hủy hoặc gỡ gói nếu thiếu quyền riêng tương ứng; dữ liệu giữ nguyên. Hệ thống không có thao tác đổi thẳng công trình của gói hay khôi phục gói đã hủy.
 
 ## Acceptance Criteria
 
@@ -117,7 +117,7 @@ Nhân viên có quyền xem nhưng không có quyền thực hiện thao tác gh
 - **Given**: Nhân viên đã đăng nhập và có quyền tra cứu riêng; hệ thống có đơn, gói và giao dịch của khách.
 - **When**: Nhân viên mở danh sách và chi tiết gói, đơn, giao dịch.
 - **Then**: Được tra cứu thông tin người mua, gói và giao dịch trong phạm vi quản trị đã chốt.
-- **And**: Không yêu cầu nhân viên phải có quyền hủy hoặc khôi phục chỉ để xem.
+- **And**: Không yêu cầu nhân viên phải có quyền hủy hoặc gỡ gói chỉ để xem.
 
 #### AC-003
 
@@ -149,8 +149,8 @@ Nhân viên có quyền xem nhưng không có quyền thực hiện thao tác gh
 
 #### AC-007
 
-- **Given**: Nhân viên chỉ có quyền tra cứu, không có quyền hủy hoặc khôi phục gói.
-- **When**: Nhân viên xem gói rồi thử gửi các yêu cầu hủy và khôi phục.
+- **Given**: Nhân viên chỉ có quyền tra cứu, không có quyền hủy hoặc gỡ gói.
+- **When**: Nhân viên xem gói rồi thử gửi các yêu cầu hủy gói và gỡ gói giám sát khỏi công trình.
 - **Then**: Xem được nhưng tất cả yêu cầu ghi đều bị từ chối.
 - **And**: Gói, công trình và lịch sử thao tác thành công không thay đổi.
 
@@ -181,13 +181,14 @@ Nhân viên có quyền xem nhưng không có quyền thực hiện thao tác gh
 - BR-PAY-002/Then
 - BR-PAY-004/Then
 - BR-SUB-024/Then
-- BR-SUB-025/Then
+- BR-SUB-026/Then
 
 ### Dependencies
 
 - STORY-PAY-001: Nguồn đơn, giao dịch và gói đã mua.
 - STORY-SUB-004: Liên kết gói với công trình.
-- STORY-SUB-005: Hủy và khôi phục gói bằng quyền riêng.
+- STORY-SUB-005: Hủy gói bằng quyền riêng; không còn thao tác khôi phục.
+- STORY-SUB-006: Gỡ gói giám sát khỏi công trình bằng quyền riêng.
 - [Tổng hợp quyết định](../discovery/payment-packages.md).
 
 ## Non-Functional

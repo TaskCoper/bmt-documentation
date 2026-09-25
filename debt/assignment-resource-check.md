@@ -44,7 +44,7 @@ Các hệ quả dưới đây đúng với code trước ngày 25/09/2026, và v
 
 1. **Đạt.** Handler giao việc và chuyển giao từ chối gói không tồn tại (404 `AssignmentResourceNotFound`) và gói chưa gán hoặc đang bị hủy (409 `ResourceNotAssignable`), có Unit Test cho cả hai nhánh. Chuyển giao dùng chung bước kiểm với giao việc; nhánh 404 riêng của chuyển giao chưa có test, vì phân công đang có luôn trỏ tới gói có thật.
 2. **Chưa đạt.** Migration mới chỉ chạy thử trên PostgreSQL tạm có dữ liệu cũ: sau `Up`, CHECK chỉ nhận `SupervisionGrant` và không còn dòng `Customer` hay `Project`. Chưa chạy trên môi trường dev dùng chung hay production. Đóng điều kiện này khi đã chạy trên mọi môi trường và kiểm lại hai điểm trên.
-3. **Đạt.** Code không có đường xóa nào cho `SupervisionGrant`. Nếu sau này thêm đường xóa gói, hoặc thêm một loại tài nguyên có thể bị xóa, phải thiết kế cách xử lý phân công của tài nguyên đó trước khi mở, nếu không khoản nợ mở lại.
+3. **Đạt.** Code không có đường xóa nào cho `SupervisionGrant`. Nếu sau này thêm đường xóa gói, hoặc thêm một loại tài nguyên có thể bị xóa, phải thiết kế cách xử lý phân công của tài nguyên đó trước khi mở, nếu không khoản nợ mở lại. Thiết kế ngày 25/09/2026 (lần 3, chưa có trong code) thêm hai đường làm gói mất tư cách được phân công là hủy và gỡ gói; cả hai kết thúc phân công của gói trong cùng transaction theo [TDD-RBAC-003](../tdd/TDD-RBAC-003.md) và [TDD-SUB-007](../tdd/TDD-SUB-007.md), nên điều kiện này vẫn đạt.
 
 ## Tài liệu liên quan
 

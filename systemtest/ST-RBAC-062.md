@@ -44,11 +44,13 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-RBAC-062 | STORY-RBAC-003 | EXC / ALT | REGRESSION | P2 | Nhân viên A chỉ có supervision.complete từ vai trò "Nhân viên giám sát" và chỉ phụ trách một gói GC; GC đã bị hủy. Nhân viên C đang hoạt động và có supervision.complete. Người quản trị có quyền role.manage và assignment.manage. | 1. Chuẩn bị A, GC và C theo Test data.<br>2. Thu hồi vai trò Nhân viên giám sát khỏi A.<br>3. Chuyển giao GC từ A sang C.<br>4. Gỡ phân công của A trên GC.<br>5. Gửi lại yêu cầu thu hồi vai trò của A. | A phụ trách 1 gói đang bị hủy; vai trò Nhân viên giám sát là nguồn duy nhất của supervision.complete của A. Dữ liệu minh họa. | Bước 2 bị từ chối và cho biết A còn 1 gói đang phụ trách, vì phân công trên gói đang bị hủy vẫn được tính. Bước 3 bị từ chối vì gói đang bị hủy không chuyển giao được; phân công của A giữ nguyên. Bước 4 thành công và được ghi nhật ký. Bước 5 thành công. | STORY-RBAC-003/ALT-02<br>STORY-RBAC-002/EXC-02<br>BR-RBAC-007/Notes<br>BR-RBAC-013/Then | Gói đang bị hủy vẫn giữ phân công nên vẫn chặn thu hồi vai trò; cách gỡ vướng duy nhất là gỡ phân công. Đặc tả chưa chạy. | [Chưa xác định] | Draft |
+| ST-RBAC-062 | STORY-RBAC-003 | ALT | REGRESSION | P2 | Nhân viên A chỉ có supervision.complete từ vai trò "Nhân viên giám sát" và phụ trách hai gói GC và GD, cả hai ở trạng thái đã gán. Nhân viên X có quyền package.cancel; nhân viên S có quyền supervision.unassign. Người quản trị có quyền role.manage và assignment.manage. | 1. Chuẩn bị A, GC, GD, X và S theo Test data.<br>2. Thu hồi vai trò Nhân viên giám sát khỏi A.<br>3. X hủy GC kèm lý do; S gỡ GD khỏi công trình kèm lý do.<br>4. Đọc lại các phân công của A.<br>5. Gửi lại yêu cầu thu hồi vai trò của A. | A phụ trách GC và GD; vai trò Nhân viên giám sát là nguồn duy nhất của supervision.complete của A. Lý do hủy và gỡ là chuỗi minh họa. Dữ liệu minh họa. | Bước 2 bị từ chối và cho biết A còn 2 gói đang phụ trách. Sau bước 3, phân công của A trên GC và GD đều kết thúc và được ghi nhật ký; A không còn phụ trách gói nào. Bước 5 thành công và được ghi nhật ký; người quản trị không phải chuyển giao hay gỡ phân công của gói đã hủy hoặc đã gỡ. | STORY-RBAC-003/ALT-02<br>STORY-RBAC-003/ALT-08<br>STORY-RBAC-002/EXC-02<br>STORY-RBAC-002/ALT-02<br>BR-RBAC-007/Notes<br>BR-RBAC-013/Then | Hủy hoặc gỡ gói kết thúc phân công, nên gói đã hủy hoặc đã gỡ không còn chặn thu hồi vai trò (BR-RBAC-007/Notes). Thay kịch bản cũ, khi hủy gói chưa kết thúc phân công. Đặc tả chưa chạy. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-RBAC-003/ALT-02
+- STORY-RBAC-003/ALT-08
 - STORY-RBAC-002/EXC-02
+- STORY-RBAC-002/ALT-02
 - BR-RBAC-007/Notes
 - BR-RBAC-013/Then

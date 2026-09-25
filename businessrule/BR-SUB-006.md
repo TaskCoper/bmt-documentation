@@ -49,9 +49,11 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Statement
 
-**Cập nhật 19/09/2026:** Khách được sở hữu nhiều gói giám sát chưa gán công trình. Giới hạn một gói áp dụng khi gán/khôi phục hiệu lực trên một công trình, không chặn mua nhiều gói chưa gán. Hạn gán lần đầu theo [BR-SUB-022](BR-SUB-022.md); quy tắc sửa liên kết ở [BR-SUB-023](BR-SUB-023.md) đã bỏ ngày 25/09/2026; hủy/khôi phục theo [BR-SUB-024](BR-SUB-024.md), [BR-SUB-025](BR-SUB-025.md).
+**Cập nhật 19/09/2026:** Khách được sở hữu nhiều gói giám sát chưa gán công trình. Giới hạn một gói áp dụng khi gán gói vào một công trình, không chặn mua nhiều gói chưa gán. Hạn gán theo [BR-SUB-022](BR-SUB-022.md); quy tắc sửa liên kết ở [BR-SUB-023](BR-SUB-023.md) đã bỏ ngày 25/09/2026; hủy theo [BR-SUB-024](BR-SUB-024.md); khôi phục theo [BR-SUB-025](BR-SUB-025.md) đã bỏ ngày 25/09/2026.
 
-**Cập nhật 24/09/2026:** Với giám sát, gói có hiệu lực trên công trình là gói giữ chỗ: đã gán hoặc đã hoàn thành. Gói đã hoàn thành vẫn giữ chỗ nên công trình không nhận được gói khác cho tới khi gói đó bị hủy. Gói chưa gán hoặc đang bị hủy không giữ chỗ.
+**Cập nhật 24/09/2026:** Với giám sát, gói có hiệu lực trên công trình là gói giữ chỗ: đã gán hoặc đã hoàn thành. Gói đã hoàn thành vẫn giữ chỗ nên công trình không nhận được gói khác cho tới khi gói đó bị hủy. Gói chưa gán hoặc đã hủy không giữ chỗ.
+
+**Cập nhật 25/09/2026:** Không còn thao tác khôi phục, nên gói đã hủy không bao giờ giữ chỗ trở lại. Gói bị nhân viên gỡ theo [BR-SUB-026](BR-SUB-026.md) về chưa gán và nhả chỗ trên công trình cũ.
 
 Tại cùng một thời điểm, tài khoản có tối đa một subscription thiết kế đang hiệu lực. Mỗi công trình có tối đa một gói giám sát đang hiệu lực. Một tài khoản có thể dùng gói thiết kế đồng thời với nhiều gói giám sát cho các công trình khác nhau.
 

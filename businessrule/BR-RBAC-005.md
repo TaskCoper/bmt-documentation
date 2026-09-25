@@ -70,5 +70,5 @@ Không có ngoại lệ. Nhân viên muốn dùng thử sản phẩm với tư c
 ## Notes
 
 - Vì hai nhóm tách hẳn nên không cần quy tắc chống nhân viên tự thao tác trên gói của chính mình: gói luôn thuộc một tài khoản khách hàng khác.
-- Quy tắc này làm rõ cách hiểu "nhân viên" trong [BR-PAY-005](BR-PAY-005.md), [BR-SUB-024](BR-SUB-024.md) và [BR-SUB-025](BR-SUB-025.md): nhân viên là tài khoản thuộc nhóm nhân viên và giữ vai trò có quyền tương ứng, không phải mọi tài khoản có vai trò khác Khách hàng.
+- Quy tắc này làm rõ cách hiểu "nhân viên" trong [BR-PAY-005](BR-PAY-005.md), [BR-SUB-024](BR-SUB-024.md) và [BR-SUB-026](BR-SUB-026.md): nhân viên là tài khoản thuộc nhóm nhân viên và giữ vai trò có quyền tương ứng, không phải mọi tài khoản có vai trò khác Khách hàng.
 - Bản nháp nghiệp vụ, chưa triển khai hoặc chạy kiểm thử. Reviewer và Approver lấy theo xác nhận đang dùng cho các bản nháp mới, không phải bằng chứng đã phê duyệt. Owner và ngày hiệu lực chưa xác định.

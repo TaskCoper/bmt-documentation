@@ -44,7 +44,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-045 | Supervision | ReassignSupervisionValidator (dự kiến) | Boundary | REGRESSION | P1 | Nhân viên đủ quyền. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | reason null, rỗng, khoảng trắng, 2001 ký tự; reason có nội dung hợp lệ. | Các giá trị rỗng/vượt giới hạn bị từ chối theo contract, không cắt ngắn; nội dung hợp lệ qua validator. | TDD-SUB-004/Internal API | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
+| UT-PAY-045 | Supervision | ReassignSupervisionValidator (dự kiến) | Boundary | REGRESSION | P1 | ĐÃ BỎ — không thuộc nghiệm thu từ 25/09/2026: đổi thẳng công trình của gói đã gán bị bỏ cùng BR-SUB-023 và mã quyền supervision.reassign; thay bằng UT-PAY-044. Nhân viên đủ quyền. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | reason null, rỗng, khoảng trắng, 2001 ký tự; reason có nội dung hợp lệ. | Các giá trị rỗng/vượt giới hạn bị từ chối theo contract, không cắt ngắn; nội dung hợp lệ qua validator. | TDD-SUB-004/Internal API | ĐÃ BỎ: đổi thẳng công trình của gói đã gán bị bỏ cùng BR-SUB-023 và mã quyền supervision.reassign. Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

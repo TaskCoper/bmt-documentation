@@ -42,9 +42,12 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-081 | AdminRead | Projection lịch sử lần mua — mốc gán công trình (dự kiến) | Branch | REGRESSION | P2 | Gói G1 của U1: cấp lúc T0, FirstAssignedAtUtc=T1 trên CS1, hủy lúc T2 (PackageLifecycleEvent Cancel), khôi phục lúc T3. Người gọi có commerce.read. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Đọc lịch sử của lần mua tương ứng với G1. | Lịch sử có đúng một mốc gán công trình tại T1 lấy từ FirstAssignedAtUtc, cùng các mốc cấp, hủy và khôi phục; sắp AtUtc DESC, Id DESC. Không đọc bảng SupervisionAssignmentEvent và không có mốc đổi công trình hay hoàn tiền. | TDD-PAY-002/Internal API<br>TDD-PAY-002/Data Model | Bảng sự kiện gán đã bỏ theo TDD-SUB-004; mỗi gói chỉ gán một lần; chưa thực thi. | [Chưa xác định] | Draft |
+| UT-PAY-081 | AdminRead | Projection lịch sử lần mua — gỡ gói, hủy và mốc gán (dự kiến) | Branch | REGRESSION | P2 | Gói G8 của U1: cấp lúc T0; gán CS7 ("Nhà Thủ Đức") lúc T1 (FirstAssignedAtUtc=T1); nhân viên NV3 gỡ lúc T2 (PackageLifecycleEvent Unassign, lý do "Khách gán nhầm công trình", bản lưu CS7 tên và địa chỉ); khách gán lại CS9 lúc T3 (AssignedAtUtc=T3); nhân viên NV1 hủy lúc T4 (Cancel, bản lưu CS9). Sau đó khách sửa tên CS7. Dữ liệu cũ của gói G10 có một dòng Restore từ trước đợt thay đổi. Người gọi có commerce.read. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Đọc lịch sử của lần mua ứng với G8, rồi của lần mua ứng với G10. | Lịch sử G8 sắp AtUtc DESC, Id DESC: hủy T4 kèm tên, địa chỉ CS9 từ bản lưu; gỡ T2 kèm người gỡ NV3, lý do, tên "Nhà Thủ Đức" và địa chỉ từ bản lưu (không phải tên mới sau khi khách sửa); mốc gán lần đầu T1 (FirstAssignedAtUtc) và mốc gán hiện tại T3 (AssignedAtUtc); mốc cấp T0. Lịch sử G10 vẫn hiện dòng Restore cũ như một mục lịch sử. Không có mục khôi phục mới, đổi công trình hay hoàn tiền; không đọc bảng SupervisionAssignmentEvent. | STORY-SUB-006/AC-005<br>BR-PAY-005/Then<br>BR-SUB-026/Then<br>TDD-PAY-002/Internal API<br>TDD-PAY-002/Data Model | Thiết kế lần 3: lịch sử gồm sự kiện gỡ với bản lưu công trình, chỉ người có commerce.read xem (BR-PAY-005 khoản 4, BR-SUB-026 khoản 7); mốc gán lấy từ hai cột của gói vì các lần gán không có dòng lịch sử riêng. Chưa thực thi. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
+- STORY-SUB-006/AC-005
+- BR-PAY-005/Then
+- BR-SUB-026/Then
 - TDD-PAY-002/Internal API
 - TDD-PAY-002/Data Model

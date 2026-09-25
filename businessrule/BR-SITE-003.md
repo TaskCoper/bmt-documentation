@@ -56,9 +56,9 @@ Có yêu cầu xem danh sách hoặc chi tiết công trình.
 
 ## Then
 
-1. Khách hàng chỉ thấy công trình thuộc tài khoản của mình. Mỗi công trình hiện tên, địa chỉ và các gói giám sát đã gắn, kèm trạng thái gói: đã gán, đã hoàn thành hoặc đang bị hủy. Khách không thấy tên nhân viên phụ trách gói.
+1. Khách hàng chỉ thấy công trình thuộc tài khoản của mình. Mỗi công trình hiện tên, địa chỉ và các gói giám sát đã gắn, kèm trạng thái gói: đã gán, đã hoàn thành hoặc đã hủy. Gói đã bị gỡ khỏi công trình không còn hiện ở công trình đó. Khách không thấy tên nhân viên phụ trách gói.
 2. Admin và nhân viên có quyền `assignment.manage` xem mọi công trình của mọi khách hàng. Mỗi công trình hiện tên, địa chỉ, khách hàng sở hữu và các gói giám sát đã gắn, kèm trạng thái gói.
-3. Nhân viên có quyền `supervision.complete` mà không có `assignment.manage` chỉ xem công trình của những gói giám sát đang được phân công cho mình tại thời điểm xem, với cùng thông tin như khoản 2. Khi phân công kết thúc hoặc được chuyển giao, nhân viên mất quyền xem công trình đó ngay. Gói đang bị hủy mà phân công vẫn còn hiệu lực thì nhân viên vẫn xem được.
+3. Nhân viên có quyền `supervision.complete` mà không có `assignment.manage` chỉ xem công trình của những gói giám sát đang được phân công cho mình tại thời điểm xem, với cùng thông tin như khoản 2. Khi phân công kết thúc hoặc được chuyển giao, nhân viên mất quyền xem công trình đó ngay. Gỡ gói hoặc hủy gói đều kết thúc phân công theo [BR-RBAC-013](BR-RBAC-013.md).
 4. Nhân viên có nhiều quyền thì xem theo phạm vi rộng nhất trong các quyền đó.
 5. Tài khoản nhân viên không có quyền `assignment.manage` hay `supervision.complete` thì không xem được danh sách hoặc chi tiết công trình.
 6. Các quyền trong quy tắc này chỉ cho xem. Không quyền nào cho nhân viên tạo, sửa hoặc xóa công trình; xem [BR-SITE-002](BR-SITE-002.md).
@@ -70,8 +70,8 @@ Nhân viên có quyền `commerce.read` thấy tên công trình gắn với gó
 
 ## Notes
 
-- Không thêm mã quyền riêng để xem công trình. Danh mục quyền còn 13 mã sau khi bỏ `supervision.reassign` theo quyết định ngày 25/09/2026.
-- Nhân viên được phân công theo từng gói giám sát, không theo công trình; xem [BR-RBAC-013](BR-RBAC-013.md). Vì gói gắn cố định với một công trình, người phụ trách gói xem được công trình của gói đó.
+- Không thêm mã quyền riêng để xem công trình. Danh mục quyền vẫn có 13 mã: ngày 25/09/2026 bỏ `supervision.reassign` và `package.restore`, thêm `supervision.unassign`.
+- Nhân viên được phân công theo từng gói giám sát, không theo công trình; xem [BR-RBAC-013](BR-RBAC-013.md). Người phụ trách gói xem được công trình đang gắn với gói đó; khi gói bị gỡ hoặc bị hủy, phân công kết thúc và quyền xem cũng hết.
 - Khoản 3 là phạm vi xem đi theo phân công. [BR-RBAC-010](BR-RBAC-010.md) khoản 1 cho quyền xem không đòi phân công; `supervision.complete` là quyền thao tác, không phải quyền xem, nên phạm vi đọc công trình của người giữ quyền này giới hạn theo gói được phân công.
 - Ví dụ: N phụ trách G1 gắn công trình A; G3 gắn B do N2 phụ trách. N thấy A, không thấy B. Nếu G1 được chuyển giao cho N2 lúc 10:00 thì từ 10:00 N không xem được A.
 - Bản nháp nghiệp vụ, chưa triển khai hoặc chạy kiểm thử. Reviewer và Approver lấy theo xác nhận đang dùng cho các bản nháp mới, không phải bằng chứng đã phê duyệt. Owner và ngày hiệu lực chưa xác định.

@@ -61,10 +61,10 @@ Người có quyền `assignment.manage` tạo, chuyển giao hoặc gỡ một 
 3. Đợt này không có phân công ở mức khách hàng hay mức công trình. Nhân viên chỉ thao tác được trên gói giám sát được phân công cho chính mình. Gói mới gắn vào một công trình phải được phân công riêng; người phụ trách gói trước đó trên cùng công trình không tự phụ trách gói mới.
 4. Mỗi gói tại một thời điểm chỉ có một phân công đang hiệu lực. Yêu cầu giao một gói đang có người phụ trách cho người khác bị từ chối và hướng sang chuyển giao; không tạo phân công thứ hai.
 5. Chuyển giao là kết thúc hiệu lực phân công cũ và tạo phân công mới cho người nhận tại cùng thời điểm. Người bàn giao mất quyền thao tác trên tài nguyên đó kể từ lúc đó.
-6. Gỡ phân công mà không chuyển giao thì gói chưa có người phụ trách. Danh sách cần chia lại chỉ gồm gói đang ở trạng thái đã gán mà chưa có người phụ trách, hoặc người phụ trách đang bị khóa theo [BR-RBAC-008](BR-RBAC-008.md). Gói chưa gán, đã hoàn thành hoặc đang bị hủy không vào danh sách này.
+6. Gỡ phân công mà không chuyển giao thì gói chưa có người phụ trách. Danh sách cần chia lại chỉ gồm gói đang ở trạng thái đã gán mà chưa có người phụ trách, hoặc người phụ trách đang bị khóa theo [BR-RBAC-008](BR-RBAC-008.md). Gói chưa gán, đã hoàn thành hoặc đã hủy không vào danh sách này. Gói được khách gán lại sau khi bị gỡ theo [BR-SUB-026](BR-SUB-026.md) chưa có người phụ trách nên vào danh sách này.
 7. Mọi thay đổi phân công đều ghi nhật ký theo [BR-RBAC-012](BR-RBAC-012.md).
-8. Chỉ giao mới hoặc chuyển giao được gói đang giữ chỗ trên công trình, tức gói đã gán hoặc đã hoàn thành theo [BR-SUB-006](BR-SUB-006.md). Từ chối giao hoặc chuyển giao gói chưa gán công trình hoặc đang bị hủy. Gỡ phân công được với gói ở mọi trạng thái.
-9. Khi gói bị hủy theo [BR-SUB-024](BR-SUB-024.md), phân công của gói giữ nguyên. Khi gói được khôi phục theo [BR-SUB-025](BR-SUB-025.md), người đó tiếp tục phụ trách mà không cần giao lại.
+8. Chỉ giao mới hoặc chuyển giao được gói đang giữ chỗ trên công trình, tức gói đã gán hoặc đã hoàn thành theo [BR-SUB-006](BR-SUB-006.md). Từ chối giao hoặc chuyển giao gói chưa gán công trình hoặc đã hủy. Gỡ phân công được với gói ở mọi trạng thái.
+9. Khi gói bị hủy theo [BR-SUB-024](BR-SUB-024.md) hoặc bị gỡ khỏi công trình theo [BR-SUB-026](BR-SUB-026.md), phân công đang hiệu lực của gói kết thúc ngay tại thời điểm đó và được ghi nhật ký theo khoản 7. Hệ thống tự kết thúc phân công; người quản trị không phải gỡ tay. Khi khách gán lại gói đã gỡ, gói chưa có người phụ trách và cần được giao lại.
 
 ## Except
 
@@ -73,8 +73,9 @@ Admin thao tác được trên gói giám sát mà không cần phân công, the
 ## Notes
 
 - Khoản 3 và khoản 4 được người dùng xác nhận ngày 25/09/2026. Bản trước cho phân công mức khách hàng có hiệu lực xuống dự án và cho nhiều người cùng phụ trách một tài nguyên; cả hai nội dung này đã bỏ.
-- Cùng ngày 25/09/2026, người dùng đổi đối tượng phân công từ công trình sang từng gói giám sát. Khoản 3, 4, 6, 8 và 9 viết theo quyết định này. Ví dụ: gói G1 của công trình P do A phụ trách. G1 bị hủy thì A vẫn phụ trách G1 và khôi phục G1 thì A làm tiếp. Khách gắn gói mới G2 vào P thì G2 chưa có người phụ trách, nằm trong danh sách cần chia lại, và người quản trị giao G2 cho A hoặc người khác.
-- Gói gắn cố định với một công trình theo [BR-SUB-009](BR-SUB-009.md), nên người phụ trách gói cũng là người lo công trình đó trong thời gian gói còn ở đó. Công trình được đặc tả tại [STORY-SITE-001](../userstory/STORY-SITE-001.md).
+- Cùng ngày 25/09/2026, người dùng đổi đối tượng phân công từ công trình sang từng gói giám sát. Khoản 3, 4, 6, 8 và 9 viết theo quyết định này. Ví dụ: gói G1 của công trình P do A phụ trách. G1 bị hủy thì phân công của A trên G1 kết thúc. Khách gắn gói mới G2 vào P thì G2 chưa có người phụ trách, nằm trong danh sách cần chia lại, và người quản trị giao G2 cho A hoặc người khác.
+- Người dùng xác nhận ngày 25/09/2026, khi bàn gỡ gói và bỏ khôi phục: khoản 9 đổi từ “giữ phân công khi hủy, người cũ phụ trách tiếp khi khôi phục” sang “kết thúc phân công khi hủy hoặc gỡ”. Không còn thao tác khôi phục theo [BR-SUB-025](BR-SUB-025.md).
+- Gói gắn với một công trình theo [BR-SUB-009](BR-SUB-009.md) cho tới khi bị gỡ theo [BR-SUB-026](BR-SUB-026.md), nên người phụ trách gói cũng là người lo công trình đó trong thời gian gói còn ở đó. Công trình được đặc tả tại [STORY-SITE-001](../userstory/STORY-SITE-001.md).
 - Cơ chế này được thiết kế để tính năng chia lead sau này dùng lại: lead là một loại tài nguyên mới, không cần thêm bảng phân công riêng. Việc chia lead không thuộc phạm vi đợt này.
 - Phân công tham chiếu tới gói giám sát theo định danh. TDD-RBAC-003 cần cập nhật theo quyết định này.
 - Bản nháp nghiệp vụ, chưa triển khai hoặc chạy kiểm thử. Reviewer và Approver lấy theo xác nhận đang dùng cho các bản nháp mới, không phải bằng chứng đã phê duyệt. Owner và ngày hiệu lực chưa xác định.

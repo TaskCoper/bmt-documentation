@@ -51,7 +51,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 **Cập nhật 24/09/2026:** Hoàn thành vẫn thuộc phạm vi và áp dụng trên vòng đời mới: chỉ gói đã gán công trình mới được hoàn thành. Người bấm phải có quyền `supervision.complete`; Admin có quyền này thì không cần phân công, nhân viên có quyền này phải được phân công gói đó (cập nhật 25/09/2026). Gói đã hoàn thành vẫn giữ chỗ trên công trình và không được đổi công trình.
 
-**Giới hạn áp dụng từ 19/09/2026:** Nội dung hoàn thành thủ công dưới đây là luồng đã thiết kế trước, không phải thao tác hủy gói. Phạm vi thanh toán hiện chỉ quản lý gói gán vào công trình nào, không thêm điều kiện hoạt động khảo sát/giám sát. Quy định “không ngày hết hạn” chỉ còn áp dụng sau khi gán đúng hạn; gói chưa gán có hạn một năm theo BR-SUB-022. Ngoại lệ sửa liên kết theo BR-SUB-023 đã bỏ ngày 25/09/2026; gói gắn cố định với công trình theo BR-SUB-009. Hủy/khôi phục theo BR-SUB-024/BR-SUB-025.
+**Giới hạn áp dụng từ 19/09/2026:** Nội dung hoàn thành thủ công dưới đây là luồng đã thiết kế trước, không phải thao tác hủy gói. Phạm vi thanh toán hiện chỉ quản lý gói gán vào công trình nào, không thêm điều kiện hoạt động khảo sát/giám sát. Quy định “không ngày hết hạn” chỉ còn áp dụng sau khi gán đúng hạn; gói chưa gán có hạn một năm theo BR-SUB-022. Ngoại lệ sửa liên kết theo BR-SUB-023 đã bỏ ngày 25/09/2026; gói gắn cố định với công trình theo BR-SUB-009. Hủy theo BR-SUB-024; khôi phục theo BR-SUB-025 đã bỏ ngày 25/09/2026. Gỡ gói đã gán theo BR-SUB-026.
 
 Gói giám sát của khách hàng gắn cố định với một công trình, không có chu kỳ tháng/năm hoặc ngày hết hạn. Khi công trình xong, Admin hoặc nhân viên phụ trách gói đó được bấm Hoàn thành gói giám sát để ghi nhận gói đã hoàn thành.
 
@@ -61,14 +61,14 @@ Admin hoặc nhân viên phụ trách chọn đúng khách hàng, công trình v
 
 ## Then
 
-1. Chuyển gói được chọn từ đã gán sang đã hoàn thành. Không bắt nhập lý do; lưu người thao tác và thời điểm. Từ chối nếu gói chưa gán hoặc đang bị hủy.
+1. Chuyển gói được chọn từ đã gán sang đã hoàn thành. Không bắt nhập lý do; lưu người thao tác và thời điểm. Từ chối nếu gói chưa gán hoặc đã hủy.
 2. Giữ đúng liên kết khách hàng và công trình của gói; không hoàn thành các gói khác của khách hàng, không thay đổi subscription thiết kế.
 3. Không yêu cầu nhập số lượt đã dùng, trừ hết lượt hoặc đóng các lịch hẹn trên nền tảng để hoàn thành gói, vì các phần này đang vận hành offline.
 4. Gói không tự hết hạn hoặc hoàn thành chỉ do thời gian trôi qua; không tự gia hạn, tạo kỳ mới hoặc làm mới hạn mức giám sát.
 
 5. Khách hàng và nhân viên không phụ trách không được hoàn thành gói. Hệ thống kiểm tra quyền trên yêu cầu xử lý, không chỉ ẩn nút trên giao diện.
 6. Người thao tác phải có quyền `supervision.complete`. Admin có quyền này thì không cần phân công. Nhân viên có quyền này phải đang được phân công gói đó theo [BR-RBAC-013](BR-RBAC-013.md); đợt này phân công theo từng gói, không theo khách hàng hay công trình.
-7. Gói đã hoàn thành vẫn gắn với công trình và vẫn giữ chỗ theo [BR-SUB-006](BR-SUB-006.md). Không ai đổi được công trình của gói, kể cả sau khi mở lại, theo [BR-SUB-009](BR-SUB-009.md). Khách vẫn xem được trạng thái đã hoàn thành của gói mình.
+7. Gói đã hoàn thành vẫn gắn với công trình và vẫn giữ chỗ theo [BR-SUB-006](BR-SUB-006.md). Không ai đổi thẳng công trình của gói theo [BR-SUB-009](BR-SUB-009.md), và gói đã hoàn thành không gỡ được. Sau khi mở lại, gói về đã gán và chỉ được gỡ theo [BR-SUB-026](BR-SUB-026.md). Khách vẫn xem được trạng thái đã hoàn thành của gói mình.
 
 ## Except
 

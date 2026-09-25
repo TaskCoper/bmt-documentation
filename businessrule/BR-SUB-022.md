@@ -52,25 +52,26 @@ Khách được mua nhiều gói giám sát chưa gán công trình, kể cả n
 
 ## When
 
-Gói giám sát đã được cấp hoặc khách yêu cầu gán lần đầu cho công trình.
+Gói giám sát đã được cấp, hoặc khách yêu cầu gán gói cho công trình, kể cả gán lại sau khi gói bị gỡ.
 
 ## Then
 
 1. Không yêu cầu công trình khi mua hoặc cấp gói. Gói chưa gán nằm trong các gói đã mua của khách, không phát sinh thanh toán lần nữa khi gán.
-2. Khách tự gán gói của mình cho một công trình thuộc mình, trong hạn một năm từ lúc cấp. Mỗi gói chỉ gán cho một công trình.
+2. Khách tự gán gói của mình cho một công trình thuộc mình, trong hạn một năm từ lúc cấp. Mỗi gói chỉ gán cho một công trình tại một thời điểm. Gói bị nhân viên gỡ về chưa gán theo [BR-SUB-026](BR-SUB-026.md) được khách gán lại theo cùng các điều kiện này và vẫn tính theo hạn ban đầu; khách được gán lại vào chính công trình cũ.
 3. Nếu công trình đã có gói giám sát đang hiệu lực, chặn gán thêm. Gói bị chặn vẫn chưa gán và giữ hạn ban đầu để dùng cho công trình khác.
-4. Quá một năm mà chưa từng gán thì không cho sử dụng hoặc gán lần đầu. Không tự hoàn tiền hay tạo gói thay thế.
-5. Gán công trình được coi là đã sử dụng gói. Sau khi gán đúng hạn, gói tiếp tục phục vụ công trình sau mốc một năm, không tự hết hạn vì mốc này.
+4. Quá hạn một năm mà gói đang chưa gán, dù chưa từng gán hay đã bị gỡ, thì không cho sử dụng hoặc gán. Khách thấy gói ở trạng thái quá hạn gán; hai trường hợp hiển thị giống nhau. Không tự hoàn tiền hay tạo gói thay thế.
+5. Gán công trình được coi là đã sử dụng gói. Sau khi gán đúng hạn, gói tiếp tục phục vụ công trình sau mốc một năm, không tự hết hạn vì mốc này. Nếu gói bị gỡ, lần gán lại vẫn phải diễn ra trước hạn ban đầu.
 6. Hiện chỉ quản lý gói gán cho công trình nào; không quản lý hoạt động khảo sát/giám sát để quyết định quyền gán hoặc sửa.
 
 ## Except
 
-Gói bị nhân viên hủy không được sử dụng khi chưa khôi phục hợp lệ. Hạn gán lần đầu không phải chu kỳ giám sát. Gói đã gán thì không đổi công trình theo BR-SUB-009.
+Gói đã bị nhân viên hủy không được sử dụng nữa; hủy không hoàn tác được theo [BR-SUB-024](BR-SUB-024.md). Hạn gán không phải chu kỳ giám sát. Gói đã gán thì không đổi thẳng công trình theo BR-SUB-009; nhân viên chỉ gỡ được theo [BR-SUB-026](BR-SUB-026.md) và bị chặn gỡ khi đã đến hoặc đã qua hạn gán.
 
 ## Notes
 
 Thay quy tắc cũ bắt buộc gắn công trình ngay khi cấp và không có hạn cho mọi gói giám sát. Hạn gán là cùng ngày và giờ năm sau theo Asia/Ho_Chi_Minh; ngày 29/02 thành 28/02 nếu năm sau không nhuận. Chỉ gán trước hạn; đúng mốc hạn bị từ chối. Không coi một năm là 365 ngày.
 
 - Bản nháp nghiệp vụ, chưa triển khai hoặc chạy kiểm thử. Tên Reviewer/Approver lấy theo xác nhận cho các bản nháp mới trong discovery/subscription-entitlements.md; không phải bằng chứng phê duyệt. Owner và ngày hiệu lực chưa được phân công/xác nhận.
-- Công trình là thực thể riêng, khác với bản dự toán; khách tự tạo công trình miễn phí, không cần gói thiết kế. Người dùng xác nhận ngày 25/09/2026; Story và BR tạo, quản lý công trình chưa được soạn và sẽ chuẩn bị riêng.
+- Công trình là thực thể riêng, khác với bản dự toán; khách tự tạo công trình miễn phí, không cần gói thiết kế. Người dùng xác nhận ngày 25/09/2026; việc tạo và quản lý công trình theo [STORY-SITE-001](../userstory/STORY-SITE-001.md) và [BR-SITE-001](BR-SITE-001.md) đến [BR-SITE-003](BR-SITE-003.md).
+- Người dùng xác nhận ngày 25/09/2026: gói bị gỡ giữ hạn gán ban đầu, không được làm mới hạn.
 - [Tổng hợp quyết định và bảng truy vết](../discovery/payment-packages.md).

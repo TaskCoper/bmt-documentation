@@ -44,10 +44,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SITE-011 | STORY-SITE-001 | ALT | REGRESSION | P1 | Khách U1 có công trình A với gói G1 đã gán do nhân viên N phụ trách; công trình B với gói G2 đã hoàn thành; công trình D với gói G3 đang bị hủy. | 1. U1 đổi tên và địa chỉ của A theo Test data.<br>2. U1 đổi địa chỉ của B và đổi tên của D.<br>3. Đọc lại ba công trình, liên kết gói và phân công của G1. | A: tên “Nhà phố mới”, địa chỉ “45 Lê Văn Lương, Quận 7”. B: địa chỉ “Bến Lức, Long An”. D: tên “Nhà kho cũ”. | Cả ba lần sửa đều thành công và lưu thông tin mới. G1 vẫn gắn A và N vẫn phụ trách G1; G2 vẫn gắn B ở trạng thái đã hoàn thành; G3 vẫn gắn D ở trạng thái đang bị hủy. | STORY-SITE-001/AC-011<br>STORY-SITE-001/ALT-02<br>BR-SITE-002/Then | Sửa được bất cứ lúc nào, kể cả khi gói đã gán, đã hoàn thành hoặc đang bị hủy; sửa không đổi gói hay người phụ trách. Đặc tả chưa chạy. | [Chưa xác định] | Draft |
+| ST-SITE-011 | STORY-SITE-001 | EXC | REGRESSION | P1 | Khách U1 có công trình A với gói G1 đã gán do nhân viên N phụ trách, và công trình C với gói G3 đã hoàn thành. U1 đang đăng nhập và biết định danh của A và C. | 1. U1 gửi yêu cầu đổi tên và địa chỉ của A theo Test data, gồm cả gửi thẳng tới API.<br>2. U1 gửi yêu cầu đổi địa chỉ của C theo Test data, gồm cả gửi thẳng tới API.<br>3. Đọc lại A, C, liên kết gói và phân công của G1. | A: tên mới “Nhà phố mới”, địa chỉ mới “45 Lê Văn Lương, Quận 7”. C: địa chỉ mới “Bến Lức, Long An”. G1 và G3 là gói giám sát thử. | Mọi yêu cầu sửa đều bị từ chối vì công trình đang có gói giữ chỗ. A và C giữ tên, địa chỉ cũ. G1 vẫn gắn A ở trạng thái đã gán và N vẫn phụ trách G1; G3 vẫn gắn C ở trạng thái đã hoàn thành. | STORY-SITE-001/AC-011<br>STORY-SITE-001/EXC-03<br>BR-SITE-002/Then | Khách không sửa được công trình có gói đã gán hoặc đã hoàn thành, để không đổi địa chỉ nhằm dùng gói cho nơi khác (quyết định ngày 25/09/2026). Đặc tả chưa chạy. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-SITE-001/AC-011
-- STORY-SITE-001/ALT-02
+- STORY-SITE-001/EXC-03
 - BR-SITE-002/Then

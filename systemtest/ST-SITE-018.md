@@ -44,7 +44,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SITE-018 | STORY-SITE-001 | EXC | REGRESSION | P2 | Khách U1 có công trình A tên “Nhà phố”, địa chỉ “Quận 7”. | 1. U1 sửa A với tên chỉ gồm khoảng trắng.<br>2. U1 sửa A với địa chỉ 501 ký tự.<br>3. Đọc lại A. | Lần 1: tên “   ”. Lần 2: địa chỉ sinh tự động 501 ký tự sau khi bỏ khoảng trắng đầu/cuối. | Cả hai yêu cầu bị từ chối, chỉ rõ trường không hợp lệ. A giữ tên “Nhà phố” và địa chỉ “Quận 7”; không lưu một phần. | STORY-SITE-001/EXC-01<br>STORY-SITE-001/ALT-02<br>BR-SITE-001/Then | Quy tắc dữ liệu áp dụng cả khi sửa; yêu cầu bị từ chối không thay đổi thông tin đã lưu. Đặc tả chưa chạy. | [Chưa xác định] | Draft |
+| ST-SITE-018 | STORY-SITE-001 | EXC | REGRESSION | P2 | Khách U1 có công trình A tên “Nhà phố”, địa chỉ “Quận 7”, không có gói giám sát giữ chỗ. | 1. U1 sửa A với tên chỉ gồm khoảng trắng.<br>2. U1 sửa A với địa chỉ 501 ký tự.<br>3. Đọc lại A. | Lần 1: tên “   ”. Lần 2: địa chỉ sinh tự động 501 ký tự sau khi bỏ khoảng trắng đầu/cuối. | Cả hai yêu cầu bị từ chối, chỉ rõ trường không hợp lệ. A giữ tên “Nhà phố” và địa chỉ “Quận 7”; không lưu một phần. | STORY-SITE-001/EXC-01<br>STORY-SITE-001/ALT-02<br>BR-SITE-001/Then | Quy tắc dữ liệu áp dụng cả khi sửa; yêu cầu bị từ chối không thay đổi thông tin đã lưu. Đặc tả chưa chạy. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

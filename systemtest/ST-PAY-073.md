@@ -44,11 +44,12 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-PAY-073 | STORY-SUB-005 | ALT | REGRESSION | P1 | Gói giám sát G1 của khách K đã gán công trình A và do nhân viên N phụ trách; N có quyền supervision.complete. Nhân viên C có quyền package.cancel và package.restore. Người quản trị Q có quyền assignment.manage. | 1. C hủy G1 kèm lý do.<br>2. Kiểm tra phân công của N trên G1; Q mở danh sách gói cần chia lại.<br>3. N gửi yêu cầu hoàn thành G1.<br>4. C khôi phục G1 kèm lý do khi A chưa có gói khác giữ chỗ.<br>5. N gửi lại yêu cầu hoàn thành G1.<br>6. Kiểm tra phân công và nhật ký phân công của G1. | K, A, G1, N, C và Q là dữ liệu thử; lý do chỉ là chuỗi minh họa. Không tạo dữ liệu lịch hoặc số dư lượt giám sát. | Sau bước 1, phân công của N trên G1 vẫn còn hiệu lực, không có bản ghi gỡ phân công; G1 không có trong danh sách cần chia lại vì đang bị hủy. Bước 3 bị từ chối vì G1 đang bị hủy. Sau bước 4, G1 về trạng thái đã gán trên A và N vẫn phụ trách mà không cần giao lại; bước 5 thành công. Nhật ký phân công của G1 không có bản ghi mới. | BR-SUB-024/Then<br>BR-SUB-025/Then<br>BR-RBAC-013/Then<br>STORY-RBAC-003/ALT-06 | BR-SUB-024 khoản 7 và BR-SUB-025 khoản 7 (người dùng xác nhận ngày 25/09/2026): hủy gói không gỡ phân công, khôi phục giữ người phụ trách cũ. Đặc tả chưa chạy. | [Chưa xác định] | Draft |
+| ST-PAY-073 | STORY-SUB-005 | Main | REGRESSION | P1 | Gói giám sát G1 của khách K đã gán công trình A và do nhân viên N phụ trách; N chỉ có quyền supervision.complete. Nhân viên C có quyền package.cancel. Người quản trị Q có quyền assignment.manage. | 1. C hủy G1 kèm lý do có nội dung.<br>2. Kiểm tra trạng thái G1, chỗ trên A, phân công của N trên G1 và nhật ký phân công.<br>3. Q mở danh sách gói cần chia lại.<br>4. N gửi yêu cầu hoàn thành G1, kể cả gửi trực tiếp tới API.<br>5. N mở chi tiết công trình A. | K, A, G1, N, C và Q là dữ liệu thử; lý do chỉ là chuỗi minh họa. Không tạo dữ liệu lịch hoặc số dư lượt giám sát. | Sau bước 1, G1 ở trạng thái đã hủy và A không còn gói giữ chỗ. Phân công của N trên G1 kết thúc ngay lúc hủy và có bản ghi nhật ký phân công; Q không phải gỡ tay. G1 không có trong danh sách cần chia lại. Bước 4 và bước 5 đều bị từ chối vì N không còn phụ trách G1. G1 giữ trạng thái đã hủy. | STORY-SUB-005/AC-016<br>STORY-RBAC-003/ALT-08<br>BR-SUB-024/Then<br>BR-RBAC-013/Then<br>BR-SITE-003/Then | Người dùng xác nhận ngày 25/09/2026: hủy gói giám sát kết thúc phân công (BR-SUB-024 khoản 7, BR-RBAC-013 khoản 9) và bỏ thao tác khôi phục. Ca này thay nội dung cũ “hủy giữ phân công, khôi phục giữ người phụ trách”. Đặc tả chưa chạy. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
+- STORY-SUB-005/AC-016
+- STORY-RBAC-003/ALT-08
 - BR-SUB-024/Then
-- BR-SUB-025/Then
 - BR-RBAC-013/Then
-- STORY-RBAC-003/ALT-06
+- BR-SITE-003/Then

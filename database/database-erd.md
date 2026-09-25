@@ -1,8 +1,10 @@
 # ERD tổng hợp database BMT từ TDD
 
-Tài liệu tổng hợp **29 bảng được định nghĩa hoặc tham chiếu trong 12 TDD**: 20 bảng của thiết kế gói dịch vụ/thanh toán, 6 bảng của thiết kế phân quyền, bảng `ConstructionSite` của thiết kế công trình, 1 bảng lịch sử thuộc thiết kế giám sát cũ và bảng nền tảng `User`. Mỗi bảng chỉ xuất hiện một lần trong danh mục bên dưới.
+Tài liệu tổng hợp **29 bảng được định nghĩa hoặc tham chiếu trong 13 TDD**: 20 bảng của thiết kế gói dịch vụ/thanh toán, 6 bảng của thiết kế phân quyền, bảng `ConstructionSite` của thiết kế công trình, 1 bảng lịch sử thuộc thiết kế giám sát cũ và bảng nền tảng `User`. Mỗi bảng chỉ xuất hiện một lần trong danh mục bên dưới.
 
 Đây là mô hình dữ liệu **theo tài liệu thiết kế**, chưa phải kết quả kiểm tra database đang chạy. Riêng `ConstructionSite`, `SupervisionGrant`, `Assignment`, `PlanOffer` và danh mục quyền đã được đối chiếu với migration `20260925074152_ConstructionSiteAndPackageAssignment` ngày 25/09/2026. Sơ đồ thể hiện các khóa và cột chính để đọc quan hệ; schema đầy đủ, độ dài cột và các quy tắc xử lý xem TDD nguồn. Không suy ra các bảng chưa được TDD định nghĩa từ tên API, DTO hoặc tên dịch vụ.
+
+**Thiết kế ngày 25/09/2026 (lần 3), chưa có trong code.** Người dùng chốt thêm: nhân viên được gỡ gói giám sát khỏi công trình khi khách gán nhầm ([TDD-SUB-007](../tdd/TDD-SUB-007.md)); bỏ thao tác khôi phục gói; hủy hoặc gỡ gói kết thúc phân công; khách không sửa, không xóa được công trình đang có gói giữ chỗ. Các thay đổi schema đi kèm, ghi rõ ở từng mục bên dưới: cột `SupervisionGrant.AssignedAtUtc`; hành động `Unassign` và ba cột bản lưu công trình của `PackageLifecycleEvent`; hai giá trị `EndReason` mới của `Assignment`; danh mục quyền bỏ `package.restore`, thêm `supervision.unassign`. Không có bảng mới. Code hiện tại ở `bmt-be` nhánh `develop`, commit `1ffdfbf`, chưa có các thay đổi này; migration gộp dự kiến `SupervisionUnassignWithoutRestore`, thứ tự ở TDD-SUB-007.
 
 ## 1. Nguồn và cách hợp nhất
 
@@ -11,9 +13,10 @@ Tài liệu tổng hợp **29 bảng được định nghĩa hoặc tham chiếu
 | [TDD-SUB-001](../tdd/TDD-SUB-001.md#data-model) | Danh mục gói, phiên bản, giá và cấu hình quyền lợi. |
 | [TDD-SUB-002](../tdd/TDD-SUB-002.md#data-model) | Kỳ thiết kế, hạn mức được cấp và từng lần sử dụng. |
 | [TDD-SUB-003](../tdd/TDD-SUB-003.md#data-model) | Thiết kế giám sát cũ, đã bị TDD-SUB-004 thay hoàn toàn; giữ dấu vết `SupervisionTransition` để tra cứu. |
-| [TDD-SUB-004](../tdd/TDD-SUB-004.md#data-model) | Điều chỉnh `SupervisionGrant` thành mua trước, gán công trình sau; gói đã gắn không đổi công trình; bỏ bảng `SupervisionAssignmentEvent`. |
-| [TDD-SUB-005](../tdd/TDD-SUB-005.md#data-model) | Quyền nhân viên, hủy/khôi phục gói, lịch sử và kết quả chống xử lý trùng. |
+| [TDD-SUB-004](../tdd/TDD-SUB-004.md#data-model) | Điều chỉnh `SupervisionGrant` thành mua trước, gán công trình sau; gói đã gắn không đổi thẳng sang công trình khác; bỏ bảng `SupervisionAssignmentEvent`. |
+| [TDD-SUB-005](../tdd/TDD-SUB-005.md#data-model) | Quyền nhân viên, hủy gói, lịch sử và kết quả chống xử lý trùng. Khôi phục gói đã bỏ theo thiết kế lần 3. |
 | [TDD-SUB-006](../tdd/TDD-SUB-006.md#data-model) | Trạng thái `Completed` của `SupervisionGrant`, hoàn thành và mở lại gói giám sát; không tạo bảng mới. |
+| [TDD-SUB-007](../tdd/TDD-SUB-007.md#data-model) | Gỡ gói giám sát khỏi công trình (thiết kế lần 3, chưa có trong code): cột `AssignedAtUtc` của `SupervisionGrant`, hành động `Unassign` và bản lưu công trình trong `PackageLifecycleEvent`, thứ tự migration gộp; không tạo bảng mới. |
 | [TDD-SITE-001](../tdd/TDD-SITE-001.md#data-model) | Bảng `ConstructionSite` và khóa ngoại ghép từ `SupervisionGrant` tới công trình của chính chủ gói. |
 | [TDD-PAY-001](../tdd/TDD-PAY-001.md#data-model) | Đơn mua, giao dịch ngân hàng, cấp quyền; mở rộng giá giám sát và `OfferKey`. |
 | [TDD-PAY-002](../tdd/TDD-PAY-002.md#data-model) | Tra cứu quản trị từ các bảng nguồn; không tạo thêm bảng. |
@@ -24,10 +27,10 @@ Tài liệu tổng hợp **29 bảng được định nghĩa hoặc tham chiếu
 Các thay đổi được hợp nhất theo chỉ dẫn trong chính TDD:
 
 - `PlanOffer.Cycle` đổi thành `OfferKey` theo PAY-001: `Month`/`Year` cho thiết kế, `ConstructionSite` cho giám sát. Mã này thay `Project` từ ngày 25/09/2026, và cột được nới lên `varchar(24)`. `ConstructionSite` ở đây là mã lựa chọn giá, không phải ID công trình. Trong sơ đồ, `OfferQuota.Cycle` và `DesignPeriod.Cycle` giữ tên của SUB-001/002; chúng tham chiếu khóa mới `PlanOffer(RevisionId,OfferKey)`. Tên cột phụ thuộc đã được chốt trong SUB-001/002: `PlanOffer` dùng `OfferKey`, các bảng chỉ áp dụng cho gói thiết kế giữ tên `Cycle` và chỉ nhận Month/Year. SUB-001 còn lặp cột `Kind` xuống `PlanRevision` và `PlanOffer` cùng khóa ngoại ghép, để database tự chặn việc gắn sai lựa chọn mua cho loại gói.
-- `SupervisionGrant` dùng cấu trúc SUB-004/005/006: `ConstructionSiteId` có thể NULL, trạng thái `Unassigned`/`Assigned`/`CanceledByStaff`/`Completed`. `Completed` ở đây là trạng thái do SUB-006 định nghĩa, không phải `Completed` của SUB-003. Bảng `SupervisionTransition` vẫn được liệt kê để không bỏ sót thiết kế cũ, nhưng không được tạo mới: lịch sử của luồng mới nằm ở `PackageLifecycleEvent`, còn lần gán đầu đọc từ `FirstAssignedAtUtc` và `PackageMutationReceipt`. Bảng `SupervisionAssignmentEvent` đã bỏ ngày 25/09/2026 vì gói gắn cố định một công trình, không còn lịch sử đổi để lưu.
-- `DesignPeriod` bổ sung `LifecycleState`, `Version`, `CancelEventId` từ SUB-005. `ClosedAtUtc` dùng cho việc bị lần mua mới thay thế, không dùng cho hủy có thể khôi phục.
+- `SupervisionGrant` dùng cấu trúc SUB-004/005/006: `ConstructionSiteId` có thể NULL, trạng thái `Unassigned`/`Assigned`/`CanceledByStaff`/`Completed`. `Completed` ở đây là trạng thái do SUB-006 định nghĩa, không phải `Completed` của SUB-003. Bảng `SupervisionTransition` vẫn được liệt kê để không bỏ sót thiết kế cũ, nhưng không được tạo mới: lịch sử của luồng mới nằm ở `PackageLifecycleEvent`, còn lần gán đầu đọc từ `FirstAssignedAtUtc` và `PackageMutationReceipt`. Bảng `SupervisionAssignmentEvent` đã bỏ ngày 25/09/2026 vì gói gắn cố định một công trình, không còn lịch sử đổi để lưu. Thiết kế lần 3 (TDD-SUB-004, TDD-SUB-007) cho nhân viên gỡ gói đã gán về `Unassigned`: thêm cột `AssignedAtUtc` là mốc gán hiện tại, còn `FirstAssignedAtUtc` giữ mốc gán đầu kể cả sau khi gỡ; mỗi lần gỡ ghi một dòng `PackageLifecycleEvent` `Action = Unassign` kèm bản lưu công trình cũ, nên không cần dựng lại bảng lịch sử đổi. Gói đã hủy có thể mất `ConstructionSiteId` khi khách xóa công trình.
+- `DesignPeriod` bổ sung `LifecycleState`, `Version`, `CancelEventId` từ SUB-005. `ClosedAtUtc` dùng cho việc bị lần mua mới thay thế, không dùng cho hủy. Thiết kế lần 3 bỏ khôi phục, nên `CanceledByStaff` là trạng thái cuối của kỳ bị hủy.
 - `User` là bảng sẵn có được TDD tham chiếu, nay được TDD-RBAC-001 sửa: thêm `AccountKind`, `Status`, `SecurityStamp` và **bỏ cột `Role` kiểu chuỗi**. Sơ đồ hiển thị các cột này vì nhiều bảng khác phụ thuộc vào chúng để xác định tư cách nhân viên và quyền. `ConstructionSite` nay có schema đầy đủ ở TDD-SITE-001 và thay cho phụ thuộc `Project` của bản trước. Bảng `User` trong sơ đồ không đại diện cho toàn bộ cột của module tài khoản.
-- Mô hình quyền nhân viên đã đổi: `StaffAccessProfile` và `StaffPermission` của TDD-SUB-005 bản trước **không còn được tạo**, thay bằng `Permission`, `Role`, `RolePermission` và `UserRole` của TDD-RBAC-001. Ba mã quyền `commerce.read`, `package.cancel`, `package.restore` giữ nguyên tên, chỉ đổi chỗ gắn quyền từ người sang vai trò. Mã `supervision.reassign` đã bỏ ngày 25/09/2026 cùng thao tác đổi công trình.
+- Mô hình quyền nhân viên đã đổi: `StaffAccessProfile` và `StaffPermission` của TDD-SUB-005 bản trước **không còn được tạo**, thay bằng `Permission`, `Role`, `RolePermission` và `UserRole` của TDD-RBAC-001. Ba mã quyền `commerce.read`, `package.cancel`, `package.restore` giữ nguyên tên, chỉ đổi chỗ gắn quyền từ người sang vai trò. Mã `supervision.reassign` đã bỏ ngày 25/09/2026 cùng thao tác đổi công trình. Theo thiết kế lần 3 cùng ngày, `package.restore` bỏ cùng thao tác khôi phục và mã `supervision.unassign` được thêm cho việc gỡ gói ([TDD-RBAC-001](../tdd/TDD-RBAC-001.md#data-model)).
 
 ## 2. Cách đọc sơ đồ
 
@@ -168,7 +171,8 @@ erDiagram
         varchar State
         timestamptz GrantedAtUtc
         timestamptz AssignmentDeadlineUtc
-        timestamptz FirstAssignedAtUtc "NULL"
+        timestamptz FirstAssignedAtUtc "NULL, moc gan dau"
+        timestamptz AssignedAtUtc "NULL, moc gan hien tai, thiet ke moi"
         bigint Version
         uuid CancelEventId "NULL - con tro kiem theo target"
     }
@@ -297,7 +301,7 @@ erDiagram
         uuid ResourceId "ma goi, khong co khoa ngoai"
         timestamptz EffectiveFromUtc
         timestamptz EffectiveToUtc "NULL khi dang phu trach"
-        varchar EndReason "Transferred Removed NULL khi con hieu luc"
+        varchar EndReason "Transferred Removed PackageCanceled PackageUnassigned"
     }
     AccessAuditLog {
         uuid Id PK
@@ -334,6 +338,9 @@ erDiagram
         text Reason
         bigint PackageVersion
         uuid ReceiptId FK, UK
+        uuid ConstructionSiteId "ban luu, khong co khoa ngoai, thiet ke moi"
+        varchar ConstructionSiteName "ban luu, thiet ke moi"
+        varchar ConstructionSiteAddress "ban luu, thiet ke moi"
     }
 
     Plan ||..o{ PlanRevision : revisions
@@ -352,7 +359,7 @@ erDiagram
     User ||..o{ SupervisionGrant : owns
     PlanRevision ||..o{ SupervisionGrant : fixed_revision
     User ||..o{ ConstructionSite : owns_site
-    ConstructionSite o|..o{ SupervisionGrant : fixed_site
+    ConstructionSite o|..o{ SupervisionGrant : current_site
     SupervisionGrant ||..o{ SupervisionTransition : legacy_transitions
     User ||--o| AccountCommerceState : commerce_state
     User ||..o{ PaymentOrder : buys
@@ -404,7 +411,7 @@ Trong bảng dưới, “1 → 0..N” nghĩa mỗi dòng con bắt buộc có m
 | DesignPeriod / PeriodQuota / BenefitDefinition → UsageOperation | `(AccountId,PeriodId)` / `(PeriodId,BenefitId)` / `(BenefitId,UsageKind)` → `(Id,UsageKind)` | Mỗi operation thuộc một kỳ đúng khách, một quota và đúng loại thao tác của quyền. | RESTRICT; không chuyển operation sang kỳ mới. |
 | User / PlanRevision → SupervisionGrant | `AccountId` / `(RevisionId,Kind)` → `(Id,Kind)` | Mỗi grant thuộc một khách và một revision của gói giám sát. | RESTRICT; Kind trên grant luôn bằng Supervision. |
 | User → ConstructionSite | `OwnerUserId` | 1 → 0..N | RESTRICT; công trình không đổi chủ. |
-| ConstructionSite → SupervisionGrant | `FK_SupervisionGrant_ConstructionSite`: `(ConstructionSiteId,AccountId)` → `(Id,OwnerUserId)`, đích là `AK_ConstructionSite_Id_OwnerUserId` | 0..1 → 0..N theo thời gian; tối đa một gói `Assigned` hoặc `Completed` mỗi công trình. | RESTRICT, MATCH SIMPLE: gói chưa gán (cột NULL) không bị kiểm; gói phải trỏ vào công trình của chính chủ gói; công trình từng có gói, kể cả gói đã hủy, không xóa được. |
+| ConstructionSite → SupervisionGrant | `FK_SupervisionGrant_ConstructionSite`: `(ConstructionSiteId,AccountId)` → `(Id,OwnerUserId)`, đích là `AK_ConstructionSite_Id_OwnerUserId` | 0..1 → 0..N theo thời gian; tối đa một gói `Assigned` hoặc `Completed` mỗi công trình. | RESTRICT, MATCH SIMPLE: gói chưa gán (cột NULL) không bị kiểm; gói phải trỏ vào công trình của chính chủ gói. Hiện trạng code: công trình từng có gói, kể cả gói đã hủy, không xóa được. Thiết kế lần 3: gói đã gỡ có cột NULL; công trình còn gói giữ chỗ thì không xóa được; khi xóa công trình chỉ còn gói đã hủy, handler đặt `ConstructionSiteId` của các gói đó về NULL trước câu `DELETE` ([TDD-SITE-001](../tdd/TDD-SITE-001.md#data-model)); RESTRICT vẫn là lớp chặn cuối. |
 | SupervisionGrant → SupervisionTransition | `GrantId` | 1 → 0..N, thiết kế cũ | RESTRICT; không tự xóa lịch sử khi đổi sang luồng mới. |
 | User → AccountCommerceState | `AccountId` là PK/FK | 1 → 0..1; tạo khi cần xử lý lần đầu. | RESTRICT; không mặc định mọi User đã có dòng. |
 | PaymentOrder → AccountCommerceState (lần mua đã áp dụng) | `(AccountId,LatestPurchaseOrderId)` → `(AccountId,Id)` | Mỗi state chọn 0..1 đơn cùng khách. | RESTRICT; giữ lần mua thiết kế đã áp dụng. |
@@ -420,12 +427,13 @@ Trong bảng dưới, “1 → 0..N” nghĩa mỗi dòng con bắt buộc có m
 | Role → RolePermission ← Permission | `RoleId` và `PermissionCode` là PK ghép | Một vai trò gồm 0..N quyền; một mã quyền thuộc 0..N vai trò. | CASCADE phía Role để xóa vai trò không phải dọn tay; RESTRICT phía Permission để không gỡ mất mã quyền đang được dùng. |
 | User → UserRole | `GrantedBy` NULL được | Người đã gán vai trò. NULL với các dòng do migration seed. | FK User; không tự thêm quy tắc SET NULL khi xóa. |
 | User → Role | `CreatedBy` NULL được | Người tạo vai trò. NULL với hai vai trò hệ thống do migration tạo. | FK User. |
-| User → Assignment | `StaffUserId` bắt buộc | Một nhân viên có 0..N khoảng thời gian phụ trách. | RESTRICT để không mất lịch sử phụ trách khi xóa tài khoản. `ResourceId` là mã gói giám sát nhưng **không** là khóa ngoại, để giữ khả năng thêm loại tài nguyên khác; handler giao và chuyển giao tự kiểm gói có thật (404) và đang giữ chỗ (409). Gói không bao giờ bị xóa nên không có dòng mồ côi. |
+| User → Assignment | `StaffUserId` bắt buộc | Một nhân viên có 0..N khoảng thời gian phụ trách. | RESTRICT để không mất lịch sử phụ trách khi xóa tài khoản. `ResourceId` là mã gói giám sát nhưng **không** là khóa ngoại, để giữ khả năng thêm loại tài nguyên khác; handler giao và chuyển giao tự kiểm gói có thật (404) và đang giữ chỗ (409). Gói không bao giờ bị xóa nên không có dòng mồ côi. Thiết kế lần 3: hủy hoặc gỡ gói kết thúc phân công đang hiệu lực của gói trong cùng transaction ([TDD-RBAC-003](../tdd/TDD-RBAC-003.md#architecture)). |
 | User → AccessAuditLog | `ActorUserId` bắt buộc | Một người có 0..N dòng nhật ký. | FK User. `TargetId` NULL được và không là khóa ngoại; `TargetLabel` chép lại tên nên nhật ký vẫn đọc được sau khi đối tượng bị xóa. |
 | User → các bảng lịch sử/kết quả thao tác | `ActorId` trong Transition, LifecycleEvent, MutationReceipt, PaymentEvent | Bắt buộc, trừ PaymentEvent cho NULL. | FK User; giữ người thao tác trong lịch sử. |
-| PackageMutationReceipt → PackageLifecycleEvent | `ReceiptId` UNIQUE FK | Mỗi sự kiện có một receipt; mỗi receipt có 0..1 sự kiện. Receipt của lần gán đầu không có dòng sự kiện. | RESTRICT. Kiểm operation trong transaction. |
+| PackageMutationReceipt → PackageLifecycleEvent | `ReceiptId` UNIQUE FK | Mỗi sự kiện có một receipt; mỗi receipt có 0..1 sự kiện. Receipt của lần gán (gán đầu hoặc gán lại sau khi gỡ) không có dòng sự kiện. | RESTRICT. Kiểm operation trong transaction. |
 | DesignPeriod / SupervisionGrant → PackageLifecycleEvent | Target ID cùng `AccountId` | Đúng một target đúng PackageKind; mỗi target có 0..N sự kiện. | RESTRICT; UNIQUE(target,PackageVersion) bằng hai partial index. |
 | PackageLifecycleEvent → DesignPeriod / SupervisionGrant (lần hủy) | `CancelEventId` | Con trỏ tùy chọn tới sự kiện Cancel đúng target. | SUB-005 yêu cầu kiểm target trong transaction; nếu tạo FK vòng phải xử lý thứ tự ghi/DEFERRABLE. |
+| PackageLifecycleEvent → ConstructionSite (bản lưu, thiết kế lần 3) | `ConstructionSiteId` của sự kiện, **không** là khóa ngoại | Sự kiện `Unassign` luôn có; sự kiện `Cancel` của gói giám sát có khi gói đang gắn công trình. | Không FK vì công trình có thể bị xóa sau sự kiện; tên và địa chỉ được chép lại để lịch sử vẫn đọc được. |
 
 `PackageMutationReceipt.TargetId` có thể chỉ kỳ thiết kế hoặc gói giám sát tùy `Operation`, nên **không phải một FK đa hình**. Tương tự, `UsageOperation.ResourceId` chỉ công trình hoặc mẫu theo `Kind`; chưa đủ schema để vẽ FK tới bảng mẫu hay coi mọi ResourceId là ProjectId.
 
@@ -447,7 +455,7 @@ Trong bảng dưới, “1 → 0..N” nghĩa mỗi dòng con bắt buộc có m
 | Bảng | Một dòng đại diện cho gì? | Khi tạo/cập nhật và cách dùng |
 | --- | --- | --- |
 | `DesignSubscription` | Đầu mối quản lý gói thiết kế của một tài khoản. | Giữ CurrentPeriodId và Version, tồn tại qua nhiều lần mua. Con trỏ không tự chứng minh kỳ còn hạn hoặc chưa bị hủy. |
-| `DesignPeriod` | Một kỳ thiết kế thực sự đã cấp. | Tạo khi cấp kỳ hợp lệ; lưu revision, lựa chọn mua, giá chốt, hạn và kỳ trước. Mua mới có thể đóng kỳ cũ; hủy/khôi phục sửa LifecycleState trên chính kỳ đó. |
+| `DesignPeriod` | Một kỳ thiết kế thực sự đã cấp. | Tạo khi cấp kỳ hợp lệ; lưu revision, lựa chọn mua, giá chốt, hạn và kỳ trước. Mua mới có thể đóng kỳ cũ; hủy sửa LifecycleState trên chính kỳ đó (thiết kế lần 3 bỏ khôi phục). |
 | `PeriodQuota` | Hạn mức một quyền được cấp cho một kỳ, cùng số đã dùng và đang giữ. | Khởi tạo từ OfferQuota. Used tăng khi dùng thành công; Reserved giữ lượt cho tác vụ chưa kết thúc. Các dự án cùng khách dùng chung quota của kỳ. |
 | `UsageOperation` | Một lần tạo thiết kế hoặc mở chi tiết mẫu đã được tiếp nhận. | Lưu key/hash, kỳ/quota, trạng thái và kết quả để chống tính lượt trùng. AI có Pending và deadline; tra cứu ghi Succeeded cùng ResponseBody. Hoàn tất sau đổi/hủy gói vẫn quyết toán vào kỳ tiếp nhận ban đầu. |
 
@@ -455,8 +463,8 @@ Trong bảng dưới, “1 → 0..N” nghĩa mỗi dòng con bắt buộc có m
 
 | Bảng | Một dòng đại diện cho gì? | Khi tạo/cập nhật và cách dùng |
 | --- | --- | --- |
-| `SupervisionGrant` | Một quyền sử dụng gói giám sát đã cấp cho khách. | Mới cấp chưa có công trình. Lần gán đầu ghi `ConstructionSiteId`, và từ đó cột này không đổi, kể cả với nhân viên và Admin. Hủy, khôi phục, hoàn thành, mở lại cập nhật cùng grant, giữ revision, mốc cấp và công trình. Hạn một năm là hạn gán lần đầu; đã gán đúng hạn không tự hết hiệu lực chỉ vì qua mốc đó. |
-| `ConstructionSite` | Một công trình thật của khách, do khách tự tạo. | Khách tạo, sửa tên và địa chỉ bất cứ lúc nào; chỉ xóa được khi chưa từng có gói nào gắn vào. Tên không trùng trong cùng một khách, so theo `NormalizedName` (chữ hoa, giữ dấu). `Version` chặn hai lần sửa cùng lúc ghi đè nhau. |
+| `SupervisionGrant` | Một quyền sử dụng gói giám sát đã cấp cho khách. | Mới cấp chưa có công trình. Lần gán đầu ghi `ConstructionSiteId`, `FirstAssignedAtUtc` và (thiết kế lần 3) `AssignedAtUtc`. Không ai đổi thẳng công trình của gói đã gán. Thiết kế lần 3: nhân viên có `supervision.unassign` gỡ gói đang gán về `Unassigned` (cột công trình và `AssignedAtUtc` về NULL, `FirstAssignedAtUtc` giữ nguyên), khách gán lại trước hạn gán ban đầu. Hủy, hoàn thành, mở lại cập nhật cùng grant, giữ revision, mốc cấp và công trình; không còn khôi phục. Hạn một năm là hạn gán; đã gán đúng hạn không tự hết hiệu lực chỉ vì qua mốc đó. |
+| `ConstructionSite` | Một công trình thật của khách, do khách tự tạo. | Hiện trạng code: khách sửa tên và địa chỉ bất cứ lúc nào; chỉ xóa được khi chưa từng có gói nào gắn vào. Thiết kế lần 3: khách không sửa, không xóa được khi công trình có gói giữ chỗ (`Assigned` hoặc `Completed`); gói đã gỡ hoặc đã hủy không khóa. Tên không trùng trong cùng một khách, so theo `NormalizedName` (chữ hoa, giữ dấu). `Version` chặn hai lần sửa cùng lúc ghi đè nhau. |
 | `SupervisionTransition` | Một lần hoàn tất/mở lại giám sát theo thiết kế cũ SUB-003. | Lưu FromState/ToState, actor, thời điểm, lý do và GrantVersion. Được giữ trong tổng hợp để truy lịch sử thiết kế. Không dùng cho luồng mới và không tạo dòng mới; cách chuyển dữ liệu cũ xem mục 8. |
 
 ### 5.4. Thanh toán và cấp gói — PAY-001
@@ -471,12 +479,12 @@ Trong bảng dưới, “1 → 0..N” nghĩa mỗi dòng con bắt buộc có m
 | `PaymentOperation` | Kết quả nhận diện một yêu cầu hủy đơn đã xử lý. | Gắn với AccountId, OperationKind, RequestKey để gửi lại không hủy lần nữa. Tạo đơn dùng CreateKey/CreateHash trên PaymentOrder, không dùng bảng này. |
 | `PaymentEvent` | Một mốc giải thích diễn biến của đơn. | Ghi thêm khi tạo/hủy/hết hạn/đủ tiền/cấp gói hoặc phát hiện lệch thứ tự. Có thể gắn actor và giao dịch; không phải bản sao mỗi webhook, không chứng minh đã hoàn tiền. |
 
-### 5.5. Hủy và khôi phục gói — SUB-005, dùng lại trong SUB-004/PAY-002
+### 5.5. Hủy, gỡ gói và lịch sử vòng đời — SUB-005/007, dùng lại trong SUB-004/006/PAY-002
 
 | Bảng | Một dòng đại diện cho gì? | Khi tạo/cập nhật và cách dùng |
 | --- | --- | --- |
-| `PackageMutationReceipt` | Kết quả một thao tác gán/hủy/khôi phục/hoàn thành/mở lại đã hoàn tất. | Lưu key/hash, ResultVersion và ResultBody để trả lại kết quả khi client gửi lại. Khóa duy nhất theo actor, operation, target và key. Không phải biên lai thanh toán. |
-| `PackageLifecycleEvent` | Một lần nhân viên hủy, khôi phục một kỳ thiết kế/grant giám sát, hoặc hoàn thành, mở lại một grant giám sát. | Ghi thêm người làm, lý do, trước/sau và version cùng transaction đổi gói. Giữ lịch sử cũ khi restore; có đúng một target cùng khách. |
+| `PackageMutationReceipt` | Kết quả một thao tác gán/gỡ/hủy/hoàn thành/mở lại đã hoàn tất (dòng khôi phục cũ, nếu có, giữ nguyên). | Lưu key/hash, ResultVersion và ResultBody để trả lại kết quả khi client gửi lại. Khóa duy nhất theo actor, operation, target và key. Không phải biên lai thanh toán. |
+| `PackageLifecycleEvent` | Một lần nhân viên hủy một kỳ thiết kế/grant giám sát, hoặc hoàn thành, mở lại, gỡ (thiết kế lần 3) một grant giám sát. Dòng `Restore` cũ vẫn đọc được nhưng không còn đường ghi mới. | Ghi thêm người làm, lý do, trước/sau và version cùng transaction đổi gói; có đúng một target cùng khách. Thiết kế lần 3: sự kiện `Unassign`, và `Cancel` của gói đang gắn công trình, chép Id, tên, địa chỉ công trình tại lúc đó vào ba cột bản lưu. |
 
 ### 5.6. Vai trò, quyền, tài khoản nhân viên và phân công — RBAC-001/002/003
 
@@ -486,7 +494,7 @@ Trong bảng dưới, “1 → 0..N” nghĩa mỗi dòng con bắt buộc có m
 | `Role` | Một vai trò có thể gán cho người dùng. | `Kind=System` với Admin và Khách hàng, hai vai trò này không sửa, không đổi tên và không xóa được. `Kind=Custom` do người có quyền `role.manage` tạo. `Name` duy nhất. |
 | `RolePermission` | Một mã quyền được gắn vào một vai trò. | Bỏ quyền khỏi vai trò là xóa dòng; lịch sử nằm ở `AccessAuditLog`. |
 | `UserRole` | Một lần một người đang giữ một vai trò. | Thu hồi vai trò là xóa dòng. Quyền thực tế của một người là hợp quyền các vai trò ở đây; đây là **giá trị tính khi đọc**, không có cột nào lưu sẵn. |
-| `Assignment` | Một khoảng thời gian một nhân viên phụ trách một gói giám sát. | Gỡ và chuyển giao đặt `EffectiveToUtc` chứ không xóa dòng, để tra được ai từng phụ trách gì. Mỗi gói tại một thời điểm chỉ có một người phụ trách. Chỉ giao hoặc chuyển giao được gói đang `Assigned` hoặc `Completed`. Khóa tài khoản **không** làm dòng đổi trạng thái; gói đang gán của người bị khóa vào danh sách cần chia lại. |
+| `Assignment` | Một khoảng thời gian một nhân viên phụ trách một gói giám sát. | Gỡ và chuyển giao đặt `EffectiveToUtc` chứ không xóa dòng, để tra được ai từng phụ trách gì. Mỗi gói tại một thời điểm chỉ có một người phụ trách. Chỉ giao hoặc chuyển giao được gói đang `Assigned` hoặc `Completed`. Khóa tài khoản **không** làm dòng đổi trạng thái; gói đang gán của người bị khóa vào danh sách cần chia lại. Thiết kế lần 3: hủy hoặc gỡ gói kết thúc dòng đang hiệu lực với `EndReason` `PackageCanceled` hoặc `PackageUnassigned`. |
 | `AccessAuditLog` | Một lần thao tác liên quan tới vai trò, quyền hoặc phân công, kể cả lần bị từ chối. | Chỉ ghi thêm, không sửa và không xóa. Thao tác thành công ghi cùng transaction với thay đổi; yêu cầu bị từ chối ghi trên kết nối riêng để rollback không xóa mất. |
 
 ### 5.7. Bảng nền tảng được tham chiếu
@@ -508,10 +516,11 @@ Trong bảng dưới, “1 → 0..N” nghĩa mỗi dòng con bắt buộc có m
 | Hiệu lực thiết kế | Đúng CurrentPeriodId, LifecycleState=Active và còn trong khoảng thời gian cho phép. | Không suy quyền sử dụng chỉ từ con trỏ; không tạo partial index chứa NOW(). |
 | Sử dụng | UNIQUE(AccountId,UsageKind,OperationKey); FK tới kỳ đúng khách, đúng quota và đúng loại thao tác của quyền. | Retry cùng key/hash không tính lại. Không tự xóa key khi chưa có chính sách lưu giữ. |
 | Kiểu thao tác | UsageKind TemplateDetail: Succeeded, DeadlineUtc=NULL, có ResponseBody/ResponseContentType/SettledAtUtc. DesignGeneration: có deadline, ResponseBody=NULL. | Phân biệt kết quả tra cứu lưu để trả lại với tác vụ AI có thời gian chờ. |
-| Giám sát | AssignmentDeadlineUtc>GrantedAtUtc; nếu có first thì GrantedAtUtc<=first<deadline. Unassigned cần ConstructionSiteId/FirstAssignedAtUtc NULL; Assigned hoặc Completed cần cả hai. | Không làm mới hạn; CanceledByStaff giữ liên kết và mốc gán nếu có. |
+| Giám sát | AssignmentDeadlineUtc>GrantedAtUtc; nếu có first thì GrantedAtUtc<=first<deadline. Hiện trạng code: Unassigned cần ConstructionSiteId/FirstAssignedAtUtc NULL; Assigned hoặc Completed cần cả hai. Thiết kế lần 3 (`CK_SupervisionGrant_AssignedColumns` mới): Unassigned cần ConstructionSiteId và AssignedAtUtc NULL (FirstAssignedAtUtc có thể có sau khi gỡ); Assigned hoặc Completed cần ConstructionSiteId, FirstAssignedAtUtc và AssignedAtUtc; thêm `CK_SupervisionGrant_AssignedWindow`: nếu có AssignedAtUtc thì first<=AssignedAtUtc<deadline. | Không làm mới hạn, kể cả khi gỡ rồi gán lại; CanceledByStaff giữ liên kết và mốc gán nếu có, trừ khi khách xóa công trình. |
+| Bản lưu công trình trong lịch sử (thiết kế lần 3) | `CK_PackageLifecycleEvent_SiteSnapshot`: ba cột bản lưu cùng NULL hoặc cùng có; nếu có thì PackageKind=Supervision và Action IN ('Cancel','Unassign'); Action=Unassign bắt buộc có. `CK_PackageLifecycleEvent_Action` thêm `Unassign`, giữ `Restore` cho dòng cũ. | Lịch sử gỡ và hủy vẫn đọc được tên, địa chỉ công trình sau khi công trình bị sửa hoặc xóa. |
 | Một gói giám sát giữ chỗ/công trình | `UX_SupervisionGrant_ConstructionSiteHolder`: UNIQUE(ConstructionSiteId) WHERE State IN ('Assigned','Completed'). | Có thể có nhiều grant lịch sử nhưng chỉ một grant giữ chỗ. Hủy gói nhả chỗ ngay sau commit. |
 | Công trình | `UX_ConstructionSite_OwnerNormalizedName`: UNIQUE(OwnerUserId,NormalizedName); `AK_ConstructionSite_Id_OwnerUserId`; CHECK tên, tên chuẩn hóa và địa chỉ có ký tự khác khoảng trắng; Version>=1. | Một khách không có hai công trình trùng tên. Ràng buộc AK làm đích cho khóa ngoại ghép từ gói. |
-| Phân công | `UX_Assignment_ActiveResource`: UNIQUE(ResourceType,ResourceId) WHERE EffectiveToUtc IS NULL; CHECK ResourceType IN ('SupervisionGrant'). | Mỗi gói tối đa một người phụ trách; khi hai yêu cầu giao chạy song song, yêu cầu sau nhận 409 `ResourceAlreadyAssigned`. |
+| Phân công | `UX_Assignment_ActiveResource`: UNIQUE(ResourceType,ResourceId) WHERE EffectiveToUtc IS NULL; CHECK ResourceType IN ('SupervisionGrant'); `CK_Assignment_EndReason` nhận Transferred/Removed, thiết kế lần 3 thêm PackageCanceled/PackageUnassigned. | Mỗi gói tối đa một người phụ trách; khi hai yêu cầu giao chạy song song, yêu cầu sau nhận 409 `ResourceAlreadyAssigned`. |
 | Đơn mua | UNIQUE(AccountId,AccountOrderSequence), UNIQUE(AccountId,CreateKey), UNIQUE PaymentCode. | Cấp số đơn và tạo đơn chống trùng theo khách. |
 | Đơn thiết kế chờ | UNIQUE(AccountId) WHERE Kind='Design' AND State IN ('Pending','PartiallyPaid'). | Tối đa một đơn thiết kế chờ mỗi khách. |
 | Tiền và hạn thanh toán | PriceVnd/AmountVnd numeric(20,0)>0; tổng tiền không âm; Eligible<=Received; ExpiresAtUtc=CreatedAtUtc+15 phút. | Lưu nguyên đồng VNĐ, không tự làm tròn hoặc vượt độ chính xác. |
@@ -528,18 +537,18 @@ Các chỉ mục đọc đáng chú ý từ TDD: Plan(SaleState,Kind,Id), PlanRe
 1. **Cấu hình để bán:** Plan chọn PlanRevision đang công bố. RevisionBenefit mô tả quyền; PlanOffer chốt giá theo lựa chọn mua; OfferQuota chốt hạn mức thiết kế.
 2. **Khách mua:** PaymentOrder giữ revision/offer/giá đã chọn. Các khoản chuyển được lưu riêng ở BankTransaction rồi khớp về đơn. PaymentEvent giải thích diễn biến xử lý.
 3. **Cấp quyền:** PaymentFulfillment ghi quyết định một lần. Nhánh Design tạo DesignPeriod và PeriodQuota rồi đổi CurrentPeriodId; nhánh Supervision tạo SupervisionGrant chưa gán công trình. Lần mua thiết kế đã bị thay thế trước kích hoạt chỉ ghi fulfillment tương ứng.
-4. **Sử dụng:** Mỗi thao tác thiết kế/tra cứu được ghi UsageOperation và cập nhật PeriodQuota của kỳ đã tiếp nhận. Khách tạo ConstructionSite rồi gán gói giám sát vào đó: cập nhật SupervisionGrant và ghi PackageMutationReceipt trong cùng transaction.
-5. **Hủy/khôi phục:** Kiểm mã quyền `package.cancel` hoặc `package.restore` trong claim `perm` của access token, đổi trạng thái gói và ghi PackageLifecycleEvent cùng receipt. Giữ kỳ, hạn, quota hiện tại và lịch sử; không tự tạo khoản hoàn tiền.
+4. **Sử dụng:** Mỗi thao tác thiết kế/tra cứu được ghi UsageOperation và cập nhật PeriodQuota của kỳ đã tiếp nhận. Khách tạo ConstructionSite rồi gán gói giám sát vào đó: cập nhật SupervisionGrant và ghi PackageMutationReceipt trong cùng transaction. Thiết kế lần 3: nhân viên gỡ gói gán nhầm về `Unassigned`, ghi PackageLifecycleEvent `Unassign` kèm bản lưu công trình và kết thúc Assignment; khách gán lại trước hạn gán ban đầu.
+5. **Hủy:** Kiểm mã quyền `package.cancel` trong claim `perm` của access token, đổi trạng thái gói và ghi PackageLifecycleEvent cùng receipt. Giữ kỳ, hạn, quota hiện tại và lịch sử; không tự tạo khoản hoàn tiền. Thiết kế lần 3: bỏ khôi phục và mã `package.restore`; hủy gói giám sát chép bản lưu công trình vào sự kiện và kết thúc Assignment đang hiệu lực, ghi AccessAuditLog `AssignmentEnded`.
 6. **Phân quyền nền:** Người quản trị tạo Role và chọn RolePermission, gán cho nhân viên qua UserRole, phân công gói giám sát qua Assignment. Mọi thay đổi ghi AccessAuditLog. Quyền được nhúng vào access token lúc phát hành, nên các bước 1–5 ở trên không truy vấn lại bảng quyền khi xử lý.
 
 ## 8. Những điểm nguồn chưa chốt hoặc cần đối chiếu
 
-- **Schema thật:** ngày 25/09/2026 đã đối chiếu `ConstructionSite`, `SupervisionGrant`, `Assignment`, `PlanOffer` và danh mục quyền với migration `20260925074152_ConstructionSiteAndPackageAssignment`; các bảng khác chưa đối chiếu với migration. Tài liệu này bao phủ các bảng của TDD, không khẳng định bao phủ mọi bảng đang tồn tại trong backend.
+- **Schema thật:** ngày 25/09/2026 đã đối chiếu `ConstructionSite`, `SupervisionGrant`, `Assignment`, `PlanOffer` và danh mục quyền với migration `20260925074152_ConstructionSiteAndPackageAssignment`; các bảng khác chưa đối chiếu với migration. Các thay đổi của thiết kế lần 3 (cột `AssignedAtUtc`, bản lưu công trình, `EndReason` mới, mã quyền) chưa có migration. Tài liệu này bao phủ các bảng của TDD, không khẳng định bao phủ mọi bảng đang tồn tại trong backend.
 - **Giá và tên cột — đã chốt:** `PlanOffer.Price` và `DesignPeriod.Price` dùng numeric(20,0) nguyên đồng như tiền thanh toán của PAY-001. Tên cột vẫn là `Price`, không đổi thành `PriceVnd`. Yêu cầu Kind cùng dòng và FK ghép xuyên revision đã được mô tả trong SUB-001: `Plan(Id,Kind)`, `PlanRevision(Id,Kind)` và `PlanOffer.Kind`. Vẫn cần viết DDL hợp nhất khi làm migration.
 - **Giám sát cũ:** SUB-003 đã bị SUB-004 thay hoàn toàn. Enum State gồm Unassigned/Assigned/CanceledByStaff/Completed, trong đó `Completed` do SUB-006 định nghĩa; không có trạng thái LegacyCompleted. Database hiện chỉ có dữ liệu dev/test, nên TDD-SUB-004 không còn kế hoạch ánh xạ dữ liệu `InProgress`/`Completed` cũ hay tính `AssignmentDeadlineUtc` cho dữ liệu cũ. Không tạo bảng `SupervisionTransition` cho luồng mới. Không tự suy GrantedAtUtc là FirstAssignedAtUtc.
 - **Module ngoài phạm vi:** mẫu chưa đủ schema; chưa tự tạo bảng phân công kỹ sư, mẫu, lịch khảo sát, outbox hoặc kết quả AI chỉ vì TDD nhắc dịch vụ tương ứng.
-- **Con trỏ hủy:** SUB-005 chưa chốt cách dùng CancelEventId sau restore. Vẫn giữ lịch sử event, không tự quy định phải xóa hay giữ con trỏ.
+- **Con trỏ hủy:** theo thiết kế lần 3 không còn khôi phục, nên `CancelEventId` của gói đã hủy luôn trỏ tới sự kiện hủy cuối cùng. Con trỏ này còn dùng để lấy tên công trình từ bản lưu khi công trình đã bị xóa (TDD-SUB-004, TDD-SITE-001).
 - **Dữ liệu tính khi đọc:** EffectiveState, ExpiredUnassigned, các danh sách quản trị, DTO và Origin=Legacy ở adapter không phải bảng mới. TDD-PAY-002 chỉ đọc/ghép bảng nguồn.
 - **Lưu giữ dữ liệu:** thời hạn lưu key chống trùng, phản hồi tra cứu và một số dữ liệu lịch sử chưa được chốt. Không bổ sung tác vụ tự xóa hoặc quy tắc cascade.
-- **Phân quyền — còn mở:** thời gian giữ `AccessAuditLog` chưa được chốt. Nhân viên mất mật khẩu trước khi kịp đổi chỉ khôi phục được qua luồng quên mật khẩu, nên chưa có đường xử lý khi địa chỉ email đăng ký không phải hộp thư nhân viên truy cập được; xem [BR-RBAC-006](../businessrule/BR-RBAC-006.md). `Assignment.ResourceId` không có khóa ngoại, nhưng tài nguyên duy nhất là gói giám sát và gói không bao giờ bị xóa, nên không có dòng mồ côi. Nếu sau này thêm loại tài nguyên có thể bị xóa, phải thiết kế cách xử lý phân công của loại đó trước. Danh sách gói cần chia lại tính khi đọc từ `SupervisionGrant`, `Assignment` và `User`.
+- **Phân quyền — còn mở:** thời gian giữ `AccessAuditLog` chưa được chốt. Nhân viên mất mật khẩu trước khi kịp đổi chỉ khôi phục được qua luồng quên mật khẩu, nên chưa có đường xử lý khi địa chỉ email đăng ký không phải hộp thư nhân viên truy cập được; xem [BR-RBAC-006](../businessrule/BR-RBAC-006.md). `Assignment.ResourceId` không có khóa ngoại, nhưng tài nguyên duy nhất là gói giám sát và gói không bao giờ bị xóa, nên không có dòng mồ côi. Gỡ gói khỏi công trình không xóa gói nhưng làm gói mất tư cách phân công; thiết kế lần 3 kết thúc phân công ngay khi gỡ. Nếu sau này thêm loại tài nguyên có thể bị xóa, phải thiết kế cách xử lý phân công của loại đó trước. Danh sách gói cần chia lại tính khi đọc từ `SupervisionGrant`, `Assignment` và `User`.
 - **Migration bảng User — không còn bước backfill:** migration đầu tiên `20260923152830_InitialRbac` tạo bảng `User` đã có sẵn các cột mới và không có cột `Role`, nên bước backfill `UserRole` từ cột `Role` cũ không còn cần. Xem [TDD-RBAC-001](../tdd/TDD-RBAC-001.md#data-model).

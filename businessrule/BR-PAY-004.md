@@ -67,7 +67,7 @@ Mỗi đơn thanh toán hợp lệ chỉ cấp một gói. Với thiết kế, l
 
 Nếu khoản cũ đến muộn làm thay đổi thời điểm đủ tiền và đảo thứ tự giữa các gói đã cấp (A đã thay B, sau đó mới biết A đủ tiền trước B), giữ gói A đang hiệu lực, không tự chuyển lại B. Nhân viên xử lý bên ngoài. Đây là ngoại lệ đã xác nhận khi thiết kế TDD, khác với nhận lần đầu một đơn mua trước sau khi đơn mua sau đã cấp.
 
-Nếu hai đơn có cùng thời điểm đủ tiền theo độ chính xác SePay, đơn tạo sau được coi là lần mua sau. Hủy nhân viên/khôi phục theo BR-SUB-024 và BR-SUB-025.
+Nếu hai đơn có cùng thời điểm đủ tiền theo độ chính xác SePay, đơn tạo sau được coi là lần mua sau. Nhân viên hủy gói theo BR-SUB-024; không có thao tác khôi phục vì BR-SUB-025 đã bỏ ngày 25/09/2026.
 
 ## Notes
 

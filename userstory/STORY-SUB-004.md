@@ -40,7 +40,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 ## Metadata
 
 - **Story**: Là khách hàng, tôi muốn gán gói giám sát đã mua cho công trình của mình để gói phục vụ đúng công trình đó.
-- **Context**: Tách việc mua/cấp gói khỏi gán công trình. Gói chưa gán có hạn một năm; đã gán đúng hạn tiếp tục phục vụ sau mốc này. Chỉ quản lý liên kết gói–công trình, chưa quản lý hoạt động khảo sát/giám sát. Theo quyết định người dùng xác nhận ngày 25/09/2026, gói đã gắn vào một công trình thì không đổi sang công trình khác, kể cả nhân viên và Admin; quyền `supervision.reassign` và BR-SUB-023 đã bỏ.
+- **Context**: Tách việc mua/cấp gói khỏi gán công trình. Gói chưa gán có hạn một năm; đã gán đúng hạn tiếp tục phục vụ sau mốc này. Chỉ quản lý liên kết gói–công trình, chưa quản lý hoạt động khảo sát/giám sát. Theo quyết định người dùng xác nhận ngày 25/09/2026, không ai đổi thẳng gói đã gắn sang công trình khác, kể cả nhân viên và Admin; quyền `supervision.reassign` và BR-SUB-023 đã bỏ. Cùng ngày, người dùng chốt: khi khách gán nhầm, nhân viên có quyền `supervision.unassign` gỡ gói về chưa gán theo STORY-SUB-006, rồi khách gán lại theo Story này trước hạn gán ban đầu.
 - **Sprint**:
 - **Priority**:
 - **Status**: Todo
@@ -65,9 +65,9 @@ Khách yêu cầu gán gói chưa gán cho một công trình của mình.
 
 ### Main Flow
 
-1. Khách mở một gói giám sát đã mua chưa gán.
+1. Khách mở một gói giám sát đã mua đang chưa gán, kể cả gói vừa được nhân viên gỡ theo STORY-SUB-006.
 2. Khách chọn công trình thuộc mình.
-3. Hệ thống kiểm tra gói chưa bị hủy, còn hạn gán lần đầu và công trình chưa có gói giám sát hiệu lực.
+3. Hệ thống kiểm tra gói chưa bị hủy, còn hạn gán ban đầu và công trình chưa có gói giám sát hiệu lực.
 4. Hệ thống gán gói cho công trình và ghi nhận đã sử dụng; không thu tiền thêm.
 5. Gói tiếp tục phục vụ công trình sau mốc một năm nếu đã gán đúng hạn.
 
@@ -114,7 +114,7 @@ Chặn công trình đã có gói.
 Khách không tự gỡ hoặc đổi.
 
 1. Khách gửi yêu cầu gỡ gói hoặc đổi sang B, kể cả yêu cầu trực tiếp.
-2. Từ chối; gói đã gắn thì không gỡ hoặc đổi công trình được.
+2. Từ chối; khách không tự gỡ hoặc đổi công trình của gói đã gắn. Muốn sửa gán nhầm, khách liên hệ tổng đài để nhân viên gỡ gói theo STORY-SUB-006.
 3. Gói vẫn gắn với A, không tạo thêm gói.
 
 #### EXC-04
@@ -147,10 +147,10 @@ Không gán lần đầu sang công trình người khác.
 
 #### EXC-07
 
-Không ai đổi được công trình của gói đã gán.
+Không ai đổi thẳng công trình của gói đã gán.
 
 1. Admin hoặc nhân viên có bất kỳ quyền nào yêu cầu đổi gói đang gắn A sang công trình B của cùng khách, kể cả có lý do và gửi trực tiếp tới API.
-2. Từ chối theo BR-SUB-009; hệ thống không có thao tác đổi công trình.
+2. Từ chối theo BR-SUB-009; hệ thống không có thao tác đổi thẳng công trình. Nhân viên chỉ gỡ được gói theo STORY-SUB-006, sau đó khách tự gán lại.
 3. Gói vẫn gắn A; trạng thái, hạn và lịch sử gói giữ nguyên.
 
 ## Acceptance Criteria
@@ -187,7 +187,7 @@ Không ai đổi được công trình của gói đã gán.
 
 - **Given**: Gói đã gán cho A; B là công trình khác của cùng khách.
 - **When**: Khách gửi yêu cầu gỡ gói hoặc đổi sang B, kể cả yêu cầu trực tiếp.
-- **Then**: Từ chối; gói đã gắn thì không gỡ hoặc đổi công trình được.
+- **Then**: Từ chối; khách không tự gỡ hoặc đổi công trình của gói đã gắn. Muốn sửa gán nhầm, khách liên hệ tổng đài để nhân viên gỡ gói theo STORY-SUB-006.
 - **And**: Gói vẫn gắn với A, không tạo thêm gói.
 
 #### AC-006
@@ -251,7 +251,7 @@ Không ai đổi được công trình của gói đã gán.
 
 - **Given**: Gói của khách U1 đang gắn công trình A; công trình B của U1 chưa có gói.
 - **When**: Admin và nhân viên có đủ các quyền lần lượt yêu cầu đổi gói sang B, có lý do “Gán nhầm công trình”, kể cả gửi trực tiếp tới API.
-- **Then**: Cả hai yêu cầu bị từ chối.
+- **Then**: Cả hai yêu cầu bị từ chối; hệ thống không có thao tác đổi thẳng công trình.
 - **And**: Gói vẫn gắn A với trạng thái, hạn và lịch sử như cũ; B vẫn chưa có gói.
 
 ## References
@@ -265,9 +265,11 @@ Không ai đổi được công trình của gói đã gán.
 - BR-SUB-022/Then
 - BR-SUB-009/Then
 - BR-SUB-006/Then
+- BR-SUB-026/Then: Gói bị nhân viên gỡ được khách gán lại theo Story này.
 
 ### Dependencies
 
+- STORY-SUB-006: Nhân viên gỡ gói khi khách gán nhầm, trước khi khách gán lại.
 - [Quyết định, hiện trạng và các điểm còn mở](../discovery/payment-packages.md).
 
 ## Non-Functional
@@ -277,5 +279,5 @@ Không ai đổi được công trình của gói đã gán.
 
 ## Out of Scope
 
-- Quản lý khảo sát, tiến độ giám sát, lịch và lượt kiểm tra; gỡ hoặc đổi công trình của gói đã gán, kể cả nhân viên và Admin; chuyển gói sang khách khác. Tạo và quản lý công trình thuộc STORY-SITE-001.
+- Quản lý khảo sát, tiến độ giám sát, lịch và lượt kiểm tra; khách tự gỡ gói; đổi thẳng công trình của gói đã gán, kể cả nhân viên và Admin; chuyển gói sang khách khác. Nhân viên gỡ gói thuộc STORY-SUB-006. Tạo và quản lý công trình thuộc STORY-SITE-001.
 - Chưa triển khai, chạy test hoặc phê duyệt tài liệu. Sprint, Priority và người thực hiện chưa được phân công; không lấy ví dụ trong template làm giá trị thật.

@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-064 | AdminRead | CommerceReadAuthorization (dự kiến) | Happy | REGRESSION | P1 | Verified session của nhân viên đang Active, không giữ vai trò admin; claim perm có commerce.read từ một vai trò tự tạo. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Query quản trị. | Allowed cả danh sách và chi tiết; không cần thêm quyền hủy hoặc khôi phục. | STORY-PAY-002/AC-002<br>TDD-PAY-002/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
+| UT-PAY-064 | AdminRead | CommerceReadAuthorization (dự kiến) | Happy | REGRESSION | P1 | Verified session của nhân viên đang Active, không giữ vai trò admin; claim perm có commerce.read từ một vai trò tự tạo. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Query quản trị. | Allowed cả danh sách và chi tiết; không cần thêm quyền hủy (package.cancel) hay gỡ gói (supervision.unassign). | STORY-PAY-002/AC-002<br>TDD-PAY-002/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

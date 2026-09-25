@@ -36,9 +36,9 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Rule Info
 
-- **Name**: Khôi phục gói bị nhân viên hủy, không làm mới thời hạn hoặc quyền lợi.
+- **Name**: [ĐÃ BỎ] Khôi phục gói bị nhân viên hủy, không làm mới thời hạn hoặc quyền lợi.
 - **Category**: Thanh toán và gói dịch vụ
-- **Status**: Draft
+- **Status**: Deprecated
 - **Version**:
 - **Effective Date**:
 - **Owner**: [Chưa xác định]
@@ -47,6 +47,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Source**: Các quyết định người dùng xác nhận trong hội thoại thiết kế thanh toán ngày 19/09/2026; xem discovery/payment-packages.md. Quyết định mới nhất được ưu tiên khi thay thế phương án trước đó.
 
 ## Statement
+
+**Đã bỏ ngày 25/09/2026:** Người dùng bỏ thao tác khôi phục cho cả gói thiết kế và gói giám sát. Hủy là thao tác cuối cùng theo [BR-SUB-024](BR-SUB-024.md); nếu hủy nhầm, nhân viên xử lý tiền với khách bên ngoài hệ thống và khách mua lại nếu cần. Quy tắc này và mã quyền `package.restore` không còn áp dụng. Nội dung dưới đây giữ để tra lịch sử, không dùng làm căn cứ nghiệm thu hay triển khai.
 
 Nhân viên có quyền riêng được khôi phục gói do nhân viên hủy, phải nhập lý do, giữ nguyên thời hạn, quyền lợi và số lượt trước khi hủy.
 

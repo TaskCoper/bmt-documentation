@@ -44,7 +44,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SITE-010 | STORY-SITE-001 | ALT | REGRESSION | P2 | Công trình A của khách U1 có gói G1 đã bị nhân viên hủy; sau đó U1 gắn gói G2 vào A và G2 đang ở trạng thái đã gán. | 1. U1 mở chi tiết công trình A.<br>2. Đọc danh sách gói và trạng thái hiển thị. | G1 và G2 là gói giám sát thử của U1. | U1 thấy cả G1 với trạng thái đang bị hủy và G2 với trạng thái đã gán. Không hiện tên nhân viên phụ trách gói nào. | STORY-SITE-001/AC-010<br>STORY-SITE-001/ALT-01<br>BR-SITE-003/Then | Khách thấy mọi gói đã gắn vào công trình, kể cả gói đang bị hủy. Đặc tả chưa chạy. | [Chưa xác định] | Draft |
+| ST-SITE-010 | STORY-SITE-001 | ALT | REGRESSION | P2 | Công trình A của khách U1 có gói G1 đã bị nhân viên hủy; sau đó U1 gắn gói G2 vào A và G2 đang ở trạng thái đã gán. | 1. U1 mở chi tiết công trình A.<br>2. Đọc danh sách gói và trạng thái hiển thị. | G1 và G2 là gói giám sát thử của U1. | U1 thấy cả G1 với trạng thái đã hủy và G2 với trạng thái đã gán. Không hiện tên nhân viên phụ trách gói nào. | STORY-SITE-001/AC-010<br>STORY-SITE-001/ALT-01<br>BR-SITE-003/Then | Khách thấy mọi gói đã gắn vào công trình, kể cả gói đã hủy. Đặc tả chưa chạy. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
