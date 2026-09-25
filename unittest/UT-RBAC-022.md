@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-022 | Role | UpdateRoleHandler.Handle (dự kiến) | Happy | REGRESSION | P1 | Unit chưa triển khai; vai trò đích có Kind bằng Custom, đang có hai quyền và hai người giữ. Người thao tác có đủ quyền định cấp. | Tên mới và danh sách quyền mới chỉ còn package.cancel. | Dòng RolePermission của package.restore bị xóa, dòng của package.cancel giữ nguyên. Tên vai trò được cập nhật và sinh bản ghi nhật ký RoleUpdated. | STORY-RBAC-001/ALT-01 | Sửa vai trò tự tạo là thao tác hợp lệ; kiểm cả thêm và bớt quyền. | [Chưa xác định] | Draft |
+| UT-RBAC-022 | Role | UpdateRoleCommandHandler.Handle | Happy | REGRESSION | P1 | Dữ liệu dựng trên EF InMemory; vai trò đích có Kind bằng Custom, đang có hai quyền và hai người giữ. Người thao tác có đủ quyền định cấp. IAccessAuditWriter và IAccessRowLocker là mock. | Tên mới và danh sách quyền mới chỉ còn package.cancel. | Dòng RolePermission của package.restore bị xóa, dòng của package.cancel giữ nguyên. Tên vai trò được cập nhật và sinh bản ghi nhật ký RoleUpdated. | STORY-RBAC-001/ALT-01 | Sửa vai trò tự tạo là thao tác hợp lệ; kiểm cả thêm và bớt quyền. Mã test: bmt-be.application.tests/usecases/role/RoleCommandHandlerTests.cs:Update_PermissionListShrinks_RemovesOnlyTheDroppedOne. Trong mã test, vai trò chưa có người giữ. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

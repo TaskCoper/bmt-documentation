@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-041 | Supervision | SupervisionAssignmentPolicy (dự kiến) | Error | REGRESSION | P1 | Công trình đã có grant Assigned khác. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Gán grant chưa gán còn hạn. | ConstructionSiteAlreadyHasSupervision; grant vẫn Unassigned, deadline không đổi. | STORY-SUB-004/AC-004<br>TDD-SUB-004/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
+| UT-PAY-041 | Supervision | AssignSupervisionGrantCommandHandler (kiểm công trình đã có gói giữ chỗ) | Error | REGRESSION | P1 | Công trình đã có grant Assigned khác của cùng khách. Gói cần gán Unassigned, còn hạn; cổng đọc sở hữu giả trả đúng chủ; EF InMemory, kho khóa tài khoản giả. | Gán grant chưa gán còn hạn. | ConstructionSiteAlreadyHasSupervision; grant vẫn Unassigned, deadline không đổi. | STORY-SUB-004/AC-004<br>TDD-SUB-004/Architecture | Một công trình chỉ có một gói giám sát giữ chỗ (BR-SUB-006). Tài liệu gọi nơi kiểm là SupervisionAssignmentPolicy; code kiểm trong handler trước khi ghi. Test kiểm mã ConstructionSiteAlreadyHasSupervision; chưa kiểm grant vẫn Unassigned và deadline không đổi. Mã test: bmt-be.application.tests/usecases/subscription/SupervisionCommandHandlerTests.cs:Assign_ProjectAlreadyHasAnotherGrant_Throws409. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

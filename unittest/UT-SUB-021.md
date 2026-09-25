@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-021 | Subscription / Entitlement | QuotaPolicy (dự kiến trong TDD) | Error | REGRESSION | P0 | Quyền unlimited; kỳ đã hết hạn | Yêu cầu mới | Từ chối SubscriptionInactive dù không giới hạn lượt. | BR-SUB-007/Then<br>TDD-SUB-002/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. | [Chưa phân công] | Draft |
+| UT-SUB-021 | Subscription / Entitlement | QuotaPolicy.EnsureCanReserve | Error | REGRESSION | P0 | Quyền unlimited; kỳ đã hết hạn: gọi chính sách với now bằng ScheduledEndsAt của kỳ. | Yêu cầu mới | Từ chối SubscriptionInactive dù không giới hạn lượt. | BR-SUB-007/Then<br>TDD-SUB-002/Architecture | Kiểm nhánh nghiệp vụ ở chính sách; không chứng minh transaction hoặc khóa PostgreSQL. Mã test: bmt-be.application.tests/usecases/subscription/UsagePolicyTests.cs:Reserve_ExpiredPeriodWithUnlimitedQuota_ThrowsSubscriptionInactiveNotQuota (lớp QuotaPolicyTests). | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 

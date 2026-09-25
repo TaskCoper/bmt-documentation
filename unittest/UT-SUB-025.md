@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-025 | Subscription / Entitlement | CommitDesignPeriodHandler (dự kiến trong TDD) | Error | REGRESSION | P0 | ActivationKey đã có hash A | Cùng key; hash B | Từ chối xung đột; không sửa kỳ đã cấp. | BR-SUB-021/Then<br>TDD-SUB-002/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. | [Chưa phân công] | Draft |
+| UT-SUB-025 | Subscription / Entitlement | CommitDesignPeriodCommandHandler | Error | REGRESSION | P0 | ActivationKey đã có hash A: cấp kỳ với một key và hash A, rồi gửi lại cùng key với hash B; EF InMemory. | Cùng key; hash B | Từ chối xung đột; không sửa kỳ đã cấp. | BR-SUB-021/Then<br>TDD-SUB-002/Architecture | Kiểm tra nhánh nghiệp vụ bằng EF InMemory; không chứng minh transaction hoặc khóa PostgreSQL. Test kiểm IdempotencyConflict, tài khoản vẫn chỉ có một kỳ và ActivationHash giữ hash A. Mã test: bmt-be.application.tests/usecases/subscription/SubscriptionCommandHandlerTests.cs:Commit_SameActivationKeyDifferentHash_Throws409AndLeavesPeriodAlone. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 

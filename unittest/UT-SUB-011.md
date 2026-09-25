@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-011 | Subscription / Entitlement | PublishPlanHandler (dự kiến trong TDD) | Error | REGRESSION | P0 | Repository trả version=3 | ExpectedVersion=2 | Trả xung đột; không đổi revision công bố. | BR-SUB-008/Then<br>TDD-SUB-001/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. | [Chưa phân công] | Draft |
+| UT-SUB-011 | Subscription / Entitlement | PublishPlanCommandHandler | Error | REGRESSION | P0 | Repository trả version=3: gói OnSale lưu Version=3, có revision đã công bố và draft hợp lệ; EF InMemory, kho cấu hình giả. | ExpectedVersion=2 | Trả xung đột; không đổi revision công bố. | BR-SUB-008/Then<br>TDD-SUB-001/Architecture | Kiểm tra nhánh nghiệp vụ bằng EF InMemory; không chứng minh transaction hoặc khóa PostgreSQL. Test kiểm ConflictException mã PlanVersionConflict, con trỏ công bố và Version=3 giữ nguyên, draft vẫn ở trạng thái Draft. Mã test: bmt-be.application.tests/usecases/plan/PlanCommandHandlerTests.cs:Publish_ExpectedVersionStale_Throws409AndLeavesPublishedRevisionAlone. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 

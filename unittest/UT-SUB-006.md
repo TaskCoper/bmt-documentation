@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-006 | Subscription / Entitlement | PlanConfigurationPolicy (dự kiến trong TDD) | Boundary | REGRESSION | P0 | Hai chu kỳ có giá riêng | Giá tháng=0 hoặc giá năm=-1 | Từ chối; giá của từng chu kỳ phải lớn hơn 0. | BR-SUB-015/Then<br>TDD-SUB-001/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. | [Chưa phân công] | Draft |
+| UT-SUB-006 | Subscription / Entitlement | PlanConfigurationPolicy.EnsureValidForPublish | Boundary | REGRESSION | P0 | Hai chu kỳ có giá riêng. Test dựng gói thiết kế đủ offer Month và Year có quota hợp lệ, lần lượt đặt giá Month=0 (Year=1.000.000) và giá Year=-1 (Month=100.000). | Giá tháng=0 hoặc giá năm=-1 | Từ chối; giá của từng chu kỳ phải lớn hơn 0. | BR-SUB-015/Then<br>TDD-SUB-001/Architecture | Kiểm nhánh nghiệp vụ ở chính sách cấu hình, không cần database; không chứng minh transaction hoặc khóa PostgreSQL. Test kiểm từng ca ra PlanConfigurationInvalid và lỗi chỉ đúng offer có giá sai. Mã test: bmt-be.application.tests/usecases/plan/PlanConfigurationPolicyTests.cs:Publish_NonPositivePriceOnEitherOffer_IsRejectedNamingThatOffer. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 

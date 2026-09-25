@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-008 | Subscription / Entitlement | PlanConfigurationPolicy (dự kiến trong TDD) | Error | REGRESSION | P0 | Danh mục quyền hệ thống được mock | Mã lạ hoặc cùng mã xuất hiện hai lần | Từ chối cấu hình không hợp lệ; không tự tạo quyền. | BR-SUB-008/Then<br>TDD-SUB-001/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. | [Chưa phân công] | Draft |
+| UT-SUB-008 | Subscription / Entitlement | PlanConfigurationPolicy.EnsureValidForPublish | Error | REGRESSION | P0 | Danh mục quyền hệ thống dựng tay trong test (design.generate, catalog.detail, design.render3d). Ca 1: offer Month dùng mã lạ design.teleport. Ca 2: offer Month khai design.generate hai lần. | Mã lạ hoặc cùng mã xuất hiện hai lần | Từ chối cấu hình không hợp lệ; không tự tạo quyền. | BR-SUB-008/Then<br>TDD-SUB-001/Architecture | Kiểm nhánh nghiệp vụ ở chính sách cấu hình, không cần database; không chứng minh transaction hoặc khóa PostgreSQL. Test kiểm cả hai ca ra PlanConfigurationInvalid; ca mã lạ kiểm thêm lỗi chỉ đúng mã design.teleport. Chính sách chỉ đọc danh mục nên không tự tạo quyền. Mã test: bmt-be.application.tests/usecases/plan/PlanConfigurationPolicyTests.cs:Publish_UnknownBenefitCode_IsRejected, Publish_DuplicateBenefitCodeWithinOneOffer_IsRejected. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 

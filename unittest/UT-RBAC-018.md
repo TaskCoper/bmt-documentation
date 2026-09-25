@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-018 | Role | CreateRoleHandler.Handle (dự kiến) | Happy | SMOKE | P1 | Unit chưa triển khai; mock kho vai trò trả về chưa có vai trò trùng tên. Người thao tác có role.manage, package.cancel và package.restore. | Tên vai trò "Nhân viên vận hành gói" và danh sách quyền package.cancel, package.restore. | Tạo một dòng Role với Kind bằng Custom, Code để trống, và đúng hai dòng RolePermission. Sinh một bản ghi nhật ký RoleCreated qua RecordAsync. | STORY-RBAC-001/AC-001<br>BR-RBAC-012/Then | Luồng chính tạo vai trò; vai trò tự tạo không mang mã Code. | [Chưa xác định] | Draft |
+| UT-RBAC-018 | Role | CreateRoleCommandHandler.Handle | Happy | SMOKE | P1 | Dữ liệu dựng trên EF InMemory, chưa có vai trò trùng tên; IAccessAuditWriter là mock. Người thao tác có role.manage, package.cancel và package.restore. | Tên vai trò "Nhân viên vận hành gói" và danh sách quyền package.cancel, package.restore. | Tạo một dòng Role với Kind bằng Custom, Code để trống, và đúng hai dòng RolePermission. Sinh một bản ghi nhật ký RoleCreated qua RecordAsync. | STORY-RBAC-001/AC-001<br>BR-RBAC-012/Then | Luồng chính tạo vai trò; vai trò tự tạo không mang mã Code. Mã test: bmt-be.application.tests/usecases/role/RoleCommandHandlerTests.cs:Create_ValidRequest_CreatesCustomRoleWithPermissionsAndAudits. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

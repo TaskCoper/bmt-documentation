@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-004 | Authorization | SecurityStampValidator.ValidateAsync (dự kiến) | Happy | SMOKE | P0 | Unit chưa triển khai; mock Redis trả stamp-1 cho khóa auth:stamp của người dùng. Mock nguồn đọc User để xác minh không bị gọi. | Token mang claim stamp bằng stamp-1. | Xác thực đạt, request đi tiếp. Nguồn đọc User không được gọi lần nào vì Redis đã có dữ liệu. | TDD-RBAC-001/Architecture | Đường đi thường gặp phải đọc Redis, không chạm database. | [Chưa xác định] | Draft |
+| UT-RBAC-004 | Authorization | SecurityStampValidator.ValidateAsync và SecurityStampService.GetCurrentAsync | Happy | SMOKE | P0 | Với SecurityStampService: mock ICacheService trả stamp-1 cho khóa auth:stamp của người dùng; mock IUnitOfWork để xác minh không đọc UserRepository. Với SecurityStampValidator: mock ISecurityStampService trả stamp-1. | Token mang claim stamp bằng stamp-1. | Xác thực đạt, request đi tiếp. Nguồn đọc User không được gọi lần nào vì Redis đã có dữ liệu. | TDD-RBAC-001/Architecture | Đường đi thường gặp phải đọc Redis, không chạm database. Mã test: bmt-be.application.tests/usecases/authorization/SecurityStampValidatorTests.cs:ValidateAsync_StampMatches_Accepts và bmt-be.application.tests/usecases/authorization/SecurityStampServiceTests.cs:GetCurrentAsync_RedisHasValue_DoesNotReadDatabase. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

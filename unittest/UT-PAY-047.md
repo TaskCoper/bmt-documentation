@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-047 | Supervision | SupervisionStatusProjector (dự kiến) | Branch | REGRESSION | P1 | Gói đã gán đúng hạn, deadline đã qua; chưa bị hủy. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Đọc effective state. | Assigned, không ExpiredUnassigned. | STORY-SUB-004/AC-003<br>TDD-SUB-004/State Diagram | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
+| UT-PAY-047 | Supervision | SupervisionPolicy.ComputeEffectiveState | Branch | REGRESSION | P1 | Gói đã gán đúng hạn, deadline đã qua; chưa bị hủy. Test dựng gói Assigned có FirstAssignedAt trước hạn và đọc trạng thái sau hạn 5 năm; gọi thẳng chính sách, không cần mock. | Đọc effective state. | Assigned, không ExpiredUnassigned. | STORY-SUB-004/AC-003<br>TDD-SUB-004/State Diagram | Hạn gán chỉ chặn việc gán lần đầu; gói đã gán đúng hạn vẫn là Assigned sau hạn. Tài liệu gọi nơi tính là SupervisionStatusProjector; code đặt trong SupervisionPolicy và được GetMySupervisionGrantsQueryHandler dùng. Mã test: bmt-be.application.tests/usecases/subscription/SupervisionPolicyTests.cs:ComputeEffectiveState_AssignedBeforeDeadline_StaysAssignedAfterIt. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

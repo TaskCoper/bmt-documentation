@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-001 | Authorization | PermissionClaimBuilder.Build (dự kiến) | Happy | SMOKE | P1 | Unit chưa triển khai; mock nguồn đọc vai trò. Người dùng giữ hai vai trò: R1 có commerce.read, R2 có package.cancel và package.restore. | UserId của người giữ hai vai trò trên. | Trả đúng ba mã quyền commerce.read, package.cancel, package.restore. Không có mã nào ngoài hợp quyền của hai vai trò. | BR-RBAC-001/Then<br>TDD-RBAC-001/Architecture | Quyền là hợp các vai trò, không nhiều và không ít hơn. | [Chưa xác định] | Draft |
+| UT-RBAC-001 | Authorization | AccessClaimsBuilder.BuildAsync | Happy | SMOKE | P1 | Dữ liệu dựng trên EF InMemory. Người dùng giữ hai vai trò: R1 có commerce.read, R2 có package.cancel và package.restore. | UserId của người giữ hai vai trò trên. | Trả đúng ba mã quyền commerce.read, package.cancel, package.restore. Không có mã nào ngoài hợp quyền của hai vai trò. | BR-RBAC-001/Then<br>TDD-RBAC-001/Architecture | Quyền là hợp các vai trò, không nhiều và không ít hơn. Mã test: bmt-be.application.tests/usecases/authorization/AccessClaimsBuilderTests.cs:BuildAsync_TwoRoles_ReturnsUnionOfTheirPermissions. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

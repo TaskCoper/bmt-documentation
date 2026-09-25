@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-055 | Lifecycle | PackageLifecyclePolicy.Restore (dự kiến) | Error | REGRESSION | P1 | A Superseded vì mua B; B đã bị nhân viên hủy. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Restore A. | PackageSuperseded; không tự quay A về hiệu lực. | STORY-SUB-005/AC-012<br>TDD-SUB-005/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
+| UT-PAY-055 | Lifecycle | PackageLifecyclePolicy.EnsureCanRestore | Error | REGRESSION | P1 | A Superseded vì mua B; B đã bị nhân viên hủy. Test gọi thẳng chính sách với kỳ A Superseded, không dựng kỳ B. | Restore A. | PackageSuperseded; không tự quay A về hiệu lực. | STORY-SUB-005/AC-012<br>TDD-SUB-005/Architecture | Kỳ bị thay bởi lần mua mới không có đường quay lại. Test kiểm mã PackageSuperseded; ca kỳ bị hủy nhưng đã đóng (ClosedAtUtc có giá trị) cũng ra PackageSuperseded. Chưa kiểm ở mức handler việc A không quay về hiệu lực. Mã test: bmt-be.application.tests/usecases/subscription/PackageLifecycleTests.cs:Restore_SupersededPeriod_ThrowsSuperseded, Restore_CanceledButAlreadyClosed_ThrowsSuperseded (lớp PackageLifecyclePolicyTests). | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

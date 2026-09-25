@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-010 | Subscription / Entitlement | PublishPlanHandler (dự kiến trong TDD) | Determinism | REGRESSION | P0 | Kỳ cũ trỏ revision A; draft B thay tư vấn và quota | Công bố B | Kỳ cũ tiếp tục đọc A; giao dịch mới có thể chọn B. | BR-SUB-004/Then<br>TDD-SUB-001/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. | [Chưa phân công] | Draft |
+| UT-SUB-010 | Subscription / Entitlement | PublishPlanCommandHandler | Determinism | REGRESSION | P0 | Kỳ cũ trỏ revision A; draft B thay tư vấn và quota. Test dựng gói OnSale có revision A đã công bố (tư vấn cũ) và draft B có cấu hình Month/Year hợp lệ; EF InMemory, kho cấu hình giả, khóa dòng là thao tác rỗng. Test chưa dựng kỳ nào trỏ tới A. | Công bố B | Kỳ cũ tiếp tục đọc A; giao dịch mới có thể chọn B. | BR-SUB-004/Then<br>TDD-SUB-001/Architecture | Kiểm tra nhánh nghiệp vụ bằng EF InMemory; không chứng minh transaction hoặc khóa PostgreSQL. Test kiểm A giữ Published cùng tên và nội dung tư vấn cũ, con trỏ công bố dời sang B, Version tăng lên 2. Chưa kiểm kỳ cũ vẫn đọc A và giao dịch mới chọn được B vì test không dựng kỳ mua. Mã test: bmt-be.application.tests/usecases/plan/PlanCommandHandlerTests.cs:Publish_SecondRevision_KeepsEarlierPublishedRevisionUntouched. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 

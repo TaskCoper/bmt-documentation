@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-039 | Supervision | SupervisionAssignmentPolicy (dự kiến) | Boundary | REGRESSION | P1 | Grant Unassigned, cùng owner; deadline=T. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | now=T-1 giây,T,T+1 giây. | Chỉ trước T được gán; các lần còn lại không đổi FirstAssignedAt. | STORY-SUB-004/AC-012<br>TDD-SUB-004/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
+| UT-PAY-039 | Supervision | SupervisionPolicy.EnsureCanAssign | Boundary | REGRESSION | P1 | Grant Unassigned, cùng owner; deadline=T. Gọi thẳng chính sách, không cần mock. | now=T-1 giây,T,T+1 giây. | Chỉ trước T được gán; các lần còn lại không đổi FirstAssignedAt. | STORY-SUB-004/AC-012<br>TDD-SUB-004/Architecture | Hạn gán chỉ chặn việc gán lần đầu; đúng mốc T đã là quá hạn. Bao phủ một phần: test kiểm now=T ném AssignmentDeadlinePassed và một mốc trước hạn nhiều ngày được phép; chưa có ca T-1 giây và T+1 giây. Chính sách không ghi dữ liệu nên FirstAssignedAt không đổi; chưa kiểm ở mức handler. Ở mức handler có Assign_PastDeadline_Throws409 với hạn đã qua một ngày. Mã test: bmt-be.application.tests/usecases/subscription/SupervisionPolicyTests.cs:Assign_PastDeadline_ThrowsDeadlinePassed, Assign_UnassignedGrantBeforeDeadline_IsAllowed. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

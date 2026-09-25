@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-026 | Role | DeleteRoleHandler.Handle (dự kiến) | Error | REGRESSION | P1 | Unit chưa triển khai; vai trò đích có Kind bằng System và không còn ai giữ. | RoleId của vai trò Khách hàng. | Ném ngoại lệ với mã RoleIsSystem. Việc không còn ai giữ không mở đường xóa vai trò hệ thống. | BR-RBAC-002/Then | Hai điều kiện độc lập; kiểm vai trò hệ thống trước điều kiện số người giữ. | [Chưa xác định] | Draft |
+| UT-RBAC-026 | Role | DeleteRoleCommandHandler.Handle | Error | REGRESSION | P1 | Dữ liệu dựng trên EF InMemory; vai trò đích có Kind bằng System và không còn ai giữ. | RoleId của vai trò Khách hàng. | Ném ngoại lệ với mã RoleIsSystem. Việc không còn ai giữ không mở đường xóa vai trò hệ thống. | BR-RBAC-002/Then | Hai điều kiện độc lập; kiểm vai trò hệ thống trước điều kiện số người giữ. Mã test: bmt-be.application.tests/usecases/role/RoleCommandHandlerTests.cs:Delete_SystemRoleWithNoMembers_StillThrowsRoleIsSystem. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

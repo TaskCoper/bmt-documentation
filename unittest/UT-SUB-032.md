@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-032 | Subscription / Entitlement | UsageTransitionPolicy (dự kiến trong TDD) | Determinism | REGRESSION | P0 | Đã TimedOut và trả lượt | Callback thành công muộn | Giữ TimedOut; không tính lượt lại hoặc gắn kết quả vào kỳ mới. | BR-SUB-016/Then<br>TDD-SUB-002/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. | [Chưa phân công] | Draft |
+| UT-SUB-032 | Subscription / Entitlement | UsageTransitionPolicy.Decide | Determinism | REGRESSION | P0 | Đã TimedOut và trả lượt: tác vụ ở trạng thái TimedOut; callback ResultReady=true đến sau hạn 1 giờ. Gọi thẳng chính sách, không cần mock. | Callback thành công muộn | Giữ TimedOut; không tính lượt lại hoặc gắn kết quả vào kỳ mới. | BR-SUB-016/Then<br>TDD-SUB-002/Architecture | Test chính sách chỉ kiểm kết quả Unchanged. Chưa có test handler kiểm bộ đếm và việc không gắn kết quả vào kỳ mới. Không chứng minh transaction hoặc khóa PostgreSQL. Mã test: bmt-be.application.tests/usecases/subscription/UsagePolicyTests.cs:Decide_AlreadyTimedOutThenLateSuccess_StaysUnchanged (lớp UsageTransitionPolicyTests). | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 

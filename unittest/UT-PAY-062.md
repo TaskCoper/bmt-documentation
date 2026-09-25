@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-062 | Lifecycle | CancelPackageHandler audit failure (dự kiến) | Error | REGRESSION | P1 | Store giả lập lỗi ghi audit sau thay state trong unit of work. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Thực hiện cancel. | Ném exception để pipeline rollback, không trả Result.Failure rồi commit. Rollback DB kiểm riêng integration. | TDD-SUB-005/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
+| UT-PAY-062 | Lifecycle | CancelPackageCommandHandler — lỗi khi ghi lịch sử hủy | Error | REGRESSION | P1 | Code đã có: handler chỉ thêm receipt và PackageLifecycleEvent vào unit of work, không tự lưu và không bắt exception; TransactionPipelineBehavior lưu rồi commit, gặp lỗi thì rollback và ném tiếp. Chưa có mã test cho ca này. Store giả lập lỗi ghi audit sau khi đổi trạng thái trong unit of work. | Thực hiện cancel. | Ném exception để pipeline rollback, không trả Result.Failure rồi commit. Rollback DB kiểm riêng integration. | TDD-SUB-005/Architecture | Kiểm hợp đồng xử lý lỗi: không trả Result.Failure rồi commit. Chưa có mã test; vì handler không tự lưu, ca này cần chạy qua TransactionPipelineBehavior hoặc integration test. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

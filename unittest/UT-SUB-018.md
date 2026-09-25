@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-018 | Subscription / Entitlement | QuotaPolicy (dự kiến trong TDD) | Boundary | REGRESSION | P0 | Limit=3; Used=1; Reserved=2 | Giữ thêm 1 | Từ chối; các bộ đếm giữ nguyên. | BR-SUB-003/Then<br>TDD-SUB-002/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. | [Chưa phân công] | Draft |
+| UT-SUB-018 | Subscription / Entitlement | QuotaPolicy.EnsureCanReserve | Boundary | REGRESSION | P0 | Limit=3; Used=1; Reserved=2; kỳ Active còn hiệu lực. Gọi thẳng chính sách, không cần mock. | Giữ thêm 1 | Từ chối; các bộ đếm giữ nguyên. | BR-SUB-003/Then<br>TDD-SUB-002/Architecture | Kiểm nhánh nghiệp vụ ở chính sách; không chứng minh transaction hoặc khóa PostgreSQL. Test kiểm mã QuotaUnavailable và hai bộ đếm giữ nguyên. Mã test: bmt-be.application.tests/usecases/subscription/UsagePolicyTests.cs:Reserve_WhenReservationsFillTheLimit_IsRejectedAndCountersUnchanged (lớp QuotaPolicyTests). | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 

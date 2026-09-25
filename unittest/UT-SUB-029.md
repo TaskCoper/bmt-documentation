@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-029 | Subscription / Entitlement | UsageTransitionPolicy (dự kiến trong TDD) | Error | REGRESSION | P0 | Pending đang giữ 1; lưu đầu ra thất bại | Báo lỗi lưu trữ | Không tính Used; giải phóng Reserved khi chốt Failed; không công bố đầu ra. | BR-SUB-003/Then<br>TDD-SUB-002/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. | [Chưa phân công] | Draft |
+| UT-SUB-029 | Subscription / Entitlement | UsageTransitionPolicy.Decide; SettleDesignUsageCommandHandler | Error | REGRESSION | P0 | Pending đang giữ 1; lưu đầu ra thất bại: báo cáo ResultReady=false, FailureCode=StorageUnavailable. Test handler giữ lượt trên kỳ Limit=5 rồi quyết toán; EF InMemory. | Báo lỗi lưu trữ | Không tính Used; giải phóng Reserved khi chốt Failed; không công bố đầu ra. | BR-SUB-003/Then<br>TDD-SUB-002/Architecture | Test handler kiểm State=Failed, Used=0, Reserved=0, ResultRef=null và lưu FailureCode. Không chứng minh transaction hoặc khóa PostgreSQL. Mã test: bmt-be.application.tests/usecases/subscription/UsagePolicyTests.cs:Decide_PendingWithStorageFailure_Fails (lớp UsageTransitionPolicyTests); bmt-be.application.tests/usecases/subscription/SubscriptionCommandHandlerTests.cs:Settle_ResultNotReady_ReleasesTheHeldUnitAndPublishesNothing. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 

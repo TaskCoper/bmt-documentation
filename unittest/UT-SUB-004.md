@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-004 | Subscription / Entitlement | PlanConfigurationPolicy (dự kiến trong TDD) | Branch | REGRESSION | P0 | Quyền lượt không giới hạn | IsUnlimited=true; Limit=null | Chấp nhận; không chuyển thành hạn mức 0. | BR-SUB-005/Then<br>TDD-SUB-001/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. | [Chưa phân công] | Draft |
+| UT-SUB-004 | Subscription / Entitlement | PlanConfigurationPolicy.EnsureValidForPublish | Branch | REGRESSION | P0 | Quyền lượt không giới hạn. Test dựng gói thiết kế có offer Month và Year, mỗi offer có design.generate IsUnlimited=true, Limit=null. | IsUnlimited=true; Limit=null | Chấp nhận; không chuyển thành hạn mức 0. | BR-SUB-005/Then<br>TDD-SUB-001/Architecture | Kiểm nhánh nghiệp vụ ở chính sách cấu hình, không cần database; không chứng minh transaction hoặc khóa PostgreSQL. Test kiểm chính sách chấp nhận cấu hình. Ý không chuyển thành hạn mức 0 đúng vì chính sách không sửa dữ liệu đầu vào; chưa kiểm dữ liệu lưu xuống database. Mã test: bmt-be.application.tests/usecases/plan/PlanConfigurationPolicyTests.cs:Publish_UnlimitedQuotaWithoutLimit_IsAccepted. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 

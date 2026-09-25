@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-005 | Subscription / Entitlement | PlanConfigurationPolicy (dự kiến trong TDD) | Error | REGRESSION | P0 | Cấu hình mâu thuẫn | IsUnlimited=true; Limit=5 | Từ chối trước khi lưu revision công bố. | BR-SUB-005/Then<br>TDD-SUB-001/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. | [Chưa phân công] | Draft |
+| UT-SUB-005 | Subscription / Entitlement | PlanConfigurationPolicy.EnsureValidForPublish | Error | REGRESSION | P0 | Cấu hình mâu thuẫn: offer Month có design.generate IsUnlimited=true kèm Limit=5; offer Year hợp lệ. | IsUnlimited=true; Limit=5 | Từ chối trước khi lưu revision công bố. | BR-SUB-005/Then<br>TDD-SUB-001/Architecture | Kiểm nhánh nghiệp vụ ở chính sách cấu hình, không cần database; không chứng minh transaction hoặc khóa PostgreSQL. Test kiểm mã PlanConfigurationInvalid. Việc không công bố revision nằm ở PublishPlanCommandHandler, chưa có test handler cho ca này. Mã test: bmt-be.application.tests/usecases/plan/PlanConfigurationPolicyTests.cs:Publish_UnlimitedQuotaCarryingALimit_IsRejected. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 

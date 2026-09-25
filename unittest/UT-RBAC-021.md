@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-021 | Role | UpdateRoleHandler.Handle (dự kiến) | Error | REGRESSION | P0 | Unit chưa triển khai; mock kho vai trò trả về vai trò đích có Kind bằng System. | Yêu cầu đổi tên vai trò Admin, và yêu cầu đổi danh sách quyền của vai trò Khách hàng. | Cả hai yêu cầu ném ngoại lệ ánh xạ 409 với mã RoleIsSystem. Tên và danh sách quyền của hai vai trò không đổi. | BR-RBAC-002/Then<br>STORY-RBAC-001/AC-002 | Vai trò hệ thống khóa cứng ở cả hai loại thao tác sửa. | [Chưa xác định] | Draft |
+| UT-RBAC-021 | Role | UpdateRoleCommandHandler.Handle | Error | REGRESSION | P0 | Dữ liệu dựng trên EF InMemory, có sẵn hai vai trò hệ thống; vai trò đích có Kind bằng System. IAccessAuditWriter và IAccessRowLocker là mock. | Yêu cầu đổi tên vai trò Admin, và yêu cầu đổi danh sách quyền của vai trò Khách hàng. | Cả hai yêu cầu ném ngoại lệ ánh xạ 409 với mã RoleIsSystem. Tên và danh sách quyền của hai vai trò không đổi. | BR-RBAC-002/Then<br>STORY-RBAC-001/AC-002 | Vai trò hệ thống khóa cứng ở cả hai loại thao tác sửa. Mã test: bmt-be.application.tests/usecases/role/RoleCommandHandlerTests.cs:Update_SystemRole_Throws409AndLeavesRoleUnchanged. Mã test chỉ có ca đổi tên vai trò Admin và chỉ kiểm tên không đổi; chưa có ca đổi danh sách quyền của vai trò Khách hàng. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

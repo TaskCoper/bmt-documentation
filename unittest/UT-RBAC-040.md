@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-040 | Staff | LockStaffHandler.Handle (dự kiến) | Quirk | FULL | P1 | Unit chưa triển khai; transaction commit thành công nhưng mock Redis ném ngoại lệ ở bước xóa khóa auth:stamp. | UserId của tài khoản nhân viên cần khóa. | Handler vẫn trả thành công và ghi log mức cảnh báo. Trạng thái Locked và SecurityStamp mới đã được lưu, nên hệ thống tự về đúng khi khóa Redis hết hạn. | TDD-RBAC-002/Architecture | Lỗi ở bước bù không được làm hỏng một thao tác đã commit đúng. | [Chưa xác định] | Draft |
+| UT-RBAC-040 | Staff | LockStaffCommandHandler.Handle | Quirk | FULL | P1 | Dữ liệu dựng trên EF InMemory; mock ISecurityStampService ném ngoại lệ ở bước xóa khóa auth:stamp (InvalidateAsync). Hàng chờ sau commit chạy sau CompleteAsync. | UserId của tài khoản nhân viên cần khóa. | Handler vẫn trả thành công và ghi log mức cảnh báo. Trạng thái Locked và SecurityStamp mới đã được lưu, nên hệ thống tự về đúng khi khóa Redis hết hạn. | TDD-RBAC-002/Architecture | Lỗi ở bước bù không được làm hỏng một thao tác đã commit đúng. Mã test: bmt-be.application.tests/usecases/staff/StaffSessionCommandHandlerTests.cs:Lock_RedisFails_StillSucceedsAndKeepsLockedState. Mã test kiểm kết quả thành công và Status bằng Locked; chưa kiểm log mức cảnh báo và SecurityStamp mới. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

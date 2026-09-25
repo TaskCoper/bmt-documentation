@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-032 | Staff | CreateStaffHandler.Handle (dự kiến) | Branch | REGRESSION | P0 | Unit chưa triển khai; mock IPasswordHasherService và kho User để quan sát giá trị được ghi. | Yêu cầu tạo tài khoản nhân viên hợp lệ. | Cột HashedPassword nhận bản băm do IPasswordHasherService trả về. Không cột nào của User chứa mật khẩu bản rõ, và bản rõ không xuất hiện trong bản ghi nhật ký. | BR-RBAC-006/Then<br>STORY-RBAC-002/AC-001 | Bản rõ chỉ được phép tồn tại trong phản hồi, không được rò vào dữ liệu lưu trữ hay nhật ký. | [Chưa xác định] | Draft |
+| UT-RBAC-032 | Staff | CreateStaffCommandHandler.Handle | Branch | REGRESSION | P0 | Dữ liệu dựng trên EF InMemory. Mock IPasswordHasherService trả một bản băm cố định; mock IAccessAuditWriter để quan sát nội dung nhật ký. Giá trị ghi vào User được đọc lại từ database. | Yêu cầu tạo tài khoản nhân viên hợp lệ. | Cột HashedPassword nhận bản băm do IPasswordHasherService trả về. Không cột nào của User chứa mật khẩu bản rõ, và bản rõ không xuất hiện trong bản ghi nhật ký. | BR-RBAC-006/Then<br>STORY-RBAC-002/AC-001 | Bản rõ chỉ được phép tồn tại trong phản hồi, không được rò vào dữ liệu lưu trữ hay nhật ký. Mã test: bmt-be.application.tests/usecases/staff/CreateStaffCommandHandlerTests.cs:Handle_ValidRequest_StoresOnlyTheHashAndNeverLogsThePlainPassword. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

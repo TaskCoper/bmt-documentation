@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-031 | Subscription / Entitlement | UsageTransitionPolicy (dự kiến trong TDD) | Determinism | REGRESSION | P0 | Đã Succeeded và tính 1 Used | Callback thành công lặp hoặc tiến trình timeout | Không trừ/hoàn thêm lượt; giữ kết quả thành công. | BR-SUB-016/Then<br>TDD-SUB-002/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. | [Chưa phân công] | Draft |
+| UT-SUB-031 | Subscription / Entitlement | UsageTransitionPolicy.Decide; SettleDesignUsageCommandHandler | Determinism | REGRESSION | P0 | Đã Succeeded và tính 1 Used. Test chính sách gọi Decide cho tác vụ Succeeded với ResultReady=true (callback lặp) và ResultReady=false (tiến trình timeout). Test handler quyết toán thành công hai lần cùng một lệnh; EF InMemory. | Callback thành công lặp hoặc tiến trình timeout | Không trừ/hoàn thêm lượt; giữ kết quả thành công. | BR-SUB-016/Then<br>TDD-SUB-002/Architecture | Test handler kiểm lần hai ChangedAnything=false, State=Succeeded, Used=1, Reserved=0. Không chứng minh transaction hoặc khóa PostgreSQL. Mã test: bmt-be.application.tests/usecases/subscription/UsagePolicyTests.cs:Decide_AlreadySucceeded_StaysUnchanged (lớp UsageTransitionPolicyTests); bmt-be.application.tests/usecases/subscription/SubscriptionCommandHandlerTests.cs:Settle_RepeatedAfterSuccess_ChangesNothing. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 

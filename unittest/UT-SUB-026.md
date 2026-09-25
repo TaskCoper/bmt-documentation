@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-026 | Subscription / Entitlement | CommitDesignPeriodHandler (dự kiến trong TDD) | Error | REGRESSION | P0 | CurrentPeriod=B | ExpectedCurrentPeriod=A | Từ chối xung đột; không ghi đè B. | BR-SUB-021/Then<br>TDD-SUB-002/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. | [Chưa phân công] | Draft |
+| UT-SUB-026 | Subscription / Entitlement | CommitDesignPeriodCommandHandler | Error | REGRESSION | P0 | CurrentPeriod=B: tài khoản đã có kỳ B; lệnh mới gửi ExpectedCurrentPeriodId là một mã khác (A); EF InMemory. | ExpectedCurrentPeriod=A | Từ chối xung đột; không ghi đè B. | BR-SUB-021/Then<br>TDD-SUB-002/Architecture | Kiểm tra nhánh nghiệp vụ bằng EF InMemory; không chứng minh transaction hoặc khóa PostgreSQL. Test kiểm SubscriptionVersionConflict và con trỏ kỳ hiện hành vẫn là B. Mã test: bmt-be.application.tests/usecases/subscription/SubscriptionCommandHandlerTests.cs:Commit_ExpectedCurrentPeriodStale_Throws409AndKeepsPointer. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 

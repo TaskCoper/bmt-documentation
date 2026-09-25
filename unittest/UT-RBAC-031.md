@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-031 | Staff | CreateStaffHandler.Handle (dự kiến) | Happy | SMOKE | P1 | Unit chưa triển khai; email chưa thuộc tài khoản nào, vai trò đích là vai trò nhân viên, người thao tác có đủ quyền định cấp. | Email, họ tên và danh sách roleIds gồm một vai trò có commerce.read. | Tạo dòng User với AccountKind bằng Staff, Status bằng Active, MustChangePassword bằng true, IsEmailVerified bằng true. Tạo dòng UserRole tương ứng. Phản hồi chứa mật khẩu bản rõ. | STORY-RBAC-002/AC-001<br>BR-RBAC-006/Then | Luồng chính tạo tài khoản; kiểm đủ bốn giá trị khởi tạo của bảng User. | [Chưa xác định] | Draft |
+| UT-RBAC-031 | Staff | CreateStaffCommandHandler.Handle | Happy | SMOKE | P1 | Dữ liệu dựng trên EF InMemory; email chưa thuộc tài khoản nào, vai trò đích là vai trò nhân viên, người thao tác có đủ quyền định cấp. IPasswordHasherService và IAccessAuditWriter là mock. | Email, họ tên và danh sách roleIds gồm một vai trò có commerce.read. | Tạo dòng User với AccountKind bằng Staff, Status bằng Active, MustChangePassword bằng true, IsEmailVerified bằng true. Tạo dòng UserRole tương ứng. Phản hồi chứa mật khẩu bản rõ. | STORY-RBAC-002/AC-001<br>BR-RBAC-006/Then | Luồng chính tạo tài khoản; kiểm đủ bốn giá trị khởi tạo của bảng User. Mã test: bmt-be.application.tests/usecases/staff/CreateStaffCommandHandlerTests.cs:Handle_ValidRequest_CreatesActiveStaffThatMustChangePassword. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

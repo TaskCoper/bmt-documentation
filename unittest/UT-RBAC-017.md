@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-017 | Audit | AccessAuditWriter.RecordAsync (dự kiến) | Branch | REGRESSION | P2 | Unit chưa triển khai; vai trò tên "Nhân viên vận hành gói" sắp bị xóa. | Bản ghi nhật ký cho hành động RoleDeleted trên vai trò đó. | Cột TargetLabel lưu chuỗi "Nhân viên vận hành gói" tại thời điểm thao tác. Sau khi vai trò bị xóa, đọc lại bản ghi vẫn ra đúng tên đó. | BR-RBAC-012/Then<br>STORY-RBAC-001/AC-006 | Nhãn là ảnh chụp, không phải khóa ngoại, nên lịch sử không mất khi đối tượng bị xóa. | [Chưa xác định] | Draft |
+| UT-RBAC-017 | Audit | AccessAuditWriter.RecordAsync | Branch | REGRESSION | P2 | Dữ liệu dựng trên EF InMemory; vai trò tên "Nhân viên vận hành gói" sắp bị xóa. | Bản ghi nhật ký cho hành động RoleDeleted trên vai trò đó. | Cột TargetLabel lưu chuỗi "Nhân viên vận hành gói" tại thời điểm thao tác. Sau khi vai trò bị xóa, đọc lại bản ghi vẫn ra đúng tên đó. | BR-RBAC-012/Then<br>STORY-RBAC-001/AC-006 | Nhãn là ảnh chụp, không phải khóa ngoại, nên lịch sử không mất khi đối tượng bị xóa. Mã test: bmt-be.application.tests/usecases/audit/AccessAuditWriterTests.cs:RecordAsync_RoleDeleted_KeepsRoleNameReadableAfterRoleIsGone. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

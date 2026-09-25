@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-002 | Subscription / Entitlement | PlanConfigurationPolicy (dự kiến trong TDD) | Boundary | REGRESSION | P0 | Quyền lượt hữu hạn trong bản cấu hình công bố | Limit=-1 | Từ chối cấu hình; không công bố revision. | BR-SUB-005/Then<br>TDD-SUB-001/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. | [Chưa phân công] | Draft |
+| UT-SUB-002 | Subscription / Entitlement | PlanConfigurationPolicy.EnsureValidForPublish | Boundary | REGRESSION | P0 | Quyền lượt hữu hạn trong bản cấu hình công bố. Test dựng gói thiết kế đủ offer Month và Year, mỗi offer có quota design.generate; danh mục quyền dựng tay trong test. | Limit=-1 | Từ chối cấu hình; không công bố revision. | BR-SUB-005/Then<br>TDD-SUB-001/Architecture | Kiểm nhánh nghiệp vụ ở chính sách cấu hình, không cần database; không chứng minh transaction hoặc khóa PostgreSQL. Test kiểm mã PlanConfigurationInvalid. Việc không công bố revision nằm ở PublishPlanCommandHandler, chưa có test handler cho ca này. Mã test: bmt-be.application.tests/usecases/plan/PlanConfigurationPolicyTests.cs:Publish_FiniteQuotaWithNegativeLimit_IsRejected. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 

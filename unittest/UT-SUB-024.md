@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-024 | Subscription / Entitlement | CommitDesignPeriodHandler (dự kiến trong TDD) | Determinism | REGRESSION | P0 | ActivationKey đã có cùng hash | Gửi lại commitment | Trả kỳ đã cấp; không đóng thêm kỳ hoặc cấp quota lần hai. | BR-SUB-021/Then<br>TDD-SUB-002/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. | [Chưa phân công] | Draft |
+| UT-SUB-024 | Subscription / Entitlement | CommitDesignPeriodCommandHandler | Determinism | REGRESSION | P0 | ActivationKey đã có cùng hash: gửi CommitDesignPeriodCommand lần hai với cùng key và hash. Unit test dùng EF InMemory; integration test chạy trên PostgreSQL thật, có ca tài khoản chưa có và đã có dòng DesignSubscription. | Gửi lại commitment | Trả kỳ đã cấp; không đóng thêm kỳ hoặc cấp quota lần hai. | BR-SUB-021/Then<br>TDD-SUB-002/Architecture | Unit test kiểm WasAlreadyCommitted=true, cùng PeriodId, tài khoản chỉ có một kỳ và một dòng quota. Integration test kiểm thêm kỳ Active, không có kỳ trước, con trỏ và Version của DesignSubscription, quota Limit=5, Used=0, Reserved=0. Mã test: bmt-be.application.tests/usecases/subscription/SubscriptionCommandHandlerTests.cs:Commit_SameActivationKeyAndHash_ReturnsExistingPeriodWithoutGrantingAgain; bmt-be.integration.tests/CommitDesignPeriodTests.cs:FirstPurchase_AndReplay_PersistOnePeriodWithQuotaAndCurrentPointer. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 

@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-045 | Staff | ChangePasswordCommandHandler.Handle (dự kiến) | Branch | REGRESSION | P1 | Unit chưa triển khai; tài khoản khách hàng có MustChangePassword bằng false. | Yêu cầu đổi mật khẩu thông thường của khách hàng. | Luồng đổi mật khẩu sẵn có chạy như cũ; cột MustChangePassword vẫn là false và không bị handler ghi lại. Nhánh mới không làm đổi hành vi của khách hàng. | BR-RBAC-006/Then | Thêm nhánh cho nhân viên không được làm hồi quy luồng đổi mật khẩu đang chạy. | [Chưa xác định] | Draft |
+| UT-RBAC-045 | Staff | ChangePasswordCommandHandler.Handle | Branch | REGRESSION | P1 | Dữ liệu dựng trên EF InMemory; tài khoản khách hàng có MustChangePassword bằng false. IPasswordHasherService và ISessionCutter là mock. | Yêu cầu đổi mật khẩu thông thường của khách hàng. | Luồng đổi mật khẩu sẵn có chạy như cũ; cột MustChangePassword vẫn là false và không bị handler ghi lại. Nhánh mới không làm đổi hành vi của khách hàng. | BR-RBAC-006/Then | Thêm nhánh cho nhân viên không được làm hồi quy luồng đổi mật khẩu đang chạy. Mã test: bmt-be.application.tests/usecases/staff/MustChangePasswordFlowTests.cs:ChangePassword_Customer_LeavesMustChangePasswordFalse. Mã test kiểm kết quả thành công và cột vẫn là false; chưa kiểm handler không ghi lại cột MustChangePassword. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

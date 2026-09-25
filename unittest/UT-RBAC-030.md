@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-030 | Staff | GeneratedPasswordFactory.Create (dự kiến) | Determinism | REGRESSION | P1 | Unit chưa triển khai; gọi hàm sinh nhiều lần liên tiếp trong cùng tiến trình. | Gọi sinh mật khẩu một số lần đủ lớn để phát hiện trùng lặp hệ thống. | Các chuỗi trả về khác nhau; không có mẫu lặp lại và không phụ thuộc thời điểm gọi. Hàm không nhận seed từ bên ngoài. | BR-RBAC-006/Then | Dùng Random thay vì bộ sinh an toàn sẽ lộ ra ở đây; mật khẩu đoán được là lỗ hổng thật. | [Chưa xác định] | Draft |
+| UT-RBAC-030 | Staff | GeneratedPasswordFactory.Create | Determinism | REGRESSION | P1 | Gọi hàm sinh nhiều lần liên tiếp trong cùng tiến trình, và trên hai instance khác nhau. | Gọi sinh mật khẩu một số lần đủ lớn để phát hiện trùng lặp hệ thống. | Các chuỗi trả về khác nhau; không có mẫu lặp lại và không phụ thuộc thời điểm gọi. Hàm không nhận seed từ bên ngoài. | BR-RBAC-006/Then | Dùng Random thay vì bộ sinh an toàn sẽ lộ ra ở đây; mật khẩu đoán được là lỗ hổng thật. Mã test: bmt-be.application.tests/usecases/staff/GeneratedPasswordFactoryTests.cs:Create_ManyTimes_ProducesDistinctValues (1.000 lần gọi không trùng) và Create_TwoInstances_DoNotShareSequence (cùng file). | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

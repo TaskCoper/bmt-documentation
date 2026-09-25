@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-027 | Subscription / Entitlement | UsageTransitionPolicy (dự kiến trong TDD) | Happy | REGRESSION | P0 | Pending của kỳ A; tài khoản đã chuyển sang B | Kết quả đủ và lưu được trước deadline | Giảm Reserved, tăng Used ở A; quota B giữ nguyên. | BR-SUB-003/Then<br>TDD-SUB-002/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. | [Chưa phân công] | Draft |
+| UT-SUB-027 | Subscription / Entitlement | UsageTransitionPolicy.Decide; SettleDesignUsageCommandHandler | Happy | REGRESSION | P0 | Pending của kỳ A; tài khoản đã chuyển sang B. Test chính sách gọi Decide với báo cáo ResultReady=true trước hạn. Test handler cấp kỳ A, giữ lượt, cấp kỳ B thay A rồi quyết toán thành công; EF InMemory. | Kết quả đủ và lưu được trước deadline | Giảm Reserved, tăng Used ở A; quota B giữ nguyên. | BR-SUB-003/Then<br>TDD-SUB-002/Architecture | Chính sách không xét kỳ hiện hành nên chỉ trả Succeeded. Test handler kiểm A có Used=1, Reserved=0 và B giữ Used=0, Reserved=0. Không chứng minh transaction hoặc khóa PostgreSQL. Mã test: bmt-be.application.tests/usecases/subscription/UsagePolicyTests.cs:Decide_PendingWithResultReady_SucceedsRegardlessOfCurrentPeriod (lớp UsageTransitionPolicyTests); bmt-be.application.tests/usecases/subscription/SubscriptionCommandHandlerTests.cs:Settle_AfterAccountMovedToNewPeriod_CountsAgainstTheOriginalPeriod. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 

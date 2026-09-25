@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-012 | Subscription / Entitlement | StopSellingPlanHandler (dự kiến trong TDD) | Branch | REGRESSION | P0 | Gói đang bán và có kỳ đang dùng | Ngừng bán | Ẩn khỏi danh sách mua mới; không sửa quyền hoặc thời hạn kỳ đã cấp. | BR-SUB-013/Then<br>TDD-SUB-001/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. | [Chưa phân công] | Draft |
+| UT-SUB-012 | Subscription / Entitlement | StopSellingPlanCommandHandler | Branch | REGRESSION | P0 | Gói đang bán và có kỳ đang dùng. Test dựng gói OnSale, Version=4, có revision đã công bố; EF InMemory. Test chưa dựng kỳ đang dùng. | Ngừng bán | Ẩn khỏi danh sách mua mới; không sửa quyền hoặc thời hạn kỳ đã cấp. | BR-SUB-013/Then<br>TDD-SUB-001/Architecture | Kiểm tra nhánh nghiệp vụ bằng EF InMemory; không chứng minh transaction hoặc khóa PostgreSQL. Test kiểm SaleState=Stopped, PublishedRevisionId giữ nguyên, Version=5. Chưa kiểm việc ẩn khỏi danh sách mua mới (thuộc truy vấn danh sách gói) và chưa dựng kỳ đã cấp để kiểm quyền, thời hạn giữ nguyên. Mã test: bmt-be.application.tests/usecases/plan/PlanCommandHandlerTests.cs:StopSelling_OnSalePlan_OnlyChangesSaleState. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 

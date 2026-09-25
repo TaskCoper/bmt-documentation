@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-009 | Subscription / Entitlement | PlanConfigurationPolicy (dự kiến trong TDD) | Branch | REGRESSION | P0 | 3D là Boolean; hai quyền lượt được cấu hình riêng | Bật/tắt 3D | Lưu giá trị hiển thị; không tạo quota 3D hoặc thay quyền tạo thiết kế. | BR-SUB-008/Then<br>TDD-SUB-001/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. | [Chưa phân công] | Draft |
+| UT-SUB-009 | Subscription / Entitlement | PlanConfigurationPolicy.EnsureValidForPublish | Branch | REGRESSION | P0 | 3D là Boolean (design.render3d trong danh mục dựng tay); hai quyền lượt được cấu hình riêng: mỗi offer Month và Year có đúng một quota design.generate. | Bật/tắt 3D | Lưu giá trị hiển thị; không tạo quota 3D hoặc thay quyền tạo thiết kế. | BR-SUB-008/Then<br>TDD-SUB-001/Architecture | Kiểm nhánh nghiệp vụ ở chính sách cấu hình, không cần database; không chứng minh transaction hoặc khóa PostgreSQL. Test kiểm cả hai giá trị bật và tắt đều được chấp nhận, mỗi offer vẫn chỉ có một quota design.generate. Chưa kiểm giá trị hiển thị được lưu xuống database. Mã test: bmt-be.application.tests/usecases/plan/PlanConfigurationPolicyTests.cs:Publish_BooleanBenefitToggled_IsAcceptedWithoutTouchingQuotas. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 

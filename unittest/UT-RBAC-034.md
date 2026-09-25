@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-034 | Staff | CreateStaffHandler.Handle (dự kiến) | Error | REGRESSION | P2 | Unit chưa triển khai; danh sách roleIds chứa RoleId của vai trò hệ thống Khách hàng. | Email hợp lệ và roleIds gồm vai trò Khách hàng. | Ném ngoại lệ từ chối yêu cầu; tài khoản nhân viên không nhận vai trò Khách hàng. Không tạo dòng User nào. | BR-RBAC-005/Then | Vai trò Khách hàng chỉ thuộc nhóm tài khoản khách hàng. | [Chưa xác định] | Draft |
+| UT-RBAC-034 | Staff | CreateStaffCommandHandler.Handle | Error | REGRESSION | P2 | Dữ liệu dựng trên EF InMemory; danh sách roleIds chứa RoleId của vai trò hệ thống Khách hàng. | Email hợp lệ và roleIds gồm vai trò Khách hàng. | Ném ngoại lệ từ chối yêu cầu; tài khoản nhân viên không nhận vai trò Khách hàng. Không tạo dòng User nào. | BR-RBAC-005/Then | Vai trò Khách hàng chỉ thuộc nhóm tài khoản khách hàng. Mã test: bmt-be.application.tests/usecases/staff/CreateStaffCommandHandlerTests.cs:Handle_CustomerRoleRequested_ThrowsAndCreatesNoUser. Mã test kiểm ConflictException mang mã RoleNotAssignableToStaff. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

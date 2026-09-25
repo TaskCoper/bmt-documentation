@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-037 | Supervision | AssignmentDeadlineCalculator (dự kiến) | Boundary | REGRESSION | P1 | GrantedAt=29/02/2028 10:00 giờ VN. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Tính hạn một năm. | 28/02/2029 10:00 giờ VN, đúng UTC tương ứng; không dùng365 ngày. | STORY-SUB-004/AC-011<br>TDD-SUB-004/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
+| UT-PAY-037 | Supervision | SupervisionPolicy.ComputeAssignmentDeadline | Boundary | REGRESSION | P1 | GrantedAt=29/02/2028 10:00 giờ VN. Gọi thẳng hàm, không cần mock; test dùng ngày nhuận 29/02/2024 10:00 giờ VN, cùng quy tắc. | Tính hạn một năm. | 28/02/2029 10:00 giờ VN, đúng UTC tương ứng; không dùng365 ngày. | STORY-SUB-004/AC-011<br>TDD-SUB-004/Architecture | Hạn gán tính theo lịch Việt Nam: ngày 29/02 lùi về 28/02 khi năm đích không nhuận, không cộng 365 ngày. Tài liệu gọi nơi tính là AssignmentDeadlineCalculator; code đặt hàm trong SupervisionPolicy. Phần đúng mốc UTC được kiểm ở test theory trả kết quả UTC. Chưa có nơi gọi hàm này vì luồng cấp gói của PAY chưa có code. Mã test: bmt-be.application.tests/usecases/subscription/SupervisionPolicyTests.cs:ComputeAssignmentDeadline_LeapDay_ClampsToFebruary28, ComputeAssignmentDeadline_ReturnsUtcAfterVietnamCalendarCalculation. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

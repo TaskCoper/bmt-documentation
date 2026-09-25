@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-005 | Authorization | SecurityStampValidator.ValidateAsync (dự kiến) | Branch | REGRESSION | P0 | Unit chưa triển khai; mock Redis không có dữ liệu cho khóa auth:stamp. Mock nguồn đọc User trả SecurityStamp bằng stamp-1. | Token mang claim stamp bằng stamp-1. | Xác thực đạt. Nguồn đọc User được gọi đúng một lần và giá trị stamp-1 được ghi lại vào Redis kèm hạn bằng hạn access token. | TDD-RBAC-001/Architecture | Redis trống thì rơi về database rồi nạp lại bộ đệm; mất Redis làm chậm chứ không làm sai. | [Chưa xác định] | Draft |
+| UT-RBAC-005 | Authorization | SecurityStampService.GetCurrentAsync | Branch | REGRESSION | P0 | Mock ICacheService không có dữ liệu cho khóa auth:stamp. User có SecurityStamp bằng stamp-1 được lưu trong EF InMemory. | Token mang claim stamp bằng stamp-1. | Xác thực đạt. Nguồn đọc User được gọi đúng một lần và giá trị stamp-1 được ghi lại vào Redis kèm hạn bằng hạn access token. | TDD-RBAC-001/Architecture | Redis trống thì rơi về database rồi nạp lại bộ đệm; mất Redis làm chậm chứ không làm sai. Mã test: bmt-be.application.tests/usecases/authorization/SecurityStampServiceTests.cs:GetCurrentAsync_RedisEmpty_ReadsDatabaseAndRepopulatesWithTokenLifetimeTtl. Mã test kiểm giá trị trả về bằng stamp-1 và lời ghi vào Redis với hạn bằng hạn access token; chưa kiểm nguồn đọc User được gọi đúng một lần. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

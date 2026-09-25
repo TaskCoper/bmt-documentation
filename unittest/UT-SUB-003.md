@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-003 | Subscription / Entitlement | PlanConfigurationPolicy (dự kiến trong TDD) | Boundary | REGRESSION | P0 | Quyền lượt hữu hạn | Limit=1 | Chấp nhận mức tối thiểu 1. | BR-SUB-005/Then<br>TDD-SUB-001/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. | [Chưa phân công] | Draft |
+| UT-SUB-003 | Subscription / Entitlement | PlanConfigurationPolicy.EnsureValidForPublish | Boundary | REGRESSION | P0 | Quyền lượt hữu hạn. Test dựng gói thiết kế đủ offer Month và Year; Month có design.generate Limit=1, Year Limit=40. | Limit=1 | Chấp nhận mức tối thiểu 1. | BR-SUB-005/Then<br>TDD-SUB-001/Architecture | Kiểm nhánh nghiệp vụ ở chính sách cấu hình, không cần database; không chứng minh transaction hoặc khóa PostgreSQL. Mã test: bmt-be.application.tests/usecases/plan/PlanConfigurationPolicyTests.cs:Publish_FiniteQuotaWithLimitOfOne_IsAccepted. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 

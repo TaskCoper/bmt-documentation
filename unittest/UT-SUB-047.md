@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-047 | Subscription / Entitlement | QuotaPolicy (dự kiến trong TDD) | Branch | REGRESSION | P0 | Hai dự án cùng chủ tài khoản; còn 1 lượt tạo | Dự án A giữ lượt rồi B yêu cầu | B không đủ lượt; không tự cấp quota riêng từng dự án. | BR-SUB-001/Then<br>TDD-SUB-002/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. | [Chưa phân công] | Draft |
+| UT-SUB-047 | Subscription / Entitlement | QuotaPolicy.EnsureCanReserve, QuotaPolicy.Reserve | Branch | REGRESSION | P0 | Hai dự án cùng chủ tài khoản; còn 1 lượt tạo. Test dựng một kỳ Active có một sổ lượt Limit=1 dùng chung, giữ lượt cho dự án A rồi gọi EnsureCanReserve lần hai cho dự án B trên cùng sổ. | Dự án A giữ lượt rồi B yêu cầu | B không đủ lượt; không tự cấp quota riêng từng dự án. | BR-SUB-001/Then<br>TDD-SUB-002/Architecture | Kiểm nhánh nghiệp vụ ở chính sách; không chứng minh transaction hoặc khóa PostgreSQL. Test kiểm lần hai ném QuotaUnavailable. Mã test: bmt-be.application.tests/usecases/subscription/UsagePolicyTests.cs:Reserve_TwoProjectsShareOneLedger_SecondOneFindsNothingLeft (lớp QuotaPolicyTests). | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 

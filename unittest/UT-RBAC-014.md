@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-014 | Authorization | PrivilegeGuard.EnsureAdminRemains (dự kiến) | Branch | REGRESSION | P1 | Unit chưa triển khai; hệ thống có hai tài khoản giữ vai trò admin, trong đó một tài khoản đang ở trạng thái Locked. | Yêu cầu thu hồi vai trò admin của tài khoản Admin đang hoạt động. | Ném ngoại lệ với mã LastAdminProtected, vì tài khoản đang bị khóa không tính là Admin đang hoạt động. | BR-RBAC-004/Notes | Điều kiện đếm phải lọc theo trạng thái, không chỉ đếm dòng UserRole. | [Chưa xác định] | Draft |
+| UT-RBAC-014 | Authorization | PrivilegeGuard.EnsureAdminRemainsAsync | Branch | REGRESSION | P1 | Hệ thống có hai tài khoản giữ vai trò admin, trong đó một tài khoản đang ở trạng thái Locked. Việc loại tài khoản Locked nằm trong ActiveAdminCounter.CountActiveExcludingAsync; trong mã test, bộ đếm này là mock trả 0. | Yêu cầu thu hồi vai trò admin của tài khoản Admin đang hoạt động. | Ném ngoại lệ với mã LastAdminProtected, vì tài khoản đang bị khóa không tính là Admin đang hoạt động. | BR-RBAC-004/Notes | Điều kiện đếm phải lọc theo trạng thái, không chỉ đếm dòng UserRole. Mã test: bmt-be.application.tests/usecases/authorization/PrivilegeGuardTests.cs:EnsureAdminRemainsAsync_OtherAdminIsLocked_CounterReturnsZeroAndGuardThrows. Mã test chỉ kiểm guard tin vào con số của bộ đếm; chưa kiểm phép lọc Status bằng Active trong ActiveAdminCounter. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

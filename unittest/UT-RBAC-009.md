@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-009 | Authorization | PrivilegeGuard.EnsureCanGrant (dự kiến) | Error | REGRESSION | P0 | Unit chưa triển khai; mock bộ quyền của người thao tác. Người thao tác và đối tượng là cùng một UserId. | Yêu cầu gán thêm một vai trò cho chính người thao tác. | Ném ngoại lệ ánh xạ 403 với mã SelfPrivilegeEscalation. Không thực hiện bước kiểm nào sau đó. | BR-RBAC-004/Then<br>STORY-RBAC-002/AC-008 | Rào chắn rẻ nhất chạy trước và chặn tự nâng quyền. | [Chưa xác định] | Draft |
+| UT-RBAC-009 | Authorization | PrivilegeGuard.EnsureCanGrant | Error | REGRESSION | P0 | Gọi thẳng PrivilegeGuard; bộ quyền của người thao tác truyền vào qua tham số actorPermissions. Người thao tác và đối tượng là cùng một UserId. | Yêu cầu gán thêm một vai trò cho chính người thao tác. | Ném ngoại lệ ánh xạ 403 với mã SelfPrivilegeEscalation. Không thực hiện bước kiểm nào sau đó. | BR-RBAC-004/Then<br>STORY-RBAC-002/AC-008 | Rào chắn rẻ nhất chạy trước và chặn tự nâng quyền. Mã test: bmt-be.application.tests/usecases/authorization/PrivilegeGuardTests.cs:EnsureCanGrant_ActorGrantsToSelf_ThrowsSelfPrivilegeEscalation. Mã test kiểm NotPermissionException (ánh xạ 403) mang mã SelfPrivilegeEscalation; chưa kiểm các bước kiểm sau không chạy. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

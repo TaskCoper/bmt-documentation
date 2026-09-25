@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-033 | Staff | CreateStaffHandler.Handle (dự kiến) | Error | REGRESSION | P1 | Unit chưa triển khai; mock kho User trả về email đã thuộc một tài khoản có AccountKind bằng Customer. | Email trùng tài khoản khách hàng, kèm danh sách vai trò hợp lệ. | Ném ngoại lệ ánh xạ 409 với mã EmailAlreadyUsed. Không tạo tài khoản mới và không đổi AccountKind của tài khoản khách hàng đang có. | BR-RBAC-005/Then<br>STORY-RBAC-002/AC-003 | Tách hẳn hai loại tài khoản; không nâng khách hàng thành nhân viên. | [Chưa xác định] | Draft |
+| UT-RBAC-033 | Staff | CreateStaffCommandHandler.Handle | Error | REGRESSION | P1 | Dữ liệu dựng trên EF InMemory; email đã thuộc một tài khoản có AccountKind bằng Customer. IAccessAuditWriter là mock. | Email trùng tài khoản khách hàng, kèm danh sách vai trò hợp lệ. | Ném ngoại lệ ánh xạ 409 với mã EmailAlreadyUsed. Không tạo tài khoản mới và không đổi AccountKind của tài khoản khách hàng đang có. | BR-RBAC-005/Then<br>STORY-RBAC-002/AC-003 | Tách hẳn hai loại tài khoản; không nâng khách hàng thành nhân viên. Mã test: bmt-be.application.tests/usecases/staff/CreateStaffCommandHandlerTests.cs:Handle_EmailBelongsToCustomer_Throws409AndLeavesCustomerUntouched. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

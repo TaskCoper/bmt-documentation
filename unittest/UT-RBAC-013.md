@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-013 | Authorization | PrivilegeGuard.EnsureAdminRemains (dự kiến) | Boundary | REGRESSION | P1 | Unit chưa triển khai; mock nguồn đếm trả về đúng hai tài khoản Admin đang hoạt động. | Yêu cầu thu hồi vai trò admin của một trong hai tài khoản đó. | Không ném ngoại lệ; thao tác được phép vì sau đó vẫn còn một Admin đang hoạt động. | BR-RBAC-004/Then | Kiểm đúng cận: chặn khi về 0, không chặn khi còn 1. | [Chưa xác định] | Draft |
+| UT-RBAC-013 | Authorization | PrivilegeGuard.EnsureAdminRemainsAsync | Boundary | REGRESSION | P1 | Hệ thống có đúng hai tài khoản Admin đang hoạt động; mock IActiveAdminCounter.CountActiveExcludingAsync trả 1, tức ngoài đối tượng còn một Admin đang hoạt động. | Yêu cầu thu hồi vai trò admin của một trong hai tài khoản đó. | Không ném ngoại lệ; thao tác được phép vì sau đó vẫn còn một Admin đang hoạt động. | BR-RBAC-004/Then | Kiểm đúng cận: chặn khi về 0, không chặn khi còn 1. Mã test: bmt-be.application.tests/usecases/authorization/PrivilegeGuardTests.cs:EnsureAdminRemainsAsync_AnotherActiveAdminExists_DoesNotThrow. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

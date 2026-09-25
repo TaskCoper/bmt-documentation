@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-019 | Role | CreateRoleHandler.Handle (dự kiến) | Error | REGRESSION | P1 | Unit chưa triển khai; mock kho vai trò trả về đã có vai trò tên "Nhân viên vận hành gói". | Tên vai trò trùng đúng tên đang có, kèm danh sách quyền hợp lệ. | Ném ngoại lệ ánh xạ 409 với mã RoleNameDuplicated. Không tạo dòng Role hay RolePermission nào. | STORY-RBAC-001/EXC-04 | Tên vai trò phải duy nhất; kiểm ở luồng tạo mới. | [Chưa xác định] | Draft |
+| UT-RBAC-019 | Role | CreateRoleCommandHandler.Handle | Error | REGRESSION | P1 | Dữ liệu dựng trên EF InMemory, đã có vai trò tên "Nhân viên vận hành gói"; IAccessAuditWriter là mock. | Tên vai trò trùng đúng tên đang có, kèm danh sách quyền hợp lệ. | Ném ngoại lệ ánh xạ 409 với mã RoleNameDuplicated. Không tạo dòng Role hay RolePermission nào. | STORY-RBAC-001/EXC-04 | Tên vai trò phải duy nhất; kiểm ở luồng tạo mới. Mã test: bmt-be.application.tests/usecases/role/RoleCommandHandlerTests.cs:Create_DuplicateName_Throws409AndCreatesNothing. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

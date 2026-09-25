@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-007 | Subscription / Entitlement | PlanConfigurationPolicy (dự kiến trong TDD) | Branch | REGRESSION | P0 | Tháng và năm có hạn mức riêng | Tháng=3; năm=17 | Giữ nguyên hai giá trị; không nhân hạn mức tháng với 12. | BR-SUB-015/Then<br>TDD-SUB-001/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. | [Chưa phân công] | Draft |
+| UT-SUB-007 | Subscription / Entitlement | PlanConfigurationPolicy.EnsureValidForPublish | Branch | REGRESSION | P0 | Tháng và năm có hạn mức riêng: offer Month có design.generate Limit=3, offer Year Limit=17. | Tháng=3; năm=17 | Giữ nguyên hai giá trị; không nhân hạn mức tháng với 12. | BR-SUB-015/Then<br>TDD-SUB-001/Architecture | Kiểm nhánh nghiệp vụ ở chính sách cấu hình, không cần database; không chứng minh transaction hoặc khóa PostgreSQL. Chính sách chỉ kiểm, không sửa dữ liệu; test xác nhận hai hạn mức giữ nguyên sau khi kiểm. Mã test: bmt-be.application.tests/usecases/plan/PlanConfigurationPolicyTests.cs:Publish_IndependentMonthAndYearLimits_AreKeptAsGiven. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 

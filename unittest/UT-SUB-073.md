@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-073 | Subscription / Supervision | CompleteSupervisionGrantCommandValidator (dự kiến trong TDD-SUB-006) | Boundary | REGRESSION | P2 | Không cần mock. | CompleteSupervisionGrantCommand với: expectedVersion=0; RequestKey rỗng; RequestKey 101 ký tự; so với expectedVersion=1 và key 100 ký tự. | Ba trường hợp đầu không hợp lệ với ErrorCode=PackageMutationInvalid; trường hợp cuối hợp lệ. | STORY-SUB-003/AC-006<br>TDD-SUB-006/Internal API | Kiểm đầu vào của lệnh hoàn thành. | [Chưa phân công] | Draft |
+| UT-SUB-073 | Subscription / Supervision | CompleteSupervisionGrantCommandValidator | Boundary | REGRESSION | P2 | Không cần mock. | CompleteSupervisionGrantCommand với: expectedVersion=0; RequestKey rỗng; RequestKey 101 ký tự; so với expectedVersion=1 và key 100 ký tự. | Ba trường hợp đầu không hợp lệ với ErrorCode=PackageMutationInvalid; trường hợp cuối hợp lệ. | STORY-SUB-003/AC-006<br>TDD-SUB-006/Internal API | Kiểm đầu vào của lệnh hoàn thành. Mã test: bmt-be.application.tests/usecases/subscription/SupervisionCompletionTests.cs:CompleteValidator_VersionAndKey_AreChecked. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 

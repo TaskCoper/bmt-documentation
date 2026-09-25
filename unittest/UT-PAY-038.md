@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-038 | Supervision | AssignmentDeadlineCalculator (dự kiến) | Happy | REGRESSION | P1 | GrantedAt=19/09/2026 10:20:30 giờ VN. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Tính hạn. | 19/09/2027 10:20:30 giờ VN; không kéo hết ngày. | BR-SUB-022/Notes<br>TDD-SUB-004/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
+| UT-PAY-038 | Supervision | SupervisionPolicy.ComputeAssignmentDeadline | Happy | REGRESSION | P1 | GrantedAt=19/09/2026 10:20:30 giờ VN. Gọi thẳng hàm, không cần mock. | Tính hạn. | 19/09/2027 10:20:30 giờ VN; không kéo hết ngày. | BR-SUB-022/Notes<br>TDD-SUB-004/Architecture | Cộng một năm theo lịch, giữ nguyên giờ phút giây, không kéo tới hết ngày. Bao phủ một phần: test dùng 19/09/2026 10:00:00, chưa có ca có giây. Chưa có nơi gọi hàm này vì luồng cấp gói của PAY chưa có code. Mã test: bmt-be.application.tests/usecases/subscription/SupervisionPolicyTests.cs:ComputeAssignmentDeadline_OrdinaryDate_AddsOneCalendarYear. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

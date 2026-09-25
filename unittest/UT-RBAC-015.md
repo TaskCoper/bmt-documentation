@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-015 | Audit | AccessAuditWriter.RecordAsync (dự kiến) | Happy | REGRESSION | P1 | Unit chưa triển khai; mock IUnitOfWork đang mở transaction của thao tác gán vai trò. | Bản ghi nhật ký cho hành động RoleGranted với trạng thái trước và sau. | Dòng nhật ký được thêm qua chính IUnitOfWork đang mở, không mở kết nối riêng. Nếu transaction rollback thì dòng nhật ký cũng mất theo. | BR-RBAC-012/Then<br>TDD-RBAC-001/Architecture | Thao tác thành công và dấu vết phải cùng commit hoặc cùng mất. | [Chưa xác định] | Draft |
+| UT-RBAC-015 | Audit | AccessAuditWriter.RecordAsync | Happy | REGRESSION | P1 | Dùng IUnitOfWork của EF InMemory đang mở cho thao tác gán vai trò; chưa gọi CompleteAsync. | Bản ghi nhật ký cho hành động RoleGranted với trạng thái trước và sau. | Dòng nhật ký được thêm qua chính IUnitOfWork đang mở, không mở kết nối riêng. Nếu transaction rollback thì dòng nhật ký cũng mất theo. | BR-RBAC-012/Then<br>TDD-RBAC-001/Architecture | Thao tác thành công và dấu vết phải cùng commit hoặc cùng mất. Mã test: bmt-be.application.tests/usecases/audit/AccessAuditWriterTests.cs:RecordAsync_SuccessfulAction_AddsThroughOpenUnitOfWorkWithoutSaving. Mã test kiểm dòng nhật ký chưa có trong database trước CompleteAsync và có sau CompleteAsync; chưa mô phỏng rollback thật vì EF InMemory không có transaction. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-059 | Subscription / Supervision | SupervisionPolicy (dự kiến trong TDD-SUB-006).EnsureCanComplete | Branch | REGRESSION | P0 | Không cần mock. Grant Version=2, lần lượt State=Unassigned, CanceledByStaff, Completed. | EnsureCanComplete(grant, expectedVersion=2) | Cả ba trạng thái đều ném ConflictException với MessageCode=PackageStateConflict. Với State=Assigned thì không ném. | STORY-SUB-003/AC-011<br>BR-SUB-011/Then<br>TDD-SUB-006/Architecture | Chỉ gói đã gán mới được hoàn thành. | [Chưa phân công] | Draft |
+| UT-SUB-059 | Subscription / Supervision | SupervisionPolicy.EnsureCanComplete | Branch | REGRESSION | P0 | Không cần mock. Grant Version=2, lần lượt State=Unassigned, CanceledByStaff, Completed. | EnsureCanComplete(grant, expectedVersion=2) | Cả ba trạng thái đều ném ConflictException với MessageCode=PackageStateConflict. Với State=Assigned thì không ném. | STORY-SUB-003/AC-011<br>BR-SUB-011/Then<br>TDD-SUB-006/Architecture | Chỉ gói đã gán mới được hoàn thành. Test kiểm thêm gói Assigned thì không ném. Mã test: bmt-be.application.tests/usecases/subscription/SupervisionPolicyTests.cs:EnsureCanComplete_StateNotAssigned_ThrowsPackageStateConflict, EnsureCanComplete_AssignedGrant_IsAllowed. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 

@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-002 | Authorization | PermissionClaimBuilder.Build (dự kiến) | Boundary | REGRESSION | P1 | Unit chưa triển khai; mock nguồn đọc vai trò trả về danh sách rỗng. | UserId của tài khoản chưa được gán vai trò nào. | Trả danh sách quyền rỗng; không ném ngoại lệ. Token phát hành cho người này không có claim perm nào. | BR-RBAC-001/Then | Không giữ vai trò nào thì không có quyền nào; kiểm cận dưới. | [Chưa xác định] | Draft |
+| UT-RBAC-002 | Authorization | AccessClaimsBuilder.BuildAsync | Boundary | REGRESSION | P1 | Dữ liệu dựng trên EF InMemory; tài khoản không có dòng UserRole nào. | UserId của tài khoản chưa được gán vai trò nào. | Trả danh sách quyền rỗng; không ném ngoại lệ. Token phát hành cho người này không có claim perm nào. | BR-RBAC-001/Then | Không giữ vai trò nào thì không có quyền nào; kiểm cận dưới. Mã test: bmt-be.application.tests/usecases/authorization/AccessClaimsBuilderTests.cs:BuildAsync_NoRoles_ReturnsNoPermissionClaims. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

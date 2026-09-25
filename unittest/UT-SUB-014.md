@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-014 | Subscription / Entitlement | PeriodPolicy (dự kiến trong TDD) | Boundary | REGRESSION | P0 | Múi giờ Asia/Ho_Chi_Minh | Bắt đầu 31/01/2026 10:00; Month | Kết thúc 28/02/2026 10:00 giờ Việt Nam. | BR-SUB-014/Then<br>TDD-SUB-002/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. | [Chưa phân công] | Draft |
+| UT-SUB-014 | Subscription / Entitlement | PeriodPolicy.ComputeScheduledEnd; CommitDesignPeriodCommandHandler | Boundary | REGRESSION | P0 | Múi giờ Asia/Ho_Chi_Minh. Test chính sách gọi thẳng ComputeScheduledEnd. Test handler dùng đồng hồ cố định lúc 31/01/2027 10:00 giờ Việt Nam và EF InMemory. | Bắt đầu 31/01/2026 10:00; Month | Kết thúc 28/02/2026 10:00 giờ Việt Nam. | BR-SUB-014/Then<br>TDD-SUB-002/Architecture | Kiểm tra nhánh nghiệp vụ; không chứng minh transaction hoặc khóa PostgreSQL. Test handler dùng ngày 31/01/2027 thay cho 2026 (cùng quy tắc lùi về ngày cuối tháng) và kiểm thêm kỳ bắt đầu đúng giờ đồng hồ. Mã test: bmt-be.application.tests/usecases/subscription/UsagePolicyTests.cs:ComputeScheduledEnd_MonthFromJanuary31_ClampsToEndOfFebruary (lớp PeriodPolicyTests); bmt-be.application.tests/usecases/subscription/SubscriptionCommandHandlerTests.cs:Commit_StartsAtClockTime_AndMonthEndClampsToLastDay. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 

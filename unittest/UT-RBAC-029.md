@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-029 | Staff | GeneratedPasswordFactory.Create (dự kiến) | Happy | REGRESSION | P1 | Unit chưa triển khai; dùng bộ sinh số ngẫu nhiên an toàn mật mã của .NET, không dùng Random. | Gọi sinh mật khẩu cho một tài khoản nhân viên mới. | Chuỗi trả về vượt được ràng buộc độ mạnh mà validator đổi mật khẩu hiện có đang áp dụng. Độ dài và bộ ký tự cụ thể chốt khi triển khai. | BR-RBAC-006/Then | Mật khẩu sinh ra phải dùng được ngay với chính ràng buộc mà hệ thống đang áp cho người dùng. | [Chưa xác định] | Draft |
+| UT-RBAC-029 | Staff | GeneratedPasswordFactory.Create | Happy | REGRESSION | P1 | Dùng bộ sinh số ngẫu nhiên an toàn mật mã của .NET (RandomNumberGenerator), không dùng Random. | Gọi sinh mật khẩu cho một tài khoản nhân viên mới. | Chuỗi trả về vượt được ràng buộc độ mạnh mà validator đổi mật khẩu hiện có đang áp dụng. Độ dài và bộ ký tự cụ thể chốt khi triển khai. | BR-RBAC-006/Then | Mật khẩu sinh ra phải dùng được ngay với chính ràng buộc mà hệ thống đang áp cho người dùng. Mã test: bmt-be.application.tests/usecases/staff/GeneratedPasswordFactoryTests.cs:Create_Always_ProducesStringWithAllCharacterClasses. Mã test sinh 200 chuỗi và kiểm mỗi chuỗi có 16 ký tự không tính dấu gạch, có chữ thường, chữ hoa, chữ số và không có ký tự dễ nhầm O, 0, l, I, 1; chưa chạy chuỗi qua validator đổi mật khẩu. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

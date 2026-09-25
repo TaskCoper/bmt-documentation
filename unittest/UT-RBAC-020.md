@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-020 | Role | CreateRoleCommandValidator (dự kiến) | Error | REGRESSION | P1 | Unit chưa triển khai; validator đối chiếu danh sách mã quyền với hằng số PermissionNames trong code. | Danh sách quyền chứa một mã không có trong danh mục, ví dụ package.destroy. | Validator trả lỗi với mã PermissionCodeUnknown; request dừng ở pipeline validation và trả 422, không tới handler. | TDD-RBAC-001/Internal API | Mã quyền lạ phải bị chặn ở validator, đúng nhánh lỗi đầu vào 422 của repo. | [Chưa xác định] | Draft |
+| UT-RBAC-020 | Role | CreateRoleCommandValidator | Error | REGRESSION | P1 | Validator đối chiếu danh sách mã quyền với PermissionNames.AllCodes trong code. | Danh sách quyền chứa một mã không có trong danh mục, ví dụ package.destroy. | Validator trả lỗi với mã PermissionCodeUnknown; request dừng ở pipeline validation và trả 422, không tới handler. | TDD-RBAC-001/Internal API | Mã quyền lạ phải bị chặn ở validator, đúng nhánh lỗi đầu vào 422 của repo. Mã test: bmt-be.application.tests/usecases/role/RoleValidatorTests.cs:CreateRole_UnknownPermissionCode_FailsWithPermissionCodeUnknown. Mã test gọi thẳng validator nên chưa kiểm việc dừng ở pipeline, trả 422 và không tới handler. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

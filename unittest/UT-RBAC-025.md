@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-025 | Role | DeleteRoleHandler.Handle (dự kiến) | Happy | REGRESSION | P2 | Unit chưa triển khai; mock nguồn đếm trả về không còn ai giữ vai trò đích, Kind bằng Custom. | RoleId của vai trò tự tạo không còn người giữ. | Xóa dòng Role cùng các dòng RolePermission theo ràng buộc CASCADE, và sinh bản ghi nhật ký RoleDeleted có TargetLabel là tên vai trò. | STORY-RBAC-001/ALT-02 | Nhánh xóa hợp lệ, đối chứng với ca từ chối khi còn người giữ. | [Chưa xác định] | Draft |
+| UT-RBAC-025 | Role | DeleteRoleCommandHandler.Handle | Happy | REGRESSION | P2 | Dữ liệu dựng trên EF InMemory; vai trò đích có Kind bằng Custom và không còn ai giữ. IAccessAuditWriter là mock. | RoleId của vai trò tự tạo không còn người giữ. | Xóa dòng Role cùng các dòng RolePermission theo ràng buộc CASCADE, và sinh bản ghi nhật ký RoleDeleted có TargetLabel là tên vai trò. | STORY-RBAC-001/ALT-02 | Nhánh xóa hợp lệ, đối chứng với ca từ chối khi còn người giữ. Mã test: bmt-be.application.tests/usecases/role/RoleCommandHandlerTests.cs:Delete_RoleWithNoMembers_DeletesAndAuditsWithRoleName. Vai trò trong mã test không có quyền nào nên chưa kiểm việc xóa các dòng RolePermission theo CASCADE. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

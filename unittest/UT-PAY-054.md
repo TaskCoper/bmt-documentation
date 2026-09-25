@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-054 | Lifecycle | PackageLifecyclePolicy.Restore (dự kiến) | Boundary | REGRESSION | P1 | Design bị hủy,now=ScheduledEndsAt. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Restore. | PackageExpired, không đổi state/pointer/quota. | BR-SUB-025/Then<br>TDD-SUB-005/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
+| UT-PAY-054 | Lifecycle | PackageLifecyclePolicy.EnsureCanRestore | Boundary | REGRESSION | P1 | Design bị hủy, now=ScheduledEndsAt. Gọi thẳng chính sách, không cần mock. | Restore. | PackageExpired, không đổi state/pointer/quota. | BR-SUB-025/Then<br>TDD-SUB-005/Architecture | Hạn cũ giữ nguyên qua lần hủy nên kỳ có thể hết hạn trong lúc bị hủy; đúng mốc hết hạn thì không khôi phục được. Test kiểm mã PackageExpired. Chính sách không ghi dữ liệu; chưa có test handler kiểm state, con trỏ và quota giữ nguyên. Mã test: bmt-be.application.tests/usecases/subscription/PackageLifecycleTests.cs:Restore_ExpiredWhileCanceled_ThrowsExpired (lớp PackageLifecyclePolicyTests). | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

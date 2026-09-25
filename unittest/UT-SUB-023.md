@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-023 | Subscription / Entitlement | CommitDesignPeriodHandler (dự kiến trong TDD) | Branch | REGRESSION | P0 | Trusted commitment hợp lệ; đang dùng kỳ tháng | Mua chu kỳ năm | Kỳ năm bắt đầu ngay; nhận hạn mức năm một lần; không chờ kỳ tháng kết thúc. | BR-SUB-021/Then<br>TDD-SUB-002/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. | [Chưa phân công] | Draft |
+| UT-SUB-023 | Subscription / Entitlement | CommitDesignPeriodCommandHandler | Branch | REGRESSION | P0 | Trusted commitment hợp lệ; đang dùng kỳ tháng. Test cấp kỳ tháng (hạn mức tháng=5, năm=40) rồi gửi lệnh chu kỳ Year với ExpectedCurrentPeriodId là kỳ tháng; EF InMemory. | Mua chu kỳ năm | Kỳ năm bắt đầu ngay; nhận hạn mức năm một lần; không chờ kỳ tháng kết thúc. | BR-SUB-021/Then<br>TDD-SUB-002/Architecture | Kiểm tra nhánh nghiệp vụ bằng EF InMemory; không chứng minh transaction hoặc khóa PostgreSQL. Test kiểm kỳ năm bắt đầu không muộn hơn hiện tại, dài hơn 300 ngày, Limit=40 và con trỏ kỳ hiện hành trỏ kỳ năm. Mã test: bmt-be.application.tests/usecases/subscription/SubscriptionCommandHandlerTests.cs:Commit_SwitchingFromMonthToYear_StartsImmediatelyWithYearQuota. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 

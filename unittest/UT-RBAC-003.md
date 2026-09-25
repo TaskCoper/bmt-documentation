@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-003 | Authorization | PermissionClaimBuilder.Build (dự kiến) | Branch | REGRESSION | P2 | Unit chưa triển khai; mock trả hai vai trò cùng chứa mã commerce.read. | UserId của người giữ hai vai trò trùng một mã quyền. | Mã commerce.read xuất hiện đúng một lần trong kết quả; không sinh hai claim perm trùng nhau. | BR-RBAC-001/Then | Hợp quyền phải loại trùng, không phải nối danh sách. | [Chưa xác định] | Draft |
+| UT-RBAC-003 | Authorization | AccessClaimsBuilder.BuildAsync | Branch | REGRESSION | P2 | Dữ liệu dựng trên EF InMemory; hai vai trò của người dùng cùng chứa mã commerce.read. | UserId của người giữ hai vai trò trùng một mã quyền. | Mã commerce.read xuất hiện đúng một lần trong kết quả; không sinh hai claim perm trùng nhau. | BR-RBAC-001/Then | Hợp quyền phải loại trùng, không phải nối danh sách. Mã test: bmt-be.application.tests/usecases/authorization/AccessClaimsBuilderTests.cs:BuildAsync_TwoRolesSharingOnePermission_EmitsItOnce. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-059 | Assignment | TransferAssignmentHandler.Handle (dự kiến) | Error | REGRESSION | P2 | Unit chưa triển khai; dòng phân công đích đã có EffectiveToUtc, tức đã kết thúc. | assignmentId của dòng đã kết thúc và một toStaffUserId hợp lệ. | Ném ngoại lệ ánh xạ 409 với mã AssignmentAlreadyEnded. Không đổi dòng cũ và không tạo dòng mới. | TDD-RBAC-003/Internal API | Dòng đã kết thúc không quay lại trạng thái đang hiệu lực; chuyển giao phải bắt đầu từ dòng còn sống. | [Chưa xác định] | Draft |
+| UT-RBAC-059 | Assignment | TransferAssignmentCommandHandler.Handle | Error | REGRESSION | P2 | Handler đã có. Dữ liệu dựng trên EF InMemory; dòng phân công đích đã có EffectiveToUtc, tức đã kết thúc. | assignmentId của dòng đã kết thúc và một toStaffUserId hợp lệ. | Ném ngoại lệ ánh xạ 409 với mã AssignmentAlreadyEnded. Không đổi dòng cũ và không tạo dòng mới. | TDD-RBAC-003/Internal API | Dòng đã kết thúc không quay lại trạng thái đang hiệu lực; chuyển giao phải bắt đầu từ dòng còn sống. Mã test: bmt-be.application.tests/usecases/assignment/AssignmentCommandHandlerTests.cs:Transfer_AssignmentAlreadyEnded_Throws409AndChangesNothing. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

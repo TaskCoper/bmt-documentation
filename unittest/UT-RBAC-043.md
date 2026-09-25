@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-043 | Staff | ForceLogoutHandler.Handle (dự kiến) | Happy | REGRESSION | P1 | Unit chưa triển khai; tài khoản đích đang Active với SecurityStamp bằng stamp-1. | UserId của tài khoản cần buộc đăng xuất. | Sinh SecurityStamp mới, xóa khóa Redis và gọi RevokeAllForUserAsync. Status vẫn là Active và các vai trò không đổi. | BR-RBAC-009/Then<br>STORY-RBAC-002/AC-007 | Buộc đăng xuất cắt phiên mà không khóa tài khoản; phân biệt với luồng khóa. | [Chưa xác định] | Draft |
+| UT-RBAC-043 | Staff | ForceLogoutCommandHandler.Handle | Happy | REGRESSION | P1 | Dữ liệu dựng trên EF InMemory; tài khoản đích đang Active với SecurityStamp bằng stamp-1. ISecurityStampService, ISessionTokenStore và IAccessAuditWriter là mock; hàng chờ sau commit chạy sau CompleteAsync. | UserId của tài khoản cần buộc đăng xuất. | Sinh SecurityStamp mới, xóa khóa Redis và gọi RevokeAllForUserAsync. Status vẫn là Active và các vai trò không đổi. | BR-RBAC-009/Then<br>STORY-RBAC-002/AC-007 | Buộc đăng xuất cắt phiên mà không khóa tài khoản; phân biệt với luồng khóa. Mã test: bmt-be.application.tests/usecases/staff/StaffSessionCommandHandlerTests.cs:ForceLogout_ActiveStaff_CutsSessionsWithoutChangingStatus. Mã test kiểm SecurityStamp mới, Status vẫn Active và RevokeAllForUserAsync được gọi; chưa kiểm lời xóa khóa Redis và các vai trò không đổi. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

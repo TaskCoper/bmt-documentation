@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-011 | Authorization | PrivilegeGuard.EnsureCanGrant (dự kiến) | Branch | REGRESSION | P1 | Unit chưa triển khai; người thao tác đang giữ vai trò có package.cancel. | Yêu cầu bỏ quyền package.cancel khỏi chính vai trò mà người thao tác đang giữ. | Không ném ngoại lệ. Rào chắn chỉ chặn thao tác làm tăng quyền của chính mình, không chặn thao tác làm giảm. | BR-RBAC-004/Then | Phân biệt hướng thay đổi quyền; tự hạ quyền là hợp lệ. | [Chưa xác định] | Draft |
+| UT-RBAC-011 | Authorization | PrivilegeGuard.EnsureCanGrant | Branch | REGRESSION | P1 | Gọi thẳng PrivilegeGuard. Người thao tác đang giữ vai trò có package.cancel; khi chỉ bỏ quyền, danh sách quyền thêm vào (permissionsBeingAdded) rỗng. | Yêu cầu bỏ quyền package.cancel khỏi chính vai trò mà người thao tác đang giữ. | Không ném ngoại lệ. Rào chắn chỉ chặn thao tác làm tăng quyền của chính mình, không chặn thao tác làm giảm. | BR-RBAC-004/Then | Phân biệt hướng thay đổi quyền; tự hạ quyền là hợp lệ. Mã test: bmt-be.application.tests/usecases/authorization/PrivilegeGuardTests.cs:EnsureCanGrant_ActorRemovesPermissionFromOwnRole_DoesNotThrow. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

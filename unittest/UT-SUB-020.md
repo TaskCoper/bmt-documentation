@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-020 | Subscription / Entitlement | QuotaPolicy (dự kiến trong TDD) | Error | REGRESSION | P0 | Không có quota của quyền yêu cầu | Kiểm tra design.generate | Từ chối EntitlementMissing; không suy ra quyền từ Boolean khác. | BR-SUB-005/Then<br>TDD-SUB-002/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. | [Chưa phân công] | Draft |
+| UT-SUB-020 | Subscription / Entitlement | QuotaPolicy.EnsureCanReserve | Error | REGRESSION | P0 | Không có quota của quyền yêu cầu: truyền quota=null cho một kỳ Active còn hiệu lực. | Kiểm tra design.generate | Từ chối EntitlementMissing; không suy ra quyền từ Boolean khác. | BR-SUB-005/Then<br>TDD-SUB-002/Architecture | Kiểm nhánh nghiệp vụ ở chính sách; không chứng minh transaction hoặc khóa PostgreSQL. Test kiểm NotPermissionException mã EntitlementMissing. Mã test: bmt-be.application.tests/usecases/subscription/UsagePolicyTests.cs:Reserve_QuotaMissingForBenefit_ThrowsEntitlementMissing (lớp QuotaPolicyTests). | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 

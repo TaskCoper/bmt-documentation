@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-060 | Lifecycle | RestorePackageHandler giữ counters (dự kiến) | Branch | REGRESSION | P1 | Lúc hủy Used2 Reserved1; tác vụ cũ hoàn tất trong khi hủy thành Used3 Reserved0. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Restore hợp lệ. | Giữ Used3 Reserved0, không lấy snapshot lúc hủy để đảo quyết toán. | STORY-SUB-005/AC-014<br>TDD-SUB-005/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
+| UT-PAY-060 | Lifecycle | RestorePackageCommandHandler — giữ bộ đếm hiện tại | Branch | REGRESSION | P1 | EF Core InMemory qua InMemoryDbFixture, dùng IUnitOfWork thật. Kỳ thiết kế có quota Limit=5, Used=2, Reserved=1 lúc hủy. Sau khi hủy, test sửa quota thành Used=3, Reserved=0 để mô phỏng tác vụ cũ hoàn tất trong lúc gói bị hủy. | Khôi phục hợp lệ với expectedVersion=2. | Giữ Used=3, Reserved=0; không lấy số lúc hủy để đảo quyết toán. | STORY-SUB-005/AC-014<br>TDD-SUB-005/Architecture | Mã test: bmt-be.application.tests/usecases/subscription/PackageLifecycleTests.cs:Restore_KeepsCountersChangedWhileCanceled. Quyết toán trong lúc hủy được mô phỏng bằng cách sửa dữ liệu, không chạy SettleDesignUsageCommandHandler. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

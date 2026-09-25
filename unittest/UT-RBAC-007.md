@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-007 | Authorization | SecurityStampValidator.ValidateAsync (dự kiến) | Error | REGRESSION | P0 | Unit chưa triển khai; mock Redis trả stamp-1. | Token hợp lệ về chữ ký và hạn nhưng không mang claim stamp. | Xác thực bị từ chối với 401; không mặc định cho qua khi thiếu claim. | TDD-RBAC-001/Architecture | Thiếu claim phải là từ chối, không phải bỏ qua bước kiểm. | [Chưa xác định] | Draft |
+| UT-RBAC-007 | Authorization | SecurityStampValidator.ValidateAsync | Error | REGRESSION | P0 | Mock ISecurityStampService trả stamp-1. | Token hợp lệ về chữ ký và hạn nhưng không mang claim stamp. | Xác thực bị từ chối với 401; không mặc định cho qua khi thiếu claim. | TDD-RBAC-001/Architecture | Thiếu claim phải là từ chối, không phải bỏ qua bước kiểm. Mã test: bmt-be.application.tests/usecases/authorization/SecurityStampValidatorTests.cs:ValidateAsync_TokenWithoutStampClaim_Rejects. Mã test kiểm kết quả bị từ chối với FailureCode bằng InvalidAccessToken và ISecurityStampService không được gọi; chưa kiểm trạng thái 401 ở tầng ASP.NET Core. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

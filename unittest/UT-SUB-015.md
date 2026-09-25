@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-SUB-015 | Subscription / Entitlement | PeriodPolicy (dự kiến trong TDD) | Boundary | REGRESSION | P0 | Múi giờ Asia/Ho_Chi_Minh | Bắt đầu 29/02/2024 10:00; Year | Kết thúc 28/02/2025 10:00 giờ Việt Nam. | BR-SUB-014/Then<br>TDD-SUB-002/Architecture | Kiểm tra nhánh nghiệp vụ; mock không chứng minh transaction hoặc khóa PostgreSQL. | [Chưa phân công] | Draft |
+| UT-SUB-015 | Subscription / Entitlement | PeriodPolicy.ComputeScheduledEnd | Boundary | REGRESSION | P0 | Múi giờ Asia/Ho_Chi_Minh. Gọi thẳng chính sách, không cần mock. | Bắt đầu 29/02/2024 10:00; Year | Kết thúc 28/02/2025 10:00 giờ Việt Nam. | BR-SUB-014/Then<br>TDD-SUB-002/Architecture | Kiểm nhánh nghiệp vụ ở chính sách; không chứng minh transaction hoặc khóa PostgreSQL. Mã test: bmt-be.application.tests/usecases/subscription/UsagePolicyTests.cs:ComputeScheduledEnd_YearFromLeapDay_ClampsToFebruary28 (lớp PeriodPolicyTests). | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 
