@@ -1,13 +1,15 @@
 # Đối chiếu đặc tả kiểm thử tư vấn KTS
 
-Nội dung ba User Story và năm Business Rule đã được người dùng chốt trong hội thoại. Đây là đặc tả kiểm thử, chưa phải kết quả thực thi. Thông tin người phụ trách, reviewer và approver chưa được phân công; không có quy trình phê duyệt hồ sơ KTS trong sản phẩm.
+Nội dung ba User Story và năm Business Rule đã được người dùng chốt trong hội thoại. Đây là đặc tả kiểm thử, chưa phải kết quả thực thi. Reviewer và Approver của các ST là Tân Trần theo xác nhận ngày 25/09/2026; Owner kiểm thử chưa được phân công. Không có quy trình phê duyệt hồ sơ KTS trong sản phẩm.
+
+**Cập nhật 25/09/2026:** quyền quản trị tư vấn KTS theo STORY-RBAC-001 và BR-CONSULT-001 có mã kỹ thuật `consultation.manage` trong TDD-RBAC-001, dùng chung cho hồ sơ, category và xử lý yêu cầu; hệ thống kiểm theo mã quyền, không theo tên vai trò. Yêu cầu tư vấn miễn phí là kênh riêng, không thay cam kết tư vấn offline của gói (BR-CONSULT-002). Đã thêm ST-CONSULT-031 và ST-CONSULT-032 cho phần quyền này.
 
 | Tiêu chí nghiệm thu | System Test |
 | --- | --- |
-| [STORY-CONSULT-001/AC-001](../userstory/STORY-CONSULT-001.md#ac-001) | [ST-CONSULT-001](../systemtest/ST-CONSULT-001.md) |
+| [STORY-CONSULT-001/AC-001](../userstory/STORY-CONSULT-001.md#ac-001) | [ST-CONSULT-001](../systemtest/ST-CONSULT-001.md), [ST-CONSULT-031](../systemtest/ST-CONSULT-031.md) |
 | [STORY-CONSULT-001/AC-002](../userstory/STORY-CONSULT-001.md#ac-002) | [ST-CONSULT-002](../systemtest/ST-CONSULT-002.md) |
 | [STORY-CONSULT-001/AC-003](../userstory/STORY-CONSULT-001.md#ac-003) | [ST-CONSULT-003](../systemtest/ST-CONSULT-003.md) |
-| [STORY-CONSULT-001/AC-004](../userstory/STORY-CONSULT-001.md#ac-004) | [ST-CONSULT-004](../systemtest/ST-CONSULT-004.md) |
+| [STORY-CONSULT-001/AC-004](../userstory/STORY-CONSULT-001.md#ac-004) | [ST-CONSULT-004](../systemtest/ST-CONSULT-004.md), [ST-CONSULT-031](../systemtest/ST-CONSULT-031.md) |
 | [STORY-CONSULT-001/AC-005](../userstory/STORY-CONSULT-001.md#ac-005) | [ST-CONSULT-005](../systemtest/ST-CONSULT-005.md) |
 | [STORY-CONSULT-001/AC-006](../userstory/STORY-CONSULT-001.md#ac-006) | [ST-CONSULT-006](../systemtest/ST-CONSULT-006.md) |
 | [STORY-CONSULT-001/AC-007](../userstory/STORY-CONSULT-001.md#ac-007) | [ST-CONSULT-007](../systemtest/ST-CONSULT-007.md) |
@@ -26,17 +28,17 @@ Nội dung ba User Story và năm Business Rule đã được người dùng ch�
 | [STORY-CONSULT-002/AC-010](../userstory/STORY-CONSULT-002.md#ac-010) | [ST-CONSULT-020](../systemtest/ST-CONSULT-020.md) |
 | [STORY-CONSULT-002/AC-011](../userstory/STORY-CONSULT-002.md#ac-011) | [ST-CONSULT-021](../systemtest/ST-CONSULT-021.md) |
 | [STORY-CONSULT-002/AC-012](../userstory/STORY-CONSULT-002.md#ac-012) | [ST-CONSULT-022](../systemtest/ST-CONSULT-022.md) |
-| [STORY-CONSULT-003/AC-001](../userstory/STORY-CONSULT-003.md#ac-001) | [ST-CONSULT-023](../systemtest/ST-CONSULT-023.md) |
+| [STORY-CONSULT-003/AC-001](../userstory/STORY-CONSULT-003.md#ac-001) | [ST-CONSULT-023](../systemtest/ST-CONSULT-023.md), [ST-CONSULT-032](../systemtest/ST-CONSULT-032.md) |
 | [STORY-CONSULT-003/AC-002](../userstory/STORY-CONSULT-003.md#ac-002) | [ST-CONSULT-024](../systemtest/ST-CONSULT-024.md), [ST-CONSULT-029](../systemtest/ST-CONSULT-029.md) |
 | [STORY-CONSULT-003/AC-003](../userstory/STORY-CONSULT-003.md#ac-003) | [ST-CONSULT-025](../systemtest/ST-CONSULT-025.md) |
 | [STORY-CONSULT-003/AC-004](../userstory/STORY-CONSULT-003.md#ac-004) | [ST-CONSULT-026](../systemtest/ST-CONSULT-026.md) |
 | [STORY-CONSULT-003/AC-005](../userstory/STORY-CONSULT-003.md#ac-005) | [ST-CONSULT-027](../systemtest/ST-CONSULT-027.md) |
-| [STORY-CONSULT-003/AC-006](../userstory/STORY-CONSULT-003.md#ac-006) | [ST-CONSULT-028](../systemtest/ST-CONSULT-028.md) |
+| [STORY-CONSULT-003/AC-006](../userstory/STORY-CONSULT-003.md#ac-006) | [ST-CONSULT-028](../systemtest/ST-CONSULT-028.md), [ST-CONSULT-032](../systemtest/ST-CONSULT-032.md) |
 
-Ba mươi ca kiểm thử bao phủ 28 tiêu chí nghiệm thu, gồm cả gửi trùng giờ bằng hai phiên, thời gian biên, KTS bị ẩn trong lúc khách đang điền form, phân quyền, email lỗi rồi phục hồi và bảo vệ ghi chú nội bộ.
+Ba mươi hai ca kiểm thử bao phủ 28 tiêu chí nghiệm thu, gồm cả gửi trùng giờ bằng hai phiên, thời gian biên, KTS bị ẩn trong lúc khách đang điền form, phân quyền theo `consultation.manage`, email lỗi rồi phục hồi và bảo vệ ghi chú nội bộ.
 
 Phần đã kiểm tra trong mã nguồn: `User` có email và số điện thoại tùy chọn; `SendEmailEvent`, `SendEmailConsumer` và cấu hình message bus đã có luồng gửi nền và thử lại. Đây là phần dự kiến tái sử dụng, chưa chứng minh tính năng tư vấn đã triển khai.
 
-Khi thiết kế kỹ thuật cần xác định định dạng số liên lạc, giới hạn dữ liệu, danh sách giờ cụ thể trên frontend, quyền quản trị tương ứng và cấu hình thử lại email. Chưa đặt endpoint, schema hoặc ngưỡng ngoài yêu cầu đã chốt.
+Cách chọn và kiểm số liên lạc, kiểm giờ mong muốn theo UTC+7, endpoint, schema và cách thử lại email nay được mô tả trong [TDD-CONSULT-001](../tdd/TDD-CONSULT-001.md); quyền quản trị đã chốt là `consultation.manage`. Không đặt thêm ngưỡng ngoài yêu cầu đã chốt.
 
-Chưa sửa mã ứng dụng, chạy migration hoặc chạy kiểm thử. Phần chuẩn bị nghiệp vụ đã có US → BR → System Test; chưa có TDD hay Unit Test cho tính năng này.
+Chưa sửa mã ứng dụng, chạy migration hoặc chạy kiểm thử. Bộ tài liệu đã có US → BR → System Test, [TDD-CONSULT-001](../tdd/TDD-CONSULT-001.md) và 47 đặc tả UT-CONSULT-001 đến UT-CONSULT-047; tất cả là đặc tả chưa thực thi.

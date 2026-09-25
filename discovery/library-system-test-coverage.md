@@ -1,6 +1,8 @@
 # Truy vết System Test thư viện mẫu
 
-US và BR đã được người dùng chốt trong hội thoại. 27 ca dưới đây là đặc tả, chưa thực thi; không phải kết quả Pass. Reviewer/Approver: Tân Trần. Owner kiểm thử chưa xác định.
+US và BR đã được người dùng chốt trong hội thoại. 28 ca dưới đây là đặc tả, chưa thực thi; không phải kết quả Pass. Reviewer/Approver: Tân Trần. Owner kiểm thử chưa xác định.
+
+**Cập nhật 25/09/2026:** quyền quản lý thư viện mẫu theo STORY-RBAC-001 và BR-LIB-002 có mã kỹ thuật `library.manage` trong TDD-RBAC-001, không gắn phân công; ST-LIB-011 kiểm thêm nhân viên thuộc vai trò tùy chỉnh được cấp mã này. Đã thêm ST-LIB-028 kiểm việc mở mẫu lần đầu và thay đổi gói của cùng khách chạy đồng thời.
 
 | Tiêu chí | System Test |
 | --- | --- |
@@ -17,7 +19,7 @@ US và BR đã được người dùng chốt trong hội thoại. 27 ca dưới
 | STORY-LIB-002/AC-004 | [ST-LIB-015](../systemtest/ST-LIB-015.md) |
 | STORY-LIB-003/AC-001 | [ST-LIB-017](../systemtest/ST-LIB-017.md), [ST-LIB-027](../systemtest/ST-LIB-027.md) |
 | STORY-LIB-003/AC-002 | [ST-LIB-018](../systemtest/ST-LIB-018.md) |
-| STORY-LIB-003/AC-003 | [ST-LIB-019](../systemtest/ST-LIB-019.md) |
+| STORY-LIB-003/AC-003 | [ST-LIB-019](../systemtest/ST-LIB-019.md), [ST-LIB-028](../systemtest/ST-LIB-028.md) |
 | STORY-LIB-003/AC-004 | [ST-LIB-020](../systemtest/ST-LIB-020.md), [ST-LIB-021](../systemtest/ST-LIB-021.md) |
 | STORY-LIB-003/AC-005 | [ST-LIB-022](../systemtest/ST-LIB-022.md), [ST-LIB-023](../systemtest/ST-LIB-023.md), [ST-LIB-025](../systemtest/ST-LIB-025.md) |
 | STORY-LIB-003/AC-006 | [ST-LIB-024](../systemtest/ST-LIB-024.md) |

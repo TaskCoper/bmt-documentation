@@ -1,6 +1,14 @@
 # Khảo sát tính năng tạo dự toán
 
-Người dùng đã xác nhận “Ok tôi đã chốt US và BR” cho bộ tài liệu Tạo dự toán hiện tại. Bộ nghiệp vụ gồm năm User Story và bảy BR-PROJ, dùng lại quy tắc quyền/gói/lượt liên quan. Đã bổ sung 60 đặc tả System Test, gồm ba ca theo các quyết định xác nhận khi thiết kế TDD; xem [bảng truy vết](estimate-system-test-coverage.md). Đã soạn ba bản nháp TDD tại [bảng thiết kế](estimate-technical-design.md); chưa sửa mã ứng dụng hoặc thực thi test. Hợp đồng AI và phần rà soát phụ thuộc chưa hoàn tất được nêu rõ bên dưới.
+Người dùng đã xác nhận “Ok tôi đã chốt US và BR” cho bộ tài liệu Tạo dự toán hiện tại. Bộ nghiệp vụ gồm năm User Story và bảy BR-PROJ, dùng lại quy tắc quyền/gói/lượt liên quan. Đã bổ sung 70 đặc tả System Test, gồm ba ca theo các quyết định khi thiết kế TDD ngày 21/09/2026 và mười ca theo quyết định ngày 25/09/2026; xem [bảng truy vết](estimate-system-test-coverage.md). Đã soạn ba bản nháp TDD tại [bảng thiết kế](estimate-technical-design.md); chưa sửa mã ứng dụng hoặc thực thi test. Hợp đồng AI và phần rà soát phụ thuộc chưa hoàn tất được nêu rõ bên dưới.
+
+## Cập nhật ngày 25/09/2026
+
+- Chủ sở hữu được đổi tên bản dự toán bất cứ lúc nào, kể cả khi gói hết hạn, hết lượt, toàn bộ lượt còn lại đang bị giữ hoặc AI đang xử lý. Chỉ cần quyền sở hữu và tên hợp lệ; tên không phải đầu vào gửi AI. Các thông tin đầu vào khác giữ nguyên điều kiện gói, lượt và khóa sửa (BR-SUB-007 khoản 11, BR-PROJ-003, BR-PROJ-005).
+- Sau khi đổi tên, màn hình chủ sở hữu và trang xem qua link hiện tên mới; tệp PDF/Excel được xuất lại với tên mới, không tính lượt và không gọi AI (BR-PROJ-007 khoản 7, STORY-PROJ-003/AC-006).
+- Quản trị danh mục loại công trình và phong cách cần quyền riêng theo STORY-RBAC-001. Vai trò Admin có quyền này, nhưng hệ thống kiểm theo quyền chứ không theo tên vai trò (STORY-PROJ-005).
+- Gói giám sát gắn với công trình, một thực thể riêng khác bản dự toán (BR-SUB-007/Notes). Mục “Đã xác nhận” bên dưới ghi “dự án” trong tài liệu quyền/gói/lượt tương ứng với bản dự toán; cách đọc này chỉ đúng với gói thiết kế. Với gói giám sát, “dự án” đọc là công trình.
+- Các quyết định đã cập nhật vào US/BR, ST-PROJ-061 đến ST-PROJ-070 và UT-PROJ-049 đến UT-PROJ-061. Thiết kế kỹ thuật xem [bảng thiết kế](estimate-technical-design.md#cập-nhật-ngày-25092026).
 
 ## Bổ sung trong bước thiết kế TDD ngày 21/09/2026
 
@@ -103,7 +111,7 @@ Các hạng mục quan sát trực tiếp ở dự án Căn hộ thử nghiệm:
 ### Mã nguồn workspace
 
 - Workspace có `bmt-be/` và `bmt-documentation/`; chưa tìm thấy repository frontend của trang tham khảo.
-- `bmt-be/src/bmt-be.persistence/ApplicationDbContext.cs` hiện chỉ khai báo `DbSet<User>`.
+- `bmt-be/src/bmt-be.persistence/ApplicationDbContext.cs` lúc khảo sát chỉ khai báo `DbSet<User>`. Kiểm lại ngày 25/09/2026: đã có thêm RBAC, danh mục gói, kỳ thiết kế, lượt và gói giám sát; vẫn chưa có module bản dự toán.
 - Thư mục entity hiện có `User.cs`; thư mục API nghiệp vụ hiện có `apis/user/UserApi.cs`.
 - README backend mô tả nền tảng tài khoản/xác thực. Chưa có module dự án, xử lý AI, dự toán hoặc hồ sơ trong phần mã đã khảo sát.
 - Một số nội dung trong AGENTS.md backend mô tả kiến trúc và đường dẫn tài liệu cũ. Dùng `bmt-documentation/` theo chỉ dẫn workspace hiện tại; không coi thành phần lịch sử là thành phần đã triển khai.
@@ -131,7 +139,7 @@ Các hạng mục quan sát trực tiếp ở dự án Căn hộ thử nghiệm:
 - [BR-PROJ-006](../businessrule/BR-PROJ-006.md): link, QR và email dùng cùng quyền xem/tải, ngày hết hạn và cơ chế thu hồi.
 - [BR-PROJ-007](../businessrule/BR-PROJ-007.md): dự toán và hồ sơ dùng kết quả AI, hỗ trợ PDF/Excel, không tự tính nội dung chuyên môn tại backend.
 
-Đã làm rõ lưu tiến độ được phép thiếu dữ liệu, còn gửi AI phải đủ dữ liệu. Story dùng lại BR-SUB-007 về điều kiện tạo/lưu và BR-RBAC-005 về tài khoản khách hàng/nhân viên. Đã chốt giới hạn ảnh, mô tả và diện tích; một số luồng lỗi và thông tin phân công còn thiếu. Reviewer/Approver đã ghi Tân Trần. Chưa hoàn tất đối chiếu toàn bộ chuỗi tham chiếu của tài liệu liên quan; người dùng đã chốt nội dung US/BR trong hội thoại; 60 đặc tả ST đã được bổ sung, nhưng chưa coi toàn bộ phụ thuộc kỹ thuật hoặc chuỗi tài liệu ngoài phạm vi PROJ đã hoàn tất.
+Đã làm rõ lưu tiến độ được phép thiếu dữ liệu, còn gửi AI phải đủ dữ liệu. Story dùng lại BR-SUB-007 về điều kiện tạo/lưu và BR-RBAC-005 về tài khoản khách hàng/nhân viên. Đã chốt giới hạn ảnh, mô tả và diện tích; một số luồng lỗi và thông tin phân công còn thiếu. Reviewer/Approver đã ghi Tân Trần. Chưa hoàn tất đối chiếu toàn bộ chuỗi tham chiếu của tài liệu liên quan; người dùng đã chốt nội dung US/BR trong hội thoại; 70 đặc tả ST đã được bổ sung, nhưng chưa coi toàn bộ phụ thuộc kỹ thuật hoặc chuỗi tài liệu ngoài phạm vi PROJ đã hoàn tất.
 
 Phân chia Story của bản nháp: tạo/lưu đầu vào; gửi và theo dõi AI; xem dự toán, hồ sơ và tải tệp; quản lý chia sẻ và gửi email. Đã bổ sung [STORY-PROJ-003](../userstory/STORY-PROJ-003.md) cho xem dự toán, hồ sơ và PDF/Excel; [STORY-PROJ-004](../userstory/STORY-PROJ-004.md) cho link, QR, email và thu hồi. Đã bổ sung [STORY-PROJ-005](../userstory/STORY-PROJ-005.md) cho Admin quản lý danh mục, tầng/tum và hai nhóm phong cách; thay đổi chỉ áp dụng cho bản dự toán mới. Chưa tự định nghĩa API của bên AI.
 
@@ -211,10 +219,10 @@ Chưa ghi các câu trả lời còn thiếu thành Business Rule hoặc tiêu c
 
 ## Kiểm tra bản nháp và bàn giao
 
-- Năm Story hiện có tổng cộng 49 tiêu chí nghiệm thu. Các Story dẫn tới bảy BR mới và dùng lại quy tắc quyền/gói/lượt hiện có.
+- Lúc bàn giao bộ US/BR, năm Story có 49 tiêu chí nghiệm thu; sau các lần bổ sung ngày 21/09 và 25/09/2026, hiện có 53. Các Story dẫn tới bảy BR mới và dùng lại quy tắc quyền/gói/lượt hiện có.
 - Đã kiểm tra cấu trúc heading, mã trùng trong từng Story, giới hạn độ dài AC, metadata Reviewer/Approver, mã đích tham chiếu trực tiếp và đường dẫn Markdown của bộ PROJ. Lần kiểm tra không phát hiện lỗi ở các mục này; chưa chạy importer hoặc test ứng dụng.
 - BR-SUB-007 được bổ sung quyền xuất Excel và quản lý chia sẻ sau khi gói hết hạn. ST-PROJ-035 và ST-PROJ-046 đã đặc tả phần mở rộng; TDD và các tham chiếu ngoài PROJ vẫn cần rà soát tiếp. Không coi kiểm tra mã tồn tại là đã xác minh nội dung toàn bộ chuỗi.
-- Người dùng đã chốt US/BR trong hội thoại; đã tạo ST-PROJ-001 đến ST-PROJ-060. Các mục chờ hợp đồng AI, thiết kế tích hợp và phân công vẫn được giữ rõ. Tất cả ST là đặc tả Draft chưa chạy, không phải kết quả Pass.
+- Người dùng đã chốt US/BR trong hội thoại; đã tạo ST-PROJ-001 đến ST-PROJ-060, rồi bổ sung ST-PROJ-061 đến ST-PROJ-070 ngày 25/09/2026. Các mục chờ hợp đồng AI, thiết kế tích hợp và phân công vẫn được giữ rõ. Tất cả ST là đặc tả Draft chưa chạy, không phải kết quả Pass.
 - Điều kiện viết ST của skill prepare-feature đã được đáp ứng bằng xác nhận rõ của người dùng. Chưa import, publish, gán tài khoản hoặc thay trạng thái phê duyệt trên hệ thống quản lý tài liệu.
 
 Bảng [truy vết System Test](estimate-system-test-coverage.md) liệt kê từng ca, liên kết AC/luồng và các điều kiện chưa thể thực thi. Chốt US/BR không tự chốt những giá trị kỹ thuật còn trống hoặc đồng nghĩa cho phép triển khai code.

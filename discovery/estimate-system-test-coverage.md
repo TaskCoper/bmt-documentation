@@ -2,7 +2,9 @@
 
 Người dùng đã xác nhận “Ok tôi đã chốt US và BR” trong hội thoại. Phạm vi xác nhận gồm STORY-PROJ-001 đến STORY-PROJ-005, BR-PROJ-001 đến BR-PROJ-007 và các quy tắc quyền/gói/lượt được áp dụng trong các Story. Xác nhận này cho phép viết ST; không phải bằng chứng import, publish hay phê duyệt trên hệ thống quản lý tài liệu.
 
-Đã soạn 60 ca ST-PROJ-001 đến ST-PROJ-060, một ca mỗi file theo template System Test. Các ca có liên kết tới đủ 52 AC, 5 Main Flow và 31 nhánh ALT/EXC hiện tại. Đây là mức bao phủ của đặc tả, không phải kết quả chạy hay bằng chứng không còn lỗi.
+Đã soạn 70 ca ST-PROJ-001 đến ST-PROJ-070, một ca mỗi file theo template System Test. Các ca có liên kết tới đủ 53 AC, 5 Main Flow và 31 nhánh ALT/EXC hiện tại. Đây là mức bao phủ của đặc tả, không phải kết quả chạy hay bằng chứng không còn lỗi.
+
+**Cập nhật 25/09/2026:** người dùng xác nhận chủ sở hữu được đổi tên bản dự toán bất cứ lúc nào (BR-SUB-007 khoản 11), kể cả khi gói hết hạn, hết lượt, toàn bộ lượt còn lại đang bị giữ hoặc AI đang xử lý; tên không phải đầu vào gửi AI. Hồ sơ, link và tệp xuất sau đó dùng tên hiện tại (BR-PROJ-007 khoản 7, STORY-PROJ-003/AC-006). Khi dùng lại link còn hiệu lực mà khách chọn ngày khác, hệ thống giữ ngày cũ và báo rõ theo TDD-PROJ-003. ST-PROJ-061 đến ST-PROJ-070 kiểm các quyết định này. Quyền quản trị danh mục theo STORY-RBAC-001 có mã kỹ thuật `estimate.catalog.manage` trong TDD-RBAC-001.
 
 Reviewer và Approver: Tân Trần theo phân công đã xác nhận. Owner kiểm thử chưa xác định; tất cả ca giữ trạng thái Draft và chưa thực thi. Không sửa mã ứng dụng, chạy migration, gọi AI thật hoặc gửi email cho người nhận thật trong tác vụ này.
 
@@ -82,6 +84,16 @@ Reviewer và Approver: Tân Trần theo phân công đã xác nhận. Owner ki�
 | [ST-PROJ-058](../systemtest/ST-PROJ-058.md) | [STORY-PROJ-005](../userstory/STORY-PROJ-005.md) | Tên danh mục bắt buộc, tối đa 200 ký tự sau trim và được trùng | Main / EXC | P1 |
 | [ST-PROJ-059](../systemtest/ST-PROJ-059.md) | [STORY-PROJ-004](../userstory/STORY-PROJ-004.md) | Ngày hết hạn tính hết ngày Việt Nam và từ chối ngày đã qua | Main / EXC / NFR | P0 |
 | [ST-PROJ-060](../systemtest/ST-PROJ-060.md) | [STORY-PROJ-004](../userstory/STORY-PROJ-004.md) | Một link đang hiệu lực dùng chung, kể cả khi yêu cầu đồng thời | Main / ALT / Integration boundary | P0 |
+| [ST-PROJ-061](../systemtest/ST-PROJ-061.md) | [STORY-PROJ-001](../userstory/STORY-PROJ-001.md) | Gói hết hạn vẫn đổi tên, lưu đầu vào vẫn bị chặn | EXC | P1 |
+| [ST-PROJ-062](../systemtest/ST-PROJ-062.md) | [STORY-PROJ-001](../userstory/STORY-PROJ-001.md) | Hết lượt hoặc không có quyền tạo thiết kế vẫn đổi tên | EXC | P1 |
+| [ST-PROJ-063](../systemtest/ST-PROJ-063.md) | [STORY-PROJ-001](../userstory/STORY-PROJ-001.md) | Lượt còn lại đang bị giữ hết không chặn đổi tên | EXC | P1 |
+| [ST-PROJ-064](../systemtest/ST-PROJ-064.md) | [STORY-PROJ-002](../userstory/STORY-PROJ-002.md) | Đổi tên khi AI đang xử lý không đổi đầu vào đã gửi | EXC / Integration boundary | P0 |
+| [ST-PROJ-065](../systemtest/ST-PROJ-065.md) | [STORY-PROJ-001](../userstory/STORY-PROJ-001.md) | Bản đã thành công vẫn đổi tên, đầu vào vẫn khóa | EXC | P1 |
+| [ST-PROJ-066](../systemtest/ST-PROJ-066.md) | [STORY-PROJ-001](../userstory/STORY-PROJ-001.md) | Chỉ chủ sở hữu được đổi tên, link chia sẻ không có quyền đổi | EXC / NFR | P0 |
+| [ST-PROJ-067](../systemtest/ST-PROJ-067.md) | [STORY-PROJ-001](../userstory/STORY-PROJ-001.md) | Đổi tên vẫn kiểm tên bắt buộc và tối đa 200 ký tự | EXC | P1 |
+| [ST-PROJ-068](../systemtest/ST-PROJ-068.md) | [STORY-PROJ-001](../userstory/STORY-PROJ-001.md) | Đổi tên từ hai tab và gửi lại không ghi đè nhau | EXC / Integration boundary | P1 |
+| [ST-PROJ-069](../systemtest/ST-PROJ-069.md) | [STORY-PROJ-003](../userstory/STORY-PROJ-003.md) | Hồ sơ, link và tệp xuất lại theo tên hiện tại | Main / Integration boundary | P1 |
+| [ST-PROJ-070](../systemtest/ST-PROJ-070.md) | [STORY-PROJ-004](../userstory/STORY-PROJ-004.md) | Dùng lại link còn hiệu lực khi khách chọn ngày khác | ALT | P1 |
 
 ## Truy vết tiêu chí nghiệm thu
 
@@ -92,12 +104,12 @@ Reviewer và Approver: Tân Trần theo phân công đã xác nhận. Owner ki�
 | [STORY-PROJ-001/AC-003](../userstory/STORY-PROJ-001.md#ac-003) | [ST-PROJ-003](../systemtest/ST-PROJ-003.md) |
 | [STORY-PROJ-001/AC-004](../userstory/STORY-PROJ-001.md#ac-004) | [ST-PROJ-005](../systemtest/ST-PROJ-005.md) |
 | [STORY-PROJ-001/AC-005](../userstory/STORY-PROJ-001.md#ac-005) | [ST-PROJ-008](../systemtest/ST-PROJ-008.md) |
-| [STORY-PROJ-001/AC-006](../userstory/STORY-PROJ-001.md#ac-006) | [ST-PROJ-014](../systemtest/ST-PROJ-014.md), [ST-PROJ-015](../systemtest/ST-PROJ-015.md), [ST-PROJ-016](../systemtest/ST-PROJ-016.md), [ST-PROJ-030](../systemtest/ST-PROJ-030.md) |
-| [STORY-PROJ-001/AC-007](../userstory/STORY-PROJ-001.md#ac-007) | [ST-PROJ-017](../systemtest/ST-PROJ-017.md), [ST-PROJ-018](../systemtest/ST-PROJ-018.md) |
+| [STORY-PROJ-001/AC-006](../userstory/STORY-PROJ-001.md#ac-006) | [ST-PROJ-014](../systemtest/ST-PROJ-014.md), [ST-PROJ-015](../systemtest/ST-PROJ-015.md), [ST-PROJ-016](../systemtest/ST-PROJ-016.md), [ST-PROJ-030](../systemtest/ST-PROJ-030.md), [ST-PROJ-061](../systemtest/ST-PROJ-061.md), [ST-PROJ-062](../systemtest/ST-PROJ-062.md), [ST-PROJ-063](../systemtest/ST-PROJ-063.md) |
+| [STORY-PROJ-001/AC-007](../userstory/STORY-PROJ-001.md#ac-007) | [ST-PROJ-017](../systemtest/ST-PROJ-017.md), [ST-PROJ-018](../systemtest/ST-PROJ-018.md), [ST-PROJ-066](../systemtest/ST-PROJ-066.md) |
 | [STORY-PROJ-001/AC-008](../userstory/STORY-PROJ-001.md#ac-008) | [ST-PROJ-012](../systemtest/ST-PROJ-012.md), [ST-PROJ-013](../systemtest/ST-PROJ-013.md) |
 | [STORY-PROJ-001/AC-009](../userstory/STORY-PROJ-001.md#ac-009) | [ST-PROJ-006](../systemtest/ST-PROJ-006.md), [ST-PROJ-007](../systemtest/ST-PROJ-007.md) |
 | [STORY-PROJ-001/AC-010](../userstory/STORY-PROJ-001.md#ac-010) | [ST-PROJ-004](../systemtest/ST-PROJ-004.md) |
-| [STORY-PROJ-001/AC-011](../userstory/STORY-PROJ-001.md#ac-011) | [ST-PROJ-014](../systemtest/ST-PROJ-014.md), [ST-PROJ-021](../systemtest/ST-PROJ-021.md), [ST-PROJ-024](../systemtest/ST-PROJ-024.md) |
+| [STORY-PROJ-001/AC-011](../userstory/STORY-PROJ-001.md#ac-011) | [ST-PROJ-014](../systemtest/ST-PROJ-014.md), [ST-PROJ-021](../systemtest/ST-PROJ-021.md), [ST-PROJ-024](../systemtest/ST-PROJ-024.md), [ST-PROJ-065](../systemtest/ST-PROJ-065.md) |
 | [STORY-PROJ-001/AC-012](../userstory/STORY-PROJ-001.md#ac-012) | [ST-PROJ-008](../systemtest/ST-PROJ-008.md), [ST-PROJ-051](../systemtest/ST-PROJ-051.md) |
 | [STORY-PROJ-001/AC-013](../userstory/STORY-PROJ-001.md#ac-013) | [ST-PROJ-019](../systemtest/ST-PROJ-019.md) |
 | [STORY-PROJ-001/AC-014](../userstory/STORY-PROJ-001.md#ac-014) | [ST-PROJ-009](../systemtest/ST-PROJ-009.md) |
@@ -105,30 +117,31 @@ Reviewer và Approver: Tân Trần theo phân công đã xác nhận. Owner ki�
 | [STORY-PROJ-001/AC-016](../userstory/STORY-PROJ-001.md#ac-016) | [ST-PROJ-011](../systemtest/ST-PROJ-011.md) |
 | [STORY-PROJ-001/AC-017](../userstory/STORY-PROJ-001.md#ac-017) | [ST-PROJ-012](../systemtest/ST-PROJ-012.md), [ST-PROJ-013](../systemtest/ST-PROJ-013.md), [ST-PROJ-014](../systemtest/ST-PROJ-014.md) |
 | [STORY-PROJ-001/AC-018](../userstory/STORY-PROJ-001.md#ac-018) | [ST-PROJ-020](../systemtest/ST-PROJ-020.md) |
-| [STORY-PROJ-001/AC-019](../userstory/STORY-PROJ-001.md#ac-019) | [ST-PROJ-002](../systemtest/ST-PROJ-002.md) |
+| [STORY-PROJ-001/AC-019](../userstory/STORY-PROJ-001.md#ac-019) | [ST-PROJ-002](../systemtest/ST-PROJ-002.md), [ST-PROJ-061](../systemtest/ST-PROJ-061.md), [ST-PROJ-062](../systemtest/ST-PROJ-062.md), [ST-PROJ-063](../systemtest/ST-PROJ-063.md), [ST-PROJ-064](../systemtest/ST-PROJ-064.md), [ST-PROJ-065](../systemtest/ST-PROJ-065.md), [ST-PROJ-067](../systemtest/ST-PROJ-067.md), [ST-PROJ-068](../systemtest/ST-PROJ-068.md) |
 | [STORY-PROJ-001/AC-020](../userstory/STORY-PROJ-001.md#ac-020) | [ST-PROJ-005](../systemtest/ST-PROJ-005.md), [ST-PROJ-007](../systemtest/ST-PROJ-007.md) |
-| [STORY-PROJ-002/AC-001](../userstory/STORY-PROJ-002.md#ac-001) | [ST-PROJ-021](../systemtest/ST-PROJ-021.md), [ST-PROJ-030](../systemtest/ST-PROJ-030.md), [ST-PROJ-031](../systemtest/ST-PROJ-031.md), [ST-PROJ-032](../systemtest/ST-PROJ-032.md), [ST-PROJ-057](../systemtest/ST-PROJ-057.md) |
-| [STORY-PROJ-002/AC-002](../userstory/STORY-PROJ-002.md#ac-002) | [ST-PROJ-021](../systemtest/ST-PROJ-021.md) |
+| [STORY-PROJ-002/AC-001](../userstory/STORY-PROJ-002.md#ac-001) | [ST-PROJ-021](../systemtest/ST-PROJ-021.md), [ST-PROJ-030](../systemtest/ST-PROJ-030.md), [ST-PROJ-031](../systemtest/ST-PROJ-031.md), [ST-PROJ-032](../systemtest/ST-PROJ-032.md), [ST-PROJ-057](../systemtest/ST-PROJ-057.md), [ST-PROJ-064](../systemtest/ST-PROJ-064.md) |
+| [STORY-PROJ-002/AC-002](../userstory/STORY-PROJ-002.md#ac-002) | [ST-PROJ-021](../systemtest/ST-PROJ-021.md), [ST-PROJ-064](../systemtest/ST-PROJ-064.md) |
 | [STORY-PROJ-002/AC-003](../userstory/STORY-PROJ-002.md#ac-003) | [ST-PROJ-022](../systemtest/ST-PROJ-022.md), [ST-PROJ-023](../systemtest/ST-PROJ-023.md), [ST-PROJ-027](../systemtest/ST-PROJ-027.md), [ST-PROJ-030](../systemtest/ST-PROJ-030.md), [ST-PROJ-057](../systemtest/ST-PROJ-057.md) |
 | [STORY-PROJ-002/AC-004](../userstory/STORY-PROJ-002.md#ac-004) | [ST-PROJ-023](../systemtest/ST-PROJ-023.md), [ST-PROJ-024](../systemtest/ST-PROJ-024.md), [ST-PROJ-025](../systemtest/ST-PROJ-025.md), [ST-PROJ-026](../systemtest/ST-PROJ-026.md), [ST-PROJ-030](../systemtest/ST-PROJ-030.md) |
 | [STORY-PROJ-002/AC-005](../userstory/STORY-PROJ-002.md#ac-005) | [ST-PROJ-026](../systemtest/ST-PROJ-026.md), [ST-PROJ-027](../systemtest/ST-PROJ-027.md) |
 | [STORY-PROJ-002/AC-006](../userstory/STORY-PROJ-002.md#ac-006) | [ST-PROJ-028](../systemtest/ST-PROJ-028.md) |
 | [STORY-PROJ-002/AC-007](../userstory/STORY-PROJ-002.md#ac-007) | [ST-PROJ-029](../systemtest/ST-PROJ-029.md) |
 | [STORY-PROJ-003/AC-001](../userstory/STORY-PROJ-003.md#ac-001) | [ST-PROJ-033](../systemtest/ST-PROJ-033.md), [ST-PROJ-037](../systemtest/ST-PROJ-037.md), [ST-PROJ-057](../systemtest/ST-PROJ-057.md) |
-| [STORY-PROJ-003/AC-002](../userstory/STORY-PROJ-003.md#ac-002) | [ST-PROJ-034](../systemtest/ST-PROJ-034.md), [ST-PROJ-037](../systemtest/ST-PROJ-037.md), [ST-PROJ-057](../systemtest/ST-PROJ-057.md) |
+| [STORY-PROJ-003/AC-002](../userstory/STORY-PROJ-003.md#ac-002) | [ST-PROJ-034](../systemtest/ST-PROJ-034.md), [ST-PROJ-037](../systemtest/ST-PROJ-037.md), [ST-PROJ-057](../systemtest/ST-PROJ-057.md), [ST-PROJ-069](../systemtest/ST-PROJ-069.md) |
 | [STORY-PROJ-003/AC-003](../userstory/STORY-PROJ-003.md#ac-003) | [ST-PROJ-035](../systemtest/ST-PROJ-035.md) |
 | [STORY-PROJ-003/AC-004](../userstory/STORY-PROJ-003.md#ac-004) | [ST-PROJ-036](../systemtest/ST-PROJ-036.md) |
 | [STORY-PROJ-003/AC-005](../userstory/STORY-PROJ-003.md#ac-005) | [ST-PROJ-038](../systemtest/ST-PROJ-038.md) |
+| [STORY-PROJ-003/AC-006](../userstory/STORY-PROJ-003.md#ac-006) | [ST-PROJ-069](../systemtest/ST-PROJ-069.md) |
 | [STORY-PROJ-004/AC-001](../userstory/STORY-PROJ-004.md#ac-001) | [ST-PROJ-039](../systemtest/ST-PROJ-039.md), [ST-PROJ-057](../systemtest/ST-PROJ-057.md), [ST-PROJ-060](../systemtest/ST-PROJ-060.md) |
-| [STORY-PROJ-004/AC-002](../userstory/STORY-PROJ-004.md#ac-002) | [ST-PROJ-039](../systemtest/ST-PROJ-039.md), [ST-PROJ-042](../systemtest/ST-PROJ-042.md), [ST-PROJ-047](../systemtest/ST-PROJ-047.md), [ST-PROJ-057](../systemtest/ST-PROJ-057.md) |
+| [STORY-PROJ-004/AC-002](../userstory/STORY-PROJ-004.md#ac-002) | [ST-PROJ-039](../systemtest/ST-PROJ-039.md), [ST-PROJ-042](../systemtest/ST-PROJ-042.md), [ST-PROJ-047](../systemtest/ST-PROJ-047.md), [ST-PROJ-057](../systemtest/ST-PROJ-057.md), [ST-PROJ-066](../systemtest/ST-PROJ-066.md), [ST-PROJ-069](../systemtest/ST-PROJ-069.md) |
 | [STORY-PROJ-004/AC-003](../userstory/STORY-PROJ-004.md#ac-003) | [ST-PROJ-040](../systemtest/ST-PROJ-040.md), [ST-PROJ-041](../systemtest/ST-PROJ-041.md), [ST-PROJ-042](../systemtest/ST-PROJ-042.md), [ST-PROJ-057](../systemtest/ST-PROJ-057.md), [ST-PROJ-059](../systemtest/ST-PROJ-059.md) |
 | [STORY-PROJ-004/AC-004](../userstory/STORY-PROJ-004.md#ac-004) | [ST-PROJ-043](../systemtest/ST-PROJ-043.md), [ST-PROJ-057](../systemtest/ST-PROJ-057.md), [ST-PROJ-060](../systemtest/ST-PROJ-060.md) |
 | [STORY-PROJ-004/AC-005](../userstory/STORY-PROJ-004.md#ac-005) | [ST-PROJ-046](../systemtest/ST-PROJ-046.md) |
 | [STORY-PROJ-004/AC-006](../userstory/STORY-PROJ-004.md#ac-006) | [ST-PROJ-047](../systemtest/ST-PROJ-047.md) |
 | [STORY-PROJ-004/AC-007](../userstory/STORY-PROJ-004.md#ac-007) | [ST-PROJ-045](../systemtest/ST-PROJ-045.md) |
 | [STORY-PROJ-004/AC-008](../userstory/STORY-PROJ-004.md#ac-008) | [ST-PROJ-043](../systemtest/ST-PROJ-043.md), [ST-PROJ-044](../systemtest/ST-PROJ-044.md) |
-| [STORY-PROJ-004/AC-009](../userstory/STORY-PROJ-004.md#ac-009) | [ST-PROJ-059](../systemtest/ST-PROJ-059.md) |
-| [STORY-PROJ-004/AC-010](../userstory/STORY-PROJ-004.md#ac-010) | [ST-PROJ-060](../systemtest/ST-PROJ-060.md) |
+| [STORY-PROJ-004/AC-009](../userstory/STORY-PROJ-004.md#ac-009) | [ST-PROJ-059](../systemtest/ST-PROJ-059.md), [ST-PROJ-070](../systemtest/ST-PROJ-070.md) |
+| [STORY-PROJ-004/AC-010](../userstory/STORY-PROJ-004.md#ac-010) | [ST-PROJ-060](../systemtest/ST-PROJ-060.md), [ST-PROJ-070](../systemtest/ST-PROJ-070.md) |
 | [STORY-PROJ-005/AC-001](../userstory/STORY-PROJ-005.md#ac-001) | [ST-PROJ-048](../systemtest/ST-PROJ-048.md) |
 | [STORY-PROJ-005/AC-002](../userstory/STORY-PROJ-005.md#ac-002) | [ST-PROJ-049](../systemtest/ST-PROJ-049.md) |
 | [STORY-PROJ-005/AC-003](../userstory/STORY-PROJ-005.md#ac-003) | [ST-PROJ-048](../systemtest/ST-PROJ-048.md), [ST-PROJ-050](../systemtest/ST-PROJ-050.md) |
@@ -150,15 +163,15 @@ Reviewer và Approver: Tân Trần theo phân công đã xác nhận. Owner ki�
 | [STORY-PROJ-001/ALT-03](../userstory/STORY-PROJ-001.md#alt-03) | [ST-PROJ-003](../systemtest/ST-PROJ-003.md), [ST-PROJ-008](../systemtest/ST-PROJ-008.md) |
 | [STORY-PROJ-001/ALT-04](../userstory/STORY-PROJ-001.md#alt-04) | [ST-PROJ-009](../systemtest/ST-PROJ-009.md), [ST-PROJ-020](../systemtest/ST-PROJ-020.md) |
 | [STORY-PROJ-001/ALT-05](../userstory/STORY-PROJ-001.md#alt-05) | [ST-PROJ-010](../systemtest/ST-PROJ-010.md) |
-| [STORY-PROJ-001/EXC-01](../userstory/STORY-PROJ-001.md#exc-01) | [ST-PROJ-014](../systemtest/ST-PROJ-014.md), [ST-PROJ-015](../systemtest/ST-PROJ-015.md), [ST-PROJ-016](../systemtest/ST-PROJ-016.md), [ST-PROJ-017](../systemtest/ST-PROJ-017.md) |
-| [STORY-PROJ-001/EXC-02](../userstory/STORY-PROJ-001.md#exc-02) | [ST-PROJ-018](../systemtest/ST-PROJ-018.md) |
+| [STORY-PROJ-001/EXC-01](../userstory/STORY-PROJ-001.md#exc-01) | [ST-PROJ-014](../systemtest/ST-PROJ-014.md), [ST-PROJ-015](../systemtest/ST-PROJ-015.md), [ST-PROJ-016](../systemtest/ST-PROJ-016.md), [ST-PROJ-017](../systemtest/ST-PROJ-017.md), [ST-PROJ-061](../systemtest/ST-PROJ-061.md), [ST-PROJ-062](../systemtest/ST-PROJ-062.md), [ST-PROJ-063](../systemtest/ST-PROJ-063.md), [ST-PROJ-066](../systemtest/ST-PROJ-066.md), [ST-PROJ-067](../systemtest/ST-PROJ-067.md) |
+| [STORY-PROJ-001/EXC-02](../userstory/STORY-PROJ-001.md#exc-02) | [ST-PROJ-018](../systemtest/ST-PROJ-018.md), [ST-PROJ-066](../systemtest/ST-PROJ-066.md) |
 | [STORY-PROJ-001/EXC-03](../userstory/STORY-PROJ-001.md#exc-03) | [ST-PROJ-012](../systemtest/ST-PROJ-012.md), [ST-PROJ-013](../systemtest/ST-PROJ-013.md), [ST-PROJ-014](../systemtest/ST-PROJ-014.md) |
 | [STORY-PROJ-001/EXC-04](../userstory/STORY-PROJ-001.md#exc-04) | [ST-PROJ-011](../systemtest/ST-PROJ-011.md) |
 | [STORY-PROJ-002/Main Flow](../userstory/STORY-PROJ-002.md#main-flow) | [ST-PROJ-021](../systemtest/ST-PROJ-021.md), [ST-PROJ-022](../systemtest/ST-PROJ-022.md), [ST-PROJ-027](../systemtest/ST-PROJ-027.md), [ST-PROJ-030](../systemtest/ST-PROJ-030.md), [ST-PROJ-032](../systemtest/ST-PROJ-032.md), [ST-PROJ-057](../systemtest/ST-PROJ-057.md) |
 | [STORY-PROJ-002/ALT-01](../userstory/STORY-PROJ-002.md#alt-01) | [ST-PROJ-024](../systemtest/ST-PROJ-024.md), [ST-PROJ-025](../systemtest/ST-PROJ-025.md) |
 | [STORY-PROJ-002/ALT-02](../userstory/STORY-PROJ-002.md#alt-02) | [ST-PROJ-029](../systemtest/ST-PROJ-029.md) |
 | [STORY-PROJ-002/EXC-01](../userstory/STORY-PROJ-002.md#exc-01) | [ST-PROJ-025](../systemtest/ST-PROJ-025.md), [ST-PROJ-028](../systemtest/ST-PROJ-028.md), [ST-PROJ-031](../systemtest/ST-PROJ-031.md) |
-| [STORY-PROJ-002/EXC-02](../userstory/STORY-PROJ-002.md#exc-02) | [ST-PROJ-021](../systemtest/ST-PROJ-021.md) |
+| [STORY-PROJ-002/EXC-02](../userstory/STORY-PROJ-002.md#exc-02) | [ST-PROJ-021](../systemtest/ST-PROJ-021.md), [ST-PROJ-064](../systemtest/ST-PROJ-064.md) |
 | [STORY-PROJ-002/EXC-03](../userstory/STORY-PROJ-002.md#exc-03) | [ST-PROJ-023](../systemtest/ST-PROJ-023.md), [ST-PROJ-024](../systemtest/ST-PROJ-024.md), [ST-PROJ-026](../systemtest/ST-PROJ-026.md), [ST-PROJ-030](../systemtest/ST-PROJ-030.md) |
 | [STORY-PROJ-002/EXC-04](../userstory/STORY-PROJ-002.md#exc-04) | [ST-PROJ-026](../systemtest/ST-PROJ-026.md) |
 | [STORY-PROJ-003/Main Flow](../userstory/STORY-PROJ-003.md#main-flow) | [ST-PROJ-033](../systemtest/ST-PROJ-033.md), [ST-PROJ-034](../systemtest/ST-PROJ-034.md) |
@@ -166,7 +179,7 @@ Reviewer và Approver: Tân Trần theo phân công đã xác nhận. Owner ki�
 | [STORY-PROJ-003/EXC-01](../userstory/STORY-PROJ-003.md#exc-01) | [ST-PROJ-036](../systemtest/ST-PROJ-036.md) |
 | [STORY-PROJ-003/EXC-02](../userstory/STORY-PROJ-003.md#exc-02) | [ST-PROJ-037](../systemtest/ST-PROJ-037.md) |
 | [STORY-PROJ-003/EXC-03](../userstory/STORY-PROJ-003.md#exc-03) | [ST-PROJ-038](../systemtest/ST-PROJ-038.md) |
-| [STORY-PROJ-004/Main Flow](../userstory/STORY-PROJ-004.md#main-flow) | [ST-PROJ-039](../systemtest/ST-PROJ-039.md), [ST-PROJ-060](../systemtest/ST-PROJ-060.md) |
+| [STORY-PROJ-004/Main Flow](../userstory/STORY-PROJ-004.md#main-flow) | [ST-PROJ-039](../systemtest/ST-PROJ-039.md), [ST-PROJ-060](../systemtest/ST-PROJ-060.md), [ST-PROJ-070](../systemtest/ST-PROJ-070.md) |
 | [STORY-PROJ-004/ALT-01](../userstory/STORY-PROJ-004.md#alt-01) | [ST-PROJ-043](../systemtest/ST-PROJ-043.md) |
 | [STORY-PROJ-004/ALT-02](../userstory/STORY-PROJ-004.md#alt-02) | [ST-PROJ-040](../systemtest/ST-PROJ-040.md) |
 | [STORY-PROJ-004/ALT-03](../userstory/STORY-PROJ-004.md#alt-03) | [ST-PROJ-046](../systemtest/ST-PROJ-046.md) |
@@ -197,7 +210,7 @@ Reviewer và Approver: Tân Trần theo phân công đã xác nhận. Owner ki�
 
 ## Bản tài liệu dùng làm căn cứ
 
-Các mã SHA-256 dưới đây giữ nguyên mốc US/BR lúc soạn 57 ST ban đầu. Sau đó đã bổ sung ba quyết định và liên kết TDD; bảng này không đại diện nội dung file hiện tại, không phải số phiên bản hoặc lịch sử phê duyệt tự tạo. Mốc hiện tại được ghi riêng dưới đây.
+Các mã SHA-256 dưới đây giữ nguyên mốc US/BR lúc soạn 57 ST ban đầu. Sau đó đã bổ sung ba quyết định và liên kết TDD; bảng này không đại diện nội dung file hiện tại, không phải số phiên bản hoặc lịch sử phê duyệt tự tạo. Các mốc sau được ghi riêng bên dưới; mốc mới nhất là ngày 25/09/2026.
 
 | File | SHA-256 |
 |---|---|
@@ -232,3 +245,23 @@ Các mã SHA-256 dưới đây giữ nguyên mốc US/BR lúc soạn 57 ST ban �
 | [BR-PROJ-005](../businessrule/BR-PROJ-005.md) | `c298e1cce65e60e53695d853f79eab1dfed9cf246995fcaf5dae41198180e344` |
 | [BR-PROJ-006](../businessrule/BR-PROJ-006.md) | `7e91ac36df5072c150a542dd6f2d8ffafb5be68f665504407f9326eb87509cd4` |
 | [BR-PROJ-007](../businessrule/BR-PROJ-007.md) | `b9378df057426b79c7399527a5e90d2ad611694d1496609141e304014903815b` |
+
+## Mốc cập nhật ngày 25/09/2026
+
+Đã cập nhật theo các quyết định người dùng xác nhận ngày 25/09/2026: đổi tên bản dự toán, tên hiện tại trên hồ sơ và tệp xuất, dùng lại link khi chọn ngày khác và mã quyền quản trị danh mục. BR-SUB-007 được thêm vào bảng vì khoản 11 là căn cứ của việc đổi tên. Các hash chỉ dùng đối chiếu nội dung, không xác nhận phê duyệt.
+
+| File | SHA-256 |
+|---|---|
+| [STORY-PROJ-001](../userstory/STORY-PROJ-001.md) | `a14136a360144b433fad42c77ec2e618b843799b55d047dbddcb9597c060f358` |
+| [STORY-PROJ-002](../userstory/STORY-PROJ-002.md) | `ae726535a94271215efe5e491c8b257f22bc03cdda67ed1282772734962a2bef` |
+| [STORY-PROJ-003](../userstory/STORY-PROJ-003.md) | `3ac04a8eeb8606051d623956b2c2d45962fc13a08bab84e7f65a59061747b680` |
+| [STORY-PROJ-004](../userstory/STORY-PROJ-004.md) | `f3aa5c4c9db5aabf050cee579d2469a34f3f094994fece08c1bb2c629acb33a6` |
+| [STORY-PROJ-005](../userstory/STORY-PROJ-005.md) | `cd568fdb18f572303f67e51199950e57fe34fff4be31dece37c299579554fad3` |
+| [BR-PROJ-001](../businessrule/BR-PROJ-001.md) | `49bdb37302aae0b36376791c52fcc4d45107976589752588ea08ff803fb72b32` |
+| [BR-PROJ-002](../businessrule/BR-PROJ-002.md) | `12752059af15c7776058fc9da9a5ed513d26a3b8391198a2e2fcfedb663fe741` |
+| [BR-PROJ-003](../businessrule/BR-PROJ-003.md) | `da4647919a4d239f9b0561b3be8dc382d7f9290844db0ba131ff8807a69d21c1` |
+| [BR-PROJ-004](../businessrule/BR-PROJ-004.md) | `bc104af242a7fc45ff91a76af63a9176bc8c55d9d4be4f3f6a6bbf0e38ab8680` |
+| [BR-PROJ-005](../businessrule/BR-PROJ-005.md) | `21eaa06d91d8a46300fcf80f549d4531a32e4c74fa139436bb652dbeef52c774` |
+| [BR-PROJ-006](../businessrule/BR-PROJ-006.md) | `7e91ac36df5072c150a542dd6f2d8ffafb5be68f665504407f9326eb87509cd4` |
+| [BR-PROJ-007](../businessrule/BR-PROJ-007.md) | `49c986448c5a6bd262f81f52828f1517e0d3752b129e665ce5888540cbbd6786` |
+| [BR-SUB-007](../businessrule/BR-SUB-007.md) | `304a9933681189a355bd860b7cf6feb04e02c4fd305f5401454468c99d97df39` |

@@ -1,5 +1,18 @@
 # Subscription và Entitlement BMT — ghi chú nghiệp vụ
 
+## Cập nhật đồng bộ — 25/09/2026
+
+Người dùng chốt thêm một loạt quyết định ngày 25/09/2026; US, BR, TDD và test đã được sửa theo. Các ghi chú lịch sử bên dưới giữ nguyên để tra cứu; khi khác nhau, dùng Business Rule hiện hành.
+
+- **Công trình thay cho “dự án” của gói giám sát.** Gói giám sát và phân công nhân viên gắn với công trình (`ConstructionSite`), một thực thể riêng khác bản dự toán, do khách tự tạo miễn phí. Story, BR và TDD của Công trình chưa được soạn. Chỗ nào bên dưới nói “dự án” của gói giám sát thì đọc là công trình.
+- **Hoàn thành và mở lại gói giám sát:** Admin hoặc nhân viên có `supervision.complete` đang phụ trách chính công trình đó. Không còn phân công mức khách hàng; mỗi công trình có tối đa một người phụ trách ([BR-SUB-011](../businessrule/BR-SUB-011.md), [BR-SUB-012](../businessrule/BR-SUB-012.md), [BR-RBAC-013](../businessrule/BR-RBAC-013.md)).
+- **Công bố gói giám sát** cần tên, giá và mô tả dịch vụ; gói giám sát không dùng danh mục quyền lợi ([BR-SUB-008](../businessrule/BR-SUB-008.md) khoản 7, STORY-SUB-002/AC-027 và EXC-06, ST-SUB-124). Quyền cấu hình gói có mã `plan.manage`.
+- **Phạm vi nghiệm thu quyền:** theo BR-SUB-008 khoản 12, các AC về quyền dạng mức hoặc kiểm tra quyền bật/tắt không nghiệm thu đợt này: STORY-SUB-001/AC-009, AC-010 và STORY-SUB-002/AC-001, AC-015, AC-016. ST-SUB-009, ST-SUB-010, ST-SUB-011, ST-SUB-067 và ST-SUB-068 đã rút khỏi nghiệm thu. Phối cảnh 3D vẫn là quyền bật/tắt để hiển thị, chưa kiểm khi Gen AI (khoản 9).
+- **Mốc chốt giá và quyền lợi** của mọi lần mua, kể cả đổi gói và mua lại, là lúc tạo đơn theo BR-PAY-001. Các ghi chú “thiết kế cùng thanh toán” bên dưới đã có câu trả lời này ([BR-SUB-004](../businessrule/BR-SUB-004.md), [BR-SUB-021](../businessrule/BR-SUB-021.md)).
+- **Đổi tên** dự án/bản dự toán được phép bất cứ lúc nào, không cần gói hay lượt ([BR-SUB-007](../businessrule/BR-SUB-007.md) khoản 11, ST-SUB-125).
+- **Tư vấn KTS miễn phí** là kênh riêng, không thay cam kết tư vấn offline của gói (BR-SUB-008/Notes, BR-CONSULT-002).
+- **Thiết kế kỹ thuật:** TDD-SUB-003 đã bị thay bởi [TDD-SUB-004](../tdd/TDD-SUB-004.md) (gán; đổi công trình đã bỏ ngày 25/09/2026), [TDD-SUB-005](../tdd/TDD-SUB-005.md) (hủy, khôi phục) và [TDD-SUB-006](../tdd/TDD-SUB-006.md) (hoàn thành, mở lại). UT-SUB-050 đã rút; UT-SUB-051 đến UT-SUB-074 theo TDD-SUB-006; UT-SUB-075 đến UT-SUB-078 thêm cho TDD-SUB-001 và UT-SUB-079 cho TDD-SUB-002. Sau khi chuyển sang phân công theo gói và bỏ đổi công trình (25/09/2026, lần 2): UT-SUB-070 đã rút; UT-SUB-052, 053, 057, 061, 062, 063, 066, 069, 074 đã sửa; thêm UT-SUB-080 và UT-SUB-081 cho TDD-SUB-006.
+
 ## Cập nhật thanh toán — 19/09/2026
 
 Đã lưu các quyết định mới tại [Thanh toán và quản lý gói đã mua](payment-packages.md), kèm 4 User Story, 9 Business Rule và 68 đặc tả System Test (đã bổ sung tra cứu quản trị). Các ghi chú lịch sử dưới đây còn nói “thanh toán thiết kế sau”, “giám sát bắt buộc gắn dự án”, “không có hạn gán” hoặc “không cho sửa dự án” phải đọc theo quyết định mới. TDD và Unit Test cũ chưa bao phủ thanh toán, hạn gán hoặc hủy/khôi phục; không coi đã sẵn sàng triển khai toàn bộ tích hợp. Các điểm biên thanh toán đã chốt và được lưu cùng 4 TDD, 70 đặc tả Unit Test tại [bàn giao thiết kế thanh toán](payment-technical-design.md). Chưa viết code hoặc chạy test ứng dụng.
@@ -12,15 +25,15 @@
 
 | Phạm vi / nguồn | Thiết kế | Đặc tả unit test | Kiểm chứng tích hợp bổ sung |
 | --- | --- | --- | --- |
-| STORY-SUB-002; BR-SUB-004/005/008/013/015 | [TDD-SUB-001](../tdd/TDD-SUB-001.md) | UT-SUB-001–013 | ST-SUB-113 |
-| STORY-SUB-001; BR-SUB-001/002/003/006/007/014/016/017/021 | [TDD-SUB-002](../tdd/TDD-SUB-002.md) | UT-SUB-014–049 | ST-SUB-109–112, ST-SUB-114 |
-| STORY-SUB-003; BR-SUB-004/006/009/011/012 | [TDD-SUB-003](../tdd/TDD-SUB-003.md) | UT-SUB-050–058 | ST-SUB-115–116 |
+| STORY-SUB-002; BR-SUB-004/005/008/013/015 | [TDD-SUB-001](../tdd/TDD-SUB-001.md) | UT-SUB-001–013, UT-SUB-075–078 | ST-SUB-113 |
+| STORY-SUB-001; BR-SUB-001/002/003/006/007/014/016/017/021 | [TDD-SUB-002](../tdd/TDD-SUB-002.md) | UT-SUB-014–049, UT-SUB-079 | ST-SUB-109–112, ST-SUB-114 |
+| STORY-SUB-003; BR-SUB-004/006/009/011/012 | [TDD-SUB-006](../tdd/TDD-SUB-006.md); [TDD-SUB-003](../tdd/TDD-SUB-003.md) đã bị thay | UT-SUB-051–069, UT-SUB-071–074, UT-SUB-080–081; UT-SUB-050 và UT-SUB-070 đã rút | ST-SUB-115–116 |
 
-Đã soạn 58 file trong `unittest/` và 8 ca tích hợp bổ sung trong `systemtest/`, mỗi file một test. Đây là đặc tả, chưa viết hoặc chạy mã test. Các ca tích hợp phải dùng PostgreSQL thật; mock chỉ kiểm tra nhánh xử lý. Người thực thi test chưa được phân công.
+Lần bàn giao đầu đã soạn 58 file trong `unittest/` và 8 ca tích hợp bổ sung trong `systemtest/`, mỗi file một test. Đến ngày 25/09/2026, bộ UT-SUB có 81 file, trong đó UT-SUB-050 và UT-SUB-070 đã rút. Đây là đặc tả, chưa viết hoặc chạy mã test. Các ca tích hợp phải dùng PostgreSQL thật; mock chỉ kiểm tra nhánh xử lý. Người thực thi test chưa được phân công.
 
 **Phạm vi lịch sử không đưa vào nghiệm thu hiện tại:** BR-SUB-018–020; xếp bậc/nâng/hạ và đổi gói chờ cuối kỳ; logic 3D và các mức tư vấn; BR-SUB-010 và bộ đếm giám sát offline. ST-SUB-010/011/068/069/102/104 cùng các AC cũ mô tả mức quyền, giới hạn đúng ba quyền hoặc chặn tính năng 3D phải đọc theo quyết định mới nhất ở đầu tài liệu. ST-SUB-070 chỉ giữ phần bộ kết quả đầy đủ, chưa nghiệm thu điều khiển 3D. Không coi phần lịch sử là yêu cầu triển khai bổ sung.
 
-**Cần làm rõ trước khi tích hợp đầy đủ:** contract thanh toán/cấp kỳ hợp lệ; module dự án và phân công nhân viên; nguồn nội dung mẫu; adapter AI/lưu đầu ra; giá trị timeout vận hành; danh sách tên quyền hiển thị bổ sung và cách hiển thị khi tắt. Các điểm này được giữ mở, không ngăn soạn thiết kế lõi. Chưa chạy migration, import hoặc sửa mã ứng dụng.
+**Cần làm rõ trước khi tích hợp đầy đủ:** contract thanh toán/cấp kỳ hợp lệ; module Công trình (trước gọi là dự án) và phân công nhân viên; nguồn nội dung mẫu; adapter AI/lưu đầu ra; giá trị timeout vận hành; danh sách tên quyền hiển thị bổ sung và cách hiển thị khi tắt. Các điểm này được giữ mở, không ngăn soạn thiết kế lõi. Chưa chạy migration, import hoặc sửa mã ứng dụng.
 
 
 ## Phạm vi hiện tại đã chốt: hai quyền có logic, các quyền khác bật/tắt

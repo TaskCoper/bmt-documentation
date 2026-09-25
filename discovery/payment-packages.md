@@ -2,6 +2,16 @@
 
 Cập nhật ngày 19/09/2026. Nguồn: các lượt trao đổi và xác nhận trực tiếp của người dùng trong phiên thiết kế thanh toán. Đây là bản lưu nghiệp vụ đã thống nhất, kèm User Story, Business Rule và đặc tả System Test; chưa phải kết quả triển khai hoặc phê duyệt.
 
+## Cập nhật ngày 25/09/2026
+
+Các quyết định người dùng xác nhận ngày 25/09/2026 thay một số điểm của biên bản ngày 19/09 bên dưới. Nội dung cũ được giữ để tra cứu; khi khác nhau, dùng Business Rule hiện hành.
+
+- **Gói giám sát gắn với công trình**, không gắn với bản dự toán. Công trình là thực thể riêng, khách tự tạo miễn phí và không cần gói thiết kế ([BR-SUB-022](../businessrule/BR-SUB-022.md)/Notes). Trong phần “Đã xác nhận” bên dưới, “dự án” của gói giám sát đọc là công trình, “sửa dự án” đọc là đổi công trình theo [BR-SUB-023](../businessrule/BR-SUB-023.md). Story, BR và TDD của Công trình chưa được soạn.
+- **Tài khoản nhân viên không mua gói**: không tạo hoặc hủy đơn, kể cả khi có quyền tra cứu ([BR-RBAC-005](../businessrule/BR-RBAC-005.md) khoản 5, STORY-PAY-001/EXC-08 và AC-028, ST-PAY-070).
+- **Quyền riêng của nhân viên** là mã quyền trong RBAC, không đòi phân công: `commerce.read` để tra cứu, `supervision.reassign` để đổi công trình, `package.cancel` và `package.restore` để hủy và khôi phục ([BR-RBAC-010](../businessrule/BR-RBAC-010.md) khoản 4). ST-PAY-069 kiểm việc thu hồi `commerce.read`.
+- **Gói giám sát** chốt tên, giá và mô tả dịch vụ theo đơn; không dùng danh mục quyền lợi ([BR-SUB-004](../businessrule/BR-SUB-004.md) khoản 5, [BR-SUB-008](../businessrule/BR-SUB-008.md) khoản 7).
+- Điểm 4 ở mục “Cần làm rõ” vẫn chưa được xác nhận: nhân viên gỡ gói về chưa gán hoặc đổi công trình của gói đang bị hủy.
+
 ## Đã xác nhận
 
 ### Mua gói và tạo đơn
@@ -89,12 +99,12 @@ Không cần hỏi lại các quyết định ở trên. Những điểm chưa c
 
 | Mục tiêu | User Story | Business Rule | System Test |
 | --- | --- | --- | --- |
-| Tạo đơn, thanh toán QR và cấp gói | [STORY-PAY-001](../userstory/STORY-PAY-001.md) | [BR-PAY-001](../businessrule/BR-PAY-001.md), [BR-PAY-002](../businessrule/BR-PAY-002.md), [BR-PAY-003](../businessrule/BR-PAY-003.md), [BR-PAY-004](../businessrule/BR-PAY-004.md) | ST-PAY-001–023 |
-| Gán và sửa dự án của gói giám sát | [STORY-SUB-004](../userstory/STORY-SUB-004.md) | [BR-SUB-022](../businessrule/BR-SUB-022.md), [BR-SUB-023](../businessrule/BR-SUB-023.md) | ST-PAY-024–033 |
+| Tạo đơn, thanh toán QR và cấp gói | [STORY-PAY-001](../userstory/STORY-PAY-001.md) | [BR-PAY-001](../businessrule/BR-PAY-001.md), [BR-PAY-002](../businessrule/BR-PAY-002.md), [BR-PAY-003](../businessrule/BR-PAY-003.md), [BR-PAY-004](../businessrule/BR-PAY-004.md) | ST-PAY-001–023, ST-PAY-070 |
+| Gán và đổi công trình của gói giám sát | [STORY-SUB-004](../userstory/STORY-SUB-004.md) | [BR-SUB-022](../businessrule/BR-SUB-022.md), [BR-SUB-023](../businessrule/BR-SUB-023.md) | ST-PAY-024–033 |
 | Hủy và khôi phục gói | [STORY-SUB-005](../userstory/STORY-SUB-005.md) | [BR-SUB-024](../businessrule/BR-SUB-024.md), [BR-SUB-025](../businessrule/BR-SUB-025.md) | ST-PAY-034–046 |
-| Tra cứu quản trị người mua, gói và giao dịch | [STORY-PAY-002](../userstory/STORY-PAY-002.md) | [BR-PAY-005](../businessrule/BR-PAY-005.md) | ST-PAY-047–054 |
+| Tra cứu quản trị người mua, gói và giao dịch | [STORY-PAY-002](../userstory/STORY-PAY-002.md) | [BR-PAY-005](../businessrule/BR-PAY-005.md) | ST-PAY-047–054, ST-PAY-069 |
 
-61 ca là đặc tả, chưa phải mã kiểm thử hoặc kết quả chạy. Mỗi ca có một file, đúng bảng 13 cột và liên kết Story/AC/BR. Các ví dụ giá/ngày/lượt là dữ liệu thử, không phải cấu hình bán thật.
+61 ca ban đầu và hai ca ST-PAY-069, ST-PAY-070 thêm ngày 25/09/2026 là đặc tả, chưa phải mã kiểm thử hoặc kết quả chạy. Mỗi ca có một file, đúng bảng 13 cột và liên kết Story/AC/BR. Các ví dụ giá/ngày/lượt là dữ liệu thử, không phải cấu hình bán thật.
 
 ## Ảnh hưởng tới tài liệu cũ
 
@@ -111,8 +121,9 @@ Không cần hỏi lại các quyết định ở trên. Những điểm chưa c
 ## Hiện trạng mã nguồn đã kiểm tra
 
 - [ApplicationDbContext](../../bmt-be/src/bmt-be.persistence/ApplicationDbContext.cs) chỉ khai báo DbSet User; chưa có bảng đơn, thanh toán hoặc gói trong file này.
-- [RoleNames](../../bmt-be/src/bmt-be.contract/constants/RoleNames.cs) có User/Admin và quyền xác thực; chưa có các quyền riêng cho sửa dự án, hủy và khôi phục gói.
+- `RoleNames.cs` lúc khảo sát có User/Admin và quyền xác thực; chưa có các quyền riêng cho sửa dự án, hủy và khôi phục gói. File này nay không còn trong code.
 - [ICurrentUserService](../../bmt-be/src/bmt-be.application/abstractions/ICurrentUserService.cs) hiện cung cấp UserId và Role. Không suy ra đã có nguồn phân quyền nhân viên/dự án.
+- **Kiểm lại ngày 25/09/2026:** các ghi nhận trên là hiện trạng lúc khảo sát ngày 19/09. Code hiện đã có RBAC với danh mục mã quyền ở `PermissionNames`, danh mục gói, kỳ thiết kế, vòng đời gói và gói giám sát (còn dùng cột `ProjectId`). Vẫn chưa có bảng đơn, giao dịch hoặc tích hợp SePay.
 - Tìm mã C# trong src với sepay/payment/subscription/entitlement chưa thấy module tương ứng. Không chạy restore, build, test, dịch vụ hoặc migration trong bước lưu tài liệu.
 
 ## Thứ tự chuẩn bị tiếp theo
@@ -140,7 +151,7 @@ Mọi AC mới có ít nhất một ca System Test bên dưới. Các ca từ ch
 | [ST-PAY-002](../systemtest/ST-PAY-002.md) | STORY-PAY-001/AC-002 | BR-PAY-001 | Giữ giá và quyền lợi của đơn |
 | [ST-PAY-003](../systemtest/ST-PAY-003.md) | STORY-PAY-001/AC-003 | BR-PAY-001 | Ngừng bán sau khi tạo đơn |
 | [ST-PAY-004](../systemtest/ST-PAY-004.md) | STORY-PAY-001/AC-004 | BR-PAY-001 | Giới hạn đơn thiết kế chờ |
-| [ST-PAY-005](../systemtest/ST-PAY-005.md) | STORY-PAY-001/AC-005 | BR-PAY-001 | Mua nhiều gói giám sát chưa có dự án |
+| [ST-PAY-005](../systemtest/ST-PAY-005.md) | STORY-PAY-001/AC-005 | BR-PAY-001 | Mua nhiều gói giám sát chưa có công trình |
 | [ST-PAY-006](../systemtest/ST-PAY-006.md) | STORY-PAY-001/AC-006 | BR-PAY-002 | Thiếu tiền và QR phần còn thiếu |
 | [ST-PAY-007](../systemtest/ST-PAY-007.md) | STORY-PAY-001/AC-007 | BR-PAY-002 | Cộng nhiều khoản đủ tiền |
 | [ST-PAY-008](../systemtest/ST-PAY-008.md) | STORY-PAY-001/AC-008 | BR-PAY-002 | Chuyển dư ngay lần đầu |
@@ -162,16 +173,17 @@ Mọi AC mới có ít nhất một ca System Test bên dưới. Các ca từ ch
 | [ST-PAY-024](../systemtest/ST-PAY-024.md) | STORY-SUB-004/AC-001 | BR-SUB-022 | Gán lần đầu không thu tiền lại |
 | [ST-PAY-025](../systemtest/ST-PAY-025.md) | STORY-SUB-004/AC-002 | BR-SUB-022 | Quá hạn chưa từng gán |
 | [ST-PAY-026](../systemtest/ST-PAY-026.md) | STORY-SUB-004/AC-003 | BR-SUB-022 | Gán đúng hạn vẫn phục vụ sau một năm |
-| [ST-PAY-027](../systemtest/ST-PAY-027.md) | STORY-SUB-004/AC-004 | BR-SUB-022 | Chặn dự án đã có gói |
-| [ST-PAY-028](../systemtest/ST-PAY-028.md) | STORY-SUB-004/AC-005 | BR-SUB-023 | Khách không tự gỡ hoặc đổi |
-| [ST-PAY-029](../systemtest/ST-PAY-029.md) | STORY-SUB-004/AC-006 | BR-SUB-023 | Nhân viên sửa dự án hợp lệ |
-| [ST-PAY-030](../systemtest/ST-PAY-030.md) | STORY-SUB-004/AC-007 | BR-SUB-023 | Sửa dự án sau một năm |
-| [ST-PAY-031](../systemtest/ST-PAY-031.md) | STORY-SUB-004/AC-008 | BR-SUB-023 | Từ chối sửa thiếu quyền hoặc lý do |
-| [ST-PAY-032](../systemtest/ST-PAY-032.md) | STORY-SUB-004/AC-009 | BR-SUB-023 | Từ chối đổi sang dự án khác khách hoặc đã có gói |
-| [ST-PAY-033](../systemtest/ST-PAY-033.md) | STORY-SUB-004/AC-010 | BR-SUB-022 | Không gán lần đầu sang dự án người khác |
+| [ST-PAY-027](../systemtest/ST-PAY-027.md) | STORY-SUB-004/AC-004 | BR-SUB-022 | Chặn công trình đã có gói |
+| [ST-PAY-028](../systemtest/ST-PAY-028.md) | STORY-SUB-004/AC-005 | BR-SUB-009 | Khách không tự gỡ hoặc đổi |
+| [ST-PAY-029](../systemtest/ST-PAY-029.md) | STORY-SUB-004/AC-006 | BR-SUB-023 | Đã rút ngày 25/09/2026: bỏ đổi công trình |
+| [ST-PAY-030](../systemtest/ST-PAY-030.md) | STORY-SUB-004/AC-007 | BR-SUB-023 | Đã rút ngày 25/09/2026: bỏ đổi công trình |
+| [ST-PAY-031](../systemtest/ST-PAY-031.md) | STORY-SUB-004/AC-008 | BR-SUB-023 | Đã rút ngày 25/09/2026: bỏ đổi công trình |
+| [ST-PAY-032](../systemtest/ST-PAY-032.md) | STORY-SUB-004/AC-009 | BR-SUB-023 | Đã rút ngày 25/09/2026: bỏ đổi công trình |
+| [ST-PAY-071](../systemtest/ST-PAY-071.md) | STORY-SUB-004/AC-013 | BR-SUB-009 | Không ai đổi được công trình của gói đã gán |
+| [ST-PAY-033](../systemtest/ST-PAY-033.md) | STORY-SUB-004/AC-010 | BR-SUB-022 | Không gán lần đầu sang công trình người khác |
 | [ST-PAY-034](../systemtest/ST-PAY-034.md) | STORY-SUB-005/AC-001 | BR-SUB-024 | Hủy gói thiết kế |
 | [ST-PAY-035](../systemtest/ST-PAY-035.md) | STORY-SUB-005/AC-002 | BR-SUB-024 | Hủy giám sát chưa gán |
-| [ST-PAY-036](../systemtest/ST-PAY-036.md) | STORY-SUB-005/AC-003 | BR-SUB-024 | Hủy giám sát đã gán giải phóng dự án |
+| [ST-PAY-036](../systemtest/ST-PAY-036.md) | STORY-SUB-005/AC-003 | BR-SUB-024 | Hủy giám sát đã gán giải phóng công trình |
 | [ST-PAY-037](../systemtest/ST-PAY-037.md) | STORY-SUB-005/AC-004 | BR-SUB-024 | Chặn hủy thiếu quyền hoặc lý do |
 | [ST-PAY-038](../systemtest/ST-PAY-038.md) | STORY-SUB-005/AC-005 | BR-SUB-025 | Khôi phục thiết kế giữ nguyên thời hạn và lượt |
 | [ST-PAY-039](../systemtest/ST-PAY-039.md) | STORY-SUB-005/AC-006 | BR-SUB-025 | Khôi phục giám sát chưa gán còn hạn |
@@ -197,7 +209,9 @@ Mọi AC mới có ít nhất một ca System Test bên dưới. Các ca từ ch
 | [ST-PAY-059](../systemtest/ST-PAY-059.md) | STORY-SUB-004/AC-011 | BR-SUB-022 | Biên/ngoại lệ bổ sung khi thiết kế kỹ thuật |
 | [ST-PAY-060](../systemtest/ST-PAY-060.md) | STORY-SUB-004/AC-012 | BR-SUB-022 | Biên/ngoại lệ bổ sung khi thiết kế kỹ thuật |
 | [ST-PAY-061](../systemtest/ST-PAY-061.md) | STORY-SUB-005/AC-014 | BR-SUB-024 | Biên/ngoại lệ bổ sung khi thiết kế kỹ thuật |
+| [ST-PAY-069](../systemtest/ST-PAY-069.md) | STORY-PAY-002/AC-003 | BR-RBAC-009 | Thu hồi quyền tra cứu có hiệu lực theo hạn token hoặc buộc đăng xuất |
+| [ST-PAY-070](../systemtest/ST-PAY-070.md) | STORY-PAY-001/AC-028 | BR-RBAC-005 | Tài khoản nhân viên không tạo hoặc hủy đơn mua gói |
 
 ## Bổ sung thiết kế kỹ thuật
 
-Xem [bàn giao TDD](payment-technical-design.md): 4 TDD, 70 Unit Test và 7 System Test tích hợp bổ sung ST-PAY-062–068. Số liệu 61 ca ở phần kiểm tra nghiệp vụ phía trên không bao gồm 7 ca kỹ thuật này.
+Xem [bàn giao TDD](payment-technical-design.md): 4 TDD, 74 Unit Test và 7 System Test tích hợp bổ sung ST-PAY-062–068. Số liệu 61 ca ở phần kiểm tra nghiệp vụ phía trên không bao gồm 7 ca kỹ thuật này và hai ca thêm ngày 25/09/2026.

@@ -6,7 +6,7 @@ Phạm vi chốt gồm thiết kế hiện có và các phần chờ tích hợp
 
 ## Mốc TDD được chốt
 
-Hash ghi nhận đúng nội dung TDD làm căn cứ cho các ca bên dưới. Giữ metadata Draft và các trường lịch sử import trống trong TDD; không tự giả lập phê duyệt bằng sửa Status.
+Hash dưới đây ghi nhận nội dung TDD làm căn cứ cho 48 ca ban đầu. Giữ metadata Draft và các trường lịch sử import trống trong TDD; không tự giả lập phê duyệt bằng sửa Status. Ba TDD đã được cập nhật ngày 25/09/2026; mốc mới ghi ở mục [Cập nhật ngày 25/09/2026](#cập-nhật-ngày-25092026).
 
 | TDD | SHA-256 |
 |---|---|
@@ -14,9 +14,9 @@ Hash ghi nhận đúng nội dung TDD làm căn cứ cho các ca bên dưới. G
 | [TDD-PROJ-002](../tdd/TDD-PROJ-002.md) | `cd8175f593ccdc4d742c8ac3eb1ec1a2e6b5a2502bc918156f815848538ad7cf` |
 | [TDD-PROJ-003](../tdd/TDD-PROJ-003.md) | `8fb511864f3ada842e5db0e425585bd2372b2e472019dca3001fc7a9374b2dd4` |
 
-## Danh sách 48 ca
+## Danh sách 61 ca
 
-Tất cả là đặc tả Draft, chưa thực thi. Reviewer/Approver: Tân Trần; Owner chưa xác định. Một file chứa một test và một dòng bảng; các biến thể trong Input là dữ liệu tham số hóa cùng hành vi.
+Tất cả là đặc tả Draft, chưa thực thi. Reviewer/Approver: Tân Trần; Owner chưa xác định. Một file chứa một test và một dòng bảng; các biến thể trong Input là dữ liệu tham số hóa cùng hành vi. UT-PROJ-049 đến UT-PROJ-061 được thêm ngày 25/09/2026.
 
 | Ca | Unit / hành vi | TDD | System Test liên quan |
 |---|---|---|---|
@@ -68,6 +68,19 @@ Tất cả là đặc tả Draft, chưa thực thi. Reviewer/Approver: Tân Tr�
 | [UT-PROJ-046](../unittest/UT-PROJ-046.md) | EstimateEmailWorker: Không coi trạng thái chưa rõ là gửi thất bại chắc chắn | [TDD-PROJ-003](../tdd/TDD-PROJ-003.md) | [ST-PROJ-045](../systemtest/ST-PROJ-045.md) |
 | [UT-PROJ-047](../unittest/UT-PROJ-047.md) | EstimateEmailWorker: Không tự gửi link thay thế cho yêu cầu cũ | [TDD-PROJ-003](../tdd/TDD-PROJ-003.md) | [ST-PROJ-040](../systemtest/ST-PROJ-040.md) |
 | [UT-PROJ-048](../unittest/UT-PROJ-048.md) | IEstimateMailSender — adapter dự kiến: Lỗi đóng kết nối không làm mất bằng chứng gửi | [TDD-PROJ-003](../tdd/TDD-PROJ-003.md) | [ST-PROJ-045](../systemtest/ST-PROJ-045.md) |
+| [UT-PROJ-049](../unittest/UT-PROJ-049.md) | RenameEstimateHandler: Đổi tên không phụ thuộc gói, lượt hay trạng thái AI | [TDD-PROJ-001](../tdd/TDD-PROJ-001.md) | [ST-PROJ-061](../systemtest/ST-PROJ-061.md) |
+| [UT-PROJ-050](../unittest/UT-PROJ-050.md) | RenameEstimateHandler: NameVersion cũ không ghi đè tên đã đổi ở nơi khác | [TDD-PROJ-001](../tdd/TDD-PROJ-001.md) | [ST-PROJ-068](../systemtest/ST-PROJ-068.md) |
+| [UT-PROJ-051](../unittest/UT-PROJ-051.md) | RenameEstimateHandler: Gửi lại đúng tên đang lưu thành công, không tăng NameVersion | [TDD-PROJ-001](../tdd/TDD-PROJ-001.md) | [ST-PROJ-068](../systemtest/ST-PROJ-068.md) |
+| [UT-PROJ-052](../unittest/UT-PROJ-052.md) | RenameEstimateHandler / validator: Từ chối trước khi ghi khi tên sai hoặc không phải tài khoản khách | [TDD-PROJ-001](../tdd/TDD-PROJ-001.md) | [ST-PROJ-067](../systemtest/ST-PROJ-067.md) |
+| [UT-PROJ-053](../unittest/UT-PROJ-053.md) | SaveEstimateInputHandler / validator: PUT /input không nhận tên | [TDD-PROJ-001](../tdd/TDD-PROJ-001.md) | Chưa liên kết System Test |
+| [UT-PROJ-054](../unittest/UT-PROJ-054.md) | EstimateGenerationInputFactory: Snapshot gửi AI không chứa tên bản dự toán | [TDD-PROJ-002](../tdd/TDD-PROJ-002.md) | [ST-PROJ-064](../systemtest/ST-PROJ-064.md) |
+| [UT-PROJ-055](../unittest/UT-PROJ-055.md) | RequestEstimateGenerationHandler: Đổi tên trước khi gửi AI không gây InputVersionConflict | [TDD-PROJ-002](../tdd/TDD-PROJ-002.md) | [ST-PROJ-064](../systemtest/ST-PROJ-064.md) |
+| [UT-PROJ-056](../unittest/UT-PROJ-056.md) | RequestEstimateExportHandler: Tìm hoặc tạo export theo NameVersion hiện tại | [TDD-PROJ-003](../tdd/TDD-PROJ-003.md) | [ST-PROJ-069](../systemtest/ST-PROJ-069.md) |
+| [UT-PROJ-057](../unittest/UT-PROJ-057.md) | EstimateExportWorker: Không render tệp theo tên đã cũ | [TDD-PROJ-003](../tdd/TDD-PROJ-003.md) | [ST-PROJ-069](../systemtest/ST-PROJ-069.md) |
+| [UT-PROJ-058](../unittest/UT-PROJ-058.md) | EstimateFileReader / đọc trạng thái export: Tệp theo tên cũ trả ExportOutdated | [TDD-PROJ-003](../tdd/TDD-PROJ-003.md) | [ST-PROJ-069](../systemtest/ST-PROJ-069.md) |
+| [UT-PROJ-059](../unittest/UT-PROJ-059.md) | EstimateResultReader: Hồ sơ chủ sở hữu và trang chia sẻ dùng tên hiện tại | [TDD-PROJ-003](../tdd/TDD-PROJ-003.md) | [ST-PROJ-069](../systemtest/ST-PROJ-069.md) |
+| [UT-PROJ-060](../unittest/UT-PROJ-060.md) | EstimateEmailWorker: Thư dựng bằng tên hiện tại lúc gửi | [TDD-PROJ-003](../tdd/TDD-PROJ-003.md) | [ST-PROJ-069](../systemtest/ST-PROJ-069.md) |
+| [UT-PROJ-061](../unittest/UT-PROJ-061.md) | GetEstimate query: canRename tách khỏi canEdit | [TDD-PROJ-001](../tdd/TDD-PROJ-001.md) | [ST-PROJ-061](../systemtest/ST-PROJ-061.md) |
 
 ## Phạm vi và phần cần kiểm chứng tiếp
 
@@ -83,4 +96,14 @@ Tất cả là đặc tả Draft, chưa thực thi. Reviewer/Approver: Tân Tr�
 
 ## Kiểm tra tài liệu đã thực hiện
 
-Đã kiểm cấu trúc 48 file: một test/một dòng dữ liệu, đúng 13 cột, mã và giá trị phân loại hợp lệ, Reviewer/Approver đúng phân công, Trace to khớp TEST_LINKS và section đích tồn tại. Các liên kết trong hai bảng bàn giao và ba hash TDD khớp file hiện tại. Không phát hiện lỗi trong các kiểm tra này; chưa chạy importer, mã Unit Test hoặc test tích hợp.
+Lần bàn giao đầu đã kiểm cấu trúc 48 file: một test/một dòng dữ liệu, đúng 13 cột, mã và giá trị phân loại hợp lệ, Reviewer/Approver đúng phân công, Trace to khớp TEST_LINKS và section đích tồn tại. Các liên kết trong hai bảng bàn giao và ba hash TDD khớp file tại thời điểm đó. Ngày 25/09/2026 đã kiểm lại cả 61 file bằng script đọc TEST_LINKS: không có lỗi cấu trúc, lệch Trace to hoặc section đích thiếu. Chưa chạy importer, mã Unit Test hoặc test tích hợp.
+
+## Cập nhật ngày 25/09/2026
+
+Ba TDD được sửa theo US/BR chốt ngày 25/09/2026 và người dùng xác nhận bản sửa trước khi cập nhật UT: API đổi tên riêng `PATCH /api/v1/estimates/{estimateId}/name` với `NameVersion`, bỏ tên khỏi snapshot gửi AI, xuất lại tệp khi tên đổi (`EstimateExport.NameVersion`, lỗi 409 `ExportOutdated`) và dùng lại link còn hiệu lực kèm `requestedExpiryApplied`. UT-PROJ-001, UT-PROJ-012 và UT-PROJ-038 được sửa theo thiết kế này; UT-PROJ-049 đến UT-PROJ-061 được thêm mới. Hash dưới đây là mốc TDD cho bộ 61 ca, chỉ dùng đối chiếu nội dung, không xác nhận phê duyệt.
+
+| TDD | SHA-256 |
+|---|---|
+| [TDD-PROJ-001](../tdd/TDD-PROJ-001.md) | `bd43872f877e36ff4887f40aad14198936f9ca0c51ad7d31b3b3e3191d0444a3` |
+| [TDD-PROJ-002](../tdd/TDD-PROJ-002.md) | `afd9b8dec70d37d103eccc86172dd87c6c44eb9c52f5030cfcf4bcceaa511e15` |
+| [TDD-PROJ-003](../tdd/TDD-PROJ-003.md) | `adaa88e334833cfbe9241e27ff6497212bfc29883020806388202a8a5f3aeff7` |

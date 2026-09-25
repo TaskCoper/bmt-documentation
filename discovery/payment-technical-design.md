@@ -1,15 +1,27 @@
 # Bàn giao thiết kế thanh toán và gói đã mua
 
-Đã lưu 4 TDD và 70 đặc tả Unit Test cho 4 User Story mới. Bộ System Test thanh toán hiện có 68 ca, gồm 7 ca bổ sung kiểm tra transaction và xử lý đồng thời. Tất cả là bản nháp thiết kế; chưa viết code ứng dụng, chạy test, tạo migration hoặc nhập vào Document First.
+Đã lưu 4 TDD và 74 đặc tả Unit Test cho 4 User Story mới. Bộ System Test thanh toán hiện có 70 ca, gồm 7 ca bổ sung kiểm tra transaction và xử lý đồng thời. Tất cả là bản nháp thiết kế, chưa nhập vào Document First. Kiểm code ngày 25/09/2026: phần gán, đổi, hủy và khôi phục gói (TDD-SUB-004, TDD-SUB-005) đã có handler và migration, trong đó gói giám sát còn dùng cột `ProjectId` của mô hình cũ; phần đơn, giao dịch và tra cứu (TDD-PAY-001, TDD-PAY-002) chưa có code. Chưa chạy các test trong bộ đặc tả này.
+
+## Cập nhật ngày 25/09/2026
+
+Bốn TDD được sửa theo US/BR người dùng chốt ngày 25/09/2026. Các thay đổi chính:
+
+- Gói giám sát gắn với **công trình**, một thực thể riêng khác bản dự toán do khách tự tạo. Tên kỹ thuật là `ConstructionSite`: cột `ConstructionSiteId`, `OfferKey = ConstructionSite` và cổng đọc `IConstructionSiteOwnershipReader` (dự kiến, thay `IProjectOwnershipReader`). Story, BR và TDD của Công trình chưa được soạn.
+- Tài khoản nhân viên không được tạo hoặc hủy đơn mua gói, kể cả khi có quyền tra cứu; hệ thống trả 403 theo BR-RBAC-005 (STORY-PAY-001/EXC-08, AC-028).
+- Mọi luồng đụng tới gói và lượt của một khách khóa `AccountCommerceState` trước, rồi mới tới kỳ, lượt và dữ liệu khác (TDD-PAY-001).
+- Gói giám sát chốt tên, giá và mô tả dịch vụ theo đơn qua revision, không dùng danh mục quyền lợi (BR-SUB-004 khoản 5, BR-SUB-008 khoản 7).
+- Thao tác nhân viên kiểm theo mã quyền trong danh mục 13 mã của TDD-RBAC-001: `commerce.read`, `package.cancel`, `package.restore`. Mã `supervision.reassign` đã bỏ ngày 25/09/2026 cùng với việc bỏ đổi công trình của gói (BR-SUB-009).
+
+Test bổ sung: ST-PAY-069 (thu hồi `commerce.read` có hiệu lực theo hạn token hoặc ngay khi buộc đăng xuất), ST-PAY-070 và UT-PAY-071 đến UT-PAY-074. Sau khi bỏ đổi công trình và chuyển sang phân công theo gói (25/09/2026, lần 2): UT-PAY-043, UT-PAY-045 đã rút; UT-PAY-040, 042, 044, 046, 048, 049, 064 đã sửa; thêm UT-PAY-075 đến UT-PAY-081. Các mục bên dưới giữ nội dung bàn giao ban đầu; chỗ nào nói “dự án” của gói giám sát thì đọc là công trình.
 
 ## Tài liệu theo chức năng
 
 | User Story | Quy tắc chính | TDD | Unit Test |
 | --- | --- | --- | --- |
-| [STORY-PAY-001](../userstory/STORY-PAY-001.md) | BR-PAY-001–004 | [TDD-PAY-001](../tdd/TDD-PAY-001.md) | UT-PAY-001–036 |
-| [STORY-SUB-004](../userstory/STORY-SUB-004.md) | BR-SUB-022–023 | [TDD-SUB-004](../tdd/TDD-SUB-004.md) | UT-PAY-037–048 |
-| [STORY-SUB-005](../userstory/STORY-SUB-005.md) | BR-SUB-024–025 | [TDD-SUB-005](../tdd/TDD-SUB-005.md) | UT-PAY-049–062 |
-| [STORY-PAY-002](../userstory/STORY-PAY-002.md) | BR-PAY-005 | [TDD-PAY-002](../tdd/TDD-PAY-002.md) | UT-PAY-063–070 |
+| [STORY-PAY-001](../userstory/STORY-PAY-001.md) | BR-PAY-001–004, BR-RBAC-005 | [TDD-PAY-001](../tdd/TDD-PAY-001.md) | UT-PAY-001–036, UT-PAY-071–074 |
+| [STORY-SUB-004](../userstory/STORY-SUB-004.md) | BR-SUB-022, BR-SUB-009 (BR-SUB-023 đã bỏ) | [TDD-SUB-004](../tdd/TDD-SUB-004.md) | UT-PAY-037–042, 044, 046–048, 075–077 (043, 045 đã rút) |
+| [STORY-SUB-005](../userstory/STORY-SUB-005.md) | BR-SUB-024–025 | [TDD-SUB-005](../tdd/TDD-SUB-005.md) | UT-PAY-049–062, 078–079 |
+| [STORY-PAY-002](../userstory/STORY-PAY-002.md) | BR-PAY-005 | [TDD-PAY-002](../tdd/TDD-PAY-002.md) | UT-PAY-063–070, 080–081 |
 
 ## Đã xác nhận
 
@@ -21,7 +33,7 @@
 
 ## Phương án kỹ thuật
 
-Lưu webhook vào cơ sở dữ liệu trước khi trả thành công. Worker xử lý dữ liệu đã lưu, tự thử lại khi lỗi. Khóa theo tài khoản và ràng buộc duy nhất của PostgreSQL bảo vệ tiền, cấp gói và liên kết dự án khi nhiều yêu cầu cùng đến. Tách trạng thái nhận tiền, cấp gói và hiệu lực gói để không nhầm “đã trả tiền” với “đang được sử dụng”.
+Lưu webhook vào cơ sở dữ liệu trước khi trả thành công. Worker xử lý dữ liệu đã lưu, tự thử lại khi lỗi. Khóa theo tài khoản và ràng buộc duy nhất của PostgreSQL bảo vệ tiền, cấp gói và liên kết công trình khi nhiều yêu cầu cùng đến. Tách trạng thái nhận tiền, cấp gói và hiệu lực gói để không nhầm “đã trả tiền” với “đang được sử dụng”.
 
 Đơn giữ bản giá/quyền lợi tại lúc tạo. Giao dịch lưu thời điểm thực tế riêng với thời điểm thứ tự đã áp dụng. Các thao tác nhân viên phải có quyền hiện hành, lý do và lịch sử trong cùng transaction. Tra cứu quản trị bao gồm giao dịch chưa khớp đơn, không có thao tác hoàn tiền hoặc gán giao dịch thủ công.
 
@@ -30,7 +42,7 @@ Lưu webhook vào cơ sở dữ liệu trước khi trả thành công. Worker x
 ## Thứ tự triển khai và điều kiện còn thiếu
 
 1. Hoàn thiện danh mục gói/revision/giá, kỳ và quota theo các TDD subscription, áp dụng phần thay đổi được ghi trong TDD thanh toán. Các bảng này chưa có trong backend đã khảo sát.
-2. Xây quyền nhân viên, transaction và nguồn dữ liệu dự án có kiểm tra chủ sở hữu. Chưa bật gán dự án nếu chưa có module dự án thật và cơ chế khóa tương thích.
+2. Xây quyền nhân viên, transaction và nguồn dữ liệu công trình có kiểm tra chủ sở hữu. Chưa bật gán công trình nếu chưa có module Công trình thật và cơ chế khóa tương thích.
 3. Triển khai đơn, tiếp nhận SePay, worker cấp gói và các thao tác gói; sau đó xây tra cứu quản trị.
 4. Cung cấp tài khoản ngân hàng, connection SePay, secret và cấu hình webhook của môi trường triển khai. Đối chiếu payload/chữ ký thực tế trước khi bật nhận tiền thật.
 5. Viết và chạy unit/integration/system test; không dùng mock để kết luận transaction PostgreSQL đã đúng.
@@ -39,9 +51,9 @@ Chưa mở phạm vi nhân viên gỡ gói về chưa gán hoặc sửa liên k�
 
 ## Căn cứ khảo sát
 
-- [ApplicationDbContext](../../bmt-be/src/bmt-be.persistence/ApplicationDbContext.cs) hiện chỉ có Users; không mô tả các bảng đề xuất như thành phần đã triển khai.
+- [ApplicationDbContext](../../bmt-be/src/bmt-be.persistence/ApplicationDbContext.cs) lúc khảo sát chỉ có Users; không mô tả các bảng đề xuất như thành phần đã triển khai. Kiểm lại ngày 25/09/2026: code đã có các bảng RBAC, danh mục gói, kỳ thiết kế, lượt, vòng đời gói, gói giám sát và phân công; vẫn chưa có bảng đơn, giao dịch hay `AccountCommerceState`.
 - [TransactionPipelineBehavior](../../bmt-be/src/bmt-be.application/behaviors/TransactionPipelineBehavior.cs) commit khi handler trả bình thường. Khi đã ghi dữ liệu rồi gặp lỗi cần hoàn tác, phải ném lỗi để transaction rollback, không chỉ trả Result.Failure.
-- [RoleNames](../../bmt-be/src/bmt-be.contract/constants/RoleNames.cs) chưa có quyền nghiệp vụ nhân viên trong thiết kế này.
+- `RoleNames.cs` lúc khảo sát chưa có quyền nghiệp vụ nhân viên trong thiết kế này. File này nay không còn; danh mục mã quyền nằm ở [PermissionNames](../../bmt-be/src/bmt-be.contract/constants/PermissionNames.cs) và mã vai trò hệ thống ở [RoleCodes](../../bmt-be/src/bmt-be.contract/constants/RoleCodes.cs).
 - **Cập nhật 20/09/2026:** mô hình quyền `StaffAccessProfile` và `StaffPermission` ghi trong biên bản này đã được thay bằng mô hình RBAC chuẩn ở [TDD-RBAC-001](../tdd/TDD-RBAC-001.md). Bốn mã quyền giữ nguyên tên, chỗ gắn quyền chuyển từ người sang vai trò. Phần bên dưới giữ nguyên làm biên bản tại thời điểm chốt thanh toán, không dùng làm thiết kế hiện hành.
 - Đã đối chiếu [tích hợp webhook](https://developer.sepay.vn/vi/sepay-webhooks/tich-hop-webhook), [xác thực](https://developer.sepay.vn/vi/sepay-webhooks/xac-thuc) và [tạo QR](https://developer.sepay.vn/vi/sepay-webhooks/tao-qr-va-form-thanh-toan) của SePay. Chưa kiểm tra tài khoản hoặc giao dịch thật.
 
@@ -92,16 +104,16 @@ TDD subscription cũ đã có ghi chú chỉ rõ phần bị thay thế và liê
 | [UT-PAY-037](../unittest/UT-PAY-037.md) | AssignmentDeadlineCalculator | STORY-SUB-004/AC-011, TDD-SUB-004/Architecture |
 | [UT-PAY-038](../unittest/UT-PAY-038.md) | AssignmentDeadlineCalculator | BR-SUB-022/Notes, TDD-SUB-004/Architecture |
 | [UT-PAY-039](../unittest/UT-PAY-039.md) | SupervisionAssignmentPolicy | STORY-SUB-004/AC-012, TDD-SUB-004/Architecture |
-| [UT-PAY-040](../unittest/UT-PAY-040.md) | AssignSupervisionGrantHandler | STORY-SUB-004/AC-001, TDD-SUB-004/Architecture |
+| [UT-PAY-040](../unittest/UT-PAY-040.md) | AssignSupervisionGrantCommandHandler | STORY-SUB-004/AC-001, TDD-SUB-004/Architecture, TDD-SUB-004/Data Model |
 | [UT-PAY-041](../unittest/UT-PAY-041.md) | SupervisionAssignmentPolicy | STORY-SUB-004/AC-004, TDD-SUB-004/Architecture |
-| [UT-PAY-042](../unittest/UT-PAY-042.md) | SupervisionAssignmentPolicy | STORY-SUB-004/AC-009, STORY-SUB-004/AC-010, TDD-SUB-004/Architecture |
-| [UT-PAY-043](../unittest/UT-PAY-043.md) | ReassignSupervisionGrantHandler | STORY-SUB-004/AC-007, TDD-SUB-004/Architecture |
-| [UT-PAY-044](../unittest/UT-PAY-044.md) | ReassignSupervisionGrantHandler | STORY-SUB-004/AC-005, STORY-SUB-004/AC-008, TDD-SUB-004/Internal API |
-| [UT-PAY-045](../unittest/UT-PAY-045.md) | ReassignSupervisionValidator | TDD-SUB-004/Internal API |
-| [UT-PAY-046](../unittest/UT-PAY-046.md) | ReassignSupervisionGrantHandler | TDD-SUB-004/Architecture |
+| [UT-PAY-042](../unittest/UT-PAY-042.md) | AssignSupervisionGrantCommandHandler | STORY-SUB-004/AC-010, STORY-SUB-004/EXC-06, TDD-SUB-004/Architecture, TDD-SUB-004/Internal API |
+| [UT-PAY-043](../unittest/UT-PAY-043.md) | ReassignSupervisionGrantHandler — đã rút ngày 25/09/2026 | STORY-SUB-004/AC-007, TDD-SUB-004/Architecture |
+| [UT-PAY-044](../unittest/UT-PAY-044.md) | AssignSupervisionGrantCommandHandler | STORY-SUB-004/AC-005, STORY-SUB-004/EXC-03, BR-SUB-009/Except, TDD-SUB-004/Internal API, TDD-SUB-004/State Diagram |
+| [UT-PAY-045](../unittest/UT-PAY-045.md) | ReassignSupervisionValidator — đã rút ngày 25/09/2026 | TDD-SUB-004/Internal API |
+| [UT-PAY-046](../unittest/UT-PAY-046.md) | AssignSupervisionGrantCommandHandler | TDD-SUB-004/Architecture, TDD-SUB-004/Internal API |
 | [UT-PAY-047](../unittest/UT-PAY-047.md) | SupervisionStatusProjector | STORY-SUB-004/AC-003, TDD-SUB-004/State Diagram |
 | [UT-PAY-048](../unittest/UT-PAY-048.md) | AssignmentReceiptPolicy | TDD-SUB-004/Architecture |
-| [UT-PAY-049](../unittest/UT-PAY-049.md) | Truy vấn gộp quyền từ vai trò | STORY-PAY-002/AC-007, TDD-RBAC-001/Architecture, TDD-SUB-005/Architecture |
+| [UT-PAY-049](../unittest/UT-PAY-049.md) | Truy vấn gộp quyền từ vai trò khi phát hành token | STORY-PAY-002/AC-007, TDD-RBAC-001/Architecture, TDD-SUB-005/Architecture |
 | [UT-PAY-050](../unittest/UT-PAY-050.md) | PackageLifecyclePolicy.Cancel | STORY-SUB-005/AC-001, TDD-SUB-005/Architecture |
 | [UT-PAY-051](../unittest/UT-PAY-051.md) | PackageLifecyclePolicy.Cancel | STORY-SUB-005/AC-002, STORY-SUB-005/AC-003, TDD-SUB-005/Architecture |
 | [UT-PAY-052](../unittest/UT-PAY-052.md) | PackageMutationValidator | TDD-SUB-005/Internal API |
@@ -123,6 +135,17 @@ TDD subscription cũ đã có ghi chú chỉ rõ phần bị thay thế và liê
 | [UT-PAY-068](../unittest/UT-PAY-068.md) | CommerceQueryValidator | TDD-PAY-002/Internal API |
 | [UT-PAY-069](../unittest/UT-PAY-069.md) | CommerceStatusProjector | STORY-PAY-002/AC-006, TDD-PAY-002/Architecture |
 | [UT-PAY-070](../unittest/UT-PAY-070.md) | CommerceDtoProjection contract | TDD-PAY-002/Architecture |
+| [UT-PAY-071](../unittest/UT-PAY-071.md) | CreatePaymentOrderHandler | BR-RBAC-005/Then, TDD-PAY-001/Internal API |
+| [UT-PAY-072](../unittest/UT-PAY-072.md) | CancelPaymentOrderHandler | BR-RBAC-005/Then, TDD-PAY-001/Architecture |
+| [UT-PAY-073](../unittest/UT-PAY-073.md) | CreatePaymentOrderHandler | BR-PAY-001/Then, TDD-PAY-001/Data Model |
+| [UT-PAY-074](../unittest/UT-PAY-074.md) | CreatePaymentOrderHandler | TDD-PAY-001/Architecture |
+| [UT-PAY-075](../unittest/UT-PAY-075.md) | AssignSupervisionGrantCommandHandler — thứ tự khóa | TDD-SUB-004/Architecture, TDD-SUB-004/Sequence Diagram |
+| [UT-PAY-076](../unittest/UT-PAY-076.md) | Ánh xạ lỗi ràng buộc cho lệnh gán | TDD-SUB-004/Internal API, TDD-SUB-004/Architecture |
+| [UT-PAY-077](../unittest/UT-PAY-077.md) | AssignSupervisionGrantCommandHandler — tài khoản nhân viên | BR-RBAC-005/Then, TDD-SUB-004/Architecture |
+| [UT-PAY-078](../unittest/UT-PAY-078.md) | CancelPackageCommandHandler — giữ phân công | BR-SUB-024/Then, BR-RBAC-013/Then, TDD-SUB-005/Architecture |
+| [UT-PAY-079](../unittest/UT-PAY-079.md) | RestorePackageCommandHandler — giữ phân công | BR-SUB-025/Then, BR-RBAC-013/Then, STORY-RBAC-003/ALT-06, TDD-SUB-005/Architecture |
+| [UT-PAY-080](../unittest/UT-PAY-080.md) | Projection gói đã mua — tên công trình | STORY-PAY-002/AC-009, BR-PAY-005/Then, TDD-PAY-002/Data Model, TDD-PAY-002/Internal API |
+| [UT-PAY-081](../unittest/UT-PAY-081.md) | Projection lịch sử — mốc gán công trình | TDD-PAY-002/Internal API, TDD-PAY-002/Data Model |
 
 ## Kiểm thử tích hợp bổ sung
 
@@ -130,10 +153,10 @@ TDD subscription cũ đã có ghi chú chỉ rõ phần bị thay thế và liê
 - [ST-PAY-063](../systemtest/ST-PAY-063.md): Webhook lặp đồng thời.
 - [ST-PAY-064](../systemtest/ST-PAY-064.md): Khôi phục sau tiến trình dừng.
 - [ST-PAY-065](../systemtest/ST-PAY-065.md): Hoàn tác cấp gói lỗi.
-- [ST-PAY-066](../systemtest/ST-PAY-066.md): Hai gói tranh cùng dự án.
+- [ST-PAY-066](../systemtest/ST-PAY-066.md): Hai gói tranh cùng công trình.
 - [ST-PAY-067](../systemtest/ST-PAY-067.md): Hủy lỗi ghi lịch sử.
 - [ST-PAY-068](../systemtest/ST-PAY-068.md): Tra cứu giao dịch không khớp.
 
 ## Kết quả kiểm tra tài liệu
 
-Đã kiểm tra cấu trúc và liên kết trong 146 tài liệu: 4 TDD, 4 User Story, 70 Unit Test và 68 System Test. Không phát hiện liên kết file thiếu, tham chiếu test thiếu mã/section, bảng test sai 13 cột hoặc Trace to lệch TEST_LINKS. Các khối JSON trong 4 TDD đọc được; 61/61 AC của 4 Story có System Test truy vết. Đây là kiểm tra tĩnh tài liệu, không thay cho review đầy đủ nghiệp vụ, kiểm tra nhập Document First hoặc chạy test ứng dụng.
+Lần bàn giao đầu đã kiểm tra cấu trúc và liên kết trong 146 tài liệu: 4 TDD, 4 User Story, 70 Unit Test và 68 System Test. Không phát hiện liên kết file thiếu, tham chiếu test thiếu mã/section, bảng test sai 13 cột hoặc Trace to lệch TEST_LINKS. Các khối JSON trong 4 TDD đọc được; 61/61 AC của 4 Story có System Test truy vết. Ngày 25/09/2026 đã kiểm lại 74 Unit Test và 70 System Test bằng script đọc TEST_LINKS: không có lỗi cấu trúc hoặc liên kết, và 62/62 AC của 4 Story có System Test còn hiệu lực. Đây là kiểm tra tĩnh tài liệu, không thay cho review đầy đủ nghiệp vụ, kiểm tra nhập Document First hoặc chạy test ứng dụng.

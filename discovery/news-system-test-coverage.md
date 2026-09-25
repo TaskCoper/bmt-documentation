@@ -1,11 +1,13 @@
 # Phạm vi và độ phủ System Test Tin tức
 
-Người dùng đã chốt STORY-NEWS-001–003 và BR-NEWS-001–003 trong hội thoại. Bộ đặc tả gồm 27 ca, phủ 20 tiêu chí nghiệm thu, các nhánh thay thế, ngoại lệ và yêu cầu hiển thị rich text an toàn. Đây là đặc tả chưa thực thi, không phải kết quả Pass.
+Người dùng đã chốt STORY-NEWS-001–003 và BR-NEWS-001–003 trong hội thoại. Bộ đặc tả gồm 29 ca, phủ 21 tiêu chí nghiệm thu, các nhánh thay thế, ngoại lệ và yêu cầu hiển thị rich text an toàn. Đây là đặc tả chưa thực thi, không phải kết quả Pass.
+
+**Cập nhật 25/09/2026:** người dùng xác nhận tên danh mục tối đa 200 ký tự, ghi tại BR-NEWS-002 khoản 1 và STORY-NEWS-002/AC-008; ST-NEWS-028 kiểm biên 200/201 ký tự. Quyền quản lý tin tức theo STORY-RBAC-001 có mã kỹ thuật `news.manage` trong TDD-RBAC-001, không gắn phân công; ST-NEWS-011 và ST-NEWS-019 kiểm thêm vai trò tùy chỉnh được cấp mã này. ST-NEWS-029 kiểm lọc theo danh mục không còn tồn tại trả danh sách rỗng.
 
 ## Phạm vi đã chốt
 
 - Bài rich text có ảnh cloud qua URL; lưu nháp thiếu thông tin, công bố kiểm đủ; sửa tại chỗ, ẩn/hiện và xóa mọi trạng thái, không khôi phục.
-- Danh mục riêng đa cấp không giới hạn nghiệp vụ; một bài nhiều danh mục; kiểm tên cùng cha, ngăn vòng lặp và chặn xóa danh mục đang dùng.
+- Danh mục riêng đa cấp không giới hạn số cấp; tên tối đa 200 ký tự; một bài nhiều danh mục; kiểm tên cùng cha, ngăn vòng lặp và chặn xóa danh mục đang dùng.
 - Đọc công khai miễn phí; tìm tiêu đề và lọc một nhánh, loại trùng trước phân trang; giữ ngày công bố đầu tiên.
 
 ## Đối chiếu tiêu chí nghiệm thu
@@ -27,9 +29,10 @@ Người dùng đã chốt STORY-NEWS-001–003 và BR-NEWS-001–003 trong hộ
 | [STORY-NEWS-002/AC-005](../userstory/STORY-NEWS-002.md#ac-005) | [ST-NEWS-016](../systemtest/ST-NEWS-016.md) |
 | [STORY-NEWS-002/AC-006](../userstory/STORY-NEWS-002.md#ac-006) | [ST-NEWS-017](../systemtest/ST-NEWS-017.md), [ST-NEWS-018](../systemtest/ST-NEWS-018.md) |
 | [STORY-NEWS-002/AC-007](../userstory/STORY-NEWS-002.md#ac-007) | [ST-NEWS-019](../systemtest/ST-NEWS-019.md) |
+| [STORY-NEWS-002/AC-008](../userstory/STORY-NEWS-002.md#ac-008) | [ST-NEWS-028](../systemtest/ST-NEWS-028.md) |
 | [STORY-NEWS-003/AC-001](../userstory/STORY-NEWS-003.md#ac-001) | [ST-NEWS-020](../systemtest/ST-NEWS-020.md) |
 | [STORY-NEWS-003/AC-002](../userstory/STORY-NEWS-003.md#ac-002) | [ST-NEWS-021](../systemtest/ST-NEWS-021.md), [ST-NEWS-024](../systemtest/ST-NEWS-024.md) |
-| [STORY-NEWS-003/AC-003](../userstory/STORY-NEWS-003.md#ac-003) | [ST-NEWS-022](../systemtest/ST-NEWS-022.md), [ST-NEWS-023](../systemtest/ST-NEWS-023.md), [ST-NEWS-024](../systemtest/ST-NEWS-024.md) |
+| [STORY-NEWS-003/AC-003](../userstory/STORY-NEWS-003.md#ac-003) | [ST-NEWS-022](../systemtest/ST-NEWS-022.md), [ST-NEWS-023](../systemtest/ST-NEWS-023.md), [ST-NEWS-024](../systemtest/ST-NEWS-024.md), [ST-NEWS-029](../systemtest/ST-NEWS-029.md) |
 | [STORY-NEWS-003/AC-004](../userstory/STORY-NEWS-003.md#ac-004) | [ST-NEWS-025](../systemtest/ST-NEWS-025.md) |
 | [STORY-NEWS-003/AC-005](../userstory/STORY-NEWS-003.md#ac-005) | [ST-NEWS-026](../systemtest/ST-NEWS-026.md) |
 
@@ -41,13 +44,13 @@ Người dùng đã chốt STORY-NEWS-001–003 và BR-NEWS-001–003 trong hộ
 - STORY-NEWS-001/ALT-02: ST-NEWS-009.
 - STORY-NEWS-001/ALT-03: ST-NEWS-010.
 - STORY-NEWS-001/EXC-01: ST-NEWS-011.
-- STORY-NEWS-002/EXC-01: ST-NEWS-013, ST-NEWS-014, ST-NEWS-016.
+- STORY-NEWS-002/EXC-01: ST-NEWS-013, ST-NEWS-014, ST-NEWS-016, ST-NEWS-028.
 - STORY-NEWS-002/ALT-01: ST-NEWS-015.
 - STORY-NEWS-002/EXC-02: ST-NEWS-017.
 - STORY-NEWS-002/ALT-02: ST-NEWS-018.
 - STORY-NEWS-002/EXC-03: ST-NEWS-019.
 - STORY-NEWS-003/ALT-01: ST-NEWS-022.
-- STORY-NEWS-003/ALT-02: ST-NEWS-023.
+- STORY-NEWS-003/ALT-02: ST-NEWS-023, ST-NEWS-029.
 - STORY-NEWS-003/EXC-01: ST-NEWS-026.
 - STORY-NEWS-001/Non-Functional: ST-NEWS-027.
 - STORY-NEWS-002/Non-Functional: ST-NEWS-027.
@@ -68,4 +71,4 @@ Người dùng đã chốt STORY-NEWS-001–003 và BR-NEWS-001–003 trong hộ
 - [TDD-NEWS-002](../tdd/TDD-NEWS-002.md): cây danh mục, thứ tự, chuyển nhánh, chống vòng lặp và khóa chung với bài.
 - Người dùng xác nhận FE dùng presigned URL do backend dự án cấp, upload trực tiếp lên cloud rồi lưu URL nội dung. Trong checkout hiện tại chưa tìm được source presign để xác minh route/provider; TDD mô tả gateway và các điều kiện tích hợp còn phải đối chiếu.
 - Hai TDD đã được người dùng chốt trong hội thoại; đặc tả Unit Test xem [bảng độ phủ](news-unit-test-coverage.md). Chưa triển khai hoặc chạy kiểm thử.
-- Giới hạn kỹ thuật đã chốt cùng TDD: tên danh mục tối đa 200 ký tự Unicode sau chuẩn hóa; không giới hạn số cấp. Hợp đồng provider/route presign thực còn cần ánh xạ source khi triển khai.
+- Tên danh mục tối đa 200 ký tự Unicode sau chuẩn hóa: ban đầu chốt cùng TDD, từ 25/09/2026 là quy tắc nghiệp vụ tại BR-NEWS-002 khoản 1. Không giới hạn số cấp. Hợp đồng provider/route presign thực còn cần ánh xạ source khi triển khai.

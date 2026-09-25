@@ -10,6 +10,18 @@
 
 Mỗi TDD có sơ đồ kiến trúc, sequence, activity, state, quan hệ dữ liệu; bảng/cột/ràng buộc, ý nghĩa từng bảng và mẫu lưu trữ; API nội bộ, lỗi và phần chờ tích hợp. Mã PROJ giữ nguyên để bảo toàn liên kết. Tên thực thể và API đề xuất là `Estimate` và `/estimates`, dành từ “dự án” cho tính năng khác.
 
+## Cập nhật ngày 25/09/2026
+
+Ba TDD được sửa theo US/BR người dùng chốt ngày 25/09/2026; người dùng xác nhận bản sửa trước khi cập nhật test. Thay đổi chính:
+
+- **Đổi tên bản dự toán bất cứ lúc nào** ([BR-SUB-007](../businessrule/BR-SUB-007.md) khoản 11): kể cả khi gói hết hạn, hết lượt, toàn bộ lượt còn lại đang bị giữ hoặc AI đang xử lý; chỉ cần quyền sở hữu và tên hợp lệ. API riêng `PATCH /api/v1/estimates/{estimateId}/name` nhận `{name, nameVersion}`; lỗi 409 `EstimateNameVersionConflict` hoặc 422 `InvalidEstimateInput`. Tên không còn nằm trong snapshot gửi AI (TDD-PROJ-001, TDD-PROJ-002).
+- **Hồ sơ và tệp dùng tên hiện tại** ([BR-PROJ-007](../businessrule/BR-PROJ-007.md) khoản 7): tệp PDF/Excel xuất theo tên cũ không được phục vụ nữa; lần tải sau xuất lại từ kết quả đã lưu, không tính lượt và không gọi AI. `EstimateExport.NameVersion` ghi tên dùng khi xuất; tệp cũ trả 409 `ExportOutdated` (TDD-PROJ-003).
+- **Dùng lại link còn hiệu lực** trả 200 kèm `requestedExpiryApplied`: `true` khi ngày khách chọn trùng ngày đang có, `false` khi khác; không đổi hạn ngầm (TDD-PROJ-003).
+- **Quyền quản trị danh mục** theo STORY-RBAC-001 có mã `estimate.catalog.manage` trong TDD-RBAC-001; kiểm theo mã quyền, không theo tên vai trò.
+- Đối tượng gắn gói giám sát, trước đây gọi là “dự án”, nay là **công trình** (`ConstructionSite`): thực thể riêng do khách tự tạo. Bản dự toán và công trình không liên kết trong đợt này ([BR-SUB-007](../businessrule/BR-SUB-007.md)/Notes).
+
+Test bổ sung: ST-PROJ-061 đến ST-PROJ-070 và UT-PROJ-049 đến UT-PROJ-061. Các mục bên dưới giữ nội dung bàn giao ban đầu, trừ số liệu và hiện trạng code đã cập nhật.
+
 ## Đã xác nhận
 
 - Giữ toàn bộ phạm vi trong năm US và bảy BR-PROJ: cả năm loại ban đầu và loại Admin thêm, tách phong cách kiến trúc/nội thất, cấu hình tầng/tum riêng, giữ danh mục tại lúc tạo bản dự toán.
@@ -37,7 +49,7 @@ Quy ước API, byte/MB, cách đếm ký tự, kiểu số diện tích, khóa 
 
 ## Hiện trạng đã kiểm tra và phần bị ảnh hưởng
 
-Backend hiện có tài khoản/xác thực và nền Carter, MediatR, EF Core; DbContext chỉ khai báo User. Chưa có các bảng Estimate, danh mục, quota, lưu tệp hoặc điều phối AI theo thiết kế này. Các TDD SUB/PAY/RBAC được viện dẫn là nguồn thiết kế, không phải bằng chứng đã triển khai.
+Lúc khảo sát ngày 21/09/2026, backend có tài khoản/xác thực và nền Carter, MediatR, EF Core; DbContext chỉ khai báo User. Kiểm lại ngày 25/09/2026: code đã có thêm RBAC, danh mục gói, kỳ thiết kế, `PeriodQuota` và `UsageOperation`. Vẫn chưa có các bảng Estimate, danh mục loại công trình/phong cách, lưu tệp hoặc điều phối AI theo thiết kế này. Các TDD SUB/PAY/RBAC được viện dẫn là nguồn thiết kế, không phải bằng chứng đã triển khai.
 
 | Vị trí | Ảnh hưởng khi triển khai |
 |---|---|
@@ -65,13 +77,13 @@ Backend hiện có tài khoản/xác thực và nền Carter, MediatR, EF Core; 
 
 | Story / nhóm AC | Rule chính | TDD | Đặc tả System Test |
 |---|---|---|---|
-| STORY-PROJ-001 / AC-001–020 | BR-PROJ-001–005, BR-SUB-007, BR-RBAC-005 | TDD-PROJ-001; khóa AI ở TDD-PROJ-002 | ST-PROJ-001–020; các ca quyền/lượt/AI liên quan trong bảng truy vết |
-| STORY-PROJ-002 / AC-001–007 | BR-PROJ-005/007, BR-SUB-003/016/017 | TDD-PROJ-002 | ST-PROJ-021–032, 057 |
-| STORY-PROJ-003 / AC-001–005 | BR-PROJ-007, BR-SUB-007 | TDD-PROJ-002/003 | ST-PROJ-033–038, 057 |
-| STORY-PROJ-004 / AC-001–010 | BR-PROJ-006, BR-SUB-007 | TDD-PROJ-003 | ST-PROJ-039–047, 057, 059–060 |
+| STORY-PROJ-001 / AC-001–020 | BR-PROJ-001–005, BR-SUB-007, BR-RBAC-005 | TDD-PROJ-001; khóa AI ở TDD-PROJ-002 | ST-PROJ-001–020, 061–063, 065–068; các ca quyền/lượt/AI liên quan trong bảng truy vết |
+| STORY-PROJ-002 / AC-001–007 | BR-PROJ-005/007, BR-SUB-003/016/017 | TDD-PROJ-002 | ST-PROJ-021–032, 057, 064 |
+| STORY-PROJ-003 / AC-001–006 | BR-PROJ-007, BR-SUB-007 | TDD-PROJ-002/003 | ST-PROJ-033–038, 057, 069 |
+| STORY-PROJ-004 / AC-001–010 | BR-PROJ-006, BR-SUB-007 | TDD-PROJ-003 | ST-PROJ-039–047, 057, 059–060, 070 |
 | STORY-PROJ-005 / AC-001–010 | BR-PROJ-004 | TDD-PROJ-001 | ST-PROJ-048–056, 057–058 |
 
-[Bảng truy vết ST](estimate-system-test-coverage.md) ghi từng AC/nhánh và ca cụ thể. Có 60 đặc tả ST, phủ liên kết của 52 AC, 5 Main Flow và 31 nhánh ALT/EXC; đây không phải kết quả chạy. Người dùng đã chốt TDD, đáp ứng điều kiện của [skill design-feature-technical](../../bmt-be/.codex/skills/design-feature-technical/SKILL.md). Đã bổ sung [48 đặc tả Unit Test](estimate-unit-test-coverage.md), chưa viết mã test hoặc thực thi.
+[Bảng truy vết ST](estimate-system-test-coverage.md) ghi từng AC/nhánh và ca cụ thể. Có 70 đặc tả ST, phủ liên kết của 53 AC, 5 Main Flow và 31 nhánh ALT/EXC; đây không phải kết quả chạy. Người dùng đã chốt TDD, đáp ứng điều kiện của [skill design-feature-technical](../../bmt-be/.codex/skills/design-feature-technical/SKILL.md). Đã bổ sung [61 đặc tả Unit Test](estimate-unit-test-coverage.md), chưa viết mã test hoặc thực thi.
 
 Kiểm tra tĩnh đã thực hiện trên 77 file thuộc bộ TDD/US/BR/ST PROJ và hai bảng bàn giao: không phát hiện lỗi cấu trúc heading TDD, số cột ST, mã test, Trace to/TEST_LINKS hoặc đường dẫn Markdown trong phạm vi kiểm. Ba TDD có 15 khối Mermaid; chưa chạy trình render sơ đồ hoặc importer. Ví dụ API khớp endpoint khai báo; metadata lịch sử của TDD mới để trống. Đây là kiểm tra tài liệu, không phải kiểm thử ứng dụng.
 
@@ -90,4 +102,4 @@ Phạm vi nguồn đã đọc sâu gồm bộ PROJ và các nguồn trực tiế
 
 ## Ghi nhận chốt TDD
 
-Xác nhận “Ok chốt đi” áp dụng cho TDD-PROJ-001–003 hiện tại, gồm lưu bền vững kết quả AI và hồ sơ để xem lại, không gọi AI hoặc tính lượt khi xem lại. [Bảng UT](estimate-unit-test-coverage.md) lưu SHA-256 của ba file làm căn cứ. Không thay Status/Version/Updated At/Change Log để mô phỏng phê duyệt trên hệ thống quản lý tài liệu.
+Xác nhận “Ok chốt đi” áp dụng cho TDD-PROJ-001–003 bản ngày 21/09/2026, gồm lưu bền vững kết quả AI và hồ sơ để xem lại, không gọi AI hoặc tính lượt khi xem lại. Bản sửa ngày 25/09/2026 được người dùng xác nhận trước khi cập nhật UT/ST. [Bảng UT](estimate-unit-test-coverage.md) lưu SHA-256 của ba file làm căn cứ, gồm cả [mốc ngày 25/09/2026](estimate-unit-test-coverage.md#cập-nhật-ngày-25092026). Không thay Status/Version/Updated At/Change Log để mô phỏng phê duyệt trên hệ thống quản lý tài liệu.
