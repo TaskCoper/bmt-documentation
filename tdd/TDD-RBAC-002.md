@@ -172,7 +172,7 @@ Bước 2 cần vì kiểm tra này đọc hai thứ có thể đổi song song.
 
 Đã có trong code (commit `182e2a8`, nhánh `feature/construction-site` của `bmt-be`): `RevokeRoleCommandHandler` khóa dòng `User` bằng `IAccessRowLocker.LockUsersForNoKeyUpdateAsync`, rồi đọc quyền còn lại và đếm phân công qua `StaffPermissionQueries`, dùng chung với handler sửa quyền vai trò. Thông báo lỗi nói "gói giám sát". Số gói gửi về qua `DomainException.Extensions` với khóa `activeAssignmentCount`, và middleware đưa khóa này thành trường cùng cấp trong thân lỗi.
 
-Chưa có trong code: bỏ ghi nhật ký từ chối ở bước 5. Handler hiện vẫn gọi `RecordRejectionAsync` với `StaffHasActiveAssignments`; người dùng xác nhận bỏ lời ghi này ngày 25/09/2026.
+Đã có trong code ở commit `111a02e`: bước 5 không còn gọi `RecordRejectionAsync` với `StaffHasActiveAssignments`, theo quyết định người dùng ngày 25/09/2026.
 
 Ví dụ theo `STORY-RBAC-002/AC-004`: nhân viên A chỉ có `supervision.complete` từ vai trò "Nhân viên giám sát" và đang phụ trách 2 gói giám sát. Thu hồi vai trò này bị từ chối, phản hồi báo còn 2 gói. Theo `AC-011`: nhân viên B có `supervision.complete` từ cả "Nhân viên giám sát" lẫn "Trưởng nhóm giám sát" và cũng phụ trách 2 gói. Thu hồi "Nhân viên giám sát" của B được chấp nhận, vì bước 4 thấy B vẫn còn quyền này từ vai trò kia; hai phân công của B giữ nguyên.
 
@@ -504,6 +504,7 @@ Mỗi mã dưới đây là giá trị `messageCode` trong thân lỗi; trườn
 
 ## Change Log
 
+- 2026-09-25 (đồng bộ code lần 2): Ghi rõ việc bỏ ghi nhật ký từ chối ở thu hồi vai trò và tạo nhân viên đã có trong code ở commit `111a02e`.
 - 2026-09-25 (chốt nhật ký): Theo `BR-RBAC-012/Notes`, người dùng xác nhận ngày 25/09/2026: ba trường hợp sau không ghi nhật ký từ chối: thu hồi vai trò bị chặn vì `StaffHasActiveAssignments`, tạo nhân viên bằng email đã dùng (`EmailAlreadyUsed`), và gán vai trò Khách hàng cho nhân viên (`RoleNotAssignableToStaff`). Code chưa đổi.
 - 2026-09-25 (đồng bộ code): Đồng bộ với code đã triển khai ở commit `182e2a8`: thu hồi vai trò khóa dòng `User`, `CannotLockSelf`, `StaffCreated` và `POST /staff` cần hai mã quyền đã có. Ví dụ lỗi ghi mã nghiệp vụ ở `messageCode`, `code` là loại lỗi chung.
 - 2026-09-25: Cập nhật theo US/BR chốt lần hai trong ngày 25/09/2026: phân công tính theo gói giám sát thay cho công trình. Thu hồi vai trò đếm số gói đang phụ trách, kể cả gói đang bị hủy mà phân công còn; khóa tài khoản chỉ đưa gói đang gán vào danh sách cần chia lại. Không đổi luồng hay mã lỗi.

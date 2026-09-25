@@ -61,6 +61,8 @@ Tài liệu này thiết kế cách lưu kỳ sử dụng và tính lượt theo
 
 Hiện trạng code đã kiểm tra ngày 25/09/2026: đã có migration `DesignSubscription` cùng các handler `CommitDesignPeriod`, `ReserveDesignUsage` và `SettleDesignUsage`. `DesignSubscriptionStore.LockAccountAsync` vẫn khóa dòng `User`. Chưa có bảng `AccountCommerceState`, module Estimate hay kết nối AI thật. Thanh toán theo TDD-PAY-001 (SePay); cách gọi nhà cung cấp AI vẫn chờ hợp đồng theo TDD-PROJ-002.
 
+Đã có trong code ở commit `72e7327` trên nhánh `feature/tech-debt-subscription` của `bmt-be`: Unit of Work đăng ký scoped; handler lấy giờ qua `TimeProvider`; lỗi xung đột đồng thời trả 409 `ConcurrencyConflict`; lệnh giữ lượt chỉ dành cho tạo thiết kế; `GET /api/v1/me/design-subscription`; migration `PackageHistoryRestrict` bỏ CASCADE ở khóa ngoại lịch sử và thêm ràng buộc kỳ bị thay thế phải có mốc đóng.
+
 **Cập nhật 25/09/2026 theo nghiệp vụ đã chốt:**
 - Chủ sở hữu được đổi tên bản dự toán bất cứ lúc nào (BR-SUB-007 khoản 11), kể cả khi gói hết hạn, hết lượt, toàn bộ lượt đang được giữ hoặc AI đang xử lý. Vì vậy policy kiểm gói/quyền/lượt của TDD này chỉ áp cho việc lưu thông tin đầu vào, không áp cho đổi tên. Thiết kế đổi tên nằm ở TDD-PROJ-001 với thao tác riêng `PATCH /api/v1/estimates/{estimateId}/name`.
 - Tra cứu mẫu theo BR-LIB-003: lần mở thành công đầu tiên của mỗi phiên bản tính 1 lượt; xem lại cùng phiên bản miễn lượt, kể cả khi gói đã hết hạn.
@@ -163,7 +165,7 @@ Hai dòng cuối là hai nhánh thay thế, không phải hai bước chạy n�
 
 Tác vụ luôn chốt vào PeriodId lúc được nhận, dù khách đã đổi kỳ hoặc kỳ đó vừa hết hạn. Không chuyển lượt giữ sang kỳ mới. Hạn mức không giới hạn vẫn ghi Used/Reserved để đối soát nhưng không dùng công thức hữu hạn để chặn theo số dư; vẫn phải có quyền và kỳ hợp lệ khi nhận yêu cầu mới.
 
-Cơ chế giữ lượt này áp dụng cho AI. Tra cứu chuẩn bị nội dung trước, rồi lưu kết quả thành công cùng việc tăng Used trong một transaction, không tăng Reserved. Tạo bản dự toán và lưu thông tin đầu vào kiểm tra điều kiện nhưng không giữ hoặc tính lượt. Đổi tên bản dự toán không qua kiểm tra này.
+Cơ chế giữ lượt này áp dụng cho AI. Lệnh giữ lượt `ReserveDesignUsageCommand` không nhận loại thao tác hay phiên bản mẫu từ bên gọi; tác vụ luôn là `DesignGeneration` (đã có trong code, commit `72e7327`). Tra cứu chuẩn bị nội dung trước, rồi lưu kết quả thành công cùng việc tăng Used trong một transaction, không tăng Reserved. Tạo bản dự toán và lưu thông tin đầu vào kiểm tra điều kiện nhưng không giữ hoặc tính lượt. Đổi tên bản dự toán không qua kiểm tra này.
 
 **6. Máy trạng thái — state machine**:
 
@@ -212,6 +214,8 @@ Trong unit test, cố định hoặc dịch chuyển đồng hồ để kiểm t
 
 Cũng dùng đồng hồ cố định để kiểm tra kỳ bắt đầu ngày 31/01 kết thúc vào ngày cuối tháng 2 hoặc kỳ năm bắt đầu ngày 29/02. Unit test không phải chờ một tháng thật. Thời gian chờ AI tối đa và chu kỳ quét vẫn chưa chốt; TimeProvider giúp kiểm thử, không tự đặt các giá trị vận hành này.
 
+Đã có trong code ở commit `72e7327` trên nhánh `feature/tech-debt-subscription` của `bmt-be`: handler, job quét tác vụ quá hạn, nhật ký phân quyền, interceptor ghi mốc tạo/sửa và middleware nhận `TimeProvider` qua DI; khi chạy thật là `TimeProvider.System`. Test dùng đồng hồ cố định để kiểm mốc 09:59:59 và 10:00:00 ở bước giữ lượt. Thời hạn token, cookie và cache vẫn đọc giờ hệ thống: đó không phải mốc nghiệp vụ, và thư viện JWT tự đọc giờ hệ thống khi kiểm token.
+
 | Thành phần dự kiến | Vai trò và phạm vi trách nhiệm |
 |---|---|
 | `SubscriptionPeriodPolicy` (domain) | Tính thời hạn: có hiệu lực từ start, hết hiệu lực tại end; kỳ mới không cộng lượt dư kỳ cũ |
@@ -242,9 +246,9 @@ flowchart LR
 **Notes**:
 
 - Các lệnh ghi mới phải có `ITransactionalRequest` để `TransactionPipelineBehavior` mở giao dịch. `ICommand<T>` hiện không kế thừa `ICommand` không có tham số kiểu; không dựa vào tên lớp để tình cờ được mở giao dịch. Yêu cầu chuẩn bị nội dung tra cứu không ghi dữ liệu là ngoại lệ được mô tả riêng ở phần Data Model.
-- Một thao tác ghi dùng cùng `DbContext` và `UnitOfWork` (UoW: đối tượng quản lý việc lưu và giao dịch) trong suốt lần xử lý. Cần đăng ký UoW theo phạm vi xử lý (`scoped`), thay vì tạo đối tượng mới mỗi lần yêu cầu (`transient`) như hiện tại; nếu đổi đăng ký dùng chung thì phải kiểm thử lại xác thực. Handler và store không tự mở hoặc commit thêm một giao dịch lồng bên trong.
+- Một thao tác ghi dùng cùng `DbContext` và `UnitOfWork` (UoW: đối tượng quản lý việc lưu và giao dịch) trong suốt lần xử lý. UoW đăng ký theo phạm vi xử lý (`scoped`), không tạo đối tượng mới mỗi lần yêu cầu (`transient`) như trước; đã có trong code ở commit `72e7327` trên nhánh `feature/tech-debt-subscription` của `bmt-be`, bộ test xác thực và phân quyền chạy lại đạt. Handler và store không tự mở hoặc commit thêm một giao dịch lồng bên trong.
 - Pipeline hiện vẫn commit khi handler trả `Result.Failure`. Vì vậy, nếu có lỗi nghiệp vụ sau khi sửa dữ liệu, handler phải ném exception để hoàn tác. Riêng khi đã chủ động ghi trạng thái Failed/TimedOut và trả lượt, cần trả DTO chứa trạng thái đó bình thường để thay đổi được lưu, không ném lỗi khiến việc trả lượt bị hoàn tác.
-- Middleware chưa chuyển `ConflictException` và `DbUpdateConcurrencyException` thành HTTP 409; cần bổ sung mã lỗi tương ứng. Giữ các nhóm lỗi đầu vào 422, không đủ quyền 403 và không tìm thấy 404. Không trả chi tiết lỗi nhà cung cấp hoặc dữ liệu nhạy cảm cho khách.
+- `ConflictException` trả HTTP 409. `DbUpdateConcurrencyException` của lệnh chưa có mã riêng được `ConstraintViolationPipelineBehavior` đổi thành 409 `ConcurrencyConflict`; middleware làm tương tự cho đường ghi nằm ngoài MediatR và không trả thông báo nội bộ của EF (commit `72e7327`). Giữ các nhóm lỗi đầu vào 422, không đủ quyền 403 và không tìm thấy 404. Không trả chi tiết lỗi nhà cung cấp hoặc dữ liệu nhạy cảm cho khách.
 - Database là nguồn quyết định quyền và số lượt. Không lấy quota trong JWT hoặc Redis làm căn cứ vì dữ liệu đó có thể cũ sau khi khách đổi kỳ. Truy vấn chỉ đọc có thể chọn các cột cần thiết để tạo DTO.
 - Luôn xác thực tài khoản và quyền sở hữu trước khi tìm yêu cầu đã xử lý, kể cả khi gửi lại cùng key. `AccountId` lấy từ người dùng đã xác thực. Khi nhận kết quả từ dịch vụ ngoài, đối chiếu tác vụ, tài khoản, bản dự toán và lần gọi đã lưu; không tin accountId do bên ngoài gửi mà chưa kiểm tra.
 - Lấy `EffectiveNow` một lần sau khi đã lấy đủ khóa cần thiết, rồi truyền cùng giá trị vào các điều kiện nghiệp vụ. Database có thể dùng `clock_timestamp()` để lấy thời gian thực sau lúc chờ khóa. Unit test dùng `TimeProvider` với thời điểm cố định. Múi giờ cá nhân `User.TimeZone` không thay thế múi giờ nghiệp vụ Việt Nam.
@@ -381,7 +385,7 @@ Với tác vụ AI, thời gian chờ tối đa tính từ `AcceptedAtUtc` khi t
 
 ## Data Model
 
-Các model dưới đây mô tả gói thiết kế đã cấp cho tài khoản và việc sử dụng lượt. Migration `DesignSubscription` đã tạo bốn bảng này trong code; cột `EstimateId`, khóa `AccountCommerceState` và các delta của TDD-LIB-002, TDD-PROJ-002 là thay đổi dự kiến.
+Các model dưới đây mô tả gói thiết kế đã cấp cho tài khoản và việc sử dụng lượt. Migration `DesignSubscription` đã tạo bốn bảng này trong code. Migration `PackageHistoryRestrict` (commit `72e7327`) đổi ba khóa ngoại `DesignSubscription → User`, `DesignPeriod → DesignSubscription`, `PeriodQuota → DesignPeriod` từ CASCADE sang RESTRICT; cột `EstimateId`, khóa `AccountCommerceState` và các delta của TDD-LIB-002, TDD-PROJ-002 là thay đổi dự kiến.
 
 | Model | Ý nghĩa và mục đích | Quan hệ với model khác |
 |---|---|---|
@@ -545,7 +549,7 @@ Request điều phối OpenLibraryVersionRequest chạy ngoài transaction ghi; 
 
 API đọc kỳ có thể triển khai độc lập. API tạo thiết kế và thư viện mẫu vẫn cần module cung cấp dữ liệu. Các thao tác có tính lượt yêu cầu phiên xác thực hợp lệ theo chính sách hiện có, người gọi là chủ sở hữu tài nguyên (bản dự toán hoặc tài khoản mở mẫu) và kỳ hiện hành còn hiệu lực có quyền tính lượt tương ứng. Chỉ đăng nhập thành công thì chưa đủ. Tìm kiếm/xem danh sách vẫn không yêu cầu đăng nhập.
 
-- **GET** `/api/v1/me/design-subscription` — Người đã xác thực đọc kỳ hiện tại, phiên bản, thời hạn, quota `{code,isUnlimited,limit,used,reserved,available}`, `displayBenefits`, `consultationText`. Chưa có kỳ trả value=null; hết hạn vẫn trả số dư lịch sử nhưng canStart=false.
+- **GET** `/api/v1/me/design-subscription` — Người đã xác thực đọc kỳ hiện tại, phiên bản, thời hạn, quota `{code,isUnlimited,limit,used,reserved,available}`, `displayBenefits`, `consultationText`. Chưa có kỳ trả value=null; hết hạn vẫn trả số dư lịch sử nhưng canStart=false. Đã có trong code (commit `72e7327`). `endsAtUtc` là mốc hết hiệu lực thực tế: mốc đóng nếu kỳ bị thay thế, nếu không là ngày kết thúc theo lịch. `canStart` dùng cùng điều kiện hiệu lực với bước giữ lượt, nên kỳ bị nhân viên hủy cũng có `canStart=false`. `available` bằng Limit − Used − Reserved, không âm, và là null khi không giới hạn.
 - **POST** `/api/v1/estimates/{estimateId}/generations` — Chủ bản dự toán đã xác thực gửi Idempotency-Key và inputVersion. Trả 202 sau khi lưu Pending; gửi lại cùng key/hash trả tác vụ cũ. Không nhận limit, accountId, price hoặc periodId tùy ý từ client. Hợp đồng đầy đủ (CSRF, phản hồi, mã lỗi) theo TDD-PROJ-002/Internal API; route `/projects/{projectId}/design-generations` của bản trước không còn dùng.
 - **GET** `/api/v1/estimates/{estimateId}/generations/{operationId}` — Chủ bản dự toán đã xác thực đọc trạng thái, theo TDD-PROJ-002. Chỉ Succeeded trả đường dẫn kết quả có kiểm soát truy cập; không trả đầu ra đang lưu tạm hoặc tới muộn. Hết hạn gói vẫn được đọc kết quả cũ thuộc quyền.
 - **GET** `/api/v1/design-templates` — Không cần đăng nhập; tìm kiếm/xem danh sách không tính lượt và không lộ chi tiết bị tính lượt. Dữ liệu trả về cần thiết kế với module mẫu.
@@ -559,6 +563,18 @@ API đọc kỳ có thể triển khai độc lập. API tạo thiết kế và 
 - `CheckEstimateInputWriteAccess(accountId, now)` -> allowed/denied; kiểm gói, quyền tạo thiết kế và lượt sẵn dùng nhưng không tính lượt. Phải gọi trong cùng giao dịch tạo bản dự toán hoặc lưu thông tin đầu vào. Không gọi khi chỉ đổi tên bản dự toán.
 
 ### Examples
+
+#### GET /api/v1/me/design-subscription
+
+```
+Response 200 (kỳ đang hiệu lực):
+{"value":{"periodId":"DP2","planId":"P1","planCode":"basic-demo","planName":"Cơ bản","revisionId":"R2","revisionNumber":2,"cycle":"Month","price":250000,"currency":"VND","startsAtUtc":"2026-09-18T03:00:00+00:00","endsAtUtc":"2026-10-18T03:00:00+00:00","lifecycleState":"Active","canStart":true,"quotas":[{"code":"catalog.detail","label":"Tra cứu thư viện mẫu","isUnlimited":false,"limit":30,"used":0,"reserved":0,"available":30},{"code":"design.generate","label":"Số phương án thiết kế mới","isUnlimited":false,"limit":10,"used":0,"reserved":1,"available":9}],"displayBenefits":[{"code":"design.render3d","label":"Phối cảnh 3D","enabled":true,"displayText":"Phối cảnh 3D","sortOrder":3}],"consultationText":"Tư vấn theo lịch hẹn, ưu tiên sắp xếp"},"isSuccess":true,"isFailure":false,"error":{"code":"","message":""}}
+
+Response 200 (chưa từng mua gói thiết kế):
+{"value":null,"isSuccess":true,"isFailure":false,"error":{"code":"","message":""}}
+```
+
+Mã như `DP2`, `P1`, `R2` là bí danh UUID của dữ liệu mẫu ở Data Model và TDD-SUB-001; số lượt khớp bảng `PeriodQuota` của DP2, quyền lợi hiển thị khớp dòng B3 của R2. Thời điểm đọc giả định trước 18/10/2026 10:00 giờ Việt Nam.
 
 #### POST /api/v1/estimates/{estimateId}/generations
 
@@ -586,6 +602,7 @@ Kỳ định nghĩa lại từ T theo giờ Việt Nam: đổi tháng lúc 18/09
 - **QuotaUnavailable** (409): hết lượt sẵn dùng, gồm lượt đang giữ.
 - **IdempotencyConflict** (409): cùng key nhưng nội dung yêu cầu hoặc thông tin tài khoản của lần cấp không khớp.
 - **SubscriptionVersionConflict** (409): kỳ hiện tại đã khác kỳ dự kiến trong yêu cầu; không áp yêu cầu cũ lên kỳ mới.
+- **ConcurrencyConflict** (409): dòng dữ liệu vừa bị một yêu cầu khác sửa hoặc xóa trong lúc lưu, với lệnh chưa có mã xung đột riêng. Người gọi tải lại rồi thử lại; transaction đã rollback nên không có gì được ghi.
 - **EstimateAlreadyGenerated** (409): bản dự toán đã có kết quả thành công, cần bản dự toán mới. Thay `ProjectAlreadyGenerated` của bản trước, theo TDD-PROJ-002; code hiện vẫn dùng tên cũ trong `SubscriptionErrorCodes`.
 - **GenerationInProgress** (409): bản dự toán đã có tác vụ khác đang chạy. Gửi lại đúng key của tác vụ đã nhận thì trả tác vụ đó, không báo lỗi này.
 - **InvalidRequest** (422): sai cycle, thiếu key, dữ liệu command không hợp lệ.
@@ -725,6 +742,7 @@ Không giữ giao dịch SQL trong lúc gọi dịch vụ ngoài. Lỗi trước
 - [UT-SUB-048](../unittest/UT-SUB-048.md)
 - [UT-SUB-049](../unittest/UT-SUB-049.md)
 - [UT-SUB-079](../unittest/UT-SUB-079.md)
+- [UT-SUB-082](../unittest/UT-SUB-082.md) đến [UT-SUB-087](../unittest/UT-SUB-087.md): đọc kỳ hiện tại và lệnh giữ lượt chỉ cho tạo thiết kế; [UT-SUB-090](../unittest/UT-SUB-090.md) đến [UT-SUB-092](../unittest/UT-SUB-092.md): lỗi xung đột đồng thời và thời gian sống của Unit of Work. Đã có mã test, chạy đạt ngày 25/09/2026.
 - [ST-SUB-109](../systemtest/ST-SUB-109.md)
 - [ST-SUB-110](../systemtest/ST-SUB-110.md)
 - [ST-SUB-111](../systemtest/ST-SUB-111.md)
@@ -763,4 +781,5 @@ Không giữ giao dịch SQL trong lúc gọi dịch vụ ngoài. Lỗi trước
 
 ## Change Log
 
+- 2026-09-25 (đồng bộ code lần 2): Đồng bộ với code ở commit `72e7327`: UoW scoped, `TimeProvider`, 409 `ConcurrencyConflict`, lệnh giữ lượt chỉ cho tạo thiết kế, `GET /api/v1/me/design-subscription` kèm ví dụ phản hồi, migration `PackageHistoryRestrict`. Thêm mã lỗi `ConcurrencyConflict` và đặc tả UT-SUB-082 đến UT-SUB-087, UT-SUB-090 đến UT-SUB-092.
 - 2026-09-25: Cập nhật theo nghiệp vụ đã chốt ngày 25/09/2026. Tách policy lưu thông tin đầu vào (`EstimateInputWriteAccessPolicy`, `CheckEstimateInputWriteAccess`) khỏi đổi tên bản dự toán; đổi tên theo BR-SUB-007 khoản 11 và TDD-PROJ-001. Sửa mục tiêu tra cứu theo BR-LIB-003: mở lại cùng phiên bản miễn lượt. Đổi "dự án"/`Project` trong luồng thiết kế thành bản dự toán (`Estimate`); route Gen AI, index giữ chỗ và mã lỗi theo TDD-PROJ-002. Thay khóa dòng `User` bằng `AccountCommerceState` cho mọi đường quota, bỏ "phân công" khỏi thứ tự khóa. Giá và phiên bản của kỳ lấy từ snapshot đơn theo TDD-PAY-001, bỏ các ghi chú "thanh toán thiết kế sau"; ghi không có kỳ tương lai trả trước theo BR-SUB-021. Ghi AC-009/010 của STORY-SUB-001 không nghiệm thu đợt này, AC-036 theo nghĩa mới và UT-SUB-042/044 cần cập nhật. Tách hiện trạng code khỏi thay đổi dự kiến.

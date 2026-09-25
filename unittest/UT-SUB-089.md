@@ -33,7 +33,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# UT-RBAC-035
+# UT-SUB-089
 
 ## Unit Test
 
@@ -42,11 +42,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-035 | Staff | RevokeRoleCommandHandler.Handle | Error | REGRESSION | P1 | Handler đã có, báo theo số gói giám sát và không ghi nhật ký từ chối (commit 111a02e, theo BR-RBAC-012/Notes). Nhân viên chỉ có supervision.complete từ vai trò giám sát định thu hồi; vai trò còn lại chỉ có commerce.read. Mock bộ đếm phân công đang hiệu lực của người đó trả 2. | UserId của nhân viên và RoleId của vai trò giám sát. | Ném ngoại lệ ánh xạ 409 với mã StaffHasActiveAssignments, activeAssignmentCount bằng 2 và thông báo nói về số gói giám sát. Dòng UserRole không bị xóa, không phân công nào bị đổi, và không gọi RecordRejectionAsync. | BR-RBAC-007/Then<br>STORY-RBAC-002/AC-004<br>TDD-RBAC-002/Architecture<br>BR-RBAC-012/Notes | Chặn khi vai trò bị thu hồi là nguồn duy nhất của supervision.complete và người đó còn phụ trách gói; không tự gỡ phân công giúp. Đây là lỗi nghiệp vụ, không phải rào chắn quyền, nên không ghi nhật ký từ chối. | [Chưa xác định] | Draft |
+| UT-SUB-089 | Plan | CreatePlanCommandValidator, SaveDraftCommandValidator — độ dài mô tả | Boundary | REGRESSION | P1 | Không cần mock; gọi validator trực tiếp. | Lệnh tạo gói và lưu nháp với Description dài 4.000 ký tự, rồi 4.001 ký tự. | 4.000 ký tự hợp lệ; 4.001 ký tự không hợp lệ với lỗi ở trường Description, ánh xạ 422. Không tự cắt ngắn mô tả. | TDD-SUB-001/Architecture | Giới hạn kỹ thuật mô tả 4.000 ký tự trong TDD-SUB-001/Notes; đầu vào quá dài bị từ chối. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- BR-RBAC-007/Then
-- STORY-RBAC-002/AC-004
-- TDD-RBAC-002/Architecture
-- BR-RBAC-012/Notes
+- TDD-SUB-001/Architecture

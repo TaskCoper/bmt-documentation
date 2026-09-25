@@ -160,7 +160,7 @@ Ví dụ gói đã Stopped thì sửa nháp không làm gói tự xuất hiện 
 
 **9. Xác thực và phân quyền theo mã `plan.manage`**:
 
-Mọi API quản trị gói yêu cầu phiên xác thực hợp lệ theo chính sách mặc định và claim `perm` có mã `plan.manage`. Policy kiểm theo mã quyền, không theo tên hay mã vai trò. Vai trò hệ thống `admin` có mã này qua dữ liệu khởi tạo `RolePermission`; nếu sau này mã được gắn cho vai trò khác thì người giữ vai trò đó cũng thao tác được. Mã này không gắn phân công theo BR-RBAC-010 khoản 4. Handler kiểm tra thêm tài khoản chưa bị xóa. Không lấy cờ Admin hoặc accountId do client tự gửi làm căn cứ.
+Mọi API quản trị gói yêu cầu phiên xác thực hợp lệ theo chính sách mặc định và claim `perm` có mã `plan.manage`. Policy kiểm theo mã quyền, không theo tên hay mã vai trò. Vai trò hệ thống `admin` có mã này qua dữ liệu khởi tạo `RolePermission`; nếu sau này mã được gắn cho vai trò khác thì người giữ vai trò đó cũng thao tác được. Mã này không gắn phân công theo BR-RBAC-010 khoản 4. Handler kiểm tra thêm tài khoản chưa bị xóa. Đã có trong code (`PlanAdminAccess`, commit `72e7327`): tài khoản đã bị xóa nhận 403 `AccessForbidden`; áp cho tạo gói, lưu nháp, công bố, ngừng bán, xem chi tiết gói và xem danh mục quyền lợi. Không lấy cờ Admin hoặc accountId do client tự gửi làm căn cứ.
 
 Ví dụ khách hàng, hoặc nhân viên không có `plan.manage`, gọi trực tiếp API publish vẫn nhận 403 dù giao diện đã ẩn nút công bố. API đọc gói đang bán cho khách không yêu cầu đăng nhập; API quản trị vẫn phải có quyền. Đây là phân quyền quản trị danh mục, không phải cấp quota cho tài khoản quản trị.
 
@@ -197,7 +197,7 @@ flowchart LR
 - Hiện biết ba mã: `design.generate`, `catalog.detail`, `design.render3d`; danh mục có thể bổ sung Boolean sau khi tên được chốt. Không coi seed ba mã là ràng buộc chỉ có ba quyền. Tư vấn giữ `ConsultationText`; nếu danh mục có mục tư vấn thì Boolean chỉ là hiển thị, không thay text bằng enum mức.
 - Danh mục quyền lợi chỉ phục vụ gói thiết kế. Gói giám sát dùng `Description` làm mô tả dịch vụ tự do; `ConsultationText` của gói giám sát phải là chuỗi rỗng để không có hai chỗ mô tả dịch vụ. Giá trị `Scope=Supervision` của `BenefitDefinition` vẫn nằm trong CHECK hiện có nhưng không có định nghĩa nào dùng; không đổi schema chỉ để bỏ giá trị này.
 - Trả Boolean cả true/false, không tự chọn UI ẩn hàng false hay hiển thị dấu gạch: quyết định trình bày còn mở, DTO bảo toàn giá trị.
-- Mô tả lưu dưới dạng văn bản thuần; frontend phải mã hóa ký tự khi hiển thị để không thực thi mã HTML/script. Giới hạn kỹ thuật đề xuất: tên 200, mã 100, mô tả 4.000 ký tự. Đầu vào quá dài bị từ chối, không âm thầm cắt ngắn. Đây là giới hạn API đề xuất, chưa phải cam kết sản phẩm đã duyệt.
+- Mô tả lưu dưới dạng văn bản thuần; frontend phải mã hóa ký tự khi hiển thị để không thực thi mã HTML/script. Giới hạn kỹ thuật đề xuất: tên 200, mã 100, mô tả 4.000 ký tự. Đầu vào quá dài bị từ chối, không âm thầm cắt ngắn. Đây là giới hạn API đề xuất, chưa phải cam kết sản phẩm đã duyệt. Validator đã kiểm cả ba giới hạn; giới hạn mô tả 4.000 ký tự thêm ở commit `72e7327`, quá dài trả 422 với lỗi ở trường `Description`.
 - API quản trị dùng `.RequireAuthorization()` cho chính sách xác thực mặc định, cộng policy theo mã quyền `plan.manage` thay vì `RequireRole(Admin)` của bản trước. Lý do đổi: cột `User.Role` kiểu chuỗi đã bị bỏ theo [TDD-RBAC-001](TDD-RBAC-001.md#data-model), và một người nay giữ được nhiều vai trò nên kiểm theo vai trò không còn là cách đúng. Mã `plan.manage` đã có trong code (`PermissionNames.PlanManage`), được thêm vào danh mục `Permission` và gắn cho vai trò hệ thống `admin` ở migration `PlanCatalog`. Mã này nằm ngoài chín mã khởi tạo và không gắn phân công (BR-RBAC-010 khoản 4). Handler kiểm tra thêm User chưa bị xóa. Không lấy tài khoản/vai trò do client tự khai trong nội dung yêu cầu làm căn cứ.
 - Không dùng lớp Entity có cơ chế xóa mềm cho bản công bố và dữ liệu theo dõi lượt. Trước `SaveChanges`, phải kiểm tra và từ chối sửa/xóa phiên bản Published hoặc cấu hình con của nó. Thay đổi gói bằng bản nháp mới; không dùng `ExecuteUpdate` hoặc SQL trực tiếp để bỏ qua kiểm tra. Kiểm thử tích hợp trên PostgreSQL phải kiểm chứng đường ghi này. Kiểm tra trong ứng dụng không ngăn được quản trị viên sửa SQL trực tiếp, nên quyền ghi database phải quản lý riêng. Cơ chế bảo vệ nằm tại `ApplicationDbContext.SaveChanges`/`SaveChangesAsync`; các đường ghi cấu hình vẫn phải lấy khóa Plan trong transaction theo quy trình ở trên.
 
@@ -290,7 +290,7 @@ Ví dụ: khách A mua khi phiên bản 1 có 5 lượt tạo thiết kế. Admi
 
 **Các bảng từ tài liệu khác**: `DesignPeriod`, `PeriodQuota` thuộc [TDD-SUB-002, Data Model](TDD-SUB-002.md#data-model); `SupervisionGrant` thuộc [TDD-SUB-004, Data Model](TDD-SUB-004.md#data-model), được bổ sung hủy/khôi phục ở [TDD-SUB-005](TDD-SUB-005.md#data-model) và trạng thái `Completed` ở [TDD-SUB-006](TDD-SUB-006.md#data-model). `User` là bảng tài khoản đã có, cấu hình tại [UserConfiguration](../../bmt-be/src/bmt-be.persistence/configurations/UserConfiguration.cs).
 
-Các kiểu dưới đây dành cho PostgreSQL; C# dùng Guid, DateTimeOffset UTC, decimal và long tương ứng. PK là khóa chính; FK là khóa ngoại; NN là bắt buộc có giá trị; UNIQUE ngăn giá trị trùng; CHECK kiểm tra điều kiện khi ghi. Khóa ngoại ghép gồm nhiều cột. Tên bảng dùng PascalCase như cấu hình EF hiện có. `Limit` là từ khóa dành riêng của PostgreSQL nên khi viết SQL tay phải đặt tên cột này trong nháy kép; EF đã tự trích dẫn các định danh PascalCase. Các khóa ngoại lịch sử dùng `ON DELETE RESTRICT`, nghĩa là không cho xóa bản ghi đang được dữ liệu lịch sử tham chiếu.
+Các kiểu dưới đây dành cho PostgreSQL; C# dùng Guid, DateTimeOffset UTC, decimal và long tương ứng. PK là khóa chính; FK là khóa ngoại; NN là bắt buộc có giá trị; UNIQUE ngăn giá trị trùng; CHECK kiểm tra điều kiện khi ghi. Khóa ngoại ghép gồm nhiều cột. Tên bảng dùng PascalCase như cấu hình EF hiện có. `Limit` là từ khóa dành riêng của PostgreSQL nên khi viết SQL tay phải đặt tên cột này trong nháy kép; EF đã tự trích dẫn các định danh PascalCase. Các khóa ngoại lịch sử dùng `ON DELETE RESTRICT`, nghĩa là không cho xóa bản ghi đang được dữ liệu lịch sử tham chiếu. Riêng bốn khóa ngoại từ `PlanOffer`, `RevisionBenefit` và `OfferQuota` tới phiên bản hoặc lựa chọn giá dùng `ON DELETE NO ACTION`, do EF cấu hình `ClientCascade` (migration `PackageHistoryRestrict`, commit `72e7327`; trước đó là CASCADE). Database vẫn từ chối xóa dòng cha còn dòng con tham chiếu, giống RESTRICT với ràng buộc không trì hoãn; EF đánh dấu xóa các dòng con đang theo dõi để lớp bảo vệ bản đã công bố trong `ApplicationDbContext` thấy đủ thay đổi và báo đúng lỗi. Code không xóa phiên bản; lưu nháp tự xóa dòng con trước khi ghi lại.
 
 | Bảng | Trường và ràng buộc |
 |---|---|
@@ -459,7 +459,7 @@ Ví dụ là gói giám sát `P2`: bản nháp đã có tên và giá `Construct
 ### Error Codes
 
 - **Unauthorized** (401): thiếu/không hợp lệ phiên xác thực.
-- **AccessForbidden** (403): thiếu mã quyền `plan.manage` hoặc phiên không đáp ứng policy; handler trả NotPermissionException có messageCode này.
+- **AccessForbidden** (403): thiếu mã quyền `plan.manage`, phiên không đáp ứng policy, hoặc tài khoản người thao tác đã bị xóa; handler trả NotPermissionException có messageCode này.
 - **PlanNotFound** (404): không thấy gói.
 - **PlanConfigurationInvalid** (422): giá, currency, quota, loại quyền, duplicate/unknown key hoặc payload sai; gói giám sát gửi kèm quyền lợi, hạn mức, nội dung tư vấn hoặc lựa chọn giá khác `ConstructionSite`; công bố gói giám sát thiếu giá `ConstructionSite` (lỗi trường `Offers[ConstructionSite]`, cùng cách gói thiết kế thiếu giá Month/Year; người dùng xác nhận ngày 25/09/2026).
 - **PlanHasNoBenefits** (422): công bố gói thiết kế rỗng quyền.
@@ -533,6 +533,8 @@ Ví dụ là gói giám sát `P2`: bản nháp đã có tên và giá `Construct
 - [UT-SUB-076](../unittest/UT-SUB-076.md)
 - [UT-SUB-077](../unittest/UT-SUB-077.md)
 - [UT-SUB-078](../unittest/UT-SUB-078.md)
+- [UT-SUB-088](../unittest/UT-SUB-088.md)
+- [UT-SUB-089](../unittest/UT-SUB-089.md)
 - [ST-SUB-113](../systemtest/ST-SUB-113.md)
 - [ST-SUB-124](../systemtest/ST-SUB-124.md)
 
@@ -551,6 +553,7 @@ Ví dụ là gói giám sát `P2`: bản nháp đã có tên và giá `Construct
 
 ## Change Log
 
+- 2026-09-25 (đồng bộ code lần 2): Đồng bộ với code ở commit `72e7327`: handler quản trị gói từ chối tài khoản đã bị xóa bằng 403 `AccessForbidden`; mô tả gói tối đa 4.000 ký tự; bốn khóa ngoại danh mục gói đổi từ CASCADE sang NO ACTION. Thêm đặc tả UT-SUB-088, UT-SUB-089.
 - 2026-09-25 (đồng bộ code): Đồng bộ với code đã triển khai ở commit `182e2a8`: mã `ConstructionSite`, cột `OfferKey` 24 ký tự và quy tắc công bố gói giám sát (`PlanDescriptionRequired`) đã có. Sửa ví dụ lỗi 422 theo thân lỗi thật.
 - 2026-09-25: Cập nhật theo nghiệp vụ đã chốt ngày 25/09/2026. Gói giám sát không dùng danh mục quyền lợi, công bố khi có tên, giá `ConstructionSite` và mô tả dịch vụ có nội dung; thêm mã lỗi `PlanDescriptionRequired` và ví dụ công bố. Đổi mã lựa chọn giá giám sát `Project` thành `ConstructionSite`, nới `PlanOffer.OfferKey` lên `varchar(24)` và thêm dữ liệu mẫu gói giám sát `P2`/`SR1`. Quyền cấu hình gói ghi rõ là mã `plan.manage`, không theo vai trò Admin. Ghi AC-001/015/016 của STORY-SUB-002 không nghiệm thu đợt này; bổ sung tham chiếu AC-004, AC-005, AC-006, AC-027, ALT-02, EXC-03, EXC-06. Trỏ `SupervisionGrant` sang TDD-SUB-004/005/006 thay cho TDD-SUB-003. Ghi rõ hiện trạng code so với thay đổi dự kiến.
 - 2026-09-20: Thay `RequireAuthorization(RoleNames.Admin)` bằng policy theo mã quyền, vì cột `User.Role` đã bị bỏ theo [TDD-RBAC-001](TDD-RBAC-001.md). Mã quyền cho việc cấu hình gói chưa được đặt tên và được ghi là điểm còn mở. Nghiệp vụ quản lý danh mục gói không đổi.

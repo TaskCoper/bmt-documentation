@@ -42,9 +42,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-024 | Role | DeleteRoleHandler.Handle (dự kiến) | Error | REGRESSION | P1 | Unit chưa triển khai; mock nguồn đếm trả về ba người đang giữ vai trò đích. | RoleId của vai trò tự tạo đang có người giữ. | Ném ngoại lệ ánh xạ 409 với mã RoleInUse, kèm số người đang giữ bằng 3. Không xóa dòng Role và không xóa dòng UserRole nào. | BR-RBAC-003/Then<br>STORY-RBAC-001/AC-003 | Không tự gỡ vai trò khỏi người giữ để xóa cho nhanh. | [Chưa xác định] | Draft |
+| UT-RBAC-024 | Role | DeleteRoleCommandHandler.Handle | Error | REGRESSION | P1 | Handler đã có. Vai trò tự tạo đang có ba người giữ; EF InMemory. | RoleId của vai trò tự tạo đang có người giữ. | Ném ngoại lệ ánh xạ 409 với mã RoleInUse; thông báo nêu số 3 và thân lỗi có trường memberCount bằng 3. Không xóa dòng Role và không xóa dòng UserRole nào; không ghi nhật ký từ chối. | BR-RBAC-003/Then<br>STORY-RBAC-001/AC-003<br>TDD-RBAC-001/Internal API | Không tự gỡ vai trò khỏi người giữ để xóa cho nhanh. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - BR-RBAC-003/Then
 - STORY-RBAC-001/AC-003
+- TDD-RBAC-001/Internal API

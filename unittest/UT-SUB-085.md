@@ -33,7 +33,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# UT-RBAC-035
+# UT-SUB-085
 
 ## Unit Test
 
@@ -42,11 +42,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-RBAC-035 | Staff | RevokeRoleCommandHandler.Handle | Error | REGRESSION | P1 | Handler đã có, báo theo số gói giám sát và không ghi nhật ký từ chối (commit 111a02e, theo BR-RBAC-012/Notes). Nhân viên chỉ có supervision.complete từ vai trò giám sát định thu hồi; vai trò còn lại chỉ có commerce.read. Mock bộ đếm phân công đang hiệu lực của người đó trả 2. | UserId của nhân viên và RoleId của vai trò giám sát. | Ném ngoại lệ ánh xạ 409 với mã StaffHasActiveAssignments, activeAssignmentCount bằng 2 và thông báo nói về số gói giám sát. Dòng UserRole không bị xóa, không phân công nào bị đổi, và không gọi RecordRejectionAsync. | BR-RBAC-007/Then<br>STORY-RBAC-002/AC-004<br>TDD-RBAC-002/Architecture<br>BR-RBAC-012/Notes | Chặn khi vai trò bị thu hồi là nguồn duy nhất của supervision.complete và người đó còn phụ trách gói; không tự gỡ phân công giúp. Đây là lỗi nghiệp vụ, không phải rào chắn quyền, nên không ghi nhật ký từ chối. | [Chưa xác định] | Draft |
+| UT-SUB-085 | Subscription / Entitlement | GetMyDesignSubscriptionQueryHandler.Handle — kỳ bị nhân viên hủy | Branch | REGRESSION | P1 | U1 đã xác thực, có DesignSubscription trỏ kỳ DP của gói "Cơ bản" phiên bản 2 theo tháng, StartsAt 18/09/2026 10:00 và ScheduledEndsAt 18/10/2026 10:00 giờ Việt Nam. Sổ lượt design.generate Limit=5, Used=2, Reserved=1; catalog.detail không giới hạn, Used=7; một quyền lợi hiển thị Boolean đang bật. DP có LifecycleState=CanceledByStaff. EF InMemory, đồng hồ cố định. Đồng hồ đặt ngày 21/09/2026, còn trong hạn. | GetMyDesignSubscriptionQuery với người gọi U1. | LifecycleState=CanceledByStaff, CanStart=false; vẫn trả sổ lượt. | BR-SUB-024/Then<br>TDD-SUB-005/Architecture<br>TDD-SUB-002/Internal API | Kỳ bị hủy vẫn là kỳ hiện tại để còn khôi phục được, nhưng không cho bắt đầu thao tác dùng lượt mới. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- BR-RBAC-007/Then
-- STORY-RBAC-002/AC-004
-- TDD-RBAC-002/Architecture
-- BR-RBAC-012/Notes
+- BR-SUB-024/Then
+- TDD-SUB-005/Architecture
+- TDD-SUB-002/Internal API

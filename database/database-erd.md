@@ -382,7 +382,7 @@ erDiagram
 
 ## 4. Khóa ngoại, số lượng liên kết và cách xóa
 
-Mặc định theo các TDD: **khóa ngoại lịch sử dùng `ON DELETE RESTRICT`**, chặn xóa bản ghi đang được tham chiếu. Hủy đơn/gói là đổi trạng thái và ghi lịch sử, không xóa cứng. Các nguồn chưa chỉ rõ `ON UPDATE`; tài liệu này không tự thêm CASCADE hoặc quy tắc đổi khóa.
+Mặc định theo các TDD: **khóa ngoại lịch sử dùng `ON DELETE RESTRICT`**, chặn xóa bản ghi đang được tham chiếu. Hủy đơn/gói là đổi trạng thái và ghi lịch sử, không xóa cứng. Migration `PackageHistoryRestrict` (commit `72e7327` của `bmt-be`) đã bỏ CASCADE ở bảy khóa ngoại của danh mục gói và kỳ thiết kế; bốn khóa của danh mục gói dùng `NO ACTION` như ghi ở từng dòng dưới. Các nguồn chưa chỉ rõ `ON UPDATE`; tài liệu này không tự thêm CASCADE hoặc quy tắc đổi khóa.
 
 Trong bảng dưới, “1 → 0..N” nghĩa mỗi dòng con bắt buộc có một cha, còn cha có thể chưa có dòng con. “0..1 → 0..N” nghĩa liên kết tới cha được phép NULL. Những quan hệ phụ thuộc module còn thiếu chưa được coi là FK đã tồn tại.
 
@@ -391,10 +391,10 @@ Trong bảng dưới, “1 → 0..N” nghĩa mỗi dòng con bắt buộc có m
 | Plan → PlanRevision | `PlanRevision.PlanId` | 1 → 0..N | RESTRICT; UNIQUE(PlanId,Number). |
 | PlanRevision → Plan (bản đang công bố) | `Plan(Id,PublishedRevisionId)` → `PlanRevision(PlanId,Id)` | Mỗi Plan chọn 0..1 revision thuộc chính nó. | RESTRICT; kiểm trạng thái Published trong transaction. |
 | User → Plan | `Plan.CreatedBy` | Người tạo; nguồn chưa ghi rõ nullability. | Không tự suy quan hệ bắt buộc. |
-| PlanRevision → PlanOffer / RevisionBenefit | `RevisionId` | 1 → 0..N ở mỗi bảng | RESTRICT. |
+| PlanRevision → PlanOffer / RevisionBenefit | `RevisionId` | 1 → 0..N ở mỗi bảng | NO ACTION (EF `ClientCascade`): database vẫn từ chối xóa phiên bản còn dòng con như RESTRICT; EF đánh dấu xóa dòng con đang theo dõi để lớp bảo vệ bản đã công bố thấy đủ thay đổi. |
 | BenefitDefinition → RevisionBenefit | `(BenefitId,Kind)` → `(Id,Kind)` | 1 → 0..N | RESTRICT; kiểu quyền phải khớp. |
-| PlanOffer → OfferQuota | `(RevisionId,Cycle)` → `(RevisionId,OfferKey)` | 1 → 0..N | RESTRICT; chỉ Month/Year cho Design. |
-| RevisionBenefit → OfferQuota | `(RevisionId,BenefitId,Kind)` | 1 → 0..N | RESTRICT; chỉ Kind=Quota. |
+| PlanOffer → OfferQuota | `(RevisionId,Cycle)` → `(RevisionId,OfferKey)` | 1 → 0..N | NO ACTION, cùng lý do dòng trên; chỉ Month/Year cho Design. |
+| RevisionBenefit → OfferQuota | `(RevisionId,BenefitId,Kind)` | 1 → 0..N | NO ACTION, cùng lý do dòng trên; chỉ Kind=Quota. |
 | User → DesignSubscription | `AccountId` là PK/FK | 1 → 0..1 | RESTRICT; mỗi tài khoản tối đa một đầu mối. |
 | DesignSubscription → DesignPeriod | `DesignPeriod.AccountId` | 1 → 0..N | RESTRICT. |
 | DesignPeriod → DesignSubscription (kỳ hiện tại) | `(AccountId,CurrentPeriodId)` → `(AccountId,Id)` | Mỗi subscription chọn 0..1 kỳ cùng tài khoản. | RESTRICT; xử lý vòng FK bằng DEFERRABLE hoặc tạo kỳ trước khi đặt con trỏ. |

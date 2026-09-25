@@ -68,7 +68,7 @@ Các thay đổi ngày 25/09/2026 trong tài liệu này **đã có trong code**
 
 Phần **chưa có trong code**: bốn mã quyền quản trị theo từng module (`estimate.catalog.manage`, `library.manage`, `news.manage`, `consultation.manage`). Mỗi mã được thêm cùng module có chỗ kiểm nó, nên danh mục hiện có 9 mã và đủ 13 mã khi bốn module đó được dựng.
 
-Cũng **chưa có trong code**: bỏ ghi nhật ký từ chối cho các lỗi nghiệp vụ theo `BR-RBAC-012/Notes`, người dùng xác nhận ngày 25/09/2026. Các handler vai trò và nhân viên hiện vẫn gọi `RecordRejectionAsync` cho các lỗi này. Phạm vi ghi đã chốt nằm ở mục "Ghi nhật ký, kể cả khi yêu cầu bị từ chối" bên dưới.
+Việc bỏ ghi nhật ký từ chối cho các lỗi nghiệp vụ theo `BR-RBAC-012/Notes` (người dùng xác nhận ngày 25/09/2026) **đã có trong code** ở commit `111a02e` trên nhánh `feature/audit-rejection-scope` của `bmt-be`. Phạm vi ghi nằm ở mục "Ghi nhật ký, kể cả khi yêu cầu bị từ chối" bên dưới. Trường `memberCount` của lỗi xóa vai trò còn người giữ đã có ở commit `72e7327`.
 
 ### Goals
 
@@ -162,7 +162,7 @@ Phạm vi ghi nhật ký từ chối theo `BR-RBAC-012/Notes`, người dùng x�
 - **Có ghi** khi yêu cầu bị chặn bởi ba rào chắn của `BR-RBAC-004` (`SelfPrivilegeEscalation`, `PermissionNotHeldByActor`, `LastAdminProtected`), khi sửa hoặc xóa vai trò hệ thống theo `BR-RBAC-002` (`RoleIsSystem`), và khi tự khóa tài khoản theo `BR-RBAC-008` khoản 7 (`CannotLockSelf`).
 - **Không ghi** với lỗi nghiệp vụ thông thường: trùng tên vai trò (`RoleNameDuplicated`), xóa vai trò còn người giữ (`RoleInUse`), email đã thuộc tài khoản khác (`EmailAlreadyUsed`), gán vai trò Khách hàng cho nhân viên (`RoleNotAssignableToStaff`), và làm người đang phụ trách gói giám sát mất `supervision.complete` (`StaffHasActiveAssignments`). Các lỗi phân công ở [TDD-RBAC-003](TDD-RBAC-003.md) cũng không ghi.
 
-Code hiện vẫn gọi `RecordRejectionAsync` cho năm mã trong nhóm không ghi; bỏ các lời gọi đó là thay đổi dự kiến.
+Đã có trong code ở commit `111a02e`: handler không còn gọi `RecordRejectionAsync` cho năm mã trong nhóm không ghi, và test kiểm cả hai nhóm.
 
 ### Sửa danh sách quyền của vai trò
 
@@ -175,7 +175,7 @@ Code hiện vẫn gọi `RecordRejectionAsync` cho năm mã trong nhóm không g
 1. Khóa dòng `Role` đang sửa bằng `SELECT ... FOR UPDATE`. Code lấy khóa này ở mọi lần sửa vai trò tự tạo, ngay trước khi đọc danh sách quyền hiện tại, nên hai lần sửa cùng một vai trò luôn nối đuôi nhau. Khóa này chặn việc gán vai trò đó cho người mới trong lúc đang xét, vì lệnh chèn `UserRole` phải kiểm khóa ngoại tới `Role` bằng khóa `FOR KEY SHARE`, mà khóa này phải chờ `FOR UPDATE`.
 2. Đọc danh sách người giữ vai trò, **kể cả tài khoản đang bị khóa**, rồi khóa các dòng `User` của họ theo thứ tự `Id` tăng dần bằng `SELECT ... FOR NO KEY UPDATE`.
 3. Với từng người, tính bộ quyền sau thay đổi: hợp quyền của các vai trò khác mà người đó giữ, cộng danh sách quyền mới của vai trò đang sửa. Không còn `supervision.complete` thì đếm phân công đang hiệu lực của người đó theo [TDD-RBAC-003](TDD-RBAC-003.md#data-model).
-4. Có ít nhất một người mất `supervision.complete` mà vẫn phụ trách từ một gói giám sát trở lên thì từ chối **toàn bộ** thay đổi: trả 409 `StaffHasActiveAssignments` kèm danh sách người bị ảnh hưởng và số gói của từng người, không lưu tên mới hay phần quyền nào. Đây là lỗi nghiệp vụ nên không ghi nhật ký từ chối; code hiện vẫn ghi, bỏ lời ghi này là thay đổi dự kiến.
+4. Có ít nhất một người mất `supervision.complete` mà vẫn phụ trách từ một gói giám sát trở lên thì từ chối **toàn bộ** thay đổi: trả 409 `StaffHasActiveAssignments` kèm danh sách người bị ảnh hưởng và số gói của từng người, không lưu tên mới hay phần quyền nào. Đây là lỗi nghiệp vụ nên không ghi nhật ký từ chối (đã có trong code ở commit `111a02e`).
 
 Ví dụ theo `STORY-RBAC-001/AC-008`: vai trò "Nhân viên giám sát" có ba người giữ. Anh Tú phụ trách 2 gói giám sát, chị Mai phụ trách 1 gói, cả hai chỉ có `supervision.complete` từ vai trò này. Anh Hải không phụ trách gói nào. Bỏ `supervision.complete` khỏi vai trò thì bị từ chối, phản hồi liệt kê anh Tú (2) và chị Mai (1). Số gói gồm cả gói đang bị hủy mà phân công còn hiệu lực. Sau khi ba gói được chuyển giao hoặc gỡ phân công, thao tác bỏ quyền mới thực hiện được.
 
@@ -588,7 +588,7 @@ Error Response:
 {"title": "Conflict", "code": "Conflict", "status": 409, "detail": "Còn 3 người đang giữ vai trò này.", "messageCode": "RoleInUse", "errors": null, "memberCount": 3}
 ```
 
-Code hiện chưa trả trường `memberCount` khi xóa vai trò đang có người giữ; số người chỉ nằm trong `detail`.
+Đã có trong code ở commit `72e7327`: `DeleteRoleCommandHandler` đưa `memberCount` vào `DomainException.Extensions`, middleware đặt nó thành trường cùng cấp trong thân lỗi như ví dụ trên.
 
 #### GET /api/v1/access-audit
 
@@ -652,6 +652,7 @@ Cách ánh xạ bám đúng bảng đã có trong `ExceptionHandlingMiddleware.c
 
 ## Change Log
 
+- 2026-09-25 (đồng bộ code lần 2): Ghi rõ việc bỏ ghi nhật ký từ chối cho năm lỗi nghiệp vụ đã có trong code ở commit `111a02e`, và `RoleInUse` đã trả `memberCount` ở commit `72e7327`.
 - 2026-09-25 (chốt nhật ký): Theo `BR-RBAC-012/Notes`, người dùng xác nhận ngày 25/09/2026: không ghi nhật ký từ chối cho năm lỗi nghiệp vụ `RoleNameDuplicated`, `RoleInUse`, `EmailAlreadyUsed`, `RoleNotAssignableToStaff` và `StaffHasActiveAssignments`. Thêm phạm vi ghi vào mục Ghi nhật ký, bỏ dòng `log-4` khỏi dữ liệu mẫu, và ghi rõ nhật ký không có tác vụ tự xóa trong đợt này. Code chưa đổi.
 - 2026-09-25 (đồng bộ code): Đồng bộ với code đã triển khai ở commit `182e2a8`: danh mục còn 9 mã sau migration `20260925074152_ConstructionSiteAndPackageAssignment`, hai kiểm tra khi sửa quyền vai trò, `StaffCreated` và cổng `IAccessRowLocker` đã có; bốn mã quyền theo module vẫn chưa có. Ví dụ lỗi ghi mã nghiệp vụ ở `messageCode`, `code` là loại lỗi chung. Ghi rõ `RoleInUse` chưa trả `memberCount`.
 - 2026-09-25: Cập nhật theo US/BR chốt lần hai trong ngày 25/09/2026. Bỏ mã `supervision.reassign` cùng chức năng đổi công trình của gói: danh mục còn 13 mã (tám mã khởi tạo và năm mã quản trị); thêm kế hoạch migration xóa mã này khỏi `RolePermission` và `Permission` trên dữ liệu dev/test, không ghi nhật ký. Phân công tính theo gói giám sát thay cho công trình trong kiểm tra `BR-RBAC-007` khoản 6 và ví dụ đi kèm.
