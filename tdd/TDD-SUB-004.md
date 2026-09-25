@@ -57,7 +57,7 @@ STORY-SUB-004 cho phép mua gói giám sát trước khi có công trình, rồi
 
 Ngày 25/09/2026 người dùng xác nhận **gói đã gắn công trình thì không đổi sang công trình khác, kể cả nhân viên và Admin** (BR-SUB-009, STORY-SUB-004/EXC-07). BR-SUB-023 và mã quyền `supervision.reassign` đã bỏ. Vì vậy thiết kế đổi công trình của bản trước (endpoint `reassign`, lý do đổi, bảng lịch sử đổi) được gỡ khỏi tài liệu này.
 
-**Cập nhật 25/09/2026 (lần 3) — thiết kế, chưa có trong code.** Cùng ngày, người dùng chốt thêm STORY-SUB-006 và BR-SUB-026: khi khách gán nhầm, nhân viên có quyền `supervision.unassign` gỡ gói đang `Assigned` về `Unassigned`; khách tự gán lại theo luồng gán của tài liệu này, vẫn trước hạn gán ban đầu (BR-SUB-022 khoản 2, 4, 5). Thao tác gỡ được thiết kế ở [TDD-SUB-007](TDD-SUB-007.md). Hệ quả cho tài liệu này:
+**Cập nhật 25/09/2026 (lần 3) — đã có trong code ở nhánh `feature/supervision-unassign` của `bmt-be`, chưa merge vào `develop`.** Cùng ngày, người dùng chốt thêm STORY-SUB-006 và BR-SUB-026: khi khách gán nhầm, nhân viên có quyền `supervision.unassign` gỡ gói đang `Assigned` về `Unassigned`; khách tự gán lại theo luồng gán của tài liệu này, vẫn trước hạn gán ban đầu (BR-SUB-022 khoản 2, 4, 5). Thao tác gỡ được thiết kế ở [TDD-SUB-007](TDD-SUB-007.md). Hệ quả cho tài liệu này:
 
 - Luồng gán nhận cả gói đã gỡ: điều kiện chỉ còn `State = Unassigned`, trước hạn và đúng version; không còn đòi `FirstAssignedAtUtc = NULL`.
 - Thêm cột `AssignedAtUtc` (mốc gán hiện tại) bên cạnh `FirstAssignedAtUtc` (mốc gán lần đầu). API của khách giữ `firstAssignedAtUtc` để không phá client và thêm `assignedAtUtc` (quyết định của người dùng ngày 25/09/2026).
@@ -314,7 +314,7 @@ Triển khai cùng lúc code và migration: code cũ đọc `ProjectId` và bả
 
 Đã chạy thử ngày 25/09/2026 trên PostgreSQL: bước kiểm dừng migration khi có gói gắn `ProjectId`; sau `Up`, `pg_constraint` có `FK_SupervisionGrant_ConstructionSite` với `confdeltype = 'r'`; `Down` chạy được. Chưa áp dụng lên môi trường dev dùng chung hay production.
 
-**Migration của lần 3 (thiết kế, chưa tạo).** Phần của bảng `SupervisionGrant` là bước 1 của migration gộp `SupervisionUnassignWithoutRestore`; thứ tự đầy đủ bốn bước ở [TDD-SUB-007](TDD-SUB-007.md#data-model).
+**Migration của lần 3 (`20260925123300_SupervisionUnassignWithoutRestore`, đã tạo, chưa áp dụng lên database dùng chung).** Phần của bảng `SupervisionGrant` là bước 1 của migration gộp `SupervisionUnassignWithoutRestore`; thứ tự đầy đủ bốn bước ở [TDD-SUB-007](TDD-SUB-007.md#data-model).
 
 | Bước con | Việc làm | Kiểm tra / điều kiện dừng |
 | --- | --- | --- |
@@ -369,7 +369,7 @@ Gọi lại route này cho gói đã gán, với một công trình khác:
 
 ```
 Error Response:
-{"title":"Conflict","code":"Conflict","status":409,"detail":"Gói này không ở trạng thái gán lần đầu.","messageCode":"GrantStateConflict","errors":null}
+{"title":"Conflict","code":"Conflict","status":409,"detail":"Gói này không ở trạng thái chưa gán.","messageCode":"GrantStateConflict","errors":null}
 ```
 
 #### GET /api/v1/me/supervision-grants/{grantId}
@@ -455,7 +455,7 @@ Bỏ các mã `NoConstructionSiteChange` (thay `NoProjectChange`) và `Construct
 - [TDD-SUB-003](TDD-SUB-003.md) là bản cũ đã bị thay; tài liệu này thay phần gán của nó. Không gọi service bên ngoài nên không có External API trong TDD này.
 - System Test hiện hành: ST-PAY-024–028, ST-PAY-033, ST-PAY-071 (không ai đổi thẳng được công trình), ST-SUB-118, ST-SUB-119, ST-SITE-020 (xóa công trình đua với gán gói) và ST-SITE-032 (sửa công trình đua với gán gói). Phần gán lại sau khi gỡ và hiển thị cho khách: ST-PAY-075, ST-PAY-076, ST-PAY-077, ST-PAY-083; toàn bộ luồng gỡ ở ST-PAY-074–084 theo [TDD-SUB-007](TDD-SUB-007.md). ST-PAY-029–032 kiểm việc đổi công trình và đã rút khỏi nghiệm thu ngày 25/09/2026. Bảng truy vết đầy đủ ở [discovery](../discovery/payment-technical-design.md).
 - STORY-SUB-004 AC-006 đến AC-009 và ALT-02, EXC-04, EXC-05 được ghi "Không nghiệm thu" nên không còn trong tham chiếu.
-- Đặc tả Unit Test: UT-PAY-037 đến UT-PAY-042, UT-PAY-044, UT-PAY-046 đến UT-PAY-048, UT-PAY-075 đến UT-PAY-077, UT-SUB-069. Lần 3 (gán lại gói đã gỡ, cột `AssignedAtUtc`, quy tắc điền trường của API khách): UT-PAY-040 (thêm `AssignedAtUtc`), UT-PAY-096 đến UT-PAY-101, UT-PAY-109 (backfill `AssignedAtUtc` trong migration). UT-PAY-043 và UT-PAY-045 kiểm việc đổi công trình và đã đánh dấu ĐÃ BỎ. Mã test hiện có ở `test/bmt-be.application.tests/usecases/subscription/` (`SupervisionCommandHandlerTests.cs`, `SupervisionPolicyTests.cs`) chạy đạt ngày 25/09/2026 cùng bộ unit 338/338, theo hành vi trước lần 3. Các ca mới và ca viết lại ở lần 3 chưa có mã test và chưa chạy; code chưa có hành vi tương ứng.
+- Đặc tả Unit Test: UT-PAY-037 đến UT-PAY-042, UT-PAY-044, UT-PAY-046 đến UT-PAY-048, UT-PAY-075 đến UT-PAY-077, UT-SUB-069. Lần 3 (gán lại gói đã gỡ, cột `AssignedAtUtc`, quy tắc điền trường của API khách): UT-PAY-040 (thêm `AssignedAtUtc`), UT-PAY-096 đến UT-PAY-101, UT-PAY-109 (backfill `AssignedAtUtc` trong migration). UT-PAY-043 và UT-PAY-045 kiểm việc đổi công trình và đã đánh dấu ĐÃ BỎ. Mã test hiện có ở `test/bmt-be.application.tests/usecases/subscription/` (`SupervisionCommandHandlerTests.cs`, `SupervisionPolicyTests.cs`) đã cập nhật theo lần 3; UT-PAY-109 nằm ở `test/bmt-be.integration.tests/SupervisionUnassignConstraintTests.cs`. Kết quả chạy ngày 25/09/2026 trên nhánh đó: unit test 465/465 (năm project test) và integration test 170/170 trên PostgreSQL 15 (Testcontainers) đạt; chưa chạy System Test và chưa áp dụng migration lên môi trường dev dùng chung hay production.
 
 ## Change Log
 

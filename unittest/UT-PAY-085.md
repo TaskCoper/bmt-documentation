@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-085 | Supervision | ISupervisionPolicy.EnsureCanUnassign (dự kiến) | Error | REGRESSION | P1 | Hàm thuần. G1 State=Assigned, Version=3 (vừa có thao tác khác), còn hạn. Unit chưa có code. | EnsureCanUnassign(G1, expectedVersion=2, nowUtc trước hạn). | Ném ConflictException với MessageCode=PackageVersionConflict (409). Hàm không tự dùng Version=3 để đi tiếp. | TDD-SUB-007/Architecture<br>TDD-SUB-007/Error Codes | Kiểm phiên bản chống ghi đè thay đổi mới hơn màn hình nhân viên đang xem; client phải tải lại. | [Chưa xác định] | Draft |
+| UT-PAY-085 | Supervision | ISupervisionPolicy.EnsureCanUnassign | Error | REGRESSION | P1 | Hàm thuần. G1 State=Assigned, Version=3 (vừa có thao tác khác), còn hạn. Mã test: `SupervisionUnassignPolicyTests.EnsureCanUnassign_StaleVersion_ThrowsPackageVersionConflict`. | EnsureCanUnassign(G1, expectedVersion=2, nowUtc trước hạn). | Ném ConflictException với MessageCode=PackageVersionConflict (409). Hàm không tự dùng Version=3 để đi tiếp. | TDD-SUB-007/Architecture<br>TDD-SUB-007/Error Codes | Kiểm phiên bản chống ghi đè thay đổi mới hơn màn hình nhân viên đang xem; client phải tải lại. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

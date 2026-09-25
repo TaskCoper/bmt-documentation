@@ -73,6 +73,8 @@ Nguồn quyền nhân viên do [TDD-RBAC-001](TDD-RBAC-001.md) cung cấp theo m
 | `PermissionNames.PackageRestore`, `PackageOperations.RestorePackage` | Có. | Bỏ; migration gỡ mã quyền theo [TDD-RBAC-001](TDD-RBAC-001.md). |
 | `PackageLifecycleEvent` | Chưa có ba cột bản lưu công trình; CHECK `Action` gồm `Cancel`, `Restore`, `Complete`, `Reopen`. | Thêm ba cột, thêm `Unassign` ([TDD-SUB-007](TDD-SUB-007.md)), thêm CHECK `CK_PackageLifecycleEvent_SiteSnapshot`. |
 
+Thiết kế mới đã có trong code ở nhánh `feature/supervision-unassign` của `bmt-be` ngày 25/09/2026, chưa merge vào `develop`; bảng trên giữ để đối chiếu với `develop`.
+
 Các thao tác vẫn khóa dòng `User` của chủ gói qua `LockAccountAsync`, vì bảng `AccountCommerceState` của TDD-PAY-001 chưa có.
 
 ### Goals
@@ -136,7 +138,7 @@ flowchart LR
 - Default session policy phải gồm phiên đã xác minh và không phải token đặt lại mật khẩu, như `JwtExtensions` hiện tại. Policy theo mã quyền thêm yêu cầu nghiệp vụ, không thay default bằng policy vai trò yếu hơn. Admin xem được theo BR-PAY-005; với thao tác hủy vẫn phải có `package.cancel` trong danh sách quyền, không có đường tắt theo vai trò.
 - Tư cách nhân viên xác định bằng `User.AccountKind = 'Staff'` và `User.Status = 'Active'`; quyền xác định bằng các vai trò trong `UserRole` theo [TDD-RBAC-001](TDD-RBAC-001.md#data-model). Quyền được nhúng vào access token lúc phát hành, nên handler không truy vấn lại; đổi lại phải chấp nhận độ trễ của BR-RBAC-009. Cấp và thu hồi vai trò thuộc [TDD-RBAC-002](TDD-RBAC-002.md).
 - **Thứ tự khóa khi hủy kỳ thiết kế**: tài khoản chủ gói → kỳ/subscription → biên nhận. Không đụng `Assignment`.
-- **Thứ tự khóa khi hủy gói giám sát** (thiết kế mới, chưa có trong code):
+- **Thứ tự khóa khi hủy gói giám sát** (có trong code ở nhánh `feature/supervision-unassign`):
   1. Khóa dòng tài khoản chủ gói (`User` `FOR UPDATE` trong code hiện tại). Hủy, gán, hoàn thành, mở lại và gỡ gói của cùng khách xếp hàng tại đây.
   2. `LockActiveByResourceForUpdateAsync('SupervisionGrant', grantId)`: khóa dòng phân công đang hiệu lực của gói, nếu có. Nếu một chuyển giao đang chạy giữ dòng này, việc hủy chờ chuyển giao commit; sau đó dòng cũ đã có `EffectiveToUtc` nên câu khóa không còn khớp.
   3. `LockSupervisionGrantForUpdateAsync(grantId)`: khóa dòng gói. Khóa này xung đột với `FOR SHARE` mà luồng giao phân công giữ khi đọc trạng thái gói, nên giao và hủy trên cùng gói không chạy xen.
@@ -409,7 +411,7 @@ Phản hồi theo dạng `PackageMutated` đang có trong code. Không trả "đ
 - [BR-SUB-025](../businessrule/BR-SUB-025.md) đã bỏ ngày 25/09/2026, chỉ giữ để tra lịch sử; không còn là căn cứ thiết kế. STORY-SUB-005 ALT-02, EXC-02 đến EXC-07, AC-005 đến AC-013 và STORY-SUB-003 ALT-04, EXC-09, AC-014, AC-015 được ghi "Không nghiệm thu" nên không còn trong tham chiếu.
 - Hiện trạng mã nguồn: [PermissionNames](../../bmt-be/src/bmt-be.contract/constants/PermissionNames.cs), [RoleCodes](../../bmt-be/src/bmt-be.contract/constants/RoleCodes.cs), [JwtExtensions](../../bmt-be/src/bmt-be.api/dependencyInjection/extensions/JwtExtensions.cs), [DbContext](../../bmt-be/src/bmt-be.persistence/ApplicationDbContext.cs).
 - [Bảng truy vết kiểm thử](../discovery/payment-technical-design.md). Không có External API: thao tác hủy không gọi ngân hàng hoặc SePay.
-- Đặc tả Unit Test hiện hành: UT-PAY-049 đến UT-PAY-052, UT-PAY-059, UT-PAY-061, UT-PAY-062 (UT-PAY-049, 052, 061 đã sửa ở lần 3); UT-PAY-078 viết lại (hủy gói giám sát kết thúc phân công); UT-PAY-102 (bản lưu công trình), UT-PAY-103 (thứ tự khóa), UT-PAY-104 (truy vấn lại phân công sau khi khóa gói), UT-PAY-105 (hủy kỳ thiết kế: không đụng phân công, `PackageExpired`, `PackageSuperseded`), UT-PAY-106 (ánh xạ `40P01`), UT-PAY-109 và UT-PAY-110 (migration). Đã đánh dấu ĐÃ BỎ vì bỏ khôi phục: UT-PAY-053 đến UT-PAY-058, UT-PAY-060, UT-PAY-079. Mã test hủy hiện ở `test/bmt-be.application.tests/usecases/subscription/PackageLifecycleTests.cs`, kiểm hành vi trước lần 3; cần bỏ phần khôi phục và viết lại ca phân công khi triển khai. Các ca mới và ca viết lại ở lần 3 chưa có mã test và chưa chạy; code chưa có hành vi tương ứng.
+- Đặc tả Unit Test hiện hành: UT-PAY-049 đến UT-PAY-052, UT-PAY-059, UT-PAY-061, UT-PAY-062 (UT-PAY-049, 052, 061 đã sửa ở lần 3); UT-PAY-078 viết lại (hủy gói giám sát kết thúc phân công); UT-PAY-102 (bản lưu công trình), UT-PAY-103 (thứ tự khóa), UT-PAY-104 (truy vấn lại phân công sau khi khóa gói), UT-PAY-105 (hủy kỳ thiết kế: không đụng phân công, `PackageExpired`, `PackageSuperseded`), UT-PAY-106 (ánh xạ `40P01`), UT-PAY-109 và UT-PAY-110 (migration). Đã đánh dấu ĐÃ BỎ vì bỏ khôi phục: UT-PAY-053 đến UT-PAY-058, UT-PAY-060, UT-PAY-079. Mã test hủy ở `test/bmt-be.application.tests/usecases/subscription/PackageLifecycleTests.cs` đã bỏ phần khôi phục và viết lại ca phân công; ánh xạ `40P01` ở `test/bmt-be.application.tests/behaviors/ConstraintViolationPipelineBehaviorTests.cs`; UT-PAY-109, UT-PAY-110 và ca hủy trên PostgreSQL thật ở `test/bmt-be.integration.tests/SupervisionUnassignConstraintTests.cs`. Kết quả chạy ngày 25/09/2026 trên nhánh đó: unit test 465/465 (năm project test) và integration test 170/170 trên PostgreSQL 15 (Testcontainers) đạt; chưa chạy System Test và chưa áp dụng migration lên môi trường dev dùng chung hay production.
 
 ## Change Log
 

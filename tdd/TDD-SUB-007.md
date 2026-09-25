@@ -77,7 +77,7 @@ Hiện trạng code đã kiểm tra ngày 25/09/2026 trên `bmt-be` nhánh `deve
 | `PermissionNames` | 9 mã, có `package.restore`. | Bỏ `package.restore`, thêm `supervision.unassign`. |
 | `SupervisionMutationFlow` | Luồng chung của hủy, khôi phục, hoàn thành, mở lại gói giám sát; chỉ đổi `State` và `Version`. | Thêm bước khóa và kết thúc phân công, dùng chung cho hủy và gỡ. |
 
-Mọi thành phần mới trong tài liệu này là **thiết kế dự kiến, chưa có trong code**.
+Các thành phần mới trong tài liệu này đã có trong code ở nhánh `feature/supervision-unassign` của `bmt-be` ngày 25/09/2026, chưa merge vào `develop`; bảng trên mô tả `develop` trước khi đổi. Khi triển khai, `SupervisionAssignmentCloser` là lớp tĩnh nội bộ, còn tùy chọn kết thúc phân công của `SupervisionMutationFlow` là record `SupervisionAssignmentClosing` gồm cổng khóa phân công, bộ ghi nhật ký và lý do kết thúc.
 
 ### Goals
 
@@ -342,7 +342,7 @@ erDiagram
 - Vì sao không ghi dòng lịch sử cho việc gán: lần gán do chủ gói thực hiện, đã có biên nhận `Assign` và mốc `AssignedAtUtc`. BR chỉ đòi lịch sử của việc gỡ; mỗi dòng gỡ đã chứa công trình cũ, nên chuỗi "gán CS1 → gỡ khỏi CS1 → gán CS2" đọc được từ các dòng gỡ và mốc gán hiện tại.
 - Độ dài `ConstructionSiteName` và `ConstructionSiteAddress` bằng giới hạn của `ConstructionSite` (200 và 500), nên bản lưu không bao giờ bị cắt.
 
-**Migration gộp `SupervisionUnassignWithoutRestore` (dự kiến, chưa tạo)**
+**Migration gộp `20260925123300_SupervisionUnassignWithoutRestore` (đã tạo, chưa áp dụng lên database dùng chung)**
 
 Một migration cho toàn bộ thay đổi schema và dữ liệu của đợt này. Database hiện chỉ có dữ liệu dev/test (người dùng xác nhận ngày 25/09/2026); các bảng nhỏ nên không cần `NOT VALID` hay `CREATE INDEX CONCURRENTLY`. Thứ tự trong `Up`:
 
@@ -353,7 +353,7 @@ Một migration cho toàn bộ thay đổi schema và dữ liệu của đợt n
 | 3. `Assignment` | Cập nhật `CK_Assignment_EndReason`; kết thúc các phân công đang hiệu lực của gói `CanceledByStaff` (dữ liệu tạo trước đợt này, khi hủy còn giữ phân công): `EffectiveToUtc = now()`, `EndedBy = ActorId` của dòng `PackageLifecycleEvent` mà `SupervisionGrant.CancelEventId` trỏ tới, `EndReason = 'PackageCanceled'`. Không ghi `AccessAuditLog`, như lần bỏ `supervision.reassign`. Chi tiết ở [TDD-RBAC-003](TDD-RBAC-003.md#data-model). | Không còn dòng `Assignment` đang hiệu lực trỏ vào gói `CanceledByStaff`. |
 | 4. `Permission` | Xóa `RolePermission` có mã `package.restore` (gồm vai trò `admin` và vai trò tự tạo), rồi xóa dòng `Permission` đó; thêm `supervision.unassign` và `RolePermission` cho vai trò `admin`. Chi tiết ở [TDD-RBAC-001](TDD-RBAC-001.md#data-model). | Bảng `Permission` khớp `PermissionNames`: khi khởi động, API từ chối chạy nếu hai bên lệch. |
 
-Triển khai code và migration cùng lúc: code mới đọc cột `AssignedAtUtc` và mã quyền mới; code cũ vẫn chạy được trên schema mới trừ luồng khôi phục (không còn mã quyền). `Down` bỏ cột và CHECK mới, đổi các dòng `Assignment` có `EndReason` là `PackageCanceled` hoặc `PackageUnassigned` về `Removed` rồi dựng lại CHECK cũ, và thêm lại `package.restore` cho `admin`. Trước khi dựng lại CHECK cũ, `Down` dừng nếu có gói `Unassigned` mang `FirstAssignedAtUtc` (gói đã gỡ). Phân công đã kết thúc ở bước 3 và bản lưu công trình không lấy lại được khi `Down`.
+Triển khai code và migration cùng lúc: code mới đọc cột `AssignedAtUtc` và mã quyền mới; code cũ vẫn chạy được trên schema mới trừ luồng khôi phục (không còn mã quyền). `Down` bỏ cột và CHECK mới, đổi các dòng `Assignment` có `EndReason` là `PackageCanceled` hoặc `PackageUnassigned` về `Removed` rồi dựng lại CHECK cũ, và thêm lại `package.restore` cho `admin`. Trước mọi bước khác, `Down` dừng nếu có gói `Unassigned` mang `FirstAssignedAtUtc` (gói đã gỡ) hoặc có dòng lịch sử `Unassign`, vì schema cũ không biểu diễn được hai trường hợp này. Ở chiều `Up`, trước bước 1, migration dừng nếu có gói `CanceledByStaff` còn phân công đang hiệu lực mà `CancelEventId` NULL, như [TDD-RBAC-003](TDD-RBAC-003.md#data-model) yêu cầu. Phân công đã kết thúc ở bước 3 và bản lưu công trình không lấy lại được khi `Down`.
 
 ## Internal API
 
@@ -443,7 +443,7 @@ Ví dụ dùng UUID giả định. Trong thân lỗi, `code` là loại lỗi ch
 
 - Tài liệu liên quan: [gán gói và cột `AssignedAtUtc`](TDD-SUB-004.md), [hủy gói, bảng `PackageLifecycleEvent`](TDD-SUB-005.md), [hoàn thành và mở lại](TDD-SUB-006.md), [công trình](TDD-SITE-001.md), [phân công](TDD-RBAC-003.md), [danh mục quyền](TDD-RBAC-001.md), [tra cứu lịch sử gói](TDD-PAY-002.md).
 - System Test: ST-PAY-074 đến ST-PAY-084 cho STORY-SUB-006; ST-RBAC-063 cho kết thúc phân công khi gỡ.
-- Đặc tả Unit Test: UT-PAY-082 đến UT-PAY-086 (`EnsureCanUnassign` về trạng thái, hạn, version; validator lệnh gỡ), UT-PAY-087 đến UT-PAY-093 và UT-PAY-095 (handler gỡ: dữ liệu ghi và bản lưu công trình, kết thúc phân công và nhật ký, gói chưa có phân công, gửi lặp, người gọi và gói không hợp lệ, thứ tự khóa, đọc lại phân công sau khi khóa gói, gỡ lần thứ hai), UT-PAY-094 (ánh xạ `40P01`). Chưa có mã test và chưa chạy. Khóa `FOR UPDATE`, CHECK mới và tranh chấp gỡ với giao hoặc chuyển giao cần integration test trên PostgreSQL thật; EF InMemory không chứng minh được.
+- Đặc tả Unit Test: UT-PAY-082 đến UT-PAY-086 (`EnsureCanUnassign` về trạng thái, hạn, version; validator lệnh gỡ), UT-PAY-087 đến UT-PAY-093 và UT-PAY-095 (handler gỡ: dữ liệu ghi và bản lưu công trình, kết thúc phân công và nhật ký, gói chưa có phân công, gửi lặp, người gọi và gói không hợp lệ, thứ tự khóa, đọc lại phân công sau khi khóa gói, gỡ lần thứ hai), UT-PAY-094 (ánh xạ `40P01`). Mã test ở `test/bmt-be.application.tests/usecases/subscription/SupervisionUnassignTests.cs` và `test/bmt-be.application.tests/behaviors/ConstraintViolationPipelineBehaviorTests.cs`. Integration test trên PostgreSQL thật ở `test/bmt-be.integration.tests/SupervisionUnassignConstraintTests.cs` kiểm CHECK mới, việc gỡ chờ một yêu cầu giao đang giữ khóa gói rồi kết thúc phân công vừa tạo, và dữ liệu của migration. Chưa có integration test cho trường hợp chờ vòng `40P01`. Kết quả chạy ngày 25/09/2026 trên nhánh đó: unit test 465/465 (năm project test) và integration test 170/170 trên PostgreSQL 15 (Testcontainers) đạt; chưa chạy System Test và chưa áp dụng migration lên môi trường dev dùng chung hay production.
 - Không gọi dịch vụ bên ngoài nên không có External API trong TDD này.
 
 ## Change Log
