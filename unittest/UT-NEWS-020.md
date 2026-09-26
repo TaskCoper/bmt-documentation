@@ -42,9 +42,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-NEWS-020 | Tin tức | Cổng complete dự kiến — kết quả bền vững (dự kiến) | Happy | REGRESSION | P1 | Gateway storage fake có object xác minh hợp lệ; final key xác định bởi ticket. | Complete ticket hợp lệ; gọi lại khi final object đã có. | Trả cùng contentUrl final ổn định; không trả uploadUrl/chữ ký GET có hạn, không sinh final key mới lần hai. Tính nguyên tử create-if-absent kiểm integration. | TDD-NEWS-001/External API<br>STORY-NEWS-001/AC-004 | Theo thiết kế đã chốt; đặc tả chưa thực thi, không phải mã test. | [Chưa xác định] | Draft |
+| UT-NEWS-020 | Tin tức | Lưu bài — img mất src sau khi làm sạch HTML | Error | REGRESSION | P1 | Bộ làm sạch thật; AllowedHosts=images.example.test. | Nội dung có đoạn chữ kèm lần lượt: img src data:image/png;base64; img src javascript:; img không có src. | Trả InvalidNewsContent (422), lỗi ở contentHtml; không tự bỏ ảnh rồi lưu phần còn lại; không ghi bài. | TDD-NEWS-001/Architecture<br>TDD-NEWS-001/Internal API<br>STORY-NEWS-001/AC-004 | Mã UT-NEWS-020 trước đây đặc tả bước complete của cổng presign, đã bỏ theo quyết định ngày 26/09/2026; nay dùng cho kiểm src của img sau khi làm sạch. Theo thiết kế đã chốt. Mã test ở bảng độ phủ kiểm thử đơn vị Tin tức; không ghi kết quả chạy vào đặc tả. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- TDD-NEWS-001/External API
+- TDD-NEWS-001/Architecture
+- TDD-NEWS-001/Internal API
 - STORY-NEWS-001/AC-004

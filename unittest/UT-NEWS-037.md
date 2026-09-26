@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-NEWS-037 | Tin tức | Chuẩn bị từ khóa ILIKE (dự kiến) | Boundary | REGRESSION | P1 | Helper escape thật, repository fake nhận tham số. | Từ khóa có %, _, backslash và dấu nháy SQL. | Tạo pattern có escape đúng để wildcard đầu vào là ký tự thường; bind bằng parameter, không nối SQL. Không bỏ dấu hoặc chuyển sang tìm ContentHtml. | TDD-NEWS-001/Architecture<br>BR-NEWS-003/Then<br>STORY-NEWS-003/AC-003 | Theo thiết kế đã chốt; đặc tả chưa thực thi, không phải mã test. | [Chưa xác định] | Draft |
+| UT-NEWS-037 | Tin tức | Chuẩn bị từ khóa ILIKE | Boundary | REGRESSION | P1 | Helper escape thật, repository fake nhận tham số. | Từ khóa có %, _, backslash và dấu nháy SQL. | Tạo pattern có escape đúng để wildcard đầu vào là ký tự thường; bind bằng parameter, không nối SQL. Không bỏ dấu hoặc chuyển sang tìm ContentHtml. | TDD-NEWS-001/Architecture<br>BR-NEWS-003/Then<br>STORY-NEWS-003/AC-003 | Theo thiết kế đã chốt. Mã test ở bảng độ phủ kiểm thử đơn vị Tin tức; không ghi kết quả chạy vào đặc tả. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-NEWS-001 | Tin tức | NewsArticleService — lưu nháp (dự kiến) | Happy | REGRESSION | P1 | Repository giả chưa có bài; actor hợp lệ; clock cố định T1. | Title=" Tin A "; các trường khác NULL; categoryIds=[]. | Tạo đúng một Draft, Title="Tin A", Version=1, ngày công bố NULL; các trường thiếu giữ NULL, không tự công bố. | TDD-NEWS-001/Architecture<br>BR-NEWS-001/Except<br>STORY-NEWS-001/AC-001 | Theo thiết kế đã chốt; đặc tả chưa thực thi, không phải mã test. | [Chưa xác định] | Draft |
+| UT-NEWS-001 | Tin tức | NewsArticleService — lưu nháp | Happy | REGRESSION | P1 | Repository giả chưa có bài; actor hợp lệ; clock cố định T1. | Title=" Tin A "; các trường khác NULL; categoryIds=[]. | Tạo đúng một Draft, Title="Tin A", Version=1, ngày công bố NULL; các trường thiếu giữ NULL, không tự công bố. | TDD-NEWS-001/Architecture<br>BR-NEWS-001/Except<br>STORY-NEWS-001/AC-001 | Theo thiết kế đã chốt. Mã test ở bảng độ phủ kiểm thử đơn vị Tin tức; không ghi kết quả chạy vào đặc tả. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

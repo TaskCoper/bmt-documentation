@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-NEWS-031 | Tin tức | NewsCategoryService — xóa danh mục đang dùng (dự kiến) | Branch | REGRESSION | P1 | Fixture có con, có link nháp, có link Published, có link Hidden, hoặc không con/link. | Delete với version đúng cho từng fixture. | Bốn trường hợp đang dùng trả NewsCategoryInUse; fixture rỗng yêu cầu xóa đúng node; không tự gỡ link hoặc xóa con. FK thật kiểm integration. | TDD-NEWS-002/Architecture<br>BR-NEWS-002/Then<br>STORY-NEWS-002/AC-006 | Theo thiết kế đã chốt; đặc tả chưa thực thi, không phải mã test. | [Chưa xác định] | Draft |
+| UT-NEWS-031 | Tin tức | NewsCategoryService — xóa danh mục đang dùng | Branch | REGRESSION | P1 | Fixture có con, có link nháp, có link Published, có link Hidden, hoặc không con/link. | Delete với version đúng cho từng fixture. | Bốn trường hợp đang dùng trả NewsCategoryInUse; fixture rỗng yêu cầu xóa đúng node; không tự gỡ link hoặc xóa con. FK thật kiểm integration. | TDD-NEWS-002/Architecture<br>BR-NEWS-002/Then<br>STORY-NEWS-002/AC-006 | Theo thiết kế đã chốt. Mã test ở bảng độ phủ kiểm thử đơn vị Tin tức; không ghi kết quả chạy vào đặc tả. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

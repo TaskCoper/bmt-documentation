@@ -42,10 +42,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-NEWS-018 | Tin tức | NewsArticleService — lỗi kiểm URL ảnh (dự kiến) | Error | REGRESSION | P1 | ImageGateway fake báo ảnh chưa sẵn sàng hoặc cloud lỗi; lưu snapshot mới. | URL ảnh mới; gateway lần lượt trả NewsImageNotReady và NewsStorageUnavailable. | Trả lỗi tương ứng; không mở bước ghi bài/link hoặc báo lưu thành công; không sửa nội dung trước đó. | TDD-NEWS-001/Architecture<br>TDD-NEWS-001/External API<br>STORY-NEWS-001/EXC-03 | Theo thiết kế đã chốt; đặc tả chưa thực thi, không phải mã test. | [Chưa xác định] | Draft |
+| UT-NEWS-018 | Tin tức | Lưu bài — URL ảnh mới ngoài tên miền hoặc kho chưa cấu hình | Error | REGRESSION | P1 | Fixture 1: bài Published đầy đủ, Version=3, AllowedHosts=images.example.test. Fixture 2: AllowedHosts rỗng. | Fixture 1: sửa tiêu đề kèm coverImageUrl https://cdn.other.test/cover.webp. Fixture 2: tạo bài có coverImageUrl đúng hình thức; thêm biến thể tạo bài không có URL ảnh nào. | Fixture 1 trả InvalidNewsContent (422); bài giữ tiêu đề, ảnh và Version=3. Fixture 2 trả NewsStorageUnavailable (503), không ghi bài; biến thể không có URL ảnh vẫn lưu được. | TDD-NEWS-001/Architecture<br>TDD-NEWS-001/Internal API<br>BR-NEWS-001/Then | Thay đặc tả lỗi cổng ảnh cũ theo quyết định ngày 26/09/2026: backend không gọi kho ảnh, chỉ kiểm tên miền. Theo thiết kế đã chốt. Mã test ở bảng độ phủ kiểm thử đơn vị Tin tức; không ghi kết quả chạy vào đặc tả. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - TDD-NEWS-001/Architecture
-- TDD-NEWS-001/External API
-- STORY-NEWS-001/EXC-03
+- TDD-NEWS-001/Internal API
+- BR-NEWS-001/Then

@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-NEWS-002 | Tin tức | NewsArticleService — kiểm đủ dữ liệu công bố (dự kiến) | Boundary | REGRESSION | P1 | Bài Draft đầy đủ, Version=2; danh mục hợp lệ. | Lần lượt bỏ từng trường Title, Summary, CoverImageUrl, ContentHtml hoặc toàn bộ categoryIds; thêm biến thể trường chữ chỉ khoảng trắng. | Từng biến thể trả InvalidNewsContent; không chuyển trạng thái, không gán ngày đầu hoặc tăng Version. | TDD-NEWS-001/Architecture<br>BR-NEWS-001/Then<br>STORY-NEWS-001/AC-002 | Theo thiết kế đã chốt; đặc tả chưa thực thi, không phải mã test. | [Chưa xác định] | Draft |
+| UT-NEWS-002 | Tin tức | NewsArticleService — kiểm đủ dữ liệu công bố | Boundary | REGRESSION | P1 | Bài Draft đầy đủ, Version=2; danh mục hợp lệ. | Lần lượt bỏ từng trường Title, Summary, CoverImageUrl, ContentHtml hoặc toàn bộ categoryIds; thêm biến thể trường chữ chỉ khoảng trắng. | Từng biến thể trả InvalidNewsContent; không chuyển trạng thái, không gán ngày đầu hoặc tăng Version. | TDD-NEWS-001/Architecture<br>BR-NEWS-001/Then<br>STORY-NEWS-001/AC-002 | Theo thiết kế đã chốt. Mã test ở bảng độ phủ kiểm thử đơn vị Tin tức; không ghi kết quả chạy vào đặc tả. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

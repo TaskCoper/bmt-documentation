@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-NEWS-021 | Tin tức | ArticleWrite validator — snapshot và trường server (dự kiến) | Boundary | REGRESSION | P1 | Validator của DTO dự kiến; không DB. | PUT thiếu categoryIds; expectedVersion<=0; UUID sai; các trường state/ngày đầu/actor do client gửi. | Input thiếu/bất hợp lệ không đi vào ghi; DTO không ánh xạ các trường server để client tự đặt. POST cho thiếu categoryIds và mặc định []. | TDD-NEWS-001/Internal API | Theo thiết kế đã chốt; đặc tả chưa thực thi, không phải mã test. | [Chưa xác định] | Draft |
+| UT-NEWS-021 | Tin tức | ArticleWrite validator — snapshot và trường server | Boundary | REGRESSION | P1 | Validator thật của lệnh tạo/sửa bài; không DB. | PUT thiếu categoryIds; expectedVersion<=0; UUID sai; các trường state/ngày đầu/actor do client gửi. | Input thiếu/bất hợp lệ không đi vào ghi; DTO không ánh xạ các trường server để client tự đặt. POST cho thiếu categoryIds và mặc định []. | TDD-NEWS-001/Internal API | Theo thiết kế đã chốt. Mã test ở bảng độ phủ kiểm thử đơn vị Tin tức; không ghi kết quả chạy vào đặc tả. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

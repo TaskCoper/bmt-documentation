@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-NEWS-003 | Tin tức | NewsArticleService — công bố lần đầu (dự kiến) | Happy | REGRESSION | P1 | Draft đủ dữ liệu Version=2; fake clock T2. | Publish expectedVersion=2. | State=Published; FirstPublishedAtUtc=T2; Version=3; cùng Id; không tạo bản phiên bản nội dung khác. | TDD-NEWS-001/Architecture<br>BR-NEWS-001/Then<br>STORY-NEWS-001/AC-002 | Theo thiết kế đã chốt; đặc tả chưa thực thi, không phải mã test. | [Chưa xác định] | Draft |
+| UT-NEWS-003 | Tin tức | NewsArticleService — công bố lần đầu | Happy | REGRESSION | P1 | Draft đủ dữ liệu Version=2; fake clock T2. | Publish expectedVersion=2. | State=Published; FirstPublishedAtUtc=T2; Version=3; cùng Id; không tạo bản phiên bản nội dung khác. | TDD-NEWS-001/Architecture<br>BR-NEWS-001/Then<br>STORY-NEWS-001/AC-002 | Theo thiết kế đã chốt. Mã test ở bảng độ phủ kiểm thử đơn vị Tin tức; không ghi kết quả chạy vào đặc tả. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

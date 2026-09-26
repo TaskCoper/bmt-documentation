@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-NEWS-034 | Tin tức | Position validator — anchor không hợp lệ (dự kiến) | Boundary | REGRESSION | P1 | Validator thật. | beforeCategoryId là chính node; anchor có ID nhưng thiếu expectedBeforeVersion; expectedVersion không dương. | InvalidNewsCategory/validation 422; không gọi service ghi. Anchor NULL với expectedBeforeVersion=NULL hợp lệ. | TDD-NEWS-002/Internal API | Theo thiết kế đã chốt; đặc tả chưa thực thi, không phải mã test. | [Chưa xác định] | Draft |
+| UT-NEWS-034 | Tin tức | Position validator — anchor không hợp lệ | Boundary | REGRESSION | P1 | Validator thật. | beforeCategoryId là chính node; anchor có ID nhưng thiếu expectedBeforeVersion; expectedVersion không dương. | InvalidNewsCategory/validation 422; không gọi service ghi. Anchor NULL với expectedBeforeVersion=NULL hợp lệ. | TDD-NEWS-002/Internal API | Theo thiết kế đã chốt. Mã test ở bảng độ phủ kiểm thử đơn vị Tin tức; không ghi kết quả chạy vào đặc tả. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

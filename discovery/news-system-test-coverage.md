@@ -1,12 +1,14 @@
 # Phạm vi và độ phủ System Test Tin tức
 
-Người dùng đã chốt STORY-NEWS-001–003 và BR-NEWS-001–003 trong hội thoại. Bộ đặc tả gồm 29 ca, phủ 21 tiêu chí nghiệm thu, các nhánh thay thế, ngoại lệ và yêu cầu hiển thị rich text an toàn. Đây là đặc tả chưa thực thi, không phải kết quả Pass.
+Người dùng đã chốt STORY-NEWS-001–003 và BR-NEWS-001–003 trong hội thoại. Bộ đặc tả gồm 30 ca, phủ 22 tiêu chí nghiệm thu, các nhánh thay thế, ngoại lệ và yêu cầu hiển thị rich text an toàn. Đây là đặc tả chưa thực thi, không phải kết quả Pass.
+
+**Cập nhật 26/09/2026:** người dùng xác nhận giới hạn tiêu đề 200, mô tả ngắn 500 và nội dung 200.000 ký tự (BR-NEWS-001 khoản 9, STORY-NEWS-001/AC-009, EXC-04); ST-NEWS-030 kiểm các biên này.
 
 **Cập nhật 25/09/2026:** người dùng xác nhận tên danh mục tối đa 200 ký tự, ghi tại BR-NEWS-002 khoản 1 và STORY-NEWS-002/AC-008; ST-NEWS-028 kiểm biên 200/201 ký tự. Quyền quản lý tin tức theo STORY-RBAC-001 có mã kỹ thuật `news.manage` trong TDD-RBAC-001, không gắn phân công; ST-NEWS-011 và ST-NEWS-019 kiểm thêm vai trò tùy chỉnh được cấp mã này. ST-NEWS-029 kiểm lọc theo danh mục không còn tồn tại trả danh sách rỗng.
 
 ## Phạm vi đã chốt
 
-- Bài rich text có ảnh cloud qua URL; lưu nháp thiếu thông tin, công bố kiểm đủ; sửa tại chỗ, ẩn/hiện và xóa mọi trạng thái, không khôi phục.
+- Bài rich text có ảnh cloud qua URL; lưu nháp thiếu thông tin, công bố kiểm đủ; sửa tại chỗ, ẩn/hiện và xóa mọi trạng thái, không khôi phục; tiêu đề tối đa 200, mô tả ngắn 500, nội dung 200.000 ký tự.
 - Danh mục riêng đa cấp không giới hạn số cấp; tên tối đa 200 ký tự; một bài nhiều danh mục; kiểm tên cùng cha, ngăn vòng lặp và chặn xóa danh mục đang dùng.
 - Đọc công khai miễn phí; tìm tiêu đề và lọc một nhánh, loại trùng trước phân trang; giữ ngày công bố đầu tiên.
 
@@ -22,6 +24,7 @@ Người dùng đã chốt STORY-NEWS-001–003 và BR-NEWS-001–003 trong hộ
 | [STORY-NEWS-001/AC-006](../userstory/STORY-NEWS-001.md#ac-006) | [ST-NEWS-009](../systemtest/ST-NEWS-009.md) |
 | [STORY-NEWS-001/AC-007](../userstory/STORY-NEWS-001.md#ac-007) | [ST-NEWS-010](../systemtest/ST-NEWS-010.md) |
 | [STORY-NEWS-001/AC-008](../userstory/STORY-NEWS-001.md#ac-008) | [ST-NEWS-011](../systemtest/ST-NEWS-011.md) |
+| [STORY-NEWS-001/AC-009](../userstory/STORY-NEWS-001.md#ac-009) | [ST-NEWS-030](../systemtest/ST-NEWS-030.md) |
 | [STORY-NEWS-002/AC-001](../userstory/STORY-NEWS-002.md#ac-001) | [ST-NEWS-012](../systemtest/ST-NEWS-012.md) |
 | [STORY-NEWS-002/AC-002](../userstory/STORY-NEWS-002.md#ac-002) | [ST-NEWS-013](../systemtest/ST-NEWS-013.md) |
 | [STORY-NEWS-002/AC-003](../userstory/STORY-NEWS-002.md#ac-003) | [ST-NEWS-014](../systemtest/ST-NEWS-014.md) |
@@ -41,6 +44,7 @@ Người dùng đã chốt STORY-NEWS-001–003 và BR-NEWS-001–003 trong hộ
 - STORY-NEWS-001/ALT-01: ST-NEWS-001.
 - STORY-NEWS-001/EXC-02: ST-NEWS-003, ST-NEWS-007, ST-NEWS-008.
 - STORY-NEWS-001/EXC-03: ST-NEWS-005.
+- STORY-NEWS-001/EXC-04: ST-NEWS-030.
 - STORY-NEWS-001/ALT-02: ST-NEWS-009.
 - STORY-NEWS-001/ALT-03: ST-NEWS-010.
 - STORY-NEWS-001/EXC-01: ST-NEWS-011.
@@ -58,7 +62,7 @@ Người dùng đã chốt STORY-NEWS-001–003 và BR-NEWS-001–003 trong hộ
 
 ## Điều kiện trước khi chạy
 
-- Cần môi trường có triển khai Tin tức, cloud thử nghiệm, tài khoản đủ/thiếu quyền và dữ liệu bài/danh mục độc lập. Hiện chỉ chuẩn bị tài liệu, chưa có kết quả chạy.
+- Cần môi trường có triển khai Tin tức, cloud thử nghiệm, tài khoản đủ/thiếu quyền và dữ liệu bài/danh mục độc lập. Backend đã có ở nhánh `feature/news`; System Test chưa chạy.
 - API, định dạng lưu rich text, cách cấp quyền upload cloud, xử lý ảnh không còn được dùng và kiểm soát nội dung nguy hiểm thuộc bước TDD; không tự chốt nhà cung cấp, hạn upload hoặc định dạng lưu ở nghiệp vụ.
 - Ca nhiều cấp dùng 13 cấp để phát hiện giới hạn thấp; một bộ dữ liệu hữu hạn không chứng minh khả năng xử lý vô hạn hoặc hiệu năng. Không đặt ngưỡng hiệu năng khi chưa có căn cứ.
 - Đối chiếu lượt cần quan sát dữ liệu gói trước/sau; không chỉ dựa vào việc giao diện không hiện thông báo trừ lượt.
@@ -67,8 +71,9 @@ Người dùng đã chốt STORY-NEWS-001–003 và BR-NEWS-001–003 trong hộ
 
 ## Thiết kế kỹ thuật
 
-- [TDD-NEWS-001](../tdd/TDD-NEWS-001.md): bài viết, rich text, presign của dự án, đọc công khai và bảng liên kết.
+- [TDD-NEWS-001](../tdd/TDD-NEWS-001.md): bài viết, rich text, URL ảnh thuộc kho presign, đọc công khai và bảng liên kết.
 - [TDD-NEWS-002](../tdd/TDD-NEWS-002.md): cây danh mục, thứ tự, chuyển nhánh, chống vòng lặp và khóa chung với bài.
-- Người dùng xác nhận FE dùng presigned URL do backend dự án cấp, upload trực tiếp lên cloud rồi lưu URL nội dung. Trong checkout hiện tại chưa tìm được source presign để xác minh route/provider; TDD mô tả gateway và các điều kiện tích hợp còn phải đối chiếu.
+- Quyết định đã xác nhận ngày 26/09/2026: frontend xin URL upload từ dịch vụ presign nằm ngoài backend, tự upload, nhận URL cố định rồi gửi URL cho backend. Backend không nhận bytes, không tạo presigned URL; chỉ nhận ảnh bìa và `src` của ảnh trong rich text khi là URL https thuộc `UploadedFileOption__AllowedHosts`. Môi trường chạy ST-NEWS-004, ST-NEWS-005 phải khai báo tên miền kho thử nghiệm trong cấu hình này.
 - Hai TDD đã được người dùng chốt trong hội thoại; đặc tả Unit Test xem [bảng độ phủ](news-unit-test-coverage.md). Chưa triển khai hoặc chạy kiểm thử.
-- Tên danh mục tối đa 200 ký tự Unicode sau chuẩn hóa: ban đầu chốt cùng TDD, từ 25/09/2026 là quy tắc nghiệp vụ tại BR-NEWS-002 khoản 1. Không giới hạn số cấp. Hợp đồng provider/route presign thực còn cần ánh xạ source khi triển khai.
+- Tên danh mục tối đa 200 ký tự Unicode sau chuẩn hóa: ban đầu chốt cùng TDD, từ 25/09/2026 là quy tắc nghiệp vụ tại BR-NEWS-002 khoản 1. Không giới hạn số cấp.
+- Backend đã triển khai ở nhánh `feature/news` của `bmt-be` (commit `4714e68`, `bce2eb2`, `e390e2d`), chưa merge. Chưa chạy System Test nào.

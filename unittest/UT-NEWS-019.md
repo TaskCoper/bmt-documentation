@@ -42,8 +42,9 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-NEWS-019 | Tin tức | Cổng presign dự kiến — ràng buộc ticket (dự kiến) | Error | REGRESSION | P1 | Dùng ticket verifier thật khi implementation có; clock cố định, actor A; storage fake ghi nhận cuộc gọi. | Ticket sai chữ ký, actor khác, purpose khác, hoặc hết hạn chưa complete. | NewsUploadTicketInvalid; không truy cập object/ghi cloud bằng ticket sai. Không dùng unit test chứng minh provider đã thực thi signed headers. | TDD-NEWS-001/External API | Theo thiết kế đã chốt; đặc tả chưa thực thi, không phải mã test. | [Chưa xác định] | Draft |
+| UT-NEWS-019 | Tin tức | Lưu bài — URL ảnh đã lưu không bị kiểm lại tên miền | Branch | REGRESSION | P1 | Bài Published Version=3 có ảnh bìa và img ở images.example.test; sau đó cấu hình chỉ còn cdn.new.example.test. | (1) Sửa tiêu đề, giữ nguyên ảnh. (2) Thêm img mới ở images.example.test. (3) Thêm img mới ở cdn.new.example.test. | (1) Lưu được, Version=4. (2) Trả InvalidNewsContent (422), không ghi. (3) Lưu được, Version=5. | TDD-NEWS-001/Architecture<br>BR-NEWS-001/Then | Mã UT-NEWS-019 trước đây đặc tả cổng presign dự kiến, đã bỏ theo quyết định ngày 26/09/2026; nay dùng cho quy tắc "chỉ kiểm URL mới". Theo thiết kế đã chốt. Mã test ở bảng độ phủ kiểm thử đơn vị Tin tức; không ghi kết quả chạy vào đặc tả. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- TDD-NEWS-001/External API
+- TDD-NEWS-001/Architecture
+- BR-NEWS-001/Then

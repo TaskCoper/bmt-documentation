@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-NEWS-026 | Tin tức | NewsCategoryService — kiểm tên cùng cha (dự kiến) | Branch | REGRESSION | P1 | Repository fake có C tên Sơn dưới P; có một gốc tên Vật liệu. | Tạo/đổi tên thành sơn dưới P; cùng tên dưới Q; trùng tên gốc; đổi tên giữ chính Id. | Trùng trong cùng phạm vi trả NameConflict; khác cha được; loại chính Id khi kiểm trùng để không từ chối bản thân. Unique cạnh tranh DB kiểm riêng. | TDD-NEWS-002/Architecture<br>BR-NEWS-002/Then<br>STORY-NEWS-002/AC-002 | Theo thiết kế đã chốt; đặc tả chưa thực thi, không phải mã test. | [Chưa xác định] | Draft |
+| UT-NEWS-026 | Tin tức | NewsCategoryService — kiểm tên cùng cha | Branch | REGRESSION | P1 | Repository fake có C tên Sơn dưới P; có một gốc tên Vật liệu. | Tạo/đổi tên thành sơn dưới P; cùng tên dưới Q; trùng tên gốc; đổi tên giữ chính Id. | Trùng trong cùng phạm vi trả NameConflict; khác cha được; loại chính Id khi kiểm trùng để không từ chối bản thân. Unique cạnh tranh DB kiểm riêng. | TDD-NEWS-002/Architecture<br>BR-NEWS-002/Then<br>STORY-NEWS-002/AC-002 | Theo thiết kế đã chốt. Mã test ở bảng độ phủ kiểm thử đơn vị Tin tức; không ghi kết quả chạy vào đặc tả. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

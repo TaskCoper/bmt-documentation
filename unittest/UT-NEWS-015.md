@@ -42,9 +42,9 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-NEWS-015 | Tin tức | INewsHtmlSanitizer — URL đúng origin và scheme (dự kiến) | Boundary | REGRESSION | P1 | Origin https://images.example.test và prefix /news/final/ được cấu hình. | Ảnh hợp lệ; http; javascript; data; blob; images.example.test.evil.test; URL userinfo đánh lừa host; ngoài prefix. | Chỉ URL ảnh HTTPS đúng origin/prefix qua kiểm; các biến thể khác bị loại/từ chối theo policy; không gọi HTTP tùy ý để kiểm host. | TDD-NEWS-001/Architecture<br>TDD-NEWS-001/External API | Theo thiết kế đã chốt; đặc tả chưa thực thi, không phải mã test. | [Chưa xác định] | Draft |
+| UT-NEWS-015 | Tin tức | Lưu bài — URL ảnh bìa và img đúng tên miền kho presign | Boundary | REGRESSION | P1 | UploadedFileOption__AllowedHosts=images.example.test; dùng UploadedFileUrlPolicy thật, không gọi HTTP tới URL. | Ảnh bìa và src của img trong nội dung lần lượt: https đúng tên máy chủ; tên máy chủ viết hoa; http; tên miền con img.images.example.test; images.example.test.evil.test; URL có user@; cổng 8443; đường dẫn tương đối. | Chỉ URL https đúng tên máy chủ (không phân biệt hoa thường) được nhận. Các biến thể khác trả InvalidNewsContent (422), lỗi ở coverImageUrl hoặc contentHtml, không ghi bài. Không so theo tiền tố đường dẫn. | TDD-NEWS-001/Architecture<br>TDD-NEWS-001/Internal API | Áp dụng quyết định đã xác nhận ngày 26/09/2026: chỉ nhận URL https thuộc tên miền kho presign, dùng lại IUploadedFileUrlPolicy. Theo thiết kế đã chốt. Mã test ở bảng độ phủ kiểm thử đơn vị Tin tức; không ghi kết quả chạy vào đặc tả. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - TDD-NEWS-001/Architecture
-- TDD-NEWS-001/External API
+- TDD-NEWS-001/Internal API

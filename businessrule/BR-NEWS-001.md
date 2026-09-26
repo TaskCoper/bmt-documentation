@@ -64,6 +64,7 @@ Người quản lý tạo, lưu, sửa, công bố, ẩn hoặc xóa bài viết
 6. Ẩn bài làm bài không xuất hiện trong danh sách công khai và không đọc được qua đường dẫn trực tiếp. Bài đã ẩn có thể công bố lại khi đủ dữ liệu.
 7. Cho xóa bài ở mọi trạng thái. Sau xóa, bài không còn trong danh sách và đường dẫn cũ báo không tìm thấy. Không có thùng rác hoặc khôi phục trong phạm vi này.
 8. Ghi ngày công bố đầu tiên khi bài được công bố lần đầu. Sửa bài, ẩn bài hoặc công bố lại không thay đổi ngày này.
+9. Tiêu đề tối đa 200 ký tự và mô tả ngắn tối đa 500 ký tự, tính sau khi bỏ khoảng trắng đầu và cuối. Nội dung rich text tối đa 200.000 ký tự, tính trên nội dung đã được hệ thống làm sạch. Giới hạn áp dụng cho mọi lần lưu, kể cả bản nháp. Vượt giới hạn thì từ chối lưu và giữ nguyên bài hiện tại, không tự cắt ngắn.
 
 ## Except
 
@@ -72,5 +73,7 @@ Bản nháp được thiếu các trường bắt buộc khi công bố; không 
 ## Notes
 
 Không áp dụng cơ chế phiên bản và lượt xem của thư viện mẫu. Xóa bài không đồng nghĩa đã chốt chính sách xóa object trên cloud; phần lưu trữ sẽ được làm rõ khi thiết kế kỹ thuật.
+
+Giới hạn độ dài ở khoản 9 do người dùng xác nhận ngày 26/09/2026. Ký tự được đếm như các module khác: mỗi ký tự Unicode tính là một, kể cả chữ có dấu hoặc ký tự đặc biệt.
 
 Owner và ngày hiệu lực chưa xác định. Người dùng đã chốt bộ US/BR Tin tức trong hội thoại. Status Draft vẫn giữ theo quy trình tài liệu; xác nhận này không thay cho phê duyệt trên hệ thống hoặc kết quả kiểm thử.

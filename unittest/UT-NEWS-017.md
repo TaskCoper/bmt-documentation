@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-NEWS-017 | Tin tức | INewsHtmlSanitizer — tính ổn định khi làm sạch lại (dự kiến) | Determinism | REGRESSION | P1 | Parser thật; input hợp lệ xen thuộc tính bị cấm. | Chạy làm sạch kết quả đã làm sạch lần đầu. | DOM ngữ nghĩa không đổi; không mất thêm nội dung hợp lệ hoặc thêm lại thuộc tính nguy hiểm. | TDD-NEWS-001/Architecture<br>STORY-NEWS-001/AC-004 | Theo thiết kế đã chốt; đặc tả chưa thực thi, không phải mã test. | [Chưa xác định] | Draft |
+| UT-NEWS-017 | Tin tức | INewsHtmlSanitizer — tính ổn định khi làm sạch lại | Determinism | REGRESSION | P1 | Parser thật; input hợp lệ xen thuộc tính bị cấm. | Chạy làm sạch kết quả đã làm sạch lần đầu. | DOM ngữ nghĩa không đổi; không mất thêm nội dung hợp lệ hoặc thêm lại thuộc tính nguy hiểm. | TDD-NEWS-001/Architecture<br>STORY-NEWS-001/AC-004 | Theo thiết kế đã chốt. Mã test ở bảng độ phủ kiểm thử đơn vị Tin tức; không ghi kết quả chạy vào đặc tả. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

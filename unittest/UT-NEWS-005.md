@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-NEWS-005 | Tin tức | NewsArticleService — sửa Published (dự kiến) | Happy | REGRESSION | P1 | Bài Published Version=4, ngày đầu T1; repository có C1,C2. | Snapshot nội dung mới đủ dữ liệu, categoryIds=[C1,C2,C1], expectedVersion=4. | Nội dung cập nhật trên cùng Id; Version=5; ngày đầu giữ T1; tập link cuối đúng C1,C2, không thêm ancestor hoặc danh mục chính. | TDD-NEWS-001/Architecture<br>BR-NEWS-001/Then<br>STORY-NEWS-001/AC-003<br>STORY-NEWS-001/AC-005 | Theo thiết kế đã chốt; đặc tả chưa thực thi, không phải mã test. | [Chưa xác định] | Draft |
+| UT-NEWS-005 | Tin tức | NewsArticleService — sửa Published | Happy | REGRESSION | P1 | Bài Published Version=4, ngày đầu T1; repository có C1,C2. | Snapshot nội dung mới đủ dữ liệu, categoryIds=[C1,C2,C1], expectedVersion=4. | Nội dung cập nhật trên cùng Id; Version=5; ngày đầu giữ T1; tập link cuối đúng C1,C2, không thêm ancestor hoặc danh mục chính. | TDD-NEWS-001/Architecture<br>BR-NEWS-001/Then<br>STORY-NEWS-001/AC-003<br>STORY-NEWS-001/AC-005 | Theo thiết kế đã chốt. Mã test ở bảng độ phủ kiểm thử đơn vị Tin tức; không ghi kết quả chạy vào đặc tả. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

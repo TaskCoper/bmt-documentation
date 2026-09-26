@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-NEWS-007 | Tin tức | NewsArticleService — danh mục đã mất (dự kiến) | Error | REGRESSION | P1 | CategoryReader trả thiếu C2; bài hiện có Version=4. | Lưu snapshot categoryIds=[C1,C2], expectedVersion=4. | InvalidNewsContent; không ghi tập link thiếu hoặc tự bỏ C2 để báo thành công. | TDD-NEWS-001/Architecture<br>BR-NEWS-002/Then<br>STORY-NEWS-001/EXC-02 | Theo thiết kế đã chốt; đặc tả chưa thực thi, không phải mã test. | [Chưa xác định] | Draft |
+| UT-NEWS-007 | Tin tức | NewsArticleService — danh mục đã mất | Error | REGRESSION | P1 | CategoryReader trả thiếu C2; bài hiện có Version=4. | Lưu snapshot categoryIds=[C1,C2], expectedVersion=4. | InvalidNewsContent; không ghi tập link thiếu hoặc tự bỏ C2 để báo thành công. | TDD-NEWS-001/Architecture<br>BR-NEWS-002/Then<br>STORY-NEWS-001/EXC-02 | Theo thiết kế đã chốt. Mã test ở bảng độ phủ kiểm thử đơn vị Tin tức; không ghi kết quả chạy vào đặc tả. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

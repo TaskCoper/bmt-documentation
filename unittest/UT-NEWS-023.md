@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-NEWS-023 | Tin tức | NewsCategoryNamePolicy — chuẩn hóa giữ dấu (dự kiến) | Happy | REGRESSION | P1 | Policy thật không DB. | Tên “ Sơn ”, “sơn”, “Son” và hai biểu diễn Unicode tổ hợp/dựng sẵn của cùng tên. | Trim/FormC cho Name; hai tên đầu cùng NameKey SƠN; Son khác key; hai biểu diễn Unicode tương đương cho cùng Name/NameKey; không xóa dấu hoặc gộp khoảng trắng giữa. | TDD-NEWS-002/Architecture<br>BR-NEWS-002/Then<br>STORY-NEWS-002/AC-002 | Theo thiết kế đã chốt; đặc tả chưa thực thi, không phải mã test. | [Chưa xác định] | Draft |
+| UT-NEWS-023 | Tin tức | NewsCategoryNamePolicy — chuẩn hóa giữ dấu | Happy | REGRESSION | P1 | Policy thật không DB. | Tên “ Sơn ”, “sơn”, “Son” và hai biểu diễn Unicode tổ hợp/dựng sẵn của cùng tên. | Trim/FormC cho Name; hai tên đầu cùng NameKey SƠN; Son khác key; hai biểu diễn Unicode tương đương cho cùng Name/NameKey; không xóa dấu hoặc gộp khoảng trắng giữa. | TDD-NEWS-002/Architecture<br>BR-NEWS-002/Then<br>STORY-NEWS-002/AC-002 | Theo thiết kế đã chốt. Mã test ở bảng độ phủ kiểm thử đơn vị Tin tức; không ghi kết quả chạy vào đặc tả. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

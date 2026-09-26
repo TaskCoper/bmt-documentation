@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-NEWS-030 | Tin tức | NewsCategoryService — node/cha không tồn tại (dự kiến) | Error | REGRESSION | P1 | Repository fake trả NULL cho node hoặc cha ở các fixture riêng. | Tạo với cha mất; sửa với node mất; chuyển tới cha mất. | NewsCategoryNotFound, không biến cha mất thành gốc và không ghi một phần. | TDD-NEWS-002/Internal API<br>BR-NEWS-002/Then | Theo thiết kế đã chốt; đặc tả chưa thực thi, không phải mã test. | [Chưa xác định] | Draft |
+| UT-NEWS-030 | Tin tức | NewsCategoryService — node/cha không tồn tại | Error | REGRESSION | P1 | Repository fake trả NULL cho node hoặc cha ở các fixture riêng. | Tạo với cha mất; sửa với node mất; chuyển tới cha mất. | NewsCategoryNotFound, không biến cha mất thành gốc và không ghi một phần. | TDD-NEWS-002/Internal API<br>BR-NEWS-002/Then | Theo thiết kế đã chốt. Mã test ở bảng độ phủ kiểm thử đơn vị Tin tức; không ghi kết quả chạy vào đặc tả. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

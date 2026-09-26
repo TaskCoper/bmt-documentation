@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-NEWS-011 | Tin tức | NewsArticleService — xóa mọi trạng thái (dự kiến) | Branch | REGRESSION | P1 | Fixture Draft, Published, Hidden, mỗi bài có version hợp lệ. | Delete từng bài với expectedVersion đúng. | Yêu cầu xóa vật lý đúng ArticleId ở cả ba trạng thái; không tạo tombstone/restore và không gọi xóa cloud. Cascade link thực tế kiểm ở integration. | TDD-NEWS-001/Architecture<br>BR-NEWS-001/Then<br>STORY-NEWS-001/AC-007 | Theo thiết kế đã chốt; đặc tả chưa thực thi, không phải mã test. | [Chưa xác định] | Draft |
+| UT-NEWS-011 | Tin tức | NewsArticleService — xóa mọi trạng thái | Branch | REGRESSION | P1 | Fixture Draft, Published, Hidden, mỗi bài có version hợp lệ. | Delete từng bài với expectedVersion đúng. | Yêu cầu xóa vật lý đúng ArticleId ở cả ba trạng thái; không tạo tombstone/restore và không gọi xóa cloud. Cascade link thực tế kiểm ở integration. | TDD-NEWS-001/Architecture<br>BR-NEWS-001/Then<br>STORY-NEWS-001/AC-007 | Theo thiết kế đã chốt. Mã test ở bảng độ phủ kiểm thử đơn vị Tin tức; không ghi kết quả chạy vào đặc tả. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

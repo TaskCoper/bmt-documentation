@@ -55,7 +55,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 STORY-NEWS-002 và BR-NEWS-002 đã chốt cây danh mục riêng không giới hạn số cấp, tên duy nhất cùng cha, chuyển nhánh không mất liên kết bài và chỉ xóa danh mục không còn con hoặc bài. STORY-NEWS-003 yêu cầu lọc cha bao gồm mọi cấp con, không lặp bài.
 
-Tài liệu này sở hữu NewsCategory, thao tác cây và quy ước khóa chung. [TDD-NEWS-001](TDD-NEWS-001.md) sở hữu NewsArticle, NewsArticleCategory, API bài, rich text và media. Hai tài liệu cùng module/DB, không phải hai dịch vụ độc lập. Đây là thiết kế đề xuất, chưa triển khai hoặc chạy test.
+Tài liệu này sở hữu NewsCategory, thao tác cây và quy ước khóa chung. [TDD-NEWS-001](TDD-NEWS-001.md) sở hữu NewsArticle, NewsArticleCategory, API bài, rich text và media. Hai tài liệu cùng module/DB, không phải hai dịch vụ độc lập. Hiện trạng code kiểm ngày 26/09/2026: thiết kế đã được triển khai ở commit `4714e68` (kèm test ở `bce2eb2`; `e390e2d` chỉ đổi phần bài viết) trên nhánh `feature/news` của `bmt-be`, tách từ `develop` tại `f21d749`, chưa merge; migration `20260926092623_NewsArticlesAndCategories` mới được tạo, chưa áp dụng lên database dùng chung. Chi tiết ở Architecture/Notes.
 
 ### Goals
 
@@ -105,7 +105,7 @@ Truy vấn hậu duệ dùng WITH RECURSIVE trên các ID và UNION để loại
 
 **Tên và thứ tự danh mục**
 
-Tên hiển thị = input.Trim().Normalize(FormC), phải còn ký tự không trắng. NameKey = Name.ToUpperInvariant() sau cùng chuẩn hóa; giữ dấu, không bỏ khoảng trắng giữa từ. Ví dụ “ Sơn ” và “sơn” có cùng NameKey “SƠN”, còn “Son” khác “Sơn”. Cùng cha so trùng; mọi gốc có ParentId NULL thuộc cùng phạm vi. Không tái dùng ProcessText.NormalizeText nếu nó bỏ dấu hoặc biến đổi ngoài quy tắc này.
+Tên hiển thị = input.Normalize(FormC).Trim(), phải còn ký tự không trắng. NameKey = Name.ToUpperInvariant() sau cùng chuẩn hóa; giữ dấu, không bỏ khoảng trắng giữa từ. Ví dụ “ Sơn ” và “sơn” có cùng NameKey “SƠN”, còn “Son” khác “Sơn”. Cùng cha so trùng; mọi gốc có ParentId NULL thuộc cùng phạm vi. Không tái dùng ProcessText.NormalizeText nếu nó bỏ dấu hoặc biến đổi ngoài quy tắc này.
 
 NameKey được lưu cùng Name trong một lần ghi, không cho client gửi. So sánh NameKey bằng collation C; mọi writer dùng cùng thuật toán. Đây là dữ liệu dẫn xuất có chủ đích để unique index không phụ thuộc locale của DB. Đổi tên hoặc chuyển cha đều kiểm trùng tại cha đích. Version EF tăng khi node thay đổi.
 
@@ -119,7 +119,7 @@ Dùng transaction READ COMMITTED. INewsTreeLock đề xuất namespace key `(131
 
 | Luồng | Thứ tự và kiểm tra |
 | --- | --- |
-| Tạo/sửa/chuyển/đổi thứ tự/xóa Category | Tree exclusive → đọc lại node, cha, anchor và links → khóa các row cần ghi theo Id tăng dần → kiểm version/invariants → ghi → commit. |
+| Tạo/sửa/chuyển/đổi thứ tự/xóa Category | Tree exclusive → đọc lại node, cha, anchor và links → kiểm version/invariants → ghi → commit. Không khóa thêm từng dòng danh mục: mọi writer của NewsCategory đều phải lấy khóa exclusive trước, nên không có ai khác sửa các dòng này cho tới lúc commit; token Version là lớp chặn cuối. |
 | Tạo/sửa/publish/hide/delete Article | Tree shared → Article FOR UPDATE khi đã tồn tại → kiểm danh mục và tập link cuối → ghi bài/links → commit. Không nâng shared thành exclusive giữa transaction. |
 | Đọc category, lọc hoặc đọc bài | Không cần advisory lock; dùng một statement/snapshot nhất quán. Nhiều truy vấn cùng response thì read-only REPEATABLE READ ngắn như TDD-NEWS-001. |
 
@@ -159,12 +159,14 @@ Predicate tìm title được thêm trước ORDER BY; count dùng cùng subtree
 | Chung quyền, không Assignment | news.manage policy | ST-NEWS-019 |
 | Lọc con, loại trùng, phân trang | CTE + EXISTS trước Count/Skip/Take | ST-NEWS-021–024 |
 
-Ngoài 27 ST nghiệp vụ, khi triển khai cần integration PostgreSQL cho hai chuyển nhánh đồng thời, tạo trùng tên ở gốc, xóa cha đồng thời tạo con, xóa Category đồng thời gắn bài, reorder với anchor bị chuyển và rollback giữa batch đổi thứ tự. Đây là phạm vi kiểm chứng kỹ thuật, chưa phải đặc tả UT mới hoặc kết quả chạy. Không dùng EF InMemory để chứng minh khóa hoặc unique index.
+Ngoài 29 ST nghiệp vụ, integration test trên PostgreSQL 15 thật (`test/bmt-be.integration.tests/NewsConcurrencyTests.cs`, `NewsConstraintTests.cs`, `NewsReadTests.cs`) kiểm: hai chuyển nhánh chéo nhau đồng thời, tạo trùng tên ở gốc đồng thời, xóa cha đồng thời tạo con, xóa Category đồng thời gắn bài và ngược lại, reorder với anchor đã đổi version, unique index NULLS NOT DISTINCT, FK RESTRICT, CTE cây 13 cấp và lọc không lặp qua nhiều trang. Các test chạy đạt ngày 26/09/2026. Chưa có test rollback giữa batch đổi thứ tự vì không có cách gây lỗi giữa batch mà không sửa code; batch nằm trong một SaveChanges nên rollback do transaction bảo đảm. Không dùng EF InMemory để chứng minh khóa hoặc unique index.
 
 **Notes**:
 
 - Không thêm service ngoài, broker/outbox hoặc DB riêng. Transaction ngắn trong cùng PostgreSQL giải quyết nhất quán bài–danh mục.
-- File mới dự kiến tại contract/services/newsCategories, application/usecases/{commands,queries}/newsCategories, persistence/configurations/NewsCategoryConfiguration.cs và NewsCategoryRepository. SQL tham số nằm ở persistence, nghiệp vụ không phụ thuộc HTTP hoặc cloud.
+- Code nằm ở `contract/services/newsCategory` (gồm `NewsCategoryText` chuẩn hóa tên), `application/usecases/{commands,queries}/newsCategory`, `presentation/apis/newsCategory/NewsCategoryApi.cs`, `persistence/configurations/NewsConfigurations.cs` và `persistence/repositories/NewsStore.cs` (`NewsTreeLock`, `NewsStore`, `NewsReadStore`). SQL tham số nằm ở persistence, nghiệp vụ không phụ thuộc HTTP hoặc cloud.
+- Tên hiển thị được chuẩn NFC rồi mới bỏ khoảng trắng đầu/cuối (bản trước ghi trim rồi mới chuẩn hóa), để dấu tổ hợp đứng đầu hoặc cuối chuỗi cũng được gộp trước khi cắt; kết quả với tên thông thường không đổi.
+- Không gian khóa advisory `(1313167187, 1)` đã kiểm: chưa module nào khác trong code dùng advisory lock.
 - Thống nhất registry key advisory lock, thuật toán normalize và versioning ở mọi writer/import script trước mở chức năng. Có truy vấn đối soát vòng lặp/orphan/tên trùng khi migration hoặc vận hành, không tự sửa cây khách đã nhập.
 
 ## Sequence Diagram
@@ -269,7 +271,7 @@ EF mapping: Parent optional self-reference Restrict, Version IsConcurrencyToken,
 
 **Notes**:
 
-- Đây là schema và hướng dẫn migration, chưa tạo/chạy migration. Các invariant nhiều dòng được ghi rõ là trách nhiệm transaction/service, không gán sai cho CHECK.
+- Schema đã có trong migration `20260926092623_NewsArticlesAndCategories` (tạo bằng `dotnet ef migrations add`, chạy trên PostgreSQL trong integration test; chưa áp dụng lên database dùng chung). Index tên dùng `AreNullsDistinct(false)` của Npgsql nên migration sinh đúng NULLS NOT DISTINCT, không cần SQL tay. Các invariant nhiều dòng được ghi rõ là trách nhiệm transaction/service, không gán sai cho CHECK.
 - Chưa có số lượng node, lưu lượng ghi hoặc SLA để chứng minh hiệu năng. Khóa global tree đơn giản và có giới hạn thông lượng ghi; phải đo trước đổi sang khóa theo nhánh.
 
 ## Internal API
@@ -329,7 +331,7 @@ Error Response:
 - **NewsVersionConflict** (409): Version node/anchor cũ hoặc anchor không còn thuộc cha kỳ vọng khi reorder.
 - **InvalidNewsCategory** (422): Tên rỗng/quá 200 ký tự, DTO sai định dạng hoặc anchor là chính node.
 
-Ánh xạ concurrency/constraint sau rollback theo yêu cầu TDD-NEWS-001; không trả SQL thô. Lỗi timeout/hạ tầng trả lỗi vận hành phù hợp, không coi là thành công một phần của cây.
+Ánh xạ concurrency/constraint sau rollback theo yêu cầu TDD-NEWS-001; không trả SQL thô. `InvalidNewsCategory` do validator trả nên nằm ở `errors[].messageCode` của ProblemDetails 422; các mã còn lại nằm ở `messageCode` của thân lỗi middleware. Lỗi timeout/hạ tầng trả lỗi vận hành phù hợp, không coi là thành công một phần của cây.
 
 ## References
 
@@ -355,7 +357,7 @@ Error Response:
 
 ### Others
 
-- Xác nhận thiết kế: Người dùng đã chốt hai TDD Tin tức trong hội thoại. Giới hạn tên danh mục tối đa 200 ký tự sau trim lấy theo BR-NEWS-002 khoản 1 và STORY-NEWS-002/AC-008. Status Draft vẫn giữ theo quy trình import; không thay cho phê duyệt trên hệ thống.
+- Xác nhận thiết kế: Người dùng đã chốt hai TDD Tin tức trong hội thoại. Ngày 26/09/2026 (lần 2) người dùng trả lời các câu hỏi mở sau lần triển khai đầu; các quyết định đó chỉ đổi phần bài viết và ghi ở TDD-NEWS-001/Context & Goals, cây danh mục không đổi. Giới hạn tên danh mục tối đa 200 ký tự sau trim lấy theo BR-NEWS-002 khoản 1 và STORY-NEWS-002/AC-008. Status Draft vẫn giữ theo quy trình import; không thay cho phê duyệt trên hệ thống.
 - Unit Test: [Độ phủ kiểm thử đơn vị Tin tức](../discovery/news-unit-test-coverage.md).
 
 - Bài viết: [TDD-NEWS-001](TDD-NEWS-001.md).
@@ -367,5 +369,7 @@ Error Response:
 
 ## Change Log
 
+- 2026-09-26 (quyết định lần 2): Cập nhật SHA sau khi rebase lên `develop` `f21d749` (`4714e68`, `bce2eb2`) và tên migration sinh lại `20260926092623_NewsArticlesAndCategories`; ghi các quyết định lần 2 thuộc TDD-NEWS-001, cây danh mục không đổi.
+- 2026-09-26 (triển khai): Ghi hiện trạng code ở nhánh `feature/news` (commit `4714e68`, test `bce2eb2`); bỏ bước khóa từng dòng danh mục vì khóa cây exclusive đã xếp hàng mọi writer; ghi thứ tự chuẩn hóa tên NFC rồi trim; liệt kê integration test đã chạy. Schema và API không đổi.
 - 2026-09-26 (CSRF): Chống CSRF dẫn tới [TDD-AUTH-001](TDD-AUTH-001.md); mã lỗi đổi từ `CsrfRejected` thành mã chung `CsrfInvalid`.
 - 2026-09-25: Giới hạn tên danh mục 200 ký tự dẫn căn cứ BR-NEWS-002 khoản 1 và STORY-NEWS-002/AC-008 thay cho ghi chú “người dùng chốt cùng TDD”; thêm ví dụ biên 200/201 ký tự. Ghi rõ lọc theo categoryId không tồn tại trả danh sách rỗng. Ghi `news.manage` là tên quyền đã chốt, kiểm theo mã quyền; bổ sung tham chiếu STORY-RBAC-001, BR-RBAC-001, BR-RBAC-011 và Use Cases của STORY-NEWS-002. Schema và API không đổi.

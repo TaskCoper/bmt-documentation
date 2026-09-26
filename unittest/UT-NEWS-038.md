@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-NEWS-038 | Tin tức | Handler đọc public dự kiến — điều kiện trạng thái (dự kiến) | Branch | REGRESSION | P1 | Read repository fake có bản public hoặc không có theo contract; state fixtures nháp/ẩn/đã xóa được loại ở persistence integration. | Đọc Id qua public handler; không cấp dependency quota/Access. | Không có projection public thì NewsArticleNotFound; có thì chỉ map public DTO, không actor/version nội bộ; không ghi quota/history. Predicate SQL thật kiểm integration. | TDD-NEWS-001/Architecture<br>BR-NEWS-003/Then<br>STORY-NEWS-003/AC-001<br>STORY-NEWS-003/AC-005 | Theo thiết kế đã chốt; đặc tả chưa thực thi, không phải mã test. | [Chưa xác định] | Draft |
+| UT-NEWS-038 | Tin tức | Handler đọc public — điều kiện trạng thái | Branch | REGRESSION | P1 | Read repository fake có bản public hoặc không có theo contract; state fixtures nháp/ẩn/đã xóa được loại ở persistence integration. | Đọc Id qua public handler; không cấp dependency quota/Access. | Không có projection public thì NewsArticleNotFound; có thì chỉ map public DTO, không actor/version nội bộ; không ghi quota/history. Predicate SQL thật kiểm integration. | TDD-NEWS-001/Architecture<br>BR-NEWS-003/Then<br>STORY-NEWS-003/AC-001<br>STORY-NEWS-003/AC-005 | Theo thiết kế đã chốt. Mã test ở bảng độ phủ kiểm thử đơn vị Tin tức; không ghi kết quả chạy vào đặc tả. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

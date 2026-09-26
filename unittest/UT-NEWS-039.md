@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-NEWS-039 | Tin tức | Error mapping Tin tức — mã lỗi rõ ràng (dự kiến) | Branch | REGRESSION | P1 | Mapper/middleware dự kiến, exception fixtures theo TDD. | Version conflict, category cycle/name/in-use, validation, forbidden, not-found, storage unavailable. | Ánh xạ lần lượt 409/422/403/404/503 phù hợp; không mặc định tất cả 400 hoặc 500; response không chứa raw SQL, HTML hay presign token. | TDD-NEWS-001/Internal API<br>TDD-NEWS-002/Internal API | Theo thiết kế đã chốt; đặc tả chưa thực thi, không phải mã test. | [Chưa xác định] | Draft |
+| UT-NEWS-039 | Tin tức | Error mapping Tin tức — mã lỗi rõ ràng | Branch | REGRESSION | P1 | Mapper và middleware lỗi, exception fixtures theo TDD. | Version conflict, category cycle/name/in-use, validation, forbidden, not-found, kho ảnh chưa cấu hình tên miền (storage unavailable). | Ánh xạ lần lượt 409/422/403/404/503 phù hợp; không mặc định tất cả 400 hoặc 500; response không chứa raw SQL hay HTML. | TDD-NEWS-001/Internal API<br>TDD-NEWS-002/Internal API | Theo thiết kế đã chốt. Mã test ở bảng độ phủ kiểm thử đơn vị Tin tức; không ghi kết quả chạy vào đặc tả. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

@@ -113,6 +113,12 @@ Upload ảnh thất bại.
 
 1. Thông báo lỗi, không chèn URL của ảnh chưa upload thành công; cho người quản lý thử lại.
 
+#### EXC-04
+
+Tiêu đề, mô tả ngắn hoặc nội dung vượt giới hạn độ dài.
+
+1. Từ chối lưu, chỉ rõ phần vượt giới hạn; giữ nguyên bài hiện tại và không tự cắt ngắn.
+
 ## Acceptance Criteria
 
 #### AC-001
@@ -163,6 +169,13 @@ Upload ảnh thất bại.
 - **When**: Gọi trực tiếp thao tác quản trị
 - **Then**: Bị từ chối, không thay đổi dữ liệu.
 
+#### AC-009
+
+- **Given**: Người có quyền đang lưu nháp hoặc sửa một bài
+- **When**: Tiêu đề dài 200 ký tự, mô tả ngắn 500 ký tự sau khi bỏ khoảng trắng đầu/cuối và nội dung 200.000 ký tự, rồi thử lại với 201, 501 hoặc 200.001 ký tự
+- **Then**: Lần đầu lưu được; mỗi lần vượt giới hạn bị từ chối, không tự cắt ngắn.
+- **And**: Yêu cầu bị từ chối không thay đổi bài hiện tại.
+
 ## References
 
 ### TDDs
@@ -183,7 +196,7 @@ Upload ảnh thất bại.
 
 - Kiểm tra quyền quản lý tại backend, kể cả yêu cầu trực tiếp; quyền đọc công khai không cấp quyền sửa dữ liệu.
 - Rich text phải hiển thị an toàn, không thực thi mã do người soạn chèn. Chi tiết kiểm soát thuộc bước thiết kế kỹ thuật.
-- Chưa chốt ngưỡng hiệu năng hoặc giới hạn truyền tải. Chưa triển khai hoặc chạy kiểm thử.
+- Chưa chốt ngưỡng hiệu năng hoặc giới hạn truyền tải. Backend đã triển khai ở nhánh `feature/news` của `bmt-be`, chưa merge; chưa chạy System Test.
 
 ## Out of Scope
 

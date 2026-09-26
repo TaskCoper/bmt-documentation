@@ -176,7 +176,7 @@ Người thao tác thiếu quyền quản lý.
 
 - Kiểm tra quyền quản lý tại backend, kể cả yêu cầu trực tiếp; quyền đọc công khai không cấp quyền sửa dữ liệu.
 - Rich text phải hiển thị an toàn, không thực thi mã do người soạn chèn. Chi tiết kiểm soát thuộc bước thiết kế kỹ thuật.
-- Chưa chốt ngưỡng hiệu năng hoặc giới hạn truyền tải. Chưa triển khai hoặc chạy kiểm thử.
+- Chưa chốt ngưỡng hiệu năng hoặc giới hạn truyền tải. Backend đã triển khai ở nhánh `feature/news` của `bmt-be`, chưa merge; chưa chạy System Test.
 
 ## Out of Scope
 

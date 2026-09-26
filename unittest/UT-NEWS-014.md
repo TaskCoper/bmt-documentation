@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-NEWS-014 | Tin tức | INewsHtmlSanitizer — chặn nội dung nguy hiểm (dự kiến) | Error | REGRESSION | P1 | Parser thật với allowlist TDD. | Các biến thể script, iframe, object, embed, form, svg, style, onerror, srcdoc và HTML sai cấu trúc. | Không có phần tử/thuộc tính thực thi bị cấm trong DOM đầu ra; không bỏ lọt biến thể do HTML lỗi. Kiểm thực thi trong browser thuộc ST-NEWS-027. | TDD-NEWS-001/Architecture<br>STORY-NEWS-001/Non-Functional | Theo thiết kế đã chốt; đặc tả chưa thực thi, không phải mã test. | [Chưa xác định] | Draft |
+| UT-NEWS-014 | Tin tức | INewsHtmlSanitizer — chặn nội dung nguy hiểm | Error | REGRESSION | P1 | Parser thật với allowlist TDD. | Các biến thể script, iframe, object, embed, form, svg, style, onerror, srcdoc và HTML sai cấu trúc. | Không có phần tử/thuộc tính thực thi bị cấm trong DOM đầu ra; không bỏ lọt biến thể do HTML lỗi. Kiểm thực thi trong browser thuộc ST-NEWS-027. | TDD-NEWS-001/Architecture<br>STORY-NEWS-001/Non-Functional | Theo thiết kế đã chốt. Mã test ở bảng độ phủ kiểm thử đơn vị Tin tức; không ghi kết quả chạy vào đặc tả. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

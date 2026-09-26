@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-NEWS-035 | Tin tức | NewsCategoryService — thêm cấp sâu (dự kiến) | Boundary | REGRESSION | P1 | Repository giả có cha tại cấp 13, không trùng tên; schema không có maxDepth. | Tạo con dưới cha đó. | Tạo được node giữ ParentId đúng; không từ chối do mức sâu hoặc thêm giới hạn cấp. CTE và hiệu năng cây sâu phải kiểm integration. | TDD-NEWS-002/Architecture<br>BR-NEWS-002/Then<br>STORY-NEWS-002/AC-001 | Theo thiết kế đã chốt; đặc tả chưa thực thi, không phải mã test. | [Chưa xác định] | Draft |
+| UT-NEWS-035 | Tin tức | NewsCategoryService — thêm cấp sâu | Boundary | REGRESSION | P1 | Repository giả có cha tại cấp 13, không trùng tên; schema không có maxDepth. | Tạo con dưới cha đó. | Tạo được node giữ ParentId đúng; không từ chối do mức sâu hoặc thêm giới hạn cấp. CTE và hiệu năng cây sâu phải kiểm integration. | TDD-NEWS-002/Architecture<br>BR-NEWS-002/Then<br>STORY-NEWS-002/AC-001 | Theo thiết kế đã chốt. Mã test ở bảng độ phủ kiểm thử đơn vị Tin tức; không ghi kết quả chạy vào đặc tả. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

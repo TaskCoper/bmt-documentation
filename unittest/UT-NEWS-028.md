@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-NEWS-028 | Tin tức | NewsCategoryService — chuyển hợp lệ và về gốc (dự kiến) | Happy | REGRESSION | P1 | C dưới P,Version=2; Q hợp lệ không trùng tên; fake clock T2. | Chuyển C sang Q rồi fixture độc lập chuyển về parentId=NULL. | Giữ C.Id và links, đổi ParentId, append vị trí ở cha đích, tăng Version; không sửa ParentId của hậu duệ. Không tạo snapshot cây. | TDD-NEWS-002/Architecture<br>BR-NEWS-002/Then<br>STORY-NEWS-002/AC-004 | Theo thiết kế đã chốt; đặc tả chưa thực thi, không phải mã test. | [Chưa xác định] | Draft |
+| UT-NEWS-028 | Tin tức | NewsCategoryService — chuyển hợp lệ và về gốc | Happy | REGRESSION | P1 | C dưới P,Version=2; Q hợp lệ không trùng tên; fake clock T2. | Chuyển C sang Q rồi fixture độc lập chuyển về parentId=NULL. | Giữ C.Id và links, đổi ParentId, append vị trí ở cha đích, tăng Version; không sửa ParentId của hậu duệ. Không tạo snapshot cây. | TDD-NEWS-002/Architecture<br>BR-NEWS-002/Then<br>STORY-NEWS-002/AC-004 | Theo thiết kế đã chốt. Mã test ở bảng độ phủ kiểm thử đơn vị Tin tức; không ghi kết quả chạy vào đặc tả. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-NEWS-033 | Tin tức | NewsCategoryService — anchor hoặc version cũ (dự kiến) | Error | REGRESSION | P1 | Node và anchor fake đã đổi version hoặc cha sau lúc đọc; fixture riêng anchor đã xóa. | Position với expectedParentId hoặc expectedBeforeVersion cũ, anchor đã mất; Save/Delete với version node cũ. | NewsVersionConflict; không ghi batch vị trí hoặc đổi node nào. | TDD-NEWS-002/Architecture<br>TDD-NEWS-002/Internal API | Theo thiết kế đã chốt; đặc tả chưa thực thi, không phải mã test. | [Chưa xác định] | Draft |
+| UT-NEWS-033 | Tin tức | NewsCategoryService — anchor hoặc version cũ | Error | REGRESSION | P1 | Node và anchor fake đã đổi version hoặc cha sau lúc đọc; fixture riêng anchor đã xóa. | Position với expectedParentId hoặc expectedBeforeVersion cũ, anchor đã mất; Save/Delete với version node cũ. | NewsVersionConflict; không ghi batch vị trí hoặc đổi node nào. | TDD-NEWS-002/Architecture<br>TDD-NEWS-002/Internal API | Theo thiết kế đã chốt. Mã test ở bảng độ phủ kiểm thử đơn vị Tin tức; không ghi kết quả chạy vào đặc tả. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

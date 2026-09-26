@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-NEWS-032 | Tin tức | NewsCategoryService — đổi vị trí (dự kiến) | Happy | REGRESSION | P1 | Anh em [A,B,C] ở P, SortOrder=[0,1,2],Version=[1,1,1]. | Move C before A; fixture riêng move A cuối với anchor NULL. | Lần đầu thứ tự [C,A,B], lần sau [B,C,A]; gán 0..2 và tăng Version từng dòng đổi; không đổi ParentId/links; trả đúng tập node đổi version. | TDD-NEWS-002/Architecture<br>STORY-NEWS-002/AC-004 | Theo thiết kế đã chốt; đặc tả chưa thực thi, không phải mã test. | [Chưa xác định] | Draft |
+| UT-NEWS-032 | Tin tức | NewsCategoryService — đổi vị trí | Happy | REGRESSION | P1 | Anh em [A,B,C] ở P, SortOrder=[0,1,2],Version=[1,1,1]. | Move C before A; fixture riêng move A cuối với anchor NULL. | Lần đầu thứ tự [C,A,B], lần sau [B,C,A]; gán 0..2 và tăng Version từng dòng đổi; không đổi ParentId/links; trả đúng tập node đổi version. | TDD-NEWS-002/Architecture<br>STORY-NEWS-002/AC-004 | Theo thiết kế đã chốt. Mã test ở bảng độ phủ kiểm thử đơn vị Tin tức; không ghi kết quả chạy vào đặc tả. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
