@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-069 | AdminRead | CommerceStatusProjector (dự kiến) | Branch | REGRESSION | P1 | Received2000000,Eligible500000,orderExpired; gói lịch sử CanceledByStaff. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Map quản trị. | Không báo đủ điều kiện thanh toán hoặc active; giữ số tiền thực nhận riêng. | STORY-PAY-002/AC-006<br>TDD-PAY-002/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
+| UT-PAY-069 | AdminRead | CommerceStatusProjector | Branch | REGRESSION | P1 | Received2000000,Eligible500000,orderExpired; gói lịch sử CanceledByStaff. Mã test: `CommerceAdminQueryTests.Handle_ExpiredOrderAndCanceledPackage_NotReportedAsPaidOrActive`, `CommerceAdminQueryTests.Handle_DesignPeriodPastScheduledEnd_EffectiveStateExpired`, `CommerceStatusProjectorTests.PurchaseEffectiveState_StoredStateAndClock_ReturnsReadState`, `CommerceStatusProjectorTests.OrderState_StoredStateAndExpiry_ReturnsReadState`. | Map quản trị. | Không báo đủ điều kiện thanh toán hoặc active; giữ số tiền thực nhận riêng. | STORY-PAY-002/AC-006<br>TDD-PAY-002/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

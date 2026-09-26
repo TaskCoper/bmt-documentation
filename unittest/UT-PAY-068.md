@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-068 | AdminRead | CommerceQueryValidator (dự kiến) | Boundary | REGRESSION | P1 | PageIndex<=0,pageSize<=0 hoặc >100; rangefrom>to; offset quá giới hạn int. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Chuẩn hóa và validate. | Page không dương về1/10, size>100 thành100 theo PagedResult; range sai/offset tràn trả422 trước query. | TDD-PAY-002/Internal API | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
+| UT-PAY-068 | AdminRead | CommerceFilters và validator của API tra cứu | Boundary | REGRESSION | P1 | PageIndex<=0,pageSize<=0 hoặc >100; rangefrom>to; offset quá giới hạn int. Mã test: `CommerceAdminValidatorTests.NormalizePage_NonPositiveOrOversized_FallsBackLikePagedResult`, `CommerceAdminValidatorTests.Validate_OffsetOverflowsInt_ReturnsCommerceQueryInvalid`, `CommerceAdminValidatorTests.Validate_FromAfterTo_ReturnsCommerceQueryInvalid`, `CommerceAdminValidatorTests.Validate_MalformedFilters_ReturnsCommerceQueryInvalid`, `CommerceAdminQueryTests.Lookup_MalformedFilter_ReturnsValidationFailure` (integration). | Chuẩn hóa và validate. | Page không dương về1/10, size>100 thành100 theo PagedResult; range sai/offset tràn trả422 trước query. | TDD-PAY-002/Internal API | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-066 | AdminRead | TransactionDtoMapper (dự kiến) | Branch | REGRESSION | P1 | Transaction hợp lệ Unmatched, không order. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Map DTO. | orderId/buyerId/packageId NULL, nhãn Chưa xác định đơn; không suy từ tên/nội dung. | STORY-PAY-002/AC-004<br>TDD-PAY-002/Data Model | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
+| UT-PAY-066 | AdminRead | GetAdminBankTransactionsQueryHandler, GetAdminBankTransactionQueryHandler, CommerceStatusProjector.MatchLabel | Branch | REGRESSION | P1 | Transaction hợp lệ Unmatched, không order. Mã test: `CommerceAdminQueryTests.Handle_UnmatchedTransaction_ReturnsNullLinksAndUnknownOrderLabel`, `CommerceAdminQueryTests.Handle_MatchedTransaction_LinksOrderBuyerAndPackage`, `CommerceStatusProjectorTests.MatchLabel_NoOrder_ReturnsUnknownOrder`, `CommerceAdminQueryTests.Lookups_SplitPaymentAndUnmatchedTransfer_KeepEveryTransactionAndCountOrderOnce` (integration). | Map DTO. | orderId/buyerId/packageId NULL, nhãn Chưa xác định đơn; không suy từ tên/nội dung. | STORY-PAY-002/AC-004<br>TDD-PAY-002/Data Model | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-070 | AdminRead | CommerceDtoProjection contract (dự kiến) | Error | REGRESSION | P1 | Entity có SecretReference,raw payload,signature và nội dung chuyển khoản. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | Map DTO quản trị cho actor có read. | DTO có nội dung được phép nhưng không chứa secret/signature/raw body; không gọi SaveChanges. | TDD-PAY-002/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
+| UT-PAY-070 | AdminRead | DTO của API tra cứu (Response.AdminBankTransactionDetail) | Error | REGRESSION | P1 | Entity có SecretReference,raw payload,signature và nội dung chuyển khoản. Mã test: `CommerceAdminQueryTests.Handle_TransactionDetail_ExposesNoSecretsAndTracksNothing`. | Map DTO quản trị cho actor có read. | DTO có nội dung được phép nhưng không chứa secret/signature/raw body; không gọi SaveChanges. | TDD-PAY-002/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

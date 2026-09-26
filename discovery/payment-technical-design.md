@@ -21,7 +21,7 @@ Test bổ sung: ST-PAY-069 (thu hồi `commerce.read` có hiệu lực theo hạ
 | [STORY-PAY-001](../userstory/STORY-PAY-001.md) | BR-PAY-001–004, BR-RBAC-005 | [TDD-PAY-001](../tdd/TDD-PAY-001.md) | UT-PAY-001–036, UT-PAY-071–074, UT-PAY-111–113, UT-PAY-120 |
 | [STORY-SUB-004](../userstory/STORY-SUB-004.md) | BR-SUB-022, BR-SUB-009 (BR-SUB-023 đã bỏ) | [TDD-SUB-004](../tdd/TDD-SUB-004.md) | UT-PAY-037–042, 044, 046–048, 075–077 (043, 045 đã rút) |
 | [STORY-SUB-005](../userstory/STORY-SUB-005.md) | BR-SUB-024–025 | [TDD-SUB-005](../tdd/TDD-SUB-005.md) | UT-PAY-049–062, 078–079 |
-| [STORY-PAY-002](../userstory/STORY-PAY-002.md) | BR-PAY-005 | [TDD-PAY-002](../tdd/TDD-PAY-002.md) | UT-PAY-063–070, 080–081 |
+| [STORY-PAY-002](../userstory/STORY-PAY-002.md) | BR-PAY-005 | [TDD-PAY-002](../tdd/TDD-PAY-002.md) | UT-PAY-063–070, 080–081, 107–108; đã có code ở commit `c1d757a` của `bmt-be` (nhánh `feature/payment-lookup`, chưa merge) |
 | [STORY-PAY-003](../userstory/STORY-PAY-003.md) (chốt 26/09/2026) | BR-PAY-006 | [TDD-PAY-001](../tdd/TDD-PAY-001.md), mục Quản trị connection | UT-PAY-114–127 (trừ 120); System Test ST-PAY-089–101 |
 
 ## Đã xác nhận
@@ -128,14 +128,14 @@ TDD subscription cũ đã có ghi chú chỉ rõ phần bị thay thế và liê
 | [UT-PAY-060](../unittest/UT-PAY-060.md) | RestorePackageHandler giữ counters | STORY-SUB-005/AC-014, TDD-SUB-005/Architecture |
 | [UT-PAY-061](../unittest/UT-PAY-061.md) | PackageMutationReceiptPolicy | TDD-SUB-005/Architecture |
 | [UT-PAY-062](../unittest/UT-PAY-062.md) | CancelPackageHandler audit failure | TDD-SUB-005/Architecture |
-| [UT-PAY-063](../unittest/UT-PAY-063.md) | CommerceReadAuthorization | STORY-PAY-002/AC-001, TDD-PAY-002/Architecture |
-| [UT-PAY-064](../unittest/UT-PAY-064.md) | CommerceReadAuthorization | STORY-PAY-002/AC-002, TDD-PAY-002/Architecture |
-| [UT-PAY-065](../unittest/UT-PAY-065.md) | CommerceReadAuthorization | STORY-PAY-002/AC-003, TDD-PAY-002/Architecture |
-| [UT-PAY-066](../unittest/UT-PAY-066.md) | TransactionDtoMapper | STORY-PAY-002/AC-004, TDD-PAY-002/Data Model |
-| [UT-PAY-067](../unittest/UT-PAY-067.md) | PurchaseDtoMapper | STORY-PAY-002/AC-001, STORY-PAY-002/AC-006, TDD-PAY-002/Architecture |
-| [UT-PAY-068](../unittest/UT-PAY-068.md) | CommerceQueryValidator | TDD-PAY-002/Internal API |
+| [UT-PAY-063](../unittest/UT-PAY-063.md) | CommerceReadAccess và policy commerce.read | STORY-PAY-002/AC-001, TDD-PAY-002/Architecture |
+| [UT-PAY-064](../unittest/UT-PAY-064.md) | CommerceReadAccess và policy commerce.read | STORY-PAY-002/AC-002, TDD-PAY-002/Architecture |
+| [UT-PAY-065](../unittest/UT-PAY-065.md) | CommerceReadAccess và policy commerce.read | STORY-PAY-002/AC-003, TDD-PAY-002/Architecture |
+| [UT-PAY-066](../unittest/UT-PAY-066.md) | GetAdminBankTransaction(s)QueryHandler | STORY-PAY-002/AC-004, TDD-PAY-002/Data Model |
+| [UT-PAY-067](../unittest/UT-PAY-067.md) | GetAdminPackagePurchasesQueryHandler | STORY-PAY-002/AC-001, STORY-PAY-002/AC-006, TDD-PAY-002/Architecture |
+| [UT-PAY-068](../unittest/UT-PAY-068.md) | CommerceFilters và validator tra cứu | TDD-PAY-002/Internal API |
 | [UT-PAY-069](../unittest/UT-PAY-069.md) | CommerceStatusProjector | STORY-PAY-002/AC-006, TDD-PAY-002/Architecture |
-| [UT-PAY-070](../unittest/UT-PAY-070.md) | CommerceDtoProjection contract | TDD-PAY-002/Architecture |
+| [UT-PAY-070](../unittest/UT-PAY-070.md) | DTO tra cứu quản trị | TDD-PAY-002/Architecture |
 | [UT-PAY-071](../unittest/UT-PAY-071.md) | CreatePaymentOrderHandler | BR-RBAC-005/Then, TDD-PAY-001/Internal API |
 | [UT-PAY-072](../unittest/UT-PAY-072.md) | CancelPaymentOrderHandler | BR-RBAC-005/Then, TDD-PAY-001/Architecture |
 | [UT-PAY-073](../unittest/UT-PAY-073.md) | CreatePaymentOrderHandler | BR-PAY-001/Then, TDD-PAY-001/Data Model |
