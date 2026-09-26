@@ -45,7 +45,7 @@ Không có yêu thích, xoay mô hình 3D trên web, tìm theo kích thước, l
 
 Thiết kế tách Template, Version, Asset/link, Access và receipt quản trị; dùng lại catalog PROJ và quota SUB. Dữ liệu kỳ/quota, chứng từ lượt và quyền xem ghi cùng transaction. Permission library.manage không yêu cầu Assignment. Đã xác nhận cho lưu nháp thiếu thông tin; kiểm đủ trước khi công bố.
 
-Cập nhật ngày 26/09/2026: backend không có kho tệp riêng. Frontend kiểm định dạng và dung lượng tệp, upload qua dịch vụ presigned URL; backend chỉ lưu URL https thuộc `UploadedFileOption__AllowedHosts`, không nhận bytes, không tạo ảnh thu nhỏ. Nội dung được bảo vệ và thumbnail do backend chuyển tiếp tệp qua route có kiểm quyền, không lộ URL gốc (TDD-LIB-001, TDD-LIB-002; người dùng xác nhận ngày 26/09/2026).
+Cập nhật ngày 26/09/2026: backend không có kho tệp riêng. Frontend kiểm định dạng và dung lượng tệp, upload qua dịch vụ presigned URL; backend chỉ lưu URL https thuộc `UploadedFileOption__AllowedHosts`, không nhận bytes, không tạo ảnh thu nhỏ. Nội dung được bảo vệ do backend chuyển tiếp tệp qua route có kiểm quyền, không lộ URL gốc; ảnh đại diện công khai trả thẳng URL gốc của ảnh cover để trình duyệt/CDN cache (TDD-LIB-001, TDD-LIB-002; người dùng xác nhận ngày 26/09/2026).
 
 Phần cần cấu hình trước production: tên miền kho presign trong `UploadedFileOption__AllowedHosts`; với bên cung cấp dịch vụ presign cần làm rõ giới hạn dung lượng upload, việc hỗ trợ HEAD và Range, timeout khi backend thăm dò và chuyển tiếp tệp, việc dọn tệp mồ côi và sao lưu/khôi phục tệp. Không tự đặt hạn mức file nghiệp vụ. Chưa triển khai hoặc chạy kiểm thử ứng dụng. Chuỗi phụ thuộc ngoài LIB chưa được rà soát toàn bộ; UT-SUB về replay cũ cần cập nhật sau khi TDD được chốt.
 

@@ -44,7 +44,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Owner**: [Chưa xác định]
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
-- **Source**: Người dùng xác nhận phạm vi cả ba bước như trang mẫu; AI service do bên khác phụ trách và trả kết quả, BMT thu thập đầu vào; giữ PDF, Excel và các thao tác chia sẻ. Hợp đồng AI trước mắt ghi chờ tích hợp.
+- **Source**: Người dùng xác nhận phạm vi cả ba bước như trang mẫu; AI service do bên khác phụ trách và trả kết quả, BMT thu thập đầu vào; giữ PDF, Excel và các thao tác chia sẻ. Hợp đồng AI trước mắt ghi chờ tích hợp. Ngày 26/09/2026 người dùng xác nhận khoản 4 (AI trả PDF/Excel, backend không tự dựng) và khoản 7 (tên mới chỉ áp vào tên tệp tải về).
 
 ## Statement
 
@@ -71,7 +71,7 @@ Nếu chưa có bộ kết quả hợp lệ hoặc chưa chuẩn bị được t
 ## Notes
 
 - Khoản 7 do người dùng xác nhận ngày 25/09/2026. Ngày 26/09/2026 người dùng xác nhận sửa phần về tệp: bản cũ yêu cầu tệp xuất trước khi đổi tên không được dùng nữa và lần tải sau xuất lại với tên mới. Vì AI tạo PDF/Excel và backend không tự dựng tệp, tên mới nay chỉ áp vào tên tệp tải về (backend đặt khi chuyển tiếp tệp, TDD-PROJ-003); nội dung tệp giữ tên tại lúc AI tạo.
-- Khoản 4 cập nhật ngày 26/09/2026 theo quyết định đã xác nhận: AI trả URL cho mọi tệp kết quả, kể cả PDF và Excel; backend chỉ lưu URL, không tự dựng tệp.
+- Khoản 4 cập nhật ngày 26/09/2026: AI trả URL cho mọi tệp kết quả, kể cả PDF và Excel; backend chỉ lưu URL, không tự dựng tệp. Người dùng xác nhận giữ bản sửa khoản 4 này ngày 26/09/2026.
 
 - Trang mẫu mô tả dự toán là tham khảo. Không suy ra giá trị mẫu hoặc hình mẫu là định mức áp dụng cho công trình thực tế.
 - BR-PROJ-004 tách lựa chọn phong cách kiến trúc và nội thất theo loại công trình. Người dùng đã chốt cấu hình chỉ điều khiển lựa chọn đầu vào; AI vẫn trả đủ kết quả. Không loại phần thiết kế, dự toán hoặc hồ sơ chỉ vì một nhóm lựa chọn phong cách bị tắt.

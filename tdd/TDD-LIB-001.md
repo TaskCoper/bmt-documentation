@@ -105,7 +105,7 @@ flowchart LR
 
 Mã quyền `library.manage` là quyền quản lý thư viện mẫu đã chốt tên theo STORY-RBAC-001/Preconditions, RequiresAssignment=false, seed cho vai trò hệ thống Admin; các vai trò khác được cấp bằng RBAC hiện có. Policy kiểm theo mã quyền này, không kiểm tên vai trò "Admin" (BR-RBAC-001, BR-RBAC-011); thiếu quyền trả 403 và không ghi dữ liệu nghiệp vụ. Bổ sung cả PermissionNames, migration seed và policy registry để PermissionCatalogGuard không từ chối khởi động. Quyền này khác quyền lợi gói `catalog.detail`: một bên là quản trị, một bên là quyền khách mở mẫu mới. Không tái dùng `assignment.manage` hoặc bắt phân công nhân viên vào mẫu.
 
-Mutation dùng cookie được kiểm Origin theo [TDD-AUTH-001](TDD-AUTH-001.md), không dùng CORS thay CSRF. Endpoint công khai chỉ trả summary và ảnh đại diện của phiên bản hiện hành không ẩn. Endpoint thumbnail kiểm lại current/visibility trước khi phục vụ ảnh. Tệp vẫn nằm ở URL công khai, cố định của kho presign, nên người đã biết URL gốc vẫn mở được sau khi mẫu bị ẩn hoặc ảnh bị thay; backend không thu hồi được URL đó. Người dùng xác nhận ngày 26/09/2026: API không trả URL gốc cho khách; nội dung được bảo vệ và thumbnail do backend chuyển tiếp tệp ([TDD-LIB-002/Architecture](TDD-LIB-002.md#architecture)). Ảnh đã tải xuống trước đó không thể thu hồi khỏi máy khách.
+Mutation dùng cookie được kiểm Origin theo [TDD-AUTH-001](TDD-AUTH-001.md), không dùng CORS thay CSRF. Endpoint công khai chỉ trả summary và ảnh đại diện của phiên bản hiện hành không ẩn. Ảnh đại diện công khai trả thẳng URL gốc: `thumbnailUrl` là `LibraryAsset.Url` của ảnh cover thuộc phiên bản hiện hành không ẩn, để trình duyệt và CDN cache được (người dùng xác nhận ngày 26/09/2026). Backend chỉ quyết định có đưa URL đó vào danh sách hay không; không có route thumbnail chuyển tiếp ảnh. Vì tệp nằm ở URL công khai, cố định của kho presign, người đã biết URL ảnh cover vẫn mở được sau khi mẫu bị ẩn hoặc ảnh bị thay; điều này chấp nhận được vì ảnh cover là nội dung công khai. Nội dung được bảo vệ thì khác: API không trả URL gốc, backend chuyển tiếp tệp qua route có kiểm quyền ([TDD-LIB-002/Architecture](TDD-LIB-002.md#architecture)). Ảnh đã tải xuống trước đó không thể thu hồi khỏi máy khách.
 
 Preview quản trị và các route đọc nội dung bảo vệ theo TDD-LIB-002/Internal API; quyền library.manage không tạo lịch sử khách hoặc dùng lượt.
 
@@ -147,7 +147,7 @@ Tạo LibraryAsset không tự gắn vào phiên bản; attach là transaction r
 
 Không đặt số ảnh/tệp tối đa trong validator (BR-LIB-001 khoản 2). Giới hạn dung lượng và thời gian upload giờ là của dịch vụ presigned URL, không phải của API backend; phải làm rõ với bên cung cấp dịch vụ và không mô tả “không giới hạn” là năng lực vật lý vô hạn.
 
-URL đã lưu của LibraryAsset không bị sửa là hợp đồng đầu vào cho luồng tải tài nguyên có quyền tại TDD-LIB-002. Thumbnail công khai chỉ phục vụ cover current không ẩn.
+URL đã lưu của LibraryAsset không bị sửa là hợp đồng đầu vào cho luồng tải tài nguyên có quyền tại TDD-LIB-002. Danh sách công khai chỉ trả URL ảnh cover của phiên bản hiện hành không ẩn.
 
 **Phạm vi thay đổi mã khi được giao triển khai**
 
@@ -168,7 +168,7 @@ Chi tiết triển khai nội dung/quản trị thuộc tài liệu này; bướ
 
 Đặc tả UT-LIB-001–032 kiểm validator, policy, service quản trị, receipt, thứ tự gọi khóa và truy vấn công khai ở biên unit; chưa có mã test hoặc kết quả chạy. Không dùng mock để kết luận mutex/UNIQUE/rollback đúng. Integration dùng PostgreSQL 15 thật và hai connection cho lượt cuối, cùng phiên bản, đổi kỳ, sửa/công bố chen lúc mở. Kiểm URL tệp (tên miền, https, độ dài) dùng lại test của `UploadedFileUrlPolicy`; backend không có test định dạng hay dung lượng tệp vì phần này thuộc frontend. Bổ sung thực nghiệm công bố lúc xác nhận và upload lớn qua dịch vụ presign trên môi trường thử; không báo đạt từ việc viết đặc tả.
 
-Đặc tả UT-LIB-009, UT-LIB-010 và UT-LIB-032 đã được viết lại ngày 26/09/2026 theo thiết kế lưu URL: kiểm URL khi thêm tài nguyên, không kiểm định dạng ở backend, và thumbnail chuyển tiếp ảnh cover.
+Đặc tả UT-LIB-009, UT-LIB-010 và UT-LIB-032 đã được viết lại ngày 26/09/2026 theo thiết kế lưu URL: kiểm URL khi thêm tài nguyên, không kiểm định dạng ở backend, và danh sách công khai trả thẳng URL ảnh cover của phiên bản hiện hành không ẩn.
 
 **Notes**:
 
@@ -340,9 +340,8 @@ Schema quota/Access được triển khai theo TDD-LIB-002 sau bảng Version; k
 
 Tất cả route dưới đây là đề xuất. Mutation quản trị cần library.manage và Idempotency-Key; chống CSRF theo [TDD-AUTH-001](TDD-AUTH-001.md). RequestKey 1–100 ký tự; request hash chứa route, target, expected versions và body chuẩn hóa. Cùng actor/operation/key khác hash trả 409; cùng hash trả kết quả đã commit trước kiểm optimistic version, nhưng vẫn kiểm quyền hiện tại. API khách không nhận AccountId từ client.
 
-- **GET** `/api/v1/design-templates` — Công khai. query `drawingKind,buildingTypeId,floorCount,hasTum,name,pageIndex,pageSize`; thiếu hasTum nghĩa Tất cả. Trả summary: templateId,versionId,number,name,dimensions,type label,floorCount,hasTum,thumbnailUrl,publishedAtUtc. `thumbnailUrl` trỏ tới route thumbnail bên dưới, không phải URL gốc ở kho; không trả URL tệp chi tiết hoặc manifest.
+- **GET** `/api/v1/design-templates` — Công khai. query `drawingKind,buildingTypeId,floorCount,hasTum,name,pageIndex,pageSize`; thiếu hasTum nghĩa Tất cả. Trả summary: templateId,versionId,number,name,dimensions,type label,floorCount,hasTum,thumbnailUrl,publishedAtUtc. `thumbnailUrl` là URL gốc (`LibraryAsset.Url`) của ảnh cover thuộc phiên bản hiện hành không ẩn, để trình duyệt/CDN cache; mẫu bị ẩn hoặc chưa có bản hiện hành không xuất hiện trong danh sách. Không trả URL tệp chi tiết, tệp đính kèm hoặc manifest; các tệp đó là nội dung được bảo vệ, đi qua route có quyền của TDD-LIB-002.
 - **GET** `/api/v1/design-templates/filters` — Công khai. query drawingKind/buildingTypeId; trả loại và số tầng hiện hành cộng giá trị cũ có mẫu public.
-- **GET** `/api/v1/design-templates/{templateId}/thumbnail` — Công khai chỉ khi có current public; phục vụ ảnh cover của phiên bản hiện hành (backend không tạo ảnh thu nhỏ), không chấp nhận assetId bất kỳ. Backend chuyển tiếp tệp ảnh, không chuyển hướng tới URL gốc (TDD-LIB-002/Architecture, xác nhận ngày 26/09/2026).
 - **GET** `/api/v1/admin/library/templates` — library.manage; danh sách quản trị gồm hidden và trạng thái current; có phân trang, không qua quota.
 - **GET** `/api/v1/admin/library/templates/{templateId}/versions` — library.manage; phiên bản/nháp và EditVersion để chọn sửa/preview; không cho sửa old.
 - **POST** `/api/v1/admin/library/templates` — Tạo Template và nháp đầu tiên với dữ liệu; 201 `{templateId,versionId,templateVersion,editVersion}`. Cho lưu nháp thiếu trường; dữ liệu có mặt phải hợp lệ. Body rỗng tạo nháp trống, chưa công khai.
@@ -452,6 +451,7 @@ Upload lỗi thì frontend không gọi API, nội dung cũ giữ nguyên. Uploa
 
 ## Change Log
 
+- 2026-09-26 (thumbnail công khai trả URL gốc): Người dùng xác nhận ngày 26/09/2026: ảnh đại diện công khai trả thẳng URL gốc của ảnh cover thuộc phiên bản hiện hành không ẩn, để trình duyệt/CDN cache; chỉ nội dung được bảo vệ mới đi qua backend chuyển tiếp. Bỏ endpoint `GET /api/v1/design-templates/{templateId}/thumbnail` (không còn cần route chuyển tiếp ảnh công khai); `thumbnailUrl` trong danh sách là `LibraryAsset.Url` của cover. Sửa Architecture, Data Model và Internal API; viết lại UT-LIB-032 và sửa UT-LIB-028 theo quyết định này.
 - 2026-09-26 (chốt tải qua backend và kiểm tệp ở frontend): Người dùng xác nhận ngày 26/09/2026: định dạng và dung lượng tệp mẫu (BR-LIB-001 khoản 2) do frontend kiểm như PROJ; backend chỉ kiểm URL https thuộc `UploadedFileOption__AllowedHosts` và `kind`, bỏ kiểm `mediaType`/phần mở rộng khai báo và thu hẹp nghĩa `UnsupportedLibraryFile`. Nội dung được bảo vệ và thumbnail do backend chuyển tiếp tệp, không lộ URL gốc (TDD-LIB-002). Hai câu hỏi mở ở Notes chuyển thành đã xác nhận. Viết lại UT-LIB-009, UT-LIB-010, UT-LIB-032.
 - 2026-09-26 (lưu URL tệp): Theo quyết định backend không có kho tệp riêng: frontend upload qua dịch vụ presigned URL, backend chỉ lưu URL https thuộc `UploadedFileOption__AllowedHosts`, kiểm bằng `IUploadedFileUrlPolicy` đã có trong code. Bỏ `ILibraryObjectStore`, `PutImmutable`, bộ kiểm bytes và tạo thumbnail; `LibraryAsset` thay `StorageKey`, `ThumbnailKey`, `Sha256` bằng cột `Url`, `SizeBytes` thành dữ liệu khai báo có thể NULL. `POST .../assets` nhận URL thay cho stream bytes; thumbnail dùng ảnh cover. Định dạng tệp kiểm ở frontend, backend kiểm định dạng khai báo; việc áp hệ quả này cho LIB và việc trả hay giấu URL gốc là câu hỏi mở. UT-LIB-009, UT-LIB-010, UT-LIB-032 cần viết lại sau khi chốt TDD. Nghiệp vụ BR-LIB-001–003 không đổi.
 - 2026-09-26 (CSRF): Chống CSRF dẫn tới [TDD-AUTH-001](TDD-AUTH-001.md), bỏ antiforgery token.
