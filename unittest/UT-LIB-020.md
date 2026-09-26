@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-LIB-020 | Thư viện mẫu | PublishLibraryVersionCommandHandler — công bố khi mẫu đang ẩn | Branch | REGRESSION | P2 | Mã test (commit `ef008fa` của `bmt-be`): `LibraryVersionCommandHandlerTests.Handle_PublishWhileHidden_KeepsTemplateHidden`. Fake repository/port ghi lại lời gọi; clock cố định. M1 IsHidden=true, current V1; nháp V2 hợp lệ. | POST publish V2 với các expected version đúng. | V2 trở thành current, IsHidden vẫn true; truy vấn công khai không trả M1 cho tới khi người quản lý chọn Hiện lại. | TDD-LIB-001/Architecture<br>BR-LIB-002/Then | Công bố không tự đảo trạng thái ẩn của mẫu. Mã test ghi ở cột Precondition; không ghi kết quả chạy vào đặc tả. | [Chưa xác định] | Draft |
+| UT-LIB-020 | Thư viện mẫu | PublishLibraryVersionCommandHandler — công bố khi mẫu đang ẩn | Branch | REGRESSION | P2 | Mã test (commit `66e4671` của `bmt-be`): `LibraryVersionCommandHandlerTests.Handle_PublishWhileHidden_KeepsTemplateHidden`. Fake repository/port ghi lại lời gọi; clock cố định. M1 IsHidden=true, current V1; nháp V2 hợp lệ. | POST publish V2 với các expected version đúng. | V2 trở thành current, IsHidden vẫn true; truy vấn công khai không trả M1 cho tới khi người quản lý chọn Hiện lại. | TDD-LIB-001/Architecture<br>BR-LIB-002/Then | Công bố không tự đảo trạng thái ẩn của mẫu. Mã test ghi ở cột Precondition; không ghi kết quả chạy vào đặc tả. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
