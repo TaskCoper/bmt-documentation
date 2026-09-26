@@ -10,6 +10,14 @@ Các quyết định nghiệp vụ đã được xác nhận qua hội thoại. 
 - TDD-LIB-002 đổi thứ tự khóa khi mở mẫu lần đầu: khóa `AccountCommerceState` của khách trước, rồi tới kỳ và lượt, sau cùng là mẫu và phiên bản. Thứ tự này thống nhất với TDD-PAY-001 và TDD-PROJ-002, thay cho việc khóa dòng `User` trước đây.
 - Thêm ST-LIB-028 kiểm việc mở mẫu lần đầu và thay đổi gói của cùng khách chạy đồng thời; ST-LIB-011 kiểm thêm vai trò tùy chỉnh có `library.manage`.
 
+## Cập nhật ngày 26/09/2026 — triển khai TDD-LIB-001
+
+- Phần quản trị và danh sách công khai (TDD-LIB-001) đã có code ở nhánh `feature/library-admin` của `bmt-be`, commit `66e4671`, tách từ `develop` tại `79faf34`, chưa merge. Gồm năm bảng nội dung/quản trị, migration `20260926102541_LibraryTemplates`, mã quyền `library.manage` seed cho vai trò `admin`, API quản trị `/api/v1/admin/library/templates` và API công khai `GET /api/v1/design-templates`, `GET /api/v1/design-templates/filters`.
+- Migration mới áp dụng lên PostgreSQL trong container kiểm thử, chưa áp dụng lên database dùng chung.
+- Đặc tả UT-LIB-001 đến UT-LIB-032 đã có mã test; tên test ghi trong từng đặc tả. Integration test PostgreSQL kiểm ràng buộc, khóa ngoại tới danh mục, công bố/ẩn đồng thời, lọc và phân trang công khai; test API kiểm quyền `library.manage`.
+- Phần tra cứu của TDD-LIB-002 (quyền xem, tính lượt, lịch sử, tải nội dung được bảo vệ) chưa triển khai. Người quản lý hiện chưa có API đọc danh sách tài nguyên của một phiên bản; đây là câu hỏi còn mở, ghi trong báo cáo triển khai.
+- System Test ST-LIB chưa chạy trên môi trường thử; bảng ở [library-system-test-coverage.md](library-system-test-coverage.md) ghi các test tự động phía backend liên quan.
+
 ## Bộ tài liệu
 
 | Phạm vi | User Story | Business Rule |

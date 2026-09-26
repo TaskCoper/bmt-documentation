@@ -33,6 +33,27 @@ US và BR đã được người dùng chốt trong hội thoại. 30 ca dưới
 
 Đã kiểm tra cấu trúc mỗi ca một file, 13 cột, mã/section tham chiếu tồn tại và Trace to khớp TEST_LINKS. Bao phủ tham chiếu không đồng nghĩa đã chứng minh hành vi đúng.
 
+**Cập nhật 26/09/2026 (triển khai TDD-LIB-001):** backend của các ca ST-LIB-001 đến ST-LIB-016 đã có ở nhánh `feature/library-admin` của `bmt-be` (commit `66e4671`, chưa merge). Các ca System Test vẫn chưa chạy trên môi trường thử; bảng dưới chỉ ghi test tự động phía backend đang kiểm cùng hành vi, không phải kết quả System Test. Các ca ST-LIB-017 đến ST-LIB-030 phụ thuộc TDD-LIB-002, chưa có backend (riêng phần sửa tại chỗ, ẩn mẫu và xóa nháp của ST-LIB-006, ST-LIB-008, ST-LIB-009 đã có).
+
+| System Test | Test tự động phía backend (test class của `bmt-be`) |
+| --- | --- |
+| ST-LIB-001 | `LibraryFlowTests.Handle_CreateAttachSaveAndPublish_AppearsPublicly` |
+| ST-LIB-002 | `LibraryContentCommandHandlerTests.Handle_PublishMissingRequiredContent_ReturnsInvalidContentAndKeepsDraft`, `LibraryConstraintTests.Handle_VersionOutsideCheck_RejectedByDatabase` |
+| ST-LIB-003 | `LibraryValidatorTests.Handle_DimensionOutOfDomain_ReturnsInvalidContent`, `LibraryContentCommandHandlerTests.Handle_SaveDraftWithValidDimensions_StoresExactValues` |
+| ST-LIB-004 | Chỉ phần backend: `LibraryContentCommandHandlerTests.Handle_AddAssetWithAllowedUrl_StoresRequestValues`, `Handle_AddAssetWithUnsupportedUrlOrKind_ReturnsUnsupportedFile`. Định dạng và dung lượng do frontend kiểm, cần chạy qua giao diện. |
+| ST-LIB-005 | `LibraryContentCommandHandlerTests.Handle_PublishWithClassification_AcceptsOnlyValidCombination`, `LibraryConstraintTests.Handle_ClassificationAgainstPinnedRevision_EnforcedByForeignKeys` |
+| ST-LIB-006 | `LibraryFlowTests.Handle_EditCurrentInPlace_ReplacesCoverAndKeepsVersion` (phần xem lại từ lịch sử thuộc TDD-LIB-002) |
+| ST-LIB-007 | `LibraryFlowTests.Handle_CreateDraftFromCurrentWithCover_CopiesLinksAndCover`, `LibraryFlowTests.Handle_DeleteOrEditSupersededVersion_ReturnsReadOnly`, `LibraryConcurrencyTests.Handle_TwoDraftsPublishedAtSameTime_OnlyOneBecomesCurrent` |
+| ST-LIB-008 | `LibraryVersionCommandHandlerTests.Handle_HideThenShow_ChangesOnlyVisibility`, `LibraryReadTests.Handle_PublicListPaging_ExcludesHiddenAndDrafts` (phần mở mới và xem lại thuộc TDD-LIB-002) |
+| ST-LIB-009 | `LibraryFlowTests.Handle_DeleteDraftWithCover_RemovesDraftKeepsAssetsAndReplays`, `LibraryFlowTests.Handle_DeleteOrEditSupersededVersion_ReturnsReadOnly` |
+| ST-LIB-010 | `LibraryFlowTests.Handle_CatalogChanged_KeepsPinnedOnRenameAndRejectsStaleClassification`, `LibraryContentCommandHandlerTests.Handle_PublishDraftAfterCatalogChange_RequiresCurrentOptionsAndPinsRevision` |
+| ST-LIB-011 | `LibraryApiAuthorizationTests` (401 khi chưa đăng nhập, 403 khi thiếu `library.manage` kể cả mang vai trò tên Admin, đạt khi chỉ có `library.manage`) |
+| ST-LIB-012 | `LibraryReadTests.Handle_PublicListPaging_ExcludesHiddenAndDrafts`, `LibraryApiAuthorizationTests.Handle_PublicRouteAnonymous_Returns200` |
+| ST-LIB-013 | `LibraryReadTests.Handle_PublicListTumFilter_DistinguishesNotApplicable` |
+| ST-LIB-014 | `LibraryReadTests.Handle_Filters_UnionCurrentCatalogWithPublicLegacyFloors` |
+| ST-LIB-015 | `LibraryReadTests.Handle_PublicList_OrdersByLatestPublishAndIgnoresInPlaceEdits`, `LibraryReadTests.Handle_PublicListNameSearch_TreatsWildcardsLiterally` |
+| ST-LIB-016 | `LibraryReadTests.Handle_PublicListNameSearch_TreatsWildcardsLiterally` |
+
 Các ca 004 và phần truyền tải chưa có ngưỡng hạ tầng để nghiệm thu tải lớn; không thể chứng minh “không giới hạn” bằng một bộ dữ liệu hữu hạn. API, fixture, điểm gây lỗi và cách điều phối đồng thời phải được cụ thể hóa trong TDD trước khi chạy. Trong bước thiết kế TDD, người dùng đã xác nhận cho lưu nháp thiếu dữ liệu và kiểm đủ khi công bố; cần bổ sung đặc tả riêng cho việc lưu nháp khi cập nhật bộ kiểm thử.
 
 Đã cập nhật ST-SUB-050–052 theo lượt từng phiên bản. TDD-SUB-002 đã được cập nhật phần tra cứu cùng TDD-LIB-002 để chốt; quản trị nội dung và danh sách theo TDD-LIB-001; các UT về tra cứu cần cập nhật sau khi chốt TDD; chưa dùng thiết kế cũ để triển khai quyền xem lại.
