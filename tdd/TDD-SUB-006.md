@@ -66,9 +66,9 @@ Hiện trạng code trước đợt thay đổi ngày 25/09/2026 (thiết kế t
 - `SupervisionStates` có `Completed` và tập giữ chỗ `HoldingProject` (`Assigned`, `Completed`); migration `SupervisionGrantCompleted` đã đổi CHECK và tạo index `UX_SupervisionGrant_ProjectHolder`.
 - Route `complete`/`reopen` trong `SupervisionGrantApi`, `CompleteSupervisionGrantCommandHandler`, `ReopenSupervisionGrantCommandHandler` và `SupervisionCompletionAccess` đã có.
 - `AssignmentAuthorizer.IsDirectlyAssignedAsync` nhận diện Admin bằng `Role.Code == RoleCodes.Admin` trong database, rồi mới đọc dòng phân công bằng `FOR SHARE`. `SupervisionCompletionAccess` đang gọi hàm này với `ResourceTypes.Project` và `grant.ProjectId`, lỗi `ProjectNotAssignedToActor`.
-- `LockAccountAsync` vẫn khóa dòng `User`. `AssignmentAuthorizer.IsAssignedAsync` còn nhánh kế thừa từ khách hàng; nhánh này không được dùng cho hoàn thành/mở lại và thuộc phạm vi TDD-RBAC-003.
+- `LockAccountAsync` khóa dòng `User`. Hàm đã chuyển sang khóa dòng `AccountCommerceState` ở commit `a53faeb` trên nhánh `feature/account-commerce-state` của `bmt-be`, chưa merge vào `develop`. `AssignmentAuthorizer.IsAssignedAsync` còn nhánh kế thừa từ khách hàng; nhánh này không được dùng cho hoàn thành/mở lại và thuộc phạm vi TDD-RBAC-003.
 
-Các thay đổi của lần cập nhật này đã có trong code ở commit `182e2a8` trên nhánh `feature/construction-site` của `bmt-be`, trừ việc khóa `AccountCommerceState`: `SupervisionCompletionAccess` gọi `IsDirectlyAssignedAsync(actor, ResourceTypes.SupervisionGrant, grant.Id)` thay cho `ResourceTypes.Project` và `grant.ProjectId`; mã lỗi `ProjectNotAssignedToActor` thành `SupervisionGrantNotAssignedToActor`; cột `ProjectId` thành `ConstructionSiteId` theo TDD-SUB-004. Khóa `AccountCommerceState` thay dòng `User` chưa làm, vì bảng đó thuộc TDD-PAY-001 và chưa có. Tên loại tài nguyên `SupervisionGrant` theo [TDD-RBAC-003](TDD-RBAC-003.md).
+Các thay đổi của lần cập nhật này đã có trong code ở commit `182e2a8` trên nhánh `feature/construction-site` của `bmt-be`: `SupervisionCompletionAccess` gọi `IsDirectlyAssignedAsync(actor, ResourceTypes.SupervisionGrant, grant.Id)` thay cho `ResourceTypes.Project` và `grant.ProjectId`; mã lỗi `ProjectNotAssignedToActor` thành `SupervisionGrantNotAssignedToActor`; cột `ProjectId` thành `ConstructionSiteId` theo TDD-SUB-004. Khóa `AccountCommerceState` thay dòng `User` có từ commit `a53faeb` trên nhánh `feature/account-commerce-state`. Tên loại tài nguyên `SupervisionGrant` theo [TDD-RBAC-003](TDD-RBAC-003.md).
 
 **Cập nhật 25/09/2026 (lần 3) — đã có trong code ở nhánh `feature/supervision-unassign` của `bmt-be`, chưa merge vào `develop`.** Người dùng chốt thêm ba điểm ảnh hưởng tới tài liệu này:
 - Bỏ khôi phục gói đã hủy (BR-SUB-025 đã bỏ, BR-SUB-024 khoản 8). Gói `Completed` bị hủy dừng hẳn ở `CanceledByStaff`; thiết kế hủy ở [TDD-SUB-005](TDD-SUB-005.md).
@@ -136,7 +136,7 @@ Thay cho khóa bản ghi công trình của TDD-SUB-003: phân công gắn với
 
 1. Kiểm tư cách nhân viên.
 2. Đọc `AccountId` của gói (không tracking).
-3. `LockAccountAsync` khóa `AccountCommerceState` của chủ gói (TDD-PAY-001). Hiện trạng code còn khóa dòng `User`; đổi cùng lúc với các luồng quota theo TDD-SUB-002.
+3. `LockAccountAsync` khóa `AccountCommerceState` của chủ gói (TDD-PAY-001), tạo dòng trước nếu chưa có. Code làm đúng như vậy từ commit `a53faeb`, cùng lúc với các luồng quota theo TDD-SUB-002.
 4. Nạp gói có tracking.
 5. Kiểm phân công bằng `FOR SHARE`.
 6. Tra biên nhận để replay.
@@ -439,6 +439,7 @@ Lỗi đầu vào bị chặn ở bước kiểm đầu vào (validator) trướ
 
 ## Change Log
 
+- 2026-09-26 (đồng bộ code): Khóa `AccountCommerceState` thay dòng `User` đã có trong code từ commit `a53faeb`; cập nhật hiện trạng và bước 3 của thứ tự khóa.
 - 2026-09-25 (lần 3): Theo BR-SUB-024 cập nhật và BR-SUB-025 đã bỏ (không còn khôi phục, hủy kết thúc phân công), STORY-SUB-006 và BR-SUB-026 (nhân viên gỡ gói đang `Assigned`), STORY-SUB-003/AC-019, ALT-05. Bỏ mọi nội dung khôi phục: mục tiêu, dòng `EnsureCanRestoreSupervision`, mũi tên khôi phục ở State Diagram, đoạn đọc `FromState` để khôi phục, dòng mẫu `Restore` và nhánh khôi phục bị chặn. Thêm nhánh mẫu hủy gói `Completed` kèm bản lưu công trình và kết thúc phân công; State Diagram thêm `Assigned → Unassigned` do nhân viên gỡ; ghi rõ nhân viên không còn phụ trách gói đã hủy (nhận 403), UT-SUB-081 cần xem lại. Chưa có trong code.
 - 2026-09-25 (đồng bộ code lần 2): Sửa ví dụ lỗi 422 của mở lại gói theo dạng phản hồi thật (ProblemDetails, mã ở `errors[].messageCode`).
 - 2026-09-25 (đồng bộ code): Đồng bộ với code đã triển khai ở commit `182e2a8`: kiểm phân công theo gói, mã `SupervisionGrantNotAssignedToActor`, cột và hằng tập giữ chỗ theo công trình đã có; khóa `AccountCommerceState` vẫn chưa làm.

@@ -59,7 +59,7 @@ Tài liệu này thiết kế cách lưu kỳ sử dụng và tính lượt theo
 
 **Thuật ngữ:** trong STORY-SUB-001, BR-SUB-007 và BR-SUB-017, "dự án" là bản dự toán (`Estimate`, cột `EstimateId`) theo TDD-PROJ-001/002. Đây không phải công trình (`ConstructionSite`) mà gói giám sát gắn vào; hai thực thể này không liên kết trong đợt này.
 
-Hiện trạng code đã kiểm tra ngày 25/09/2026: đã có migration `DesignSubscription` cùng các handler `CommitDesignPeriod`, `ReserveDesignUsage` và `SettleDesignUsage`. `DesignSubscriptionStore.LockAccountAsync` vẫn khóa dòng `User`. Chưa có bảng `AccountCommerceState`, module Estimate hay kết nối AI thật. Thanh toán theo TDD-PAY-001 (SePay); cách gọi nhà cung cấp AI vẫn chờ hợp đồng theo TDD-PROJ-002.
+Hiện trạng code đã kiểm tra ngày 25/09/2026: đã có migration `DesignSubscription` cùng các handler `CommitDesignPeriod`, `ReserveDesignUsage` và `SettleDesignUsage`. Chưa có module Estimate hay kết nối AI thật. Ngày 26/09/2026, `DesignSubscriptionStore.LockAccountAsync` chuyển từ khóa dòng `User` sang khóa dòng `AccountCommerceState` (migration `AccountCommerceState`, commit `a53faeb` trên nhánh `feature/account-commerce-state` của `bmt-be`, chưa merge vào `develop`). Thanh toán theo TDD-PAY-001 (SePay); cách gọi nhà cung cấp AI vẫn chờ hợp đồng theo TDD-PROJ-002.
 
 Đã có trong code ở commit `72e7327` trên nhánh `feature/tech-debt-subscription` của `bmt-be`: Unit of Work đăng ký scoped; handler lấy giờ qua `TimeProvider`; lỗi xung đột đồng thời trả 409 `ConcurrencyConflict`; lệnh giữ lượt chỉ dành cho tạo thiết kế; `GET /api/v1/me/design-subscription`; migration `PackageHistoryRestrict` bỏ CASCADE ở khóa ngoại lịch sử và thêm ràng buộc kỳ bị thay thế phải có mốc đóng.
 
@@ -272,7 +272,7 @@ Mục đích là ngăn hai yêu cầu cùng thấy một lượt còn lại rồ
 
 Các thao tác phải tuân thủ khóa tài khoản gồm cấp/đổi kỳ (`CommitDesignPeriod`), giữ lượt (`ReserveDesignUsage`), chốt thành công (`CompleteDesignUsage`), giải phóng lượt khi lỗi/quá hạn (`FailDesignUsage`, `ExpireDesignUsage`) và tính lượt tra cứu (`CommitTemplateOpen`). Kiểm tra quyền tạo bản dự toán hoặc lưu thông tin đầu vào cũng phải phối hợp với giao dịch lưu của module Estimate theo cùng quy ước. Thứ tự khóa của module Estimate đã thống nhất ở TDD-PROJ-001/002; không tự lấy khóa theo thứ tự ngược.
 
-Hiện trạng code: `DesignSubscriptionStore.LockAccountAsync` đang khóa dòng `User`, và các luồng gói giám sát cũng gọi hàm này. Khi bảng `AccountCommerceState` của TDD-PAY-001 được tạo, hàm phải đổi sang khóa dòng đó để mọi luồng cùng tài khoản dùng chung một điểm khóa.
+Hiện trạng code (commit `a53faeb` trên nhánh `feature/account-commerce-state` của `bmt-be`, chưa merge vào `develop`): `DesignSubscriptionStore.LockAccountAsync` khóa dòng `AccountCommerceState`, không còn khóa dòng `User`. Mọi luồng gói và lượt đang có đều gọi hàm này làm khóa đầu tiên: `CommitDesignPeriod`, `ReserveDesignUsage`, `SettleDesignUsage` (cả khi `ExpireStaleUsageJob` gửi lệnh này), cùng các luồng gán, gỡ, hủy, hoàn thành, mở lại gói. Hàm chạy hai câu lệnh trong transaction đang mở: chèn dòng bằng `INSERT ... SELECT` từ `User` với `ON CONFLICT DO NOTHING`, rồi `SELECT ... FOR UPDATE`. Dòng mới có `NextOrderSequence = 1`, `Version = 1`. Tài khoản không tồn tại thì không chèn gì và không phát sinh lỗi khóa ngoại, giữ hành vi cũ; handler tự báo không tìm thấy. Integration test ở `test/bmt-be.integration.tests/AccountCommerceStateLockTests.cs`.
 
 Ví dụ cú pháp lấy khóa; đây chỉ là bước đầu của giao dịch, không phải SQL đầy đủ để tiếp nhận tác vụ:
 
@@ -385,7 +385,7 @@ Với tác vụ AI, thời gian chờ tối đa tính từ `AcceptedAtUtc` khi t
 
 ## Data Model
 
-Các model dưới đây mô tả gói thiết kế đã cấp cho tài khoản và việc sử dụng lượt. Migration `DesignSubscription` đã tạo bốn bảng này trong code. Migration `PackageHistoryRestrict` (commit `72e7327`) đổi ba khóa ngoại `DesignSubscription → User`, `DesignPeriod → DesignSubscription`, `PeriodQuota → DesignPeriod` từ CASCADE sang RESTRICT; cột `EstimateId`, khóa `AccountCommerceState` và các delta của TDD-LIB-002, TDD-PROJ-002 là thay đổi dự kiến.
+Các model dưới đây mô tả gói thiết kế đã cấp cho tài khoản và việc sử dụng lượt. Migration `DesignSubscription` đã tạo bốn bảng này trong code. Migration `PackageHistoryRestrict` (commit `72e7327`) đổi ba khóa ngoại `DesignSubscription → User`, `DesignPeriod → DesignSubscription`, `PeriodQuota → DesignPeriod` từ CASCADE sang RESTRICT; migration `AccountCommerceState` (commit `a53faeb`) tạo bảng khóa chung của TDD-PAY-001. Cột `EstimateId` và các delta của TDD-LIB-002, TDD-PROJ-002 là thay đổi dự kiến.
 
 | Model | Ý nghĩa và mục đích | Quan hệ với model khác |
 |---|---|---|
@@ -781,5 +781,6 @@ Không giữ giao dịch SQL trong lúc gọi dịch vụ ngoài. Lỗi trước
 
 ## Change Log
 
+- 2026-09-26 (đồng bộ code): `LockAccountAsync` khóa `AccountCommerceState` thay dòng `User` từ commit `a53faeb` (migration `AccountCommerceState`); cập nhật hiện trạng ở Problem, phần khóa bản ghi và Data Model. Thiết kế không đổi.
 - 2026-09-25 (đồng bộ code lần 2): Ghi đúng tên và tầng của ba policy (`PeriodPolicy`, `QuotaPolicy`, `UsageTransitionPolicy` ở application) như code. Đồng bộ với code ở commit `72e7327`: UoW scoped, `TimeProvider`, 409 `ConcurrencyConflict`, lệnh giữ lượt chỉ cho tạo thiết kế, `GET /api/v1/me/design-subscription` kèm ví dụ phản hồi, migration `PackageHistoryRestrict`. Thêm mã lỗi `ConcurrencyConflict` và đặc tả UT-SUB-082 đến UT-SUB-087, UT-SUB-090 đến UT-SUB-092.
 - 2026-09-25: Cập nhật theo nghiệp vụ đã chốt ngày 25/09/2026. Tách policy lưu thông tin đầu vào (`EstimateInputWriteAccessPolicy`, `CheckEstimateInputWriteAccess`) khỏi đổi tên bản dự toán; đổi tên theo BR-SUB-007 khoản 11 và TDD-PROJ-001. Sửa mục tiêu tra cứu theo BR-LIB-003: mở lại cùng phiên bản miễn lượt. Đổi "dự án"/`Project` trong luồng thiết kế thành bản dự toán (`Estimate`); route Gen AI, index giữ chỗ và mã lỗi theo TDD-PROJ-002. Thay khóa dòng `User` bằng `AccountCommerceState` cho mọi đường quota, bỏ "phân công" khỏi thứ tự khóa. Giá và phiên bản của kỳ lấy từ snapshot đơn theo TDD-PAY-001, bỏ các ghi chú "thanh toán thiết kế sau"; ghi không có kỳ tương lai trả trước theo BR-SUB-021. Ghi AC-009/010 của STORY-SUB-001 không nghiệm thu đợt này, AC-036 theo nghĩa mới và UT-SUB-042/044 cần cập nhật. Tách hiện trạng code khỏi thay đổi dự kiến.

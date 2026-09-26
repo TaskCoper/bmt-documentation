@@ -75,7 +75,7 @@ Nguồn quyền nhân viên do [TDD-RBAC-001](TDD-RBAC-001.md) cung cấp theo m
 
 Thiết kế mới đã có trong code ở nhánh `feature/supervision-unassign` của `bmt-be` ngày 25/09/2026, chưa merge vào `develop`; bảng trên giữ để đối chiếu với `develop`.
 
-Các thao tác vẫn khóa dòng `User` của chủ gói qua `LockAccountAsync`, vì bảng `AccountCommerceState` của TDD-PAY-001 chưa có.
+Các thao tác khóa dòng `AccountCommerceState` của chủ gói qua `LockAccountAsync`, thay cho dòng `User`. Thay đổi này có từ commit `a53faeb` trên nhánh `feature/account-commerce-state` của `bmt-be`, chưa merge vào `develop`.
 
 ### Goals
 
@@ -139,7 +139,7 @@ flowchart LR
 - Tư cách nhân viên xác định bằng `User.AccountKind = 'Staff'` và `User.Status = 'Active'`; quyền xác định bằng các vai trò trong `UserRole` theo [TDD-RBAC-001](TDD-RBAC-001.md#data-model). Quyền được nhúng vào access token lúc phát hành, nên handler không truy vấn lại; đổi lại phải chấp nhận độ trễ của BR-RBAC-009. Cấp và thu hồi vai trò thuộc [TDD-RBAC-002](TDD-RBAC-002.md).
 - **Thứ tự khóa khi hủy kỳ thiết kế**: tài khoản chủ gói → kỳ/subscription → biên nhận. Không đụng `Assignment`.
 - **Thứ tự khóa khi hủy gói giám sát** (có trong code ở nhánh `feature/supervision-unassign`):
-  1. Khóa dòng tài khoản chủ gói (`User` `FOR UPDATE` trong code hiện tại). Hủy, gán, hoàn thành, mở lại và gỡ gói của cùng khách xếp hàng tại đây.
+  1. Khóa dòng `AccountCommerceState` của chủ gói (`FOR UPDATE`, tạo dòng trước nếu chưa có). Hủy, gán, hoàn thành, mở lại và gỡ gói của cùng khách xếp hàng tại đây.
   2. `LockActiveByResourceForUpdateAsync('SupervisionGrant', grantId)`: khóa dòng phân công đang hiệu lực của gói, nếu có. Nếu một chuyển giao đang chạy giữ dòng này, việc hủy chờ chuyển giao commit; sau đó dòng cũ đã có `EffectiveToUtc` nên câu khóa không còn khớp.
   3. `LockSupervisionGrantForUpdateAsync(grantId)`: khóa dòng gói. Khóa này xung đột với `FOR SHARE` mà luồng giao phân công giữ khi đọc trạng thái gói, nên giao và hủy trên cùng gói không chạy xen.
   4. Đọc gói có theo dõi thay đổi, tra biên nhận (gửi lặp thì trả kết quả cũ), gọi `EnsureCanCancelSupervision`.
@@ -179,7 +179,7 @@ sequenceDiagram
     S->>A: POST cancel {expectedVersion, reason}, Idempotency-Key
     A->>H: CancelPackageCommand, người thao tác từ phiên
     H->>F: Gói giám sát
-    F->>D: Khóa tài khoản chủ gói (dòng User)
+    F->>D: Khóa AccountCommerceState của chủ gói
     F->>D: Khóa Assignment đang hiệu lực của gói FOR UPDATE
     F->>D: Khóa SupervisionGrant FOR UPDATE
     F->>D: Đọc gói, tra biên nhận
@@ -415,6 +415,7 @@ Phản hồi theo dạng `PackageMutated` đang có trong code. Không trả "đ
 
 ## Change Log
 
+- 2026-09-26 (đồng bộ code): Khóa tài khoản chủ gói trong code là dòng `AccountCommerceState` từ commit `a53faeb`, không còn dòng `User`; sửa Context, thứ tự khóa khi hủy gói giám sát và Sequence Diagram. Bảng hiện trạng của `develop` trước lần 3 giữ nguyên để đối chiếu.
 - 2026-09-25 (lần 3): Theo quyết định người dùng ngày 25/09/2026: bỏ khôi phục cho cả hai loại gói (BR-SUB-025 đã bỏ) — gỡ endpoint, handler, policy, mã quyền `package.restore` và dữ liệu mẫu khôi phục; kỳ thiết kế `CanceledByStaff` là trạng thái cuối. Hủy gói giám sát kết thúc phân công (`EndReason = PackageCanceled`, nhật ký `AssignmentEnded`) theo thứ tự khóa tài khoản → `Assignment` → `SupervisionGrant`, có truy vấn lại phân công sau khi khóa gói và ánh xạ `40P01` thành 409 `PackageVersionConflict`. `PackageLifecycleEvent` thêm `Unassign` (TDD-SUB-007) và ba cột bản lưu công trình với CHECK `CK_PackageLifecycleEvent_SiteSnapshot`, ghi khi hủy gói giám sát có công trình. Ghi hộp xác nhận là việc của giao diện. Thêm phần migration và cập nhật truy vết ST-PAY-073, ST-PAY-085–088, ST-SUB-127; ST-PAY-038–046 đã bỏ. Thiết kế chưa có trong code.
 - 2026-09-25 (đồng bộ code lần 2): Ghi rõ dạng thân lỗi 422 `PackageMutationInvalid`. Ghi rõ migration `PackageHistoryRestrict` ở commit `72e7327` đã thêm CHECK `CK_DesignPeriod_SupersededClosedAt` và đổi ba khóa ngoại kỳ thiết kế sang RESTRICT.
 - 2026-09-25 (đồng bộ code): Đồng bộ với code đã triển khai ở commit `182e2a8`: cột `ConstructionSiteId` và ánh xạ vi phạm index giữ chỗ khi khôi phục thành `AnotherPackageActive`. Ví dụ lỗi ghi mã nghiệp vụ ở `messageCode`.

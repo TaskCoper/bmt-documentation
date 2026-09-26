@@ -179,7 +179,7 @@ sequenceDiagram
     API->>H: UnassignSupervisionGrantCommand, actor tu phien
     H->>PG: Kiem User cua S la Staff dang hoat dong
     H->>PG: Doc AccountId cua G1
-    H->>PG: Khoa dong User cua chu goi FOR UPDATE
+    H->>PG: Khoa AccountCommerceState cua chu goi FOR UPDATE
     H->>PG: Khoa Assignment dang hieu luc cua G1 FOR UPDATE
     H->>PG: Khoa SupervisionGrant G1 FOR UPDATE, doc lai co tracking
     H->>PG: Tra bien nhan (ActorId, UnassignSupervision, G1, key)
