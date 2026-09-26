@@ -47,6 +47,17 @@ Người dùng xác nhận làm trước toàn bộ phần của BMT trong TDD-P
 
 Code ở nhánh `feature/estimate-generation` của `bmt-be` (commit `62a626d`, migration `20260926141806_EstimateGeneration`), chưa merge và chưa áp dụng migration lên database dùng chung. Chi tiết và phần chưa làm ở [TDD-PROJ-002](../tdd/TDD-PROJ-002.md) (Problem, Architecture/Notes). Thêm UT-PROJ-064 đến UT-PROJ-066 và ST-PROJ-072, ST-PROJ-073. Hợp đồng AI thật vẫn còn chờ.
 
+## Cập nhật ngày 26/09/2026 (lần 4): triển khai TDD-PROJ-003
+
+Đã triển khai toàn bộ phạm vi TDD-PROJ-003 trên nhánh `feature/estimate-sharing` của `bmt-be` (commit `f8a7ffa`, rebase lên `develop` tại `128f758` ngày 27/09/2026), chưa merge. Migration `20260926153253_EstimateSharing` thêm năm bảng export, yêu cầu xuất, link chia sẻ, biên nhận link, yêu cầu email và cột `Estimate.CurrentShareId`; chưa áp dụng lên database dùng chung.
+
+- Chủ sở hữu xem kết quả và hồ sơ, yêu cầu PDF/Excel, tải tệp, tạo/dùng lại/thu hồi link, lấy QR và gửi email; người có link xem và tải không cần đăng nhập. Không kiểm gói hay lượt, không gọi AI, không dựng tệp.
+- Mọi lần tải, của chủ sở hữu lẫn người có link, đi qua backend: kiểm quyền rồi mới đọc URL đã lưu và chuyển tiếp, không trả hay chuyển hướng tới URL gốc. Tên tệp tải về là tên hiện tại của bản dự toán.
+- Email gửi qua MassTransit Bus Outbox ghi cùng transaction với yêu cầu; consumer kiểm lại link ngay trước khi gửi và ghi Accepted/Rejected/Unknown/Skipped theo bằng chứng SMTP.
+- Gốc link đọc từ `ClientOption__BaseUrl` (`CLIENT_BASE_URL`, đã có sẵn trong compose và workflow); QR vẽ bằng QRCoder 1.6.0 (MIT).
+
+Quyết định kỹ thuật và phần chưa làm ở [TDD-PROJ-003](../tdd/TDD-PROJ-003.md) (Problem, Architecture/Notes, Data Model/Notes). UT-PROJ-033 đến UT-PROJ-048 và UT-PROJ-056 đến UT-PROJ-060 nay có mã test.
+
 ## Đã xác nhận
 
 - Giữ toàn bộ phạm vi trong năm US và bảy BR-PROJ: cả năm loại ban đầu và loại Admin thêm, tách phong cách kiến trúc/nội thất, cấu hình tầng/tum riêng, giữ danh mục tại lúc tạo bản dự toán.
@@ -122,7 +133,7 @@ Phạm vi nguồn đã đọc sâu gồm bộ PROJ và các nguồn trực tiế
 2. Đặc tả Unit Test theo TDD đã được chốt; cập nhật phần kiểm chứng tích hợp tương ứng. Đã soạn đặc tả Unit Test cho phần có hợp đồng rõ; các adapter còn mở giữ riêng trong bảng UT.
 3. Triển khai danh mục, tạo/tự lưu và lưu URL ảnh; kiểm chứng quyền lợi, phiên bản và dữ liệu cũ. Đã có trong code ở `a557993` và `388a426`.
 4. Triển khai tiếp nhận AI, snapshot, worker, chốt lượt và các trường hợp timeout/kết quả muộn. Đã có với adapter AI giả ở nhánh `feature/estimate-generation` (`62a626d`); còn thay adapter thật khi có hợp đồng.
-5. Triển khai đọc hồ sơ, tải tệp từ URL AI trả, link/QR và email; kiểm quyền trên mọi đường tải, chuyển tiếp tệp qua link chia sẻ mà không lộ URL gốc.
+5. Triển khai đọc hồ sơ, tải tệp từ URL AI trả, link/QR và email; kiểm quyền trên mọi đường tải, chuyển tiếp tệp qua link chia sẻ mà không lộ URL gốc. Đã có ở nhánh `feature/estimate-sharing` (`f8a7ffa`); còn frontend và hợp đồng AI thật.
 6. Chạy test trên môi trường thử, phân biệt kết quả với giả lập và tích hợp thật; chỉ mở tính năng khi các phụ thuộc bắt buộc đã sẵn sàng.
 
 ## Ghi nhận chốt TDD
