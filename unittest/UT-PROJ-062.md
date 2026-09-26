@@ -11,13 +11,11 @@
 -->
 
 <!-- Mỗi file chứa một test, đúng một dòng dữ liệu và 13 cột theo thứ tự bên dưới.
-Thay ST-001 ở heading và Test ID, STORY-001 bằng mã Story cần kiểm thử.
-Trong ô bảng: xuống dòng bằng <br>, dấu | viết thành \|. Steps gồm các bước đánh số.
-Loại: Main / ALT / EXC / NFR / Integration boundary; ghép nhiều loại bằng dấu /.
-Suite: SMOKE / REGRESSION / FULL. Priority: P0 / P1 / P2 / P3.
+Thay UT-001 ở heading và Test ID. Trong ô bảng: xuống dòng bằng <br>, dấu | viết thành \|.
+Loại: Happy / Branch / Boundary / Error / Quirk / Determinism. Suite: SMOKE / REGRESSION / FULL. Priority: P0 / P1 / P2 / P3.
 TEST_LINKS là nguồn liên kết khi import; cột Trace to chỉ để đọc. Giữ hai nơi nhất quán.
-Owner là tên hiển thị; phê duyệt thực hiện sau import.
-Steps và Expected result phải bám Flow, AC và Business Rule của Story có thật. Test data là dữ liệu kiểm thử minh hoạ; không tự thêm hành vi nghiệp vụ hoặc ghi Pass/đã chạy nếu chưa có bằng chứng thực thi.
+Mỗi liên kết dùng DOC-KEY/section: ghi chú. Owner là tên hiển thị; phê duyệt thực hiện sau import.
+Expected output và assertion phải suy ra từ Business Rule/contract đã xác nhận. Dữ liệu mock chỉ là dữ liệu kiểm thử minh hoạ, không phải dữ liệu production; không ghi Pass/đã chạy nếu chưa có bằng chứng thực thi.
 BẮT BUỘC KHI HOÀN THIỆN MẪU: phải có cả Reviewer và Approver, mỗi tên 1–200 ký tự sau khi bỏ khoảng trắng đầu/cuối. Không xoá hai dòng metadata, để trống, dùng tên bịa hoặc giữ placeholder rồi coi là hoàn tất.
 Nếu chưa biết người review hoặc người phê duyệt, phải hỏi người dùng và báo tài liệu chưa đủ thông tin; không tự lấy Author/Owner làm người thay thế. Tên trong file không tự gán tài khoản hoặc xác nhận đã duyệt; gán thành viên trên giao diện sau import.
 Đây là yêu cầu hoàn thiện mẫu; backend hiện vẫn nhận file cũ thiếu hai trường để tương thích.
@@ -29,26 +27,26 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Không dùng Status trong Markdown hoặc tên Approver để tự xác nhận phê duyệt; import không cấp quyền hay gán tài khoản từ tên. Chạy Kiểm tra file và xử lý lỗi/cảnh báo trước khi nhập.
 - Giới hạn độ dài bên dưới tính theo string.Length của .NET (đơn vị UTF-16); không tự cắt ngắn dữ kiện quan trọng để vượt validation, hãy viết lại có căn cứ hoặc hỏi người dùng.
 - Bảng phải có header, dòng phân cách và đúng một dòng dữ liệu, đủ 13 cột theo thứ tự mẫu. Reviewer/Approver là hai bullet trước bảng, không thêm thành cột. Test ID trong bảng phải nhất quán với heading; mã tài liệu import lấy từ heading.
-- Story tối đa 100 ký tự và được dùng làm tiêu đề tài liệu; Owner tối đa 200. Trạng thái parser nhận: Draft / Approved; đây không phải kết quả chạy test hoặc quyền phê duyệt.
-- Giữ Loại: Main / ALT / EXC / NFR / Integration boundary, có thể ghép bằng dấu /; Suite: SMOKE / REGRESSION / FULL; Priority: P0 / P1 / P2 / P3. Không dùng số ngoài dải Priority 0–3.
-- Steps là các bước đánh số trong một ô, tách bằng <br>; không xuống dòng vật lý trong ô, dấu | trong nội dung phải viết \|. TEST_LINKS mới là nguồn liên kết import; cột Trace to chỉ hiển thị, hai nơi phải nhất quán.
+- Module tối đa 200 ký tự; Unit under test tối đa 500 (được dùng làm tiêu đề tài liệu); Owner tối đa 200. Trạng thái parser nhận: Draft / Approved; đây không phải kết quả chạy test hoặc quyền phê duyệt.
+- Giữ Loại: Happy / Branch / Boundary / Error / Quirk / Determinism; Suite: SMOKE / REGRESSION / FULL; Priority: P0 / P1 / P2 / P3. Không dùng số ngoài dải Priority 0–3.
+- Không xuống dòng vật lý trong ô: dùng <br>; dấu phân cột trong nội dung phải viết \|. TEST_LINKS mới là nguồn liên kết import; cột Trace to chỉ hiển thị, hai nơi phải nhất quán.
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# ST-PROJ-054
+# UT-PROJ-062
 
-## System Test
+## Unit Test
 
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
 
-| Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
+| Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-PROJ-054 | STORY-PROJ-005 | Main / EXC | REGRESSION | P1 | Môi trường thử đã có chức năng tương ứng; C1 là khách đã đăng nhập, sở hữu bản dự toán; gói còn hiệu lực, quyền tạo thiết kế, quota hữu hạn 3, đã dùng 0, đang giữ 0, trừ khi ca nêu khác. Có thể đọc lại dữ liệu đã lưu, trạng thái tác vụ và sổ lượt. A1 có quyền; phong cách cũ K1 có ảnh hợp lệ. | 1. Trên giao diện, thử tạo và sửa phong cách với từng dữ liệu ảnh; dùng cả kiến trúc và nội thất; kiểm tra frontend chặn ảnh sai trước khi upload.<br>2. Gửi trực tiếp tới API yêu cầu thiếu URL ảnh, URL http hoặc URL tương đối để bỏ qua giao diện.<br>3. Gửi thẳng API URL https ở tên miền khác kho và ở tên miền con của kho cho phong cách mới và cho K1.<br>4. Sửa tên K1 mà giữ URL ảnh đang lưu.<br>5. Đọc lại danh mục và K1 sau các yêu cầu bị từ chối. | Hợp lệ: JPG/PNG/WebP dưới hoặc đúng 5 MB. Không hợp lệ ở frontend: HEIC/GIF/PDF, 5 MB + 1 byte, hai ảnh. Không hợp lệ ở backend: thiếu URL, URL http, URL tương đối, URL https ngoài tên miền kho hoặc ở tên miền con (tên miền kho thử cấu hình qua `UploadedFileOption__AllowedHosts`). Frontend dùng 1 MB = 1.000.000 byte theo đề xuất ở TDD-PROJ-001. | Mỗi phong cách có đúng một URL ảnh https; frontend chặn ảnh sai định dạng, quá lớn hoặc nhiều ảnh; backend từ chối thiếu URL, URL không phải https hoặc URL mới ngoài tên miền kho với 422 InvalidCatalogConfiguration, không thay dữ liệu đã lưu. Sửa tên mà giữ URL đang lưu không bị kiểm lại tên miền. Backend không kiểm định dạng hay dung lượng của tệp ở URL https theo quyết định ngày 26/09/2026. Ảnh HEIC của bản dự toán không làm HEIC hợp lệ cho danh mục. | STORY-PROJ-005/AC-008<br>STORY-PROJ-005/Main Flow<br>STORY-PROJ-005/EXC-02<br>BR-PROJ-004/Then | Ảnh phong cách bắt buộc JPG PNG WebP tối đa 5 MB, kiểm ở frontend; backend kiểm URL https thuộc tên miền kho presign. Đặc tả chưa thực thi; dữ liệu trong ca là fixture kiểm thử, không phải mặc định sản phẩm. | [Chưa xác định] | Draft |
+| UT-PROJ-062 | Tạo dự toán | ProvincesOpenApiLocationCatalog — Dùng bản lưu khi nguồn địa chỉ lỗi, 503 khi chưa có bản nào | Error | FULL | P1 | Đã có mã test trong bmt-be, tên test ghi ở Rationale. Không gọi dịch vụ thật: HttpMessageHandler giả trả dữ liệu cùng cấu trúc `GET /api/v2/?depth=2` (hai tỉnh mẫu: mã 1 có xã 4 và 8, mã 4 có xã 1273); Redis thay bằng bộ nhớ có tuần tự hóa JSON; đồng hồ giả. Option: CacheTtlMinutes=60, RefreshRetrySeconds=30. | (a) Lần đọc đầu; (b) đọc lại sau 59 phút; (c) sau 61 phút nguồn trả 500, JSON hỏng hoặc mảng rỗng; (d) chưa có bản lưu, nguồn trả 502, quá thời gian chờ, xã ghi `province_code` của tỉnh khác hoặc tỉnh không có xã; (e) nguồn lỗi rồi đọc lại sau 29 và 30 giây; (f) Redis lỗi; (g) `PrepareAsync` khi nguồn và Redis cùng lỗi. | (a) Gọi đúng `https://provinces.open-api.vn/api/v2/?depth=2`, trả hai tỉnh với mã dạng chuỗi và phiên bản bắt đầu `pov2-`, lưu Redis không đặt hạn. (b) Không gọi nguồn. (c) Trả lại bản cũ cùng phiên bản. (d) 503 DependencyUnavailable, không ghi Redis. (e) Lần 29 giây không gọi nguồn và vẫn 503; lần 30 giây gọi lại và nhận dữ liệu. (f) Lấy thẳng từ nguồn. (g) Không ném lỗi. | TDD-PROJ-001/External API<br>TDD-PROJ-001/Architecture<br>BR-PROJ-004/Notes<br>ST-PROJ-071/System Test | Quyết định ngày 26/09/2026: nguồn lỗi thì dùng bản đã lưu, chỉ 503 khi chưa có. Mã test: `ProvincesOpenApiLocationCatalogTests.Handle_FirstLoad_FetchesV2DatasetAndCachesWithoutExpiry`, `Handle_FreshCache_DoesNotCallSource`, `Handle_StaleCacheAndSourceFails_ReturnsCachedData`, `Handle_NoCacheAndSourceFails_ReturnsDependencyUnavailable`, `Handle_AfterFailure_WaitsRetryIntervalBeforeCallingAgain`, `Handle_RedisFailure_FallsBackToSource_PrepareSwallowsUnavailable`. Không chứng minh dịch vụ thật trả đúng cấu trúc; phần đó kiểm ở ST-PROJ-071. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- STORY-PROJ-005/AC-008
-- STORY-PROJ-005/Main Flow
-- STORY-PROJ-005/EXC-02
-- BR-PROJ-004/Then
+- TDD-PROJ-001/External API
+- TDD-PROJ-001/Architecture
+- BR-PROJ-004/Notes
+- ST-PROJ-071/System Test

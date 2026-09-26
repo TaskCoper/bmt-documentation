@@ -2,7 +2,7 @@
 
 Người dùng đã xác nhận “Ok tôi đã chốt US và BR” trong hội thoại. Phạm vi xác nhận gồm STORY-PROJ-001 đến STORY-PROJ-005, BR-PROJ-001 đến BR-PROJ-007 và các quy tắc quyền/gói/lượt được áp dụng trong các Story. Xác nhận này cho phép viết ST; không phải bằng chứng import, publish hay phê duyệt trên hệ thống quản lý tài liệu.
 
-Đã soạn 70 ca ST-PROJ-001 đến ST-PROJ-070, một ca mỗi file theo template System Test. Các ca có liên kết tới đủ 53 AC, 5 Main Flow và 31 nhánh ALT/EXC hiện tại. Đây là mức bao phủ của đặc tả, không phải kết quả chạy hay bằng chứng không còn lỗi.
+Đã soạn 71 ca ST-PROJ-001 đến ST-PROJ-071, một ca mỗi file theo template System Test. Các ca có liên kết tới đủ 53 AC, 5 Main Flow và 31 nhánh ALT/EXC hiện tại. Đây là mức bao phủ của đặc tả, không phải kết quả chạy hay bằng chứng không còn lỗi.
 
 **Cập nhật 25/09/2026:** người dùng xác nhận chủ sở hữu được đổi tên bản dự toán bất cứ lúc nào (BR-SUB-007 khoản 11), kể cả khi gói hết hạn, hết lượt, toàn bộ lượt còn lại đang bị giữ hoặc AI đang xử lý; tên không phải đầu vào gửi AI. Hồ sơ, link và tệp xuất sau đó dùng tên hiện tại (BR-PROJ-007 khoản 7, STORY-PROJ-003/AC-006). Khi dùng lại link còn hiệu lực mà khách chọn ngày khác, hệ thống giữ ngày cũ và báo rõ theo TDD-PROJ-003. ST-PROJ-061 đến ST-PROJ-070 kiểm các quyết định này. Quyền quản trị danh mục theo STORY-RBAC-001 có mã kỹ thuật `estimate.catalog.manage` trong TDD-RBAC-001.
 
@@ -94,6 +94,7 @@ Reviewer và Approver: Tân Trần theo phân công đã xác nhận. Owner ki�
 | [ST-PROJ-068](../systemtest/ST-PROJ-068.md) | [STORY-PROJ-001](../userstory/STORY-PROJ-001.md) | Đổi tên từ hai tab và gửi lại không ghi đè nhau | EXC / Integration boundary | P1 |
 | [ST-PROJ-069](../systemtest/ST-PROJ-069.md) | [STORY-PROJ-003](../userstory/STORY-PROJ-003.md) | Hồ sơ, link và tệp xuất lại theo tên hiện tại | Main / Integration boundary | P1 |
 | [ST-PROJ-070](../systemtest/ST-PROJ-070.md) | [STORY-PROJ-004](../userstory/STORY-PROJ-004.md) | Dùng lại link còn hiệu lực khi khách chọn ngày khác | ALT | P1 |
+| [ST-PROJ-071](../systemtest/ST-PROJ-071.md) | [STORY-PROJ-001](../userstory/STORY-PROJ-001.md) | Nguồn địa chỉ lỗi dùng bản lưu, phiên bản dữ liệu đổi và xã cũ trong bản nháp | EXC / ALT / Integration boundary | P1 |
 
 ## Truy vết tiêu chí nghiệm thu
 
@@ -103,7 +104,7 @@ Reviewer và Approver: Tân Trần theo phân công đã xác nhận. Owner ki�
 | [STORY-PROJ-001/AC-002](../userstory/STORY-PROJ-001.md#ac-002) | [ST-PROJ-001](../systemtest/ST-PROJ-001.md), [ST-PROJ-057](../systemtest/ST-PROJ-057.md) |
 | [STORY-PROJ-001/AC-003](../userstory/STORY-PROJ-001.md#ac-003) | [ST-PROJ-003](../systemtest/ST-PROJ-003.md) |
 | [STORY-PROJ-001/AC-004](../userstory/STORY-PROJ-001.md#ac-004) | [ST-PROJ-005](../systemtest/ST-PROJ-005.md) |
-| [STORY-PROJ-001/AC-005](../userstory/STORY-PROJ-001.md#ac-005) | [ST-PROJ-008](../systemtest/ST-PROJ-008.md) |
+| [STORY-PROJ-001/AC-005](../userstory/STORY-PROJ-001.md#ac-005) | [ST-PROJ-008](../systemtest/ST-PROJ-008.md), [ST-PROJ-071](../systemtest/ST-PROJ-071.md) |
 | [STORY-PROJ-001/AC-006](../userstory/STORY-PROJ-001.md#ac-006) | [ST-PROJ-014](../systemtest/ST-PROJ-014.md), [ST-PROJ-015](../systemtest/ST-PROJ-015.md), [ST-PROJ-016](../systemtest/ST-PROJ-016.md), [ST-PROJ-030](../systemtest/ST-PROJ-030.md), [ST-PROJ-061](../systemtest/ST-PROJ-061.md), [ST-PROJ-062](../systemtest/ST-PROJ-062.md), [ST-PROJ-063](../systemtest/ST-PROJ-063.md) |
 | [STORY-PROJ-001/AC-007](../userstory/STORY-PROJ-001.md#ac-007) | [ST-PROJ-017](../systemtest/ST-PROJ-017.md), [ST-PROJ-018](../systemtest/ST-PROJ-018.md), [ST-PROJ-066](../systemtest/ST-PROJ-066.md) |
 | [STORY-PROJ-001/AC-008](../userstory/STORY-PROJ-001.md#ac-008) | [ST-PROJ-012](../systemtest/ST-PROJ-012.md), [ST-PROJ-013](../systemtest/ST-PROJ-013.md) |
@@ -113,7 +114,7 @@ Reviewer và Approver: Tân Trần theo phân công đã xác nhận. Owner ki�
 | [STORY-PROJ-001/AC-012](../userstory/STORY-PROJ-001.md#ac-012) | [ST-PROJ-008](../systemtest/ST-PROJ-008.md), [ST-PROJ-051](../systemtest/ST-PROJ-051.md) |
 | [STORY-PROJ-001/AC-013](../userstory/STORY-PROJ-001.md#ac-013) | [ST-PROJ-019](../systemtest/ST-PROJ-019.md) |
 | [STORY-PROJ-001/AC-014](../userstory/STORY-PROJ-001.md#ac-014) | [ST-PROJ-009](../systemtest/ST-PROJ-009.md) |
-| [STORY-PROJ-001/AC-015](../userstory/STORY-PROJ-001.md#ac-015) | [ST-PROJ-010](../systemtest/ST-PROJ-010.md) |
+| [STORY-PROJ-001/AC-015](../userstory/STORY-PROJ-001.md#ac-015) | [ST-PROJ-010](../systemtest/ST-PROJ-010.md), [ST-PROJ-071](../systemtest/ST-PROJ-071.md) |
 | [STORY-PROJ-001/AC-016](../userstory/STORY-PROJ-001.md#ac-016) | [ST-PROJ-011](../systemtest/ST-PROJ-011.md) |
 | [STORY-PROJ-001/AC-017](../userstory/STORY-PROJ-001.md#ac-017) | [ST-PROJ-012](../systemtest/ST-PROJ-012.md), [ST-PROJ-013](../systemtest/ST-PROJ-013.md), [ST-PROJ-014](../systemtest/ST-PROJ-014.md) |
 | [STORY-PROJ-001/AC-018](../userstory/STORY-PROJ-001.md#ac-018) | [ST-PROJ-020](../systemtest/ST-PROJ-020.md) |
@@ -162,7 +163,7 @@ Reviewer và Approver: Tân Trần theo phân công đã xác nhận. Owner ki�
 | [STORY-PROJ-001/ALT-02](../userstory/STORY-PROJ-001.md#alt-02) | [ST-PROJ-005](../systemtest/ST-PROJ-005.md) |
 | [STORY-PROJ-001/ALT-03](../userstory/STORY-PROJ-001.md#alt-03) | [ST-PROJ-003](../systemtest/ST-PROJ-003.md), [ST-PROJ-008](../systemtest/ST-PROJ-008.md) |
 | [STORY-PROJ-001/ALT-04](../userstory/STORY-PROJ-001.md#alt-04) | [ST-PROJ-009](../systemtest/ST-PROJ-009.md), [ST-PROJ-020](../systemtest/ST-PROJ-020.md) |
-| [STORY-PROJ-001/ALT-05](../userstory/STORY-PROJ-001.md#alt-05) | [ST-PROJ-010](../systemtest/ST-PROJ-010.md) |
+| [STORY-PROJ-001/ALT-05](../userstory/STORY-PROJ-001.md#alt-05) | [ST-PROJ-010](../systemtest/ST-PROJ-010.md), [ST-PROJ-071](../systemtest/ST-PROJ-071.md) |
 | [STORY-PROJ-001/EXC-01](../userstory/STORY-PROJ-001.md#exc-01) | [ST-PROJ-014](../systemtest/ST-PROJ-014.md), [ST-PROJ-015](../systemtest/ST-PROJ-015.md), [ST-PROJ-016](../systemtest/ST-PROJ-016.md), [ST-PROJ-017](../systemtest/ST-PROJ-017.md), [ST-PROJ-061](../systemtest/ST-PROJ-061.md), [ST-PROJ-062](../systemtest/ST-PROJ-062.md), [ST-PROJ-063](../systemtest/ST-PROJ-063.md), [ST-PROJ-066](../systemtest/ST-PROJ-066.md), [ST-PROJ-067](../systemtest/ST-PROJ-067.md) |
 | [STORY-PROJ-001/EXC-02](../userstory/STORY-PROJ-001.md#exc-02) | [ST-PROJ-018](../systemtest/ST-PROJ-018.md), [ST-PROJ-066](../systemtest/ST-PROJ-066.md) |
 | [STORY-PROJ-001/EXC-03](../userstory/STORY-PROJ-001.md#exc-03) | [ST-PROJ-012](../systemtest/ST-PROJ-012.md), [ST-PROJ-013](../systemtest/ST-PROJ-013.md), [ST-PROJ-014](../systemtest/ST-PROJ-014.md) |
@@ -265,3 +266,7 @@ Các mã SHA-256 dưới đây giữ nguyên mốc US/BR lúc soạn 57 ST ban �
 | [BR-PROJ-006](../businessrule/BR-PROJ-006.md) | `7e91ac36df5072c150a542dd6f2d8ffafb5be68f665504407f9326eb87509cd4` |
 | [BR-PROJ-007](../businessrule/BR-PROJ-007.md) | `49c986448c5a6bd262f81f52828f1517e0d3752b129e665ce5888540cbbd6786` |
 | [BR-SUB-007](../businessrule/BR-SUB-007.md) | `304a9933681189a355bd860b7cf6feb04e02c4fd305f5401454468c99d97df39` |
+
+## Mốc cập nhật ngày 26/09/2026 (lần 2)
+
+Người dùng xác nhận bốn quyết định: URL ảnh mới phải thuộc tên miền kho presign; nhóm lựa chọn tắt vẫn giữ danh sách nhưng khách không chọn được; người vận hành bật cổng tạo bản dự toán; nguồn địa chỉ là provinces.open-api.vn theo địa giới mới, dùng bản lưu khi nguồn lỗi, bản nháp giữ xã cũ nhưng phải chọn lại trước khi gửi AI. ST-PROJ-006, ST-PROJ-053 và ST-PROJ-054 được sửa; ST-PROJ-071 được thêm. US không đổi; BR-PROJ-002 và BR-PROJ-004 chỉ bổ sung Notes, không đổi nghĩa quy tắc. Kiểm chặn gửi AI khi xã không còn trong dữ liệu mới thuộc TDD-PROJ-002, chưa có ca riêng.

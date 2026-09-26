@@ -14,9 +14,9 @@ Hash dưới đây ghi nhận nội dung TDD làm căn cứ cho 48 ca ban đầu
 | [TDD-PROJ-002](../tdd/TDD-PROJ-002.md) | `cd8175f593ccdc4d742c8ac3eb1ec1a2e6b5a2502bc918156f815848538ad7cf` |
 | [TDD-PROJ-003](../tdd/TDD-PROJ-003.md) | `8fb511864f3ada842e5db0e425585bd2372b2e472019dca3001fc7a9374b2dd4` |
 
-## Danh sách 61 ca
+## Danh sách 63 ca
 
-Tất cả là đặc tả Draft, chưa thực thi. Reviewer/Approver: Tân Trần; Owner chưa xác định. Một file chứa một test và một dòng bảng; các biến thể trong Input là dữ liệu tham số hóa cùng hành vi. UT-PROJ-049 đến UT-PROJ-061 được thêm ngày 25/09/2026.
+Tất cả là đặc tả Draft, chưa thực thi. Reviewer/Approver: Tân Trần; Owner chưa xác định. Một file chứa một test và một dòng bảng; các biến thể trong Input là dữ liệu tham số hóa cùng hành vi. UT-PROJ-049 đến UT-PROJ-061 được thêm ngày 25/09/2026; UT-PROJ-062 và UT-PROJ-063 được thêm ngày 26/09/2026.
 
 | Ca | Unit / hành vi | TDD | System Test liên quan |
 |---|---|---|---|
@@ -81,6 +81,8 @@ Tất cả là đặc tả Draft, chưa thực thi. Reviewer/Approver: Tân Tr�
 | [UT-PROJ-059](../unittest/UT-PROJ-059.md) | EstimateResultReader: Hồ sơ chủ sở hữu và trang chia sẻ dùng tên hiện tại | [TDD-PROJ-003](../tdd/TDD-PROJ-003.md) | [ST-PROJ-069](../systemtest/ST-PROJ-069.md) |
 | [UT-PROJ-060](../unittest/UT-PROJ-060.md) | EstimateEmailWorker: Thư dựng bằng tên hiện tại lúc gửi | [TDD-PROJ-003](../tdd/TDD-PROJ-003.md) | [ST-PROJ-069](../systemtest/ST-PROJ-069.md) |
 | [UT-PROJ-061](../unittest/UT-PROJ-061.md) | GetEstimate query: canRename tách khỏi canEdit | [TDD-PROJ-001](../tdd/TDD-PROJ-001.md) | [ST-PROJ-061](../systemtest/ST-PROJ-061.md) |
+| [UT-PROJ-062](../unittest/UT-PROJ-062.md) | ProvincesOpenApiLocationCatalog: Dùng bản lưu khi nguồn địa chỉ lỗi, 503 khi chưa có bản nào | [TDD-PROJ-001](../tdd/TDD-PROJ-001.md) | [ST-PROJ-071](../systemtest/ST-PROJ-071.md) |
+| [UT-PROJ-063](../unittest/UT-PROJ-063.md) | ProvincesOpenApiLocationCatalog / SaveEstimateInputHandler: Xã thuộc tỉnh theo đúng phiên bản dữ liệu hiện hành | [TDD-PROJ-001](../tdd/TDD-PROJ-001.md) | [ST-PROJ-010](../systemtest/ST-PROJ-010.md) |
 
 ## Phạm vi và phần cần kiểm chứng tiếp
 
@@ -107,3 +109,7 @@ Ba TDD được sửa theo US/BR chốt ngày 25/09/2026 và người dùng xác
 | [TDD-PROJ-001](../tdd/TDD-PROJ-001.md) | `bd43872f877e36ff4887f40aad14198936f9ca0c51ad7d31b3b3e3191d0444a3` |
 | [TDD-PROJ-002](../tdd/TDD-PROJ-002.md) | `afd9b8dec70d37d103eccc86172dd87c6c44eb9c52f5030cfcf4bcceaa511e15` |
 | [TDD-PROJ-003](../tdd/TDD-PROJ-003.md) | `adaa88e334833cfbe9241e27ff6497212bfc29883020806388202a8a5f3aeff7` |
+
+## Cập nhật ngày 26/09/2026 (lần 2)
+
+TDD-PROJ-001 được sửa theo bốn quyết định người dùng xác nhận ngày 26/09/2026: URL ảnh mới phải thuộc tên miền kho presign; nhóm lựa chọn tắt vẫn giữ danh sách nhưng khách không chọn được; người vận hành bật cổng tạo bản dự toán; nguồn địa chỉ là provinces.open-api.vn v2 có bản lưu Redis. UT-PROJ-008, 011, 017 và 018 được sửa theo các quyết định này và ghi tên mã test; UT-PROJ-062 và UT-PROJ-063 được thêm cho adapter địa chỉ. TDD-PROJ-002 và TDD-PROJ-003 không đổi trong đợt này. Đã kiểm lại cấu trúc sáu file UT bị đụng tới (một dòng, 13 cột, Trace to khớp TEST_LINKS).

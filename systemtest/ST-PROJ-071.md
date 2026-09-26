@@ -35,7 +35,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# ST-PROJ-054
+# ST-PROJ-071
 
 ## System Test
 
@@ -44,11 +44,12 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-PROJ-054 | STORY-PROJ-005 | Main / EXC | REGRESSION | P1 | Môi trường thử đã có chức năng tương ứng; C1 là khách đã đăng nhập, sở hữu bản dự toán; gói còn hiệu lực, quyền tạo thiết kế, quota hữu hạn 3, đã dùng 0, đang giữ 0, trừ khi ca nêu khác. Có thể đọc lại dữ liệu đã lưu, trạng thái tác vụ và sổ lượt. A1 có quyền; phong cách cũ K1 có ảnh hợp lệ. | 1. Trên giao diện, thử tạo và sửa phong cách với từng dữ liệu ảnh; dùng cả kiến trúc và nội thất; kiểm tra frontend chặn ảnh sai trước khi upload.<br>2. Gửi trực tiếp tới API yêu cầu thiếu URL ảnh, URL http hoặc URL tương đối để bỏ qua giao diện.<br>3. Gửi thẳng API URL https ở tên miền khác kho và ở tên miền con của kho cho phong cách mới và cho K1.<br>4. Sửa tên K1 mà giữ URL ảnh đang lưu.<br>5. Đọc lại danh mục và K1 sau các yêu cầu bị từ chối. | Hợp lệ: JPG/PNG/WebP dưới hoặc đúng 5 MB. Không hợp lệ ở frontend: HEIC/GIF/PDF, 5 MB + 1 byte, hai ảnh. Không hợp lệ ở backend: thiếu URL, URL http, URL tương đối, URL https ngoài tên miền kho hoặc ở tên miền con (tên miền kho thử cấu hình qua `UploadedFileOption__AllowedHosts`). Frontend dùng 1 MB = 1.000.000 byte theo đề xuất ở TDD-PROJ-001. | Mỗi phong cách có đúng một URL ảnh https; frontend chặn ảnh sai định dạng, quá lớn hoặc nhiều ảnh; backend từ chối thiếu URL, URL không phải https hoặc URL mới ngoài tên miền kho với 422 InvalidCatalogConfiguration, không thay dữ liệu đã lưu. Sửa tên mà giữ URL đang lưu không bị kiểm lại tên miền. Backend không kiểm định dạng hay dung lượng của tệp ở URL https theo quyết định ngày 26/09/2026. Ảnh HEIC của bản dự toán không làm HEIC hợp lệ cho danh mục. | STORY-PROJ-005/AC-008<br>STORY-PROJ-005/Main Flow<br>STORY-PROJ-005/EXC-02<br>BR-PROJ-004/Then | Ảnh phong cách bắt buộc JPG PNG WebP tối đa 5 MB, kiểm ở frontend; backend kiểm URL https thuộc tên miền kho presign. Đặc tả chưa thực thi; dữ liệu trong ca là fixture kiểm thử, không phải mặc định sản phẩm. | [Chưa xác định] | Draft |
+| ST-PROJ-071 | STORY-PROJ-001 | EXC / ALT / Integration boundary | REGRESSION | P1 | C1 là khách đã đăng nhập, sở hữu D1 và đủ điều kiện lưu. Môi trường thử điều khiển được đường ra tới provinces.open-api.vn (proxy hoặc máy chủ giả trả đúng cấu trúc `GET /api/v2/?depth=2`) và đọc/xóa được khóa dữ liệu địa chỉ trong Redis. Đặt `ProvincesOpenApiOption__CacheTtlMinutes` nhỏ để thử bản lưu quá hạn. | 1. Xóa bản lưu, chặn nguồn; gọi GET danh sách tỉnh; PUT D1 chọn tỉnh; PUT D1 chỉ sửa mô tả.<br>2. Mở nguồn; gọi GET danh sách tỉnh, danh sách xã của một tỉnh; PUT D1 chọn tỉnh P và xã W của tỉnh đó với phiên bản vừa nhận; thử thêm xã thuộc tỉnh khác.<br>3. Chặn nguồn, chờ bản lưu quá hạn; gọi lại GET danh sách tỉnh và PUT D1 chọn xã khác của P.<br>4. Cho máy chủ giả đổi dữ liệu (gộp W vào xã khác); mở nguồn, chờ bản lưu quá hạn rồi gọi GET danh sách tỉnh; PUT D1 chọn xã với phiên bản cũ; mở lại D1; PUT D1 chỉ sửa mô tả. | Dữ liệu thật hoặc giả cùng cấu trúc API v2 sau sáp nhập 07/2025 (34 tỉnh/thành, hai cấp tỉnh–xã). Mã tỉnh/xã là số của nguồn, backend trả dạng chuỗi. Phiên bản dữ liệu dạng `pov2-` cộng 16 ký tự hex. | Bước 1: GET tỉnh và PUT chọn tỉnh trả 503 DependencyUnavailable, không ghi; PUT chỉ sửa mô tả thành công. Bước 2: trả 34 tỉnh cùng một datasetVersion; lưu được P/W với tên lấy từ nguồn; xã thuộc tỉnh khác bị từ chối 422. Bước 3: nguồn lỗi nhưng GET vẫn trả danh sách và phiên bản đã lưu; PUT chọn xã khác vẫn lưu được, không 503. Bước 4: datasetVersion mới khác cũ; PUT với phiên bản cũ trả 409 LocationDatasetChanged, không ghi; D1 vẫn hiển thị W và phiên bản cũ đã lưu; PUT chỉ sửa mô tả vẫn lưu được. Kiểm chặn gửi AI khi xã không còn trong dữ liệu mới thuộc TDD-PROJ-002, chưa nằm trong ca này. | STORY-PROJ-001/AC-005<br>STORY-PROJ-001/AC-015<br>STORY-PROJ-001/ALT-05<br>BR-PROJ-004/Then<br>BR-PROJ-004/Notes | Nguồn địa chỉ provinces.open-api.vn theo quyết định ngày 26/09/2026: nguồn lỗi thì dùng bản đã lưu, chỉ 503 khi chưa có; bản nháp giữ xã cũ đã lưu. Đặc tả chưa thực thi. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- STORY-PROJ-005/AC-008
-- STORY-PROJ-005/Main Flow
-- STORY-PROJ-005/EXC-02
+- STORY-PROJ-001/AC-005
+- STORY-PROJ-001/AC-015
+- STORY-PROJ-001/ALT-05
 - BR-PROJ-004/Then
+- BR-PROJ-004/Notes
