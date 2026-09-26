@@ -35,7 +35,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# ST-PROJ-057
+# ST-PROJ-072
 
 ## System Test
 
@@ -44,24 +44,13 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-PROJ-057 | STORY-PROJ-002 | Main / Integration boundary | FULL | P0 | Môi trường thử đã có chức năng tương ứng; C1 là khách đã đăng nhập, sở hữu bản dự toán; gói còn hiệu lực, quyền tạo thiết kế, quota hữu hạn 3, đã dùng 0, đang giữ 0, trừ khi ca nêu khác. Có thể đọc lại dữ liệu đã lưu, trạng thái tác vụ và sổ lượt. Có bộ giả lập AI kiểm soát được kết quả/lỗi theo hợp đồng tích hợp đã thống nhất. Ca chưa chạy; phần AI thật chờ hợp đồng, môi trường và bộ đầu ra mẫu. Có kết quả và tệp thử theo hợp đồng đầu ra đã thống nhất; cách nhận hoặc xuất PDF/Excel còn chờ tích hợp. Không dùng tệp giả làm bằng chứng tích hợp thật. Dùng dịch vụ email giả lập/hộp thư thử, không gửi tới người thật; có thể kiểm tra nội dung và phản hồi tiếp nhận. | 1. A1 nhập hai phong cách có ảnh và gán loại công trình hợp lệ.<br>2. C1 tạo bằng tên, nhập 70.25 m² và chỉ mô tả, lưu rồi mở lại để kiểm tra.<br>3. C1 chọn đúng một phong cách mỗi nhóm bật, đủ địa chỉ/gói hoàn thiện/tầng/tum rồi bấm Nhận dự toán.<br>4. Cho AI trả bộ R1 đầy đủ, lưu và mở được; C1 xem dự toán, chuẩn bị/tải PDF và Excel.<br>5. C1 chọn ngày hết hạn, tạo QR/link và gửi email một người nhận; người nhận mở không đăng nhập và tải.<br>6. C1 thu hồi, người nhận gửi yêu cầu tải mới; đối chiếu nguồn và sổ lượt cuối cùng. | C1 quota 3; tên Nhà thử xuyên suốt; mô tả Nhà hai phòng ngủ; người nhận trong hộp thư thử. Không dùng dữ liệu khách thật. | Toàn bộ dữ liệu đi đúng bản từ đầu vào tới AI, kết quả và tệp; chỉ giữ 1 khi gửi, tính 1 sau thành công. Tạo/lưu/xuất/chia sẻ không tính thêm lượt. Email/QR cùng quyền; thu hồi chặn tải mới nhưng không mất nguồn. AI thật chưa tích hợp thì chỉ được ghi kết quả chạy với giả lập, không tuyên bố E2E nhà cung cấp. | STORY-PROJ-002/AC-001<br>STORY-PROJ-002/AC-003<br>STORY-PROJ-002/Main Flow<br>BR-PROJ-003/Then<br>BR-PROJ-004/Then<br>BR-PROJ-006/Then<br>BR-PROJ-007/Then<br>BR-SUB-003/Then<br>STORY-PROJ-001/AC-001<br>STORY-PROJ-001/AC-002<br>STORY-PROJ-003/AC-001<br>STORY-PROJ-003/AC-002<br>STORY-PROJ-004/AC-001<br>STORY-PROJ-004/AC-002<br>STORY-PROJ-004/AC-003<br>STORY-PROJ-004/AC-004<br>STORY-PROJ-005/AC-009 | Luồng đầy đủ từ Admin cấu hình đến người nhận tải hồ sơ. Đặc tả chưa thực thi; dữ liệu trong ca là fixture kiểm thử, không phải mặc định sản phẩm. Chạy được với adapter AI giả mock-v1 (`EstimateAiOption__Mode=Mock`, chỉ Development/Staging) khi URL tệp mẫu đã có tệp thật; kết quả với adapter giả không phải bằng chứng tích hợp AI thật. | [Chưa xác định] | Draft |
+| ST-PROJ-072 | STORY-PROJ-002 | NFR / Integration boundary | REGRESSION | P0 | Môi trường thử đã có chức năng tương ứng; C1 là khách đã đăng nhập, sở hữu bản dự toán; gói còn hiệu lực, quyền tạo thiết kế, quota hữu hạn 3, đã dùng 0, đang giữ 0, trừ khi ca nêu khác. Có thể đọc lại dữ liệu đã lưu, trạng thái tác vụ và sổ lượt. Có ba bản cài đặt API cùng một database thử: Staging với `EstimateAiOption__Mode=Mock` và năm URL tệp mẫu đã upload lên kho presign (tên máy chủ có trong `UploadedFileOption__AllowedHosts`); Staging không đặt Mode; và một lần khởi động với `ASPNETCORE_ENVIRONMENT=Production` cùng `EstimateAiOption__Mode=Mock`. Job quá hạn quét mỗi 60 giây. | 1. Khởi động bản Production có Mode=Mock; đọc log khởi động.<br>2. Trên bản không đặt Mode, C1 bấm Nhận dự toán với D1 đủ đầu vào; đọc tác vụ và sổ lượt.<br>3. Trên bản Mock, C1 bấm Nhận dự toán với D1; đọc trạng thái ngay sau khi nhận rồi sau vài lượt quét của worker.<br>4. Đọc sổ lượt, danh sách tệp kết quả đã lưu và trạng thái bản dự toán; thử lưu đầu vào D1.<br>5. Đổi một URL tệp mẫu thành URL chưa có tệp, gửi D2 và chờ quá thời hạn. | D1, D2 đủ đầu vào, InputVersion=7. Bộ kết quả mẫu mock-v1; năm tệp mẫu (ảnh bìa, mặt bằng 2D, phối cảnh, PDF, Excel) do người vận hành upload. Không dùng AI thật. | Bước 1: API không khởi động, log nêu Mock chỉ bật ở Development/Staging. Bước 2: 503 DependencyUnavailable, không có tác vụ, sẵn 3/giữ 0/dùng 0. Bước 3: 202 với state Pending; sau khi worker gửi và nhận kết quả, GET trả Succeeded kèm resultUrl là route của backend, không có URL tệp gốc. Bước 4: sẵn 2/giữ 0/dùng 1; có năm tệp và bảng dự toán ghi rõ dữ liệu mẫu; lưu đầu vào bị từ chối EstimateAlreadyGenerated. Bước 5: D2 không thành công, hết hạn với failureCode ResultFileUnavailable, lượt được trả. | STORY-PROJ-002/AC-001<br>STORY-PROJ-002/AC-003<br>STORY-PROJ-002/EXC-01<br>STORY-PROJ-002/Main Flow<br>BR-SUB-003/Then<br>BR-PROJ-007/Then | Quyết định ngày 26/09/2026 về adapter AI giả: chỉ Development/Staging, Production cấu hình Mock thì không khởi động, không cấu hình thì 503 không giữ lượt, adapter luôn thành công với bộ kết quả mẫu. Kết quả chạy với adapter giả không phải bằng chứng tích hợp AI thật. Đặc tả chưa thực thi; dữ liệu trong ca là fixture kiểm thử. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-PROJ-002/AC-001
 - STORY-PROJ-002/AC-003
+- STORY-PROJ-002/EXC-01
 - STORY-PROJ-002/Main Flow
-- BR-PROJ-003/Then
-- BR-PROJ-004/Then
-- BR-PROJ-006/Then
-- BR-PROJ-007/Then
 - BR-SUB-003/Then
-- STORY-PROJ-001/AC-001
-- STORY-PROJ-001/AC-002
-- STORY-PROJ-003/AC-001
-- STORY-PROJ-003/AC-002
-- STORY-PROJ-004/AC-001
-- STORY-PROJ-004/AC-002
-- STORY-PROJ-004/AC-003
-- STORY-PROJ-004/AC-004
-- STORY-PROJ-005/AC-009
+- BR-PROJ-007/Then

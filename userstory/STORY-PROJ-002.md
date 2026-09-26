@@ -204,7 +204,7 @@ Nhận kết quả sau khi tác vụ đã thất bại do quá thời gian.
 ## Non-Functional
 
 - Bảo vệ dữ liệu đầu vào đã tiếp nhận khỏi thay đổi trong lúc AI xử lý bằng kiểm tra tại backend.
-- [Chờ hợp đồng AI để xác định cấu trúc đầu ra bắt buộc, cách nhận trạng thái và phân loại lỗi; giá trị thời gian chờ chưa được chốt.]
+- [Chờ hợp đồng AI để xác định cấu trúc đầu ra bắt buộc, cách nhận trạng thái và phân loại lỗi.] Thời gian chờ một lần tạo mặc định 15 phút, đọc từ cấu hình (người dùng xác nhận ngày 26/09/2026, TDD-PROJ-002).
 - [Cơ chế xử lý yêu cầu mạng gửi lặp, cập nhật đồng thời và phản hồi trùng sẽ mô tả trong thiết kế; chưa có API hoặc phương án kỹ thuật được chốt.]
 
 ## Out of Scope

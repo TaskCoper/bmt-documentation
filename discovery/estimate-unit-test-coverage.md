@@ -14,9 +14,9 @@ Hash dưới đây ghi nhận nội dung TDD làm căn cứ cho 48 ca ban đầu
 | [TDD-PROJ-002](../tdd/TDD-PROJ-002.md) | `cd8175f593ccdc4d742c8ac3eb1ec1a2e6b5a2502bc918156f815848538ad7cf` |
 | [TDD-PROJ-003](../tdd/TDD-PROJ-003.md) | `8fb511864f3ada842e5db0e425585bd2372b2e472019dca3001fc7a9374b2dd4` |
 
-## Danh sách 63 ca
+## Danh sách 66 ca
 
-Tất cả là đặc tả Draft, chưa thực thi. Reviewer/Approver: Tân Trần; Owner chưa xác định. Một file chứa một test và một dòng bảng; các biến thể trong Input là dữ liệu tham số hóa cùng hành vi. UT-PROJ-049 đến UT-PROJ-061 được thêm ngày 25/09/2026; UT-PROJ-062 và UT-PROJ-063 được thêm ngày 26/09/2026.
+Tất cả là đặc tả Draft, chưa thực thi. Reviewer/Approver: Tân Trần; Owner chưa xác định. Một file chứa một test và một dòng bảng; các biến thể trong Input là dữ liệu tham số hóa cùng hành vi. UT-PROJ-049 đến UT-PROJ-061 được thêm ngày 25/09/2026; UT-PROJ-062 và UT-PROJ-063 được thêm ngày 26/09/2026; UT-PROJ-064 đến UT-PROJ-066 được thêm cùng ngày khi triển khai TDD-PROJ-002.
 
 | Ca | Unit / hành vi | TDD | System Test liên quan |
 |---|---|---|---|
@@ -83,6 +83,9 @@ Tất cả là đặc tả Draft, chưa thực thi. Reviewer/Approver: Tân Tr�
 | [UT-PROJ-061](../unittest/UT-PROJ-061.md) | GetEstimate query: canRename tách khỏi canEdit | [TDD-PROJ-001](../tdd/TDD-PROJ-001.md) | [ST-PROJ-061](../systemtest/ST-PROJ-061.md) |
 | [UT-PROJ-062](../unittest/UT-PROJ-062.md) | ProvincesOpenApiLocationCatalog: Dùng bản lưu khi nguồn địa chỉ lỗi, 503 khi chưa có bản nào | [TDD-PROJ-001](../tdd/TDD-PROJ-001.md) | [ST-PROJ-071](../systemtest/ST-PROJ-071.md) |
 | [UT-PROJ-063](../unittest/UT-PROJ-063.md) | ProvincesOpenApiLocationCatalog / SaveEstimateInputHandler: Xã thuộc tỉnh theo đúng phiên bản dữ liệu hiện hành | [TDD-PROJ-001](../tdd/TDD-PROJ-001.md) | [ST-PROJ-010](../systemtest/ST-PROJ-010.md) |
+| [UT-PROJ-064](../unittest/UT-PROJ-064.md) | EstimateAiInfrastructureExtensions / EstimateGenerationAvailability: Chặn adapter giả ngoài Development/Staging, 503 khi chưa có adapter | [TDD-PROJ-002](../tdd/TDD-PROJ-002.md) | [ST-PROJ-072](../systemtest/ST-PROJ-072.md) |
+| [UT-PROJ-065](../unittest/UT-PROJ-065.md) | RequestEstimateGenerationHandler: Kiểm lại địa chỉ theo dữ liệu hiện hành trước khi gửi AI | [TDD-PROJ-002](../tdd/TDD-PROJ-002.md) | [ST-PROJ-073](../systemtest/ST-PROJ-073.md) |
+| [UT-PROJ-066](../unittest/UT-PROJ-066.md) | MockEstimateAiGateway / MockEstimateResultContract: Adapter giả luôn thành công với bộ kết quả mẫu cố định | [TDD-PROJ-002](../tdd/TDD-PROJ-002.md) | [ST-PROJ-072](../systemtest/ST-PROJ-072.md) |
 
 ## Phạm vi và phần cần kiểm chứng tiếp
 
@@ -122,3 +125,9 @@ Người dùng xác nhận ngày 26/09/2026 hai nhóm quyết định làm thay 
 - **Tên tệp sau khi đổi tên.** Tên mới chỉ áp vào tên tệp tải về (`Content-Disposition`), nội dung PDF/Excel giữ như lúc AI tạo (BR-PROJ-007 khoản 7). Export chỉ gắn với nguồn và định dạng; bỏ `EstimateExport.NameVersion`, `isCurrent`, trạng thái Failed `EstimateRenamed` và mã 409 `ExportOutdated` của bản ngày 25/09/2026. UT-PROJ-056, 057, 058 và 059 được sửa theo; ST-PROJ-069 cũng sửa bước kiểm tên.
 
 Đã kiểm lại cấu trúc các UT bị đụng tới (một dòng, 13 cột, Trace to khớp TEST_LINKS). Hash TDD ở các mục trên là mốc cũ, không còn khớp nội dung hiện tại của TDD-PROJ-002/003; chưa ghi mốc mới vì TDD chưa được chốt lại sau đợt sửa này.
+
+## Cập nhật ngày 26/09/2026 (lần 4): triển khai TDD-PROJ-002
+
+TDD-PROJ-002 được triển khai với adapter AI giả `mock-v1` theo quyết định người dùng cùng ngày, trên nhánh `feature/estimate-generation` của `bmt-be` (commit `62a626d`). UT-PROJ-019 đến UT-PROJ-032, UT-PROJ-054 và UT-PROJ-055 nay có mã test: cột Precondition ghi "Đã có mã test", tên test nằm ở cột Rationale; nội dung Expected output không đổi. Ba ca mới UT-PROJ-064 đến UT-PROJ-066 kiểm chế độ adapter, việc kiểm lại địa chỉ trước khi gửi AI và bộ kết quả mẫu của adapter giả. Các phần cần PostgreSQL (tranh lượt cuối, chốt-vs-timeout, đổi/hủy kỳ lúc tiếp nhận, gửi lặp cùng khóa, worker dừng trước/sau gửi, hai worker nhận việc cùng lúc, kết quả tới sau TimedOut) có integration test trong `EstimateGenerationFlowTests` và `EstimateGenerationConstraintTests`. Test với adapter giả chứng minh điều phối nội bộ, không chứng minh hợp đồng AI thật. Đã kiểm cấu trúc các file UT bị đụng tới (một dòng, 13 cột, Trace to khớp TEST_LINKS).
+
+Bổ sung cùng ngày: người dùng xác nhận URL tệp AI trả về sai dạng hoặc ngoài danh sách tên máy chủ thì thất bại ngay với InvalidProviderResult; UT-PROJ-026 được sửa Expected output và tên test theo quyết định này (commit `624e212`). Nhánh đã rebase lên `develop` sau TDD-LIB-002; SHA triển khai nay là `62a626d`, migration `20260926141806_EstimateGeneration`.

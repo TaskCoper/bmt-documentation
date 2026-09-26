@@ -11,13 +11,11 @@
 -->
 
 <!-- Mỗi file chứa một test, đúng một dòng dữ liệu và 13 cột theo thứ tự bên dưới.
-Thay ST-001 ở heading và Test ID, STORY-001 bằng mã Story cần kiểm thử.
-Trong ô bảng: xuống dòng bằng <br>, dấu | viết thành \|. Steps gồm các bước đánh số.
-Loại: Main / ALT / EXC / NFR / Integration boundary; ghép nhiều loại bằng dấu /.
-Suite: SMOKE / REGRESSION / FULL. Priority: P0 / P1 / P2 / P3.
+Thay UT-001 ở heading và Test ID. Trong ô bảng: xuống dòng bằng <br>, dấu | viết thành \|.
+Loại: Happy / Branch / Boundary / Error / Quirk / Determinism. Suite: SMOKE / REGRESSION / FULL. Priority: P0 / P1 / P2 / P3.
 TEST_LINKS là nguồn liên kết khi import; cột Trace to chỉ để đọc. Giữ hai nơi nhất quán.
-Owner là tên hiển thị; phê duyệt thực hiện sau import.
-Steps và Expected result phải bám Flow, AC và Business Rule của Story có thật. Test data là dữ liệu kiểm thử minh hoạ; không tự thêm hành vi nghiệp vụ hoặc ghi Pass/đã chạy nếu chưa có bằng chứng thực thi.
+Mỗi liên kết dùng DOC-KEY/section: ghi chú. Owner là tên hiển thị; phê duyệt thực hiện sau import.
+Expected output và assertion phải suy ra từ Business Rule/contract đã xác nhận. Dữ liệu mock chỉ là dữ liệu kiểm thử minh hoạ, không phải dữ liệu production; không ghi Pass/đã chạy nếu chưa có bằng chứng thực thi.
 BẮT BUỘC KHI HOÀN THIỆN MẪU: phải có cả Reviewer và Approver, mỗi tên 1–200 ký tự sau khi bỏ khoảng trắng đầu/cuối. Không xoá hai dòng metadata, để trống, dùng tên bịa hoặc giữ placeholder rồi coi là hoàn tất.
 Nếu chưa biết người review hoặc người phê duyệt, phải hỏi người dùng và báo tài liệu chưa đủ thông tin; không tự lấy Author/Owner làm người thay thế. Tên trong file không tự gán tài khoản hoặc xác nhận đã duyệt; gán thành viên trên giao diện sau import.
 Đây là yêu cầu hoàn thiện mẫu; backend hiện vẫn nhận file cũ thiếu hai trường để tương thích.
@@ -29,39 +27,26 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Không dùng Status trong Markdown hoặc tên Approver để tự xác nhận phê duyệt; import không cấp quyền hay gán tài khoản từ tên. Chạy Kiểm tra file và xử lý lỗi/cảnh báo trước khi nhập.
 - Giới hạn độ dài bên dưới tính theo string.Length của .NET (đơn vị UTF-16); không tự cắt ngắn dữ kiện quan trọng để vượt validation, hãy viết lại có căn cứ hoặc hỏi người dùng.
 - Bảng phải có header, dòng phân cách và đúng một dòng dữ liệu, đủ 13 cột theo thứ tự mẫu. Reviewer/Approver là hai bullet trước bảng, không thêm thành cột. Test ID trong bảng phải nhất quán với heading; mã tài liệu import lấy từ heading.
-- Story tối đa 100 ký tự và được dùng làm tiêu đề tài liệu; Owner tối đa 200. Trạng thái parser nhận: Draft / Approved; đây không phải kết quả chạy test hoặc quyền phê duyệt.
-- Giữ Loại: Main / ALT / EXC / NFR / Integration boundary, có thể ghép bằng dấu /; Suite: SMOKE / REGRESSION / FULL; Priority: P0 / P1 / P2 / P3. Không dùng số ngoài dải Priority 0–3.
-- Steps là các bước đánh số trong một ô, tách bằng <br>; không xuống dòng vật lý trong ô, dấu | trong nội dung phải viết \|. TEST_LINKS mới là nguồn liên kết import; cột Trace to chỉ hiển thị, hai nơi phải nhất quán.
+- Module tối đa 200 ký tự; Unit under test tối đa 500 (được dùng làm tiêu đề tài liệu); Owner tối đa 200. Trạng thái parser nhận: Draft / Approved; đây không phải kết quả chạy test hoặc quyền phê duyệt.
+- Giữ Loại: Happy / Branch / Boundary / Error / Quirk / Determinism; Suite: SMOKE / REGRESSION / FULL; Priority: P0 / P1 / P2 / P3. Không dùng số ngoài dải Priority 0–3.
+- Không xuống dòng vật lý trong ô: dùng <br>; dấu phân cột trong nội dung phải viết \|. TEST_LINKS mới là nguồn liên kết import; cột Trace to chỉ hiển thị, hai nơi phải nhất quán.
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# ST-PROJ-057
+# UT-PROJ-064
 
-## System Test
+## Unit Test
 
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
 
-| Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
+| Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-PROJ-057 | STORY-PROJ-002 | Main / Integration boundary | FULL | P0 | Môi trường thử đã có chức năng tương ứng; C1 là khách đã đăng nhập, sở hữu bản dự toán; gói còn hiệu lực, quyền tạo thiết kế, quota hữu hạn 3, đã dùng 0, đang giữ 0, trừ khi ca nêu khác. Có thể đọc lại dữ liệu đã lưu, trạng thái tác vụ và sổ lượt. Có bộ giả lập AI kiểm soát được kết quả/lỗi theo hợp đồng tích hợp đã thống nhất. Ca chưa chạy; phần AI thật chờ hợp đồng, môi trường và bộ đầu ra mẫu. Có kết quả và tệp thử theo hợp đồng đầu ra đã thống nhất; cách nhận hoặc xuất PDF/Excel còn chờ tích hợp. Không dùng tệp giả làm bằng chứng tích hợp thật. Dùng dịch vụ email giả lập/hộp thư thử, không gửi tới người thật; có thể kiểm tra nội dung và phản hồi tiếp nhận. | 1. A1 nhập hai phong cách có ảnh và gán loại công trình hợp lệ.<br>2. C1 tạo bằng tên, nhập 70.25 m² và chỉ mô tả, lưu rồi mở lại để kiểm tra.<br>3. C1 chọn đúng một phong cách mỗi nhóm bật, đủ địa chỉ/gói hoàn thiện/tầng/tum rồi bấm Nhận dự toán.<br>4. Cho AI trả bộ R1 đầy đủ, lưu và mở được; C1 xem dự toán, chuẩn bị/tải PDF và Excel.<br>5. C1 chọn ngày hết hạn, tạo QR/link và gửi email một người nhận; người nhận mở không đăng nhập và tải.<br>6. C1 thu hồi, người nhận gửi yêu cầu tải mới; đối chiếu nguồn và sổ lượt cuối cùng. | C1 quota 3; tên Nhà thử xuyên suốt; mô tả Nhà hai phòng ngủ; người nhận trong hộp thư thử. Không dùng dữ liệu khách thật. | Toàn bộ dữ liệu đi đúng bản từ đầu vào tới AI, kết quả và tệp; chỉ giữ 1 khi gửi, tính 1 sau thành công. Tạo/lưu/xuất/chia sẻ không tính thêm lượt. Email/QR cùng quyền; thu hồi chặn tải mới nhưng không mất nguồn. AI thật chưa tích hợp thì chỉ được ghi kết quả chạy với giả lập, không tuyên bố E2E nhà cung cấp. | STORY-PROJ-002/AC-001<br>STORY-PROJ-002/AC-003<br>STORY-PROJ-002/Main Flow<br>BR-PROJ-003/Then<br>BR-PROJ-004/Then<br>BR-PROJ-006/Then<br>BR-PROJ-007/Then<br>BR-SUB-003/Then<br>STORY-PROJ-001/AC-001<br>STORY-PROJ-001/AC-002<br>STORY-PROJ-003/AC-001<br>STORY-PROJ-003/AC-002<br>STORY-PROJ-004/AC-001<br>STORY-PROJ-004/AC-002<br>STORY-PROJ-004/AC-003<br>STORY-PROJ-004/AC-004<br>STORY-PROJ-005/AC-009 | Luồng đầy đủ từ Admin cấu hình đến người nhận tải hồ sơ. Đặc tả chưa thực thi; dữ liệu trong ca là fixture kiểm thử, không phải mặc định sản phẩm. Chạy được với adapter AI giả mock-v1 (`EstimateAiOption__Mode=Mock`, chỉ Development/Staging) khi URL tệp mẫu đã có tệp thật; kết quả với adapter giả không phải bằng chứng tích hợp AI thật. | [Chưa xác định] | Draft |
+| UT-PROJ-064 | Tạo dự toán | EstimateAiInfrastructureExtensions / EstimateGenerationAvailability — Chặn adapter giả ngoài Development/Staging, 503 khi chưa có adapter | Error | FULL | P0 | Đã có mã test trong bmt-be (commit `62a626d`), tên test ghi ở Rationale. Môi trường chạy (IHostEnvironment) là bản giả đặt tên được; cấu hình đọc từ bộ nhớ. Không khởi động API thật, không gọi mạng. | `EstimateAiOption:Mode` lần lượt là Mock với môi trường Production và Test; Mock với Development và Staging; giá trị lạ Partner; để trống với Production. | Mock ở Production/Test: đăng ký ném InvalidOperationException nêu chỉ được bật ở Development/Staging, nên API từ chối khởi động. Mode lạ: ném lỗi nêu giá trị không hợp lệ. Mock ở Development/Staging: adapter là MockEstimateAiGateway, có đúng một hợp đồng `mock-v1` và worker gửi AI được đăng ký. Mode trống: adapter có IsConfigured=false, không có worker, và IEstimateGenerationAvailability trả NULL (handler trả 503 DependencyUnavailable, không giữ lượt). | TDD-PROJ-002/Architecture<br>TDD-PROJ-002/External API<br>TDD-PROJ-002/Internal API<br>ST-PROJ-072/System Test | Quyết định ngày 26/09/2026: adapter giả chỉ ở Development/Staging, Production mà cấu hình Mock thì API từ chối khởi động, không cấu hình adapter thì 503 không giữ lượt. Mã test: `EstimateAiAdapterTests.Handle_MockOutsideDevelopmentOrStaging_RefusesToStart`, `Handle_UnknownMode_RefusesToStart`, `Handle_MockInDevelopmentOrStaging_RegistersMockAndWorker`, `Handle_NoMode_RegistersNotConfiguredGatewayWithoutWorker`; nhánh 503 ở handler: `RequestEstimateGenerationCommandHandlerTests.Handle_AdapterNotReady_ThrowsDependencyUnavailableWithoutReserving`. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- STORY-PROJ-002/AC-001
-- STORY-PROJ-002/AC-003
-- STORY-PROJ-002/Main Flow
-- BR-PROJ-003/Then
-- BR-PROJ-004/Then
-- BR-PROJ-006/Then
-- BR-PROJ-007/Then
-- BR-SUB-003/Then
-- STORY-PROJ-001/AC-001
-- STORY-PROJ-001/AC-002
-- STORY-PROJ-003/AC-001
-- STORY-PROJ-003/AC-002
-- STORY-PROJ-004/AC-001
-- STORY-PROJ-004/AC-002
-- STORY-PROJ-004/AC-003
-- STORY-PROJ-004/AC-004
-- STORY-PROJ-005/AC-009
+- TDD-PROJ-002/Architecture
+- TDD-PROJ-002/External API
+- TDD-PROJ-002/Internal API
+- ST-PROJ-072/System Test

@@ -36,6 +36,17 @@ Thiết kế chi tiết theo các quyết định này nằm ở TDD-PROJ-002, T
 
 **Tên bản dự toán trong tệp PDF/Excel (người dùng xác nhận ngày 26/09/2026):** sau khi đổi tên, tên mới chỉ áp vào tên tệp tải về, do backend đặt bằng header `Content-Disposition` khi chuyển tiếp tệp; nội dung PDF/Excel giữ tên tại lúc AI tạo. Không gọi AI, không tự dựng tệp, không tính lượt. Đã sửa [BR-PROJ-007](../businessrule/BR-PROJ-007.md) khoản 7, STORY-PROJ-003/AC-006, ST-PROJ-069, TDD-PROJ-003 và UT-PROJ-056 đến UT-PROJ-059 cho khớp.
 
+## Cập nhật ngày 26/09/2026 (lần 3): triển khai TDD-PROJ-002 với adapter AI giả
+
+Người dùng xác nhận làm trước toàn bộ phần của BMT trong TDD-PROJ-002 khi chưa có hợp đồng API AI thật:
+
+- Có cổng kết nối AI và một adapter giả `mock-v1` chạy trong tiến trình backend. Khi có API thật chỉ thay adapter; giữ nguyên bước nhận việc, worker, kiểm và ghi kết quả, lệnh chốt và ContractVersion.
+- Adapter giả chỉ bật bằng `EstimateAiOption__Mode=Mock` ở Development/Staging; Production mà cấu hình Mock thì API không khởi động; không cấu hình adapter thì yêu cầu tạo thiết kế trả 503 và không giữ lượt.
+- Adapter giả luôn thành công, trả bộ kết quả mẫu cố định theo BR-PROJ-007 (ảnh bìa, mặt bằng 2D, phối cảnh, bảng dự toán ghi rõ là dữ liệu mẫu, PDF, Excel). URL tệp mẫu đọc từ cấu hình; hiện là URL giữ chỗ trên `bmt.hcm.ss.bfcplatform.vn`, cần upload tệp mẫu rồi thay. Tạm kiểm URL tệp của AI bằng `UploadedFileOption__AllowedHosts`.
+- Thời hạn một lần tạo mặc định 15 phút; job quá hạn quét mỗi 60 giây. Cả hai là cấu hình.
+
+Code ở nhánh `feature/estimate-generation` của `bmt-be` (commit `62a626d`, migration `20260926141806_EstimateGeneration`), chưa merge và chưa áp dụng migration lên database dùng chung. Chi tiết và phần chưa làm ở [TDD-PROJ-002](../tdd/TDD-PROJ-002.md) (Problem, Architecture/Notes). Thêm UT-PROJ-064 đến UT-PROJ-066 và ST-PROJ-072, ST-PROJ-073. Hợp đồng AI thật vẫn còn chờ.
+
 ## Đã xác nhận
 
 - Giữ toàn bộ phạm vi trong năm US và bảy BR-PROJ: cả năm loại ban đầu và loại Admin thêm, tách phong cách kiến trúc/nội thất, cấu hình tầng/tum riêng, giữ danh mục tại lúc tạo bản dự toán.
@@ -110,7 +121,7 @@ Phạm vi nguồn đã đọc sâu gồm bộ PROJ và các nguồn trực tiế
 1. Hoàn tất hợp đồng tích hợp và rà soát phụ thuộc còn mở; thống nhất nền RBAC/subscription/khóa thương mại và transaction. CSRF đã thống nhất ngày 26/09/2026 ở [TDD-AUTH-001](../tdd/TDD-AUTH-001.md).
 2. Đặc tả Unit Test theo TDD đã được chốt; cập nhật phần kiểm chứng tích hợp tương ứng. Đã soạn đặc tả Unit Test cho phần có hợp đồng rõ; các adapter còn mở giữ riêng trong bảng UT.
 3. Triển khai danh mục, tạo/tự lưu và lưu URL ảnh; kiểm chứng quyền lợi, phiên bản và dữ liệu cũ. Đã có trong code ở `a557993` và `388a426`.
-4. Triển khai tiếp nhận AI, snapshot, worker, chốt lượt và các trường hợp timeout/kết quả muộn.
+4. Triển khai tiếp nhận AI, snapshot, worker, chốt lượt và các trường hợp timeout/kết quả muộn. Đã có với adapter AI giả ở nhánh `feature/estimate-generation` (`62a626d`); còn thay adapter thật khi có hợp đồng.
 5. Triển khai đọc hồ sơ, tải tệp từ URL AI trả, link/QR và email; kiểm quyền trên mọi đường tải, chuyển tiếp tệp qua link chia sẻ mà không lộ URL gốc.
 6. Chạy test trên môi trường thử, phân biệt kết quả với giả lập và tích hợp thật; chỉ mở tính năng khi các phụ thuộc bắt buộc đã sẵn sàng.
 

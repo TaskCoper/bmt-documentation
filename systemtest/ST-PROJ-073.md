@@ -35,7 +35,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# ST-PROJ-057
+# ST-PROJ-073
 
 ## System Test
 
@@ -44,24 +44,12 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-PROJ-057 | STORY-PROJ-002 | Main / Integration boundary | FULL | P0 | Môi trường thử đã có chức năng tương ứng; C1 là khách đã đăng nhập, sở hữu bản dự toán; gói còn hiệu lực, quyền tạo thiết kế, quota hữu hạn 3, đã dùng 0, đang giữ 0, trừ khi ca nêu khác. Có thể đọc lại dữ liệu đã lưu, trạng thái tác vụ và sổ lượt. Có bộ giả lập AI kiểm soát được kết quả/lỗi theo hợp đồng tích hợp đã thống nhất. Ca chưa chạy; phần AI thật chờ hợp đồng, môi trường và bộ đầu ra mẫu. Có kết quả và tệp thử theo hợp đồng đầu ra đã thống nhất; cách nhận hoặc xuất PDF/Excel còn chờ tích hợp. Không dùng tệp giả làm bằng chứng tích hợp thật. Dùng dịch vụ email giả lập/hộp thư thử, không gửi tới người thật; có thể kiểm tra nội dung và phản hồi tiếp nhận. | 1. A1 nhập hai phong cách có ảnh và gán loại công trình hợp lệ.<br>2. C1 tạo bằng tên, nhập 70.25 m² và chỉ mô tả, lưu rồi mở lại để kiểm tra.<br>3. C1 chọn đúng một phong cách mỗi nhóm bật, đủ địa chỉ/gói hoàn thiện/tầng/tum rồi bấm Nhận dự toán.<br>4. Cho AI trả bộ R1 đầy đủ, lưu và mở được; C1 xem dự toán, chuẩn bị/tải PDF và Excel.<br>5. C1 chọn ngày hết hạn, tạo QR/link và gửi email một người nhận; người nhận mở không đăng nhập và tải.<br>6. C1 thu hồi, người nhận gửi yêu cầu tải mới; đối chiếu nguồn và sổ lượt cuối cùng. | C1 quota 3; tên Nhà thử xuyên suốt; mô tả Nhà hai phòng ngủ; người nhận trong hộp thư thử. Không dùng dữ liệu khách thật. | Toàn bộ dữ liệu đi đúng bản từ đầu vào tới AI, kết quả và tệp; chỉ giữ 1 khi gửi, tính 1 sau thành công. Tạo/lưu/xuất/chia sẻ không tính thêm lượt. Email/QR cùng quyền; thu hồi chặn tải mới nhưng không mất nguồn. AI thật chưa tích hợp thì chỉ được ghi kết quả chạy với giả lập, không tuyên bố E2E nhà cung cấp. | STORY-PROJ-002/AC-001<br>STORY-PROJ-002/AC-003<br>STORY-PROJ-002/Main Flow<br>BR-PROJ-003/Then<br>BR-PROJ-004/Then<br>BR-PROJ-006/Then<br>BR-PROJ-007/Then<br>BR-SUB-003/Then<br>STORY-PROJ-001/AC-001<br>STORY-PROJ-001/AC-002<br>STORY-PROJ-003/AC-001<br>STORY-PROJ-003/AC-002<br>STORY-PROJ-004/AC-001<br>STORY-PROJ-004/AC-002<br>STORY-PROJ-004/AC-003<br>STORY-PROJ-004/AC-004<br>STORY-PROJ-005/AC-009 | Luồng đầy đủ từ Admin cấu hình đến người nhận tải hồ sơ. Đặc tả chưa thực thi; dữ liệu trong ca là fixture kiểm thử, không phải mặc định sản phẩm. Chạy được với adapter AI giả mock-v1 (`EstimateAiOption__Mode=Mock`, chỉ Development/Staging) khi URL tệp mẫu đã có tệp thật; kết quả với adapter giả không phải bằng chứng tích hợp AI thật. | [Chưa xác định] | Draft |
+| ST-PROJ-073 | STORY-PROJ-002 | EXC / Integration boundary | REGRESSION | P0 | Môi trường thử đã có chức năng tương ứng; C1 là khách đã đăng nhập, sở hữu bản dự toán; gói còn hiệu lực, quyền tạo thiết kế, quota hữu hạn 3, đã dùng 0, đang giữ 0, trừ khi ca nêu khác. Có thể đọc lại dữ liệu đã lưu, trạng thái tác vụ và sổ lượt. Có bộ giả lập AI kiểm soát được (có thể là adapter giả mock-v1). Môi trường thử điều khiển được dữ liệu nguồn provinces.open-api.vn (máy chủ giả cùng cấu trúc `GET /api/v2/?depth=2`) và bản lưu trong Redis. D1, D2, D3 đủ đầu vào, đã lưu tỉnh P và xã W theo phiên bản dữ liệu V1. | 1. Không đổi dữ liệu nguồn; C1 gửi D1 cho AI.<br>2. Cho nguồn đổi tên xã W, giữ mã; làm mới bản lưu; C1 gửi D2 và đọc đầu vào đã gửi AI của tác vụ, cùng địa chỉ đang lưu của D2.<br>3. Cho nguồn gộp W vào xã khác (mã W không còn); làm mới bản lưu; C1 gửi D3.<br>4. C1 chọn lại xã cho D3 theo dữ liệu mới, lưu rồi gửi lại.<br>5. Xóa bản lưu và chặn nguồn; C1 gửi một bản khác đủ đầu vào. | Dữ liệu tỉnh/xã giả cùng cấu trúc API v2; phiên bản dạng `pov2-` cộng 16 ký tự hex. Tên xã sau khi đổi là giá trị thử. | Bước 1: tiếp nhận, đầu vào gửi AI dùng mã, tên và phiên bản đã lưu. Bước 2: tiếp nhận, không bắt chọn lại; đầu vào gửi AI dùng phiên bản mới và tên xã mới; địa chỉ và InputVersion của D2 không đổi. Bước 3: 422 InvalidGenerationInput trường wardCode, không có tác vụ, không giữ lượt. Bước 4: tiếp nhận sau khi chọn lại. Bước 5: 503 DependencyUnavailable, không giữ lượt. | STORY-PROJ-002/EXC-01<br>STORY-PROJ-002/AC-001<br>STORY-PROJ-001/AC-015<br>BR-PROJ-004/Then<br>BR-PROJ-004/Notes | Người dùng xác nhận ngày 26/09/2026: xã giữ mã nhưng đổi tên vẫn hợp lệ và dùng tên mới; mã xã không còn hoặc không còn thuộc tỉnh thì chặn gửi và yêu cầu chọn lại. Bổ sung phần ST-PROJ-071 ghi là thuộc TDD-PROJ-002. Đặc tả chưa thực thi; dữ liệu trong ca là fixture kiểm thử. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
+- STORY-PROJ-002/EXC-01
 - STORY-PROJ-002/AC-001
-- STORY-PROJ-002/AC-003
-- STORY-PROJ-002/Main Flow
-- BR-PROJ-003/Then
+- STORY-PROJ-001/AC-015
 - BR-PROJ-004/Then
-- BR-PROJ-006/Then
-- BR-PROJ-007/Then
-- BR-SUB-003/Then
-- STORY-PROJ-001/AC-001
-- STORY-PROJ-001/AC-002
-- STORY-PROJ-003/AC-001
-- STORY-PROJ-003/AC-002
-- STORY-PROJ-004/AC-001
-- STORY-PROJ-004/AC-002
-- STORY-PROJ-004/AC-003
-- STORY-PROJ-004/AC-004
-- STORY-PROJ-005/AC-009
+- BR-PROJ-004/Notes
