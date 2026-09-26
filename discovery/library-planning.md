@@ -23,6 +23,14 @@ Các quyết định nghiệp vụ đã được xác nhận qua hội thoại. 
 - Người dùng xác nhận hai câu hỏi mở sau đợt triển khai TDD-LIB-001: thêm route `GET /api/v1/admin/library/templates/{templateId}/versions/{versionId}/assets` cho người có `library.manage` (phân trang, URL gốc, loại, vị trí, cover), và làm log thao tác quản trị cùng đợt TDD-LIB-002.
 - Route đã có ở nhánh `feature/library-admin-assets` của `bmt-be`, commit `9e02c4d`, chưa merge; không cần migration. Đặc tả mới: UT-LIB-051, UT-LIB-052, ST-LIB-031.
 
+## Cập nhật ngày 26/09/2026 — triển khai TDD-LIB-002
+
+- Phần tra cứu (TDD-LIB-002) đã có code ở nhánh `feature/library-access` của `bmt-be`, commit `0263297`, tách từ `develop` tại `1d39450`, chưa merge. Gồm bảng `LibraryAccess`, phần mở rộng `UsageOperation`, migration `20260926115537_LibraryAccess` và sáu route: access-info, mở phiên bản (`POST /api/v1/design-templates/{templateId}/open`), lịch sử `/api/v1/me/library-history`, chi tiết phiên bản, trang tài nguyên và route tải tệp chuyển tiếp qua backend.
+- Mở lần đầu tính đúng một lượt và ghi quyền xem cùng transaction, theo thứ tự khóa `AccountCommerceState` → kỳ/quota → mẫu → phiên bản; mở lại phiên bản đã có quyền xem không tính lượt và không phụ thuộc gói. Nội dung được bảo vệ chỉ tải qua backend, không lộ URL gốc; backend chỉ đọc URL thuộc `UploadedFileOption__AllowedHosts`.
+- Log cấp quyền xem và log thao tác quản trị của TDD-LIB-001 đã làm cùng đợt.
+- Migration mới chạy thử trên PostgreSQL tạm và container kiểm thử, chưa áp dụng lên database dùng chung. Đặc tả UT-LIB-033 đến UT-LIB-050 đã có mã test; System Test vẫn chưa chạy trên môi trường thử. Bảng test tự động phía backend ở [library-system-test-coverage.md](library-system-test-coverage.md).
+- Còn chờ bên vận hành kho presign: kho có nhận HEAD và Range không, thời gian chờ khi thăm dò và chuyển tiếp tệp (code đang dùng giá trị tạm 30 giây, cấu hình bằng `LibraryFileOption__TimeoutSeconds`).
+
 ## Bộ tài liệu
 
 | Phạm vi | User Story | Business Rule |

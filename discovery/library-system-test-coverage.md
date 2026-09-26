@@ -56,6 +56,25 @@ US và BR đã được người dùng chốt trong hội thoại. 31 ca dưới
 | ST-LIB-016 | `LibraryReadTests.Handle_PublicListNameSearch_TreatsWildcardsLiterally` |
 | ST-LIB-031 | `LibraryReadTests.Handle_AdminVersionAssets_PagesByPositionWithOriginalUrl`, `LibraryApiAuthorizationTests` (401, 403, đạt với `library.manage` ở route `.../versions/{versionId}/assets`), commit `9e02c4d` |
 
+**Cập nhật 26/09/2026 (triển khai TDD-LIB-002):** backend của các ca ST-LIB-017 đến ST-LIB-030 đã có ở nhánh `feature/library-access` của `bmt-be` (commit `0263297`, chưa merge), gồm cả phần xem lại từ lịch sử của ST-LIB-006 và phần mở mới, xem lại của ST-LIB-008. Các ca System Test vẫn chưa chạy trên môi trường thử; bảng dưới chỉ ghi test tự động phía backend đang kiểm cùng hành vi. Tranh chấp dùng hai kết nối PostgreSQL thật; kho presign là bản giả không gọi mạng, nên phần HEAD/Range của kho thật và mất phản hồi mạng thật (ST-LIB-022) vẫn cần kiểm trên môi trường thử.
+
+| System Test | Test tự động phía backend (test class của `bmt-be`) |
+| --- | --- |
+| ST-LIB-017 | `LibraryAccessFlowTests.Handle_FirstOpenThenReopen_ChargesExactlyOnce` |
+| ST-LIB-018 | `LibraryAccessFlowTests.Handle_HistoryAfterNewVersion_TwoRowsNewestFirstWithCurrentContent` |
+| ST-LIB-019 | `LibraryAccessFlowTests.Handle_ReopenAfterPlanLapsed_FreeButNewVersionDenied` (gói hết hạn, bị hủy, hết lượt) |
+| ST-LIB-020 | `LibraryAccessFlowTests.Handle_NotConfirmed_ReturnsConfirmationRequiredWithoutProbing` |
+| ST-LIB-021 | `LibraryAccessFlowTests.Handle_StorageFailsBeforeCommit_NoChargeThenSucceedsLater` |
+| ST-LIB-022 | Chỉ phần backend: `LibraryAccessFlowTests.Handle_FirstOpenThenReopen_ChargesExactlyOnce` (mở lại bằng yêu cầu mới không tính thêm), `LibraryAccessConcurrencyTests.Handle_SameVersionOpenedConcurrently_ChargedOnce` |
+| ST-LIB-023 | `LibraryAccessConcurrencyTests.Handle_SameVersionOpenedConcurrently_ChargedOnce`, `LibraryAccessConcurrencyTests.Handle_TwoVersionsCompeteForLastUnit_OnlyOneCharged` |
+| ST-LIB-024 | `LibraryAccessFlowTests.Handle_DownloadContent_StreamsThroughBackendWithRangeAndChecks`, `LibraryAccessApiTests.Handle_Content_StreamsBytesWithProtectiveHeaders`, `LibraryAccessApiTests.Handle_ContentWithRange_Returns206AndForwardsRange` |
+| ST-LIB-025 | `LibraryAccessApiTests.Handle_RouteWithoutSession_Returns401`, `LibraryViewerTests.Handle_OtherAccount_CannotReadVersionOrSeeHistory`, `LibraryAccessFlowTests.Handle_DownloadContent_StreamsThroughBackendWithRangeAndChecks` (tài khoản chưa mở bị 403) |
+| ST-LIB-026 | `LibraryAccessFlowTests.Handle_ReopenAfterPlanLapsed_FreeButNewVersionDenied` (biến thể không giới hạn rồi hết hạn) |
+| ST-LIB-027 | `LibraryAccessApiTests.Handle_RouteWithoutSession_Returns401`, `LibraryAccessFlowTests.Handle_PlanWithoutCatalogDetail_ReturnsEntitlementMissingAndKeepsGenerateQuota`, `LibraryAccessFlowTests.Handle_QuotaExhausted_ReturnsQuotaUnavailableWithoutWrites`, `LibraryOpenTests.Handle_PlanConditionMissing_ReturnsSubscriptionCodeNotQuotaUnavailable` |
+| ST-LIB-028 | `LibraryAccessConcurrencyTests.Handle_PlanChangedWhileOpenWaits_ChecksCurrentPeriodAfterLock` |
+| ST-LIB-029 | `LibraryAccessFlowTests.Handle_DownloadContent_StreamsThroughBackendWithRangeAndChecks` (tệp đã gỡ không tải được), `LibraryAccessFlowTests.Handle_HistoryAfterNewVersion_TwoRowsNewestFirstWithCurrentContent` (sửa tại chỗ không tính lượt) |
+| ST-LIB-030 | `LibraryAccessFlowTests.Handle_HiddenTemplate_NewOpenDeniedButExistingAccessServed`, `LibraryAccessConcurrencyTests.Handle_AdminMutationDuringOpen_OpenWaitsThenRejectsWithoutCharge` (ẩn mẫu chen vào lúc mở) |
+
 Các ca 004 và phần truyền tải chưa có ngưỡng hạ tầng để nghiệm thu tải lớn; không thể chứng minh “không giới hạn” bằng một bộ dữ liệu hữu hạn. API, fixture, điểm gây lỗi và cách điều phối đồng thời phải được cụ thể hóa trong TDD trước khi chạy. Trong bước thiết kế TDD, người dùng đã xác nhận cho lưu nháp thiếu dữ liệu và kiểm đủ khi công bố; cần bổ sung đặc tả riêng cho việc lưu nháp khi cập nhật bộ kiểm thử.
 
 Đã cập nhật ST-SUB-050–052 theo lượt từng phiên bản. TDD-SUB-002 đã được cập nhật phần tra cứu cùng TDD-LIB-002 để chốt; quản trị nội dung và danh sách theo TDD-LIB-001; các UT về tra cứu cần cập nhật sau khi chốt TDD; chưa dùng thiết kế cũ để triển khai quyền xem lại.
