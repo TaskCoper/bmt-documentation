@@ -42,9 +42,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-CONSULT-018 | Tư vấn kiến trúc sư | Filter request: bearer (unit dự kiến theo TDD) | Branch | REGRESSION | P1 | Đặc tả chưa thực thi. Dữ liệu minh họa; mock/fake trong bộ nhớ, không chứng minh PostgreSQL/broker. Bearer không cookie; JSON; không Origin. | Header X-BMT-Request lần lượt 1 hoặc thiếu. | Có header được đi tiếp; thiếu bị từ chối; không bắt Origin cho bearer không cookie. | BR-CONSULT-002/Then<br>TDD-CONSULT-001/Architecture | Kiểm nhánh và kết quả quan sát được theo hợp đồng đã chốt. | Tân Trần | Draft |
+| UT-CONSULT-018 | Tư vấn kiến trúc sư | Lớp chống CSRF dùng chung trên endpoint ghi tư vấn: Bearer và client không cookie (dự kiến theo TDD) | Branch | REGRESSION | P1 | Đặc tả chưa thực thi cho route tư vấn; quy tắc chung đã có test ở `CsrfOriginPolicyTests` của `bmt-be`. Dữ liệu minh họa; mock/fake trong bộ nhớ, không chứng minh PostgreSQL/broker. Allowlist https://client.example.test. | Request ghi JSON lần lượt: có `Authorization: Bearer` và Origin lạ; không cookie, không Origin; không cookie nhưng Origin lạ. | Bearer đi tiếp mà không bị kiểm Origin; không cookie và không Origin đi tiếp; không cookie nhưng Origin lạ trả 403 `CsrfInvalid`. Không cần header riêng nào. | BR-CONSULT-002/Then<br>TDD-CONSULT-001/Architecture<br>TDD-AUTH-001/Architecture | Kiểm nhánh và kết quả quan sát được theo hợp đồng đã chốt. | Tân Trần | Draft |
 
 ## TEST_LINKS
 
 - BR-CONSULT-002/Then
 - TDD-CONSULT-001/Architecture
+- TDD-AUTH-001/Architecture

@@ -253,7 +253,7 @@ Nhánh thay thế: J1 TimedOut tại 03:10Z → Used=0, Reserved=0; không có R
 
 ### Endpoints
 
-- **POST** `/api/v1/estimates/{estimateId}/generations` — Verified Customer + owner, CSRF khi cookie; `{inputVersion}` + Idempotency-Key. Yêu cầu mới 202 `{operationId,state:"Pending",acceptedAtUtc,deadlineUtc}`; replay cùng key/hash 200 với trạng thái operation cũ, không reserve lại.
+- **POST** `/api/v1/estimates/{estimateId}/generations` — Verified Customer + owner, kiểm Origin theo [TDD-AUTH-001](TDD-AUTH-001.md) khi dùng cookie; `{inputVersion}` + Idempotency-Key. Yêu cầu mới 202 `{operationId,state:"Pending",acceptedAtUtc,deadlineUtc}`; replay cùng key/hash 200 với trạng thái operation cũ, không reserve lại.
 - **GET** `/api/v1/estimates/{estimateId}/generations/{operationId}` — Owner đọc `{operationId,state,acceptedAtUtc,deadlineUtc,settledAtUtc,failureCode,resultUrl}`. resultUrl chỉ có khi Succeeded, là route backend có kiểm quyền. Không trả tỷ lệ hoàn tất giả nếu AI không có progress.
 
 Ports nội bộ không phải HTTP công khai:
@@ -264,7 +264,7 @@ Ports nội bộ không phải HTTP công khai:
 - `FinalizeEstimateGeneration(operationId,providerAttemptId,candidateRef)` → terminal hoặc Pending; kiểm identity, deadline và chốt quota/result cùng transaction.
 - `FailEstimateGeneration` và `ExpireDesignUsage` dùng chung coordinator settlement, không có endpoint để khách tự báo AI thành công/thất bại.
 
-Các kiểu lỗi/Result/CSRF theo TDD-PROJ-001. Phiên khách có quyền đọc operation cũ dù gói hết hạn, nhưng không có quyền bắt đầu operation mới. Khi khách bấm nhận dự toán, frontend đợi tự lưu cuối hoàn tất và dùng đúng inputVersion đã xác nhận; không đính kèm đầu vào chưa lưu vào POST generation.
+Các kiểu lỗi/Result theo TDD-PROJ-001; chống CSRF theo [TDD-AUTH-001](TDD-AUTH-001.md). Phiên khách có quyền đọc operation cũ dù gói hết hạn, nhưng không có quyền bắt đầu operation mới. Khi khách bấm nhận dự toán, frontend đợi tự lưu cuối hoàn tất và dùng đúng inputVersion đã xác nhận; không đính kèm đầu vào chưa lưu vào POST generation.
 
 ### Examples
 
@@ -273,7 +273,7 @@ Các kiểu lỗi/Result/CSRF theo TDD-PROJ-001. Phiên khách có quyền đọ
 ```
 Request:
 Idempotency-Key: gen-estimate-1
-X-CSRF-Token: <request-token>
+Origin: https://app.example.test
 {"inputVersion":7}
 
 Response 202:
@@ -302,7 +302,7 @@ Error Response:
 
 - **Unauthorized** (401): phiên không hợp lệ.
 - **AccessForbidden** (403): không phải khách đủ chính sách phiên.
-- **CsrfInvalid** (403): yêu cầu cookie thiếu bảo vệ CSRF.
+- **CsrfInvalid** (403): yêu cầu dùng cookie có `Origin`/`Referer` ngoài danh sách được phép, hoặc thiếu cả hai; theo [TDD-AUTH-001](TDD-AUTH-001.md).
 - **EstimateNotFound** (404): bản không thuộc phạm vi owner.
 - **GenerationNotFound** (404): operation không thuộc bản/owner hoặc không phải DesignGeneration.
 - **SubscriptionInactive** (403): kỳ chưa có/hết hiệu lực/bị hủy/thay thế khi yêu cầu mới.
@@ -386,5 +386,6 @@ Mất phản hồi gửi không tương đương provider từ chối. Quy trìn
 
 ## Change Log
 
+- 2026-09-26 (CSRF): Chống CSRF dẫn tới [TDD-AUTH-001](TDD-AUTH-001.md); ví dụ bỏ header `X-CSRF-Token`, thay bằng `Origin`.
 - 2026-09-25 (lần 2): Ranh giới tài nguyên dẫn tới đặc tả Công trình (STORY-SITE-001, TDD-SITE-001) thay cho ghi chú "chưa có đặc tả". Không đổi thiết kế gửi AI.
 - 2026-09-25: Bỏ `name` khỏi snapshot nội bộ v1 gửi AI vì tên bản dự toán không phải đầu vào AI (BR-SUB-007 khoản 11). Ghi rõ đổi tên không tăng InputVersion nên không gây InputVersionConflict khi gửi AI, vẫn được phép khi tác vụ Pending và không lấy khóa AccountCommerceState. Thêm STORY-PROJ-002/EXC-02 vào Use Cases. Ghi đúng quan hệ giữa bản dự toán và Công trình (`ConstructionSite`) thay cho cách gọi "phụ thuộc tương lai".

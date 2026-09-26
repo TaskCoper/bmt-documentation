@@ -42,9 +42,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-CONSULT-017 | Tư vấn kiến trúc sư | Filter request: cookie và Origin (unit dự kiến theo TDD) | Branch | REGRESSION | P1 | Đặc tả chưa thực thi. Dữ liệu minh họa; mock/fake trong bộ nhớ, không chứng minh PostgreSQL/broker. Allowlist https://client.example.test; spy delegate tiếp theo. | Cookie+JSON+header 1 với Origin đúng, thiếu, sai, hoặc host thêm hậu tố; lặp trường hợp thiếu header. | Chỉ Origin khớp chính xác và đủ header được đi tiếp; các trường hợp còn lại bị chặn, không gọi handler. | BR-CONSULT-002/Then<br>TDD-CONSULT-001/Architecture | Kiểm nhánh và kết quả quan sát được theo hợp đồng đã chốt. | Tân Trần | Draft |
+| UT-CONSULT-017 | Tư vấn kiến trúc sư | Lớp chống CSRF dùng chung trên endpoint ghi tư vấn: cookie và Origin (dự kiến theo TDD) | Branch | REGRESSION | P1 | Đặc tả chưa thực thi cho route tư vấn; quy tắc chung đã có test ở `CsrfOriginPolicyTests` của `bmt-be`. Dữ liệu minh họa; mock/fake trong bộ nhớ, không chứng minh PostgreSQL/broker. Allowlist https://client.example.test; spy delegate tiếp theo. | Request ghi JSON mang cookie `accessToken` với Origin đúng, sai, host thêm hậu tố (https://client.example.test.evil.test), chuỗi null; không Origin nhưng Referer đúng; không cả Origin lẫn Referer. | Origin khớp chính xác hoặc Referer đúng thì đi tiếp; các trường hợp còn lại trả 403 `CsrfInvalid`, không gọi handler. | BR-CONSULT-002/Then<br>TDD-CONSULT-001/Architecture<br>TDD-AUTH-001/Architecture | Kiểm nhánh và kết quả quan sát được theo hợp đồng đã chốt. | Tân Trần | Draft |
 
 ## TEST_LINKS
 
 - BR-CONSULT-002/Then
 - TDD-CONSULT-001/Architecture
+- TDD-AUTH-001/Architecture

@@ -54,7 +54,7 @@ Người dùng đã chốt TDD-NEWS-001 và TDD-NEWS-002, gồm giới hạn tê
 | UNIQUE tên cùng cha, NULL gốc, FK và cascade | PostgreSQL 15 thật; ST-NEWS-013, ST-NEWS-016–018 và TDD-NEWS-002/Data Model. Mock không chứng minh constraint. |
 | Khóa cây và bài, rollback, cạnh tranh chuyển nhánh | Hai connection thật, kiểm cả kết quả và dữ liệu cuối; thử xóa Category đồng thời gắn Article, A→B đồng thời B→A, ghi links thất bại. Theo hai TDD/Architecture. |
 | CTE toàn nhánh, EXISTS loại trùng, thứ tự và snapshot phân trang | Integration SQL và ST-NEWS-021–025, ST-NEWS-029; không dùng LINQ-to-objects thay SQL để tuyên bố đạt. |
-| Quyền và CSRF ở route thực, session, AllowAnonymous | API integration và ST-NEWS-011, ST-NEWS-019–020, ST-NEWS-026; policy unit không chứng minh middleware được gắn. |
+| Quyền và CSRF ở route thực, session, AllowAnonymous | API integration và ST-NEWS-011, ST-NEWS-019–020, ST-NEWS-026; policy unit không chứng minh middleware được gắn. CSRF dùng lớp chung ở [TDD-AUTH-001](../tdd/TDD-AUTH-001.md), đã có test qua pipeline HTTP cho lớp này. |
 | Presign, CORS, signed headers, URL hết hạn, ảnh final bất biến | Storage contract test trên môi trường thử của dự án và ST-NEWS-004–005; thử finalize đồng thời và staging bị đổi giữa xác minh/copy. |
 | Rich text không thực thi mã và round-trip editor | Parser unit kiểm DOM; trình duyệt thật kiểm ST-NEWS-027, cả trang quản trị và khách. |
 | Xóa/ẩn phản ánh trên trang khách và không trừ lượt | ST-NEWS-009–010, ST-NEWS-020, ST-NEWS-026; kiểm response mới, cache và dữ liệu gói trước/sau. |

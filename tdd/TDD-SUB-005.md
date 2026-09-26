@@ -338,7 +338,7 @@ erDiagram
 
 - **POST** `/api/v1/admin/packages/{kind}/{packageId}/cancel` — kind Design/Supervision; nhân viên đã xác minh có `package.cancel`; body `{expectedVersion,reason}` và header `Idempotency-Key`. Hủy gói giám sát kết thúc phân công và ghi bản lưu công trình như Architecture.
 
-Không còn route `POST /api/v1/admin/packages/{kind}/{packageId}/restore`. Quyền `commerce.read` không bắt buộc để handler hủy xác minh quyền riêng; giao diện có thể cần quyền đọc để chọn gói. Không cho client truyền `actorId` hoặc thời điểm hủy. Lý do sau khi bỏ khoảng trắng không rỗng, tối đa 2.000 ký tự; key tối đa 100; không tự cắt dữ liệu. API phải hỗ trợ chống CSRF/origin cho cookie-auth theo chính sách triển khai đã xác minh. Hộp xác nhận "hủy không hoàn tác được" do giao diện hiện trước khi gửi yêu cầu; server không có bước xác nhận riêng.
+Không còn route `POST /api/v1/admin/packages/{kind}/{packageId}/restore`. Quyền `commerce.read` không bắt buộc để handler hủy xác minh quyền riêng; giao diện có thể cần quyền đọc để chọn gói. Không cho client truyền `actorId` hoặc thời điểm hủy. Lý do sau khi bỏ khoảng trắng không rỗng, tối đa 2.000 ký tự; key tối đa 100; không tự cắt dữ liệu. Request dùng cookie được kiểm Origin theo [TDD-AUTH-001](TDD-AUTH-001.md); sai thì trả 403 `CsrfInvalid`. Hộp xác nhận "hủy không hoàn tác được" do giao diện hiện trước khi gửi yêu cầu; server không có bước xác nhận riêng.
 
 ### Examples
 
@@ -415,6 +415,7 @@ Phản hồi theo dạng `PackageMutated` đang có trong code. Không trả "đ
 
 ## Change Log
 
+- 2026-09-26 (CSRF): Chống CSRF dẫn tới [TDD-AUTH-001](TDD-AUTH-001.md).
 - 2026-09-26 (đồng bộ code): Khóa tài khoản chủ gói trong code là dòng `AccountCommerceState` từ commit `a53faeb`, không còn dòng `User`; sửa Context, thứ tự khóa khi hủy gói giám sát và Sequence Diagram. Bảng hiện trạng của `develop` trước lần 3 giữ nguyên để đối chiếu.
 - 2026-09-25 (lần 3): Theo quyết định người dùng ngày 25/09/2026: bỏ khôi phục cho cả hai loại gói (BR-SUB-025 đã bỏ) — gỡ endpoint, handler, policy, mã quyền `package.restore` và dữ liệu mẫu khôi phục; kỳ thiết kế `CanceledByStaff` là trạng thái cuối. Hủy gói giám sát kết thúc phân công (`EndReason = PackageCanceled`, nhật ký `AssignmentEnded`) theo thứ tự khóa tài khoản → `Assignment` → `SupervisionGrant`, có truy vấn lại phân công sau khi khóa gói và ánh xạ `40P01` thành 409 `PackageVersionConflict`. `PackageLifecycleEvent` thêm `Unassign` (TDD-SUB-007) và ba cột bản lưu công trình với CHECK `CK_PackageLifecycleEvent_SiteSnapshot`, ghi khi hủy gói giám sát có công trình. Ghi hộp xác nhận là việc của giao diện. Thêm phần migration và cập nhật truy vết ST-PAY-073, ST-PAY-085–088, ST-SUB-127; ST-PAY-038–046 đã bỏ. Thiết kế chưa có trong code.
 - 2026-09-25 (đồng bộ code lần 2): Ghi rõ dạng thân lỗi 422 `PackageMutationInvalid`. Ghi rõ migration `PackageHistoryRestrict` ở commit `72e7327` đã thêm CHECK `CK_DesignPeriod_SupersededClosedAt` và đổi ba khóa ngoại kỳ thiết kế sang RESTRICT.

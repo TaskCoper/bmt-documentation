@@ -276,7 +276,7 @@ EF mapping: Parent optional self-reference Restrict, Version IsConcurrencyToken,
 
 ### Endpoints
 
-Route mới đề xuất. Dùng news.manage, phiên và CSRF như TDD-NEWS-001; endpoint công khai AllowAnonymous. DTO UUID dạng chuỗi; parentId NULL/thiếu trên GET nghĩa gốc. Tất cả list có phân trang và thứ tự SortOrder,Id. expectedVersion là token kỹ thuật, không phải phiên bản cây có thể xem lại.
+Route mới đề xuất. Dùng news.manage và phiên như TDD-NEWS-001; chống CSRF theo [TDD-AUTH-001](TDD-AUTH-001.md); endpoint công khai AllowAnonymous. DTO UUID dạng chuỗi; parentId NULL/thiếu trên GET nghĩa gốc. Tất cả list có phân trang và thứ tự SortOrder,Id. expectedVersion là token kỹ thuật, không phải phiên bản cây có thể xem lại.
 
 - **GET** `/api/v1/news/categories` — Public; query parentId,pageIndex,pageSize; trả con trực tiếp với id,parentId,name,sortOrder,hasChildren, không trả toàn cây lồng nhau.
 - **GET** `/api/v1/news/categories/{id}` — Public; metadata một node; không có node trả 404. Phục vụ nhãn của danh mục đã chọn.
@@ -321,7 +321,7 @@ Error Response:
 
 - **Unauthorized** (401): Không có phiên quản trị hợp lệ.
 - **AccessForbidden** (403): Không có news.manage.
-- **CsrfRejected** (403): Mutation cookie thiếu token/Origin hợp lệ.
+- **CsrfInvalid** (403): Mutation dùng cookie có `Origin`/`Referer` ngoài danh sách được phép, hoặc thiếu cả hai; theo [TDD-AUTH-001](TDD-AUTH-001.md).
 - **NewsCategoryNotFound** (404): Node hoặc cha yêu cầu không tồn tại.
 - **NewsCategoryNameConflict** (409): Trùng NameKey dưới cùng cha, gồm cả gốc hoặc cha đích khi chuyển.
 - **NewsCategoryCycle** (409): Cha mới là chính node hoặc hậu duệ.
@@ -367,4 +367,5 @@ Error Response:
 
 ## Change Log
 
+- 2026-09-26 (CSRF): Chống CSRF dẫn tới [TDD-AUTH-001](TDD-AUTH-001.md); mã lỗi đổi từ `CsrfRejected` thành mã chung `CsrfInvalid`.
 - 2026-09-25: Giới hạn tên danh mục 200 ký tự dẫn căn cứ BR-NEWS-002 khoản 1 và STORY-NEWS-002/AC-008 thay cho ghi chú “người dùng chốt cùng TDD”; thêm ví dụ biên 200/201 ký tự. Ghi rõ lọc theo categoryId không tồn tại trả danh sách rỗng. Ghi `news.manage` là tên quyền đã chốt, kiểm theo mã quyền; bổ sung tham chiếu STORY-RBAC-001, BR-RBAC-001, BR-RBAC-011 và Use Cases của STORY-NEWS-002. Schema và API không đổi.

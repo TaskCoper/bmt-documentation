@@ -101,7 +101,7 @@ flowchart LR
 
 Người có `library.manage` (kiểm theo mã quyền, không theo tên vai trò Admin; BR-RBAC-001, BR-RBAC-011) preview bản nháp/current/old không tính quota và không tạo lịch sử khách. Không dùng preview quản trị để cấp quyền xem cho tài khoản khách. Khách mở chi tiết/history phải có phiên Customer hợp lệ; AccountId lấy từ phiên, không nhận từ body. Phiên bị khóa/thu hồi vẫn bị từ chối: xem lại miễn gói không có nghĩa bỏ kiểm xác thực.
 
-Permission library.manage được định nghĩa tại TDD-LIB-001; endpoint khách lấy AccountId từ phiên, không từ body. POST mở dùng cookie cần CSRF/Origin như nền tảng chung. Danh sách và thumbnail công khai theo TDD-LIB-001 không được trả manifest bảo vệ.
+Permission library.manage được định nghĩa tại TDD-LIB-001; endpoint khách lấy AccountId từ phiên, không từ body. POST mở dùng cookie được kiểm Origin theo [TDD-AUTH-001](TDD-AUTH-001.md). Danh sách và thumbnail công khai theo TDD-LIB-001 không được trả manifest bảo vệ.
 
 **Lượt và quyền xem: cùng lưu hoặc cùng hoàn tác**
 
@@ -289,7 +289,7 @@ Tạo bảng Version của TDD-LIB-001 trước khi thêm TemplateVersionId/FK v
 
 ### Endpoints
 
-Route đề xuất; AccountId lấy từ phiên. POST mở cần CSRF/Origin nhưng không dựa Idempotency-Key của client để tính lượt. Định danh lượt là account/version. Danh sách công khai và mutation quản trị theo TDD-LIB-001/Internal API.
+Route đề xuất; AccountId lấy từ phiên. POST mở được kiểm Origin theo [TDD-AUTH-001](TDD-AUTH-001.md) nhưng không dựa Idempotency-Key của client để tính lượt. Định danh lượt là account/version. Danh sách công khai và mutation quản trị theo TDD-LIB-001/Internal API.
 
 - **GET** `/api/v1/design-templates/{templateId}/access-info` — Phiên khách; trả currentVersionId,editVersion,alreadyOpened,requiresConfirmation,canOpen,deniedCode; không trả nội dung bảo vệ. Chỉ là gợi ý, POST kiểm lại.
 - **POST** `/api/v1/design-templates/{templateId}/open` — Phiên khách; `{versionId,expectedEditVersion,confirmUse}`. Trả `{templateId,versionId,number,editVersion,charged,detailUrl}`. Đã có Access thì charged=false, không yêu cầu confirmUse hoặc gói; chưa có phải confirmUse=true và điều kiện hiện hành.
@@ -393,4 +393,5 @@ Chuẩn bị nội dung lỗi trước commit không tính lượt. Lỗi tải 
 
 ## Change Log
 
+- 2026-09-26 (CSRF): Chống CSRF dẫn tới [TDD-AUTH-001](TDD-AUTH-001.md).
 - 2026-09-25: Đổi khóa đầu tiên của luồng mở mẫu lần đầu từ User khách sang AccountCommerceState, theo thứ tự thống nhất AccountCommerceState → kỳ/quota → Template/Version như TDD-PROJ-002 và TDD-PAY-001; cập nhật sơ đồ, mẫu dữ liệu và giải thích lý do. Ghi rõ quyền preview là `library.manage`, kiểm theo mã quyền; bổ sung tham chiếu STORY-RBAC-001, BR-RBAC-001 và TDD-PAY-001. Quy tắc tra cứu BR-LIB-003 không đổi.

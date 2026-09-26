@@ -278,7 +278,7 @@ Khi lấy lại link đang hiệu lực, giải mã CT1 cho owner, không tạo 
 
 ### Endpoints
 
-JSON thành công dùng Result<T>; binary stream không bọc JSON. Idempotency-Key cho mọi POST mutation, no-store cho các response. Policy owner gồm verified Customer và cùng OwnerId, CSRF khi dùng cookie; không yêu cầu subscription. Policy public chỉ xét share/header, bỏ qua cookie để không phát sinh quyền owner từ token chia sẻ.
+JSON thành công dùng Result<T>; binary stream không bọc JSON. Idempotency-Key cho mọi POST mutation, no-store cho các response. Policy owner gồm verified Customer và cùng OwnerId, kiểm Origin theo [TDD-AUTH-001](TDD-AUTH-001.md) khi dùng cookie; không yêu cầu subscription. Policy public chỉ xét share/header, bỏ qua cookie để không phát sinh quyền owner từ token chia sẻ.
 
 - **GET** `/api/v1/estimates/{estimateId}/result` — Owner nhận `{operationId,contractVersion,estimateName,dossier,exportAvailability}` từ nguồn Succeeded. `estimateName` là Estimate.Name hiện tại; `exportAvailability` chỉ tính export của NameVersion hiện tại. DTO dossier chi tiết chờ AI; không trả raw provider credential/URL hoặc toàn bộ envelope tùy ý.
 - **POST** `/api/v1/estimates/{estimateId}/exports` — `{format:"Pdf"|"Xlsx"}` + key; 202 khi Pending, 200 khi đã Ready hoặc replay; `{exportId,state,attemptNumber}`. Tìm hoặc tạo export theo NameVersion hiện tại, nên sau đổi tên sẽ tạo export mới. Failed + key mới chủ động → attempt mới; cùng key trả attempt đã nhận và currentState.
@@ -306,7 +306,7 @@ Các GET file nếu hỗ trợ HEAD hoặc Range phải dùng cùng policy, khô
 ```
 Request:
 Idempotency-Key: share-estimate-1
-X-CSRF-Token: <request-token>
+Origin: https://app.example.test
 {"expiryDate":"2026-09-25"}
 
 Response 201:
@@ -323,7 +323,7 @@ Domain example.test và token là placeholder minh họa, không phải URL tri�
 ```
 Request:
 Idempotency-Key: email-estimate-1
-X-CSRF-Token: <request-token>
+Origin: https://app.example.test
 {"recipient":"recipient@example.test"}
 
 Response 202:
@@ -353,7 +353,7 @@ Error Response:
 
 - **Unauthorized** (401): phiên owner không hợp lệ.
 - **AccessForbidden** (403): không đáp ứng policy tài khoản cho thao tác owner.
-- **CsrfInvalid** (403): mutation cookie thiếu/sai request token hoặc Origin.
+- **CsrfInvalid** (403): mutation dùng cookie có `Origin`/`Referer` ngoài danh sách được phép, hoặc thiếu cả hai; theo [TDD-AUTH-001](TDD-AUTH-001.md).
 - **EstimateNotFound** (404): bản không thuộc owner.
 - **ResultNotReady** (409): chưa có operation Succeeded đủ kết quả.
 - **ExportNotFound** (404): export/asset không thuộc đúng bản hoặc nguồn.
@@ -430,4 +430,5 @@ Không giữ SQL transaction trong quá trình gọi SMTP/render/upload. Export 
 
 ## Change Log
 
+- 2026-09-26 (CSRF): Chống CSRF dẫn tới [TDD-AUTH-001](TDD-AUTH-001.md); ví dụ bỏ header `X-CSRF-Token`, thay bằng `Origin`.
 - 2026-09-25: Dùng lại link còn hiệu lực trả 200 kèm ngày hết hạn hiện có và cờ `requestedExpiryApplied`, bỏ mã lỗi `ExistingShareActive` (BR-PROJ-006 khoản 9, STORY-PROJ-004/AC-010). Thêm `EstimateExport.NameVersion`, đổi unique thành `(OperationId,Format,NameVersion)` và mã lỗi `ExportOutdated` (409) để tệp xuất theo tên cũ không được phục vụ sau khi đổi tên; lần tải tiếp theo xuất lại từ kết quả đã lưu, không tính lượt, không gọi AI (BR-PROJ-007 khoản 7, STORY-PROJ-003/AC-006). Hồ sơ của chủ sở hữu, trang xem qua link và email luôn đọc tên hiện tại. Ghi rõ cấu trúc dự toán áp dụng cho mọi loại công trình trong danh mục; bổ sung Use Cases và mẫu dữ liệu tương ứng.

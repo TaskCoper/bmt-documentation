@@ -84,7 +84,7 @@ Người dùng xác nhận dùng presigned URL của dự án. Trong checkout n�
 
 | Thành phần | Trách nhiệm |
 | --- | --- |
-| AdminNewsApi / PublicNewsApi | Route quản lý có quyền và route đọc AllowAnonymous; DTO, trạng thái HTTP, chống CSRF cho mutation dùng cookie. |
+| AdminNewsApi / PublicNewsApi | Route quản lý có quyền và route đọc AllowAnonymous; DTO, trạng thái HTTP. Chống CSRF do lớp dùng chung ở [TDD-AUTH-001](TDD-AUTH-001.md) đảm nhận, module không tự làm. |
 | NewsArticleService | Lưu bài và liên kết danh mục cùng transaction; kiểm trạng thái, dữ liệu công bố và Version. |
 | INewsHtmlSanitizer | Phân tích HTML bằng parser, giữ allowlist, trả HTML chuẩn hóa và kết quả kiểm nội dung. |
 | INewsImageUploadGateway | Bao cơ chế presign hiện có của dự án; hoàn tất upload, xác minh ảnh và trả URL đọc bền vững. |
@@ -108,7 +108,7 @@ flowchart LR
 
 Mã quyền `news.manage` là quyền quản lý tin tức đã chốt tên theo STORY-RBAC-001/Preconditions, RequiresAssignment=false; vai trò Admin có quyền này. Policy kiểm theo mã quyền, không kiểm tên vai trò "Admin" (BR-RBAC-001, BR-RBAC-011); thiếu quyền trả 403 và không ghi dữ liệu nghiệp vụ. Thêm PermissionNames, bản ghi Permission qua migration và policy có hiệu lực tại backend; cấp cho Admin theo cơ chế vai trò hệ thống, các vai trò khác qua quản lý quyền hiện có. Không tạo quyền danh mục riêng, không yêu cầu Assignment. ActorId lấy từ phiên; client không được đặt CreatedBy, thời điểm công bố hoặc trạng thái qua DTO lưu nội dung.
 
-Quản trị phải có phiên hợp lệ, tài khoản không bị khóa/buộc đổi mật khẩu và quyền hiện hành. Khi chưa có cơ chế RBAC hoàn chỉnh, cần bổ sung trước mở route; không thay kiểm quyền bằng việc chỉ kiểm đăng nhập. Public API dùng AllowAnonymous và chỉ truy vấn Published; cookie hết hạn/không có gói không biến việc đọc công khai thành yêu cầu đăng nhập. Mutation dùng cookie phải kiểm antiforgery token và Origin được cấu hình, không dùng CORS thay cho chống CSRF. Đây là phần bổ sung nền tảng chưa được xác minh là đã tồn tại.
+Quản trị phải có phiên hợp lệ, tài khoản không bị khóa/buộc đổi mật khẩu và quyền hiện hành. Khi chưa có cơ chế RBAC hoàn chỉnh, cần bổ sung trước mở route; không thay kiểm quyền bằng việc chỉ kiểm đăng nhập. Public API dùng AllowAnonymous và chỉ truy vấn Published; cookie hết hạn/không có gói không biến việc đọc công khai thành yêu cầu đăng nhập. Chống CSRF theo [TDD-AUTH-001](TDD-AUTH-001.md): mutation dùng cookie phải có `Origin` (không có thì `Referer`) nằm trong danh sách được phép, sai thì trả 403 `CsrfInvalid`; không dùng CORS thay cho chống CSRF.
 
 **Rich text và URL ảnh**
 
@@ -287,7 +287,7 @@ Migration triển khai tạo Category trước, Article sau rồi link; dùng EF
 
 ### Endpoints
 
-Các route dưới đây là contract đề xuất v1, không khẳng định endpoint presign hiện có trùng tên. Carter dùng /api/v{version:apiVersion}. Quản trị yêu cầu news.manage; mutation kiểm CSRF khi dùng cookie. JSON field camelCase; UUID dạng chuỗi. Response dưới đây mô tả payload; endpoint giữ envelope Result của repo nếu đang dùng, không bọc PagedResult thêm một lần.
+Các route dưới đây là contract đề xuất v1, không khẳng định endpoint presign hiện có trùng tên. Carter dùng /api/v{version:apiVersion}. Quản trị yêu cầu news.manage; mutation dùng cookie được kiểm Origin theo [TDD-AUTH-001](TDD-AUTH-001.md). JSON field camelCase; UUID dạng chuỗi. Response dưới đây mô tả payload; endpoint giữ envelope Result của repo nếu đang dùng, không bọc PagedResult thêm một lần.
 
 - **GET** `/api/v1/news/articles` — Public; query keyword, categoryId, pageIndex, pageSize. Trả PagedResult<ArticleSummary> chỉ Published; không có contentHtml hoặc thông tin người quản trị. categoryId không tồn tại trả danh sách rỗng, không trả 404.
 - **GET** `/api/v1/news/articles/{id}` — Public; ArticleDetail gồm id,title,summary,coverImageUrl,contentHtml,firstPublishedAtUtc,categories. Không Published hoặc không tồn tại trả 404.
@@ -348,7 +348,7 @@ Error Response:
 
 - **Unauthorized** (401): Thiếu hoặc không có phiên quản trị hợp lệ.
 - **AccessForbidden** (403): Không có news.manage; quyền đọc public không cho phép mutation.
-- **CsrfRejected** (403): Mutation dùng cookie không có antiforgery token/Origin hợp lệ.
+- **CsrfInvalid** (403): Mutation dùng cookie có `Origin`/`Referer` ngoài danh sách được phép, hoặc thiếu cả hai; theo [TDD-AUTH-001](TDD-AUTH-001.md).
 - **NewsArticleNotFound** (404): Không có bài; trên public còn áp dụng cho bài không Published.
 - **NewsVersionConflict** (409): expectedVersion cũ; giữ dữ liệu hiện hành.
 - **NewsStateConflict** (409): Thao tác trạng thái không được phép, ví dụ ẩn Draft.
@@ -423,4 +423,5 @@ Không mở SQL transaction khi gọi cloud. Upload xong nhưng lưu bài thất
 
 ## Change Log
 
+- 2026-09-26 (CSRF): Chống CSRF dẫn tới [TDD-AUTH-001](TDD-AUTH-001.md), bỏ antiforgery token; mã lỗi đổi từ `CsrfRejected` thành mã chung `CsrfInvalid`.
 - 2026-09-25: Lọc tin theo categoryId không tồn tại trả danh sách rỗng như BR-NEWS-003 khoản 5, không trả 404; bỏ mã lỗi `NewsCategoryNotFound` khỏi API bài viết (mã này vẫn dùng cho API danh mục ở TDD-NEWS-002). Ghi `news.manage` là tên quyền đã chốt theo STORY-RBAC-001, kiểm theo mã quyền. Giới hạn tên danh mục 200 ký tự dẫn căn cứ BR-NEWS-002 khoản 1 và STORY-NEWS-002/AC-008. Bổ sung tham chiếu STORY-NEWS-002, STORY-RBAC-001, BR-RBAC-001 và BR-RBAC-011.

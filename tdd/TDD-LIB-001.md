@@ -81,7 +81,7 @@ Backend là .NET 8, EF Core/Npgsql 8; compose dùng PostgreSQL 15. `ApplicationD
 
 | Thành phần dự kiến | Trách nhiệm |
 |---|---|
-| LibraryApi, AdminLibraryApi | Carter routes, policy, CSRF, DTO; không tự tính quota. |
+| LibraryApi, AdminLibraryApi | Carter routes, policy, DTO; không tự tính quota. Chống CSRF do lớp dùng chung ở [TDD-AUTH-001](TDD-AUTH-001.md) đảm nhận. |
 | LibraryContentPolicy | Kiểm tên, kích thước, định dạng, ảnh đại diện, phân loại và điều kiện công bố. |
 | LibraryVersionService | Sửa tại chỗ, nháp riêng, công bố, ẩn/hiện, xóa nháp; kiểm version chống ghi đè. |
 | ILibraryCatalogReader | Đọc cùng EstimateCatalog/CatalogBuildingType/CatalogFloor của PROJ; trả revision và lựa chọn hợp lệ. Không có bản sao danh mục LIB. |
@@ -101,7 +101,7 @@ flowchart LR
 
 Mã quyền `library.manage` là quyền quản lý thư viện mẫu đã chốt tên theo STORY-RBAC-001/Preconditions, RequiresAssignment=false, seed cho vai trò hệ thống Admin; các vai trò khác được cấp bằng RBAC hiện có. Policy kiểm theo mã quyền này, không kiểm tên vai trò "Admin" (BR-RBAC-001, BR-RBAC-011); thiếu quyền trả 403 và không ghi dữ liệu nghiệp vụ. Bổ sung cả PermissionNames, migration seed và policy registry để PermissionCatalogGuard không từ chối khởi động. Quyền này khác quyền lợi gói `catalog.detail`: một bên là quản trị, một bên là quyền khách mở mẫu mới. Không tái dùng `assignment.manage` hoặc bắt phân công nhân viên vào mẫu.
 
-Mutation dùng cookie phải kiểm antiforgery token và Origin theo nền tảng PROJ/RBAC, không dùng CORS thay CSRF. Endpoint công khai chỉ trả summary và ảnh đại diện của phiên bản hiện hành không ẩn. Endpoint thumbnail kiểm lại current/visibility, không để URL asset thô tồn tại công khai sau ẩn/thay ảnh. Ảnh đã tải xuống trước đó không thể thu hồi khỏi máy khách.
+Mutation dùng cookie được kiểm Origin theo [TDD-AUTH-001](TDD-AUTH-001.md), không dùng CORS thay CSRF. Endpoint công khai chỉ trả summary và ảnh đại diện của phiên bản hiện hành không ẩn. Endpoint thumbnail kiểm lại current/visibility, không để URL asset thô tồn tại công khai sau ẩn/thay ảnh. Ảnh đã tải xuống trước đó không thể thu hồi khỏi máy khách.
 
 Preview quản trị và các route đọc nội dung bảo vệ theo TDD-LIB-002/Internal API; quyền library.manage không tạo lịch sử khách hoặc dùng lượt.
 
@@ -141,7 +141,7 @@ Object/metadata bất biến là hợp đồng đầu vào cho luồng tải tà
 
 - Thêm DTO/validator tại `contract/services/library/`, command/query handler tại `application/usecases/.../library/`, Carter routes tại `presentation/apis/library/` và entity/config tại domain/persistence.
 - Thêm các port đã nêu vào application/abstractions; catalog adapter đọc schema PROJ, quota adapter ghi schema SUB, storage adapter ở infrastructure. Không cho LIB cập nhật catalog hoặc cấu hình gói trực tiếp.
-- Bổ sung permission/policy registry/seed, UoW scoped và cấu hình stream/CSRF tại API. Hồi quy auth và gói/lượt sau thay đổi nền tảng.
+- Bổ sung permission/policy registry/seed, UoW scoped và cấu hình stream tại API; chống CSRF đã có ở lớp chung ([TDD-AUTH-001](TDD-AUTH-001.md)). Hồi quy auth và gói/lượt sau thay đổi nền tảng.
 - Thứ tự triển khai: nền RBAC/UoW → catalog và SUB cốt lõi → metadata/nháp/assets → công bố/danh sách → quyền xem/quota/history → tích hợp tải tệp và kiểm thử lỗi. Chưa giao triển khai trong tác vụ thiết kế này.
 
 Chi tiết triển khai nội dung/quản trị thuộc tài liệu này; bước quota/history và tải có quyền thuộc TDD-LIB-002.
@@ -320,7 +320,7 @@ Schema quota/Access được triển khai theo TDD-LIB-002 sau bảng Version; k
 
 ### Endpoints
 
-Tất cả route dưới đây là đề xuất. Mutation quản trị cần library.manage, Idempotency-Key và CSRF. RequestKey 1–100 ký tự; request hash chứa route, target, expected versions và body chuẩn hóa. Cùng actor/operation/key khác hash trả 409; cùng hash trả kết quả đã commit trước kiểm optimistic version, nhưng vẫn kiểm quyền hiện tại. API khách không nhận AccountId từ client.
+Tất cả route dưới đây là đề xuất. Mutation quản trị cần library.manage và Idempotency-Key; chống CSRF theo [TDD-AUTH-001](TDD-AUTH-001.md). RequestKey 1–100 ký tự; request hash chứa route, target, expected versions và body chuẩn hóa. Cùng actor/operation/key khác hash trả 409; cùng hash trả kết quả đã commit trước kiểm optimistic version, nhưng vẫn kiểm quyền hiện tại. API khách không nhận AccountId từ client.
 
 - **GET** `/api/v1/design-templates` — Công khai. query `drawingKind,buildingTypeId,floorCount,hasTum,name,pageIndex,pageSize`; thiếu hasTum nghĩa Tất cả. Trả summary: templateId,versionId,number,name,dimensions,type label,floorCount,hasTum,thumbnailUrl,publishedAtUtc. Không có file keys hoặc manifest chi tiết.
 - **GET** `/api/v1/design-templates/filters` — Công khai. query drawingKind/buildingTypeId; trả loại và số tầng hiện hành cộng giá trị cũ có mẫu public.
@@ -435,4 +435,5 @@ Upload hoàn tất nhưng metadata lỗi để lại object chưa gắn, không 
 
 ## Change Log
 
+- 2026-09-26 (CSRF): Chống CSRF dẫn tới [TDD-AUTH-001](TDD-AUTH-001.md), bỏ antiforgery token.
 - 2026-09-25: Ghi `library.manage` là tên quyền đã chốt theo STORY-RBAC-001 (RequiresAssignment=false, vai trò Admin có quyền), policy kiểm theo mã quyền chứ không theo tên vai trò. Bảng ý nghĩa dữ liệu đổi “Admin tạo/sửa” thành “người có `library.manage`”. Bổ sung tham chiếu STORY-RBAC-001 và BR-RBAC-001. Thiết kế nội dung, phiên bản và API không đổi.

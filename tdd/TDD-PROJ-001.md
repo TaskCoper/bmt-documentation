@@ -162,7 +162,7 @@ flowchart LR
 - Quy ước kỹ thuật: kiểm dung lượng ảnh thuộc frontend; đề xuất frontend dùng 1 MB = 1.000.000 byte (ảnh đầu vào ≤10.000.000 byte, ảnh phong cách ≤5.000.000 byte) và tính trên số byte thực của tệp. URL ảnh tối đa 2048 ký tự là giới hạn kỹ thuật cho cột `varchar(2048)`, chọn theo độ dài URL mà trình duyệt và CDN thường hỗ trợ; đây không phải quy tắc nghiệp vụ. Chuỗi đếm Unicode scalar (Rune), không đếm UTF-16 như giới hạn nhập tài liệu; không tự đổi chuẩn Unicode. Tên trim khoảng trắng đầu/cuối, mô tả giữ nội dung gốc nhưng whitespace-only không đáp ứng điều kiện mô tả. Mã tỉnh, mã xã và phiên bản dữ liệu địa chỉ tối đa 64 ký tự, không có khoảng trắng đầu/cuối (giới hạn kỹ thuật ở validator; cột vẫn là `text`).
 - Diện tích dùng `numeric(28,2)`/C# decimal; JSON gửi chuỗi thập phân như `"70.25"` để không mất chính xác trong JavaScript. Validator kiểm chuỗi số trước chuyển kiểu: tối đa 26 chữ số phần nguyên, 0–2 phần lẻ, >0, không exponent/NaN/Infinity. Đây là giới hạn biểu diễn, không trần diện tích nghiệp vụ; từ chối thay vì làm tròn. PostgreSQL có thể làm tròn khi ép vào numeric có scale, nên kiểm trước ghi là bắt buộc. [PostgreSQL 15 — numeric](https://www.postgresql.org/docs/15/datatype-numeric.html).
 - Danh mục địa chỉ là phụ thuộc riêng. Adapter trả `datasetVersion, provinceCode/name, wardCode/name`; backend lưu giá trị đã xác minh. Thay địa chỉ phải kiểm tập dữ liệu tương ứng; nguồn chưa sẵn sàng thì không nhận địa chỉ giả. Việc xử lý xã đã bị ngừng dùng trong bản cũ còn mở; không suy ra quy tắc giữ catalog loại/phong cách cũng áp dụng địa giới.
-- Cookie hiện có SameSite=None khi HTTPS. Các mutation mới phải kiểm antiforgery token và Origin hợp lệ; không dùng CORS thay CSRF. Thêm endpoint cấp request token cho phiên và chia sẻ Data Protection keyring giữa instance trước triển khai. GET công khai dùng token chia sẻ không dùng cookie quyền khách. [ASP.NET Core 8 — antiforgery](https://learn.microsoft.com/en-us/aspnet/core/security/anti-request-forgery?view=aspnetcore-8.0).
+- Chống CSRF theo lớp dùng chung ở [TDD-AUTH-001](TDD-AUTH-001.md): mọi mutation dùng cookie phải có `Origin` (không có thì `Referer`) nằm trong `Cors:AllowedOrigins`, sai thì trả 403 `CsrfInvalid`; request có header `Authorization` không bị kiểm. Không có request token hay endpoint cấp token, và không dùng CORS thay CSRF. Cookie phiên là `SameSite=None; Secure` ngoài Development. GET công khai dùng token chia sẻ không dùng cookie quyền khách.
 - Quyền khách: verified session + AccountKind=Customer + ownership. Tài khoản nhân viên (AccountKind=Staff) không tạo, sửa hoặc đổi tên bản dự toán; kiểm theo AccountKind, không theo tên vai trò. Quyền quản trị danh mục dùng policy verified Staff có quyền `estimate.catalog.manage` theo RBAC, RequiresAssignment=false (STORY-RBAC-001/Preconditions); seed permission này cho vai trò hệ thống Admin, không cho mọi nhân viên. Policy kiểm theo mã quyền, không kiểm tên vai trò "Admin" (BR-RBAC-001, BR-RBAC-011); thiếu quyền trả 403 và không ghi dữ liệu nghiệp vụ, ngoài nhật ký yêu cầu bị từ chối theo BR-RBAC-011 khoản 4. Không dùng role Admin để bỏ qua các điều kiện của tài khoản khách. Việc gán quyền cho vai trò nhân viên khác vẫn theo quy trình RBAC, không tự cấp ở tính năng này.
 - **Quyết định kỹ thuật khi triển khai (26/09/2026)**, không đổi nghiệp vụ:
   - Tên trong code so với bảng thành phần: handler mang hậu tố `CommandHandler`/`QueryHandler` (ví dụ `CreateEstimateCommandHandler`, `SaveBuildingTypeCommandHandler`); `IEstimateStore` gộp phần đọc/ghi của cả bản dự toán và danh mục (không có `IEstimateCatalogStore` riêng); khóa dòng nằm ở `IEstimateRowLocks`; `IEstimateWriteAccess` có tên `IEstimateInputWriteAccess`, hiện thực là `EstimateInputWriteAccessPolicy`; `ILocationCatalog` có tên `IEstimateLocationCatalog` (thêm `PrepareAsync` để nạp sẵn dữ liệu trước khi khóa dòng).
@@ -174,7 +174,7 @@ flowchart LR
   - `missingFields` của GET dùng tên trường của DTO; thiếu cả ảnh lẫn mô tả dùng tên chung `imageOrDescription`. GET còn trả `failureCode` của tác vụ thất bại gần nhất khi `state` là Failed.
   - Trường JSON lạ trong body và trong `input`, kể cả `name`, được giữ lại khi đọc JSON rồi validator trả 422 `InvalidEstimateInput` (hoặc `InvalidCatalogConfiguration` ở API danh mục), không bị bỏ qua. Lỗi hình thức từ validator dùng dạng ProblemDetails 422 hiện có của `ApiEndpoint`; lỗi phát hiện trong handler dùng dạng `{title,code,status,detail,messageCode,errors}` của middleware.
   - Khóa ngoại ghép của Estimate có tên cố định (`FK_Estimate_CatalogBuildingType`, `FK_Estimate_CatalogFloor`, `FK_Estimate_ArchitectureStyle`, `FK_Estimate_InteriorStyle`). Nếu một lần lưu vẫn chạm các khóa này, pipeline đổi thành 422 `InvalidEstimateInput`.
-- **Phần chưa triển khai**: (1) CSRF: endpoint `GET /api/v1/antiforgery/token` và kiểm `X-CSRF-Token`/Origin cho mutation dùng cookie chưa có ở module nào của backend; đây là việc nền tảng chung, cần làm trước khi mở tính năng. (2) Kiểm trước khi gửi AI rằng xã đã lưu còn thuộc tỉnh trong dữ liệu địa chỉ hiện hành: thuộc TDD-PROJ-002, chưa làm. Nguồn địa chỉ đã có adapter thật từ đợt bổ sung ngày 26/09/2026 (lần 2).
+- **Phần chưa triển khai**: (1) CSRF: lớp kiểm Origin dùng chung theo [TDD-AUTH-001](TDD-AUTH-001.md) đã có ở commit `50ed2f3` trên nhánh `feature/csrf-protection` của `bmt-be`, chưa merge vào `develop`; module này không cần code riêng. (2) Kiểm trước khi gửi AI rằng xã đã lưu còn thuộc tỉnh trong dữ liệu địa chỉ hiện hành: thuộc TDD-PROJ-002, chưa làm. Nguồn địa chỉ đã có adapter thật từ đợt bổ sung ngày 26/09/2026 (lần 2).
 
 ## Sequence Diagram
 
@@ -338,10 +338,9 @@ Nhóm tắt giữ danh sách: Admin tắt chọn tầng của B1 ở V3 nhưng v
 
 Tất cả route dưới đây là đề xuất v1. Response JSON thành công dùng envelope `Result<T>` hiện có; ví dụ chỉ lược trường trong value khi đã ghi rõ. Unknown JSON members bị từ chối cho DTO mutation, không bind EF entity. OwnerId/quota/revision hiệu lực do server quyết định.
 
-- **GET** `/api/v1/antiforgery/token` — Phiên verified lấy request token; no-store. Mutation dùng cookie phải gửi X-CSRF-Token hợp lệ, token không thay quyền sở hữu.
 - **POST** `/api/v1/estimates` — `{name}` + Idempotency-Key; 201 `{estimateId,inputVersion,nameVersion}`. Kiểm quyền tạo, ghim catalog hiện hành; cùng key trả receipt cũ.
 - **GET** `/api/v1/estimates/{estimateId}` — Chủ sở hữu đọc `{estimateId,name,nameVersion,canRename,inputVersion,catalogRevisionId,input,state,failureCode,canEdit,writeDeniedCode,missingFields}`; hết gói vẫn xem được. `canEdit` và `writeDeniedCode` chỉ nói về đầu vào. `canRename` là true khi người gọi là chủ sở hữu Customer, không phụ thuộc gói, lượt hay trạng thái AI. Cả hai cờ chỉ là gợi ý, mutation kiểm lại.
-- **PATCH** `/api/v1/estimates/{estimateId}/name` — Chủ sở hữu đổi tên với `{name,nameVersion}`; `nameVersion` là giá trị đã đọc từ GET. 200 `{name,nameVersion}` với tên đã trim và NameVersion mới (hoặc hiện tại nếu tên không đổi). Chỉ kiểm phiên Customer, quyền sở hữu, tên hợp lệ và NameVersion; không kiểm gói, quyền tạo thiết kế, lượt hay tác vụ AI, không đổi InputVersion, không gọi AI và không giữ/trừ lượt. Cần CSRF khi dùng cookie; không cần Idempotency-Key.
+- **PATCH** `/api/v1/estimates/{estimateId}/name` — Chủ sở hữu đổi tên với `{name,nameVersion}`; `nameVersion` là giá trị đã đọc từ GET. 200 `{name,nameVersion}` với tên đã trim và NameVersion mới (hoặc hiện tại nếu tên không đổi). Chỉ kiểm phiên Customer, quyền sở hữu, tên hợp lệ và NameVersion; không kiểm gói, quyền tạo thiết kế, lượt hay tác vụ AI, không đổi InputVersion, không gọi AI và không giữ/trừ lượt. Kiểm Origin theo [TDD-AUTH-001](TDD-AUTH-001.md) khi dùng cookie; không cần Idempotency-Key.
 - **GET** `/api/v1/estimates/{estimateId}/catalog` — Chủ sở hữu đọc snapshot danh mục của bản, gồm loại/cờ/danh sách tầng/hai nhóm tên và URL ảnh. Danh sách của nhóm đang tắt trả rỗng vì khách không được chọn. Không trả catalog hiện hành thay thế.
 - **PUT** `/api/v1/estimates/{estimateId}/input` — `{expectedInputVersion,changedFields,input}` + key; 200 `{estimateId,savedInputVersion}`. Input đủ tất cả trường DTO, NULL nghĩa chưa nhập; changedFields xác định trường chủ động sửa, không cho sửa field ngoài danh sách. Đọc lại GET sau thành công để lấy chuẩn hóa; không gọi AI.
 - **GET** `/api/v1/estimate-locations/provinces` — Phiên verified nhận `datasetVersion` và danh sách tỉnh `{code,name}` từ provinces.open-api.vn v2 qua bản lưu Redis. Nguồn lỗi thì dùng bản đã lưu; chưa có bản nào thì 503.
@@ -361,7 +360,7 @@ DTO input gồm `buildingTypeId,areaM2,description,provinceCode,wardCode,locatio
 ```
 Request:
 Idempotency-Key: create-estimate-1
-X-CSRF-Token: <request-token>
+Origin: https://app.example.test
 {"name":"  Nhà A  "}
 
 Response 201:
@@ -376,7 +375,7 @@ Error Response:
 ```
 Request:
 Idempotency-Key: save-estimate-1
-X-CSRF-Token: <request-token>
+Origin: https://app.example.test
 {"expectedInputVersion":1,"changedFields":["areaM2","description"],"input":{"buildingTypeId":null,"areaM2":"70.25","description":"Nhà hai phòng ngủ","provinceCode":null,"wardCode":null,"locationDatasetVersion":null,"addressDetail":null,"finishPackage":null,"floorCount":null,"hasTum":null,"architectureStyleId":null,"interiorStyleId":null,"inputImageUrl":null}}
 
 Response 200:
@@ -390,7 +389,7 @@ Error Response:
 
 ```
 Request:
-X-CSRF-Token: <request-token>
+Origin: https://app.example.test
 {"name":"  Nhà A - phương án chốt  ","nameVersion":1}
 
 Response 200:
@@ -406,7 +405,7 @@ Ví dụ vẫn trả 200 khi gói đã hết hạn hoặc bản đang có tác v
 
 - **Unauthorized** (401): phiên không hợp lệ; dùng mapping xác thực hiện có.
 - **AccessForbidden** (403): thiếu quyền `estimate.catalog.manage` khi gọi API quản trị danh mục, hoặc tài khoản không phải Customer (AccountKind khác Customer) gọi thao tác khách, gồm cả đổi tên.
-- **CsrfInvalid** (403): mutation cookie thiếu/sai antiforgery hoặc Origin không hợp lệ; bổ sung filter dự kiến, chưa có trong code (việc nền tảng chung).
+- **CsrfInvalid** (403): mutation dùng cookie có `Origin`/`Referer` ngoài danh sách được phép, hoặc thiếu cả hai; theo [TDD-AUTH-001](TDD-AUTH-001.md).
 - **EstimateNotFound** (404): không có bản trong phạm vi owner, gồm ID của người khác.
 - **SubscriptionInactive** (403): chỉ khi tạo bản dự toán hoặc lưu đầu vào: chưa có kỳ, đã hết hạn, bị hủy hoặc bị thay thế. Không áp cho đổi tên.
 - **EntitlementMissing** (403): chỉ khi tạo bản dự toán hoặc lưu đầu vào: không có quyền design.generate của kỳ hiện tại. Không áp cho đổi tên.
@@ -501,6 +500,7 @@ Nguồn địa chỉ: HTTP khác 2xx, quá thời gian chờ, lỗi mạng, JSON
 
 ## Change Log
 
+- 2026-09-26 (CSRF): Chống CSRF chuyển sang lớp kiểm Origin dùng chung ở [TDD-AUTH-001](TDD-AUTH-001.md) theo quyết định người dùng cùng ngày: bỏ `GET /api/v1/antiforgery/token` và header `X-CSRF-Token` khỏi endpoint, ví dụ và mục "Phần chưa triển khai"; `CsrfInvalid` giữ nguyên mã.
 - 2026-09-26 (lần 2): Theo bốn quyết định người dùng xác nhận cùng ngày. (1) URL ảnh phong cách và ảnh đầu vào mới phải thuộc tên miền kho presign, đọc từ option chung `UploadedFileOption__AllowedHosts`; so khớp chính xác tên máy chủ, không phân biệt hoa thường, không nhận tên miền con; danh sách rỗng thì từ chối URL mới bằng 503. (2) Nhóm lựa chọn tắt giữ danh sách: bỏ quy định danh sách của nhóm tắt phải rỗng; khách không thấy và không chọn được phần tử của nhóm tắt; ghi ảnh hưởng tới snapshot, đổi loại và kiểm trước khi gửi AI. (3) Ghi rõ người vận hành bật `EstimateOption__CustomerCreationEnabled`, hệ thống không tự kiểm danh mục đủ. (4) Nguồn địa chỉ là provinces.open-api.vn v2 (`GET /api/v2/?depth=2`), lưu trong Redis, dùng bản lưu khi nguồn lỗi, phiên bản dữ liệu tính từ nội dung; thêm mã lỗi `LocationDatasetChanged` (409), thêm option `ProvincesOpenApiOption`. Không đổi schema, không thêm migration. Cập nhật hiện trạng: code đã merge vào `develop` (commit `a557993`).
 - 2026-09-26: Theo quyết định của người dùng về tệp và ảnh: bỏ bảng `EstimateAsset`, cổng `IEstimateAssetStore` và bốn endpoint upload/tải (`POST /estimates/{estimateId}/input-assets`, `GET /estimates/{estimateId}/assets/{assetId}`, `POST /admin/estimate-catalog/style-assets`, `GET /estimate-style-assets/{assetId}`). Ảnh phong cách lưu bằng `CatalogStyle.ImageUrl`, ảnh đầu vào bằng `Estimate.InputImageUrl` (`varchar(2048)`, CHECK https); DTO dùng `imageUrl` và `inputImageUrl`. Frontend kiểm định dạng, dung lượng và upload qua dịch vụ presigned URL; backend chỉ kiểm URL tuyệt đối https. Giữ quy tắc giữ ảnh cũ tới khi lưu URL mới thành công. Bỏ mã lỗi InvalidAsset và UploadTooLarge; thêm CatalogItemNotFound (404). Sửa ghi chú khóa thương mại: TDD-SUB-002 đã dùng AccountCommerceState. Ghi hiện trạng triển khai trên nhánh `feature/estimate` (migration `EstimateCatalogAndDraft`), các quyết định kỹ thuật khi triển khai và phần chưa làm (CSRF, nguồn địa chỉ).
 - 2026-09-25 (lần 2): Non-goals dẫn tới đặc tả Công trình (STORY-SITE-001, TDD-SITE-001) thay cho ghi chú "chưa có đặc tả". Không đổi thiết kế bản dự toán.

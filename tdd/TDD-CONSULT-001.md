@@ -136,7 +136,7 @@ Gửi yêu cầu dùng policy riêng `ConsultationCustomer`: phiên đăng nhậ
 
 **Bảo vệ request và dữ liệu**:
 
-API mới chỉ nhận JSON cho thao tác ghi. Đề xuất filter dành cho module: yêu cầu `X-BMT-Request: 1`; với cookie-auth, Origin phải khớp chính xác danh sách frontend được cấu hình; thiếu/sai Origin bị từ chối. Header này buộc trình duyệt khác origin đi qua preflight; CORS phải giữ allowlist cụ thể, không wildcard với credentials. Không coi CORS là phân quyền. Client dùng bearer không cookie vẫn phải có header riêng nhưng không cần Origin. Đây là thay đổi tích hợp frontend phải làm cùng API, không khẳng định filter đã tồn tại.
+API mới chỉ nhận JSON cho thao tác ghi. Chống CSRF dùng lớp chung ở [TDD-AUTH-001](TDD-AUTH-001.md), module không có filter riêng và không dùng header `X-BMT-Request`: request ghi dùng cookie phải có `Origin` (không có thì `Referer`) khớp chính xác danh sách frontend được cấu hình, mang cookie mà thiếu cả hai cũng bị từ chối; client dùng Bearer không bị kiểm. CORS phải giữ allowlist cụ thể, không wildcard với credentials. Không coi CORS là phân quyền. Frontend gọi từ trình duyệt không phải gửi header riêng.
 
 Ảnh là URL HTTPS tuyệt đối do admin nhập, giới hạn độ dài và không có user-info trong URL; không nhận `javascript:`, `data:` hoặc đường dẫn file. Backend không tải URL để kiểm tra hoặc làm proxy, tránh biến API thành công cụ truy cập mạng nội bộ. Frontend dùng img với `referrerPolicy=no-referrer`, hiển thị ảnh dự phòng khi host ngoài không truy cập được; không tuyên bố kiểm chứng bytes hoặc quyền sở hữu ảnh. Giới thiệu, category, message và internalNote là plain text; không render HTML do người nhập cung cấp. Không ghi số điện thoại, email đầy đủ, body hoặc URL có query vào log mới. Consumer hiện log email người nhận; khi tích hợp cần che địa chỉ trong log, không log nội dung thư.
 
@@ -169,7 +169,7 @@ Các hợp đồng kỹ thuật mới cần được kiểm chứng thêm khi tr
 | Model và cấu hình | `src/bmt-be.domain/entities/{Architect,ArchitectCategory,ArchitectCategoryLink,ConsultationRequest}.cs`; các configuration cùng tên trong `src/bmt-be.persistence/configurations/`; `ApplicationDbContext.cs`, `constants/TableNames.cs`; migration mới sau mốc đang có |
 | Repository | Ba interface tương ứng trong `domain/abstractions/repositories/`, ba implementation trong `persistence/repositories/`; đăng ký scoped trong persistence DI. Inject trực tiếp repository chuyên biệt, không thêm vào generic GetRepository<TEntity> đòi Entity<Guid>. |
 | API/use case | Các thư mục services, usecases/commands, usecases/queries và apis cho architect, architectCategory, consultationRequest; handler command kết thúc tên bằng Command để vào transaction pipeline |
-| Quyền và bảo vệ request | Hằng `consultation.manage` trong `PermissionNames.cs`, migration seed Permission/RolePermission cho admin; policy/claim/kiểm phiên dùng hạ tầng RBAC chung đã có; filter chống cross-site cho các endpoint ghi mới |
+| Quyền và bảo vệ request | Hằng `consultation.manage` trong `PermissionNames.cs`, migration seed Permission/RolePermission cho admin; policy/claim/kiểm phiên dùng hạ tầng RBAC chung đã có; chống CSRF dùng lớp chung ở [TDD-AUTH-001](TDD-AUTH-001.md), không thêm filter riêng |
 | Tài khoản và email | `contract/services/user/Response.cs`, `GetMeHandler.cs`; `contract/templates/ConsultationEmailTemplate.cs`; log người nhận ở `SendEmailConsumer.cs`; cấu hình timeout ở MailOption/MailService nếu chọn đề xuất 30 giây |
 | Lỗi | Kiểu conflict/service-unavailable và ánh xạ có kiểm soát trong `ExceptionHandlingMiddleware.cs`; không đổi envelope của endpoint cũ |
 
@@ -503,7 +503,7 @@ DTO tạo hồ sơ dùng nullable cho các trường bắt buộc kiểu số/bo
 
 ### Examples
 
-Các UUID dưới đây chỉ minh họa. Khối response trình bày envelope Result<T> hiện có (`isSuccess`, `isFailure`, `error`, `value`); Error.None có code/message/messageCode là chuỗi rỗng. FE không phụ thuộc thứ tự thuộc tính. Thao tác ghi có cookie cần Origin hợp lệ và X-BMT-Request như Architecture.
+Các UUID dưới đây chỉ minh họa. Khối response trình bày envelope Result<T> hiện có (`isSuccess`, `isFailure`, `error`, `value`); Error.None có code/message/messageCode là chuỗi rỗng. FE không phụ thuộc thứ tự thuộc tính. Thao tác ghi có cookie cần Origin hợp lệ theo [TDD-AUTH-001](TDD-AUTH-001.md).
 
 #### POST /api/v1/admin/architects
 
@@ -621,7 +621,7 @@ Các mã nghiệp vụ dưới đây dùng messageCode khi đi qua DomainExcepti
 - **InvalidAccessToken** (401): Không có phiên hợp lệ; giữ cách trả Unauthorized hiện có.
 - **ExpiredAccessToken** (401): Phiên hết hạn.
 - **AccessForbidden** (403): Thiếu quyền, sai loại phiên hoặc vi phạm điều kiện policy.
-- **ConsultationOriginRejected** (403): Cookie request thiếu/sai Origin hoặc thiếu header chống request cross-site.
+- **CsrfInvalid** (403): Request ghi dùng cookie có `Origin`/`Referer` ngoài danh sách được phép, hoặc thiếu cả hai; theo [TDD-AUTH-001](TDD-AUTH-001.md).
 - **ArchitectNotFound** (404): Không có hồ sơ; public coi hồ sơ ẩn là không tìm thấy.
 - **ArchitectUnavailable** (409): KTS bị ẩn khi tiếp nhận yêu cầu mới.
 - **ArchitectCategoryNotFound** (404): Category trong thao tác quản trị không tồn tại hoặc đã bị xóa trước khi gán.
@@ -713,5 +713,6 @@ Mặc định source hiện là 3 lần retry, khoảng đầu 5 giây, mỗi l�
 
 ## Change Log
 
+- 2026-09-26 (CSRF): Chống CSRF dùng lớp chung ở [TDD-AUTH-001](TDD-AUTH-001.md): bỏ filter riêng của module và header `X-BMT-Request`; mã lỗi đổi từ `ConsultationOriginRejected` thành mã chung `CsrfInvalid`. Sửa UT-CONSULT-017, UT-CONSULT-018 theo.
 - 2026-09-25 (metadata): Điền Author, Reviewer và Approver là Tân Trần theo xác nhận của người dùng.
 - 2026-09-25: Cập nhật theo US/BR đã chốt ngày 25/09/2026. Gộp bốn mã đề xuất `architect.manage`, `architect_category.manage`, `consultation.read`, `consultation.update` thành một mã `consultation.manage` (`RequiresAssignment=false`, seed cho admin) cho toàn bộ quản trị tư vấn KTS; sửa bảng quyền, mẫu dữ liệu Permission/RolePermission, migration và câu kiểm "số Permission tăng đúng bốn" thành tăng đúng một. Thêm Non-goal: tư vấn KTS miễn phí là kênh riêng, không thay cam kết tư vấn của gói (BR-CONSULT-002/Notes). Cập nhật hiện trạng code: 10 mã quyền, policy theo mã quyền và kiểm dấu phiên đã có; sửa liên kết migration `InitialRbac`. Bổ sung tham chiếu STORY-RBAC-001, BR-RBAC-010, BR-RBAC-011.

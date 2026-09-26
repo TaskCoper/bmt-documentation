@@ -56,7 +56,7 @@ Lúc khảo sát ngày 21/09/2026, backend có tài khoản/xác thực và nề
 | Domain và Application | Thêm thực thể/cấu hình danh mục, Estimate, snapshot/kết quả, export/share/email; validator, policy và handler theo ba TDD. |
 | Persistence | Thêm mapping và FK ghép bảo vệ quyền sở hữu; UoW dùng chung theo scope; khóa hàng và chỉ mục chống tác vụ sống trùng. Chỉ lập kế hoạch migration sau khi kiểm tra schema/dữ liệu đích. |
 | TransactionPipelineBehavior | Hiện commit cả phản hồi Result.Failure bình thường. Lỗi cần rollback phải có đường xử lý rõ; Failed/TimedOut của AI là trạng thái cần commit khoản trả lượt. |
-| Presentation và xác thực | Thêm Carter endpoint, kiểm owner/AccountKind, quyền estimate.catalog.manage, CSRF cho cookie, ánh xạ lỗi 409/413/503 và DTO theo TDD. |
+| Presentation và xác thực | Thêm Carter endpoint, kiểm owner/AccountKind, quyền estimate.catalog.manage, ánh xạ lỗi 409/413/503 và DTO theo TDD. Chống CSRF cho cookie dùng lớp chung ở [TDD-AUTH-001](../tdd/TDD-AUTH-001.md), không làm riêng. |
 | MailService | Task hiện tại không phân biệt SMTP đã nhận với lỗi đóng kết nối. Adapter gửi hồ sơ cần giữ đúng bằng chứng tiếp nhận, dùng cùng cấu hình mà không tự thay hợp đồng gửi thư xác thực. |
 | Subscription/PAY/RBAC | Dùng quyền và quota đã thiết kế; thống nhất khóa thương mại, bổ sung FK Estimate vào UsageOperation và permission quản trị. Không cấp quota từ gói hoàn thiện Cơ bản/Tiêu chuẩn/VIP. |
 
@@ -93,7 +93,7 @@ Phạm vi nguồn đã đọc sâu gồm bộ PROJ và các nguồn trực tiế
 
 ## Thứ tự triển khai sau khi chốt thiết kế
 
-1. Hoàn tất hợp đồng tích hợp và rà soát phụ thuộc còn mở; thống nhất nền RBAC/subscription/khóa thương mại, transaction và CSRF.
+1. Hoàn tất hợp đồng tích hợp và rà soát phụ thuộc còn mở; thống nhất nền RBAC/subscription/khóa thương mại và transaction. CSRF đã thống nhất ngày 26/09/2026 ở [TDD-AUTH-001](../tdd/TDD-AUTH-001.md).
 2. Đặc tả Unit Test theo TDD đã được chốt; cập nhật phần kiểm chứng tích hợp tương ứng. Đã soạn đặc tả Unit Test cho phần có hợp đồng rõ; các adapter còn mở giữ riêng trong bảng UT.
 3. Triển khai danh mục, tạo/tự lưu và kho ảnh; kiểm chứng quyền lợi, phiên bản và dữ liệu cũ.
 4. Triển khai tiếp nhận AI, snapshot, worker, chốt lượt và các trường hợp timeout/kết quả muộn.
