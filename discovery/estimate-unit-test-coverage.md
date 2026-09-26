@@ -2,7 +2,7 @@
 
 Người dùng xác nhận “Ok chốt đi” cho TDD-PROJ-001, TDD-PROJ-002 và TDD-PROJ-003 sau khi làm rõ việc lưu và xem lại kết quả bước 2–3. Đây là xác nhận thiết kế trong hội thoại, không phải thao tác import/publish hoặc phê duyệt trên hệ thống quản lý tài liệu.
 
-Phạm vi chốt gồm thiết kế hiện có và các phần chờ tích hợp đã nêu rõ. Chưa có hợp đồng AI, lựa chọn kho tệp, nguồn địa chỉ hoặc thông số vận hành; không coi xác nhận này là đã bổ sung các dữ liệu còn thiếu. Chưa triển khai mã hoặc chạy test.
+Phạm vi chốt gồm thiết kế hiện có và các phần chờ tích hợp đã nêu rõ. Chưa có hợp đồng AI, lựa chọn kho tệp (ngày 26/09/2026 đã chốt không có kho tệp riêng, xem mục cập nhật cuối), nguồn địa chỉ hoặc thông số vận hành; không coi xác nhận này là đã bổ sung các dữ liệu còn thiếu. Chưa triển khai mã hoặc chạy test.
 
 ## Mốc TDD được chốt
 
@@ -45,7 +45,7 @@ Tất cả là đặc tả Draft, chưa thực thi. Reviewer/Approver: Tân Tr�
 | [UT-PROJ-023](../unittest/UT-PROJ-023.md) | EstimateGenerationInputFactory: Đầu vào từng lần AI bất biến | [TDD-PROJ-002](../tdd/TDD-PROJ-002.md) | [ST-PROJ-051](../systemtest/ST-PROJ-051.md) |
 | [UT-PROJ-024](../unittest/UT-PROJ-024.md) | UsageMaintenanceWorker: Hết lease không tự gửi AI lại | [TDD-PROJ-002](../tdd/TDD-PROJ-002.md) | [ST-PROJ-026](../systemtest/ST-PROJ-026.md) |
 | [UT-PROJ-025](../unittest/UT-PROJ-025.md) | UsageMaintenanceWorker: Worker cũ không ghi đè lần nhận việc mới | [TDD-PROJ-002](../tdd/TDD-PROJ-002.md) | [ST-PROJ-026](../systemtest/ST-PROJ-026.md) |
-| [UT-PROJ-026](../unittest/UT-PROJ-026.md) | EstimateResultStager: Kết quả thiếu hoặc không đọc được chưa thành công | [TDD-PROJ-002](../tdd/TDD-PROJ-002.md) | [ST-PROJ-023](../systemtest/ST-PROJ-023.md) |
+| [UT-PROJ-026](../unittest/UT-PROJ-026.md) | EstimateResultFileVerifier: Kết quả thiếu hoặc URL tệp không mở được chưa thành công | [TDD-PROJ-002](../tdd/TDD-PROJ-002.md) | [ST-PROJ-023](../systemtest/ST-PROJ-023.md) |
 | [UT-PROJ-027](../unittest/UT-PROJ-027.md) | FinalizeEstimateGenerationHandler: Chốt đúng kết quả và kỳ quota | [TDD-PROJ-002](../tdd/TDD-PROJ-002.md) | [ST-PROJ-022](../systemtest/ST-PROJ-022.md) |
 | [UT-PROJ-028](../unittest/UT-PROJ-028.md) | FinalizeEstimateGenerationHandler: Đúng mốc timeout không nhận kết quả muộn | [TDD-PROJ-002](../tdd/TDD-PROJ-002.md) | [ST-PROJ-026](../systemtest/ST-PROJ-026.md) |
 | [UT-PROJ-029](../unittest/UT-PROJ-029.md) | FinalizeEstimateGenerationHandler: Thành công không bị tính hoặc trả lượt lần nữa | [TDD-PROJ-002](../tdd/TDD-PROJ-002.md) | [ST-PROJ-027](../systemtest/ST-PROJ-027.md) |
@@ -75,9 +75,9 @@ Tất cả là đặc tả Draft, chưa thực thi. Reviewer/Approver: Tân Tr�
 | [UT-PROJ-053](../unittest/UT-PROJ-053.md) | SaveEstimateInputHandler / validator: PUT /input không nhận tên | [TDD-PROJ-001](../tdd/TDD-PROJ-001.md) | Chưa liên kết System Test |
 | [UT-PROJ-054](../unittest/UT-PROJ-054.md) | EstimateGenerationInputFactory: Snapshot gửi AI không chứa tên bản dự toán | [TDD-PROJ-002](../tdd/TDD-PROJ-002.md) | [ST-PROJ-064](../systemtest/ST-PROJ-064.md) |
 | [UT-PROJ-055](../unittest/UT-PROJ-055.md) | RequestEstimateGenerationHandler: Đổi tên trước khi gửi AI không gây InputVersionConflict | [TDD-PROJ-002](../tdd/TDD-PROJ-002.md) | [ST-PROJ-064](../systemtest/ST-PROJ-064.md) |
-| [UT-PROJ-056](../unittest/UT-PROJ-056.md) | RequestEstimateExportHandler: Tìm hoặc tạo export theo NameVersion hiện tại | [TDD-PROJ-003](../tdd/TDD-PROJ-003.md) | [ST-PROJ-069](../systemtest/ST-PROJ-069.md) |
-| [UT-PROJ-057](../unittest/UT-PROJ-057.md) | EstimateExportWorker: Không render tệp theo tên đã cũ | [TDD-PROJ-003](../tdd/TDD-PROJ-003.md) | [ST-PROJ-069](../systemtest/ST-PROJ-069.md) |
-| [UT-PROJ-058](../unittest/UT-PROJ-058.md) | EstimateFileReader / đọc trạng thái export: Tệp theo tên cũ trả ExportOutdated | [TDD-PROJ-003](../tdd/TDD-PROJ-003.md) | [ST-PROJ-069](../systemtest/ST-PROJ-069.md) |
+| [UT-PROJ-056](../unittest/UT-PROJ-056.md) | RequestEstimateExportHandler: Đổi tên không tạo export mới | [TDD-PROJ-003](../tdd/TDD-PROJ-003.md) | [ST-PROJ-069](../systemtest/ST-PROJ-069.md) |
+| [UT-PROJ-057](../unittest/UT-PROJ-057.md) | EstimateExportWorker: Lấy tệp không phụ thuộc tên bản dự toán | [TDD-PROJ-003](../tdd/TDD-PROJ-003.md) | [ST-PROJ-069](../systemtest/ST-PROJ-069.md) |
+| [UT-PROJ-058](../unittest/UT-PROJ-058.md) | EstimateFileReader: Tên tệp tải về theo tên hiện tại sau khi đổi tên | [TDD-PROJ-003](../tdd/TDD-PROJ-003.md) | [ST-PROJ-069](../systemtest/ST-PROJ-069.md) |
 | [UT-PROJ-059](../unittest/UT-PROJ-059.md) | EstimateResultReader: Hồ sơ chủ sở hữu và trang chia sẻ dùng tên hiện tại | [TDD-PROJ-003](../tdd/TDD-PROJ-003.md) | [ST-PROJ-069](../systemtest/ST-PROJ-069.md) |
 | [UT-PROJ-060](../unittest/UT-PROJ-060.md) | EstimateEmailWorker: Thư dựng bằng tên hiện tại lúc gửi | [TDD-PROJ-003](../tdd/TDD-PROJ-003.md) | [ST-PROJ-069](../systemtest/ST-PROJ-069.md) |
 | [UT-PROJ-061](../unittest/UT-PROJ-061.md) | GetEstimate query: canRename tách khỏi canEdit | [TDD-PROJ-001](../tdd/TDD-PROJ-001.md) | [ST-PROJ-061](../systemtest/ST-PROJ-061.md) |
@@ -89,9 +89,9 @@ Tất cả là đặc tả Draft, chưa thực thi. Reviewer/Approver: Tân Tr�
 - Unit tập trung vào validator/policy, trạng thái, hash/key chống lặp, đối số truyền giữa handler và port, quyết định công bố và quyền đọc. Expected output được viết theo TDD/BR đã chốt, không lấy giá trị fake trả về làm bằng chứng tự đủ cho assertion.
 - Việc đọc lại bước 2–3 phải giữ đúng source operation và giá trị dữ liệu, không gọi AI/quota. ST-PROJ-022, 033–038 và 057 kiểm chứng thêm bằng lưu/đọc thật và tệp thật trong môi trường thử.
 - Không dùng các fake store ở UT để kết luận đã bảo vệ transaction, FK, unique index hoặc khóa đồng thời. Tranh lượt, chốt-vs-timeout, tạo-vs-sửa danh mục, nhiều yêu cầu tạo link và rollback cần PostgreSQL thật; bám ST-PROJ-021–032, 052, 056 và 060.
-- Xác thực, CSRF, HTTP status/envelope, stream HEAD/Range, nội dung thật của ảnh JPG/PNG/HEIC/WebP, giới hạn byte, keyring và khôi phục tệp cần kiểm tra ở adapter/tầng tích hợp. Bám ST-PROJ-006, 011, 018, 034–047, 054–057 và 059–060; các nhánh keyring/fencing bổ sung bộ tích hợp kỹ thuật khi triển khai, không coi ST hiện có đã phủ mọi chi tiết kỹ thuật. Nhánh CSRF dùng lớp chung ở [TDD-AUTH-001](../tdd/TDD-AUTH-001.md), đã có test qua pipeline HTTP trong `test/bmt-be.api.tests/security/` của `bmt-be`; khi có route dự toán, chỉ cần kiểm route đó đi qua `UseApiPipeline`.
+- Xác thực, CSRF, HTTP status/envelope, stream HEAD/Range khi backend chuyển tiếp tệp từ URL, header `Content-Disposition`, kiểm tên máy chủ của URL tệp và keyring cần kiểm tra ở adapter/tầng tích hợp. Định dạng và dung lượng ảnh JPG/PNG/HEIC/WebP do frontend kiểm trước khi upload qua presign, backend chỉ kiểm URL (TDD-PROJ-001); backend không giữ bản sao tệp nên không có bước khôi phục tệp riêng. Bám ST-PROJ-006, 011, 018, 034–047, 054–057 và 059–060; các nhánh keyring/fencing bổ sung bộ tích hợp kỹ thuật khi triển khai, không coi ST hiện có đã phủ mọi chi tiết kỹ thuật. Nhánh CSRF dùng lớp chung ở [TDD-AUTH-001](../tdd/TDD-AUTH-001.md), đã có test qua pipeline HTTP trong `test/bmt-be.api.tests/security/` của `bmt-be`; khi có route dự toán, chỉ cần kiểm route đó đi qua `UseApiPipeline`.
 - Giữ nội dung chưa lưu, tự lưu lại khi mạng phục hồi, QR và tải tệp từ fragment/header cần trình duyệt thật. Chưa có frontend trong workspace.
-- Validator payload chuyên môn AI và exporter PDF/Excel chi tiết chưa thể đặc tả khi thiếu hợp đồng. Ca dùng envelope opaque chỉ kiểm luồng điều phối, không chứng minh dữ liệu AI thực đúng.
+- Validator payload chuyên môn AI và nguồn tệp PDF/Excel (`IEstimateExportFileSource`, lấy URL do AI trả) chưa thể đặc tả chi tiết khi thiếu hợp đồng. Ca dùng envelope opaque chỉ kiểm luồng điều phối, không chứng minh dữ liệu AI thực đúng.
 - Chưa hoàn tất rà soát ngữ nghĩa toàn bộ chuỗi tài liệu ngoài PROJ như đã ghi trong bảng TDD. Xác nhận thiết kế không thay bằng chứng đã rà soát hoặc chạy kiểm thử. Sau khi tích hợp được bổ sung làm thay đổi TDD, cần đối chiếu lại các ca bị ảnh hưởng.
 
 [Bảng Story/AC → BR → TDD](estimate-technical-design.md#truy-vết-và-kiểm-chứng) và [bảng từng AC/luồng → ST](estimate-system-test-coverage.md) là nguồn truy vết bổ sung; không coi số ca là mức bao phủ mã hoặc kết quả Pass.
@@ -113,3 +113,12 @@ Ba TDD được sửa theo US/BR chốt ngày 25/09/2026 và người dùng xác
 ## Cập nhật ngày 26/09/2026 (lần 2)
 
 TDD-PROJ-001 được sửa theo bốn quyết định người dùng xác nhận ngày 26/09/2026: URL ảnh mới phải thuộc tên miền kho presign; nhóm lựa chọn tắt vẫn giữ danh sách nhưng khách không chọn được; người vận hành bật cổng tạo bản dự toán; nguồn địa chỉ là provinces.open-api.vn v2 có bản lưu Redis. UT-PROJ-008, 011, 017 và 018 được sửa theo các quyết định này và ghi tên mã test; UT-PROJ-062 và UT-PROJ-063 được thêm cho adapter địa chỉ. TDD-PROJ-002 và TDD-PROJ-003 không đổi trong đợt này. Đã kiểm lại cấu trúc sáu file UT bị đụng tới (một dòng, 13 cột, Trace to khớp TEST_LINKS).
+
+## Cập nhật ngày 26/09/2026 (lần 3)
+
+Người dùng xác nhận ngày 26/09/2026 hai nhóm quyết định làm thay đổi các ca UT về tệp:
+
+- **Lưu URL, không có kho tệp riêng.** Backend lưu URL ảnh đầu vào đã kiểm theo `UploadedFileOption__AllowedHosts`; AI trả URL cho mọi tệp kết quả, kể cả PDF và Excel; backend chuyển tiếp tệp qua route có kiểm quyền, không lộ URL gốc. `EstimateResultStager`, `EstimateAsset` và các khóa AssetId đã bỏ khỏi TDD-PROJ-002/003. `EstimateResultFileVerifier` đọc thử URL trước khi chốt; `EstimateFileReader` kiểm quyền rồi đọc tệp theo URL và chuyển tiếp. UT-PROJ-026, 036, 042, 057 và 058 được sửa theo thiết kế này.
+- **Tên tệp sau khi đổi tên.** Tên mới chỉ áp vào tên tệp tải về (`Content-Disposition`), nội dung PDF/Excel giữ như lúc AI tạo (BR-PROJ-007 khoản 7). Export chỉ gắn với nguồn và định dạng; bỏ `EstimateExport.NameVersion`, `isCurrent`, trạng thái Failed `EstimateRenamed` và mã 409 `ExportOutdated` của bản ngày 25/09/2026. UT-PROJ-056, 057, 058 và 059 được sửa theo; ST-PROJ-069 cũng sửa bước kiểm tên.
+
+Đã kiểm lại cấu trúc các UT bị đụng tới (một dòng, 13 cột, Trace to khớp TEST_LINKS). Hash TDD ở các mục trên là mốc cũ, không còn khớp nội dung hiện tại của TDD-PROJ-002/003; chưa ghi mốc mới vì TDD chưa được chốt lại sau đợt sửa này.

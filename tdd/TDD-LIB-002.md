@@ -82,7 +82,7 @@ Dùng cùng hiện trạng .NET 8/EF Core/Npgsql/PostgreSQL 15 đã xác minh �
 | OpenLibraryVersionRequest | Chuẩn bị nội dung ngoài transaction ghi; chuyển sang CommitLibraryOpenCommand khi cần mua quyền xem. |
 | ILibraryQuotaService | Cổng application tới module Subscription; đọc kỳ/quyền và ghi PeriodQuota/UsageOperation trong UoW đang mở. Không tự commit. |
 | LibraryAccessReader | Đọc quyền AccountId + VersionId; không kiểm lại gói cho phiên bản đã mở. |
-| ILibraryFileReader (dự kiến) | Đọc tệp từ URL đã lưu trong LibraryAsset: thăm dò trước khi tính lượt và, nếu chọn phương án chuyển tiếp ở câu hỏi mở bên dưới, mở luồng đọc có Range. Chỉ gọi URL đã lưu, không nhận URL từ request. Không ghi hay xóa tệp. |
+| ILibraryFileReader (dự kiến) | Đọc tệp từ URL đã lưu trong LibraryAsset: thăm dò trước khi tính lượt và mở luồng đọc có Range để backend chuyển tiếp tệp (đã xác nhận ngày 26/09/2026, xem bên dưới). Chỉ gọi URL đã lưu, không nhận URL từ request. Không ghi hay xóa tệp. |
 
 ```mermaid
 flowchart LR
@@ -142,16 +142,17 @@ Chuẩn bị xong nhưng EditVersion/current đổi: trả 409 LibraryVersionCha
 
 Theo quyết định ngày 26/09/2026, backend không có kho tệp riêng: tệp nằm ở kho presign, tại URL https công khai và cố định, backend chỉ lưu URL trong `LibraryAsset.Url` ([TDD-LIB-001/Architecture](TDD-LIB-001.md#architecture)). Route tải vẫn kiểm quyền xem đúng VersionId và asset còn thuộc phiên bản đó trước khi phục vụ tệp. Thumbnail public dùng route riêng chỉ phục vụ cover current không ẩn. Khi thay ảnh đại diện trong cùng phiên bản, server không bỏ link ảnh cũ trước khi LibraryAsset mới được lưu và mutation commit. Các tệp đã được gỡ khỏi current không còn được cấp qua route của current; asset còn tham chiếu từ phiên bản cũ vẫn đọc được qua phiên bản cũ hợp lệ.
 
-**Câu hỏi mở — trả URL gốc hay backend chuyển tiếp tệp (chưa chốt).** BR-LIB-003 khoản 8 yêu cầu người chưa có quyền xem không lấy được ảnh chi tiết hoặc tệp bằng đường dẫn trực tiếp. Vì URL ở kho presign công khai và không hết hạn, ai có URL gốc là mở được tệp, không qua kiểm quyền của backend. Có hai cách:
+**Đã xác nhận ngày 26/09/2026 — backend chuyển tiếp tệp, không lộ URL gốc.** BR-LIB-003 khoản 8 yêu cầu người chưa có quyền xem không lấy được ảnh chi tiết hoặc tệp bằng đường dẫn trực tiếp. Vì URL ở kho presign công khai và không hết hạn, ai có URL gốc là mở được tệp mà không qua kiểm quyền của backend. Người dùng chọn cách backend chuyển tiếp tệp, giống tải tệp qua link chia sẻ ở [TDD-PROJ-003](TDD-PROJ-003.md):
 
-| Phương án | Cách làm | Ưu điểm | Hạn chế |
-|---|---|---|---|
-| (a) Backend chuyển tiếp tệp — **đề xuất** | Route `.../assets/{assetId}/content` và thumbnail kiểm quyền rồi tự đọc URL đã lưu và stream tệp về, chuyển tiếp header `Range` nếu kho hỗ trợ, đặt `Cache-Control: private, no-store` cho nội dung bảo vệ. API không trả URL gốc cho khách. Cùng cách với tải tệp qua link chia sẻ ở [TDD-PROJ-003](TDD-PROJ-003.md). | Khách chỉ thấy route của backend, nên không chia sẻ được đường dẫn trực tiếp; ẩn mẫu hoặc gỡ tệp chặn được lần tải mới qua backend. | Tốn băng thông và kết nối của API; người đã biết URL gốc (người quản lý, hoặc URL bị lộ từ kho) vẫn mở được vì kho công khai. |
-| (b) Trả URL gốc sau khi kiểm quyền | `contentUrl` là URL ở kho presign. | Đơn giản, không tốn băng thông API. | Người có quyền có thể gửi URL cho người khác, URL không hết hạn; không đáp ứng đầy đủ BR-LIB-003 khoản 8. |
+- Nội dung được bảo vệ (ảnh chi tiết, tệp đính kèm, cover trong lịch sử) chỉ tải qua route `.../assets/{assetId}/content` của backend. Route kiểm quyền xem đã mở của đúng VersionId và asset còn thuộc phiên bản, rồi mới đọc URL đã lưu và stream tệp về. Chuyển tiếp header `Range` nếu kho hỗ trợ; đặt `Cache-Control: private, no-store`. API không trả URL gốc ở kho cho khách, kể cả người đã có quyền xem.
+- Thumbnail công khai (TDD-LIB-001) dùng cùng cách chuyển tiếp để không lộ URL gốc của ảnh cover. Header cache của thumbnail chưa chốt.
+- `ILibraryFileReader` chỉ gọi URL đã lưu trong `LibraryAsset.Url`, không nhận URL từ request.
 
-Cho tới khi người dùng chốt, hợp đồng API ở Internal API viết theo phương án (a). Chọn (b) thì phải sửa Internal API, UT-LIB-032, UT-LIB-046 và đối chiếu lại BR-LIB-003 khoản 8. Cả hai phương án đều không thu hồi được tệp người dùng đã tải về máy.
+Ví dụ: khách K đã mở phiên bản V1 và gửi `GET /api/v1/library-versions/V1/assets/F2/content`. Backend kiểm Access của K với V1 và F2 còn thuộc V1, rồi đọc `https://cdn.example.test/lib/m1/ban-ve.pdf` và trả nội dung tệp với tên tải xuống `ban-ve.pdf`; phản hồi không chứa URL gốc. Nếu K gửi link route này cho người chưa mở V1, người đó nhận 403 `AccessForbidden`.
 
-Upload, kiểm URL và schema asset do TDD-LIB-001 định nghĩa. TDD này chỉ đọc URL đã lưu (thăm dò và, với phương án (a), chuyển tiếp), không ghi hay xóa tệp ở kho và không thêm hạn mức tải.
+Giới hạn: tốn băng thông và kết nối của API. Người đã biết URL gốc (người quản lý, hoặc URL bị lộ từ kho) vẫn mở được vì kho công khai; backend không thu hồi được tệp người dùng đã tải về máy.
+
+Upload, kiểm URL và schema asset do TDD-LIB-001 định nghĩa. TDD này chỉ đọc URL đã lưu (thăm dò và chuyển tiếp), không ghi hay xóa tệp ở kho và không thêm hạn mức tải.
 
 **Nơi thực hiện quy tắc và kiểm chứng**
 
@@ -160,9 +161,9 @@ Upload, kiểm URL và schema asset do TDD-LIB-001 định nghĩa. TDD này ch�
 | BR-LIB-003: lượt/quyền/lịch sử | AccessReader + quota service + transaction | ST-LIB-017–023, ST-LIB-026–028 | UT-LIB-033–043, UT-LIB-047–049 |
 | BR-LIB-003: tài nguyên và cách ly | Download policy; account từ phiên | ST-LIB-024–025 | UT-LIB-044–046, UT-LIB-050 |
 
-Đặc tả UT-LIB-033–050 kiểm luồng mở, quyền xem, lượt, lịch sử và tải tài nguyên ở biên unit; chưa có mã test hoặc kết quả chạy. Không dùng mock để kết luận mutex/UNIQUE/rollback đúng. Integration dùng PostgreSQL 15 thật và hai connection cho lượt cuối, cùng phiên bản, đổi kỳ, sửa/công bố chen lúc mở. Kiểm với kho presign thử: thăm dò URL lỗi hoặc hết thời gian trước khi ghi nhận, chuyển tiếp tệp có Range (nếu chọn phương án (a)). Bổ sung thực nghiệm công bố lúc xác nhận và tệp lớn trên môi trường thử; không báo đạt từ việc viết đặc tả.
+Đặc tả UT-LIB-033–050 kiểm luồng mở, quyền xem, lượt, lịch sử và tải tài nguyên ở biên unit; chưa có mã test hoặc kết quả chạy. Không dùng mock để kết luận mutex/UNIQUE/rollback đúng. Integration dùng PostgreSQL 15 thật và hai connection cho lượt cuối, cùng phiên bản, đổi kỳ, sửa/công bố chen lúc mở. Kiểm với kho presign thử: thăm dò URL lỗi hoặc hết thời gian trước khi ghi nhận, chuyển tiếp tệp có Range. Bổ sung thực nghiệm công bố lúc xác nhận và tệp lớn trên môi trường thử; không báo đạt từ việc viết đặc tả.
 
-Đặc tả UT-LIB-042 và UT-LIB-046 dùng `ILibraryObjectStore` (`ProbeReadable`, `OpenRead`) của thiết kế kho riêng cũ; UT-LIB-033 và UT-LIB-034 nhắc `ProbeReadable` trong mock. Hành vi mong đợi (lỗi chuẩn bị không tính lượt, tải có kiểm quyền) không đổi nhưng tên port và cách đọc tệp phải viết lại theo URL sau khi người dùng chốt TDD này và câu hỏi mở ở trên; chưa sửa trong đợt này.
+Đặc tả UT-LIB-033, UT-LIB-034, UT-LIB-042 và UT-LIB-046 đã được viết lại ngày 26/09/2026 theo `ILibraryFileReader` và cách chuyển tiếp tệp; hành vi mong đợi (lỗi chuẩn bị không tính lượt, tải có kiểm quyền) không đổi.
 
 **Notes**:
 
@@ -307,8 +308,8 @@ Route đề xuất; AccountId lấy từ phiên. POST mở được kiểm Origi
 - **POST** `/api/v1/design-templates/{templateId}/open` — Phiên khách; `{versionId,expectedEditVersion,confirmUse}`. Trả `{templateId,versionId,number,editVersion,charged,detailUrl}`. Đã có Access thì charged=false, không yêu cầu confirmUse hoặc gói; chưa có phải confirmUse=true và điều kiện hiện hành.
 - **GET** `/api/v1/me/library-history` — Phiên khách; phân trang các version có Access, sort ngày mở đầu tiên DESC rồi VersionId DESC; mỗi version một dòng, có tên/cover theo nội dung version đó, kể cả hidden/old. Không dùng public thumbnail route cho cover cũ, dùng route file có quyền.
 - **GET** `/api/v1/library-versions/{versionId}` — Phiên khách có Access hoặc Staff có library.manage; trả metadata, cover reference và URL trang assets. Không tự mua quyền xem qua GET.
-- **GET** `/api/v1/library-versions/{versionId}/assets` — Cùng quyền đọc version, query pageIndex/pageSize/expectedEditVersion, phân trang theo Position,AssetId; trả editVersion và assetId,kind,name,size,contentUrl; `contentUrl` là route content bên dưới, không trả URL gốc ở kho (theo phương án (a) đang đề xuất ở Architecture). expectedEditVersion khác EditVersion hiện tại thì trả 409 LibraryVersionChanged để client tải lại từ trang đầu, không ghép danh sách của hai lần sửa.
-- **GET** `/api/v1/library-versions/{versionId}/assets/{assetId}/content` — Kiểm quyền version và membership; theo phương án (a) đang đề xuất, backend đọc URL đã lưu và stream ảnh hoặc tệp đính kèm về (tên tải xuống lấy từ OriginalName), chuyển tiếp Range hợp lệ nếu kho hỗ trợ. Không tính lượt. AssetId không thuộc phiên bản, kể cả tài nguyên đã gỡ khi sửa tại chỗ, trả 404 LibraryNotFound trước khi gọi URL tệp.
+- **GET** `/api/v1/library-versions/{versionId}/assets` — Cùng quyền đọc version, query pageIndex/pageSize/expectedEditVersion, phân trang theo Position,AssetId; trả editVersion và assetId,kind,name,size,contentUrl; `contentUrl` là route content bên dưới, không trả URL gốc ở kho (đã xác nhận ngày 26/09/2026, Architecture). expectedEditVersion khác EditVersion hiện tại thì trả 409 LibraryVersionChanged để client tải lại từ trang đầu, không ghép danh sách của hai lần sửa.
+- **GET** `/api/v1/library-versions/{versionId}/assets/{assetId}/content` — Kiểm quyền version và membership; backend đọc URL đã lưu và stream ảnh hoặc tệp đính kèm về (tên tải xuống lấy từ OriginalName), chuyển tiếp Range hợp lệ nếu kho hỗ trợ. Không tính lượt. AssetId không thuộc phiên bản, kể cả tài nguyên đã gỡ khi sửa tại chỗ, trả 404 LibraryNotFound trước khi gọi URL tệp.
 
 ### Examples
 
@@ -344,7 +345,7 @@ Thiếu gói, hết hạn/hủy hoặc thiếu quyền tra cứu dùng mã SUB h
 
 ### Endpoints
 
-- **Kho presign — đọc theo URL đã lưu** — Backend gọi HTTP tới URL trong `LibraryAsset.Url` để thăm dò trước khi tính lượt và, với phương án (a), để chuyển tiếp tệp. Dịch vụ presigned URL nằm ngoài backend ([TDD-LIB-001/External API](TDD-LIB-001.md#external-api)); không tạo adapter lưu trữ.
+- **Kho presign — đọc theo URL đã lưu** — Backend gọi HTTP tới URL trong `LibraryAsset.Url` để thăm dò trước khi tính lượt và để chuyển tiếp tệp. Dịch vụ presigned URL nằm ngoài backend ([TDD-LIB-001/External API](TDD-LIB-001.md#external-api)); không tạo adapter lưu trữ.
 
 ### Fields
 
@@ -396,7 +397,7 @@ Chuẩn bị nội dung lỗi trước commit không tính lượt. Lỗi tải 
 
 - [Bảng System Test LIB](../discovery/library-system-test-coverage.md) — đặc tả System Test chưa thực thi.
 - [TDD-PROJ-001](TDD-PROJ-001.md) — catalog revision, kiểu số, UoW và quy ước lưu URL tệp.
-- [TDD-PROJ-003](TDD-PROJ-003.md) — cách backend chuyển tiếp tệp qua route có kiểm link chia sẻ, dùng làm mẫu cho phương án (a).
+- [TDD-PROJ-003](TDD-PROJ-003.md) — cách backend chuyển tiếp tệp qua route có kiểm link chia sẻ, dùng làm mẫu cho cách tải nội dung được bảo vệ.
 - [TDD-SUB-001](TDD-SUB-001.md) — BenefitDefinition và mã catalog.detail.
 - [TDD-SUB-002](TDD-SUB-002.md) — kỳ/quota; phần tra cứu được cập nhật theo TDD này.
 - [TDD-SUB-005](TDD-SUB-005.md) — LifecycleState khi kiểm hiệu lực kỳ.
@@ -407,6 +408,7 @@ Chuẩn bị nội dung lỗi trước commit không tính lượt. Lỗi tải 
 
 ## Change Log
 
+- 2026-09-26 (chốt tải qua backend và kiểm tệp ở frontend): Người dùng xác nhận ngày 26/09/2026: nội dung mẫu được bảo vệ chỉ tải qua route backend có kiểm quyền xem đã mở; backend chuyển tiếp tệp, không lộ URL gốc, giống link chia sẻ của TDD-PROJ-003. Câu hỏi mở (a)/(b) ở Architecture chuyển thành quyết định đã xác nhận; thumbnail công khai dùng cùng cách chuyển tiếp. Viết lại UT-LIB-033, UT-LIB-034, UT-LIB-042, UT-LIB-046 theo `ILibraryFileReader`.
 - 2026-09-26 (lưu URL tệp): Theo quyết định backend không có kho tệp riêng, tệp nằm ở kho presign và chỉ được lưu bằng URL (TDD-LIB-001). Thay `ILibraryObjectStore` bằng `ILibraryFileReader` dự kiến, chỉ đọc URL đã lưu; giữ bước thăm dò tệp trước khi tính lượt (BR-LIB-003 khoản 7). Thêm câu hỏi mở: trả URL gốc hay backend chuyển tiếp tệp, đề xuất chuyển tiếp như TDD-PROJ-003 để giữ BR-LIB-003 khoản 8; Internal API tạm viết theo đề xuất này. UT-LIB-033, UT-LIB-034, UT-LIB-042, UT-LIB-046 cần viết lại tên port sau khi chốt. Quy tắc tra cứu BR-LIB-003 không đổi.
 - 2026-09-26 (CSRF): Chống CSRF dẫn tới [TDD-AUTH-001](TDD-AUTH-001.md).
 - 2026-09-25: Đổi khóa đầu tiên của luồng mở mẫu lần đầu từ User khách sang AccountCommerceState, theo thứ tự thống nhất AccountCommerceState → kỳ/quota → Template/Version như TDD-PROJ-002 và TDD-PAY-001; cập nhật sơ đồ, mẫu dữ liệu và giải thích lý do. Ghi rõ quyền preview là `library.manage`, kiểm theo mã quyền; bổ sung tham chiếu STORY-RBAC-001, BR-RBAC-001 và TDD-PAY-001. Quy tắc tra cứu BR-LIB-003 không đổi.

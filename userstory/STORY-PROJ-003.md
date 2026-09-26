@@ -146,10 +146,10 @@ Chuẩn bị hoặc tải tệp thất bại sau khi kết quả thiết kế đ
 
 #### AC-006
 
-- **Given**: Bản dự toán "Phương án 3" đã có tệp PDF xuất sẵn và đang được chia sẻ qua link còn hiệu lực.
+- **Given**: Bản dự toán "Phương án 3" đã có tệp PDF do AI tạo và đang được chia sẻ qua link còn hiệu lực.
 - **When**: Chủ sở hữu đổi tên thành "Phương án chốt", rồi chủ sở hữu và người nhận link lần lượt mở hồ sơ và tải PDF.
-- **Then**: Cả hai đều thấy tên "Phương án chốt"; tệp PDF được xuất lại từ kết quả đã lưu với tên mới theo BR-PROJ-007.
-- **And**: Việc xuất lại không tính lượt, không gọi AI và không thay kết quả nguồn.
+- **Then**: Cả hai đều thấy tên "Phương án chốt" trên hồ sơ; tệp PDF tải về có tên tệp "Phương án chốt", còn nội dung tệp giữ nguyên như lúc AI tạo theo BR-PROJ-007 khoản 7 (người dùng xác nhận ngày 26/09/2026).
+- **And**: Việc tải lại không tính lượt, không gọi AI, không tự dựng lại tệp và không thay kết quả nguồn.
 
 ## References
 
@@ -157,7 +157,7 @@ Chuẩn bị hoặc tải tệp thất bại sau khi kết quả thiết kế đ
 
 - TDD-PROJ-002
 - TDD-PROJ-003
-- TDD-PROJ-001: Thao tác đổi tên và NameVersion dùng cho AC-006.
+- TDD-PROJ-001: Thao tác đổi tên dùng cho AC-006; tên tệp tải về theo tên hiện tại thiết kế ở TDD-PROJ-003.
 
 ### Rules
 

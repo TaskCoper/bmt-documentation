@@ -420,6 +420,7 @@ erDiagram
 
 - Partial unique index `UX_Order_OnePendingDesign(AccountId) WHERE Kind='Design' AND State IN ('Pending','PartiallyPaid')`. Expire stale orders dưới khóa trước tạo; worker sweep hỗ trợ nhưng tính đúng không phụ thuộc sweep chạy đúng giờ. Đơn cũ chuyển Paid do webhook muộn không tự hủy đơn mới đang chờ.
 - Index Order(AccountId,CreatedAtUtc DESC,Id), Order(State,ExpiresAtUtc), BankTransaction(OrderId,OccurredAtUtc,ProviderTransactionId), BankTransaction(ProcessingState,NextAttemptAtUtc) và BankTransaction(MatchState,OccurredAtUtc DESC,Id). Eligible/PaidAt là projection có thể dựng lại từ transaction; không sửa bằng UI.
+- Migration `20260926085401_CommerceAdminLookupIndexes` (commit `c1d757a`, đã nằm trên `develop` của `bmt-be`) thêm bốn index cho API tra cứu quản trị của [TDD-PAY-002](TDD-PAY-002.md): `IX_PaymentOrder_CreatedAtUtc_Id` (PaymentOrder: CreatedAtUtc, Id), `IX_BankTransaction_OccurredAtUtc_Id` (BankTransaction: OccurredAtUtc, Id), `IX_BankTransaction_ProviderTransactionId` (BankTransaction: ProviderTransactionId) và `IX_PaymentFulfillment_CompletedAtUtc_OrderId` (PaymentFulfillment: CompletedAtUtc, OrderId). Ba index ghép giúp danh sách mặc định không lọc, sắp theo thời điểm rồi Id, đọc được một trang mà không phải sắp cả bảng; index `ProviderTransactionId` phục vụ tìm giao dịch theo mã SePay mà không biết connection. Migration chỉ thêm index, không đổi dữ liệu.
 - Constrain ExpiresAtUtc=CreatedAtUtc+15 phút, Eligible<=Received; số tiền vượt numeric20 hoặc không nguyên từ provider phải bị từ chối, không overflow/silent round. Kind/offer/connection/account consistency được kiểm dưới transaction, đồng thời bảo vệ bằng composite FK nơi có đủ cột.
 - Thiết kế thời điểm mua trước đến muộn không tạo DesignPeriod giả. Danh sách gói đã mua của quản trị lấy fulfillment cùng order nên vẫn có lịch sử bị thay thế trước kích hoạt.
 - Kế hoạch schema cho `OfferKey` (database hiện chỉ có dữ liệu dev/test, không chuyển đổi dữ liệu thật): `PaymentOrder` chưa có trong database nên được tạo mới với `OfferKey varchar(24)` và CHECK chỉ nhận `Month`/`Year`/`ConstructionSite`. `PlanOffer.OfferKey` được nới từ `varchar(8)` lên `varchar(24)` và đổi `Project` thành `ConstructionSite` theo migration của TDD-SUB-001. Khóa ngoại `(RevisionId, OfferKey)` từ `PaymentOrder` tới `PlanOffer` đòi hai cột cùng kiểu, nên migration tạo `PaymentOrder` phải chạy sau migration đó. Kiểm sau: không còn dòng `OfferKey = 'Project'` ở cả hai bảng.
@@ -460,7 +461,7 @@ Response 201:
 {"value":{"id":"22222222-2222-2222-2222-222222222222","state":"Pending","priceVnd":"2000000","currency":"VND","receivedAmountVnd":"0","eligibleAmountVnd":"0","remainingAmountVnd":"2000000","paymentCode":"BMT7K9D3P2Q8R","createdAtUtc":"2026-09-19T03:00:00Z","expiresAtUtc":"2026-09-19T03:15:00Z","serverNowUtc":"2026-09-19T03:00:00Z","version":1},"isSuccess":true,"isFailure":false,"error":{"code":"","message":""}}
 
 Error Response:
-{"title":"Conflict","code":"PendingDesignOrderExists","status":409,"detail":"Đang có một đơn thiết kế chờ thanh toán.","messageCode":"PendingDesignOrderExists","errors":null}
+{"title":"Conflict","code":"Conflict","status":409,"detail":"Đang có một đơn thiết kế chờ thanh toán.","messageCode":"PendingDesignOrderExists","errors":null}
 ```
 
 Ví dụ chỉ trích các trường chính; DTO OrderDetail còn có planName/revisionId/offerKey, thông tin thụ hưởng từ connection, qrUrl, fulfillment và lịch sử liên quan theo mô tả endpoint. Enum serialize dạng chuỗi rõ trong DTO. `extraReceivedAmountVnd=max(received-price,0)` chỉ mô tả chênh lệch thực nhận, không tự tuyên bố đó là khoản hoàn hoặc số tiền hợp lệ.
@@ -493,10 +494,10 @@ Response 201:
 {"value":{"id":"33333333-3333-3333-3333-333333333333","environment":"Test","gateway":"Vietcombank","accountNumber":"TEST_ACCOUNT_2","subAccount":null,"qrBankCode":"Vietcombank","enabled":true,"isActive":false,"secretConfigured":false,"accountLocked":false,"webhookPath":"/api/v1/payment-webhooks/sepay/33333333-3333-3333-3333-333333333333","secretConfigKeys":["SePayOption__Connections__{n}__ConnectionId","SePayOption__Connections__{n}__WebhookSecret"],"version":1,"createdAtUtc":"2026-09-20T02:00:00Z"},"isSuccess":true,"isFailure":false,"error":{"code":"","message":""}}
 
 Error Response:
-{"title":"Unprocessable Entity","code":"PaymentConnectionInputInvalid","status":422,"detail":"Môi trường phải là Test hoặc Live.","messageCode":"PaymentConnectionInputInvalid","errors":null}
+{"type":"Validation Error","title":"Validation Error","status":422,"detail":"A validation error occured","errors":[{"code":"Environment","message":"Môi trường phải là Test hoặc Live.","messageCode":"PaymentConnectionInputInvalid"}]}
 ```
 
-`secretConfigured=false` vì vận hành chưa đặt secret cho Id mới; `{n}` là số thứ tự mục cấu hình do vận hành chọn.
+`secretConfigured=false` vì vận hành chưa đặt secret cho Id mới; `{n}` là số thứ tự mục cấu hình do vận hành chọn. Lỗi đầu vào do validator phát hiện không đi qua `ExceptionHandlingMiddleware`: `ApiEndpoint.HandlerFailure` trả ProblemDetails 422 có `type` và `title` là `Validation Error`, còn mã riêng `PaymentConnectionInputInvalid` nằm ở `messageCode` của từng phần tử trong `errors`, cạnh tên trường (`code`) và thông báo (`message`).
 
 #### PUT /api/v1/admin/payment-environments/{environment}/active-connection
 
@@ -509,10 +510,12 @@ Response 200:
 {"value":{"environment":"Test","connectionId":"33333333-3333-3333-3333-333333333333","previousConnectionId":"44444444-4444-4444-4444-444444444444","selectedAtUtc":"2026-09-20T02:05:00Z","version":2},"isSuccess":true,"isFailure":false,"error":{"code":"","message":""}}
 
 Error Response:
-{"title":"Conflict","code":"PaymentConnectionNotReady","status":409,"detail":"Connection chưa có secret trên máy chủ này.","messageCode":"PaymentConnectionNotReady","errors":null}
+{"title":"Conflict","code":"Conflict","status":409,"detail":"Chỉ chọn được kết nối đang bật, cùng môi trường và đã có secret trên máy chủ.","messageCode":"PaymentConnectionNotReady","errors":null}
 ```
 
 Đổi lựa chọn không sửa đơn đã tạo.
+
+Cách đọc thân lỗi (kiểm với `ExceptionHandlingMiddleware` và `DomainException` trên `develop` của `bmt-be` tại `c1d757a`): lỗi nghiệp vụ ném ngoại lệ miền trả `{title, code, status, detail, messageCode, errors}`. Trường `code` là loại lỗi chung suy từ loại ngoại lệ (`Conflict`, `NotFound`, `Forbidden`, `BadRequest`, `ValidationFailure`, `DependencyUnavailable`); mã riêng của tài liệu này, như `PendingDesignOrderExists` hay `PaymentConnectionNotReady`, nằm ở `messageCode`. Các mã ở Error Codes bên dưới vì vậy là giá trị của `messageCode`, trừ lỗi validator (mã nằm trong `errors[].messageCode`) và phản hồi webhook (dùng envelope riêng của SePay).
 
 ### Error Codes
 
@@ -597,6 +600,7 @@ SePay cần HTTP 200/201 và JSON `{"success":true}` trong 30 giây; BMT chọn 
 
 ## Change Log
 
+- 2026-09-26 (index tra cứu và thân lỗi): Thêm vào Data Model/Notes bốn index của migration `20260926085401_CommerceAdminLookupIndexes` (commit `c1d757a`, phục vụ TDD-PAY-002). Sửa ví dụ Error Response cho khớp `ExceptionHandlingMiddleware` và `ApiEndpoint.HandlerFailure` trên `develop` tại `c1d757a`: `code` là loại lỗi chung (`Conflict`...), mã riêng nằm ở `messageCode`; lỗi validator trả ProblemDetails 422 với mã riêng trong `errors[].messageCode`. Ghi cách đọc thân lỗi trước mục Error Codes.
 - 2026-09-26 (miễn kiểm CSRF): Endpoint POST /api/v1/payment-webhooks/sepay/{connectionId} được miễn kiểm Origin chống CSRF bằng .SkipCsrfCheck() (TDD-AUTH-001/Architecture, danh sách miễn trừ), vì máy chủ SePay gọi mà không có cookie hay Origin và nguồn gọi đã được xác thực bằng HMAC. Đây là endpoint duy nhất được miễn; test CsrfPipelineTests.ExemptEndpoints_OnlySePayWebhook kiểm điều này. Code ở commit `53ec4be` trên `develop` của `bmt-be` (`SePayWebhookApi.cs`).
 - 2026-09-26 (chốt Q1–Q7 và triển khai quản trị connection): Người dùng trả lời Q1–Q7 ngày 26/09/2026, đều theo phương án đề xuất; bảng câu hỏi ở Architecture chuyển thành bảng quyết định đã xác nhận. Q6 đổi hành vi đã code ở `62b226f`: vẫn lưu mỗi webhook lệch nhưng chỉ báo lần đầu của mỗi cặp (giao dịch gốc, CanonicalHash), nhờ cột `BankTransactionConflict.Alerted` và unique index có điều kiện (commit `97108bb`, migration `20260926074258_PaymentAlerts` sinh lại thay bản `20260926072356`). API quản trị connection, quyền `payment.connection.manage`, bảng PaymentActiveConnection và PaymentConnectionEvent, biến `SePayOption__Environment` thay `SePayOption__ActiveConnectionId` đã có code ở commit `3256436`, migration `20260926075035_PaymentConnectionAdmin`; chưa merge, chưa áp dụng lên database dùng chung. Khác bản thiết kế trước: chọn connection đang dùng khóa dòng lựa chọn trước rồi mới chèn khi chưa có, thay cho chèn trước rồi khóa, vì dòng lựa chọn cần ConnectionId hợp lệ ngay lúc chèn. Thêm ST-PAY-089 đến ST-PAY-101 và UT-PAY-113 đến UT-PAY-127.
 - 2026-09-26 (cảnh báo và thiết kế quản trị connection): Theo quyết định người dùng ngày 26/09/2026. (1) Webhook cùng id nhưng khác dữ kiện: vẫn trả 200, giữ dòng gốc, không cộng tiền; lưu nội dung lệch vào bảng mới BankTransactionConflict và gửi cảnh báo Discord `PaymentWebhookConflict` sau commit. Điểm này thay điểm (5) “ghi log cảnh báo (đang chờ xác nhận)” của mục triển khai bên dưới. (2) Worker vẫn thử lại mãi; lần thử thứ 10 gửi cảnh báo `PaymentProcessingRetry`, mỗi giao dịch một lần nhờ cột mới `BankTransaction.RetryAlertedAtUtc`. Hai điểm này đã có code ở commit `62b226f` trên nhánh `feature/payment-alerts-connections` của `bmt-be` (tách từ `develop` `de3c61f`, chưa merge), migration `20260926072356_PaymentAlerts` chưa áp dụng lên database dùng chung; đặc tả UT-PAY-022 (sửa), UT-PAY-111, UT-PAY-112. Phương án báo mỗi lần nhận webhook lệch còn chờ xác nhận (Q6). (3) VA: giữ code hỗ trợ cả tài khoản chính và VA; phải thử với tài khoản SePay thật trước khi bật Live. (4) Thiết kế API quản trị connection với quyền `payment.connection.manage`, bảng PaymentActiveConnection và PaymentConnectionEvent, cột theo dõi thay đổi của PaymentConnection; thêm bản nháp STORY-PAY-003, BR-PAY-006. Phần (4) chưa có code và chưa có đặc tả test, chờ người dùng chốt TDD và các câu hỏi Q1–Q7 ở Architecture.

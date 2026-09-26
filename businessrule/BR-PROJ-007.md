@@ -59,10 +59,10 @@ Hệ thống nhận kết quả AI hoặc khách yêu cầu xem dự toán, xem 
 1. Giữ cấu trúc dự toán theo trang mẫu gồm phần thô, hoàn thiện và nội thất, cùng tổng dự toán và nội dung tư vấn do AI trả. Áp dụng phạm vi này cho mọi loại công trình trong danh mục theo BR-PROJ-004; không tự loại nhóm phần thô riêng với Căn hộ.
 2. Dữ liệu phục vụ màn hình, PDF và Excel phải thuộc đúng bản dự toán và cùng kết quả nguồn đã lưu. Không dùng số tiền, diện tích hoặc hình minh họa mẫu của website làm kết quả thật.
 3. Kiểm tra phản hồi theo hợp đồng AI trước khi công bố. Hợp đồng cần xác định trường và đầu ra bắt buộc; không tự điền kết quả chuyên môn còn thiếu để báo thành công.
-4. Hỗ trợ xem hồ sơ, chuẩn bị/tải PDF và tải Excel dự toán. Việc nhận tệp có sẵn từ AI hay xuất tệp từ dữ liệu AI sẽ xác định khi có hợp đồng; chưa chọn cách render hoặc thư viện xuất tệp.
+4. Hỗ trợ xem hồ sơ, chuẩn bị/tải PDF và tải Excel dự toán. AI trả tệp PDF và Excel như mọi tệp kết quả; backend không tự dựng tệp. Thời điểm AI trả từng tệp xác định khi có hợp đồng.
 5. Xem, xuất hoặc tải từ kết quả cũ không tạo thiết kế AI mới, không thay thế kết quả nguồn và không giữ/trừ thêm lượt tạo thiết kế.
 6. Khi gói hết hạn, vẫn được dùng các thao tác hồ sơ cũ theo BR-SUB-007. Chia sẻ qua link, QR và email áp dụng BR-PROJ-006.
-7. Sau khi chủ sở hữu đổi tên bản dự toán theo BR-SUB-007 khoản 11, màn hình của chủ sở hữu và trang xem qua link luôn hiện tên hiện tại. Tệp PDF/Excel đã xuất trước khi đổi tên không được dùng nữa; lần tải tiếp theo xuất lại từ kết quả đã lưu với tên mới. Việc xuất lại không tính lượt, không gọi AI và không thay kết quả nguồn. Tệp người nhận đã tải về trước đó không bị thu hồi.
+7. Sau khi chủ sở hữu đổi tên bản dự toán theo BR-SUB-007 khoản 11, màn hình của chủ sở hữu và trang xem qua link luôn hiện tên hiện tại. Tệp PDF/Excel tải về sau khi đổi tên mang tên hiện tại ở tên tệp; nội dung tệp giữ nguyên như lúc AI tạo, kể cả tên in trong tệp nếu có. Việc tải lại không tính lượt, không gọi AI, không tự dựng lại tệp và không thay kết quả nguồn. Tệp người nhận đã tải về trước đó không bị thu hồi.
 
 ## Except
 
@@ -70,7 +70,8 @@ Nếu chưa có bộ kết quả hợp lệ hoặc chưa chuẩn bị được t
 
 ## Notes
 
-- Khoản 7 do người dùng xác nhận ngày 25/09/2026.
+- Khoản 7 do người dùng xác nhận ngày 25/09/2026. Ngày 26/09/2026 người dùng xác nhận sửa phần về tệp: bản cũ yêu cầu tệp xuất trước khi đổi tên không được dùng nữa và lần tải sau xuất lại với tên mới. Vì AI tạo PDF/Excel và backend không tự dựng tệp, tên mới nay chỉ áp vào tên tệp tải về (backend đặt khi chuyển tiếp tệp, TDD-PROJ-003); nội dung tệp giữ tên tại lúc AI tạo.
+- Khoản 4 cập nhật ngày 26/09/2026 theo quyết định đã xác nhận: AI trả URL cho mọi tệp kết quả, kể cả PDF và Excel; backend chỉ lưu URL, không tự dựng tệp.
 
 - Trang mẫu mô tả dự toán là tham khảo. Không suy ra giá trị mẫu hoặc hình mẫu là định mức áp dụng cho công trình thực tế.
 - BR-PROJ-004 tách lựa chọn phong cách kiến trúc và nội thất theo loại công trình. Người dùng đã chốt cấu hình chỉ điều khiển lựa chọn đầu vào; AI vẫn trả đủ kết quả. Không loại phần thiết kế, dự toán hoặc hồ sơ chỉ vì một nhóm lựa chọn phong cách bị tắt.

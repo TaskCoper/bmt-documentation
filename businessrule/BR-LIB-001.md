@@ -73,3 +73,4 @@ Bản nháp chưa công bố không được cung cấp cho khách. Cho phép l�
 
 - Người dùng đã xác nhận “chốt US và BR” cho bộ LIB trong hội thoại. Trạng thái phê duyệt trên hệ thống chưa được cập nhật; tên Reviewer/Approver không thay cho thao tác phê duyệt.
 - Owner và ngày hiệu lực chưa xác định. Chưa triển khai hoặc chạy kiểm thử.
+- Tầng thực thi khoản 2 (người dùng xác nhận ngày 26/09/2026, không đổi nghĩa quy tắc): frontend kiểm định dạng và dung lượng tệp trước khi tải lên kho qua presign, như với ảnh của bản dự toán. Backend chỉ lưu URL tệp và chỉ nhận URL https thuộc tên miền trong `UploadedFileOption__AllowedHosts`; backend không tải tệp về để kiểm định dạng, nên request gọi thẳng API với URL đúng tên miền nhưng trỏ tới tệp sai định dạng không bị backend chặn. Thiết kế ở TDD-LIB-001/Architecture.

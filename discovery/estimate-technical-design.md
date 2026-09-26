@@ -15,7 +15,7 @@ Mỗi TDD có sơ đồ kiến trúc, sequence, activity, state, quan hệ dữ 
 Ba TDD được sửa theo US/BR người dùng chốt ngày 25/09/2026; người dùng xác nhận bản sửa trước khi cập nhật test. Thay đổi chính:
 
 - **Đổi tên bản dự toán bất cứ lúc nào** ([BR-SUB-007](../businessrule/BR-SUB-007.md) khoản 11): kể cả khi gói hết hạn, hết lượt, toàn bộ lượt còn lại đang bị giữ hoặc AI đang xử lý; chỉ cần quyền sở hữu và tên hợp lệ. API riêng `PATCH /api/v1/estimates/{estimateId}/name` nhận `{name, nameVersion}`; lỗi 409 `EstimateNameVersionConflict` hoặc 422 `InvalidEstimateInput`. Tên không còn nằm trong snapshot gửi AI (TDD-PROJ-001, TDD-PROJ-002).
-- **Hồ sơ và tệp dùng tên hiện tại** ([BR-PROJ-007](../businessrule/BR-PROJ-007.md) khoản 7): tệp PDF/Excel xuất theo tên cũ không được phục vụ nữa; lần tải sau xuất lại từ kết quả đã lưu, không tính lượt và không gọi AI. `EstimateExport.NameVersion` ghi tên dùng khi xuất; tệp cũ trả 409 `ExportOutdated` (TDD-PROJ-003). Ngày 26/09/2026: backend không tự dựng PDF/Excel nữa nên cách áp khoản này đang là câu hỏi mở, xem mục Cập nhật ngày 26/09/2026.
+- **Hồ sơ và tệp dùng tên hiện tại** ([BR-PROJ-007](../businessrule/BR-PROJ-007.md) khoản 7): bản ngày 25/09/2026 yêu cầu xuất lại tệp theo tên mới (`EstimateExport.NameVersion`, 409 `ExportOutdated`). Người dùng sửa ngày 26/09/2026: tên mới chỉ áp vào tên tệp tải về, nội dung PDF/Excel giữ như lúc AI tạo; `NameVersion` của export và `ExportOutdated` đã bỏ, xem mục Cập nhật ngày 26/09/2026.
 - **Dùng lại link còn hiệu lực** trả 200 kèm `requestedExpiryApplied`: `true` khi ngày khách chọn trùng ngày đang có, `false` khi khác; không đổi hạn ngầm (TDD-PROJ-003).
 - **Quyền quản trị danh mục** theo STORY-RBAC-001 có mã `estimate.catalog.manage` trong TDD-RBAC-001; kiểm theo mã quyền, không theo tên vai trò.
 - Đối tượng gắn gói giám sát, trước đây gọi là “dự án”, nay là **công trình** (`ConstructionSite`): thực thể riêng do khách tự tạo. Bản dự toán và công trình không liên kết trong đợt này ([BR-SUB-007](../businessrule/BR-SUB-007.md)/Notes).
@@ -34,7 +34,7 @@ Người dùng đã xác nhận ngày 26/09/2026:
 
 Thiết kế chi tiết theo các quyết định này nằm ở TDD-PROJ-002, TDD-PROJ-003 và BR-PROJ-006. Thư viện mẫu áp dụng cùng quy ước lưu URL ở [TDD-LIB-001](../tdd/TDD-LIB-001.md) và [TDD-LIB-002](../tdd/TDD-LIB-002.md). Các mục bên dưới đã được sửa ở những chỗ mâu thuẫn với quyết định này.
 
-**Câu hỏi mở phát sinh:** [BR-PROJ-007](../businessrule/BR-PROJ-007.md) khoản 7 yêu cầu tệp PDF/Excel xuất trước khi đổi tên không được dùng nữa và lần tải sau "xuất lại từ kết quả đã lưu với tên mới", không gọi AI và không tính lượt. Khi PDF/Excel do AI tạo và backend không tự dựng tệp, backend không tự xuất lại được. Cần người dùng chọn cách áp khoản này, ví dụ: tên bản dự toán chỉ hiện trên màn hình, còn tệp của AI giữ nguyên nội dung; hoặc AI service có thao tác xuất lại theo tên mới mà không tính là một lần tạo thiết kế. Chưa sửa BR-PROJ-007 và chưa chọn thay người dùng.
+**Tên bản dự toán trong tệp PDF/Excel (người dùng xác nhận ngày 26/09/2026):** sau khi đổi tên, tên mới chỉ áp vào tên tệp tải về, do backend đặt bằng header `Content-Disposition` khi chuyển tiếp tệp; nội dung PDF/Excel giữ tên tại lúc AI tạo. Không gọi AI, không tự dựng tệp, không tính lượt. Đã sửa [BR-PROJ-007](../businessrule/BR-PROJ-007.md) khoản 7, STORY-PROJ-003/AC-006, ST-PROJ-069, TDD-PROJ-003 và UT-PROJ-056 đến UT-PROJ-059 cho khớp.
 
 ## Đã xác nhận
 
