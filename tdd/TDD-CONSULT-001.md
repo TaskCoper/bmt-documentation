@@ -172,7 +172,7 @@ Các hợp đồng kỹ thuật mới cần được kiểm chứng thêm khi tr
 | Repository | Ba interface tương ứng trong `domain/abstractions/repositories/`, ba implementation trong `persistence/repositories/`; đăng ký scoped trong persistence DI. Inject trực tiếp repository chuyên biệt, không thêm vào generic GetRepository<TEntity> đòi Entity<Guid>. |
 | API/use case | Các thư mục services, usecases/commands, usecases/queries và apis cho architect, architectCategory, consultationRequest; handler command kết thúc tên bằng Command để vào transaction pipeline |
 | Quyền và bảo vệ request | Hằng `consultation.manage` trong `PermissionNames.cs`, migration seed Permission/RolePermission cho admin; policy/claim/kiểm phiên dùng hạ tầng RBAC chung đã có; chống CSRF dùng lớp chung ở [TDD-AUTH-001](TDD-AUTH-001.md), không thêm filter riêng |
-| Tài khoản và email | `contract/services/user/Response.cs`, `GetMeHandler.cs`; `contract/templates/ConsultationEmailTemplate.cs`; log người nhận ở `SendEmailConsumer.cs`; cấu hình timeout ở MailOption/MailService nếu chọn đề xuất 30 giây |
+| Tài khoản và email | `contract/services/user/Response.cs`, `GetMeHandler.cs`; `contract/templates/ConsultationEmailTemplate.cs`; log người nhận ở `SendEmailConsumer.cs`; timeout SMTP ở `MailOption`/`MailService` làm ở thay đổi riêng (commit `e451773`, xem Notes) |
 | Lỗi | Kiểu conflict/service-unavailable và ánh xạ có kiểm soát trong `ExceptionHandlingMiddleware.cs`; không đổi envelope của endpoint cũ |
 
 **Notes**:
@@ -188,7 +188,7 @@ Các hợp đồng kỹ thuật mới cần được kiểm chứng thêm khi tr
 - Khi triển khai, policy `ConsultationCustomer` chỉ kiểm phiên: đã đăng nhập, không phải phiên quên mật khẩu, không bị bắt đổi mật khẩu. Token không mang loại tài khoản, nên handler đọc User để kiểm chưa xóa, `Status=Active` và `AccountKind=Customer`; sai một điều kiện thì trả 403 `AccessForbidden`. Tài khoản bị khóa hoặc phiên bị thu hồi đã bị chặn ở bước so dấu phiên.
 - Khi triển khai, lỗi 503 `ConsultationTemporarilyUnavailable` chỉ dùng cho lệnh ghi của module khi PostgreSQL báo chờ vòng (40P01), không lấy được khóa (55P03), câu lệnh bị hủy (57014), lỗi tuần tự hóa (40001), hoặc Npgsql báo hết thời gian chờ. Transaction đã rollback nên client gửi lại với cùng Idempotency-Key.
 - `internalNote` được bỏ khoảng trắng đầu/cuối; chuỗi chỉ có khoảng trắng được lưu thành NULL, giống cách chuẩn hóa `message`. Người dùng xác nhận ngày 26/09/2026.
-- Người dùng đồng ý timeout SMTP 30 giây (`SmtpTimeoutSeconds`) ngày 26/09/2026, nhưng làm ở một thay đổi riêng vì ảnh hưởng mọi loại email; nhánh tư vấn chưa có thay đổi này nên adapter SMTP vẫn dùng timeout mặc định của MailKit. `SendEmailConsumer` ghi địa chỉ người nhận ở dạng che, ví dụ `c***@example.test`, cho mọi loại email.
+- Người dùng đồng ý timeout SMTP 30 giây ngày 26/09/2026 và làm ở một thay đổi riêng vì ảnh hưởng mọi loại email (xác thực tài khoản, quên mật khẩu, tư vấn). Đã làm ở commit `e451773` trên nhánh `feature/smtp-timeout` của `bmt-be`, chưa merge vào `develop`. Tên `SmtpTimeoutSeconds` trong đề xuất trước được đổi thành `TimeoutSeconds` nằm trong `MailOption`: biến môi trường `MailOption__TimeoutSeconds`, trong compose và workflow deploy là `MAIL_TIMEOUT_SECONDS`, để trống thì dùng 30. Hạn này áp cho từng bước kết nối, xác thực, gửi thư và ngắt kết nối. Quá hạn thì adapter ném `TimeoutException`, `SendEmailConsumer` ném lại để MassTransit thử lại theo cấu hình retry hiện có. Giá trị 0 hoặc âm làm API từ chối khởi động. `SendEmailConsumer` ghi địa chỉ người nhận ở dạng che, ví dụ `c***@example.test`, cho mọi loại email.
 
 ## Sequence Diagram
 
@@ -677,7 +677,7 @@ Thêm kiểu ConflictException/ServiceUnavailableException hoặc kiểu riêng 
 | Admin cập nhật trạng thái | Chỉ cập nhật đơn | Không publish email mới, kể cả mở lại |
 | Host ảnh hỏng | Hồ sơ vẫn tồn tại | FE hiển thị ảnh dự phòng; admin sửa URL |
 
-Mặc định source hiện là 3 lần retry, khoảng đầu 5 giây, mỗi lần tăng 10 giây; cấu hình môi trường có thể ghi đè, không coi đây là SLA. Không thêm retry vòng ngoài tại handler hoặc MailService. Adapter hiện chưa có timeout/cancellation tường minh: đề xuất thêm `SmtpTimeoutSeconds=30` cấu hình cho mỗi thao tác I/O, giữ ý nghĩa retry hiện tại và kiểm hồi quy email auth; đây là giá trị kỹ thuật đề xuất, không cam kết thời gian email tới hộp thư. Lock/command timeout dùng cấu hình Npgsql hiện có, không tự vô hạn chờ; chỉ trả 503 cho lỗi thực sự tạm thời đã phân loại.
+Mặc định source hiện là 3 lần retry, khoảng đầu 5 giây, mỗi lần tăng 10 giây; cấu hình môi trường có thể ghi đè, không coi đây là SLA. Không thêm retry vòng ngoài tại handler hoặc MailService. Adapter có timeout `MailOption:TimeoutSeconds`, mặc định 30 giây, cho mỗi bước kết nối, xác thực, gửi thư và ngắt kết nối (commit `e451773`). Quá hạn được xử lý như dòng SMTP lỗi ở bảng trên và đi theo retry hiện có. Đây là giới hạn kỹ thuật, không cam kết thời gian email tới hộp thư. Lock/command timeout dùng cấu hình Npgsql hiện có, không tự vô hạn chờ; chỉ trả 503 cho lỗi thực sự tạm thời đã phân loại.
 
 ### Quirks
 
@@ -721,6 +721,7 @@ Mặc định source hiện là 3 lần retry, khoảng đầu 5 giây, mỗi l�
 
 ## Change Log
 
+- 2026-09-26 (timeout SMTP): Ghi nhận timeout SMTP 30 giây đã làm ở commit `e451773` (nhánh `feature/smtp-timeout` của `bmt-be`, chưa merge): option `MailOption__TimeoutSeconds`, biến `MAIL_TIMEOUT_SECONDS`, áp cho mọi email qua adapter chung. Sửa Architecture/Notes và External API/Error Handling cho khớp.
 - 2026-09-26 (quyết định): Người dùng xác nhận ảnh đại diện phải thuộc tên miền kho presign, dùng chung `UploadedFileOption__AllowedHosts` và `IUploadedFileUrlPolicy` với ảnh dự toán (BR-CONSULT-001 khoản 9, UT-CONSULT-048); thêm mã lỗi `DependencyUnavailable` (503). Xác nhận lưu `internalNote` chỉ có khoảng trắng thành NULL. Timeout SMTP 30 giây được đồng ý nhưng làm ở thay đổi riêng. Cập nhật hiện trạng code sau khi dựng lại nhánh trên `develop`: commit `4d6c386`, `9e4f220`, migration `20260926091223_ConsultationArchitect`.
 - 2026-09-26 (triển khai): Ghi hiện trạng code trên nhánh `feature/consultation` của `bmt-be` và migration `ConsultationArchitect`. Thêm vào Architecture/Notes các lựa chọn khi triển khai: ảnh đại diện chỉ kiểm cú pháp HTTPS (khi đó chưa chốt giới hạn tên miền), cách chia việc giữa policy `ConsultationCustomer` và handler, các lỗi được trả 503, chuẩn hóa `internalNote`, chưa thêm timeout SMTP, che địa chỉ email trong log.
 - 2026-09-26 (CSRF): Chống CSRF dùng lớp chung ở [TDD-AUTH-001](TDD-AUTH-001.md): bỏ filter riêng của module và header `X-BMT-Request`; mã lỗi đổi từ `ConsultationOriginRejected` thành mã chung `CsrfInvalid`. Sửa UT-CONSULT-017, UT-CONSULT-018 theo.
