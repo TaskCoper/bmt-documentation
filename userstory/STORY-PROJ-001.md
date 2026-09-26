@@ -212,7 +212,7 @@ Khách thay ảnh nhưng tải lên hoặc lưu ảnh mới thất bại.
 - **Given**: Khách cung cấp ảnh hoặc mô tả thiết kế cho bản dự toán.
 - **When**: Hệ thống kiểm tra dữ liệu được cung cấp.
 - **Then**: Chỉ tối đa một ảnh JPG/PNG/HEIC không vượt 10 MB và mô tả không vượt 500 ký tự mới đáp ứng các giới hạn tương ứng.
-- **And**: Có cả ảnh và mô tả vẫn phải tuân thủ từng giới hạn; không bắt buộc bổ sung loại dữ liệu còn lại nếu đã có một loại hợp lệ.
+- **And**: Có cả ảnh và mô tả vẫn phải tuân thủ từng giới hạn; không bắt buộc bổ sung loại dữ liệu còn lại nếu đã có một loại hợp lệ. Ghi chú kỹ thuật, không đổi tiêu chí: định dạng và dung lượng ảnh do frontend kiểm trước khi tải ảnh lên qua presign; với ảnh, backend chỉ kiểm URL là URL https thuộc tên miền được phép trong `UploadedFileOption__AllowedHosts` (TDD-PROJ-001).
 
 #### AC-010
 

@@ -73,9 +73,10 @@ Thu hồi hoặc hết hạn chỉ ngăn truy cập tiếp qua link; không thu 
 
 ## Notes
 
-- Phạm vi đã xác nhận gồm tải PDF hồ sơ và Excel dự toán. Cách nhận hoặc xuất tệp từ kết quả AI còn chờ hợp đồng tích hợp, không mặc định AI đã trả sẵn các tệp này.
+- Phạm vi đã xác nhận gồm tải PDF hồ sơ và Excel dự toán. Người dùng xác nhận ngày 26/09/2026: AI trả URL cho mọi tệp kết quả, kể cả PDF và Excel; backend chỉ lưu URL, không có kho tệp riêng và không tự dựng PDF/Excel. Hợp đồng API của AI service vẫn chưa có.
+- Cách giữ hiệu lực của khoản 4 khi tệp nằm ở URL do AI trả (người dùng xác nhận ngày 26/09/2026): người nhận không bao giờ nhận URL gốc của tệp. Mỗi yêu cầu xem hoặc tải qua link đi qua route của backend; backend kiểm link còn hiệu lực và chưa bị thu hồi rồi mới chuyển tiếp nội dung tệp. Vì vậy sau khi thu hồi hoặc đến hạn, yêu cầu tải mới bị từ chối như khoản 4. Chi tiết ở TDD-PROJ-003/Architecture. Ghi chú này chỉ mô tả cách thực hiện, không đổi quy tắc.
 - Quyền thao tác trên hồ sơ cũ sau khi gói hết hạn đã được người dùng xác nhận riêng; BR-SUB-007 được bổ sung tương ứng. Đây không phải quyền tạo thiết kế AI mới.
-- Múi giờ và mốc hết hiệu lực đã được xác nhận tại khoản 8. Thiết kế phải kiểm tra hiệu lực cho từng yêu cầu xem/tải, không dùng đường tải tệp bỏ qua việc thu hồi hoặc hết hạn.
+- Múi giờ và mốc hết hiệu lực đã được xác nhận tại khoản 8. Thiết kế phải kiểm tra hiệu lực cho từng yêu cầu xem/tải, không dùng đường tải tệp bỏ qua việc thu hồi hoặc hết hạn, kể cả việc đưa URL gốc của tệp cho người nhận.
 - Đã chốt một link đang hiệu lực tại khoản 9. Thay đổi ngày hết hạn hoặc gia hạn link cũ chưa thuộc phạm vi; không tự bổ sung các thao tác này.
 - Người dùng đã xác nhận nhập một địa chỉ email nhận mỗi lần gửi, không giới hạn về email tài khoản của chủ sở hữu bản dự toán. Địa chỉ phải có định dạng email hợp lệ; chưa mở gửi đồng thời nhiều người. Chưa gửi email hoặc liên hệ bên thứ ba trong quá trình khảo sát.
 - Reviewer và Approver là Tân Trần. Owner và ngày hiệu lực chưa xác định; bản nháp chưa được phê duyệt, chưa có kết quả kiểm thử.

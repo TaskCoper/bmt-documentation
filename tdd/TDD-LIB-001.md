@@ -68,12 +68,15 @@ Tài liệu này sở hữu năm bảng nội dung/quản trị và các API qu�
 - Không thiết kế lại quota hoặc LibraryAccess; tham chiếu TDD-LIB-002.
 - Không yêu thích, xoay 3D, tìm kích thước, phân công mẫu, sửa bản đã thay thế hoặc xóa bản đã công bố.
 - Chưa triển khai code/migration hoặc viết mã test. Đặc tả Unit Test UT-LIB-001–032 đã có nhưng chưa thực thi.
+- Backend không làm kho tệp: không nhận bytes, không tạo presigned URL, không tải tệp về để kiểm nội dung và không tạo ảnh thu nhỏ. Frontend upload tệp qua dịch vụ presigned URL rồi gửi URL; backend chỉ lưu URL (quyết định ngày 26/09/2026, cùng quy ước với TDD-PROJ-001).
 
 ## Architecture
 
 **Hiện trạng đã xác minh**
 
 Backend là .NET 8, EF Core/Npgsql 8; compose dùng PostgreSQL 15. `ApplicationDbContext` có User và các bảng nền RBAC, chưa có bảng LIB, catalog PROJ hay subscription trong DbContext được đọc. Không có tenant filter. Các port/tên lớp mới trong tài liệu là đề xuất, không khẳng định đã tồn tại.
+
+Kiểm tra lại ngày 26/09/2026 trên `develop` tại `9c7b147`: chưa có code LIB. Code đã có phần lưu URL tệp của dự toán mà LIB dùng lại: option `UploadedFileOption` (`src/bmt-be.application/dependencyInjection/options/UploadedFileOption.cs`, biến `UploadedFileOption__AllowedHosts__0`, `__1`…), interface `IUploadedFileUrlPolicy` và lớp `UploadedFileUrlPolicy` (`src/bmt-be.application/services/UploadedFileUrlPolicy.cs`). `Check(url)` trả `NotConfigured` khi danh sách tên miền rỗng, `HostNotAllowed` khi URL không phải https tuyệt đối, có thông tin đăng nhập, có cổng khác mặc định hoặc tên máy chủ không khớp chính xác một phần tử của danh sách, và `Allowed` khi hợp lệ. Lớp này không gọi HTTP tới URL.
 
 `TransactionPipelineBehavior` commit khi handler trả về bình thường, kể cả Result.Failure. Generic `ICommand<T>` không kế thừa marker `ICommand`; command ghi mới phải đặt hậu tố Command hoặc hiện thực `ITransactionalRequest`. `IUnitOfWork` hiện đăng ký transient: phải đổi scoped để LIB và dịch vụ quota dùng cùng DbContext/transaction. Sau khi bắt đầu ghi, lỗi phải ném exception để rollback, không trả Result.Failure rồi để pipeline commit. Không mở transaction lồng. Quy ước tương ứng đã có trong TDD-PROJ-001.
 
@@ -82,18 +85,19 @@ Backend là .NET 8, EF Core/Npgsql 8; compose dùng PostgreSQL 15. `ApplicationD
 | Thành phần dự kiến | Trách nhiệm |
 |---|---|
 | LibraryApi, AdminLibraryApi | Carter routes, policy, DTO; không tự tính quota. Chống CSRF do lớp dùng chung ở [TDD-AUTH-001](TDD-AUTH-001.md) đảm nhận. |
-| LibraryContentPolicy | Kiểm tên, kích thước, định dạng, ảnh đại diện, phân loại và điều kiện công bố. |
+| LibraryContentPolicy | Kiểm tên, kích thước, định dạng khai báo của tệp, ảnh đại diện, phân loại và điều kiện công bố. |
 | LibraryVersionService | Sửa tại chỗ, nháp riêng, công bố, ẩn/hiện, xóa nháp; kiểm version chống ghi đè. |
 | ILibraryCatalogReader | Đọc cùng EstimateCatalog/CatalogBuildingType/CatalogFloor của PROJ; trả revision và lựa chọn hợp lệ. Không có bản sao danh mục LIB. |
-| ILibraryObjectStore | Ghi object bất biến, xác nhận có thể đọc, mở stream; adapter nhà cung cấp còn chờ cấu hình. |
+| IUploadedFileUrlPolicy (đã có trong code) | Kiểm URL tệp mới là https và thuộc tên miền kho presign trong `UploadedFileOption__AllowedHosts`; dùng chung với PROJ, không tạo bản kiểm URL thứ hai cho LIB. |
 
 ```mermaid
 flowchart LR
     UI[Người quản lý và danh sách công khai] --> API[Library API]
+    UI -.->|xin URL upload, tự upload tệp| P[Dịch vụ presigned URL ngoài backend]
     API --> LIB[ContentPolicy và VersionService]
+    LIB --> URLP[IUploadedFileUrlPolicy]
     LIB --> CAT[Catalog PROJ]
-    LIB --> DB[(PostgreSQL)]
-    LIB --> STORE[Kho object private]
+    LIB --> DB[(PostgreSQL: lưu URL tệp)]
     VIEW[Tra cứu TDD-LIB-002] --> DB
 ```
 
@@ -101,7 +105,7 @@ flowchart LR
 
 Mã quyền `library.manage` là quyền quản lý thư viện mẫu đã chốt tên theo STORY-RBAC-001/Preconditions, RequiresAssignment=false, seed cho vai trò hệ thống Admin; các vai trò khác được cấp bằng RBAC hiện có. Policy kiểm theo mã quyền này, không kiểm tên vai trò "Admin" (BR-RBAC-001, BR-RBAC-011); thiếu quyền trả 403 và không ghi dữ liệu nghiệp vụ. Bổ sung cả PermissionNames, migration seed và policy registry để PermissionCatalogGuard không từ chối khởi động. Quyền này khác quyền lợi gói `catalog.detail`: một bên là quản trị, một bên là quyền khách mở mẫu mới. Không tái dùng `assignment.manage` hoặc bắt phân công nhân viên vào mẫu.
 
-Mutation dùng cookie được kiểm Origin theo [TDD-AUTH-001](TDD-AUTH-001.md), không dùng CORS thay CSRF. Endpoint công khai chỉ trả summary và ảnh đại diện của phiên bản hiện hành không ẩn. Endpoint thumbnail kiểm lại current/visibility, không để URL asset thô tồn tại công khai sau ẩn/thay ảnh. Ảnh đã tải xuống trước đó không thể thu hồi khỏi máy khách.
+Mutation dùng cookie được kiểm Origin theo [TDD-AUTH-001](TDD-AUTH-001.md), không dùng CORS thay CSRF. Endpoint công khai chỉ trả summary và ảnh đại diện của phiên bản hiện hành không ẩn. Endpoint thumbnail kiểm lại current/visibility trước khi phục vụ ảnh. Tệp vẫn nằm ở URL công khai, cố định của kho presign, nên người đã biết URL gốc vẫn mở được sau khi mẫu bị ẩn hoặc ảnh bị thay; backend không thu hồi được URL đó. Việc trả hay giấu URL gốc là câu hỏi mở tại [TDD-LIB-002/Architecture](TDD-LIB-002.md#architecture). Ảnh đã tải xuống trước đó không thể thu hồi khỏi máy khách.
 
 Preview quản trị và các route đọc nội dung bảo vệ theo TDD-LIB-002/Internal API; quyền library.manage không tạo lịch sử khách hoặc dùng lượt.
 
@@ -111,9 +115,9 @@ Preview quản trị và các route đọc nội dung bảo vệ theo TDD-LIB-00
 
 Phiên bản có State Draft hoặc Published. Phiên bản cũ là Published nhưng không còn được CurrentVersionId trỏ tới; không lưu thêm trạng thái Superseded để tránh lệch hai nguồn. Number được cấp lúc công bố bằng max Number đã công bố + 1 dưới khóa Template. Nháp có Number/PublishedAtUtc NULL. Có thể có nhiều nháp kỹ thuật; công bố phải gửi expectedCurrentVersionId nên nháp dựa trên bản cũ không tự ghi đè bản mới. Không tự thêm luồng gộp nháp. BaseVersionId là dấu nguồn sao chép, không bị so bằng current mỗi lần công bố: Admin có thể xem xét một nháp cũ rồi gửi expectedCurrentVersionId hiện hành, nhưng server không tự đổi giá trị kỳ vọng thay khách.
 
-Tạo nháp từ current sao chép metadata và các dòng liên kết tài nguyên; object đã xác minh được dùng chung bằng AssetId, không nhân đôi bytes. Sửa asset luôn tạo object mới, không ghi đè object đang được bản khác tham chiếu. Khi công bố, dữ liệu nháp phải đủ, phân loại phải hợp lệ theo catalog hiện hành. Transaction đổi con trỏ và chuyển Draft sang Published. Bản trước không còn sửa được, kể cả API trực tiếp.
+Tạo nháp từ current sao chép metadata và các dòng liên kết tài nguyên; mỗi LibraryAsset (một URL tệp) được dùng chung bằng AssetId, không lặp URL. Thay tệp luôn là thêm LibraryAsset mới với URL mới; backend không sửa URL của asset đang được bản khác tham chiếu. Khi công bố, dữ liệu nháp phải đủ, phân loại phải hợp lệ theo catalog hiện hành. Transaction đổi con trỏ và chuyển Draft sang Published. Bản trước không còn sửa được, kể cả API trực tiếp.
 
-Ẩn/hiện chỉ đổi Template.IsHidden, không thay phiên bản, lượt hoặc quyền xem. Mẫu chưa công bố không xuất hiện dù IsHidden=false. Xóa nháp xóa các liên kết của riêng nháp; không xóa object hoặc template identity dùng bởi lịch sử/receipt. Công bố không tự đảo IsHidden; mẫu đang ẩn tiếp tục ẩn tới khi người quản lý chọn Hiện lại.
+Ẩn/hiện chỉ đổi Template.IsHidden, không thay phiên bản, lượt hoặc quyền xem. Mẫu chưa công bố không xuất hiện dù IsHidden=false. Xóa nháp xóa các liên kết của riêng nháp; không xóa dòng LibraryAsset, tệp ở kho presign hoặc template identity dùng bởi lịch sử/receipt. Công bố không tự đảo IsHidden; mẫu đang ẩn tiếp tục ẩn tới khi người quản lý chọn Hiện lại.
 
 **Dùng chung catalog mà vẫn giữ phân loại cũ**
 
@@ -125,23 +129,31 @@ Bộ lọc dùng UNION DISTINCT của lựa chọn catalog hiện hành và phâ
 
 **Khóa và ranh giới với tra cứu**
 
-Mutation quản trị khóa User người thao tác FOR UPDATE → EstimateCatalog FOR SHARE khi revalidate → Template FOR UPDATE → Version theo Id tăng dần. Ghi content, con trỏ và receipt cùng transaction; upload ngoài transaction. Không lấy khóa tài khoản khách/quota sau Template. Quy tắc khóa phối hợp đầy đủ và xử lý mở khi nội dung đổi được định nghĩa một lần tại [TDD-LIB-002/Architecture](TDD-LIB-002.md#architecture).
+Mutation quản trị khóa User người thao tác FOR UPDATE → EstimateCatalog FOR SHARE khi revalidate → Template FOR UPDATE → Version theo Id tăng dần. Ghi content, con trỏ và receipt cùng transaction; frontend upload tệp lên kho presign trước, ngoài backend. Không lấy khóa tài khoản khách/quota sau Template. Quy tắc khóa phối hợp đầy đủ và xử lý mở khi nội dung đổi được định nghĩa một lần tại [TDD-LIB-002/Architecture](TDD-LIB-002.md#architecture).
 
 **Upload và tài nguyên**
 
-Upload từng tệp theo stream ngoài SQL transaction qua port PutImmutable; server cấp object key ngẫu nhiên, không nhận URL/key tùy ý của người gọi. Kiểm nội dung thực tương ứng JPG/PNG/WebP/PDF/DWG/DXF, không tin extension hoặc Content-Type. Với ảnh, tạo thumbnail từ ảnh đại diện bằng adapter xử lý ảnh; PDF/CAD là download attachment, không thực thi hoặc render CAD trên server. Cần chọn/thử bộ kiểm định dạng và thư viện ảnh trước triển khai production.
+Backend không nhận bytes tệp. Theo quyết định ngày 26/09/2026 (cùng quy ước ở TDD-PROJ-001/Architecture, ghi chú "URL ảnh thuộc kho presign"), mỗi tệp đi theo ba bước:
 
-Chỉ tạo LibraryAsset sau khi object hoàn tất, checksum/bytes đã xác minh và đọc lại được. Upload không tự gắn vào phiên bản; attach là transaction riêng kiểm quyền, TemplateId và expectedEditVersion. Upload thất bại hoặc attach thất bại giữ nội dung cũ. Object không gắn có thể tồn tại sau lỗi; không xóa để bù một object còn được version khác dùng. Dọn object mồ côi phải có kiểm tra tham chiếu và phối hợp khóa khi triển khai; chưa bật tự dọn trong phạm vi này.
+1. Frontend kiểm định dạng theo BR-LIB-001 khoản 2 (ảnh JPG/PNG/WebP; tệp đính kèm PDF/DWG/DXF), xin URL upload từ dịch vụ presigned URL rồi tự upload tệp lên đó. Dịch vụ này nằm ngoài backend.
+2. Frontend gửi `POST .../assets` với `{kind, url, originalName, mediaType, sizeBytes}` của tệp vừa upload.
+3. Backend kiểm URL bằng `IUploadedFileUrlPolicy` (URL tuyệt đối https, không khoảng trắng, tối đa 2048 ký tự, tên máy chủ thuộc `UploadedFileOption__AllowedHosts`), kiểm `kind` khớp `mediaType` và phần mở rộng của `originalName` theo danh sách định dạng của BR-LIB-001 khoản 2, rồi tạo một dòng LibraryAsset trong transaction ngắn. Danh sách tên miền rỗng thì trả 503 `LibraryStorageUnavailable`, không lưu URL.
 
-Không lưu binary trong PostgreSQL hoặc buffer cả file bằng IFormFile/MemoryStream. Không đặt số ảnh/tệp tối đa trong validator. Upload stream vẫn chịu giới hạn request, timeout và kho tệp thực tế; các giá trị vận hành phải được cấu hình và nghiệm thu, không mô tả “không giới hạn” là năng lực vật lý vô hạn. [ASP.NET Core 8 — streaming upload](https://learn.microsoft.com/en-us/aspnet/core/mvc/models/file-uploads?view=aspnetcore-8.0).
+Ví dụ: ảnh `mat-bang.jpg` được upload lên `https://cdn.example.test/lib/m1/mat-bang.jpg`. Với `UploadedFileOption__AllowedHosts__0=cdn.example.test`, backend tạo F1 với Kind=Image, MediaType=image/jpeg. Cùng yêu cầu nhưng URL `https://other.example.test/mat-bang.jpg` hoặc `mediaType=image/gif` bị trả 422 `UnsupportedLibraryFile`, không tạo dòng.
 
-Object/metadata bất biến là hợp đồng đầu vào cho luồng tải tài nguyên có quyền tại TDD-LIB-002. Thumbnail công khai chỉ phục vụ cover current không ẩn.
+Kiểm `mediaType` và tên tệp chỉ là kiểm dữ liệu khai báo, không phải kiểm nội dung thật: backend không tải tệp về. Vì vậy request gửi thẳng API với URL đúng tên miền nhưng trỏ tới tệp sai định dạng sẽ không bị chặn. Ở PROJ, người dùng đã chấp nhận hệ quả này cho ảnh (TDD-PROJ-001); với LIB chưa có xác nhận riêng, xem câu hỏi mở ở Notes. `sizeBytes` do frontend khai, chỉ để hiển thị, backend không xác minh. Backend không tạo ảnh thu nhỏ; ảnh đại diện dùng chính tệp ảnh cover. PDF/CAD là tệp tải về, không render trên server.
+
+Tạo LibraryAsset không tự gắn vào phiên bản; attach là transaction riêng kiểm quyền, TemplateId và expectedEditVersion. Upload lỗi thì frontend không gọi API, lưu hoặc attach lỗi thì transaction rollback; nội dung cũ giữ nguyên. Tệp đã upload mà không được lưu hoặc gắn có thể còn nằm ở kho presign; backend không xóa tệp ở kho, việc dọn tệp không còn được tham chiếu thuộc dịch vụ lưu trữ.
+
+Không đặt số ảnh/tệp tối đa trong validator (BR-LIB-001 khoản 2). Giới hạn dung lượng và thời gian upload giờ là của dịch vụ presigned URL, không phải của API backend; phải làm rõ với bên cung cấp dịch vụ và không mô tả “không giới hạn” là năng lực vật lý vô hạn.
+
+URL đã lưu của LibraryAsset không bị sửa là hợp đồng đầu vào cho luồng tải tài nguyên có quyền tại TDD-LIB-002. Thumbnail công khai chỉ phục vụ cover current không ẩn.
 
 **Phạm vi thay đổi mã khi được giao triển khai**
 
 - Thêm DTO/validator tại `contract/services/library/`, command/query handler tại `application/usecases/.../library/`, Carter routes tại `presentation/apis/library/` và entity/config tại domain/persistence.
-- Thêm các port đã nêu vào application/abstractions; catalog adapter đọc schema PROJ, quota adapter ghi schema SUB, storage adapter ở infrastructure. Không cho LIB cập nhật catalog hoặc cấu hình gói trực tiếp.
-- Bổ sung permission/policy registry/seed, UoW scoped và cấu hình stream tại API; chống CSRF đã có ở lớp chung ([TDD-AUTH-001](TDD-AUTH-001.md)). Hồi quy auth và gói/lượt sau thay đổi nền tảng.
+- Thêm các port đã nêu vào application/abstractions; catalog adapter đọc schema PROJ, quota adapter ghi schema SUB. Dùng lại `IUploadedFileUrlPolicy` và `UploadedFileOption` đã có, không thêm storage adapter. Không cho LIB cập nhật catalog hoặc cấu hình gói trực tiếp.
+- Bổ sung permission/policy registry/seed và UoW scoped; chống CSRF đã có ở lớp chung ([TDD-AUTH-001](TDD-AUTH-001.md)). Hồi quy auth và gói/lượt sau thay đổi nền tảng.
 - Thứ tự triển khai: nền RBAC/UoW → catalog và SUB cốt lõi → metadata/nháp/assets → công bố/danh sách → quyền xem/quota/history → tích hợp tải tệp và kiểm thử lỗi. Chưa giao triển khai trong tác vụ thiết kế này.
 
 Chi tiết triển khai nội dung/quản trị thuộc tài liệu này; bước quota/history và tải có quyền thuộc TDD-LIB-002.
@@ -150,29 +162,35 @@ Chi tiết triển khai nội dung/quản trị thuộc tài liệu này; bướ
 
 | Quy tắc | Nơi thực hiện | Đặc tả hệ thống | Đặc tả Unit Test |
 |---|---|---|---|
-| BR-LIB-001: nội dung, kích thước, file | Validator, LibraryContentPolicy, asset verifier và CHECK | ST-LIB-001–005 | UT-LIB-001–005, UT-LIB-009–011, UT-LIB-025 |
+| BR-LIB-001: nội dung, kích thước, file | Validator, LibraryContentPolicy, `IUploadedFileUrlPolicy` và CHECK; định dạng tệp kiểm ở frontend, backend kiểm định dạng khai báo | ST-LIB-001–005 | UT-LIB-001–005, UT-LIB-009–011, UT-LIB-025 |
 | BR-LIB-001: catalog và filter | ILibraryCatalogReader, FKs ghép, query projections | ST-LIB-010, ST-LIB-012–016 | UT-LIB-006–008, UT-LIB-028–032 |
 | BR-LIB-002: sửa/công bố/ẩn/xóa | VersionService, mutex Template, receipt, state guard | ST-LIB-006–009, ST-LIB-011 | UT-LIB-012–024, UT-LIB-026–027 |
 
-Đặc tả UT-LIB-001–032 kiểm validator, policy, service quản trị, receipt, thứ tự gọi khóa và truy vấn công khai ở biên unit; chưa có mã test hoặc kết quả chạy. Không dùng mock để kết luận mutex/UNIQUE/rollback đúng. Integration dùng PostgreSQL 15 thật và hai connection cho lượt cuối, cùng phiên bản, đổi kỳ, sửa/công bố chen lúc mở. Storage contract test kiểm object bất biến, lỗi trước/sau metadata, tải Range và định dạng thật. Bổ sung thực nghiệm công bố lúc xác nhận và upload lớn theo cấu hình hạ tầng; không báo đạt từ việc viết đặc tả.
+Đặc tả UT-LIB-001–032 kiểm validator, policy, service quản trị, receipt, thứ tự gọi khóa và truy vấn công khai ở biên unit; chưa có mã test hoặc kết quả chạy. Không dùng mock để kết luận mutex/UNIQUE/rollback đúng. Integration dùng PostgreSQL 15 thật và hai connection cho lượt cuối, cùng phiên bản, đổi kỳ, sửa/công bố chen lúc mở. Kiểm URL tệp (tên miền, https, độ dài) dùng lại test của `UploadedFileUrlPolicy`; phần định dạng khai báo kiểm ở LibraryContentPolicy. Bổ sung thực nghiệm công bố lúc xác nhận và upload lớn qua dịch vụ presign trên môi trường thử; không báo đạt từ việc viết đặc tả.
+
+Đặc tả UT-LIB-009, UT-LIB-010 và UT-LIB-032 viết theo thiết kế kho riêng cũ (bộ nhận diện đọc bytes, `ILibraryObjectStore`, `PutImmutable`, `ThumbnailKey`). Chúng mâu thuẫn với quyết định lưu URL và cần viết lại sau khi người dùng chốt bản TDD này; chưa sửa trong đợt này.
 
 **Notes**:
 
-- Không thêm broker, outbox hoặc database khác. Quota/Access/nội dung cùng PostgreSQL; object store nằm ngoài transaction và được chuẩn bị trước. [EF Core transactions](https://learn.microsoft.com/en-us/ef/core/saving/transactions).
-- Log operationId/accountId/versionId/editVersion, kết quả Granted/Reused/Denied/Conflict, không log token, signed URL hay bytes. Theo dõi lỗi storage, thời gian chờ khóa, cấp quyền thất bại và lệch Access/UsageOperation; chưa đặt ngưỡng cảnh báo khi chưa có tải thực.
-- RPO/RTO, retention object chưa gắn, storage provider, timeout/giới hạn truyền tải là phần vận hành chưa có số liệu. Backup phải bao gồm DB và object cùng tham chiếu; thử restore để quyền xem không trỏ file đã mất trước mở production.
+- Không thêm broker, outbox hoặc database khác. Quota/Access/nội dung cùng PostgreSQL; tệp nằm ở kho presign ngoài backend, backend chỉ lưu URL. [EF Core transactions](https://learn.microsoft.com/en-us/ef/core/saving/transactions).
+- Log operationId/accountId/versionId/editVersion, kết quả Granted/Reused/Denied/Conflict, không log token, signed URL hay bytes. Theo dõi lỗi đọc tệp, thời gian chờ khóa, cấp quyền thất bại và lệch Access/UsageOperation; chưa đặt ngưỡng cảnh báo khi chưa có tải thực.
+- RPO/RTO của tệp, giới hạn dung lượng upload và việc dọn tệp mồ côi thuộc dịch vụ presigned URL, chưa có số liệu. Backup của backend chỉ gồm URL trong database; cần thống nhất với bên vận hành kho để quyền xem không trỏ tới tệp đã mất trước khi mở production.
+- **Câu hỏi mở (LIB, lưu URL)**: (1) Người dùng đã chấp nhận ở PROJ rằng định dạng và dung lượng ảnh chỉ kiểm ở frontend. Có áp dụng cùng hệ quả cho ảnh và tệp đính kèm của thư viện mẫu không? Đề xuất: có, backend kiểm thêm định dạng khai báo như trên. (2) Trả URL gốc hay backend chuyển tiếp tệp cho ảnh chi tiết, tệp đính kèm và thumbnail: xem [TDD-LIB-002/Architecture](TDD-LIB-002.md#architecture).
 
 ## Sequence Diagram
 
 ```mermaid
 sequenceDiagram
     actor A as Người quản lý
+    participant P as Dịch vụ presigned URL
     participant API as AdminLibraryApi
-    participant S as Kho private
     participant DB as PostgreSQL
-    A->>API: Upload ảnh hoặc tệp
-    API->>S: Ghi bất biến, xác minh và đọc lại
-    API->>DB: Lưu asset metadata bằng giao dịch ngắn
+    A->>A: Frontend kiểm định dạng tệp
+    A->>P: Xin URL upload và tự upload tệp
+    P-->>A: URL https cố định của tệp
+    A->>API: POST assets với url, kind, originalName, mediaType
+    API->>API: Kiểm URL thuộc AllowedHosts và định dạng khai báo
+    API->>DB: Lưu LibraryAsset bằng giao dịch ngắn
     A->>API: Tạo và chỉnh sửa nháp riêng
     API->>DB: Lưu nháp, link tài nguyên và receipt
     Note over API,DB: Current vẫn phục vụ khách
@@ -244,7 +262,7 @@ LibraryAccess và phần mở rộng UsageOperation có nguồn duy nhất tại
 |---|---|
 | LibraryTemplate | Một mẫu ổn định. Người có `library.manage` tạo; CurrentVersionId NULL trước công bố, IsHidden dùng chung cho mẫu. Không lưu tên/kích thước tại đây. |
 | LibraryVersion | Một phiên bản nội dung tính lượt, thuộc một Template. Người có `library.manage` sửa khi Draft/current; Published cũ không sửa. Number NULL trước công bố. EditVersion khác Number. |
-| LibraryAsset | Một object đã xác minh, thuộc một Template; uploader tạo sau upload thành công. Metadata bất biến, dùng lại được giữa các phiên bản cùng mẫu. |
+| LibraryAsset | Một tệp (ảnh hoặc tệp đính kèm) thuộc một Template, lưu bằng URL ở kho presign. Người có `library.manage` tạo sau khi frontend upload xong và backend kiểm URL. URL và metadata không sửa sau khi tạo, dùng lại được giữa các phiên bản cùng mẫu. |
 | LibraryVersionAsset | Một liên kết Version–Asset với vị trí hiển thị. Cho phép cùng asset ở nhiều phiên bản; không lặp metadata file. |
 | LibraryMutationReceipt | Một mutation quản trị đã commit, dùng nhận diện key gửi lại; lưu hash và kết quả ID/version, không chứa bytes tài nguyên. |
 
@@ -254,7 +272,7 @@ LibraryAccess và phần mở rộng UsageOperation có nguồn duy nhất tại
 |---|---|
 | LibraryTemplate | Id uuid PK; CurrentVersionId uuid NULL; IsHidden boolean NN DEFAULT false; Version bigint NN DEFAULT 1 CHECK>0; CreatedBy uuid NN FK User; CreatedAtUtc timestamptz NN. FK(Id,CurrentVersionId) → LibraryVersion(TemplateId,Id), thêm sau khi tạo bảng; current phải Published do transaction policy. |
 | LibraryVersion | Id uuid PK; TemplateId uuid NN FK Template; State varchar(16) NN CHECK Draft/Published; Number bigint NULL; EditVersion bigint NN DEFAULT 1 CHECK>0; BaseVersionId uuid NULL; Name text NULL; Description text NULL; DrawingKind varchar(2) NULL CHECK NULL/2D/3D; WidthM,LengthM,AreaM2 numeric(28,2) NULL CHECK NULL hoặc >0; CatalogRevisionId,BuildingTypeId uuid NULL; FloorCount int NULL CHECK NULL hoặc >=1; HasTum boolean NULL; CoverAssetId uuid NULL; CreatedBy uuid NN FK User; CreatedAtUtc,ModifiedAtUtc timestamptz NN; PublishedAtUtc timestamptz NULL. UNIQUE(TemplateId,Id), UNIQUE(TemplateId,Number). CHECK Draft thì Number/PublishedAtUtc NULL, Published thì Number>0 và PublishedAtUtc NN. |
-| LibraryAsset | Id uuid PK; TemplateId uuid NN FK Template; Kind varchar(16) NN CHECK Image/Attachment; StorageKey text NN UNIQUE; ThumbnailKey text NULL UNIQUE; OriginalName text NN; MediaType varchar(100) NN; SizeBytes bigint NN CHECK>0; Sha256 char(64) NN; CreatedBy uuid NN FK User; CreatedAtUtc timestamptz NN; UNIQUE(TemplateId,Id). Image phải có ThumbnailKey; Attachment không có. Không có trạng thái Ready giả: chỉ insert sau xác minh object. |
+| LibraryAsset | Id uuid PK; TemplateId uuid NN FK Template; Kind varchar(16) NN CHECK Image/Attachment; Url varchar(2048) NN CHECK bắt đầu bằng `https://` (cùng kiểu CHECK với `CK_CatalogStyle_ImageUrl` của PROJ); OriginalName text NN; MediaType varchar(100) NN; SizeBytes bigint NULL CHECK NULL hoặc >0; CreatedBy uuid NN FK User; CreatedAtUtc timestamptz NN; UNIQUE(TemplateId,Id). Tên miền của Url kiểm ở ứng dụng bằng `IUploadedFileUrlPolicy`, không kiểm bằng CHECK vì danh sách đọc từ cấu hình. OriginalName, MediaType và SizeBytes là dữ liệu frontend khai, backend không xác minh với nội dung tệp. Không có cột khóa kho, ảnh thu nhỏ hay checksum. |
 | LibraryVersionAsset | TemplateId uuid NN; VersionId uuid NN; AssetId uuid NN; Position bigint NN CHECK>0; PK(VersionId,AssetId); UNIQUE(VersionId,Position); FK(TemplateId,VersionId) → Version(TemplateId,Id); FK(TemplateId,AssetId) → Asset(TemplateId,Id). |
 | LibraryMutationReceipt | Id uuid PK; ActorId uuid NN FK User; Operation varchar(24) NN CHECK Create/Save/Publish/Visibility/DeleteDraft/Attach/Detach/Reorder; RequestKey varchar(100) NN; RequestHash char(64) NN; TemplateId uuid NN FK Template; ResultVersionId uuid NULL; Result jsonb NN; CreatedAtUtc timestamptz NN; UNIQUE(ActorId,Operation,RequestKey). ResultVersionId không FK vì receipt xóa nháp phải còn trả lại được ID đã xóa; không dùng nó để cấp quyền đọc nội dung. |
 
@@ -289,11 +307,11 @@ Dữ liệu giả định, ID bí danh thay uuid, lược cột không liên qua
 |---|---|
 | LibraryTemplate | Id=M1; CurrentVersionId=V1; IsHidden=false; Version=2; CreatedBy=A1; CreatedAtUtc=T1. |
 | LibraryVersion | Id=V1; TemplateId=M1; State=Published; Number=1; EditVersion=1; BaseVersionId=NULL; Name=Nhà ABC; DrawingKind=2D; WidthM=5; LengthM=20; AreaM2=80; CatalogRevisionId=C1; BuildingTypeId=B1; FloorCount=3; HasTum=true; CoverAssetId=F1; PublishedAtUtc=T1. |
-| LibraryAsset | F1/M1/Kind=Image/StorageKey=lib/M1/F1/ThumbnailKey=lib/M1/F1-thumb/OriginalName=mat-bang.jpg/MediaType=image/jpeg/SizeBytes=120000/Sha256=H1; F2/M1/Kind=Attachment/StorageKey=lib/M1/F2/ThumbnailKey=NULL/OriginalName=ban-ve.pdf/MediaType=application/pdf/SizeBytes=240000/Sha256=H2. H1/H2 là bí danh hash 64 ký tự. |
+| LibraryAsset | F1/M1/Kind=Image/Url=https://cdn.example.test/lib/m1/mat-bang.jpg/OriginalName=mat-bang.jpg/MediaType=image/jpeg/SizeBytes=120000; F2/M1/Kind=Attachment/Url=https://cdn.example.test/lib/m1/ban-ve.pdf/OriginalName=ban-ve.pdf/MediaType=application/pdf/SizeBytes=240000. Giả định `UploadedFileOption__AllowedHosts__0=cdn.example.test`; tên miền chỉ minh họa. |
 | LibraryVersionAsset | M1/V1/F1/Position=1; M1/V1/F2/Position=2. |
 | LibraryMutationReceipt | ActorId=A1; Operation=Publish; RequestKey=publish-demo-1; RequestHash=HP1; TemplateId=M1; ResultVersionId=V1; Result={"versionId":"V1","number":1,"templateVersion":2}; CreatedAtUtc=T1. Result minh họa JSON, ID thật là uuid. |
 
-Sau mở đầu tiên, Q1 Used=1 và Access U1/V1 cùng tồn tại; mất mạng rồi mở lại không tạo OP2. A1 sửa tên và thay ảnh F1 bằng F3: V1.EditVersion=2, cover/link trỏ F3; M1.CurrentVersionId vẫn V1. U1 xem lịch sử thấy tên/ảnh mới nhưng Used vẫn 1. F1 không bị ghi đè.
+Sau mở đầu tiên, Q1 Used=1 và Access U1/V1 cùng tồn tại; mất mạng rồi mở lại không tạo OP2. A1 sửa tên và thay ảnh F1 bằng F3: V1.EditVersion=2, cover/link trỏ F3; M1.CurrentVersionId vẫn V1. U1 xem lịch sử thấy tên/ảnh mới nhưng Used vẫn 1. F3 là dòng LibraryAsset mới với URL mới, ví dụ https://cdn.example.test/lib/m1/mat-bang-2.jpg; dòng F1 và URL của F1 không bị sửa.
 
 Tạo nháp V2: TemplateId=M1, BaseVersionId=V1, State=Draft, Number/PublishedAtUtc NULL, EditVersion=1; các link sao lại dùng F3/F2. Sửa nháp không đổi V1. Khi công bố ở T3 sau khi catalog thành C2, V2 phải dùng tầng 2 và C2; V1 tiếp tục C1/tầng 3. M1.CurrentVersionId=V2, V2.Number=2, V2.State=Published; V1 không còn sửa được. U1 mở V2 đủ điều kiện tạo OP2 và Access U1/V2, Q1 Used=2; lịch sử có hai dòng. Gói hết hạn hoặc M1.IsHidden=true không xóa hai dòng này.
 
@@ -306,7 +324,7 @@ Các thay đổi lượt trong tình huống trên chỉ giải thích quan hệ
 |---|---|
 | Nội dung | Phụ thuộc VersionId; tên/kích thước không lặp ở Template, Access hoặc receipt phục vụ đọc. |
 | Phân loại | Phụ thuộc revision+type; lưu FK ghim lịch sử, không sao chép tên hiện hành. |
-| File | Metadata phụ thuộc AssetId; VersionAsset chỉ lưu quan hệ/thứ tự. TemplateId lặp để FK ghép ngăn gắn file mẫu khác, được ràng buộc ở cả hai đầu. |
+| File | URL và metadata phụ thuộc AssetId; VersionAsset chỉ lưu quan hệ/thứ tự. TemplateId lặp để FK ghép ngăn gắn file mẫu khác, được ràng buộc ở cả hai đầu. |
 | Receipt | JSON là kết quả thao tác bất biến để gửi lại, không phải nguồn nội dung hoặc bảng snapshot toàn mẫu. |
 
 Index theo truy vấn: Version(TemplateId,Number) unique; Version(PublishedAtUtc DESC,Id DESC) WHERE State='Published'; Version(DrawingKind,BuildingTypeId,FloorCount,HasTum) WHERE State='Published'; Asset(TemplateId,Id) unique; VersionAsset(VersionId,Position) unique và index AssetId cho tra tham chiếu; receipt unique key. Không tạo full-text engine; tìm tên bằng ILIKE có escape ký tự wildcard, truy vấn SQL trước phân trang. Hiệu năng contains có thể cần pg_trgm khi có số liệu, không cam kết B-tree tăng tốc contains.
@@ -322,18 +340,18 @@ Schema quota/Access được triển khai theo TDD-LIB-002 sau bảng Version; k
 
 Tất cả route dưới đây là đề xuất. Mutation quản trị cần library.manage và Idempotency-Key; chống CSRF theo [TDD-AUTH-001](TDD-AUTH-001.md). RequestKey 1–100 ký tự; request hash chứa route, target, expected versions và body chuẩn hóa. Cùng actor/operation/key khác hash trả 409; cùng hash trả kết quả đã commit trước kiểm optimistic version, nhưng vẫn kiểm quyền hiện tại. API khách không nhận AccountId từ client.
 
-- **GET** `/api/v1/design-templates` — Công khai. query `drawingKind,buildingTypeId,floorCount,hasTum,name,pageIndex,pageSize`; thiếu hasTum nghĩa Tất cả. Trả summary: templateId,versionId,number,name,dimensions,type label,floorCount,hasTum,thumbnailUrl,publishedAtUtc. Không có file keys hoặc manifest chi tiết.
+- **GET** `/api/v1/design-templates` — Công khai. query `drawingKind,buildingTypeId,floorCount,hasTum,name,pageIndex,pageSize`; thiếu hasTum nghĩa Tất cả. Trả summary: templateId,versionId,number,name,dimensions,type label,floorCount,hasTum,thumbnailUrl,publishedAtUtc. `thumbnailUrl` trỏ tới route thumbnail bên dưới (theo đề xuất ở câu hỏi mở của TDD-LIB-002); không trả URL tệp chi tiết hoặc manifest.
 - **GET** `/api/v1/design-templates/filters` — Công khai. query drawingKind/buildingTypeId; trả loại và số tầng hiện hành cộng giá trị cũ có mẫu public.
-- **GET** `/api/v1/design-templates/{templateId}/thumbnail` — Công khai chỉ khi có current public; stream thumbnail của cover hiện hành, không chấp nhận assetId bất kỳ.
+- **GET** `/api/v1/design-templates/{templateId}/thumbnail` — Công khai chỉ khi có current public; phục vụ ảnh cover của phiên bản hiện hành (backend không tạo ảnh thu nhỏ), không chấp nhận assetId bất kỳ. Phục vụ bằng cách chuyển tiếp tệp hay chuyển hướng tới URL gốc là câu hỏi mở tại TDD-LIB-002/Architecture.
 - **GET** `/api/v1/admin/library/templates` — library.manage; danh sách quản trị gồm hidden và trạng thái current; có phân trang, không qua quota.
 - **GET** `/api/v1/admin/library/templates/{templateId}/versions` — library.manage; phiên bản/nháp và EditVersion để chọn sửa/preview; không cho sửa old.
 - **POST** `/api/v1/admin/library/templates` — Tạo Template và nháp đầu tiên với dữ liệu; 201 `{templateId,versionId,templateVersion,editVersion}`. Cho lưu nháp thiếu trường; dữ liệu có mặt phải hợp lệ. Body rỗng tạo nháp trống, chưa công khai.
 - **POST** `/api/v1/admin/library/templates/{templateId}/drafts` — `{expectedTemplateVersion,baseVersionId}`; sao current thành nháp mới, không đổi current; base phải là current lúc tiếp nhận.
 - **PUT** `/api/v1/admin/library/templates/{templateId}/versions/{versionId}` — `{expectedEditVersion,name,description,drawingKind,widthM,lengthM,areaM2,buildingTypeId,floorCount,hasTum}`; sửa metadata current/nháp. So giá trị phân loại với bản đã lưu để quyết định revalidate; không tự ghim catalog mới khi chỉ sửa tên.
-- **POST** `/api/v1/admin/library/templates/{templateId}/assets` — Upload một file stream ngoài transaction dài; trả assetId sau xác minh. Upload gửi lại có thể để lại asset chưa gắn; không tự thay nội dung version. Không áp cơ chế receipt quản trị cho stream bytes trong đợt này.
+- **POST** `/api/v1/admin/library/templates/{templateId}/assets` — `{kind,url,originalName,mediaType,sizeBytes}` của một tệp frontend đã upload qua dịch vụ presigned URL; backend không nhận bytes. Kiểm URL bằng `IUploadedFileUrlPolicy` và định dạng khai báo theo BR-LIB-001 khoản 2, tạo LibraryAsset trong transaction ngắn, trả 201 `{assetId}`. Gửi lại tạo thêm asset chưa gắn; không tự thay nội dung version. Không áp cơ chế receipt quản trị cho thao tác này trong đợt này.
 - **PUT** `/api/v1/admin/library/templates/{templateId}/versions/{versionId}/assets/{assetId}` — `{expectedEditVersion,position,setAsCover}`; attach/reposition asset cùng template, tăng EditVersion. Nếu setAsCover=false thì giữ cover hiện có. Vị trí đã chiếm trả 409, dùng reorder để đổi chỗ.
 - **POST** `/api/v1/admin/library/templates/{templateId}/versions/{versionId}/reorder` — `{expectedEditVersion,items:[{assetId,position}]}`; đổi vị trí tập con, kiểm không trùng toàn bộ phiên bản, không xóa asset không nằm trong request.
-- **DELETE** `/api/v1/admin/library/templates/{templateId}/versions/{versionId}/assets/{assetId}` — expectedEditVersion trong query; detach, không xóa bytes. Không được làm current Published thiếu ảnh/cover; phải chọn cover khác trước.
+- **DELETE** `/api/v1/admin/library/templates/{templateId}/versions/{versionId}/assets/{assetId}` — expectedEditVersion trong query; detach, không xóa dòng LibraryAsset hay tệp ở kho. Không được làm current Published thiếu ảnh/cover; phải chọn cover khác trước.
 - **POST** `/api/v1/admin/library/templates/{templateId}/versions/{versionId}/publish` — `{expectedTemplateVersion,expectedEditVersion,expectedCurrentVersionId}`; kiểm đủ nội dung/catalog và đổi con trỏ cùng receipt.
 - **PUT** `/api/v1/admin/library/templates/{templateId}/visibility` — `{expectedTemplateVersion,isHidden}`; cùng version mẫu, không đổi lượt.
 - **DELETE** `/api/v1/admin/library/templates/{templateId}/versions/{versionId}` — expectedEditVersion trong query; chỉ nháp, xóa link và nháp cùng receipt; published trả 409.
@@ -366,32 +384,30 @@ Error Response:
 - **LibraryPositionConflict** (409): Vị trí liên kết tài nguyên bị trùng.
 - **IdempotencyConflict** (409): Cùng mutation key nhưng khác nội dung.
 - **InvalidLibraryContent** (422): Thiếu dữ liệu khi công bố, sai kích thước/phân loại/cover/membership hoặc dữ liệu có giá trị không hợp lệ.
-- **UnsupportedLibraryFile** (422): Nội dung file không thuộc định dạng cho phép hoặc không qua xác minh.
-- **LibraryStorageUnavailable** (503): Không chuẩn bị/upload/đọc được tài nguyên; không tính lượt nếu trước commit mở đầu.
+- **UnsupportedLibraryFile** (422): `kind`, `mediaType` hoặc phần mở rộng của `originalName` không thuộc định dạng cho phép, hoặc `url` không phải URL tuyệt đối https, dài hơn 2048 ký tự hay không thuộc tên miền trong `UploadedFileOption__AllowedHosts`.
+- **LibraryStorageUnavailable** (503): Chưa cấu hình tên miền kho presign khi gửi URL tệp mới, hoặc không đọc được tệp khi chuẩn bị/phục vụ nội dung (TDD-LIB-002); không tính lượt nếu trước commit mở đầu.
 
-Lỗi giới hạn truyền tải 413/timeout thuộc cấu hình hạ tầng, không tự chuyển thành hạn mức nghiệp vụ.
+Giới hạn dung lượng và timeout khi upload thuộc dịch vụ presigned URL, không tự chuyển thành hạn mức nghiệp vụ.
 
 ## External API
 
 ### Endpoints
 
-- **Kho tệp riêng tư — nhà cung cấp chưa chọn** — port `PutImmutable`, `ProbeReadable`, `OpenRead(range)`; không chốt URL hoặc SDK giả. Object mới có key riêng; không overwrite.
-- **Bộ xác minh file và tạo thumbnail — adapter nội bộ** — kiểm bytes thực và sinh thumbnail ảnh; cần đánh giá thư viện hỗ trợ DWG/DXF trước mở upload.
+- **Dịch vụ presigned URL — ngoài phạm vi backend** — Frontend xin URL upload, tự upload tệp và nhận URL cố định của tệp. Backend không gọi dịch vụ này và không tạo presigned URL; chỉ nhận URL có tên máy chủ nằm trong `UploadedFileOption__AllowedHosts` (dùng chung với PROJ, TDD-PROJ-001/External API).
 
 ### Fields
 
-- **StorageKey** — Do server sinh và lưu nội bộ, không xuất vào public DTO.
-- **SizeBytes/Sha256/MediaType** — Tính/xác minh từ bytes thật, không tin trường khách gửi.
-- **Range** — Khoảng byte được kiểm hợp lệ; stream có kiểm quyền, không buffer toàn bộ.
+- **url** — URL https cố định của tệp do dịch vụ presign trả; backend lưu nguyên chuỗi vào `LibraryAsset.Url`, không nhận khóa kho hay đường dẫn nội bộ.
+- **originalName/mediaType/sizeBytes** — Frontend khai; backend chỉ kiểm định dạng khai báo, không xác minh với nội dung tệp.
 
 ### Error Handling
 
-Upload hoàn tất nhưng metadata lỗi để lại object chưa gắn, không báo version đã lưu. Gửi lại attach/publish dùng cùng key/hash; không upload lại trong transaction. Timeout đọc/ghi trước mở đầu làm mở đầu thất bại không trừ lượt; lỗi tải sau khi đã có quyền chỉ cần tải lại. Không tự xóa asset phiên bản cũ để bù lỗi storage.
+Upload lỗi thì frontend không gọi API, nội dung cũ giữ nguyên. Upload xong nhưng lưu LibraryAsset lỗi để lại tệp chưa được tham chiếu ở kho; backend không báo version đã lưu và không xóa tệp. Gửi lại attach/publish dùng cùng key/hash. Lỗi đọc tệp khi mở hoặc tải thuộc TDD-LIB-002.
 
 ### Quirks
 
-- Không thể rollback kho object bằng SQL. Chính sách dọn rác phải bảo vệ mọi link current/old/nháp.
-- Chưa có provider, thông số timeout, khả năng Range, giới hạn một object và request body được kiểm chứng. Đây là điều kiện vận hành trước production, không phải cam kết upload vật lý vô hạn.
+- Không rollback được kho presign bằng SQL. Dọn tệp mồ côi thuộc dịch vụ lưu trữ và phải tránh xóa tệp còn được LibraryAsset của phiên bản current/old/nháp tham chiếu; cần thống nhất với bên vận hành kho.
+- Tệp ở URL công khai có thể bị thay hoặc xóa ngoài hệ thống; backend không phát hiện khi lưu.
 - Không sao chép quy tắc ảnh 5 MB/10 MB của PROJ sang LIB.
 
 ## References
@@ -425,7 +441,8 @@ Upload hoàn tất nhưng metadata lỗi để lại object chưa gắn, không 
 - Unit Test: UT-LIB-001 đến UT-LIB-032 cho nội dung, phiên bản, quyền quản trị và danh sách công khai; UT-LIB-033 đến UT-LIB-050 thuộc TDD-LIB-002. Đặc tả chưa thực thi, chưa có mã test.
 
 - [Bảng System Test LIB](../discovery/library-system-test-coverage.md) — đặc tả System Test chưa thực thi.
-- [TDD-PROJ-001](TDD-PROJ-001.md) — catalog revision, kiểu số, UoW và storage đề xuất.
+- [TDD-PROJ-001](TDD-PROJ-001.md) — catalog revision, kiểu số, UoW và quy ước lưu URL tệp (`UploadedFileOption__AllowedHosts`, `IUploadedFileUrlPolicy`).
+- Code lưu URL tệp dùng lại: `bmt-be/src/bmt-be.application/services/UploadedFileUrlPolicy.cs`, `bmt-be/src/bmt-be.application/abstractions/IUploadedFileUrlPolicy.cs`, `bmt-be/src/bmt-be.application/dependencyInjection/options/UploadedFileOption.cs` (`develop` tại `9c7b147`).
 - [TDD-SUB-001](TDD-SUB-001.md) — BenefitDefinition và mã catalog.detail.
 - [TDD-SUB-002](TDD-SUB-002.md) — kỳ/quota; phần tra cứu được cập nhật theo TDD-LIB-002.
 - [TDD-SUB-005](TDD-SUB-005.md) — LifecycleState khi kiểm hiệu lực kỳ.
@@ -435,5 +452,6 @@ Upload hoàn tất nhưng metadata lỗi để lại object chưa gắn, không 
 
 ## Change Log
 
+- 2026-09-26 (lưu URL tệp): Theo quyết định backend không có kho tệp riêng: frontend upload qua dịch vụ presigned URL, backend chỉ lưu URL https thuộc `UploadedFileOption__AllowedHosts`, kiểm bằng `IUploadedFileUrlPolicy` đã có trong code. Bỏ `ILibraryObjectStore`, `PutImmutable`, bộ kiểm bytes và tạo thumbnail; `LibraryAsset` thay `StorageKey`, `ThumbnailKey`, `Sha256` bằng cột `Url`, `SizeBytes` thành dữ liệu khai báo có thể NULL. `POST .../assets` nhận URL thay cho stream bytes; thumbnail dùng ảnh cover. Định dạng tệp kiểm ở frontend, backend kiểm định dạng khai báo; việc áp hệ quả này cho LIB và việc trả hay giấu URL gốc là câu hỏi mở. UT-LIB-009, UT-LIB-010, UT-LIB-032 cần viết lại sau khi chốt TDD. Nghiệp vụ BR-LIB-001–003 không đổi.
 - 2026-09-26 (CSRF): Chống CSRF dẫn tới [TDD-AUTH-001](TDD-AUTH-001.md), bỏ antiforgery token.
 - 2026-09-25: Ghi `library.manage` là tên quyền đã chốt theo STORY-RBAC-001 (RequiresAssignment=false, vai trò Admin có quyền), policy kiểm theo mã quyền chứ không theo tên vai trò. Bảng ý nghĩa dữ liệu đổi “Admin tạo/sửa” thành “người có `library.manage`”. Bổ sung tham chiếu STORY-RBAC-001 và BR-RBAC-001. Thiết kế nội dung, phiên bản và API không đổi.

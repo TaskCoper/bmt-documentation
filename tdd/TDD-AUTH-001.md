@@ -71,7 +71,13 @@ Người dùng xác nhận ngày 26/09/2026 (phân tích và so sánh phương �
 6. Bật chặn ngay ở mọi môi trường, không có chế độ chỉ ghi log.
 7. Tài liệu thống nhất về kiểm Origin: bỏ `X-CSRF-Token`, endpoint `GET /api/v1/antiforgery/token` và header `X-BMT-Request`; dùng một mã lỗi chung `CsrfInvalid`. Thiết kế chính thức nằm ở tài liệu này; TDD tính năng chỉ dẫn tới đây.
 
-**Hiện trạng code:** thiết kế này đã có trong code ở commit `50ed2f3` trên nhánh `feature/csrf-protection` của `bmt-be`, tách từ `develop` tại `388a426`, chưa merge. Chưa kiểm trên môi trường đã triển khai; các biến cấu hình cần đặt nằm ở Architecture/Notes.
+Người dùng xác nhận thêm cùng ngày, sau khi có code lần đầu:
+
+8. Bật cả `X-Forwarded-For`. Chấp nhận hệ quả: sau proxy tin cậy, bộ giới hạn tần suất chia ngăn theo IP thật của từng khách thay vì theo IP của tunnel.
+9. Cố định dải IP của hai mạng Docker: `bmt-network-dev` là `10.47.10.0/24`, `bmt-network-prod` là `10.47.20.0/24`. API chỉ tin forwarded headers từ khối `.8/29` của mỗi mạng; `cloudflared` có IP tĩnh `.10` trong khối đó.
+10. Môi trường bật Swagger tự cho phép origin của chính API, ghép từ scheme (sau khi áp forwarded headers tin cậy) và header `Host` thật; không đọc `X-Forwarded-Host`. Cách này an toàn vì cookie phiên là cookie host-only, xem Architecture/Origin của chính API khi bật Swagger.
+
+**Hiện trạng code:** thiết kế này đã có trong code và đã merge vào `develop` của `bmt-be` ở hai commit: `53ec4be` (middleware, cờ cookie, forwarded headers; trước khi rebase là `50ed2f3` trên nhánh `feature/csrf-protection`) và `9c7b147` (dải IP cố định, origin của API khi bật Swagger; trước khi rebase là `3974b55`). Chưa kiểm trên môi trường đã triển khai; mạng Docker trên máy chủ phải được tạo lại một lần (Architecture/Notes) và các biến cấu hình cần đặt nằm ở Architecture/Notes.
 
 ### Goals
 
@@ -86,8 +92,8 @@ Người dùng xác nhận ngày 26/09/2026 (phân tích và so sánh phương �
 - Không dùng antiforgery token của ASP.NET Core, header `X-CSRF-Token`, endpoint cấp token hay header tùy chỉnh `X-BMT-Request`.
 - Không có chế độ chỉ ghi log (ReportOnly).
 - Không chống XSS. Mã độc chạy trên chính origin được phép vẫn gửi được request hợp lệ; đó là việc của lớp khác.
-- Không tự thêm origin của chính API vào danh sách cho Swagger; môi trường có Swagger phải tự khai báo.
-- Không đổi thiết kế bộ giới hạn tần suất; ảnh hưởng gián tiếp của forwarded headers lên bộ này ghi ở Architecture/Notes.
+- Không cho phép origin của chính API ở môi trường không bật Swagger; khi đó origin của API phải nằm trong `Cors:AllowedOrigins` mới được nhận.
+- Không đổi thiết kế bộ giới hạn tần suất; ảnh hưởng gián tiếp của forwarded headers lên bộ này (người dùng đã chấp nhận) ghi ở Architecture/Notes.
 
 ## Architecture
 
@@ -97,11 +103,12 @@ Lớp chống CSRF là một middleware dùng chung cho toàn API, không gắn 
 |---|---|---|
 | `AllowedOrigins` | `src/bmt-be.api/security/AllowedOrigins.cs` | Đọc `Cors:AllowedOrigins`, chuẩn hóa và kiểm cấu hình; cộng `http://localhost:3000` khi là Development. Đăng ký singleton để CORS và middleware dùng chung. |
 | `CsrfOriginPolicy` | `src/bmt-be.api/security/CsrfOriginPolicy.cs` | Lớp thuần, không phụ thuộc `HttpContext`: nhận method, cờ miễn trừ, có `Authorization` hay không, `Origin`, `Referer`, có cookie phiên hay không; trả kết luận cho qua hoặc lý do chặn. |
-| `CsrfOriginProtectionMiddleware` | `src/bmt-be.api/middlewares/CsrfOriginProtectionMiddleware.cs` | Lấy dữ liệu từ request, gọi `CsrfOriginPolicy`, tự ghi phản hồi 403 và log khi chặn. |
+| `CsrfOriginProtectionMiddleware` | `src/bmt-be.api/middlewares/CsrfOriginProtectionMiddleware.cs` | Lấy dữ liệu từ request, gọi `CsrfOriginPolicy`, tự ghi phản hồi 403 và log khi chặn. Nhận tham số `allowApiOrigin`; khi bật, ghép origin của chính API (`ApiOriginOf`) và truyền vào `CsrfRequest.ApiOrigin`. |
 | `SkipCsrfCheckMetadata`, `.SkipCsrfCheck()` | `src/bmt-be.presentation/abstractions/SkipCsrfCheck.cs` | Đánh dấu endpoint được miễn kiểm. |
 | `AuthCookieHelper.BuildCookieOptions`, `AuthCookieOption` | `src/bmt-be.presentation/abstractions/AuthCookieHelper.cs` | Cờ `Secure` và `SameSite` của cookie phiên theo môi trường và cấu hình. |
 | `RequestProtectionExtensions` | `src/bmt-be.api/dependencyInjection/extensions/RequestProtectionExtensions.cs` | Đăng ký forwarded headers, `AuthCookieOption`, `CsrfOriginPolicy`; hàm `UseApiPipeline` giữ thứ tự middleware để `Program.cs` và test qua pipeline dùng chung. |
 | `ServiceCollectionExtensions.ConfigureCors` | `src/bmt-be.api/dependencyInjection/extensions/ServiceCollectionExtensions.cs` | Dựng CORS policy từ `AllowedOrigins`. |
+| Mạng Docker và mặc định proxy tin cậy | `.docker/compose.yaml` | Cố định dải `bmt-network-dev`, `bmt-network-prod`; gán IP tĩnh cho `bmt-cloudflare-dev`, `bmt-cloudflare-prod`; đặt mặc định `ForwardedHeadersOption__KnownNetworks` riêng cho `bmt-api-dev` và `bmt-api-prod`. |
 
 ```mermaid
 flowchart LR
@@ -129,6 +136,7 @@ Middleware xét theo thứ tự dưới đây; gặp bước nào có kết lu�
 4. Lấy origin của request: dùng `Origin` nếu có; không có thì lấy phần `scheme://host[:port]` của `Referer`.
 5. Có origin:
    - Khớp danh sách → cho qua.
+   - Ở môi trường bật Swagger: trùng chính xác origin của chính API → cho qua (xem mục Origin của chính API khi bật Swagger).
    - Không khớp, là chuỗi `null`, sai định dạng, hoặc có nhiều header `Origin` → **chặn**, lý do `UntrustedOrigin`. Quy tắc này áp cả khi không có cookie, để chặn đăng nhập giả mạo (login CSRF: trang lạ đăng nhập nạn nhân vào tài khoản của kẻ tấn công) và việc lợi dụng trình duyệt người khác gọi `resend_verify_account_code`.
 6. Không có origin:
    - Request mang cookie `accessToken` hoặc `refreshToken` (chỉ xét tên cookie có mặt) → **chặn**, lý do `MissingOrigin`.
@@ -146,6 +154,8 @@ Ví dụ với danh sách `https://app.example.test`:
 | `POST /api/v1/users/login` từ script, không cookie, không `Origin` | Cho qua |
 | `POST /api/v1/staff/{id}/lock`, `Authorization: Bearer ...`, `Origin` lạ | Cho qua; bước xác thực quyết định |
 | `POST /api/v1/payment-webhooks/sepay/{connectionId}`, không `Origin` hoặc `Origin` lạ | Cho qua (miễn trừ); đi tới bước kiểm HMAC |
+| Staging bật Swagger, API ở `https://api-staging.example.test`: `POST /api/v1/staff/{id}/lock` từ Swagger UI, cookie, `Origin: https://api-staging.example.test` | Cho qua, dù origin này không có trong `Cors:AllowedOrigins` |
+| Production không bật Swagger, cùng request với `Origin` là origin của API | Chặn `UntrustedOrigin`, trừ khi origin đó được khai trong `Cors:AllowedOrigins` |
 
 ### So khớp origin
 
@@ -157,7 +167,19 @@ So chính xác scheme, host và port, không so theo tiền tố hay hậu tố:
 - `http://localhost:3000` chỉ được cộng sẵn khi `ASPNETCORE_ENVIRONMENT=Development`. Trước thay đổi này, origin này được cho phép ở mọi môi trường.
 - Mục có `*`, có đường dẫn, có query hoặc sai định dạng làm ứng dụng ném `InvalidOperationException` lúc đăng ký dịch vụ, tức là từ chối khởi động. Code cũ lặng lẽ bỏ `*`.
 - CORS dùng `WithOrigins` với đúng danh sách đã chuẩn hóa, vẫn `AllowCredentials`, `AllowAnyHeader`, `AllowAnyMethod` như cũ.
-- Môi trường có Swagger (Development, Staging) phải thêm origin công khai của chính API vào danh sách. Nếu không, lệnh ghi trên Swagger dùng cookie bị chặn; dùng nút Authorize (Bearer) thì không bị kiểm.
+- Môi trường bật Swagger (Development, Staging) không cần khai origin của chính API vào danh sách; middleware tự cho phép origin đó, xem mục dưới. Dùng nút Authorize (Bearer) trên Swagger thì request không bị kiểm.
+
+### Origin của chính API khi bật Swagger
+
+Swagger UI chạy cùng origin với API, nên lệnh ghi gửi từ Swagger mang `Origin` (hoặc `Referer` của trang `/swagger`) là origin của API. Trước commit `9c7b147`, môi trường có Swagger phải tự khai origin này vào `Cors:AllowedOrigins`; nay middleware tự cho phép ở môi trường bật Swagger.
+
+- **Khi nào bật:** `UseApiPipeline(enableSwagger)` truyền cùng cờ bật Swagger vào `CsrfOriginProtectionMiddleware` (tham số `allowApiOrigin`). `Program.cs` bật Swagger khi `ASPNETCORE_ENVIRONMENT` là Development hoặc Staging. Môi trường khác không tự cho phép origin của API.
+- **Ghép origin của API:** `ApiOriginOf` lấy `Request.Scheme` và `Request.Host`, rồi chuẩn hóa bằng `AllowedOrigins.TryNormalizeOrigin`. Scheme là giá trị sau `UseForwardedHeaders`, nên chỉ thành `https` khi proxy tin cậy báo qua `X-Forwarded-Proto`. `Host` là header thật của request; middleware **không** đọc `X-Forwarded-Host` và pipeline cũng không bật xử lý header này. Không có `Host` thì không cho phép thêm origin nào.
+- **So khớp:** `CsrfOriginPolicy.IsTrusted` cho qua khi origin (từ `Origin` hoặc `Referer`) nằm trong danh sách, hoặc trùng chính xác `CsrfRequest.ApiOrigin`. Subdomain khác, scheme khác hay port khác của API vẫn bị chặn.
+- **Vì sao an toàn:** cookie phiên là cookie host-only (không đặt `Domain`), nên trình duyệt chỉ gửi cookie khi request đi tới đúng host của API. Khi trang lạ gửi request tới API, `Host` là host của API còn `Origin` là origin của trang lạ, hai giá trị không trùng nên vẫn bị chặn. Kẻ tấn công cũng không dùng được `X-Forwarded-Host` để đổi origin của API, vì giá trị này không được đọc.
+- **Giới hạn:** nếu API và frontend chạy chung host (khác đường dẫn), origin của API cũng là origin của frontend; trường hợp này hiện không có vì frontend chạy khác site. Sau tunnel, nếu proxy không nằm trong danh sách tin cậy thì scheme vẫn là `http`, origin ghép ra là `http://<host>` và không khớp `Origin: https://<host>` của trình duyệt, nên Swagger dùng cookie bị chặn (xem câu hỏi mở về tunnel của Document First ở Notes).
+
+Ví dụ: Staging nghe sau tunnel tin cậy tại `https://api-staging.example.test`. Swagger UI gửi `POST /api/v1/staff/{id}/lock` với cookie và `Origin: https://api-staging.example.test`. Scheme sau forwarded headers là `https`, `Host` là `api-staging.example.test`, origin ghép ra trùng `Origin`, nên request đi tiếp tới xác thực. Cùng lúc đó, `https://evil.example.org` gửi cùng request và kèm `X-Forwarded-Host: evil.example.org` thì vẫn bị chặn, vì origin của API vẫn lấy từ `Host`.
 
 ### Vị trí trong pipeline
 
@@ -204,18 +226,42 @@ Chỉ miễn bằng metadata gắn trên từng endpoint, không miễn theo ti�
 
 API nghe HTTP sau Cloudflare Tunnel. Để `Request.IsHttps` phản ánh HTTPS phía trình duyệt, `UseForwardedHeaders` nhận `X-Forwarded-Proto` và `X-Forwarded-For`, nhưng chỉ khi kết nối đến từ proxy tin cậy:
 
-- `ForwardedHeadersOption:KnownNetworks`: dải CIDR, cách nhau bằng dấu phẩy, ví dụ dải mạng Docker mà container `cloudflared` dùng để gọi API.
+- `ForwardedHeadersOption:KnownNetworks`: dải CIDR, cách nhau bằng dấu phẩy, ví dụ khối IP dành cho container `cloudflared` trong mạng Docker.
 - `ForwardedHeadersOption:KnownProxies`: địa chỉ IP, cách nhau bằng dấu phẩy.
 - Có cấu hình thì danh sách mặc định (loopback) bị thay hẳn. Không cấu hình gì thì giữ mặc định loopback của ASP.NET Core; khi đó header từ mạng Docker bị bỏ qua và API coi mọi request là HTTP.
 - Mục sai định dạng làm ứng dụng từ chối khởi động.
 - Không dùng biến `ASPNETCORE_FORWARDEDHEADERS_ENABLED`, vì biến này xóa trắng danh sách proxy tin cậy và tin header của bất kỳ ai.
 
+**Dải IP cố định trong `.docker/compose.yaml`.** Để có một danh sách proxy tin cậy không phải đọc lại từ máy chủ, hai mạng Docker được cố định dải:
+
+| Mạng | Dải (`subnet`) | IP động cho container thường (`ip_range`) | Gateway | Khối proxy tin cậy | `cloudflared` |
+|---|---|---|---|---|---|
+| `bmt-network-dev` | `10.47.10.0/24` | `10.47.10.128/25` | `10.47.10.1` | `10.47.10.8/29` | `bmt-cloudflare-dev`, IP tĩnh `10.47.10.10` |
+| `bmt-network-prod` | `10.47.20.0/24` | `10.47.20.128/25` | `10.47.20.1` | `10.47.20.8/29` | `bmt-cloudflare-prod`, IP tĩnh `10.47.20.10` |
+
+- Khối `.8/29` gồm các địa chỉ `.8` đến `.15`, nằm ngoài `ip_range`, nên Docker không tự cấp địa chỉ trong khối này cho container khác. Chỉ container được gán IP tĩnh, hiện là `cloudflared`, mới nằm trong khối.
+- `bmt-api-dev` mặc định `ForwardedHeadersOption__KnownNetworks=${FORWARDED_HEADERS_KNOWN_NETWORKS:-10.47.10.8/29}`, `bmt-api-prod` mặc định `10.47.20.8/29`. Biến được đặt riêng ở từng service API vì dev và prod khác dải; `ForwardedHeadersOption__KnownProxies` vẫn nằm trong phần biến dùng chung.
+- Không tin cả dải `/24`: kết nối vào cổng publish (`8080`) từ chính máy chủ đi qua gateway, nên có địa chỉ nguồn `.1`. Nếu tin cả mạng, ai gọi được cổng publish đều tự báo được HTTPS và tự chọn IP khách.
+- Chọn `10.47.x.0/24` vì nằm ngoài các dải Docker tự cấp (`172.17–31.x`, `192.168.x`), `10.88.0.0/16` của Podman, `10.96.0.0/12` và `10.244.0.0/16` hay gặp ở Kubernetes, và các dải `10.0–10.10.x` mà LAN/VPN thường dùng. Dải chưa được kiểm trên máy chủ thật; kiểm ở bước vận hành trong Notes.
+- `FORWARDED_HEADERS_KNOWN_NETWORKS` có giá trị thì thay hẳn mặc định của service, không cộng thêm. Vì biến này dùng chung cho cả `bmt-api-dev` và `bmt-api-prod` trong cùng file `.env`, đặt giá trị cho một stack là đổi cả stack kia nếu hai stack dùng chung file `.env`.
+- File `.docker/docker-compose.yml` (stack nền không dùng profile) không cố định dải và vẫn để `ForwardedHeadersOption__KnownNetworks` rỗng theo mặc định; dùng file này thì phải tự đặt biến. Workflow `deploy-application.yaml` dùng `.docker/compose.yaml`.
+
 **Notes**:
-- **Phải bật cả `X-Forwarded-For`, khác với yêu cầu ban đầu chỉ cần scheme.** `ForwardedHeadersMiddleware` của ASP.NET Core 8 chỉ so địa chỉ kết nối với danh sách proxy tin cậy trong nhánh xử lý `X-Forwarded-For`. Nếu chỉ bật `X-Forwarded-Proto`, bất kỳ ai cũng tự báo được HTTPS; test `AuthCookieFlagsTests.Development_HttpsForwardedByUntrustedSource_Ignored` đã hỏng đúng theo cách này trước khi bật thêm `X-Forwarded-For`. Hệ quả: sau proxy tin cậy, `RemoteIpAddress` là IP của khách do Cloudflare ghi vào `X-Forwarded-For` (lấy giá trị cuối, `ForwardLimit = 1`) thay vì IP của tunnel. Bộ giới hạn tần suất (`ConfigureRateLimiter`), vốn chia ngăn theo `RemoteIpAddress` khi chưa đăng nhập, sẽ chia theo từng khách thay vì dồn mọi người vào một ngăn. Chỉ xảy ra khi đã cấu hình proxy tin cậy.
+- **Bật cả `X-Forwarded-For` (người dùng xác nhận ngày 26/09/2026), khác với yêu cầu ban đầu chỉ cần scheme.** `ForwardedHeadersMiddleware` của ASP.NET Core 8 chỉ so địa chỉ kết nối với danh sách proxy tin cậy trong nhánh xử lý `X-Forwarded-For`. Nếu chỉ bật `X-Forwarded-Proto`, bất kỳ ai cũng tự báo được HTTPS; test `AuthCookieFlagsTests.Development_HttpsForwardedByUntrustedSource_Ignored` đã hỏng đúng theo cách này trước khi bật thêm `X-Forwarded-For`. Hệ quả người dùng đã chấp nhận: sau proxy tin cậy, `RemoteIpAddress` là IP của khách do Cloudflare ghi vào `X-Forwarded-For` (lấy giá trị cuối, `ForwardLimit = 1`) thay vì IP của tunnel. Bộ giới hạn tần suất (`ConfigureRateLimiter`), vốn chia ngăn theo `RemoteIpAddress` khi chưa đăng nhập, chia theo IP thật của từng khách thay vì dồn mọi người vào một ngăn. Chỉ xảy ra với request đến từ proxy tin cậy.
 - **Cấu hình cần đặt trên mỗi môi trường** (tên biến trong `.docker/.env.sample` và secret của workflow `deploy-application.yaml`):
-  - `CORS_ALLOWED_ORIGINS`: origin thật của frontend; môi trường có Swagger thêm origin công khai của API. Không để `*` hay đường dẫn, nếu không API không khởi động. Môi trường khác Development không còn tự có `http://localhost:3000`.
-  - `FORWARDED_HEADERS_KNOWN_NETWORKS` hoặc `FORWARDED_HEADERS_KNOWN_PROXIES`: dải hoặc IP của `cloudflared` nhìn từ container API. Stack dev nhận tunnel qua mạng `document-first-network-dev`, stack prod qua `bmt-network-prod`; hai mạng không cố định dải IP trong compose, nên cần xem bằng `docker network inspect`. Bắt buộc với môi trường chạy `Development` sau tunnel; nếu thiếu, cookie ở môi trường đó là `Secure=false`, `SameSite=Lax` và frontend khác site không gửi được cookie. Môi trường khác Development vẫn có cookie đúng cờ khi thiếu biến này.
+  - `CORS_ALLOWED_ORIGINS`: origin thật của frontend. Môi trường bật Swagger không cần thêm origin của API. Không để `*` hay đường dẫn, nếu không API không khởi động. Môi trường khác Development không còn tự có `http://localhost:3000`.
+  - `FORWARDED_HEADERS_KNOWN_NETWORKS`: để trống thì compose dùng khối proxy mặc định (`10.47.10.8/29` cho dev, `10.47.20.8/29` cho prod). Chỉ đặt khi cần tin thêm nguồn khác; giá trị đặt vào thay hẳn mặc định, nên phải ghi lại cả khối mặc định. Nếu thiếu proxy tin cậy, môi trường chạy `Development` sau tunnel có cookie `Secure=false`, `SameSite=Lax` và frontend khác site không gửi được cookie. Môi trường khác Development vẫn có cookie đúng cờ khi thiếu.
+  - `FORWARDED_HEADERS_KNOWN_PROXIES`: để trống, trừ khi cần tin thêm một IP cụ thể.
   - `AUTH_COOKIE_SAME_SITE`: bỏ trống để dùng `None`.
+- **Bước vận hành một lần: tạo lại mạng Docker trên mỗi máy chủ.** Docker không đổi được dải của mạng đã tạo, nên máy đang có `bmt-network-dev` hoặc `bmt-network-prod` từ trước commit `9c7b147` phải tạo lại mạng trước lần triển khai đầu tiên có commit này. Làm lần lượt cho từng stack, thay `<env>` bằng `dev` hoặc `prod` và `<project>` bằng tên project đang chạy (workflow dùng `bmt-server-<profile>`):
+  1. Kiểm dải chưa bị dùng: `docker network ls -q | xargs docker network inspect --format '{{.Name}} {{range .IPAM.Config}}{{.Subnet}} {{end}}'` và `ip -4 route` trên máy chủ. Không mạng hay tuyến nào được trùng hoặc chứa `10.47.10.0/24`, `10.47.20.0/24`. Nếu trùng thì dừng lại, chọn dải khác và sửa compose trước.
+  2. Dừng stack, **không** thêm `-v`: `docker compose -f .docker/compose.yaml -p <project> --profile <env> down`. `-v` xóa cả volume dữ liệu Postgres, RabbitMQ và khóa Data Protection. Với dev, nếu đang chạy tunnel riêng thì thêm `--profile cloudflare-dev`.
+  3. Xóa mạng cũ: `docker network rm bmt-network-<env>`. Lệnh báo mạng còn container thì xem bằng `docker network inspect bmt-network-<env> --format '{{range .Containers}}{{.Name}} {{end}}'` và dừng các container đó trước.
+  4. Chạy lại: `docker compose -f .docker/compose.yaml -p <project> --profile <env> up -d`. Compose tạo mạng với dải cố định.
+  5. Kiểm IP: `docker network inspect bmt-network-<env> --format '{{range .IPAM.Config}}{{.Subnet}}{{end}}'` phải ra `10.47.10.0/24` (dev) hoặc `10.47.20.0/24` (prod); `docker inspect bmt-cloudflare-<env> --format '{{range .NetworkSettings.Networks}}{{.IPAddress}} {{end}}'` phải có `10.47.10.10` hoặc `10.47.20.10` (với dev chỉ khi có chạy tunnel riêng). Sau đó gửi một request ghi qua tunnel và kiểm cookie trả về có `Secure`.
+- **Câu hỏi mở (chưa chốt): tunnel dev của Document First nằm ngoài khối tin cậy.** Stack dev không tự chạy tunnel; `cloudflared` của dự án Document First trỏ thẳng vào `bmt-api-dev` qua mạng `document-first-network-dev`. Mạng này do Document First tạo, không cố định dải, và địa chỉ của `cloudflared` bên đó không nằm trong `10.47.10.8/29`. Với cấu hình mặc định, API dev bỏ qua forwarded headers từ tunnel này và coi request là HTTP. Hệ quả: nếu stack dev chạy `ASPNETCORE_ENVIRONMENT=Development` thì cookie là `Secure=false`, `SameSite=Lax`; Swagger dùng cookie qua tunnel bị chặn vì origin ghép ra là `http://...` còn trình duyệt gửi `https://...`; bộ giới hạn tần suất dồn mọi khách qua tunnel vào IP của tunnel. Có hai cách, **chưa chốt**:
+  - (a) Document First cố định dải của `document-first-network-dev`, rồi khai thêm dải đó (hoặc khối IP tĩnh của `cloudflared` bên đó) vào `FORWARDED_HEADERS_KNOWN_NETWORKS`, cùng với `10.47.10.8/29`. Cần phối hợp với Document First và phải lặp lại bước tạo lại mạng bên họ.
+  - (b) `cloudflared` của Document First nối thêm vào `bmt-network-dev` với IP tĩnh trong khối `10.47.10.8/29` (khác `.10` nếu `bmt-cloudflare-dev` cũng có lúc chạy), rồi trỏ tunnel tới `bmt-api-dev` qua mạng đó. Không phải đổi biến của API, nhưng container của dự án khác nằm trong mạng của BMT. Nếu `cloudflared` đó vẫn nằm chung `document-first-network-dev` với API, kết nối có thể đi qua mạng này; phải kiểm địa chỉ nguồn mà API thấy trước khi coi là xong.
 - Frontend web gọi thẳng từ trình duyệt không phải sửa, miễn origin nằm trong danh sách; nên xử lý mã `CsrfInvalid` (403) bằng một thông báo chung. Tầng server của frontend (SSR) chuyển tiếp cookie tới API mà không gửi `Origin` sẽ bị chặn; phải gửi `Authorization: Bearer` hoặc đặt `Origin` đúng. Postman hay curl dùng cookie phải tự thêm `Origin`, hoặc dùng Bearer. Mobile và script dùng Bearer không bị ảnh hưởng.
 - Lớp JSON-only (minimal API trả 415 với body không phải JSON) và header `Idempotency-Key` hiện có vẫn còn tác dụng, trở thành lớp phòng thủ thứ hai.
 - Chặn không phụ thuộc SameSite. Nếu sau này đổi cookie sang `Lax`, lớp này vẫn giữ nguyên.
@@ -257,11 +303,11 @@ flowchart TD
     C -->|Không| D{Có header Authorization?}
     D -->|Có| OK
     D -->|Không| E{Có header Origin?}
-    E -->|Có| F{Một giá trị, đúng định dạng, khớp danh sách?}
+    E -->|Có| F{Một giá trị, đúng định dạng, khớp danh sách hoặc origin API khi bật Swagger?}
     F -->|Có| OK
     F -->|Không| X1[Chặn UntrustedOrigin]
     E -->|Không| G{Có header Referer?}
-    G -->|Có| H{Origin của Referer khớp danh sách?}
+    G -->|Có| H{Origin của Referer khớp danh sách hoặc origin API khi bật Swagger?}
     H -->|Có| OK
     H -->|Không| X1
     G -->|Không| I{Có cookie accessToken hoặc refreshToken?}
@@ -297,11 +343,11 @@ Không thêm hay đổi bảng, cột hay migration. Dữ liệu mà thiết k�
 | Khóa cấu hình | Biến môi trường trong compose | Ý nghĩa | Mặc định |
 |---|---|---|---|
 | `Cors:AllowedOrigins` | `CORS_ALLOWED_ORIGINS` | Origin được phép, dùng chung cho CORS và chống CSRF | Rỗng; Development tự có `http://localhost:3000` |
-| `ForwardedHeadersOption:KnownNetworks` | `FORWARDED_HEADERS_KNOWN_NETWORKS` | Dải CIDR của proxy được tin forwarded headers | Rỗng, giữ loopback của ASP.NET Core |
+| `ForwardedHeadersOption:KnownNetworks` | `FORWARDED_HEADERS_KNOWN_NETWORKS` | Dải CIDR của proxy được tin forwarded headers | Trong `.docker/compose.yaml`: `10.47.10.8/29` (`bmt-api-dev`), `10.47.20.8/29` (`bmt-api-prod`). Ngoài compose này: rỗng, giữ loopback của ASP.NET Core |
 | `ForwardedHeadersOption:KnownProxies` | `FORWARDED_HEADERS_KNOWN_PROXIES` | IP của proxy được tin forwarded headers | Rỗng, giữ loopback của ASP.NET Core |
 | `AuthCookieOption:SameSite` | `AUTH_COOKIE_SAME_SITE` | SameSite của cookie phiên | `None` |
 
-Ví dụ cấu hình giả định cho một môi trường Staging: `CORS_ALLOWED_ORIGINS=https://app.example.test,https://api-staging.example.test`, `FORWARDED_HEADERS_KNOWN_NETWORKS=172.20.0.0/16`, `AUTH_COOKIE_SAME_SITE` bỏ trống. Kết quả: danh sách có hai origin (frontend và Swagger của API); request từ `https://app.example.test` được cho qua; cookie phiên là `Secure; SameSite=None`; request đến từ `cloudflared` trong dải `172.20.0.0/16` có `X-Forwarded-Proto: https` được coi là HTTPS. Các tên miền và dải IP trên chỉ minh họa.
+Ví dụ cấu hình giả định cho một môi trường Staging chạy stack prod của compose, API ở `https://api-staging.example.test`: `CORS_ALLOWED_ORIGINS=https://app.example.test`, `FORWARDED_HEADERS_KNOWN_NETWORKS` và `AUTH_COOKIE_SAME_SITE` bỏ trống. Kết quả: danh sách có một origin là frontend; request từ `https://app.example.test` được cho qua; Swagger của API ghi được bằng cookie vì Staging bật Swagger và origin của API được tự cho phép; cookie phiên là `Secure; SameSite=None`; request đến từ `bmt-cloudflare-prod` (`10.47.20.10`, trong khối mặc định `10.47.20.8/29`) có `X-Forwarded-Proto: https` được coi là HTTPS, còn request gọi thẳng cổng publish từ máy chủ (nguồn `10.47.20.1`) mà tự gửi `X-Forwarded-Proto: https` thì bị bỏ qua header. Tên miền chỉ minh họa; dải IP là giá trị thật trong compose.
 
 **Notes**:
 - Không có dữ liệu lưu trữ nên không có chiến lược migration. Đổi cấu hình cần khởi động lại API.
@@ -373,7 +419,8 @@ Header từ nguồn không tin cậy bị bỏ qua, không làm request lỗi. C
 
 - `ForwardedHeadersMiddleware` của ASP.NET Core 8 chỉ kiểm proxy tin cậy trong nhánh `X-Forwarded-For`; chỉ bật `X-Forwarded-Proto` là tin mọi nguồn.
 - Để trống cả hai danh sách proxy tin cậy (như khi đặt `ASPNETCORE_FORWARDEDHEADERS_ENABLED=true`) nghĩa là tin mọi nguồn; code không bao giờ để hai danh sách cùng rỗng.
-- Hai mạng Docker của compose không cố định dải IP, nên dải phải đọc từ máy chủ và cập nhật nếu mạng được tạo lại.
+- Hai mạng Docker của `.docker/compose.yaml` có dải cố định từ commit `9c7b147`; máy chủ đã có mạng cũ phải tạo lại mạng một lần (Architecture/Notes). Mạng `document-first-network-dev` do Document First quản lý, không cố định dải, nên tunnel đi qua mạng này chưa được tin (câu hỏi mở ở Architecture/Notes).
+- Proxy tin cậy chỉ đổi scheme và IP khách; `X-Forwarded-Host` không được xử lý, nên `Host` luôn là giá trị thật của request.
 
 ## References
 
@@ -388,9 +435,11 @@ Header từ nguồn không tin cậy bị bỏ qua, không làm request lỗi. C
 - Không có User Story, Business Rule hay System Test nào về CSRF: đây là yêu cầu kỹ thuật nền tảng, người dùng xác nhận thiết kế ngày 26/09/2026.
 - Tài liệu kỹ thuật: [debt/csrf-protection.md](../debt/csrf-protection.md), phân tích hiện trạng và so sánh phương án trước khi chốt.
 - Tài liệu kỹ thuật dẫn tới thiết kế này cho các thao tác ghi dùng cookie: [TDD-PROJ-001](TDD-PROJ-001.md), [TDD-PROJ-002](TDD-PROJ-002.md), [TDD-PROJ-003](TDD-PROJ-003.md), [TDD-NEWS-001](TDD-NEWS-001.md), [TDD-NEWS-002](TDD-NEWS-002.md), [TDD-CONSULT-001](TDD-CONSULT-001.md), [TDD-LIB-001](TDD-LIB-001.md), [TDD-LIB-002](TDD-LIB-002.md), [TDD-SUB-002](TDD-SUB-002.md), [TDD-SUB-005](TDD-SUB-005.md). Webhook được miễn: [TDD-PAY-001](TDD-PAY-001.md). Xác thực JWT, dấu phiên và mã lỗi 401: [TDD-RBAC-001](TDD-RBAC-001.md).
-- Mã test ở `test/bmt-be.api.tests/security/`: `CsrfOriginPolicyTests` và `AllowedOriginsTests` kiểm quy tắc quyết định và cấu hình; `CsrfPipelineTests` và `AuthCookieFlagsTests` chạy qua TestServer với đúng `UseApiPipeline` và các Carter module thật (MediatR, bộ kiểm dấu phiên và bộ đọc webhook là bản giả). Chưa có đặc tả Unit Test riêng cho tài liệu này.
+- Mã test ở `test/bmt-be.api.tests/security/`: `CsrfOriginPolicyTests` và `AllowedOriginsTests` kiểm quy tắc quyết định và cấu hình, gồm các ca `SwaggerEnabled_*`/`SwaggerDisabled_*` của origin API; `CsrfPipelineTests` và `AuthCookieFlagsTests` chạy qua TestServer với đúng `UseApiPipeline` và các Carter module thật (MediatR, bộ kiểm dấu phiên và bộ đọc webhook là bản giả); `SwaggerApiOriginPipelineTests` chạy qua pipeline ở Staging, tin khối `10.47.10.8/29`, và kiểm origin của API khi bật và không bật Swagger, `Referer` từ trang `/swagger`, `X-Forwarded-Host` không đổi được origin của API, và scheme `https` chỉ được nhận khi proxy tin cậy (`10.47.10.10`) báo, không nhận từ gateway `10.47.10.1`. Người dùng quyết định không viết đặc tả Unit Test (UT-AUTH) cho tài liệu này.
 - OWASP, [Cross-Site Request Forgery Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html): kiểm Origin/Referer.
 - Microsoft, [Configure ASP.NET Core to work with proxy servers and load balancers](https://learn.microsoft.com/en-us/aspnet/core/host-and-deploy/proxy-load-balancer?view=aspnetcore-8.0): forwarded headers và danh sách proxy tin cậy.
 - MDN, [CORS: simple requests](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS#simple_requests): điều kiện trình duyệt gửi request mà không preflight.
 
 ## Change Log
+
+- 2026-09-26 (dải IP cố định, Swagger): Ghi theo code đã merge vào `develop` của `bmt-be`: commit `53ec4be` (trước rebase là `50ed2f3`) và `9c7b147` (trước rebase là `3974b55`). Theo xác nhận của người dùng cùng ngày: bật cả `X-Forwarded-For` và chấp nhận việc bộ giới hạn tần suất chia theo IP thật của khách sau proxy tin cậy; cố định `bmt-network-dev` là `10.47.10.0/24`, `bmt-network-prod` là `10.47.20.0/24`, chỉ tin khối `.8/29`, `cloudflared` có IP tĩnh `.10`; môi trường bật Swagger tự cho phép origin của chính API, ghép từ scheme sau forwarded headers tin cậy và `Host` thật, không đọc `X-Forwarded-Host`, vì cookie phiên là host-only. Thêm mục Origin của chính API khi bật Swagger, bảng dải IP, bước vận hành tạo lại mạng Docker một lần, câu hỏi mở về tunnel dev của Document First (mạng `document-first-network-dev`), test `SwaggerApiOriginPipelineTests`. Bỏ Non-goal "không tự thêm origin của API". Reviewer và Approver là Tân Trần theo xác nhận của người dùng. Người dùng quyết định không viết đặc tả UT-AUTH.

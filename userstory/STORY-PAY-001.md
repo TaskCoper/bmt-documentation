@@ -425,7 +425,7 @@ Tài khoản nhân viên gửi yêu cầu tạo hoặc hủy đơn mua gói, k�
 - **Given**: B đã đủ tiền 10:16; A được ghi nhận đủ tiền 10:17 và đã thay B.
 - **When**: Nhận khoản cũ đến muộn chứng minh A thực ra đã đủ tiền 10:14.
 - **Then**: Giữ A đang hiệu lực, không tự chuyển lại B.
-- **And**: Ghi nhận lệch thứ tự để tra cứu; nhân viên xử lý bên ngoài, không tự hoàn tiền hoặc làm mới lượt.
+- **And**: Ghi nhận lệch thứ tự để tra cứu; nhân viên xử lý bên ngoài, không tự hoàn tiền hoặc làm mới lượt. Ghi chú, không đổi tiêu chí: vì mỗi khách chỉ có một đơn thiết kế đang chờ (BR-PAY-001 khoản 3), tình huống này chỉ xảy ra khi B đã được cấp trước lúc tạo A nhưng thời điểm giao dịch SePay báo cho khoản làm B đủ tiền lại muộn hơn lúc tạo A, tức giờ SePay đi trước đồng hồ máy chủ; phân tích ở BR-PAY-004/Notes.
 
 #### AC-028
 

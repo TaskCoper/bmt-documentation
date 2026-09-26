@@ -70,7 +70,7 @@ Nhân viên có quyền `commerce.read` thấy tên công trình gắn với gó
 
 ## Notes
 
-- Không thêm mã quyền riêng để xem công trình. Danh mục quyền vẫn có 13 mã: ngày 25/09/2026 bỏ `supervision.reassign` và `package.restore`, thêm `supervision.unassign`.
+- Không thêm mã quyền riêng để xem công trình. Danh mục quyền có 14 mã: ngày 25/09/2026 bỏ `supervision.reassign` và `package.restore`, thêm `supervision.unassign`; ngày 26/09/2026 thêm `payment.connection.manage` theo BR-PAY-006.
 - Nhân viên được phân công theo từng gói giám sát, không theo công trình; xem [BR-RBAC-013](BR-RBAC-013.md). Người phụ trách gói xem được công trình đang gắn với gói đó; khi gói bị gỡ hoặc bị hủy, phân công kết thúc và quyền xem cũng hết.
 - Khoản 3 là phạm vi xem đi theo phân công. [BR-RBAC-010](BR-RBAC-010.md) khoản 1 cho quyền xem không đòi phân công; `supervision.complete` là quyền thao tác, không phải quyền xem, nên phạm vi đọc công trình của người giữ quyền này giới hạn theo gói được phân công.
 - Ví dụ: N phụ trách G1 gắn công trình A; G3 gắn B do N2 phụ trách. N thấy A, không thấy B. Nếu G1 được chuyển giao cho N2 lúc 10:00 thì từ 10:00 N không xem được A.

@@ -166,7 +166,7 @@ Admin lưu cấu hình có danh sách chọn tầng hoặc nhóm phong cách đ�
 - **Given**: Admin thêm hoặc sửa một phong cách kiến trúc hoặc nội thất.
 - **When**: Lưu thông tin phong cách.
 - **Then**: Phong cách phải có một ảnh minh họa JPG/PNG/WebP tối đa 5 MB; thiếu ảnh, sai định dạng hoặc vượt dung lượng thì từ chối lưu.
-- **And**: Không dùng giới hạn ảnh đầu vào bản dự toán để thay thế quy tắc ảnh danh mục; yêu cầu không hợp lệ không thay dữ liệu đã lưu.
+- **And**: Không dùng giới hạn ảnh đầu vào bản dự toán để thay thế quy tắc ảnh danh mục; yêu cầu không hợp lệ không thay dữ liệu đã lưu. Ghi chú kỹ thuật, không đổi tiêu chí: định dạng và dung lượng ảnh do frontend kiểm trước khi tải ảnh lên qua presign; backend kiểm có ảnh và chỉ kiểm URL ảnh là URL https thuộc tên miền được phép trong `UploadedFileOption__AllowedHosts` (TDD-PROJ-001).
 
 #### AC-009
 

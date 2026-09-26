@@ -57,6 +57,8 @@ STORY-PROJ-002 cần tiếp nhận đầu vào đã lưu, giữ một lượt, k
 
 TDD-SUB-002 đã thiết kế `UsageOperation`, quota và worker, nhưng vẫn dùng tên Project và thứ tự khóa User. TDD-PAY-001/TDD-SUB-005 bổ sung AccountCommerceState và vòng đời kỳ. TDD này nối Estimate vào đúng sổ lượt đó và quy định một thứ tự khóa chung; không tạo bảng quota hoặc trạng thái cuối AI thứ hai.
 
+Người dùng xác nhận ngày 26/09/2026 về tệp: backend không có kho tệp riêng. Ảnh đầu vào và ảnh phong cách được lưu bằng URL đã kiểm theo `UploadedFileOption__AllowedHosts` (TDD-PROJ-001), nên snapshot gửi AI dùng `inputImageUrl` và `imageUrl`. AI trả URL cho mọi tệp kết quả, kể cả PDF và Excel; backend chỉ lưu các URL đó, không tải về lưu lại và không tự dựng PDF/Excel. Cùng ngày, người dùng xác nhận cách xử lý địa chỉ trước khi gửi AI: xã giữ mã nhưng đổi tên vẫn là còn dùng và gửi AI bằng tên mới; khách chỉ phải chọn lại khi mã xã không còn hoặc không còn thuộc tỉnh (TDD-PROJ-001/Architecture). Hợp đồng API của AI service vẫn chưa có.
+
 ### Goals
 
 - Tiếp nhận nguyên tử: đầu vào bất biến, UsageOperation Pending và Reserved tăng đúng một cùng commit.
@@ -76,13 +78,14 @@ Tái sử dụng `UsageOperation` làm một lần sử dụng AI và nguồn tr
 
 | Thành phần dự kiến | Trách nhiệm |
 |---|---|
-| RequestEstimateGenerationHandler | Xác thực owner, khóa account/bản, replay key, kiểm inputVersion và đầu vào đầy đủ, kiểm quyền/quota, tạo operation cùng input snapshot. |
-| EstimateGenerationInputFactory | Tạo snapshot phiên bản nội bộ v1 từ dữ liệu đã xác minh; không nhận prompt/giá/quota tùy ý của client. |
+| RequestEstimateGenerationHandler | Xác thực owner, khóa account/bản, replay key, kiểm inputVersion, kiểm đầu vào đầy đủ bằng `IEstimateInputPolicy.FindMissingForGeneration`, kiểm địa chỉ theo dữ liệu hiện hành qua `IEstimateLocationCatalog`, kiểm quyền/quota, tạo operation cùng input snapshot. |
+| EstimateGenerationInputFactory | Tạo snapshot phiên bản nội bộ v1 từ dữ liệu đã xác minh; chỉ đưa số tầng/phong cách khi `CanSelectFloor`/`CanSelectStyle` trả true; không nhận prompt/giá/quota tùy ý của client. |
 | IDesignUsageCoordinator | Adapter tới store/policy TDD-SUB-002; Reserve/Complete/Fail/Expire tham gia UoW của handler gọi, không commit lồng. |
 | UsageMaintenanceWorker | Worker theo TDD-SUB-002: nhận việc gửi AI, đối soát và timeout. Mỗi việc dùng scope/DbContext mới; không thêm RabbitMQ/Quartz. |
 | IEstimateAiGateway | Gửi/đối chiếu trạng thái theo hợp đồng nhà cung cấp sau này; không có implementation thật ở hiện trạng. |
 | IEstimateResultValidator | Kiểm schema, nguồn operation/attempt và đủ bộ kết quả theo ContractVersion; thiếu contract không thể trả ResultReady. |
-| EstimateResultStager | Lưu dữ liệu/tệp riêng tư, kiểm đọc lại được trước chốt; không cung cấp đường tải công khai. |
+| EstimateResultFileVerifier | Kiểm từng URL tệp trong kết quả, kể cả PDF/Excel: URL tuyệt đối https, tên máy chủ thuộc danh sách cho phép, mở được qua `IEstimateResultFileClient`. Không tải tệp về lưu lại và không trả URL gốc cho khách. |
+| IEstimateResultFileClient | Cổng đọc tệp theo URL do AI trả: kiểm mở được trước khi chốt (TDD này) và chuyển tiếp nội dung cho route tải của TDD-PROJ-003. Chỉ gọi URL https thuộc tên máy chủ cho phép, không theo chuyển hướng sang máy chủ khác. |
 | FinalizeEstimateGenerationHandler | Khóa và đọc lại operation/kỳ gốc; quyết định thành công/lỗi/quá hạn, công bố kết quả cùng quyết toán quota. |
 
 ```mermaid
@@ -92,10 +95,10 @@ flowchart LR
     H --> DB[(Estimate và Subscription cùng PostgreSQL)]
     DB --> W[UsageMaintenanceWorker]
     W --> AI[AI gateway chờ tích hợp]
-    AI --> V[Kiểm hợp đồng và lưu riêng tư]
+    AI --> V[Kiểm hợp đồng và URL tệp mở được]
     V --> F[Chốt kết quả và lượt]
     F --> DB
-    V --> S[Kho tệp riêng tư]
+    V -.->|Chỉ đọc thử, không lưu bản sao| FILES[Tệp do AI lưu, truy cập bằng URL]
 ```
 
 **Notes**:
@@ -106,11 +109,20 @@ flowchart LR
 - Hiệu lực mới: CurrentPeriodId đúng kỳ + LifecycleState=Active + nằm trong thời hạn + có design.generate; finite còn `Limit-Used-Reserved>=1`. Unlimited ghi Used/Reserved cho đối soát theo TDD-SUB-002 nhưng không có số dư hữu hạn và không chặn theo Used. Cơ bản/Tiêu chuẩn/VIP đầu vào không cấp entitlement; Boolean/3D hoặc cờ phong cách không cắt kết quả.
 - **Replay trước kiểm quyền dùng mới**: sau xác thực/owner, tìm `(AccountId,DesignGeneration,OperationKey)`. Hash lấy `estimateId,inputVersion,operationKind`, không lấy bản đầu vào hiện tại đã thay đổi khi retry sau lỗi. Cùng key/hash trả operation cũ (200) dù kỳ hết hạn, không gửi lại AI hoặc giữ thêm. Khác hash trả 409. Key mới sau Failed/TimedOut là lần thử chủ động, kiểm lại quyền hiện hành; cùng key của lần Failed không trở thành tác vụ mới.
 - Chỉ reserve khi adapter/contract/config thời gian chờ sẵn sàng và toàn bộ đầu vào hợp lệ. Lỗi cấu hình trước accept trả 503 không giữ lượt. Trong transaction tiếp nhận, khóa bản và kiểm InputVersion, kiểm không Pending/Succeeded, đóng băng input, thêm UsageOperation Pending và tăng Reserved. Commit là mốc tiếp nhận; frontend nhận 202 sau commit, không phải sau lời gọi AI. Đổi tên bản dự toán dùng NameVersion riêng và không tăng InputVersion (TDD-PROJ-001/Architecture), nên khách đổi tên ngay trước hoặc trong lúc bấm nhận dự toán không làm yêu cầu gửi AI bị InputVersionConflict. Hash replay cũng không chứa tên.
-- Snapshot giữ input, catalogRevision, tên/ID của các lựa chọn danh mục tương ứng, areaM2 nguyên giá trị, ảnh nội bộ, địa chỉ đã xác minh và gói hoàn thiện. Snapshot không chứa tên bản dự toán, vì tên không phải đầu vào gửi AI (BR-SUB-007 khoản 11). Snapshot không thay quota hiện hành khi khách retry, cũng không tự thêm phong cách mặc định khi một nhóm tắt. Mỗi operation có input riêng, nên sửa bản sau J1 lỗi không thay dữ liệu của J1.
+- Snapshot giữ input, catalogRevision, tên/ID của các lựa chọn danh mục tương ứng, areaM2 nguyên giá trị, URL ảnh đầu vào (`inputImageUrl`) và URL ảnh phong cách (`imageUrl`), địa chỉ đã kiểm theo dữ liệu hiện hành và gói hoàn thiện. Snapshot không chứa tên bản dự toán, vì tên không phải đầu vào gửi AI (BR-SUB-007 khoản 11). Snapshot không thay quota hiện hành khi khách retry, cũng không tự thêm phong cách mặc định khi một nhóm tắt. Mỗi operation có input riêng, nên sửa bản sau J1 lỗi không thay dữ liệu của J1.
 - `DeadlineUtc=AcceptedAtUtc+ConfiguredGenerationTimeout`; bao gồm thời gian chờ gửi, nhận và lưu kết quả. Không có mặc định 15 phút. Lấy EffectiveNow sau đủ khóa bằng đồng hồ server, không dùng thời gian kết thúc AI do provider tự khai để vượt deadline. Khi chốt `now>=DeadlineUtc` thì TimedOut, kể cả callback vừa tới trước lúc quét. Tác vụ đã Succeeded trước đó giữ nguyên.
 - **Lease không phải giấy phép gửi lại**: worker nhận dòng NotStarted bằng transaction ngắn, đặt Sending, lease token rồi gọi AI ngoài SQL. Nếu hết lease lúc chưa rõ provider đã nhận, đặt Unknown, đối chiếu bằng operationId/attemptId nếu provider hỗ trợ. Không mặc định gửi lại vì worker chết. Nhà cung cấp không có truy vấn/chống trùng thì chờ timeout; không tạo operation mới hay lặp HTTP POST mù. Worker khác không ghi trạng thái dispatch bằng lease cũ.
 - Lỗi truyền mạng sau gửi và lỗi nghiệp vụ cuối cùng khác nhau. Provider trả lỗi cuối được xác thực → Failed và giải phóng. Không biết đã nhận → Pending/Unknown tới khi đối chiếu hoặc timeout. Thử lại giao dịch SQL thuần dùng DbContext mới, cùng operation/key; không đặt HTTP gọi AI trong vòng retry DB.
-- **Công bố bằng transaction**: lưu candidate JSON/tệp và xác minh mở được ngoài transaction dài; sau đó lock/check lại deadline/attempt/state. Chỉ transaction chốt mới gắn ResultRef và Succeeded cùng thay quota. Truy vấn đọc kết quả luôn JOIN operation Succeeded, không dựa vào có tệp hoặc có dòng Result. Lỗi SQL cuối để candidate riêng tư; lần chốt lại không gọi AI. SQL không hoàn tác việc đã ghi object nên phải giữ vùng tạm riêng tư.
+- **Công bố bằng transaction**: kiểm URL tệp mở được và ghi candidate (payload JSON cùng danh sách URL tệp) ngoài transaction dài; sau đó lock/check lại deadline/attempt/state. Chỉ transaction chốt mới gắn ResultRef và Succeeded cùng thay quota. Truy vấn đọc kết quả luôn JOIN operation Succeeded, không dựa vào có URL tệp hoặc có dòng Result. Lỗi SQL cuối để candidate chưa công bố; lần chốt lại không gọi AI. Backend không ghi tệp ở đâu cả, nên không có vùng tạm cần dọn: candidate chỉ là dòng DB mà không route nào đọc được khi operation chưa Succeeded.
+- **Tệp kết quả lưu bằng URL** (người dùng xác nhận ngày 26/09/2026): AI trả URL cho mọi tệp kết quả, gồm ảnh, bản vẽ, PDF và Excel. Backend lưu mỗi URL thành một dòng `EstimateResultFile`, không tải về lưu lại và không tự dựng PDF/Excel. Trước khi chốt, `EstimateResultFileVerifier` kiểm từng URL: tuyệt đối, https, tên máy chủ thuộc danh sách cho phép, và mở được qua `IEstimateResultFileClient` (đọc thử, không lưu bytes). Một URL sai hoặc không mở được thì bộ kết quả chưa đủ, không được Succeeded. Ví dụ: AI báo xong J1 với ba URL, một URL trả 404 → không chốt; nếu AI không gửi lại bộ đủ trước hạn thì J1 TimedOut và trả lượt. Giới hạn: backend không giữ bản sao, nên nếu sau này AI xóa tệp hoặc URL hết hạn thì hồ sơ không tải được dù J1 vẫn Succeeded; thời hạn giữ tệp phía AI là câu hỏi mở bên dưới. Khách không bao giờ nhận URL gốc; mọi lần xem/tải đi qua route có kiểm quyền của TDD-PROJ-003.
+- **Kiểm địa chỉ và lựa chọn trước khi gửi AI** (theo TDD-PROJ-001/Architecture, mục nguồn địa chỉ và nhóm lựa chọn tắt): đây là bước của `RequestEstimateGenerationHandler`, chạy trước khi giữ lượt. Code hiện chưa có handler này; tên hàm và cổng dưới đây là những thứ đã có trong code `bmt-be` (develop `9c7b147`).
+  1. Trước khi khóa dòng, gọi `IEstimateLocationCatalog.PrepareAsync` rồi `GetProvincesAsync` để nạp sẵn dữ liệu và lấy phiên bản hiện hành. Không gọi HTTP khi đang giữ khóa.
+  2. Sau khi khóa và đọc lại Estimate, kiểm đầu vào đủ bằng `IEstimateInputPolicy.FindMissingForGeneration(state, catalog)` với `EstimateCatalogSnapshot` của revision đã ghim. Hàm này chỉ đòi nhóm đang bật và dùng `CanSelectFloor`/`CanSelectStyle`, nên không đọc thẳng danh sách của nhóm tắt. Thiếu trường nào thì trả 422 `InvalidGenerationInput` theo trường, không giữ lượt.
+  3. So `Estimate.LocationDatasetVersion` với phiên bản hiện hành. Trùng thì dùng mã và tên đã lưu. Khác thì gọi `VerifyAsync(phiên bản hiện hành, ProvinceCode, WardCode)`: kết quả NULL (mã xã không còn hoặc không còn thuộc tỉnh) → 422 `InvalidGenerationInput` với trường `wardCode`, khách phải chọn lại xã; có kết quả → dùng `ProvinceName`/`WardName` mới trong snapshot, kể cả khi xã chỉ đổi tên. Handler không ghi đè cột địa chỉ của Estimate, vì việc này sẽ đổi InputVersion ngoài ý khách; snapshot ghi `datasetVersion` là phiên bản hiện hành.
+  4. Nếu dữ liệu địa chỉ được làm mới giữa bước 1 và bước 3, `VerifyAsync` ném 409 `LocationDatasetChanged`; transaction rollback, không giữ lượt, khách bấm gửi lại. Nếu chưa có bản dữ liệu nào và nguồn lỗi thì 503 `DependencyUnavailable`, cũng không giữ lượt.
+  5. `EstimateGenerationInputFactory` chỉ đưa số tầng, tum và phong cách của nhóm đang bật vào snapshot; nhóm tắt luôn là NULL, kể cả khi Estimate còn giữ giá trị cũ thuộc danh sách của nhóm tắt.
+  - URL ảnh trong snapshot là URL đã kiểm tên miền khi lưu (TDD-PROJ-001). Handler không kiểm lại tên miền khi gửi AI, cùng nguyên tắc với TDD-PROJ-001: đổi danh sách tên miền không chặn bản đã lưu. AI tự tải ảnh từ các URL này.
+- **Câu hỏi mở (chờ hợp đồng AI, chưa chốt)**: (1) endpoint, xác thực, cách gửi và nhận kết quả của AI service; (2) URL tệp của AI có hết hạn không, cần xác thực không và AI giữ tệp bao lâu; (3) tên máy chủ tệp của AI dùng chung `UploadedFileOption__AllowedHosts` (tức AI ghi vào cùng kho presign) hay cần danh sách cấu hình riêng; (4) PDF/Excel có bắt buộc có mặt lúc AI báo thành công hay được AI tạo sau qua thao tác riêng (xem TDD-PROJ-003/Architecture). Chưa có câu trả lời thì không tạo endpoint AI giả và không đặt tên cấu hình cho danh sách tên máy chủ của AI.
 - Nếu J1 timeout trong lúc tải kết quả, finalizer thấy terminal và không công bố. J2 có snapshot/result ID khác, không tìm “bản dự toán đang chạy” để đoán operation callback. Callback lặp sau Succeeded cùng kết quả chỉ ACK nội bộ, không tăng Used; callback khác nội dung cùng operation/attempt bị ghi nhận bất thường, không thay nguồn đã công bố.
 - Hết hạn, hủy hoặc đổi kỳ sau tiếp nhận không hủy J1. Chốt vào `UsageOperation.PeriodId/BenefitId`, không tìm kỳ mới để giảm/tăng bộ đếm. Finalizer không dùng policy “được tạo mới” để từ chối lưu kết quả của tác vụ đã được nhận.
 - Theo pipeline hiện có, Failed/TimedOut là kết quả xử lý cần commit: trả DTO trạng thái bình thường sau khi giải phóng, không ném exception làm rollback khoản trả lượt. Exception chỉ dùng khi transaction phải bỏ toàn bộ thay đổi. Không tự mở khóa đầu vào bằng một cờ rời: hết Pending thì khả năng sửa được tính lại cùng quyền hiện tại. Khóa này chỉ áp cho đầu vào: trong lúc Pending, chủ sở hữu vẫn đổi được tên bản dự toán qua PATCH /name của TDD-PROJ-001 (STORY-PROJ-002/EXC-02 bước 3); đổi tên không chạm UsageOperation, snapshot hay quota.
@@ -124,16 +136,21 @@ sequenceDiagram
     participant DB as PostgreSQL
     participant W as Worker
     participant AI as AI service
-    participant S as Kho kết quả riêng tư
+    participant L as Nguồn địa chỉ (bản lưu Redis)
+    participant FS as Tệp do AI lưu (URL)
     C->>API: POST generation, key, inputVersion
+    API->>L: PrepareAsync, lấy phiên bản hiện hành (trước khi khóa)
     API->>DB: Khóa account và dữ liệu; kiểm owner/key/input/quota
+    API->>L: VerifyAsync nếu LocationDatasetVersion khác bản hiện hành
+    L-->>API: Mã và tên xã hiện hành, hoặc NULL thì trả 422 wardCode
     API->>DB: Snapshot + Pending + Reserved tăng 1
     DB-->>API: Commit tiếp nhận
     API-->>C: 202 operationId
     W->>DB: Claim dispatch với lease token
     W->>AI: Gửi operationId và snapshot ngoài SQL
-    AI-->>W: Kết quả đúng attempt hoặc lỗi
-    W->>S: Kiểm đủ, lưu và xác nhận đọc được
+    AI-->>W: Kết quả đúng attempt kèm URL tệp, hoặc lỗi
+    W->>FS: Đọc thử từng URL tệp, không lưu bản sao
+    W->>DB: Ghi candidate gồm payload và URL tệp
     W->>DB: Khóa lại theo thứ tự; kiểm state và deadline
     alt Pending và trước hạn, đủ kết quả
       W->>DB: ResultRef + Succeeded + Reserved giảm + Used tăng
@@ -143,7 +160,7 @@ sequenceDiagram
       DB-->>W: Commit, không công bố candidate
     end
     C->>API: GET operation
-    API-->>C: Trạng thái và URL kết quả có kiểm quyền nếu thành công
+    API-->>C: Trạng thái và route đọc kết quả của backend nếu thành công, không lộ URL gốc
 ```
 
 ## Activity Diagram
@@ -153,13 +170,13 @@ flowchart TD
     A[Nhận kết quả server đã xác thực] --> B[Đối chiếu operation và provider attempt]
     B --> C{Đúng nguồn?}
     C -->|Không| X[Từ chối, không chốt lượt]
-    C -->|Có| D[Kiểm hợp đồng, lưu vùng riêng tư]
+    C -->|Có| D[Kiểm hợp đồng và URL tệp mở được, ghi candidate]
     D --> E[Khóa account và operation theo thứ tự]
     E --> F{Đã terminal?}
     F -->|Có| G[Giữ terminal, không công bố thêm]
     F -->|Không| H{now đã tới deadline?}
     H -->|Có| I[TimedOut, trả lượt kỳ gốc]
-    H -->|Không| J{Đủ kết quả đã lưu và mở được?}
+    H -->|Không| J{Đủ kết quả và mọi URL tệp mở được?}
     J -->|Có| K[Succeeded, tính một lượt, công bố]
     J -->|Lỗi cuối| L[Failed, trả lượt kỳ gốc]
     J -->|Chưa xác định| M[Tiếp tục Pending tới kết quả cuối hoặc timeout]
@@ -170,7 +187,7 @@ flowchart TD
 ```mermaid
 stateDiagram-v2
     [*] --> Pending: Accept commit và giữ lượt
-    Pending --> Succeeded: Kết quả đủ và đọc được, now trước deadline
+    Pending --> Succeeded: Kết quả đủ và URL tệp mở được, now trước deadline
     Pending --> Failed: Lỗi cuối được xác minh
     Pending --> TimedOut: now từ deadline trở đi
     Succeeded --> Succeeded: Gửi lặp hoặc timeout tới sau
@@ -188,15 +205,15 @@ Dùng lại DesignSubscription, DesignPeriod, PeriodQuota và UsageOperation the
 |---|---|
 | UsageOperation — mở rộng | Một lần tạo thiết kế đã được tiếp nhận. Thêm FK rõ ràng tới Estimate và khóa lease; vẫn là nguồn trạng thái cuối, key/hash, kỳ giữ và deadline duy nhất. |
 | EstimateGenerationInput | Một snapshot bất biến của đầu vào thuộc một UsageOperation. Ghi cùng tiếp nhận; không sửa khi bản nháp thay đổi sau lỗi. |
-| EstimateGenerationResult | Một bộ kết quả đã kiểm tra và lưu của đúng operation/attempt. Có thể tồn tại riêng tư trước finalization; chỉ công bố qua operation Succeeded. Không phải bảng tính lại dự toán. |
-| EstimateResultAsset | Một tệp/ảnh/bản vẽ thuộc bộ kết quả nguồn. RoleKey theo hợp đồng, không tự hardcode số lượng; trỏ asset riêng tư của cùng bản. |
+| EstimateGenerationResult | Một bộ kết quả đã kiểm tra và lưu của đúng operation/attempt. Có thể tồn tại dưới dạng candidate chưa công bố trước finalization; chỉ công bố qua operation Succeeded. Không phải bảng tính lại dự toán. |
+| EstimateResultFile | Một tệp thuộc bộ kết quả nguồn (ảnh, bản vẽ, PDF hoặc Excel), lưu bằng URL do AI trả. Worker ghi cùng candidate sau khi kiểm URL mở được; không sửa sau đó. RoleKey theo hợp đồng, không tự hardcode số lượng. Bảng này thay cho EstimateResultAsset và EstimateAsset của bản thiết kế trước. |
 
 | Bảng | Cột, null và ràng buộc |
 |---|---|
 | UsageOperation bổ sung | EstimateId uuid NULL; DispatchLeaseToken uuid NULL; DispatchErrorCode varchar(100) NULL. FK(AccountId,EstimateId) → Estimate(OwnerId,Id); CHECK (UsageKind=DesignGeneration AND EstimateId IS NOT NULL AND ResourceId=EstimateId) OR (UsageKind=TemplateDetail AND EstimateId IS NULL). UNIQUE(Id,AccountId,EstimateId); UNIQUE(Id,EstimateId). DispatchState giới hạn NotStarted/Sending/Sent/Unknown cho DesignGeneration; TemplateDetail NULL. |
-| EstimateGenerationInput | OperationId uuid PK; AccountId uuid NN; EstimateId uuid NN; InputVersion bigint NN CHECK>0; SchemaVersion int NN CHECK>0; CatalogRevisionId uuid NN; Payload jsonb NN CHECK object; InputAssetId uuid NULL; CreatedAtUtc timestamptz NN. FK(OperationId,AccountId,EstimateId) → UsageOperation(Id,AccountId,EstimateId); FK(EstimateId,CatalogRevisionId) → Estimate(Id,CatalogRevisionId); FK(InputAssetId,EstimateId) → EstimateAsset(Id,EstimateId). |
-| EstimateGenerationResult | OperationId uuid PK; EstimateId uuid NN; ProviderAttemptId varchar(200) NN; ContractVersion varchar(100) NN; Payload jsonb NN CHECK object; PayloadHash char(64) NN; StoredAtUtc timestamptz NN; ReadVerifiedAtUtc timestamptz NN; FK(OperationId,EstimateId) → UsageOperation(Id,EstimateId); UNIQUE(OperationId,EstimateId). |
-| EstimateResultAsset | OperationId uuid NN; EstimateId uuid NN; AssetId uuid NN; RoleKey varchar(100) NN; Ordinal int NN CHECK>=0; PK(OperationId,AssetId); UNIQUE(OperationId,RoleKey,Ordinal); FK(OperationId,EstimateId) → EstimateGenerationResult(OperationId,EstimateId); FK(AssetId,EstimateId) → EstimateAsset(Id,EstimateId). Purpose=Result kiểm trong store. |
+| EstimateGenerationInput | OperationId uuid PK; AccountId uuid NN; EstimateId uuid NN; InputVersion bigint NN CHECK>0; SchemaVersion int NN CHECK>0; CatalogRevisionId uuid NN; Payload jsonb NN CHECK object; InputImageUrl varchar(2048) NULL CHECK NULL hoặc bắt đầu bằng https:// (không phân biệt hoa thường); CreatedAtUtc timestamptz NN. FK(OperationId,AccountId,EstimateId) → UsageOperation(Id,AccountId,EstimateId); FK(EstimateId,CatalogRevisionId) → Estimate(Id,CatalogRevisionId). InputImageUrl là bản chụp `Estimate.InputImageUrl` lúc tiếp nhận, trùng giá trị `inputImageUrl` trong Payload; cả hai ghi một lần, không có khóa ngoại tới bảng tệp. |
+| EstimateGenerationResult | OperationId uuid PK; EstimateId uuid NN; ProviderAttemptId varchar(200) NN; ContractVersion varchar(100) NN; Payload jsonb NN CHECK object; PayloadHash char(64) NN; StoredAtUtc timestamptz NN; ReadVerifiedAtUtc timestamptz NN (lúc backend kiểm xong mọi URL tệp mở được); FK(OperationId,EstimateId) → UsageOperation(Id,EstimateId); UNIQUE(OperationId,EstimateId). |
+| EstimateResultFile | Id uuid PK; OperationId uuid NN; EstimateId uuid NN; RoleKey varchar(100) NN; Ordinal int NN CHECK>=0; FileUrl varchar(2048) NN CHECK bắt đầu bằng https:// (không phân biệt hoa thường); UNIQUE(OperationId,RoleKey,Ordinal); UNIQUE(Id,EstimateId); FK(OperationId,EstimateId) → EstimateGenerationResult(OperationId,EstimateId). Tên máy chủ thuộc danh sách cho phép kiểm ở verifier, không kiểm bằng CHECK. Giới hạn 2048 theo quy ước URL của TDD-PROJ-001; nếu hợp đồng AI có URL dài hơn thì xem lại. Id dùng làm tham số route tải của TDD-PROJ-003, để URL gốc không xuất hiện trong route. |
 
 PK/FK mới dùng RESTRICT. FK vòng input/result với UsageOperation đi một chiều qua OperationId; `InputRef/ResultRef` giữ locator nội bộ `estimate-input:<operationId>` và `estimate-result:<operationId>` để tương thích port SUB. Không coi locator text là URL hoặc quyền đọc. Finalizer xác nhận tồn tại dòng tương ứng trước commit; unique Result OperationId bảo vệ một nguồn cho mỗi lần gọi.
 
@@ -204,7 +221,7 @@ Partial unique của TDD-SUB-002 được đặt tên rõ `UX_Usage_Estimate_Liv
 
 Kết quả JSON chưa có schema nhà cung cấp nên không chốt cấu trúc tiền/bản vẽ giả. ContractVersion gắn với validator và mapper đã triển khai trước khi bật tích hợp. Các trường được dùng cho FK/quyền/trạng thái không nằm riêng trong JSON. Payload là nội dung chuyên môn bất biến để đọc/xuất; không tạo GIN index khi chưa có truy vấn phần tử. Không dùng `jsonb` để né ràng buộc quota.
 
-**Snapshot nội bộ v1** gồm `estimateId,inputVersion,catalogRevisionId,buildingType{id,name},areaM2,description,address{datasetVersion,provinceCode,provinceName,wardCode,wardName,detail},finishPackage,floorCount,hasTum,architectureStyle{id,name,imageAssetId}|null,interiorStyle{...}|null,inputAssetId|null`. ID đều từ DB đã kiểm; areaM2 chuỗi thập phân theo TDD-PROJ-001. Đây là contract nội bộ BMT, không khẳng định AI chấp nhận payload này. Adapter chuyển ID/ảnh sang format được đối tác xác nhận, giữ đúng nghĩa NULL của nhóm không chọn. `buildingType.name` và tên phong cách là tên lựa chọn trong revision đã ghim; tên bản dự toán (`Estimate.Name`) không có trong snapshot.
+**Snapshot nội bộ v1** gồm `estimateId,inputVersion,catalogRevisionId,buildingType{id,name},areaM2,description,address{datasetVersion,provinceCode,provinceName,wardCode,wardName,detail},finishPackage,floorCount,hasTum,architectureStyle{id,name,imageUrl}|null,interiorStyle{...}|null,inputImageUrl|null`. ID đều từ DB đã kiểm; areaM2 chuỗi thập phân theo TDD-PROJ-001. `address` lấy theo dữ liệu địa chỉ hiện hành sau bước kiểm ở Architecture/Notes: `datasetVersion` là phiên bản hiện hành, tên tỉnh/xã là tên mới nếu nguồn đã đổi tên. `imageUrl` lấy từ `CatalogStyle.ImageUrl` của revision đã ghim, `inputImageUrl` từ `Estimate.InputImageUrl`; cả hai đã được kiểm theo `UploadedFileOption__AllowedHosts` khi lưu. Đây là contract nội bộ BMT, không khẳng định AI chấp nhận payload này. Adapter chuyển ID/ảnh sang format được đối tác xác nhận, giữ đúng nghĩa NULL của nhóm không chọn. `buildingType.name` và tên phong cách là tên lựa chọn trong revision đã ghim; tên bản dự toán (`Estimate.Name`) không có trong snapshot.
 
 ```mermaid
 erDiagram
@@ -214,11 +231,10 @@ erDiagram
     PeriodQuota ||--o{ UsageOperation : original_quota
     UsageOperation ||--o| EstimateGenerationInput : immutable_input
     UsageOperation ||--o| EstimateGenerationResult : candidate_or_published
-    EstimateGenerationResult ||--o{ EstimateResultAsset : outputs
-    EstimateAsset ||--o{ EstimateResultAsset : private_bytes
+    EstimateGenerationResult ||--o{ EstimateResultFile : file_urls
 ```
 
-Sơ đồ UsageOperation có cả loại TemplateDetail nên quan hệ Input/Result là 0..1 tổng quát; DesignGeneration mới nhận phải có đúng một input được handler ghi cùng transaction. Một kết quả có 0..n asset theo hợp đồng; việc đủ phần bắt buộc do validator xác định, không mặc định zero asset là thành công.
+Sơ đồ UsageOperation có cả loại TemplateDetail nên quan hệ Input/Result là 0..1 tổng quát; DesignGeneration mới nhận phải có đúng một input được handler ghi cùng transaction. Một kết quả có 0..n tệp theo hợp đồng; việc đủ phần bắt buộc do validator xác định, không mặc định zero tệp là thành công.
 
 **Mẫu dữ liệu** — các ID là bí danh UUID; hash H1/HR1 là bí danh 64 ký tự, không dữ liệu seed. Giả sử đầu vào D1/V1/version=7 hợp lệ; timeout 10 phút dưới đây chỉ để minh họa, không cấu hình vận hành được chốt.
 
@@ -227,12 +243,11 @@ Sơ đồ UsageOperation có cả loại TemplateDetail nên quan hệ Input/Res
 | AccountCommerceState dùng lại | AccountId=U1; các cột thứ tự đơn giữ nguyên. Luồng dự toán chỉ lấy khóa, không thay thứ tự mua. |
 | PeriodQuota dùng lại, trước nhận | PeriodId=P1; BenefitId=BGEN; IsUnlimited=false; Limit=3; Used=0; Reserved=0. |
 | UsageOperation — J1 | Id=J1; AccountId=U1; EstimateId=ResourceId=D1; UsageKind=DesignGeneration; PeriodId=P1; BenefitId=BGEN; OperationKey=gen-1; RequestHash=H1; State=Pending; AcceptedAtUtc=2026-09-21T03:00:00Z; DeadlineUtc=2026-09-21T03:10:00Z; SettledAtUtc=NULL; InputRef=estimate-input:J1; ResultRef=NULL; DispatchState=NotStarted; DispatchLeaseToken=NULL. |
-| EstimateGenerationInput | OperationId=J1; AccountId=U1; EstimateId=D1; InputVersion=7; SchemaVersion=1; CatalogRevisionId=V1; InputAssetId=NULL; CreatedAtUtc=03:00Z; Payload chứa snapshot đầy đủ, areaM2="70.25", description="Nhà hai phòng ngủ", hai phong cách K1/N1 hợp lệ; không có tên bản dự toán. NULL ảnh được phép vì có mô tả. Nếu khách đổi tên D1 trong lúc J1 Pending, dòng này và InputVersion=7 giữ nguyên; chỉ D1.Name/NameVersion đổi. |
+| EstimateGenerationInput | OperationId=J1; AccountId=U1; EstimateId=D1; InputVersion=7; SchemaVersion=1; CatalogRevisionId=V1; InputImageUrl=NULL; CreatedAtUtc=03:00Z; Payload chứa snapshot đầy đủ, areaM2="70.25", description="Nhà hai phòng ngủ", hai phong cách K1/N1 hợp lệ kèm `imageUrl` của từng phong cách (ví dụ https://cdn.example.test/style/k1.jpg theo mẫu của TDD-PROJ-001), `inputImageUrl`=null; không có tên bản dự toán. NULL ảnh được phép vì có mô tả. Giả sử D1 lưu LocationDatasetVersion=pov2-3f9c0a1b2c4d5e6f nhưng phiên bản hiện hành đã là pov2-9a8b7c6d5e4f3a2b (bí danh) và xã mã 4 đổi tên: VerifyAsync vẫn trả mã 4 thuộc tỉnh 1 kèm tên mới, nên Payload ghi datasetVersion mới và tên mới; cột địa chỉ của D1 giữ nguyên. Nếu mã 4 không còn thì không có dòng này: yêu cầu bị 422 trường `wardCode`, không giữ lượt. Nếu khách đổi tên D1 trong lúc J1 Pending, dòng này và InputVersion=7 giữ nguyên; chỉ D1.Name/NameVersion đổi. |
 | PeriodQuota — sau nhận | P1/BGEN: Used=0; Reserved=1; available đọc ra 2. |
 | UsageOperation — đã gửi | J1: DispatchState=Sent; ProviderAttemptId=provider-j1; lease đã nhả. Không tăng Used. |
-| EstimateAsset — kết quả | FOUT1; EstimateId=D1; Purpose=Result; StorageKey=result/j1/plan; MediaType=image/png; SizeBytes=123000; Sha256=HFOUT1; CreatedBy=NULL vì worker tạo; CreatedAtUtc=2026-09-21T03:02:00Z. OperationId trong EstimateResultAsset cho biết tác vụ sinh tệp; không nhận CreatedBy từ provider. |
 | EstimateGenerationResult — candidate | OperationId=J1; EstimateId=D1; ProviderAttemptId=provider-j1; ContractVersion=partner-contract-test-v1; Payload={...nội dung fixture theo schema đối tác...}; PayloadHash=HR1; StoredAtUtc=03:02Z; ReadVerifiedAtUtc=03:02:01Z. Đây là ký hiệu dữ liệu mẫu, không JSON gửi được hoặc schema giả định. |
-| EstimateResultAsset | OperationId=J1; EstimateId=D1; AssetId=FOUT1; RoleKey=plan-preview (mã fixture chỉ dùng nếu contract có); Ordinal=0. |
+| EstimateResultFile | RF1: OperationId=J1; EstimateId=D1; RoleKey=plan-preview; Ordinal=0; FileUrl=https://ai-files.example.test/j1/plan-preview.png. RF2: OperationId=J1; EstimateId=D1; RoleKey=dossier-pdf; Ordinal=0; FileUrl=https://ai-files.example.test/j1/dossier.pdf. RF3: RoleKey=estimate-xlsx; Ordinal=0; FileUrl=https://ai-files.example.test/j1/estimate.xlsx. RoleKey là mã fixture, chỉ dùng nếu contract có; tên miền ai-files.example.test là URL minh họa, chưa biết AI dùng tên miền nào. Ba dòng ghi cùng candidate sau khi đọc thử cả ba URL thành công lúc 03:02:01Z. |
 | UsageOperation — sau thành công | J1: State=Succeeded; SettledAtUtc=03:02:02Z; ResultRef=estimate-result:J1. |
 | PeriodQuota — cùng commit thành công | P1/BGEN: Used=1; Reserved=0; available=2. |
 
@@ -244,9 +259,9 @@ Nhánh thay thế: J1 TimedOut tại 03:10Z → Used=0, Reserved=0; không có R
 - Chốt callback/result cần hai pha: xác thực và stage; sau đó finalizer ngắn. Candidate chỉ được insert một lần theo operation/attempt/hash đã đối chiếu. Hai callback khác hash không được UPDATE kết quả nguồn. Có thể lưu log sự kiện provider tối giản để đối soát, nhưng chưa tự thêm bảng lưu toàn bộ raw response hoặc retention khi chưa có hợp đồng.
 - Index dùng lại pending deadline, account-kind-key và period-benefit; thêm UsageOperation(EstimateId,AcceptedAtUtc DESC,Id) cho lịch sử/trạng thái bản, index dispatch theo State/DispatchState/lease để worker scan. Chỉ SELECT projection cần thiết, không tải cả JSON vào lượt poll trạng thái.
 - Migration bổ sung EstimateId nullable trước để kiểm dữ liệu. Nếu đã có DesignGeneration dựa trên Project thật, dừng trước CHECK/NOT NULL: cần quyết định ánh xạ dữ liệu, không tự gán ProjectId sang EstimateId. Trong DB mới không có lịch sử thì thêm CHECK và FK ngay theo thứ tự cha trước con. Giữ cột ResourceId cho TemplateDetail. Không đổi tên Project trong các module giám sát trong đợt này.
-- Theo dõi metric: số accept/deny theo mã lỗi; Pending quá deadline; thời gian dispatch/stage/finalize; Used/Reserved lệch so operation; số phản hồi muộn/trùng/không khớp attempt. Metric không dùng userId/raw URL làm nhãn. Log traceId/operationId/estimateId/periodId/attempt và mã lỗi, không log mô tả/địa chỉ/token/raw output.
+- Theo dõi metric: số accept/deny theo mã lỗi; Pending quá deadline; thời gian dispatch/stage/finalize; Used/Reserved lệch so operation; số phản hồi muộn/trùng/không khớp attempt. Metric không dùng userId/raw URL làm nhãn. Log traceId/operationId/estimateId/periodId/attempt và mã lỗi, không log mô tả/địa chỉ/token/raw output/URL tệp.
 - Khi worker dừng, API đọc vẫn hoạt động nhưng không nhận việc mới nếu dispatcher chưa sẵn sàng. Hết deadline được xử lý lại khi worker phục hồi hoặc khi finalizer chạy; cảnh báo nếu Pending quá hạn tồn đọng. Không trả lượt chỉ trên giao diện khi DB chưa quyết toán. Cần cấu hình timeout, tần suất quét, lease, giới hạn song song, cảnh báo và người vận hành trước production; chưa có SLA/RPO/RTO.
-- Đối soát chỉ phát hiện sai lệch và tạo báo cáo: không tự đặt lại Used/Reserved từ đầu nếu chưa xác định nguyên nhân. Dữ liệu được nhận trước lỗi vẫn phải giữ để phục hồi. Backup phải gồm DB, object bất biến và khóa truy cập; chưa tự đặt lịch xóa.
+- Đối soát chỉ phát hiện sai lệch và tạo báo cáo: không tự đặt lại Used/Reserved từ đầu nếu chưa xác định nguyên nhân. Dữ liệu được nhận trước lỗi vẫn phải giữ để phục hồi. Backup của backend chỉ gồm DB (có URL tệp); bản thân tệp nằm ở phía AI hoặc kho presign, ngoài backend, nên việc giữ và sao lưu tệp phụ thuộc hợp đồng AI (câu hỏi mở ở Architecture/Notes). Chưa tự đặt lịch xóa.
 - Kiểm chứng ST-PROJ-021–032, 051, 057; integration PostgreSQL hai connection cho tranh lượt, chốt-vs-timeout, đổi/hủy kỳ-vs-accept, rollback input/hold, worker crash trước/sau gửi và callback lặp. Giả lập AI chứng minh điều phối nội bộ, không chứng minh hợp đồng thực. Chưa viết đặc tả Unit Test trước chốt TDD.
 
 ## Internal API
@@ -254,13 +269,13 @@ Nhánh thay thế: J1 TimedOut tại 03:10Z → Used=0, Reserved=0; không có R
 ### Endpoints
 
 - **POST** `/api/v1/estimates/{estimateId}/generations` — Verified Customer + owner, kiểm Origin theo [TDD-AUTH-001](TDD-AUTH-001.md) khi dùng cookie; `{inputVersion}` + Idempotency-Key. Yêu cầu mới 202 `{operationId,state:"Pending",acceptedAtUtc,deadlineUtc}`; replay cùng key/hash 200 với trạng thái operation cũ, không reserve lại.
-- **GET** `/api/v1/estimates/{estimateId}/generations/{operationId}` — Owner đọc `{operationId,state,acceptedAtUtc,deadlineUtc,settledAtUtc,failureCode,resultUrl}`. resultUrl chỉ có khi Succeeded, là route backend có kiểm quyền. Không trả tỷ lệ hoàn tất giả nếu AI không có progress.
+- **GET** `/api/v1/estimates/{estimateId}/generations/{operationId}` — Owner đọc `{operationId,state,acceptedAtUtc,deadlineUtc,settledAtUtc,failureCode,resultUrl}`. resultUrl chỉ có khi Succeeded, là route backend có kiểm quyền (`GET /api/v1/estimates/{estimateId}/result` của TDD-PROJ-003), không phải URL tệp gốc của AI. Không trả tỷ lệ hoàn tất giả nếu AI không có progress.
 
 Ports nội bộ không phải HTTP công khai:
 
 - `ReserveEstimateGeneration(ownerId,estimateId,inputVersion,key)` chạy qua handler transactional; dùng coordinator subscription cùng UoW.
 - `ClaimEstimateDispatch(operationId,workerId)` → leaseToken + snapshot; transaction ngắn, lưu DispatchState=Sending và DispatchLeaseToken trước khi gọi nhà cung cấp; OperationId là mã chống gửi lặp phía BMT. ProviderAttemptId chỉ được lưu khi nhận được mã thực từ provider theo hợp đồng; không tin worker chỉ giữ bộ nhớ.
-- `StageEstimateResult(operationId,providerAttemptId,envelope)` → candidate; kiểm ContractVersion/đủ kết quả và files, ngoài transaction chốt.
+- `RecordEstimateResultCandidate(operationId,providerAttemptId,envelope)` → candidate; kiểm ContractVersion/đủ kết quả, kiểm mọi URL tệp qua `EstimateResultFileVerifier`, rồi ghi EstimateGenerationResult và EstimateResultFile; ngoài transaction chốt. Không tải tệp về lưu lại.
 - `FinalizeEstimateGeneration(operationId,providerAttemptId,candidateRef)` → terminal hoặc Pending; kiểm identity, deadline và chốt quota/result cùng transaction.
 - `FailEstimateGeneration` và `ExpireDesignUsage` dùng chung coordinator settlement, không có endpoint để khách tự báo AI thành công/thất bại.
 
@@ -309,39 +324,42 @@ Error Response:
 - **EntitlementMissing** (403): thiếu quyền design.generate.
 - **QuotaUnavailable** (409): hết lượt sẵn dùng hữu hạn.
 - **InputVersionConflict** (409): đầu vào đã đổi so phiên bản khách muốn gửi.
+- **LocationDatasetChanged** (409): dữ liệu địa chỉ được làm mới trong lúc xử lý yêu cầu, theo mã lỗi cùng tên của TDD-PROJ-001; không giữ lượt, khách gửi lại.
 - **IdempotencyConflict** (409): cùng key nhưng đổi nội dung yêu cầu.
 - **GenerationInProgress** (409): một operation khác còn Pending.
 - **EstimateAlreadyGenerated** (409): bản đã thành công, không nhận phương án mới.
-- **InvalidGenerationInput** (422): thiếu hoặc sai đầu vào theo revision đã ghim; trả lỗi theo trường, không giữ lượt.
-- **DependencyUnavailable** (503): AI/contract/storage/timeout chưa sẵn sàng trước accept.
+- **InvalidGenerationInput** (422): thiếu hoặc sai đầu vào theo revision đã ghim (theo `FindMissingForGeneration`), hoặc xã đã lưu không còn trong dữ liệu địa chỉ hiện hành hay không còn thuộc tỉnh đã chọn (trường `wardCode`); trả lỗi theo trường, không giữ lượt.
+- **DependencyUnavailable** (503): AI/contract/cấu hình timeout chưa sẵn sàng trước accept, hoặc nguồn địa chỉ lỗi khi chưa có bản lưu nào.
 
-GenerationTimedOut, ProviderRejected, InvalidProviderResult, ResultStorageFailed là failureCode của operation khi được xác định, không phải HTTP 500 cho GET trạng thái. Mã provider cụ thể chỉ map sau khi có hợp đồng; không đẩy raw message về khách.
+GenerationTimedOut, ProviderRejected, InvalidProviderResult, ResultFileUnavailable (URL tệp kết quả sai hoặc không mở được tới hạn) là failureCode của operation khi được xác định, không phải HTTP 500 cho GET trạng thái. Mã provider cụ thể chỉ map sau khi có hợp đồng; không đẩy raw message về khách.
 
 ## External API
 
 ### Endpoints
 
 - **AI service — chờ tích hợp** — Chưa biết base URL, method/path, xác thực, submit/status/result, webhook hay polling. Không mở callback công khai trước khi có cơ chế xác thực và chống phát lại được xác nhận với nhóm AI.
-- **Kho kết quả — port của TDD-PROJ-001** — Ghi object riêng tư bất biến, đọc lại trước ResultReady; không dùng URL hết hạn của AI làm hồ sơ lưu lâu dài.
+- **Tệp kết quả của AI — đọc qua URL** — AI trả URL cho mọi tệp kết quả, kể cả PDF và Excel. Backend lưu URL, đọc thử trước khi chốt và chuyển tiếp nội dung khi khách tải (TDD-PROJ-003); không ghi tệp vào kho riêng. Chưa biết URL có hết hạn, cần xác thực hay nằm ở tên miền nào.
+- **Ảnh đầu vào gửi AI — URL công khai** — AI tự tải ảnh từ `inputImageUrl` và `imageUrl` trong snapshot. Các URL này thuộc kho presign và đã kiểm tên miền khi lưu (TDD-PROJ-001); người dùng đã chấp nhận ảnh đầu vào nằm ở URL công khai.
 
 ### Fields
 
 - **operationId** — ID của BMT để đối chiếu, chống lẫn callback; provider phải trả lại hoặc có bảng ánh xạ đáng tin cậy.
 - **providerAttemptId** — Mã lần xử lý phía provider, không được dùng lại cho operation khác.
-- **inputSnapshot/schemaVersion** — Dữ liệu nội bộ để adapter ánh xạ; cách biểu diễn nhóm phong cách NULL và ảnh HEIC còn cần hợp đồng.
-- **contractVersion/resultEnvelope** — Schema và đủ bộ kết quả: kiến trúc/nội thất, dự toán phần thô/hoàn thiện/nội thất, tổng và hồ sơ theo phạm vi đã chốt; chi tiết trường, đơn vị tiền, định dạng tệp chưa có.
-- **requiredOutputSet** — Danh sách phần cần có để báo thành công và phần PDF/Excel có thể xuất sau; cần nhóm AI xác nhận trước cấu hình validator.
+- **inputSnapshot/schemaVersion** — Dữ liệu nội bộ để adapter ánh xạ; ảnh gửi bằng URL. Cách biểu diễn nhóm phong cách NULL và ảnh HEIC còn cần hợp đồng.
+- **contractVersion/resultEnvelope** — Schema và đủ bộ kết quả: kiến trúc/nội thất, dự toán phần thô/hoàn thiện/nội thất, tổng và hồ sơ theo phạm vi đã chốt, cùng URL của từng tệp; chi tiết trường, đơn vị tiền, định dạng tệp chưa có.
+- **requiredOutputSet** — Danh sách phần cần có để báo thành công, và PDF/Excel có bắt buộc có URL ngay lúc thành công hay AI tạo sau; cần nhóm AI xác nhận trước cấu hình validator.
 
 ### Error Handling
 
-Xác thực response/callback, đối chiếu ID và attempt trước thay dữ liệu. Khi phải tải URL provider, adapter chỉ chấp nhận host/đường dẫn được cấu hình, HTTPS, chặn redirect sang mạng nội bộ, giới hạn bytes/pixel/thời gian theo hợp đồng; không nhận URL tùy ý từ khách. Không công bố HTML/script hoặc file đính kèm chưa qua kiểm tra. Chữ ký, chống replay, timeout HTTP và chính sách query/retry còn chờ API thực, không giả định hỗ trợ idempotency.
+Xác thực response/callback, đối chiếu ID và attempt trước thay dữ liệu. Khi đọc tệp theo URL AI trả (đọc thử lúc chốt, chuyển tiếp lúc khách tải), `IEstimateResultFileClient` chỉ chấp nhận URL https có tên máy chủ thuộc danh sách cho phép, không theo chuyển hướng sang máy chủ khác hoặc mạng nội bộ, giới hạn dung lượng và thời gian theo hợp đồng. Danh sách tên máy chủ này dùng chung `UploadedFileOption__AllowedHosts` hay cấu hình riêng là câu hỏi mở. Không nhận URL tùy ý từ khách. Không công bố HTML/script hoặc tệp chưa qua kiểm tra. Chữ ký, chống replay, timeout HTTP và chính sách query/retry còn chờ API thực, không giả định hỗ trợ idempotency.
 
-Mất phản hồi gửi không tương đương provider từ chối. Quy trình Unknown không tự gửi lại. Result staging lỗi có thể thử lại việc đọc/lưu cùng đầu ra bất biến trong deadline khi contract cho phép; không gọi lại tạo thiết kế. Một terminal operation không được phục hồi thành Succeeded bởi vận hành hoặc callback đến muộn.
+Mất phản hồi gửi không tương đương provider từ chối. Quy trình Unknown không tự gửi lại. Kiểm URL tệp lỗi (ví dụ lỗi mạng tạm thời) có thể thử đọc lại cùng URL trong deadline khi contract cho phép; không gọi lại tạo thiết kế. Một terminal operation không được phục hồi thành Succeeded bởi vận hành hoặc callback đến muộn.
 
 ### Quirks
 
 - Tắt nhóm chọn phong cách không tắt nhóm output; BMT không kiểm entitlement 3D để cắt output trong phạm vi hiện tại.
-- Provider báo completed chưa đủ: BMT phải lưu, kiểm đủ và mở được. Xuất PDF/Excel sau thành công không được biến thành operation AI tính lượt mới.
+- Provider báo completed chưa đủ: BMT phải kiểm đủ và mọi URL tệp mở được. Nếu PDF/Excel được AI tạo sau thành công, việc đó không được biến thành operation AI tính lượt mới.
+- URL tệp của AI có thể hết hạn hoặc bị xóa phía AI; backend không giữ bản sao nên khi đó hồ sơ không tải được, dù kết quả vẫn Succeeded và lượt không hoàn lại.
 - Thiếu hợp đồng làm phần tích hợp chưa thể triển khai hoàn chỉnh; mock chỉ dành môi trường thử. Không trả số tiền/ảnh của website mẫu để lấp kết quả.
 
 ## References
@@ -377,6 +395,7 @@ Mất phản hồi gửi không tương đương provider từ chối. Quy trìn
 ### Others
 
 - TDD-PROJ-001/Data Model
+- TDD-PROJ-001/Architecture
 - TDD-PROJ-003/Data Model
 - TDD-SUB-002/Data Model
 - TDD-SUB-005/Data Model
@@ -386,6 +405,7 @@ Mất phản hồi gửi không tương đương provider từ chối. Quy trìn
 
 ## Change Log
 
+- 2026-09-26 (lưu URL tệp): Theo quyết định người dùng ngày 26/09/2026, backend không có kho tệp riêng. Bỏ `EstimateResultStager`, kho kết quả riêng tư, `EstimateGenerationInput.InputAssetId`, `EstimateResultAsset` và mọi khóa ngoại tới `EstimateAsset`; thêm cột `EstimateGenerationInput.InputImageUrl` và bảng `EstimateResultFile` lưu URL do AI trả cho mọi tệp kết quả, kể cả PDF và Excel. Snapshot v1 dùng `inputImageUrl` và `imageUrl`. Thêm `EstimateResultFileVerifier` và cổng `IEstimateResultFileClient` để kiểm URL tệp mở được trước khi chốt; port `StageEstimateResult` đổi thành `RecordEstimateResultCandidate`, failureCode `ResultStorageFailed` đổi thành `ResultFileUnavailable`. Thêm bước kiểm địa chỉ và lựa chọn trước khi gửi AI: so `LocationDatasetVersion`, gọi `VerifyAsync` khi khác phiên bản, xã đổi tên dùng tên mới, mã xã không còn thì 422 trường `wardCode`; đầu vào đủ theo `FindMissingForGeneration`, `CanSelectFloor`/`CanSelectStyle`. Thêm mã lỗi `LocationDatasetChanged` (409). Hợp đồng API AI, thời hạn URL tệp và danh sách tên máy chủ tệp của AI ghi là câu hỏi mở. Sửa các sơ đồ tương ứng.
 - 2026-09-26 (CSRF): Chống CSRF dẫn tới [TDD-AUTH-001](TDD-AUTH-001.md); ví dụ bỏ header `X-CSRF-Token`, thay bằng `Origin`.
 - 2026-09-25 (lần 2): Ranh giới tài nguyên dẫn tới đặc tả Công trình (STORY-SITE-001, TDD-SITE-001) thay cho ghi chú "chưa có đặc tả". Không đổi thiết kế gửi AI.
 - 2026-09-25: Bỏ `name` khỏi snapshot nội bộ v1 gửi AI vì tên bản dự toán không phải đầu vào AI (BR-SUB-007 khoản 11). Ghi rõ đổi tên không tăng InputVersion nên không gây InputVersionConflict khi gửi AI, vẫn được phép khi tác vụ Pending và không lấy khóa AccountCommerceState. Thêm STORY-PROJ-002/EXC-02 vào Use Cases. Ghi đúng quan hệ giữa bản dự toán và Công trình (`ConstructionSite`) thay cho cách gọi "phụ thuộc tương lai".

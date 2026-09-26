@@ -1,6 +1,6 @@
 # Chống CSRF cho API dùng cookie đăng nhập
 
-**Trạng thái: Đã trả phần code ngày 26/09/2026, chưa đóng — còn chờ merge và đặt cấu hình trên các môi trường thật.** Thiết kế chính thức nằm ở [TDD-AUTH-001](../tdd/TDD-AUTH-001.md); code ở commit `50ed2f3` trên nhánh `feature/csrf-protection` của `bmt-be`, chưa merge vào `develop`. Phần còn lại của ghi chú này là bản nháp phân tích ngày 26/09/2026, giữ lại làm lịch sử: số dòng, hiện trạng và các câu hỏi bên dưới là trước khi chốt, không còn là yêu cầu.
+**Trạng thái: Đã trả phần code và đã merge vào `develop` ngày 26/09/2026, chưa đóng — còn chờ tạo lại mạng Docker, đặt cấu hình và thử trên các môi trường thật, và chờ chốt cách xử lý tunnel dev của Document First.** Thiết kế chính thức nằm ở [TDD-AUTH-001](../tdd/TDD-AUTH-001.md). Code nằm trên `develop` của `bmt-be` ở hai commit: `53ec4be` (middleware, cờ cookie, forwarded headers; trước khi rebase là `50ed2f3` trên nhánh `feature/csrf-protection`) và `9c7b147` (dải IP cố định cho proxy tin cậy, origin của API khi bật Swagger; trước khi rebase là `3974b55`). Phần còn lại của ghi chú này là bản nháp phân tích ngày 26/09/2026, giữ lại làm lịch sử: số dòng, hiện trạng và các câu hỏi bên dưới là trước khi chốt, không còn là yêu cầu.
 
 Người dùng đã chốt ngày 26/09/2026 (chi tiết ở TDD-AUTH-001/Context & Goals):
 
@@ -8,7 +8,16 @@ Người dùng đã chốt ngày 26/09/2026 (chi tiết ở TDD-AUTH-001/Context
 - Câu 1: frontend khác site với API. Câu 2: chọn (a), request mang cookie phiên mà thiếu cả `Origin` lẫn `Referer` bị chặn. Câu 3: cookie phiên `SameSite=None; Secure` ngoài Development, SameSite đọc từ cấu hình. Câu 4: `http://localhost:3000` chỉ tự thêm ở Development; cấu hình sai thì từ chối khởi động. Câu 5: bỏ antiforgery token, `X-CSRF-Token`, `GET /api/v1/antiforgery/token`, `X-BMT-Request`; thiết kế chính thức ở TDD nền tảng. Câu 6: chọn (a), bật chặn ngay ở mọi môi trường, **không** làm chế độ `ReportOnly` (tùy chọn `Csrf:Mode` ở mục Cấu hình bên dưới đã bỏ).
 - Khác bản nháp khi triển khai: forwarded headers phải bật cả `X-Forwarded-For`, vì ASP.NET Core 8 chỉ kiểm proxy tin cậy trong nhánh đó (TDD-AUTH-001/Architecture Notes).
 
-Điều kiện đóng nợ: (1) nhánh `feature/csrf-protection` được merge; (2) mỗi môi trường đã đặt `CORS_ALLOWED_ORIGINS` đúng và `FORWARDED_HEADERS_KNOWN_NETWORKS` hoặc `FORWARDED_HEADERS_KNOWN_PROXIES` cho `cloudflared`; (3) đã thử trên môi trường thử rằng request ghi từ origin lạ nhận 403 `CsrfInvalid` và frontend thật vẫn hoạt động. Khi đạt cả ba thì đổi trạng thái ở đầu tài liệu thành đã đóng.
+Người dùng chốt thêm cùng ngày, sau khi có code lần đầu (chi tiết ở TDD-AUTH-001/Architecture):
+
+- Bật cả `X-Forwarded-For` và chấp nhận hệ quả: sau proxy tin cậy, bộ giới hạn tần suất chia ngăn theo IP thật của từng khách.
+- Cố định dải IP: `bmt-network-dev` là `10.47.10.0/24`, `bmt-network-prod` là `10.47.20.0/24`. API chỉ tin forwarded headers từ khối `.8/29` của mỗi mạng (mặc định của `FORWARDED_HEADERS_KNOWN_NETWORKS` trong `.docker/compose.yaml`); `cloudflared` có IP tĩnh `.10`. Không tin cả dải, vì kết nối qua cổng publish từ máy chủ mang IP gateway `.1`.
+- Môi trường bật Swagger (Development, Staging) tự cho phép origin của chính API, ghép từ scheme sau forwarded headers tin cậy và header `Host` thật, không đọc `X-Forwarded-Host`. An toàn vì cookie phiên là host-only. Môi trường có Swagger không cần khai origin của API vào `CORS_ALLOWED_ORIGINS` nữa (thay cho mục Cấu hình và câu hỏi 4 bên dưới).
+- Reviewer và Approver của TDD-AUTH-001 là Tân Trần. Không viết đặc tả Unit Test UT-AUTH; test trong code nằm ở `test/bmt-be.api.tests/security/`, gồm `SwaggerApiOriginPipelineTests` cho phần Swagger.
+
+Còn mở: tunnel dev của Document First đi qua mạng `document-first-network-dev`, nằm ngoài khối tin cậy, nên API dev bỏ qua forwarded headers từ tunnel đó. Hai cách chưa chốt: (a) Document First cố định dải mạng của họ và BMT khai thêm dải đó vào `FORWARDED_HEADERS_KNOWN_NETWORKS`; (b) `cloudflared` của Document First nối thêm vào `bmt-network-dev` với IP tĩnh trong khối `10.47.10.8/29`. Phân tích ở TDD-AUTH-001/Architecture Notes.
+
+Điều kiện đóng nợ: (1) code được merge vào `develop` — **đã đạt** ngày 26/09/2026 (`53ec4be`, `9c7b147`); (2) mỗi máy chủ đã tạo lại mạng Docker theo bước vận hành ở TDD-AUTH-001/Architecture Notes, kiểm `cloudflared` có IP `.10`, và mỗi môi trường đã đặt `CORS_ALLOWED_ORIGINS` đúng (`FORWARDED_HEADERS_KNOWN_NETWORKS` để trống dùng mặc định, trừ khi cần tin thêm nguồn); (3) đã chốt và làm xong cách xử lý tunnel dev của Document First; (4) đã thử trên môi trường thử rằng request ghi từ origin lạ nhận 403 `CsrfInvalid`, frontend thật vẫn hoạt động và cookie trả về qua tunnel có `Secure`. Khi đạt cả bốn thì đổi trạng thái ở đầu tài liệu thành đã đóng.
 
 ## Tóm tắt
 
