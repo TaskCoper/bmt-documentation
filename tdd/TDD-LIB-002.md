@@ -168,7 +168,7 @@ Upload, kiểm URL và schema asset do TDD-LIB-001 định nghĩa. TDD này ch�
 **Notes**:
 
 - Không thêm broker, outbox hoặc database khác. Quota/Access/nội dung cùng PostgreSQL; tệp nằm ở kho presign ngoài backend và được thăm dò trước transaction ghi. [EF Core transactions](https://learn.microsoft.com/en-us/ef/core/saving/transactions).
-- Log operationId/accountId/versionId/editVersion, kết quả Granted/Reused/Denied/Conflict, không log token, signed URL hay bytes. Theo dõi lỗi đọc tệp, thời gian chờ khóa, cấp quyền thất bại và lệch Access/UsageOperation; chưa đặt ngưỡng cảnh báo khi chưa có tải thực.
+- Log operationId/accountId/versionId/editVersion, kết quả Granted/Reused/Denied/Conflict, không log token, signed URL hay bytes. Người dùng xác nhận ngày 26/09/2026: log thao tác quản trị của TDD-LIB-001 (operationId, kết quả) cũng làm trong đợt triển khai tài liệu này. Theo dõi lỗi đọc tệp, thời gian chờ khóa, cấp quyền thất bại và lệch Access/UsageOperation; chưa đặt ngưỡng cảnh báo khi chưa có tải thực.
 - Timeout khi thăm dò và chuyển tiếp tệp, RPO/RTO và việc giữ tệp là phần vận hành chưa có số liệu; tệp do dịch vụ presigned URL quản lý. Backup của backend chỉ gồm URL; cần thống nhất với bên vận hành kho để quyền xem không trỏ tới tệp đã mất trước khi mở production.
 
 ## Sequence Diagram
@@ -408,6 +408,7 @@ Chuẩn bị nội dung lỗi trước commit không tính lượt. Lỗi tải 
 
 ## Change Log
 
+- 2026-09-26 (log quản trị gộp vào đợt này): Người dùng xác nhận ngày 26/09/2026 log thao tác quản trị của TDD-LIB-001 (operationId, kết quả) làm cùng đợt triển khai tài liệu này; ghi ở Notes. Route đọc tài nguyên cho người quản lý thuộc TDD-LIB-001, khác route đọc tài nguyên của khách ở đây. Nghiệp vụ không đổi.
 - 2026-09-26 (đồng bộ sau khi triển khai TDD-LIB-001): Sửa câu còn sót ở Architecture/Tải tài nguyên nói thumbnail công khai dùng route riêng, cho khớp quyết định đã xác nhận cùng ngày: danh sách công khai trả thẳng URL gốc của cover. TDD-LIB-001 đã triển khai ở nhánh `feature/library-admin` của `bmt-be` (commit `66e4671`); phần của tài liệu này (LibraryAccess, UsageOperation, mở mẫu, lịch sử, tải có quyền) chưa triển khai. Nghiệp vụ không đổi.
 - 2026-09-26 (thumbnail công khai trả URL gốc): Người dùng xác nhận ngày 26/09/2026: ảnh đại diện công khai của TDD-LIB-001 trả thẳng URL gốc, không qua backend chuyển tiếp; chỉ nội dung được bảo vệ mới đi qua route có quyền. Sửa Architecture/Notes và mô tả `GET /api/v1/me/library-history`; cover của phiên bản trong lịch sử vẫn tải qua route file có quyền như trước.
 - 2026-09-26 (chốt tải qua backend và kiểm tệp ở frontend): Người dùng xác nhận ngày 26/09/2026: nội dung mẫu được bảo vệ chỉ tải qua route backend có kiểm quyền xem đã mở; backend chuyển tiếp tệp, không lộ URL gốc, giống link chia sẻ của TDD-PROJ-003. Câu hỏi mở (a)/(b) ở Architecture chuyển thành quyết định đã xác nhận; thumbnail công khai dùng cùng cách chuyển tiếp. Viết lại UT-LIB-033, UT-LIB-034, UT-LIB-042, UT-LIB-046 theo `ILibraryFileReader`.

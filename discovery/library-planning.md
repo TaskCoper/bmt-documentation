@@ -18,6 +18,11 @@ Các quyết định nghiệp vụ đã được xác nhận qua hội thoại. 
 - Phần tra cứu của TDD-LIB-002 (quyền xem, tính lượt, lịch sử, tải nội dung được bảo vệ) chưa triển khai. Người quản lý hiện chưa có API đọc danh sách tài nguyên của một phiên bản; đây là câu hỏi còn mở, ghi trong báo cáo triển khai.
 - System Test ST-LIB chưa chạy trên môi trường thử; bảng ở [library-system-test-coverage.md](library-system-test-coverage.md) ghi các test tự động phía backend liên quan.
 
+## Cập nhật ngày 26/09/2026 — đọc tài nguyên cho người quản lý
+
+- Người dùng xác nhận hai câu hỏi mở sau đợt triển khai TDD-LIB-001: thêm route `GET /api/v1/admin/library/templates/{templateId}/versions/{versionId}/assets` cho người có `library.manage` (phân trang, URL gốc, loại, vị trí, cover), và làm log thao tác quản trị cùng đợt TDD-LIB-002.
+- Route đã có ở nhánh `feature/library-admin-assets` của `bmt-be`, commit `9e02c4d`, chưa merge; không cần migration. Đặc tả mới: UT-LIB-051, UT-LIB-052, ST-LIB-031.
+
 ## Bộ tài liệu
 
 | Phạm vi | User Story | Business Rule |
