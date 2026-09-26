@@ -166,7 +166,8 @@ flowchart LR
 **Notes**:
 
 - **Đã xác nhận:** phạm vi Customer Android/iOS, nhiều thiết bị, dừng gửi sau logout, chống yêu cầu A đến muộn, chuyển token sang bản cài mới khi cài lại app (BR-PUSH-001 khoản 6, xác nhận ngày 25/09/2026) và nền tảng gửi chưa gắn sự kiện nghiệp vụ. Reviewer/Approver: Tân Trần.
-- **Đề xuất chưa chốt:** bốn bảng, API mobile trả token riêng, khóa điều phối qua bước gọi Expo, ngân sách retry. Rào chắn LoginOrder khi chuyển token giữa hai bản cài đã được người dùng chốt ngày 25/09/2026 và ghi vào BR-PUSH-001 khoản 6. Bản TDD này cần review trước khi làm căn cứ viết Unit Test.
+- **Đề xuất chưa chốt:** bốn bảng, khóa điều phối qua bước gọi Expo, ngân sách retry. Rào chắn LoginOrder khi chuyển token giữa hai bản cài đã được người dùng chốt ngày 25/09/2026 và ghi vào BR-PUSH-001 khoản 6. Bản TDD này cần review trước khi làm căn cứ viết Unit Test.
+- **API mobile trả token riêng:** đã được thiết kế và người dùng chốt ngày 26/09/2026 ở [TDD-AUTH-002](TDD-AUTH-002.md). Phiên mobile lưu trên Redis với trường `clientKind`; bảng AuthSession, `sid`, `LoginOrder` và việc xoay token bằng Lua trong tài liệu này vẫn là đề xuất, sẽ được thêm lên trên thiết kế đó khi làm push.
 - **Cần làm rõ trước triển khai:** app mobile có dùng Expo hay không (ngày 25/09/2026 đội mobile chưa chọn công nghệ), phiên bản SDK/project/credentials mobile, thời gian lưu dữ liệu. Luồng cài lại app cần thử trên thiết bị Android/iOS thật để xác nhận Expo có trả lại token cũ hay cấp token mới; cả hai trường hợp đều được thiết kế xử lý.
 - **Thứ tự triển khai đề xuất:** migration thêm bảng → điều phối phiên và API mobile → đăng ký/token rotation/logout → dispatcher/outbox/worker → receipt/retry → tích hợp Android/iOS → kiểm chứng staging rồi bật feature. Chưa thực hiện bước nào trong giai đoạn tài liệu này.
 - **Transaction auth:** thêm command/coordinator cho mobile; không dùng nguyên login query hiện tại để giả định có transaction. Mỗi bước SQL phải commit rõ trước bước Redis theo thứ tự trên; pipeline không được trì hoãn commit đến sau khi trả token. Refresh dùng cùng thứ tự khóa user, installation, session với các writer khác.
@@ -497,5 +498,6 @@ Bật bảo vệ access token của Expo cho môi trường production nếu c�
 
 ## Change Log
 
+- 2026-09-26 (API mobile trả token): Người dùng chốt TDD-AUTH-002 cho phiên mobile. Bỏ "API mobile trả token riêng" khỏi nhóm đề xuất chưa chốt và ghi rõ phần AuthSession/sid của tài liệu này vẫn là đề xuất.
 - 2026-09-25 (tạm hoãn): Người dùng xác nhận đội mobile chưa chọn công nghệ cho app. Tài liệu giữ trạng thái chờ; chưa viết đặc tả Unit Test và chưa triển khai code cho tới khi chốt app có dùng Expo hay không.
 - 2026-09-25: Theo BR-PUSH-001 khoản 6 và STORY-PUSH-001/AC-010, token đang gắn với bản cài khác được chuyển sang registration của bản cài mới và registration cũ bị tắt (DisabledReason=TokenMovedToNewInstallation) trong cùng transaction; bỏ mã lỗi `PushTokenAlreadyBound` và phương án challenge khôi phục. Giữ rào chắn yêu cầu đến muộn bằng LoginOrder (sid cũ hơn nhận 409 PushRegistrationStale); thêm mẫu dữ liệu nhánh cài lại app. `CustomerOnly` và điều kiện chọn đích ghi rõ kiểm User.AccountKind=Customer. Câu về thông báo website trỏ tới STORY-PUSH-001/Out of Scope thay cho ghi nhận technical debt riêng.
