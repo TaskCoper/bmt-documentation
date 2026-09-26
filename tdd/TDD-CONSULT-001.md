@@ -59,6 +59,8 @@ Thiết kế phải tiếp nhận yêu cầu miễn phí từ khách đã đăng
 
 Checkout khảo sát có .NET 8, Carter/MediatR/FluentValidation, EF Core/Npgsql 8.0.0; cấu hình Docker dùng PostgreSQL 15. MassTransit RabbitMQ và EF Core Outbox cùng phiên bản 8.4.1. Phiên bản PostgreSQL của môi trường triển khai chưa được kiểm tra. Chưa có entity/API tư vấn trong source. Các file source đang có thay đổi chưa commit; thiết kế lấy nội dung hiện tại làm mốc, không thay các thay đổi đó.
 
+**Hiện trạng triển khai (26/09/2026):** thiết kế này đã có trong code ở hai commit `4d6c386` (module) và `9e4f220` (kiểm tên miền ảnh đại diện) trên nhánh `feature/consultation` của `bmt-be`, dựng trên `develop` tại `c1d757a`, chưa merge. Migration `20260926091223_ConsultationArchitect` tạo bốn bảng, các index và seed `consultation.manage` cho vai trò admin; migration chưa chạy trên môi trường đã triển khai. Unit test theo UT-CONSULT-001 đến UT-CONSULT-048 và integration test trên PostgreSQL 15 đã chạy qua; các System Test ST-CONSULT vẫn chưa thực thi. Những lựa chọn phát sinh khi triển khai ghi ở Architecture/Notes, mục "Khi triển khai".
+
 ### Goals
 
 - Lưu hồ sơ đủ bảy nhóm thông tin, có nhiều category, có trạng thái Ẩn/Hiện do người tạo chọn.
@@ -138,7 +140,7 @@ Gửi yêu cầu dùng policy riêng `ConsultationCustomer`: phiên đăng nhậ
 
 API mới chỉ nhận JSON cho thao tác ghi. Chống CSRF dùng lớp chung ở [TDD-AUTH-001](TDD-AUTH-001.md), module không có filter riêng và không dùng header `X-BMT-Request`: request ghi dùng cookie phải có `Origin` (không có thì `Referer`) khớp chính xác danh sách frontend được cấu hình, mang cookie mà thiếu cả hai cũng bị từ chối; client dùng Bearer không bị kiểm. CORS phải giữ allowlist cụ thể, không wildcard với credentials. Không coi CORS là phân quyền. Frontend gọi từ trình duyệt không phải gửi header riêng.
 
-Ảnh là URL HTTPS tuyệt đối do admin nhập, giới hạn độ dài và không có user-info trong URL; không nhận `javascript:`, `data:` hoặc đường dẫn file. Backend không tải URL để kiểm tra hoặc làm proxy, tránh biến API thành công cụ truy cập mạng nội bộ. Frontend dùng img với `referrerPolicy=no-referrer`, hiển thị ảnh dự phòng khi host ngoài không truy cập được; không tuyên bố kiểm chứng bytes hoặc quyền sở hữu ảnh. Giới thiệu, category, message và internalNote là plain text; không render HTML do người nhập cung cấp. Không ghi số điện thoại, email đầy đủ, body hoặc URL có query vào log mới. Consumer hiện log email người nhận; khi tích hợp cần che địa chỉ trong log, không log nội dung thư.
+Ảnh là URL HTTPS tuyệt đối do admin nhập, giới hạn độ dài và không có user-info trong URL; không nhận `javascript:`, `data:` hoặc đường dẫn file. URL còn phải thuộc tên miền của kho presign khai báo ở `UploadedFileOption__AllowedHosts`, kiểm bằng `IUploadedFileUrlPolicy` dùng chung với ảnh dự toán, không viết bộ kiểm thứ hai (BR-CONSULT-001 khoản 9, người dùng xác nhận ngày 26/09/2026). Tạo hồ sơ luôn kiểm; sửa hồ sơ chỉ kiểm khi URL mới khác URL đang lưu, giống ảnh dự toán. Tên miền ngoài danh sách trả 422 `ConsultationInputInvalid`; chưa cấu hình tên miền nào thì trả 503 `DependencyUnavailable`, không nhận URL bất kỳ. Backend không tải URL để kiểm tra hoặc làm proxy, tránh biến API thành công cụ truy cập mạng nội bộ. Frontend dùng img với `referrerPolicy=no-referrer`, hiển thị ảnh dự phòng khi host ngoài không truy cập được; không tuyên bố kiểm chứng bytes hoặc quyền sở hữu ảnh. Giới thiệu, category, message và internalNote là plain text; không render HTML do người nhập cung cấp. Không ghi số điện thoại, email đầy đủ, body hoặc URL có query vào log mới. Consumer hiện log email người nhận; khi tích hợp cần che địa chỉ trong log, không log nội dung thư.
 
 **Transaction, gửi lại và thao tác đồng thời**:
 
@@ -182,6 +184,11 @@ Các hợp đồng kỹ thuật mới cần được kiểm chứng thêm khi tr
 - API receipt gửi lại chỉ trả id, receivedAtUtc và message tiếp nhận cố định; không trả trạng thái xử lý hiện tại để tránh vô tình tạo API theo dõi cho khách.
 - Chiến lược kiểm thử: Unit kiểm tra validation, ánh xạ và quyết định handler sau khi TDD được chốt; PostgreSQL thật kiểm FK, lock, version, idempotency và rollback đơn/outbox; RabbitMQ/SMTP thử kiểm email. Không viết đặc tả Unit Test ở giai đoạn này.
 - Thứ tự triển khai dự kiến: thêm mã `consultation.manage` và policy → cấu hình schema/repository → quản trị hồ sơ/category → đọc public và bổ sung phoneNumber → gửi đơn/outbox → quản trị đơn → tích hợp FE và kiểm chứng. Xem Data Model/Notes về cửa sổ nâng cấp quyền.
+- Khi triển khai (26/09/2026), ảnh đại diện được kiểm cú pháp rồi kiểm tên miền kho presign như mục Bảo vệ request và dữ liệu. Người dùng xác nhận quyết định này ngày 26/09/2026.
+- Khi triển khai, policy `ConsultationCustomer` chỉ kiểm phiên: đã đăng nhập, không phải phiên quên mật khẩu, không bị bắt đổi mật khẩu. Token không mang loại tài khoản, nên handler đọc User để kiểm chưa xóa, `Status=Active` và `AccountKind=Customer`; sai một điều kiện thì trả 403 `AccessForbidden`. Tài khoản bị khóa hoặc phiên bị thu hồi đã bị chặn ở bước so dấu phiên.
+- Khi triển khai, lỗi 503 `ConsultationTemporarilyUnavailable` chỉ dùng cho lệnh ghi của module khi PostgreSQL báo chờ vòng (40P01), không lấy được khóa (55P03), câu lệnh bị hủy (57014), lỗi tuần tự hóa (40001), hoặc Npgsql báo hết thời gian chờ. Transaction đã rollback nên client gửi lại với cùng Idempotency-Key.
+- `internalNote` được bỏ khoảng trắng đầu/cuối; chuỗi chỉ có khoảng trắng được lưu thành NULL, giống cách chuẩn hóa `message`. Người dùng xác nhận ngày 26/09/2026.
+- Người dùng đồng ý timeout SMTP 30 giây (`SmtpTimeoutSeconds`) ngày 26/09/2026, nhưng làm ở một thay đổi riêng vì ảnh hưởng mọi loại email; nhánh tư vấn chưa có thay đổi này nên adapter SMTP vẫn dùng timeout mặc định của MailKit. `SendEmailConsumer` ghi địa chỉ người nhận ở dạng che, ví dụ `c***@example.test`, cho mọi loại email.
 
 ## Sequence Diagram
 
@@ -284,7 +291,7 @@ Bốn bảng mới trong schema `public`, tên PascalCase theo bảng `User` hi�
 | Id | uuid / Guid | Không; app sinh | PK |
 | FullName | varchar(200) / string | Không | Họ tên, trim, không rỗng |
 | Title | varchar(200) / string | Không | Chức danh, không rỗng |
-| AvatarUrl | varchar(2048) / string | Không | URL HTTPS tuyệt đối, không rỗng; app kiểm cú pháp |
+| AvatarUrl | varchar(2048) / string | Không | URL HTTPS tuyệt đối, không rỗng; app kiểm cú pháp và tên miền kho presign |
 | YearsExperience | integer / int | Không; không mặc định | Số năm, số nguyên >= 0 |
 | ProjectCount | integer / int | Không; không mặc định | Số công trình, số nguyên >= 0 |
 | Introduction | varchar(5000) / string | Không | Giới thiệu plain text, không rỗng |
@@ -633,7 +640,8 @@ Các mã nghiệp vụ dưới đây dùng messageCode khi đi qua DomainExcepti
 - **ConsultationRequestNotFound** (404): Không có đơn tại API quản trị.
 - **ArchitectCategoriesRequired** (422): Chưa chọn category hoặc categoryIds trùng/rỗng không hợp lệ; chi tiết field trong errors.
 - **ArchitectCategoryNameRequired** (422): Tên chuyên môn rỗng.
-- **ConsultationInputInvalid** (422): Thiếu trường, URL/phone sai cú pháp, thiếu offset, vượt độ dài hoặc enum/version/key không hợp lệ; trả lỗi theo field.
+- **ConsultationInputInvalid** (422): Thiếu trường, URL/phone sai cú pháp, URL ảnh đại diện ngoài kho presign, thiếu offset, vượt độ dài hoặc enum/version/key không hợp lệ; trả lỗi theo field.
+- **DependencyUnavailable** (503): Chưa cấu hình tên miền kho presign nên chưa nhận URL ảnh đại diện mới; cùng mã với module dự toán.
 - **ConsultationTemporarilyUnavailable** (503): Timeout khóa hoặc dependency DB tạm thời không cho hoàn tất; client giữ key khi thử lại.
 
 Thêm kiểu ConflictException/ServiceUnavailableException hoặc kiểu riêng của module vào middleware để hỗ trợ 409/503 có code rõ. Catch DbUpdateConcurrencyException và các constraint được đặt tên của module sau rollback; không ánh xạ mọi FK violation thành CategoryInUse. Không đưa exception SQL thô vào response. Lỗi bất ngờ trả 500 với thông báo chung, requestId cho tra cứu. Validator chỉ kiểm đồng bộ/cú pháp; đọc DB và kiểm giờ nằm trong handler vì pipeline hiện gọi Validate đồng bộ.
@@ -713,6 +721,8 @@ Mặc định source hiện là 3 lần retry, khoảng đầu 5 giây, mỗi l�
 
 ## Change Log
 
+- 2026-09-26 (quyết định): Người dùng xác nhận ảnh đại diện phải thuộc tên miền kho presign, dùng chung `UploadedFileOption__AllowedHosts` và `IUploadedFileUrlPolicy` với ảnh dự toán (BR-CONSULT-001 khoản 9, UT-CONSULT-048); thêm mã lỗi `DependencyUnavailable` (503). Xác nhận lưu `internalNote` chỉ có khoảng trắng thành NULL. Timeout SMTP 30 giây được đồng ý nhưng làm ở thay đổi riêng. Cập nhật hiện trạng code sau khi dựng lại nhánh trên `develop`: commit `4d6c386`, `9e4f220`, migration `20260926091223_ConsultationArchitect`.
+- 2026-09-26 (triển khai): Ghi hiện trạng code trên nhánh `feature/consultation` của `bmt-be` và migration `ConsultationArchitect`. Thêm vào Architecture/Notes các lựa chọn khi triển khai: ảnh đại diện chỉ kiểm cú pháp HTTPS (khi đó chưa chốt giới hạn tên miền), cách chia việc giữa policy `ConsultationCustomer` và handler, các lỗi được trả 503, chuẩn hóa `internalNote`, chưa thêm timeout SMTP, che địa chỉ email trong log.
 - 2026-09-26 (CSRF): Chống CSRF dùng lớp chung ở [TDD-AUTH-001](TDD-AUTH-001.md): bỏ filter riêng của module và header `X-BMT-Request`; mã lỗi đổi từ `ConsultationOriginRejected` thành mã chung `CsrfInvalid`. Sửa UT-CONSULT-017, UT-CONSULT-018 theo.
 - 2026-09-25 (metadata): Điền Author, Reviewer và Approver là Tân Trần theo xác nhận của người dùng.
 - 2026-09-25: Cập nhật theo US/BR đã chốt ngày 25/09/2026. Gộp bốn mã đề xuất `architect.manage`, `architect_category.manage`, `consultation.read`, `consultation.update` thành một mã `consultation.manage` (`RequiresAssignment=false`, seed cho admin) cho toàn bộ quản trị tư vấn KTS; sửa bảng quyền, mẫu dữ liệu Permission/RolePermission, migration và câu kiểm "số Permission tăng đúng bốn" thành tăng đúng một. Thêm Non-goal: tư vấn KTS miễn phí là kênh riêng, không thay cam kết tư vấn của gói (BR-CONSULT-002/Notes). Cập nhật hiện trạng code: 10 mã quyền, policy theo mã quyền và kiểm dấu phiên đã có; sửa liên kết migration `InitialRbac`. Bổ sung tham chiếu STORY-RBAC-001, BR-RBAC-010, BR-RBAC-011.

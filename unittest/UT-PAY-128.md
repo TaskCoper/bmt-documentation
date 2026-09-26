@@ -11,13 +11,11 @@
 -->
 
 <!-- Mỗi file chứa một test, đúng một dòng dữ liệu và 13 cột theo thứ tự bên dưới.
-Thay ST-001 ở heading và Test ID, STORY-001 bằng mã Story cần kiểm thử.
-Trong ô bảng: xuống dòng bằng <br>, dấu | viết thành \|. Steps gồm các bước đánh số.
-Loại: Main / ALT / EXC / NFR / Integration boundary; ghép nhiều loại bằng dấu /.
-Suite: SMOKE / REGRESSION / FULL. Priority: P0 / P1 / P2 / P3.
+Thay UT-001 ở heading và Test ID. Trong ô bảng: xuống dòng bằng <br>, dấu | viết thành \|.
+Loại: Happy / Branch / Boundary / Error / Quirk / Determinism. Suite: SMOKE / REGRESSION / FULL. Priority: P0 / P1 / P2 / P3.
 TEST_LINKS là nguồn liên kết khi import; cột Trace to chỉ để đọc. Giữ hai nơi nhất quán.
-Owner là tên hiển thị; phê duyệt thực hiện sau import.
-Steps và Expected result phải bám Flow, AC và Business Rule của Story có thật. Test data là dữ liệu kiểm thử minh hoạ; không tự thêm hành vi nghiệp vụ hoặc ghi Pass/đã chạy nếu chưa có bằng chứng thực thi.
+Mỗi liên kết dùng DOC-KEY/section: ghi chú. Owner là tên hiển thị; phê duyệt thực hiện sau import.
+Expected output và assertion phải suy ra từ Business Rule/contract đã xác nhận. Dữ liệu mock chỉ là dữ liệu kiểm thử minh hoạ, không phải dữ liệu production; không ghi Pass/đã chạy nếu chưa có bằng chứng thực thi.
 BẮT BUỘC KHI HOÀN THIỆN MẪU: phải có cả Reviewer và Approver, mỗi tên 1–200 ký tự sau khi bỏ khoảng trắng đầu/cuối. Không xoá hai dòng metadata, để trống, dùng tên bịa hoặc giữ placeholder rồi coi là hoàn tất.
 Nếu chưa biết người review hoặc người phê duyệt, phải hỏi người dùng và báo tài liệu chưa đủ thông tin; không tự lấy Author/Owner làm người thay thế. Tên trong file không tự gán tài khoản hoặc xác nhận đã duyệt; gán thành viên trên giao diện sau import.
 Đây là yêu cầu hoàn thiện mẫu; backend hiện vẫn nhận file cũ thiếu hai trường để tương thích.
@@ -29,25 +27,25 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Không dùng Status trong Markdown hoặc tên Approver để tự xác nhận phê duyệt; import không cấp quyền hay gán tài khoản từ tên. Chạy Kiểm tra file và xử lý lỗi/cảnh báo trước khi nhập.
 - Giới hạn độ dài bên dưới tính theo string.Length của .NET (đơn vị UTF-16); không tự cắt ngắn dữ kiện quan trọng để vượt validation, hãy viết lại có căn cứ hoặc hỏi người dùng.
 - Bảng phải có header, dòng phân cách và đúng một dòng dữ liệu, đủ 13 cột theo thứ tự mẫu. Reviewer/Approver là hai bullet trước bảng, không thêm thành cột. Test ID trong bảng phải nhất quán với heading; mã tài liệu import lấy từ heading.
-- Story tối đa 100 ký tự và được dùng làm tiêu đề tài liệu; Owner tối đa 200. Trạng thái parser nhận: Draft / Approved; đây không phải kết quả chạy test hoặc quyền phê duyệt.
-- Giữ Loại: Main / ALT / EXC / NFR / Integration boundary, có thể ghép bằng dấu /; Suite: SMOKE / REGRESSION / FULL; Priority: P0 / P1 / P2 / P3. Không dùng số ngoài dải Priority 0–3.
-- Steps là các bước đánh số trong một ô, tách bằng <br>; không xuống dòng vật lý trong ô, dấu | trong nội dung phải viết \|. TEST_LINKS mới là nguồn liên kết import; cột Trace to chỉ hiển thị, hai nơi phải nhất quán.
+- Module tối đa 200 ký tự; Unit under test tối đa 500 (được dùng làm tiêu đề tài liệu); Owner tối đa 200. Trạng thái parser nhận: Draft / Approved; đây không phải kết quả chạy test hoặc quyền phê duyệt.
+- Giữ Loại: Happy / Branch / Boundary / Error / Quirk / Determinism; Suite: SMOKE / REGRESSION / FULL; Priority: P0 / P1 / P2 / P3. Không dùng số ngoài dải Priority 0–3.
+- Không xuống dòng vật lý trong ô: dùng <br>; dấu phân cột trong nội dung phải viết \|. TEST_LINKS mới là nguồn liên kết import; cột Trace to chỉ hiển thị, hai nơi phải nhất quán.
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# ST-CONSULT-001
+# UT-PAY-128
 
-## System Test
+## Unit Test
 
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
 
-| Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
+| Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-CONSULT-001 | STORY-CONSULT-001 | Main | SMOKE | P1 | Môi trường thử đã triển khai tính năng, có frontend, API, database và tài khoản thử với quyền tương ứng. Có thể đọc dữ liệu đã lưu; chỉ dùng dữ liệu và email thử. | 1. Tạo KTS đủ bảy nhóm thông tin, chọn Hiện<br>2. Mở lại hồ sơ<br>3. Sửa giới thiệu và số công trình rồi lưu<br>4. Tải lại và đối chiếu dữ liệu lưu | KTS A; ảnh thử nằm trên kho ảnh của hệ thống; Nguyễn An; KTS; category Nhà phố; 5 năm; 12 công trình; giới thiệu Bản đầu, sửa Bản mới; dữ liệu minh họa, không phải cấu hình sản phẩm. | Lưu và đọc lại được đầy đủ bảy nhóm thông tin đã xác nhận. Không tự thêm tài khoản đăng nhập cho KTS. Đối chiếu ảnh và tất cả trường; không chỉ kiểm tra thông báo thành công. | STORY-CONSULT-001/AC-001<br>BR-CONSULT-001/Then<br>STORY-CONSULT-001/ALT-01 | Đặc tả chưa thực thi; đối chiếu hành vi với dữ liệu thực lưu và nguồn đã chốt. | [Chưa xác định] | Draft |
+| UT-PAY-128 | AdminRead | GetAdminPaymentOrderEventsQueryHandler | Happy | REGRESSION | P1 | Khách U1 có đơn O3 đã hủy, chưa được cấp gói; PaymentEvent của O3: Created (do hệ thống, Detail có priceVnd) và Canceled một lúc sau với ActorId=U1. Một đơn khác của U1 cũng có mốc Created. Người gọi chỉ có commerce.read. Mã test: `CommerceAdminOrderEventsAndEmailTests.Handle_CanceledOrderWithoutFulfillment_ReturnsPaymentEventsNewestFirst`, `CommerceAdminQueryTests.OrderEvents_CanceledAndPaidOrders_ReadFromPostgresWithBuyerEmail` (integration). | Đọc lịch sử thanh toán của O3 với trang mặc định, rồi trang 2 cỡ 1; đọc chi tiết O3. | Trang mặc định có đúng hai mốc của O3, sắp Canceled rồi Created; mốc Canceled có actorId=U1 và họ tên U1; mốc Created có actorId=null và Detail đúng JSON đã lưu. Trang 2 cỡ 1 chỉ có mốc Created. Không lẫn mốc của đơn khác. Chi tiết O3 có eventsPath trỏ route events, historyPath=null vì chưa có lần mua. | STORY-PAY-002/AC-010<br>BR-PAY-005/Then<br>TDD-PAY-002/Internal API | Người dùng xác nhận ngày 26/09/2026: xem được lịch sử thanh toán của mọi đơn, kể cả đơn chưa được cấp gói. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- STORY-CONSULT-001/AC-001
-- BR-CONSULT-001/Then
-- STORY-CONSULT-001/ALT-01
+- STORY-PAY-002/AC-010
+- BR-PAY-005/Then
+- TDD-PAY-002/Internal API

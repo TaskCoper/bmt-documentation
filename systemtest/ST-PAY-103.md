@@ -35,7 +35,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# ST-CONSULT-001
+# ST-PAY-103
 
 ## System Test
 
@@ -44,10 +44,9 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-CONSULT-001 | STORY-CONSULT-001 | Main | SMOKE | P1 | Môi trường thử đã triển khai tính năng, có frontend, API, database và tài khoản thử với quyền tương ứng. Có thể đọc dữ liệu đã lưu; chỉ dùng dữ liệu và email thử. | 1. Tạo KTS đủ bảy nhóm thông tin, chọn Hiện<br>2. Mở lại hồ sơ<br>3. Sửa giới thiệu và số công trình rồi lưu<br>4. Tải lại và đối chiếu dữ liệu lưu | KTS A; ảnh thử nằm trên kho ảnh của hệ thống; Nguyễn An; KTS; category Nhà phố; 5 năm; 12 công trình; giới thiệu Bản đầu, sửa Bản mới; dữ liệu minh họa, không phải cấu hình sản phẩm. | Lưu và đọc lại được đầy đủ bảy nhóm thông tin đã xác nhận. Không tự thêm tài khoản đăng nhập cho KTS. Đối chiếu ảnh và tất cả trường; không chỉ kiểm tra thông báo thành công. | STORY-CONSULT-001/AC-001<br>BR-CONSULT-001/Then<br>STORY-CONSULT-001/ALT-01 | Đặc tả chưa thực thi; đối chiếu hành vi với dữ liệu thực lưu và nguồn đã chốt. | [Chưa xác định] | Draft |
+| ST-PAY-103 | STORY-PAY-002 | Main | REGRESSION | P1 | Khách U1 có email lan@example.com, đã mua gói qua đơn O1 và có giao dịch T1 khớp O1; hệ thống còn giao dịch T3 chưa khớp đơn nào. Nhân viên K chỉ có quyền commerce.read. | 1. K mở danh sách và chi tiết đơn O1.<br>2. K mở danh sách và chi tiết gói đã mua từ O1.<br>3. K mở danh sách giao dịch, chi tiết T1 và chi tiết T3.<br>4. U1 đổi email thành lan.moi@example.com; K mở lại chi tiết O1. | U1, O1, T1, T3, K là dữ liệu thử; email chỉ là chuỗi minh họa. | Bước 1–3: mọi chỗ hiện người mua của O1, gồm cả T1, có email lan@example.com. T3 không có người mua và không có email. Bước 4: chi tiết O1 hiện email mới lan.moi@example.com. Xem không thay đổi dữ liệu. | STORY-PAY-002/AC-011<br>BR-PAY-005/Then | Người dùng xác nhận ngày 26/09/2026: người có quyền tra cứu thấy email người mua. Đặc tả chưa chạy. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- STORY-CONSULT-001/AC-001
-- BR-CONSULT-001/Then
-- STORY-CONSULT-001/ALT-01
+- STORY-PAY-002/AC-011
+- BR-PAY-005/Then

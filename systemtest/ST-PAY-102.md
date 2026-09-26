@@ -35,7 +35,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# ST-CONSULT-001
+# ST-PAY-102
 
 ## System Test
 
@@ -44,10 +44,9 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-CONSULT-001 | STORY-CONSULT-001 | Main | SMOKE | P1 | Môi trường thử đã triển khai tính năng, có frontend, API, database và tài khoản thử với quyền tương ứng. Có thể đọc dữ liệu đã lưu; chỉ dùng dữ liệu và email thử. | 1. Tạo KTS đủ bảy nhóm thông tin, chọn Hiện<br>2. Mở lại hồ sơ<br>3. Sửa giới thiệu và số công trình rồi lưu<br>4. Tải lại và đối chiếu dữ liệu lưu | KTS A; ảnh thử nằm trên kho ảnh của hệ thống; Nguyễn An; KTS; category Nhà phố; 5 năm; 12 công trình; giới thiệu Bản đầu, sửa Bản mới; dữ liệu minh họa, không phải cấu hình sản phẩm. | Lưu và đọc lại được đầy đủ bảy nhóm thông tin đã xác nhận. Không tự thêm tài khoản đăng nhập cho KTS. Đối chiếu ảnh và tất cả trường; không chỉ kiểm tra thông báo thành công. | STORY-CONSULT-001/AC-001<br>BR-CONSULT-001/Then<br>STORY-CONSULT-001/ALT-01 | Đặc tả chưa thực thi; đối chiếu hành vi với dữ liệu thực lưu và nguồn đã chốt. | [Chưa xác định] | Draft |
+| ST-PAY-102 | STORY-PAY-002 | ALT | REGRESSION | P1 | Khách U1 đã đăng nhập, gói đang bán. Nhân viên K chỉ có quyền commerce.read. | 1. U1 tạo đơn O3 rồi tự hủy khi chưa chuyển tiền.<br>2. K mở chi tiết O3 rồi mở lịch sử thanh toán của O3.<br>3. K mở lịch sử của một mã đơn không tồn tại.<br>4. Đọc lại O3. | U1, O3, K là dữ liệu thử. | Bước 2: chi tiết O3 hiện trạng thái đã hủy; lịch sử có mốc tạo đơn và mốc U1 hủy đơn kèm người hủy, mốc mới nhất trước, dù O3 chưa từng được cấp gói. Bước 3 bị từ chối với lỗi không tìm thấy. O3 không thay đổi sau khi xem. | STORY-PAY-002/AC-010<br>BR-PAY-005/Then | Người dùng xác nhận ngày 26/09/2026: xem được lịch sử thanh toán của mọi đơn, kể cả đơn chưa được cấp gói. Đặc tả chưa chạy. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- STORY-CONSULT-001/AC-001
-- BR-CONSULT-001/Then
-- STORY-CONSULT-001/ALT-01
+- STORY-PAY-002/AC-010
+- BR-PAY-005/Then

@@ -68,8 +68,8 @@ Người có quyền mở phần quản trị gói đã mua hoặc giao dịch.
 
 1. Người dùng mở danh sách gói đã mua, đơn hoặc giao dịch.
 2. Hệ thống kiểm tra quyền tra cứu trước khi trả dữ liệu.
-3. Người dùng xem ai đã mua gói nào và chọn gói cần đối chiếu. Với gói giám sát đã gán, hệ thống hiện tên công trình gắn với gói; quyền tra cứu không cho xem danh sách công trình của khách. Với gói giám sát từng bị gỡ, hệ thống hiện lịch sử gỡ theo STORY-SUB-006.
-4. Hệ thống cung cấp liên kết đơn mua và các giao dịch thực tế của đơn, giữ đúng thông tin đã ghi nhận.
+3. Người dùng xem ai đã mua gói nào, gồm họ tên và email hiện tại của người mua, và chọn gói cần đối chiếu. Với gói giám sát đã gán, hệ thống hiện tên công trình gắn với gói; quyền tra cứu không cho xem danh sách công trình của khách. Với gói giám sát từng bị gỡ, hệ thống hiện lịch sử gỡ theo STORY-SUB-006.
+4. Hệ thống cung cấp liên kết đơn mua, các giao dịch thực tế và lịch sử thanh toán của đơn, giữ đúng thông tin đã ghi nhận. Đơn chưa được cấp gói vẫn xem được lịch sử thanh toán.
 5. Người dùng xem chi tiết; thao tác xem không thay đổi tiền, liên kết công trình hoặc hiệu lực gói.
 
 ### Alternative Flow
@@ -167,6 +167,20 @@ Nhân viên có quyền xem nhưng không có quyền thực hiện thao tác gh
 - **When**: Nhân viên xem chi tiết G1, rồi yêu cầu danh sách công trình của U2, kể cả gửi trực tiếp tới API.
 - **Then**: Chi tiết G1 hiện tên công trình “Nhà Thủ Đức”; yêu cầu danh sách công trình bị từ chối.
 - **And**: Nhân viên không thấy “Nhà Gò Vấp”; thao tác xem không thay đổi gói hay công trình.
+
+#### AC-010
+
+- **Given**: Khách U1 tạo đơn O3 rồi tự hủy khi chưa chuyển tiền, nên O3 không được cấp gói; người tra cứu có quyền `commerce.read`.
+- **When**: Người tra cứu mở lịch sử thanh toán của O3.
+- **Then**: Thấy các mốc đã ghi nhận của O3, gồm lúc tạo đơn và lúc U1 hủy đơn kèm người hủy, mốc mới nhất trước.
+- **And**: Không cần O3 có gói đã mua; xem lịch sử không thay đổi đơn.
+
+#### AC-011
+
+- **Given**: Khách U1 có email lan@example.com, có đơn O1 đã được cấp gói và giao dịch T1 khớp O1; có giao dịch T3 chưa khớp đơn nào.
+- **When**: Người có quyền tra cứu xem danh sách và chi tiết đơn O1, gói đã mua từ O1 và giao dịch T1, T3.
+- **Then**: Mọi chỗ hiện người mua của O1, gồm cả T1, đều có email hiện tại lan@example.com của U1.
+- **And**: T3 không có người mua nên không có email; hệ thống không đoán email từ nội dung chuyển khoản.
 
 ## References
 

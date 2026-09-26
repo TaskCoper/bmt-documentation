@@ -57,4 +57,6 @@ Phần đã kiểm tra trong mã nguồn: `User` có email và số điện tho�
 
 Cách chọn và kiểm số liên lạc, kiểm giờ mong muốn theo UTC+7, endpoint, schema và cách thử lại email nay được mô tả trong [TDD-CONSULT-001](../tdd/TDD-CONSULT-001.md); quyền quản trị đã chốt là `consultation.manage`. Không đặt thêm ngưỡng ngoài yêu cầu đã chốt.
 
-Chưa sửa mã ứng dụng, chạy migration hoặc chạy kiểm thử. Bộ tài liệu đã có US → BR → System Test, [TDD-CONSULT-001](../tdd/TDD-CONSULT-001.md) và 47 đặc tả UT-CONSULT-001 đến UT-CONSULT-047; tất cả là đặc tả chưa thực thi.
+Bộ tài liệu có US → BR → System Test, [TDD-CONSULT-001](../tdd/TDD-CONSULT-001.md) và 48 đặc tả UT-CONSULT-001 đến UT-CONSULT-048. UT-CONSULT-048 kiểm quyết định ngày 26/09/2026: ảnh đại diện phải thuộc kho ảnh của hệ thống (BR-CONSULT-001 khoản 9).
+
+**Cập nhật 26/09/2026:** mã ứng dụng đã có ở commit `4d6c386` và `9e4f220` trên nhánh `feature/consultation` của `bmt-be`, chưa merge. Unit test theo 48 đặc tả UT-CONSULT và integration test trên PostgreSQL 15 (ràng buộc, khóa, gửi lại đồng thời cùng Idempotency-Key, đơn và email cùng commit hoặc cùng rollback) đã chạy qua. Các System Test trong bảng trên vẫn chưa thực thi, và migration chưa chạy trên môi trường đã triển khai.

@@ -40,7 +40,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 ## Metadata
 
 - **Story**: Là admin, tôi muốn quản lý hồ sơ KTS để khách chọn người phù hợp khi gửi yêu cầu tư vấn.
-- **Context**: Admin phụ trách thông tin KTS và việc hiển thị hồ sơ. Người dùng xác nhận ảnh đại diện là đường dẫn có sẵn, không có luồng upload. Nghiệp vụ được xác nhận qua hội thoại ngày 2026-09-23; người dùng đã chốt bộ US/BR trong hội thoại. Metadata chưa đầy đủ. Hồ sơ bắt buộc đủ bảy nhóm thông tin và ít nhất một category. Giới hạn dữ liệu cụ thể sẽ xác định khi thiết kế. Người dùng đã chốt: người tạo chủ động chọn Ẩn/Hiện khi tạo hồ sơ.
+- **Context**: Admin phụ trách thông tin KTS và việc hiển thị hồ sơ. Người dùng xác nhận ảnh đại diện là đường dẫn có sẵn, backend không có luồng upload; ngày 26/09/2026 người dùng chốt thêm đường dẫn phải thuộc kho ảnh của hệ thống (BR-CONSULT-001 khoản 9). Nghiệp vụ được xác nhận qua hội thoại ngày 2026-09-23; người dùng đã chốt bộ US/BR trong hội thoại. Metadata chưa đầy đủ. Hồ sơ bắt buộc đủ bảy nhóm thông tin và ít nhất một category. Giới hạn dữ liệu cụ thể sẽ xác định khi thiết kế. Người dùng đã chốt: người tạo chủ động chọn Ẩn/Hiện khi tạo hồ sơ.
 - **Sprint**:
 - **Priority**: Must
 - **Status**: Todo

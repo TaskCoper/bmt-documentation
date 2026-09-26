@@ -21,7 +21,7 @@ Test bổ sung: ST-PAY-069 (thu hồi `commerce.read` có hiệu lực theo hạ
 | [STORY-PAY-001](../userstory/STORY-PAY-001.md) | BR-PAY-001–004, BR-RBAC-005 | [TDD-PAY-001](../tdd/TDD-PAY-001.md) | UT-PAY-001–036, UT-PAY-071–074, UT-PAY-111–113, UT-PAY-120 |
 | [STORY-SUB-004](../userstory/STORY-SUB-004.md) | BR-SUB-022, BR-SUB-009 (BR-SUB-023 đã bỏ) | [TDD-SUB-004](../tdd/TDD-SUB-004.md) | UT-PAY-037–042, 044, 046–048, 075–077 (043, 045 đã rút) |
 | [STORY-SUB-005](../userstory/STORY-SUB-005.md) | BR-SUB-024–025 | [TDD-SUB-005](../tdd/TDD-SUB-005.md) | UT-PAY-049–062, 078–079 |
-| [STORY-PAY-002](../userstory/STORY-PAY-002.md) | BR-PAY-005 | [TDD-PAY-002](../tdd/TDD-PAY-002.md) | UT-PAY-063–070, 080–081, 107–108; đã có code ở commit `c1d757a` của `bmt-be` (nhánh `feature/payment-lookup`, chưa merge) |
+| [STORY-PAY-002](../userstory/STORY-PAY-002.md) | BR-PAY-005 | [TDD-PAY-002](../tdd/TDD-PAY-002.md) | UT-PAY-063–070, 080–081, 107–108, 128–130; System Test ST-PAY-047–054, 072, 078, 102–103. Code tra cứu ở `develop` của `bmt-be` (`c1d757a`); lịch sử thanh toán của đơn và email người mua ở commit `a9e5069`, nhánh `feature/payment-lookup-events`, chưa merge |
 | [STORY-PAY-003](../userstory/STORY-PAY-003.md) (chốt 26/09/2026) | BR-PAY-006 | [TDD-PAY-001](../tdd/TDD-PAY-001.md), mục Quản trị connection | UT-PAY-114–127 (trừ 120); System Test ST-PAY-089–101 |
 
 ## Đã xác nhận
@@ -164,6 +164,9 @@ TDD subscription cũ đã có ghi chú chỉ rõ phần bị thay thế và liê
 | [UT-PAY-125](../unittest/UT-PAY-125.md) | Sửa tài khoản khi đơn đang tạo giữ khóa (PostgreSQL) | TDD-PAY-001/Architecture, STORY-PAY-003/AC-003 |
 | [UT-PAY-126](../unittest/UT-PAY-126.md) | Đổi connection đang dùng đầu cuối (PostgreSQL) | STORY-PAY-003/AC-002, AC-008, BR-PAY-006/Then |
 | [UT-PAY-127](../unittest/UT-PAY-127.md) | SePayOption — kiểm Environment lúc khởi động | STORY-PAY-003/AC-011, EXC-06, BR-PAY-006/Then |
+| [UT-PAY-128](../unittest/UT-PAY-128.md) | GetAdminPaymentOrderEventsQueryHandler | STORY-PAY-002/AC-010, BR-PAY-005/Then, TDD-PAY-002/Internal API |
+| [UT-PAY-129](../unittest/UT-PAY-129.md) | Lịch sử thanh toán của đơn — từ chối và 404 | STORY-PAY-002/AC-003, AC-010, BR-PAY-005/Then, TDD-PAY-002/Internal API |
+| [UT-PAY-130](../unittest/UT-PAY-130.md) | Email người mua trong phản hồi tra cứu | STORY-PAY-002/AC-011, BR-PAY-005/Then, TDD-PAY-002/Architecture |
 
 ## Kiểm thử tích hợp bổ sung
 

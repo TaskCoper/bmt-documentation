@@ -68,13 +68,15 @@ Admin thêm, sửa, ẩn/hiện hồ sơ hoặc khách gửi yêu cầu cho KTS.
 
 8. Người tạo chủ động chọn Ẩn/Hiện khi tạo hồ sơ KTS, không có bước phê duyệt.
 
+9. Ảnh đại diện phải là đường dẫn tới tệp trên kho ảnh của hệ thống, cùng kho với ảnh của dự toán. Đường dẫn ngoài kho bị từ chối khi tạo hồ sơ hoặc khi đổi sang ảnh mới; sửa hồ sơ mà giữ nguyên ảnh đang lưu thì không bị kiểm lại.
+
 ## Except
 
 Các yêu cầu đã gửi trước khi ẩn vẫn được giữ để xử lý.
 
 ## Notes
 
-Người dùng xác nhận khi bắt đầu thiết kế kỹ thuật: người quản trị nhập đường dẫn ảnh có sẵn cho ảnh đại diện; không thêm upload.
+Người dùng xác nhận khi bắt đầu thiết kế kỹ thuật: người quản trị nhập đường dẫn ảnh có sẵn cho ảnh đại diện; backend không nhận tệp ảnh. Ngày 26/09/2026 người dùng chốt thêm khoản 9: đường dẫn đó phải thuộc kho ảnh của hệ thống (kho presign dùng chung với ảnh dự toán), không nhận ảnh ở tên miền bất kỳ.
 
 STORY-CONSULT-001; STORY-CONSULT-002. Giới hạn dữ liệu cụ thể sẽ xác định khi thiết kế; người tạo chủ động chọn Ẩn/Hiện khi tạo hồ sơ; không tự thêm chức năng xóa hồ sơ.
 

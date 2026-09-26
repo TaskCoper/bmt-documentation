@@ -44,7 +44,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Owner**: [Chưa xác định]
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
-- **Source**: Người dùng bổ sung quản lý ai mua gói nào và các giao dịch; xác nhận hiển thị giao dịch chưa khớp đơn và cho cả Admin, nhân viên có quyền tra cứu riêng được xem trong hội thoại thiết kế thanh toán.
+- **Source**: Người dùng bổ sung quản lý ai mua gói nào và các giao dịch; xác nhận hiển thị giao dịch chưa khớp đơn và cho cả Admin, nhân viên có quyền tra cứu riêng được xem trong hội thoại thiết kế thanh toán. Ngày 26/09/2026 người dùng xác nhận thêm: xem được lịch sử thanh toán của mọi đơn, kể cả đơn chưa được cấp gói, và thấy email người mua.
 
 ## Statement
 
@@ -57,9 +57,9 @@ Người dùng truy cập danh sách hoặc chi tiết quản trị gói đã mu
 ## Then
 
 1. Kiểm tra người gọi là Admin hoặc nhân viên có quyền tra cứu riêng. Áp dụng cho cả danh sách và chi tiết, kể cả yêu cầu trực tiếp; không chỉ ẩn nút trên giao diện.
-2. Cho biết khách nào đã mua gói nào và liên kết đơn mua tương ứng. Gói giám sát chưa gán vẫn thuộc danh sách gói đã mua. Với gói giám sát đã gán, cho biết tên công trình gắn với gói; quyền tra cứu không cho xem danh sách công trình của khách (người dùng xác nhận ngày 25/09/2026).
+2. Cho biết khách nào đã mua gói nào, gồm họ tên và email hiện tại của người mua (người dùng xác nhận ngày 26/09/2026), và liên kết đơn mua tương ứng. Gói giám sát chưa gán vẫn thuộc danh sách gói đã mua. Với gói giám sát đã gán, cho biết tên công trình gắn với gói; quyền tra cứu không cho xem danh sách công trình của khách (người dùng xác nhận ngày 25/09/2026).
 3. Cho tra cứu đơn và các giao dịch thực tế liên quan, gồm các khoản chuyển bổ sung; phân biệt tiền từng giao dịch với tổng tiền nhận của đơn. Không coi webhook gửi lại là giao dịch tiền mới.
-4. Giữ khả năng tra cứu đơn đang chờ, nhận thiếu, hết hạn, đã hủy và đã thanh toán; gói không còn hiệu lực vẫn là lịch sử mua, không được trình bày như gói đang dùng. Với gói giám sát, cho xem lịch sử gỡ gói theo [BR-SUB-026](BR-SUB-026.md): người gỡ, thời điểm, lý do, cùng tên và địa chỉ công trình tại lúc gỡ (người dùng xác nhận ngày 25/09/2026).
+4. Giữ khả năng tra cứu đơn đang chờ, nhận thiếu, hết hạn, đã hủy và đã thanh toán, kể cả lịch sử thanh toán của từng đơn khi đơn chưa được cấp gói (người dùng xác nhận ngày 26/09/2026); gói không còn hiệu lực vẫn là lịch sử mua, không được trình bày như gói đang dùng. Với gói giám sát, cho xem lịch sử gỡ gói theo [BR-SUB-026](BR-SUB-026.md): người gỡ, thời điểm, lý do, cùng tên và địa chỉ công trình tại lúc gỡ (người dùng xác nhận ngày 25/09/2026).
 5. Giao dịch chưa khớp đơn vẫn có thông tin giao dịch đã nhận và nhãn “Chưa xác định đơn”. Không tự gán khách hàng/gói từ suy đoán và chưa hỗ trợ gán thủ công.
 6. Quyền xem không thay thế các quyền riêng ở BR-SUB-024 và BR-SUB-026. Không có thao tác đổi thẳng công trình của gói theo BR-SUB-009. Không ghi nhận hoàn tiền, chuyển tiền hoặc xác nhận cấp gói thủ công từ màn hình tra cứu.
 
