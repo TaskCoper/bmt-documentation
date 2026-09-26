@@ -58,6 +58,17 @@ Code ở nhánh `feature/estimate-generation` của `bmt-be` (commit `62a626d`, 
 
 Quyết định kỹ thuật và phần chưa làm ở [TDD-PROJ-003](../tdd/TDD-PROJ-003.md) (Problem, Architecture/Notes, Data Model/Notes). UT-PROJ-033 đến UT-PROJ-048 và UT-PROJ-056 đến UT-PROJ-060 nay có mã test.
 
+## Cập nhật ngày 27/09/2026: tăng cường chia sẻ hồ sơ
+
+Phần triển khai TDD-PROJ-003 ở trên đã có trên `develop` và môi trường dev. Người dùng xác nhận thêm bốn quyết định, làm trên nhánh `feature/estimate-sharing-hardening` của `bmt-be` (commit `8de4c21`), chưa merge:
+
+- Route công khai theo link có giới hạn tần suất riêng: 60 request/phút mỗi IP, 300 request/phút mỗi link, tải tệp tính chung; vượt thì 429 như bộ giới hạn hiện có, không lộ link có tồn tại hay không. Cấu hình `EstimateShareRateLimitOption__PerIpPermitLimit`, `__PerSharePermitLimit`.
+- Email gửi link ghi tên hiển thị của chủ hồ sơ, không có email hay số điện thoại; tên đọc lúc gửi, được làm sạch; chưa có tên thì dùng câu trung tính.
+- Job Quartz đóng yêu cầu kẹt quá 15 phút: export Pending chuyển Failed `ExportTimedOut` để khách bấm lại, email Queued/Sending chuyển Unknown `EmailTimedOut`, không tự chạy lại hay gửi lại; mỗi đợt có dòng được đổi gửi một cảnh báo Discord. Cấu hình `EstimateSharingMaintenanceOption__ScanIntervalSeconds` (mặc định 60 ở compose, `.env.sample`, workflow; 0 là tắt) và `__StuckAfterMinutes` (15). Migration `20260926200639_EstimateSharingStuckScanIndexes` chỉ thêm hai index có điều kiện.
+- Keyring Data Protection giữ trên volume vì dev và prod chỉ chạy một instance API; trước khi chạy nhiều instance phải chuyển sang PostgreSQL hoặc Redis.
+
+Chi tiết ở [TDD-PROJ-003](../tdd/TDD-PROJ-003.md) (Problem, Architecture/Notes mục "Tăng cường ngày 27/09/2026"). Thêm UT-PROJ-069 đến UT-PROJ-071 và ST-PROJ-074 đến ST-PROJ-077.
+
 ## Đã xác nhận
 
 - Giữ toàn bộ phạm vi trong năm US và bảy BR-PROJ: cả năm loại ban đầu và loại Admin thêm, tách phong cách kiến trúc/nội thất, cấu hình tầng/tum riêng, giữ danh mục tại lúc tạo bản dự toán.
@@ -105,8 +116,8 @@ Lúc khảo sát ngày 21/09/2026, backend có tài khoản/xác thực và nề
 | AI service do nhóm khác phụ trách | API/xác thực, ánh xạ đầu vào và ảnh, submit/status/callback, đối chiếu yêu cầu, schema kết quả, bộ đầu ra bắt buộc và dữ liệu mẫu | Chưa thể hoàn tất adapter hoặc xác nhận kết quả đủ để chốt lượt. Không tự tạo hợp đồng giả. |
 | PDF/Excel | Đã chốt ngày 26/09/2026: AI trả URL cho mọi tệp kết quả, kể cả PDF và Excel; backend chỉ lưu URL, không chọn thư viện xuất. Còn mở: tệp nào thuộc bộ kết quả bắt buộc khi AI thành công (theo hợp đồng AI), và cách áp BR-PROJ-007 khoản 7 khi đổi tên (mục Cập nhật ngày 26/09/2026). | Không tự đặt nội dung bản vẽ/dự toán hoặc tự dựng tệp ở backend. |
 | Địa chỉ | Nguồn tỉnh/xã, phiên bản dữ liệu; xử lý địa giới ngừng dùng ở bản nháp cũ | Có thể thiết kế port và lưu địa chỉ đã xác minh; phần hành vi với địa giới cũ còn mở, không suy từ quy tắc danh mục phong cách. |
-| Dịch vụ presign và kho khóa | Backend không có kho tệp; dịch vụ presigned URL do bên khác cung cấp. Còn cần: danh sách tên miền thật cho `UploadedFileOption__AllowedHosts`, kho có hỗ trợ Range khi backend chuyển tiếp tệp không, backup/giữ tệp ở phía kho; keyring Data Protection dùng chung cho token link | Chưa cấu hình tên miền thì backend từ chối URL mới (503). Link chia sẻ không trả URL gốc để giữ được yêu cầu thu hồi. |
-| Vận hành | Timeout AI, lease/retry, rate limit, lưu giữ dữ liệu/tệp mồ côi, ngưỡng cảnh báo, môi trường thử | Không tự đặt số thành yêu cầu nghiệp vụ; cấu hình bắt buộc phải được kiểm tra trước nhận việc. |
+| Dịch vụ presign và kho khóa | Backend không có kho tệp; dịch vụ presigned URL do bên khác cung cấp. Còn cần: danh sách tên miền thật cho `UploadedFileOption__AllowedHosts`, kho có hỗ trợ Range khi backend chuyển tiếp tệp không, backup/giữ tệp ở phía kho. Keyring Data Protection cho token link giữ trên volume khi chỉ có một instance API (xác nhận ngày 27/09/2026); cần chuyển sang PostgreSQL hoặc Redis trước khi chạy nhiều instance | Chưa cấu hình tên miền thì backend từ chối URL mới (503). Link chia sẻ không trả URL gốc để giữ được yêu cầu thu hồi. |
+| Vận hành | Timeout AI, lease/retry, lưu giữ dữ liệu/tệp mồ côi, ngưỡng cảnh báo, môi trường thử. Rate limit của route công khai theo link và xử lý yêu cầu xuất tệp/email kẹt đã chốt ngày 27/09/2026 (TDD-PROJ-003) | Không tự đặt số thành yêu cầu nghiệp vụ; cấu hình bắt buộc phải được kiểm tra trước nhận việc. |
 | Nền quyền/gói/lượt | Các module liên quan chưa có trong code, cần thống nhất thứ tự khóa giữa các TDD | Chưa thể triển khai dự toán độc lập rồi bỏ qua kiểm quota hoặc quyền lợi. |
 
 ## Truy vết và kiểm chứng

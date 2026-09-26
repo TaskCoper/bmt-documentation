@@ -227,7 +227,9 @@ Chủ sở hữu chọn ngày hết hạn đã qua theo giờ Việt Nam.
 ## Non-Functional
 
 - Kiểm tra ngày hết hạn và việc thu hồi cho cả yêu cầu xem lẫn tải; không dùng địa chỉ tải tệp độc lập để vô hiệu hóa quyền thu hồi.
-- Mốc hết ngày Việt Nam và một link đang hiệu lực đã chốt tại BR-PROJ-006. Cơ chế token, lưu tệp, chống yêu cầu đồng thời và email được đề xuất trong TDD-PROJ-003; giới hạn vận hành còn chờ cấu hình, gia hạn link chưa thuộc phạm vi.
+- Mốc hết ngày Việt Nam và một link đang hiệu lực đã chốt tại BR-PROJ-006. Cơ chế token, lưu tệp, chống yêu cầu đồng thời và email được đề xuất trong TDD-PROJ-003; gia hạn link chưa thuộc phạm vi.
+- Người dùng xác nhận ngày 27/09/2026: xem và tải qua link có giới hạn tần suất riêng, mặc định 60 request mỗi phút cho một IP và 300 request mỗi phút cho một link, tải tệp tính chung. Vượt giới hạn thì bị từ chối tạm thời (429) và phản hồi không cho biết link có tồn tại hay không. Hai con số là cấu hình (TDD-PROJ-003).
+- Người dùng xác nhận ngày 27/09/2026: email gửi link ghi tên hiển thị của chủ bản dự toán để người nhận biết ai gửi, không có email hay số điện thoại của chủ bản dự toán; chưa có tên thì dùng câu trung tính. Yêu cầu gửi email bị kẹt quá 15 phút được đánh dấu chưa rõ kết quả (Unknown) và không tự gửi lại (TDD-PROJ-003).
 
 ## Out of Scope
 

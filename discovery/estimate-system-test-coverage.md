@@ -278,3 +278,16 @@ Người dùng xác nhận bốn quyết định: URL ảnh mới phải thuộc
 Người dùng xác nhận làm trước TDD-PROJ-002 với adapter AI giả `mock-v1`: chỉ bật ở Development/Staging bằng `EstimateAiOption__Mode=Mock`, Production mà cấu hình Mock thì API không khởi động, không cấu hình adapter thì 503 không giữ lượt; adapter luôn thành công với bộ kết quả mẫu cố định. Thêm ST-PROJ-072 (chế độ adapter) và ST-PROJ-073 (kiểm lại địa chỉ trước khi gửi AI, phần ST-PROJ-071 để lại cho TDD-PROJ-002). ST-PROJ-021, 022, 057 ghi rõ chạy được với adapter giả khi có tệp mẫu thật; ST-PROJ-023, 024, 026 ghi rõ adapter giả không tạo được nhánh AI lỗi. US, BR không đổi. Code ở nhánh `feature/estimate-generation` của `bmt-be` (commit `62a626d`) có integration test PostgreSQL cho tranh lượt, chốt-vs-timeout, đổi/hủy kỳ, gửi lặp và worker dừng; đó không phải kết quả chạy các ST này.
 
 Bổ sung cùng ngày: ST-PROJ-023 thêm biến thể URL tệp ngoài tên miền cho phép, thất bại ngay với InvalidProviderResult theo quyết định người dùng (commit `624e212`).
+
+## Mốc cập nhật ngày 27/09/2026: tăng cường chia sẻ hồ sơ
+
+Người dùng xác nhận bốn quyết định cho TDD-PROJ-003: giới hạn tần suất riêng cho route công khai theo link (60 request/phút mỗi IP, 300 request/phút mỗi link, tải tệp tính chung, vượt thì 429 và không lộ link có tồn tại hay không); email gửi link ghi tên hiển thị của chủ hồ sơ, không có email hay số điện thoại; job đóng yêu cầu xuất tệp và yêu cầu email kẹt quá 15 phút (export chuyển Failed để khách bấm lại, email chuyển Unknown, không tự chạy lại hay gửi lại, có cảnh báo Discord); keyring Data Protection giữ trên volume khi chỉ có một instance API. Thêm bốn ca:
+
+| Ca | Story / nhánh | Nội dung |
+|---|---|---|
+| [ST-PROJ-074](../systemtest/ST-PROJ-074.md) | STORY-PROJ-004 / AC-002, Non-Functional | Giới hạn theo IP và theo link, 429 giống nhau cho link có thật và không có |
+| [ST-PROJ-075](../systemtest/ST-PROJ-075.md) | STORY-PROJ-004 / ALT-01, AC-004 | Email ghi tên chủ hồ sơ, câu trung tính khi chưa có tên, tên chứa HTML hiện dạng chữ |
+| [ST-PROJ-076](../systemtest/ST-PROJ-076.md) | STORY-PROJ-003 / EXC-03, AC-005 | Export kẹt chuyển Failed `ExportTimedOut`, khách yêu cầu lại được |
+| [ST-PROJ-077](../systemtest/ST-PROJ-077.md) | STORY-PROJ-004 / EXC-03, AC-007 | Email kẹt chuyển Unknown `EmailTimedOut`, không gửi lại từ yêu cầu cũ |
+
+US, BR không đổi. Code ở nhánh `feature/estimate-sharing-hardening` của `bmt-be` (commit `8de4c21`) có test qua pipeline HTTP cho 429 và integration test PostgreSQL cho job chạy đồng thời với consumer; đó không phải kết quả chạy các ST này. Bảng truy vết AC ở trên chưa được đánh lại để thêm bốn ca này.

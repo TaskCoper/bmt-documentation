@@ -137,3 +137,15 @@ Bổ sung cùng ngày: người dùng xác nhận URL tệp AI trả về sai d�
 TDD-PROJ-003 được triển khai trên nhánh `feature/estimate-sharing` của `bmt-be` (commit `f8a7ffa`). UT-PROJ-033 đến UT-PROJ-048 và UT-PROJ-056 đến UT-PROJ-060 nay có mã test: cột Precondition ghi "Đã có mã test", tên test nằm ở cột Rationale; Unit under test ghi thêm tên lớp trong code; nội dung Expected output không đổi. Kết quả nguồn trong test là của adapter AI giả `mock-v1`, dùng như kết quả thật theo quyết định của người dùng.
 
 Phần cần PostgreSQL có integration test trong `EstimateSharingFlowTests` và `EstimateSharingConstraintTests`: sáu yêu cầu tạo link đồng thời chỉ ra một link, hết hạn theo ngày Việt Nam, chặn tải qua link sau khi thu hồi mà không mở URL tệp, yêu cầu email và message outbox cùng commit hoặc cùng rollback, worker email ghi Unknown/Skipped, gói hết hạn vẫn dùng hồ sơ cũ, yêu cầu PDF đồng thời chỉ ra một export, lease cũ không ghi đè và các ràng buộc database. Chuyển tiếp tệp (Range, không theo chuyển hướng, không lộ URL gốc) kiểm bằng HttpMessageHandler giả; SMTP kiểm bằng `ISmtpClient` giả; header tải tệp, 401/403/404 và chống CSRF kiểm qua pipeline HTTP. Không gọi mạng hay SMTP thật. Đã kiểm cấu trúc các file UT bị đụng tới (một dòng, 13 cột, Trace to khớp TEST_LINKS).
+
+## Cập nhật ngày 27/09/2026: tăng cường TDD-PROJ-003
+
+TDD-PROJ-003 được bổ sung bốn quyết định người dùng xác nhận ngày 27/09/2026 (Problem, Architecture/Notes mục "Tăng cường ngày 27/09/2026"). Ba ca mới đã có mã test trên nhánh `feature/estimate-sharing-hardening` của `bmt-be` (commit `8de4c21`). UT-PROJ-067 và UT-PROJ-068 thuộc một thay đổi khác làm cùng ngày, không nằm trong mục này.
+
+| Ca | Unit / hành vi | TDD | System Test liên quan |
+|---|---|---|---|
+| [UT-PROJ-069](../unittest/UT-PROJ-069.md) | EstimateShareRateLimits: Giới hạn tần suất riêng theo IP và theo link của route công khai | [TDD-PROJ-003](../tdd/TDD-PROJ-003.md) | [ST-PROJ-074](../systemtest/ST-PROJ-074.md) |
+| [UT-PROJ-070](../unittest/UT-PROJ-070.md) | EstimateEmailWorker / EstimateShareEmailTemplate: Thư ghi tên chủ hồ sơ, không có email hay số điện thoại | [TDD-PROJ-003](../tdd/TDD-PROJ-003.md) | [ST-PROJ-075](../systemtest/ST-PROJ-075.md) |
+| [UT-PROJ-071](../unittest/UT-PROJ-071.md) | EstimateSharingStuckRecovery: Job đóng yêu cầu xuất tệp và email bị kẹt | [TDD-PROJ-003](../tdd/TDD-PROJ-003.md) | [ST-PROJ-076](../systemtest/ST-PROJ-076.md), [ST-PROJ-077](../systemtest/ST-PROJ-077.md) |
+
+Giới hạn tần suất kiểm qua pipeline HTTP thật (TestServer), không có proxy thật. Điều kiện kẹt và việc job chạy đồng thời với consumer xuất tệp và consumer gửi email kiểm trên PostgreSQL thật trong `EstimateSharingStuckRecoveryFlowTests`. Đã kiểm cấu trúc ba file UT mới (một dòng, 13 cột, Trace to khớp TEST_LINKS).
