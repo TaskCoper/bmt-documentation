@@ -55,7 +55,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 STORY-PAY-001 cần giữ giá/quyền lợi lúc tạo đơn, cộng dồn chuyển thiếu trong 15 phút và tự cấp gói. Webhook có thể trùng, đến muộn hoặc đảo thứ tự. Phải phân biệt tiền thực nhận, tiền hợp lệ theo thời gian và việc cấp quyền để không mất giao dịch hoặc cấp trùng.
 
-Hiện trạng ngày 26/09/2026: module thanh toán đã có code ở commit `de3c61f` trên nhánh `feature/payment-order` của `bmt-be` (rebase lên `develop` đã có dự toán, chưa merge vào `develop`; migration `20260926070317_PaymentOrder` chạy sau `20260926040024_EstimateCatalogAndDraft`, chưa áp dụng lên database dùng chung); chi tiết và các điểm khác thiết kế ở Change Log. Dùng lại kiến trúc .NET 8, Carter, MediatR, FluentValidation, EF Core/Npgsql. Danh mục gói, kỳ thiết kế và gói giám sát ở TDD-SUB-001/002/004 đã có một phần trong code qua các migration `PlanCatalog`, `DesignSubscription` và `SupervisionGrant`; phần thay đổi ngày 25/09/2026 của các tài liệu đó vẫn là dự kiến. RabbitMQ, MassTransit 8.4.1 với outbox có sẵn của thư viện và Quartz đã được đưa lại vào mã nguồn ngày 23/09/2026 cho gửi email và tác vụ nền (xem `bmt-be/CLAUDE.md`). Luồng thanh toán không cần chúng: bảng BankTransaction đóng vai trò hộp thư bền vững cho worker, như mô tả ở Architecture.
+Hiện trạng ngày 26/09/2026: module thanh toán đã có trong nhánh `develop` của `bmt-be` ở commit `de3c61f` (migration `20260926070317_PaymentOrder` chạy sau `20260926040024_EstimateCatalogAndDraft`); chi tiết và các điểm khác thiết kế ở Change Log. Nhánh `feature/payment-alerts-connections` đã được merge vào `develop` (fast-forward sau `388a426`) với ba commit: `62b226f` và `97108bb` cảnh báo Discord cho webhook lệch dữ kiện và cho giao dịch xử lý lỗi lặp lại (migration `20260926074258_PaymentAlerts`); `3256436` API quản trị kết nối nhận tiền theo STORY-PAY-003, BR-PAY-006 (migration `20260926075035_PaymentConnectionAdmin`). Hai migration chưa áp dụng lên database dùng chung. Dùng lại kiến trúc .NET 8, Carter, MediatR, FluentValidation, EF Core/Npgsql. Danh mục gói, kỳ thiết kế và gói giám sát ở TDD-SUB-001/002/004 đã có một phần trong code qua các migration `PlanCatalog`, `DesignSubscription` và `SupervisionGrant`; phần thay đổi ngày 25/09/2026 của các tài liệu đó vẫn là dự kiến. RabbitMQ, MassTransit 8.4.1 với outbox có sẵn của thư viện và Quartz đã được đưa lại vào mã nguồn ngày 23/09/2026 cho gửi email và tác vụ nền (xem `bmt-be/CLAUDE.md`). Luồng thanh toán không cần chúng: bảng BankTransaction đóng vai trò hộp thư bền vững cho worker, như mô tả ở Architecture.
 
 ### Goals
 
@@ -63,6 +63,8 @@ Hiện trạng ngày 26/09/2026: module thanh toán đã có code ở commit `de
 - Mỗi giao dịch thực tế chỉ ghi nhận một lần; mỗi đơn hợp lệ có một kết quả cấp gói duy nhất dù worker hoặc webhook lặp.
 - Giữ giao dịch trước khi xác nhận với SePay; cấp gói có thể thử lại sau lỗi mà không yêu cầu khách chuyển tiền lần nữa.
 - Xếp thứ tự mua thiết kế bằng thời điểm đủ tiền, sau đó thứ tự tạo đơn; không dùng thứ tự nhận webhook.
+- Người trực hệ thống được báo qua Discord khi webhook trùng id nhưng lệch dữ kiện, và khi một giao dịch xử lý lỗi tới lần thử thứ 10; mỗi giao dịch lỗi chỉ báo một lần.
+- Người có quyền `payment.connection.manage` quản lý kết nối nhận tiền và chọn kết nối đang dùng cho từng môi trường qua API, không cần sửa database hay biến môi trường chọn kết nối.
 
 ### Non-goals
 
@@ -85,6 +87,7 @@ Hiện trạng ngày 26/09/2026: module thanh toán đã có code ở commit `de
 | Snapshot bằng revision bất biến | Đơn trỏ tới bản quyền lợi đã công bố và lưu giá lúc tạo. | Giá hiện tại tăng vẫn không đổi số tiền/quyền lợi của O1. Bản revision được tham chiếu không được sửa tại chỗ. |
 | Thời gian sự kiện và thứ tự đã áp dụng | OccurredAtUtc xét thời điểm ngân hàng; ReceivedAtUtc đo lúc nhận; AppliedPaidAtUtc giữ mốc dùng khi quyết định cấp. | Phân biệt giao dịch đúng hạn đến muộn với giao dịch phát sinh quá hạn; khi sửa mốc của gói đã cấp thì giữ A theo quy tắc đã chốt. |
 | HMAC và hash nội dung | HMAC kiểm chữ ký của request theo secret và raw body; CanonicalHash so các dữ kiện chuẩn hóa của cùng giao dịch. | HMAC xác thực nguồn, không thay quy tắc đủ tiền. Hash không phải mã hóa và không tự che nội dung nhạy cảm. Hợp đồng provider nằm ở External API. |
+| Cảnh báo sau commit và dấu “đã báo” | Webhook lệch: handler chèn BankTransactionConflict bằng `INSERT ... ON CONFLICT DO NOTHING` trên unique index có điều kiện `(TransactionId, CanonicalHash) WHERE Alerted`; chỉ lần chèn được dòng Alerted=true mới đăng ký việc gửi cảnh báo vào IPostCommitActionQueue, và TransactionPipelineBehavior chỉ chạy việc này sau khi commit. Worker lỗi: sau khi ghi lịch thử lại, nếu số lần thử đã tới ngưỡng thì chạy `UPDATE ... SET RetryAlertedAtUtc WHERE RetryAlertedAtUtc IS NULL`; chỉ lời gọi đổi được dòng mới gửi cảnh báo. | Transaction rollback thì không có cảnh báo sai. Hai worker cùng lỗi một giao dịch vẫn chỉ báo một lần. Kênh Discord gửi theo kiểu cố gắng hết sức: hàng đợi nằm trong bộ nhớ, nên tiến trình dừng ngay sau khi đánh dấu có thể làm mất cảnh báo đó; log mức Error vẫn còn. |
 
 Các kỹ thuật trên là thiết kế dự kiến. Phần dưới chỉ rõ thành phần chịu trách nhiệm và thứ tự xử lý để tránh chỉ liệt kê tên kỹ thuật.
 
@@ -97,11 +100,13 @@ Các kỹ thuật trên là thiết kế dự kiến. Phần dưới chỉ rõ t
 | Command/Query/Response và validator | contract/services/payment/ | Chuẩn hóa DTO, Idempotency-Key, version, mã lỗi. |
 | CreatePaymentOrderHandler / CancelPaymentOrderHandler | application/usecases/commands/payment/ | Chốt bản bán, giới hạn đơn chờ, hủy đơn theo tiền đã ghi nhận. |
 | SePayEnvelopeVerifier / SePayPayloadMapper | infrastructure/payments/sepay/ | Xác minh HMAC trên raw body, nhận diện tài khoản nhận, chuẩn hóa tiền và giờ giao dịch. |
-| RecordBankTransactionHandler | application/usecases/commands/payment/ | Lưu bền vững giao dịch và trạng thái chờ xử lý; chưa cấp gói trong request webhook. |
-| PaymentProcessingWorker / ProcessBankTransactionHandler | infrastructure/payments/ và application/usecases/commands/payment/ | Đọc việc chưa xử lý trong PostgreSQL; tính tiền hợp lệ và cấp gói trong một transaction riêng. |
+| RecordBankTransactionHandler | application/usecases/commands/payment/ | Lưu bền vững giao dịch và trạng thái chờ xử lý; chưa cấp gói trong request webhook. Cùng id nhưng lệch dữ kiện thì lưu BankTransactionConflict và hẹn cảnh báo sau commit. |
+| PaymentProcessingWorker / PaymentProcessingRunner / ProcessBankTransactionHandler | infrastructure/payments/ và application/usecases/commands/payment/ | Đọc việc chưa xử lý trong PostgreSQL; tính tiền hợp lệ và cấp gói trong một transaction riêng. Runner hẹn thử lại khi lỗi và gửi cảnh báo lỗi lặp lại qua IAlertNotifier. |
 | PaymentEligibilityPolicy / PurchaseOrderingPolicy | domain/policies/payment/ | Hàm thuần tính đủ tiền, biên thời gian và thứ tự mua. |
 | PackageFulfillmentService | application/abstractions và persistence implementation | Dùng lại chính DesignPeriod/PeriodQuota và SupervisionGrant, không tạo bộ entitlement song song. |
 | PaymentStore / configuration | persistence/payments/ và configurations/ | Khóa, dedupe, projection, constraint và history. |
+| IAlertNotifier / DiscordAlertNotifier | application/abstractions/ và infrastructure/alerting/ | Dùng lại kênh cảnh báo Discord có sẵn; thêm hai loại `PaymentWebhookConflict` và `PaymentProcessingRetry`. Cảnh báo không mang secret, chữ ký hay nội dung chuyển khoản. |
+| PaymentConnectionAdminApi và các handler quản trị connection | presentation/apis/payment/, application/usecases/commands/paymentConnection/ và queries/paymentConnection/ | Xem, tạo, sửa connection và chọn connection đang dùng theo môi trường; kiểm quyền `payment.connection.manage`. Chi tiết ở mục Quản trị connection bên dưới. |
 
 Luồng có hai giao dịch SQL: (1) xác thực và lưu giao dịch nhận tiền; (2) quyết toán đơn và cấp gói. Bảng BankTransaction đóng vai trò hộp thư bền vững cho worker, không cần thêm message broker. HostedService mới là phần cần thêm có chủ đích, không giả định hạ tầng chạy nền đã tồn tại.
 
@@ -122,7 +127,7 @@ flowchart LR
 
 - TransactionPipelineBehavior hiện commit khi handler trả bình thường, kể cả Result.Failure. Lệnh mới phải dùng ITransactionalRequest, kiểm tra trước khi sửa và ném domain exception nếu cần rollback; không bắt lỗi sau ghi rồi trả Failure. Bổ sung ánh xạ ConflictException 409 và lỗi phụ thuộc 503 vì middleware hiện chưa xử lý chúng. Không mở nested transaction trong handler.
 - Chỉ gửi ACK sau khi RecordBankTransactionHandler đã commit. DB lỗi trả 503; không trả success trước khi dữ liệu bền vững. Worker xử lý lỗi ở DbContext/scope mới, không tái sử dụng transaction đã abort.
-- Worker lấy việc bằng UPDATE/SELECT FOR UPDATE SKIP LOCKED với lease token, LeaseUntilUtc và NextAttemptAtUtc; mặc định kỹ thuật đề xuất poll 2 giây, lease 60 giây, backoff 5 giây tăng đến 5 phút. Lease chỉ điều phối công việc; khóa/constraint vẫn là lớp bảo vệ cuối. Mất lease không được đánh dấu việc của worker khác đã xong. Không bỏ việc sau một số lần lỗi; lưu Attempts/LastErrorCode, cảnh báo vận hành sau ngưỡng cấu hình. Đây không phải SLA nghiệp vụ.
+- Worker lấy việc bằng UPDATE/SELECT FOR UPDATE SKIP LOCKED với lease token, LeaseUntilUtc và NextAttemptAtUtc; mặc định kỹ thuật đề xuất poll 2 giây, lease 60 giây, backoff 5 giây tăng đến 5 phút. Lease chỉ điều phối công việc; khóa/constraint vẫn là lớp bảo vệ cuối. Mất lease không được đánh dấu việc của worker khác đã xong. Không bỏ việc sau một số lần lỗi; lưu Attempts/LastErrorCode. Từ lần thử `PaymentProcessingOption__AlertAfterAttempts` (mặc định 10 theo quyết định ngày 26/09/2026), mỗi lần lỗi ghi log mức Error; lần lỗi đầu tiên đạt ngưỡng còn gửi một cảnh báo Discord `PaymentProcessingRetry`. Cột `BankTransaction.RetryAlertedAtUtc` bảo đảm mỗi giao dịch chỉ báo một lần. Nếu lần thử thứ 10 không ghi được lịch thử lại vì đã mất lease thì không báo; lần lỗi kế tiếp của worker đang giữ việc sẽ báo thay. Đây không phải SLA nghiệp vụ.
 - Thứ tự khóa thống nhất: AccountCommerceState → Plan (chỉ tạo đơn) → các PaymentOrder theo Id → DesignSubscription/DesignPeriod hoặc SupervisionGrant → quota/operation. Mọi luồng liên quan cùng tài khoản dùng AccountCommerceState trước khi sửa gói. Chức năng gán thêm khóa `FOR KEY SHARE` trên dòng công trình đích ngay sau AccountCommerceState, theo TDD-SUB-004. Ingress chỉ ghi transaction, không giữ khóa bank transaction rồi chờ khóa tài khoản. Không khóa dòng quyền của người thao tác: quyền đọc từ claim `perm` theo TDD-RBAC-001, giống TDD-SUB-004/005/006.
 - HMAC timestamp dùng chống phát lại request, khác transactionDate dùng xét 15 phút. Payload được gửi lại hợp lệ với chữ ký mới không bị loại chỉ vì giao dịch ngân hàng đã cũ.
 
@@ -137,7 +142,9 @@ flowchart LR
 **Nhận và cộng tiền**:
 
 - Kết nối nhận tiền được cấu hình phía server. Chỉ nhận webhook đã xác thực; validate id dương, transferAmount nguyên dương và tài khoản/ngân hàng/VA khớp connection. Test payload id=0 không được ghi thành giao dịch thật; test mode dùng cấu hình và dữ liệu tách live.
-- Unique(ConnectionId, ProviderTransactionId) chống lặp. Cùng ID và cùng dữ kiện cốt lõi nhận ACK nhưng không tạo dòng mới. Nếu cùng ID nhưng tiền/tài khoản/thời điểm/nội dung nhận diện thay đổi, giữ dữ liệu gốc, ghi cảnh báo xung đột riêng, không cộng thêm hay ghi đè; vận hành kiểm tra nguồn. Không ghi secret hoặc chữ ký vào log.
+- Unique(ConnectionId, ProviderTransactionId) chống lặp. Cùng ID và cùng dữ kiện cốt lõi (CanonicalHash giống) nhận ACK nhưng không tạo dòng mới.
+- Cùng ID nhưng dữ kiện cốt lõi khác (CanonicalHash khác, ví dụ khác số tiền, tài khoản nhận, thời điểm hay nội dung nhận diện): vẫn trả 200 cho SePay, giữ dòng gốc, không cộng thêm hay ghi đè (quyết định ngày 26/09/2026). Mỗi lần nhận webhook lệch, handler lưu nội dung đã chuẩn hóa thành một dòng BankTransactionConflict trong cùng transaction. Chỉ lần đầu của mỗi cặp (giao dịch gốc, CanonicalHash) có Alerted=true và gửi một cảnh báo Discord `PaymentWebhookConflict` sau khi commit (Q6); vận hành kiểm tra nguồn. Hai webhook lệch giống hệt nhau đến cùng lúc vẫn chỉ báo một lần nhờ unique index có điều kiện. Nội dung lệch khác (hash khác) của cùng giao dịch là cặp mới nên được báo riêng; Subject là Id bản ghi lệch nên bước chống trùng 30 giây của kênh Discord không gộp hai cặp khác nhau. Không ghi secret, chữ ký hay raw body vào log, bảng hoặc cảnh báo; nội dung chuyển khoản chỉ lưu trong bảng, không đưa vào cảnh báo.
+- Tài khoản ảo (VA): chưa biết có dùng. Code hỗ trợ cả hai cách. Connection có SubAccount thì QR và thông tin chuyển khoản dùng số VA, và webhook phải có `subAccount` trùng khớp mới được khớp đơn. Connection không có SubAccount thì QR dùng tài khoản chính và không xét `subAccount` của payload. Cách SePay điền `accountNumber` và `subAccount` khi tiền vào VA chưa được kiểm chứng, nên phải thử với tài khoản SePay thật trước khi bật Live (quyết định ngày 26/09/2026).
 - Chỉ transferType=in có thể trả cho đơn. Giao dịch out nếu lọt qua cấu hình được lưu IgnoredDirection, không trừ tiền đơn hoặc suy ra hoàn tiền.
 - Khớp mã bằng code đã chuẩn hóa chữ hoa và so khớp toàn bộ PaymentCode, cùng connection của đơn. Null/rỗng/mã không tồn tại → Unmatched, hiển thị quản trị; không dò theo số tiền hoặc tên khách. Không có API gán thủ công.
 - `ReceivedAmountVnd` là tổng tiền in thực tế khớp đơn đã xử lý; `EligibleAmountVnd` chỉ gồm khoản phát sinh từ lúc tạo đơn đến trước min(ExpiresAtUtc, CanceledAtUtc nếu có). Tiền muộn vẫn tra cứu được, không tính vào đủ điều kiện. API tách hai tổng để không báo đã đủ hợp lệ khi chỉ đủ sau hạn.
@@ -156,6 +163,32 @@ flowchart LR
 - PaymentFulfillment lưu AppliedPaidAtUtc và AppliedOrderSequence bất biến tại quyết định cấp/bỏ kích hoạt. AccountCommerceState.LatestPurchaseOrderId giữ quyết định đã áp dụng, kể cả gói bị hủy. Order.PaidAtUtc có thể được hiệu chỉnh từ giao dịch đến muộn nhưng không tự ghi đè thứ tự quyền đã áp dụng; PurchaseOrderingPolicy so với khóa đã áp dụng, phát hiện lệch và không đảo lại gói. Một lần mua mới sau đó vẫn được xử lý bình thường nếu khóa mua mới lớn hơn khóa đã áp dụng. Dữ liệu trái thứ tự trong khoảng đã có sai lệch được ghi nhận cùng discrepancy, không tự khôi phục quyền hoặc làm mới quota.
 - Phân biệt hai ca: đơn A chưa từng xử lý đến sau B thì SupersededBeforeActivation nếu A mua trước; còn A đã cấp thay B rồi mới hiệu chỉnh thời điểm thì giữ A và ghi discrepancy. Không dùng cùng nhánh để vô tình cấp lại B.
 
+**Quản trị connection (đã chốt ngày 26/09/2026, đã có code ở commit `3256436`)**:
+
+Căn cứ: STORY-PAY-003, BR-PAY-006. Quyền riêng `payment.connection.manage`, Admin có mặc định; secret vẫn ở biến môi trường `SePayOption__Connections__{n}__ConnectionId`/`WebhookSecret` theo Id connection, API không nhận và không trả secret; connection đang dùng của từng môi trường Test/Live được chọn qua API, bỏ `SePayOption__ActiveConnectionId`; đơn mới dùng connection đang dùng, đơn cũ giữ connection lúc tạo; connection đã có đơn hoặc giao dịch webhook không đổi tài khoản nhận. Câu trả lời Q1–Q7 ghi ở bảng cuối mục.
+
+1. PaymentConnectionAdminApi đăng ký nhóm route `/api/v1/admin/payment-connections` và `/api/v1/admin/payment-environments`. Mọi route cần verified session và claim `perm` có `payment.connection.manage` theo TDD-RBAC-001; handler kiểm lại quyền nên lệnh gọi thẳng qua MediatR cũng bị chặn. Không có đường tắt theo tên vai trò. Quyền mới nằm trong `PermissionNames.All`, nên seed `HasData` tự gán cho vai trò `admin`.
+2. Tạo connection: validator kiểm Environment thuộc Test/Live; Gateway, AccountNumber, QrBankCode dài 1–100 ký tự sau khi bỏ khoảng trắng hai đầu; SubAccount rỗng thì lưu NULL. Server sinh Id, đặt Provider=SePay, Enabled theo request, Version=1, CreatedBy/CreatedAtUtc và SecretReference là mô tả khóa cấu hình theo Id (`SePayOption:Connections[ConnectionId=<Id>]:WebhookSecret`). Không nhận Idempotency-Key: gửi trùng chỉ tạo thêm một connection chưa dùng, không đụng tới tiền; người dùng sửa hoặc tắt dòng thừa. Trường lạ như `webhookSecret` trong body bị bỏ qua.
+3. Sửa connection: khóa dòng PaymentConnection `FOR UPDATE`, so `expectedVersion`. Gửi đúng giá trị hiện tại thì trả kết quả hiện tại, không tăng version, không ghi lịch sử. Đổi Gateway, AccountNumber, SubAccount hoặc QrBankCode khi connection đã có đơn hoặc giao dịch webhook (`EXISTS` trên PaymentOrder và BankTransaction theo ConnectionId) thì trả 409 `PaymentConnectionAccountLocked` (Q1). Tắt connection đang được chọn cho môi trường trả 409 `PaymentConnectionInUse` (Q2). Environment không có trong lệnh sửa nên không đổi được. Không có thao tác xóa (Q3).
+4. Chọn connection đang dùng: bảng PaymentActiveConnection có tối đa một dòng cho mỗi môi trường. Handler khóa dòng của môi trường `FOR UPDATE` (nếu có) và so `expectedVersion` (NULL khi môi trường chưa từng chọn). Sau đó khóa connection đích `FOR SHARE` và kiểm connection đang bật, cùng môi trường, máy chủ đang xử lý có secret cho Id đó; thiếu một điều kiện thì trả 409 `PaymentConnectionNotReady`. Chọn lại đúng connection đang dùng thì không đổi gì. Lần chọn đầu chèn dòng bằng `INSERT ... ON CONFLICT DO NOTHING`; hai yêu cầu chọn lần đầu cùng lúc thì yêu cầu thua nhận 409 `PaymentConnectionVersionConflict`. FK ghép `(ConnectionId, Environment)` chặn ở database việc chọn connection của môi trường khác. Không có thao tác bỏ chọn (Q4).
+5. Tạo đơn: `ResolveConnectionAsync` đọc PaymentActiveConnection của môi trường máy chủ (`SePayOption__Environment`, Q5), khóa connection `FOR SHARE` tới hết transaction và kiểm Enabled cùng secret. Không có connection hợp lệ thì trả 503 `PaymentUnavailable` (Q4). Khóa `FOR SHARE` buộc thao tác sửa tài khoản (`FOR UPDATE`) chờ đơn đang tạo commit, nên không thể có đơn đầu tiên được tạo đúng lúc tài khoản vừa bị đổi; webhook đang chèn giao dịch cũng giữ khóa khóa ngoại trên dòng connection nên lệnh sửa phải chờ tương tự. Thứ tự khóa của tạo đơn là AccountCommerceState → Plan → PaymentConnection; thao tác quản trị chỉ khóa PaymentActiveConnection → PaymentConnection, không khóa dữ liệu khách, nên không tạo vòng chờ.
+6. `SePayOption__Environment` bắt buộc, chỉ nhận Test hoặc Live; thiếu hoặc sai thì `ValidateOnStart` làm ứng dụng không khởi động (Q5). Biến này chỉ chọn môi trường, không chọn connection. Hai file compose chuyển `SEPAY_ACTIVE_CONNECTION_ID` thành `SEPAY_ENVIRONMENT` với giá trị mặc định rỗng, để thiếu biến thì API dừng lúc khởi động thay vì chạy sai môi trường.
+7. Webhook không đổi: xác thực theo secret của Id trong đường dẫn và vẫn nhận khi connection đã tắt hoặc không còn là connection đang dùng, để đơn cũ tiếp tục nhận tiền.
+8. Đọc danh sách và chi tiết: trả tài khoản nhận, Enabled, `isActive`, `secretConfigured` (máy chủ xử lý request có secret cho Id hay không, chỉ true/false), `accountLocked`, `webhookPath`, `secretConfigKeys` (tên biến môi trường cần đặt, không có giá trị), Version và mốc tạo/sửa. Các cờ được dựng bằng ba câu truy vấn theo danh sách Id, không truy vấn lặp từng dòng. Nhiều máy chủ có thể cấu hình secret khác nhau, nên `secretConfigured` chỉ đúng cho máy chủ đã trả lời.
+9. Lịch sử thao tác: mỗi lần tạo, sửa, chọn connection đang dùng thành công ghi một dòng PaymentConnectionEvent trong cùng transaction, gồm người làm, thời điểm, hành động và giá trị trước/sau; yêu cầu bị từ chối không ghi (Q7). Đổi tài khoản nhận tiền là thao tác nhạy cảm vì có thể chuyển tiền của khách sang tài khoản khác, nên cần biết ai làm và làm lúc nào.
+
+**Quyết định đã xác nhận ngày 26/09/2026**:
+
+| Mã | Câu hỏi | Quyết định | Nơi thực hiện |
+| --- | --- | --- | --- |
+| Q1 | Connection chưa có đơn thì sửa được những trường nào? | Chưa có đơn và chưa có giao dịch webhook thì sửa được ngân hàng, số tài khoản, VA, mã ngân hàng QR và bật/tắt; Environment cố định sau khi tạo. “Đã dùng” là có đơn hoặc có giao dịch webhook. | UpdatePaymentConnectionCommandHandler, `IsConnectionUsedAsync` |
+| Q2 | Tắt connection đang dùng hoặc còn đơn chờ thì sao? | Chặn tắt connection đang được chọn (409 `PaymentConnectionInUse`). Connection còn đơn chờ vẫn tắt được; webhook của nó vẫn được nhận. | UpdatePaymentConnectionCommandHandler |
+| Q3 | Có xóa connection không? | Không xóa, chỉ tắt. | Không có route xóa |
+| Q4 | Môi trường chưa có connection đang dùng thì tạo đơn trả gì? | 503 `PaymentUnavailable`; không có thao tác bỏ chọn, chỉ đổi sang connection khác. | CreatePaymentOrderCommandHandler |
+| Q5 | Máy chủ biết mình thuộc Test hay Live bằng cách nào? | Biến `SePayOption__Environment` (Test/Live); thiếu thì không khởi động. Chỉ chọn môi trường, không chọn connection. | SePayOption, `ValidateOnStart` |
+| Q6 | SePay gửi lại cùng một webhook lệch nhiều lần thì báo mấy lần? | Vẫn lưu mỗi lần nhận vào BankTransactionConflict, nhưng chỉ báo Discord lần đầu cho mỗi cặp (giao dịch gốc, CanonicalHash), đúng một lần kể cả khi đến đồng thời. | RecordBankTransactionCommandHandler, `InsertTransactionConflictAsync` (commit `97108bb`) |
+| Q7 | Có cần lịch sử thao tác trên connection không? | Có: bảng PaymentConnectionEvent (ai, lúc nào, làm gì, giá trị trước/sau, không có secret) và API xem lịch sử. | Handler tạo/sửa/chọn, GetPaymentConnectionHistoryQueryHandler |
+
 **Ánh xạ rule và kiểm chứng**:
 
 | Quy tắc | Nơi thực hiện | Kiểm chứng |
@@ -165,6 +198,8 @@ flowchart LR
 | BR-PAY-003 | CancelPaymentOrderHandler và policy cutoff | UT thời điểm hủy; ST-PAY-015–018, ST-PAY-022 |
 | BR-PAY-004 / BR-SUB-021 | PurchaseOrderingPolicy, FulfillmentService | ST-PAY-019–021, ST-PAY-023; integration worker retry/cấp quota |
 | BR-RBAC-005 | Kiểm `AccountKind = Customer` trong CreatePaymentOrderHandler và CancelPaymentOrderHandler trước khi ghi | ST-PAY-070 (STORY-PAY-001/AC-028, EXC-08); UT-PAY-071, UT-PAY-072 |
+| Quyết định 26/09/2026 về webhook lệch và lỗi lặp lại | RecordBankTransactionHandler, PaymentProcessingRunner, PaymentStore.TryMarkRetryAlertedAsync, PaymentStore.InsertTransactionConflictAsync | UT-PAY-022, UT-PAY-111, UT-PAY-113; integration UT-PAY-112 và `PaymentFlowTests.Webhook_SameIdDifferentFacts_StoresConflictAlertsAndDoesNotCredit` |
+| BR-PAY-006 | PaymentConnectionAdminApi, handler quản trị connection, `ResolveConnectionAsync`, SePayOption | ST-PAY-089 đến ST-PAY-101; UT-PAY-114 đến UT-PAY-127 (UT-PAY-124 đến UT-PAY-126 là integration PostgreSQL) |
 
 ## Sequence Diagram
 
@@ -175,15 +210,23 @@ sequenceDiagram
     participant S as SePay
     participant D as PostgreSQL
     participant W as Worker
+    participant K as Discord
     C->>A: Tạo đơn + Idempotency-Key
     A->>D: Khóa account/plan, lưu snapshot và đơn
     D-->>A: Commit
     A-->>C: QR + hạn 15 phút
     S->>A: POST webhook có chữ ký
     A->>A: Xác thực raw body và chuẩn hóa
-    A->>D: Lưu transaction duy nhất, Pending
+    alt Id giao dịch mới
+      A->>D: Lưu transaction duy nhất, Pending
+    else Cùng id, khác dữ kiện
+      A->>D: Giữ dòng gốc, lưu BankTransactionConflict
+    end
     D-->>A: Commit
     A-->>S: 200 success=true
+    opt Bản ghi lệch đầu tiên của nội dung lệch này
+      A-)K: Cảnh báo PaymentWebhookConflict
+    end
     W->>D: Claim việc, khóa account/order
     W->>W: Tính eligible, PaidAt và thứ tự mua
     alt Đủ tiền và cần cấp
@@ -192,6 +235,11 @@ sequenceDiagram
       W->>D: Ghi kết quả, không cấp trùng
     end
     D-->>W: Commit
+    opt Lỗi: rollback, hẹn thử lại
+      W->>D: Retry, NextAttemptAtUtc, LastErrorCode
+      W->>D: Lần thử thứ 10: đánh dấu RetryAlertedAtUtc nếu còn NULL
+      W-)K: Cảnh báo PaymentProcessingRetry, một lần mỗi giao dịch
+    end
     C->>A: Đọc trạng thái đơn
     A-->>C: Tiền đã nhận, còn thiếu hoặc gói đã mua
 ```
@@ -202,7 +250,10 @@ sequenceDiagram
 flowchart TD
     A[Webhook] --> B{Chữ ký và dữ liệu hợp lệ?}
     B -->|Không| X[Từ chối; không ghi tiền]
-    B -->|Có| C[Lưu bền vững và ACK]
+    B -->|Có| Y{Đã có giao dịch cùng id?}
+    Y -->|Chưa| C[Lưu bền vững và ACK]
+    Y -->|Có, cùng dữ kiện| Z[ACK, không tạo dòng mới]
+    Y -->|Có, khác dữ kiện| Q[Lưu bản ghi lệch, ACK; lần đầu của nội dung lệch thì cảnh báo sau commit; không cộng tiền]
     C --> D{Khớp đơn và tiền vào?}
     D -->|Không| E[Unmatched hoặc IgnoredDirection]
     D -->|Có| F[Cộng khoản trước hạn và trước hủy]
@@ -213,6 +264,8 @@ flowchart TD
     I -->|Không| K{Thiết kế mua trước đơn đã cấp?}
     K -->|Có| L[Ghi lần mua bị thay thế]
     K -->|Không| M[Cấp gói trong transaction]
+    M -->|Lỗi| R[Rollback, hẹn thử lại; lần thử thứ 10 cảnh báo một lần]
+    R --> F
 ```
 
 ## State Diagram
@@ -241,10 +294,13 @@ stateDiagram-v2
 
 | Bảng | Một dòng đại diện cho gì? | Khi tạo, khi thay đổi và liên kết chính |
 | --- | --- | --- |
-| PaymentConnection | Một cấu hình nhận tiền qua SePay cho một môi trường/tài khoản ngân hàng. | Cấu hình trước khi bán; PaymentOrder và BankTransaction cùng tham chiếu connection. Khi đổi tài khoản nhận, tạo connection khác để đơn cũ vẫn đối chiếu đúng. SecretReference chỉ là địa chỉ tham chiếu bí mật, không phải khóa thật. |
+| PaymentConnection | Một cấu hình nhận tiền qua SePay cho một môi trường/tài khoản ngân hàng. | Cấu hình trước khi bán; PaymentOrder và BankTransaction cùng tham chiếu connection. Khi đổi tài khoản nhận, tạo connection khác để đơn cũ vẫn đối chiếu đúng. SecretReference chỉ là địa chỉ tham chiếu bí mật, không phải khóa thật. Người có `payment.connection.manage` tạo và sửa qua API; dòng cũ do vận hành chèn tay trước khi có API có CreatedBy=NULL. Không xóa dòng, chỉ tắt. |
+| PaymentActiveConnection | Lựa chọn connection đang dùng cho đơn mới của một môi trường. | Tối đa một dòng cho Test và một dòng cho Live; người có quyền đổi ConnectionId qua API, không xóa dòng. Thay biến `SePayOption__ActiveConnectionId`. Chưa có dòng nghĩa là môi trường đó chưa mở nhận thanh toán và tạo đơn trả 503 (Q4). |
+| PaymentConnectionEvent | Một thao tác quản trị trên connection: tạo, sửa hoặc chọn làm connection đang dùng. | Ghi cùng transaction với thao tác; lưu người làm, thời điểm và giá trị trước/sau. Không lưu secret. Khác PaymentEvent: bảng này không gắn với đơn. |
+| BankTransactionConflict | Một lần nhận webhook có cùng id giao dịch với dòng đã lưu nhưng dữ kiện cốt lõi khác. | Tạo trong transaction của request webhook lệch; không bao giờ sửa. TransactionId trỏ tới BankTransaction gốc; connection và id SePay đọc qua dòng gốc, không chép lại. Alerted=true chỉ ở dòng đầu của mỗi cặp (TransactionId, CanonicalHash), là dòng đã hẹn gửi cảnh báo. Không phải việc chờ worker và không cộng tiền. |
 | AccountCommerceState | Điểm điều phối các thao tác mua gói của một khách. | Tạo khi cần xử lý khách lần đầu. Khóa dòng này để cấp số thứ tự đơn và thay gói tuần tự; LatestPurchaseOrderId giữ lần mua thiết kế đã áp dụng, không phải số dư tiền. |
 | PaymentOrder | Một yêu cầu mua đúng một gói theo một bản giá/quyền lợi đã chọn. | Tạo trước khi hiển thị QR; lưu giá/revision bất biến, cập nhật trạng thái và tổng tiền khi xử lý giao dịch. AccountId là người mua; chưa có fulfillment không có nghĩa chưa nhận tiền. |
-| BankTransaction | Một giao dịch ngân hàng đã được xác thực và lưu, đồng thời là một việc chờ worker xử lý. | Tạo khi nhận webhook lần đầu. Dữ kiện tiền/thời gian gốc được giữ; trạng thái khớp đơn và xử lý có thể đổi. Một đơn có nhiều dòng; OrderId=NULL khi chưa khớp, không tự đoán khách. |
+| BankTransaction | Một giao dịch ngân hàng đã được xác thực và lưu, đồng thời là một việc chờ worker xử lý. | Tạo khi nhận webhook lần đầu. Dữ kiện tiền/thời gian gốc được giữ; trạng thái khớp đơn và xử lý có thể đổi. Một đơn có nhiều dòng; OrderId=NULL khi chưa khớp, không tự đoán khách. RetryAlertedAtUtc=NULL nghĩa là chưa gửi cảnh báo lỗi lặp lại cho giao dịch này. |
 | PaymentFulfillment | Một kết quả quyết định cấp quyền của một đơn đã đủ điều kiện. | Tạo một lần cùng transaction cấp gói. Activated trỏ tới kỳ thiết kế hoặc gói giám sát; SupersededBeforeActivation ghi lần mua thiết kế đến muộn mà không tạo kỳ/quota giả. Không thêm dòng khi webhook lặp. |
 | PaymentOperation | Kết quả nhận diện một yêu cầu hủy đơn để gửi lại không hủy lần nữa. | Tạo khi thao tác hủy hoàn tất; khóa theo khách, loại thao tác và RequestKey. Khác PaymentEvent: bảng này phục vụ trả lại kết quả yêu cầu cũ. Tạo đơn dùng CreateKey/CreateHash ngay trên PaymentOrder. |
 | PaymentEvent | Một mốc lịch sử giải thích điều gì đã xảy ra với đơn. | Ghi khi tạo, hủy, hết hạn, đủ tiền, cấp gói hoặc phát hiện lệch thứ tự. Có thể liên kết giao dịch/nhân viên gây ra sự kiện; không phải bản sao từng webhook và không ghi xác nhận hoàn tiền. |
@@ -269,6 +325,29 @@ stateDiagram-v2
 | AccountCommerceState | AccountId=U1; NextOrderSequence=2; LatestPurchaseOrderId=O1 | Số 2 dành cho đơn kế tiếp; O1 là lần mua thiết kế đã áp dụng. |
 | PaymentEvent | OrderId=O1; TransactionId=ID nội bộ của khoản 102; AtUtc=03:16:01Z; Detail chứa tổng hợp lệ 2100000 và kỳ P1 | Một sự kiện giải thích quyết định cấp. EventKind dùng bộ tên sự kiện do implementation định nghĩa theo các mốc ở schema. |
 | PaymentOperation, nhánh hủy độc lập | AccountId=U1; OrderId=O2; OperationKind=Cancel; RequestKey=cancel-o2-1; ResultVersion=2 | O2 là đơn khác chưa nhận tiền đã hủy thành công. Không được tạo kết quả hủy thành công cho O1 đã nhận tiền. RequestHash là hash thật khi triển khai, được lược khỏi ví dụ. |
+
+**Dữ liệu lưu trữ minh họa — webhook lệch dữ kiện và lỗi lặp lại**
+
+Tiếp tục tình huống O1 ở trên. Khoản 101 là dòng BankTransaction có Id nội bộ T101. H101 và H999 thay cho hai CanonicalHash dài 64 ký tự. Giờ đều là UTC ngày 19/09/2026.
+
+| Bảng | Giá trị minh họa được lưu | Cách đọc |
+| --- | --- | --- |
+| BankTransactionConflict X1 | Id=X1; TransactionId=T101; ReceivedAtUtc=03:20:00Z; CanonicalHash=H999; OccurredAtUtc=03:05Z; Direction=in; AmountVnd=5000000; Code=O1 PaymentCode; ReceivedAccountNumber=TEST_ACCOUNT; Alerted=true | SePay gửi lại id=101 nhưng số tiền là 5.000.000. Dòng T101 giữ AmountVnd=500000 và CanonicalHash=H101; O1 không được cộng thêm. BMT trả 200 và gửi một cảnh báo có Subject=X1. |
+| BankTransactionConflict X2 | Id=X2; TransactionId=T101; ReceivedAtUtc=03:25:00Z; CanonicalHash=H999; Alerted=false; các dữ kiện khác như X1 | Cùng webhook lệch được gửi lại lần nữa: vẫn lưu thêm một dòng để tra lại, nhưng không cảnh báo nữa vì cặp (T101, H999) đã báo ở X1 (Q6). Nếu sau đó có webhook lệch với hash khác H999 thì đó là cặp mới, lưu Alerted=true và báo thêm một lần. |
+| BankTransaction T777 trước lần thử thứ 10 | Id=T777; OrderId=NULL; MatchState=Pending; ProcessingState=Retry; Attempts=9; LastErrorCode=InvalidOperationException; RetryAlertedAtUtc=NULL | Giao dịch khác đã lỗi 9 lần khi cấp gói; mỗi lần transaction cấp gói rollback nên OrderId vẫn NULL. Chưa gửi cảnh báo. |
+| BankTransaction T777 sau lần thử thứ 10 lỗi | Attempts=10; ProcessingState=Retry; NextAttemptAtUtc=lúc lỗi + 300 giây; RetryAlertedAtUtc=lúc lỗi | Gửi một cảnh báo PaymentProcessingRetry với Subject=T777. Lần 11, 12… vẫn hẹn thử lại nhưng không báo nữa vì RetryAlertedAtUtc đã có giá trị. |
+
+**Dữ liệu minh họa — đổi connection đang dùng**
+
+Tiếp tục tình huống O1 dùng connection C1. A1 là Admin có `payment.connection.manage`. Giờ là UTC ngày 20/09/2026.
+
+| Bảng | Giá trị minh họa được lưu | Cách đọc |
+| --- | --- | --- |
+| PaymentConnection C2 | Id=C2; Provider=SePay; Environment=Test; Gateway=Vietcombank; AccountNumber=TEST_ACCOUNT_2; SubAccount=NULL; QrBankCode=Vietcombank; Enabled=true; Version=1; CreatedAtUtc=02:00Z; CreatedBy=A1 | A1 tạo connection cho tài khoản nhận mới; vận hành đặt secret theo Id C2 trong biến môi trường. |
+| PaymentActiveConnection, trước | Environment=Test; ConnectionId=C1; Version=1 | O1 được tạo khi C1 đang dùng nên O1.ConnectionId=C1. |
+| PaymentActiveConnection, sau | Environment=Test; ConnectionId=C2; SelectedAtUtc=02:05Z; SelectedBy=A1; Version=2 | Cập nhật cùng dòng Test. Đơn tạo sau đó có ConnectionId=C2; O1 giữ C1 và webhook gửi tới `/api/v1/payment-webhooks/sepay/C1` vẫn được nhận. |
+| PaymentConnectionEvent E1, E2 | E1: ConnectionId=C2; Action=Created; ActorId=A1; AtUtc=02:00Z. E2: ConnectionId=C2; Action=Selected; ActorId=A1; AtUtc=02:05Z; Detail={"environment":"Test","fromConnectionId":"C1","toConnectionId":"C2"} | Hai thao tác thành công, hai dòng lịch sử. |
+| Sửa C1 bị từ chối | Request đổi AccountNumber của C1 | C1 đã có O1 nên trả 409 `PaymentConnectionAccountLocked`; C1 giữ Version cũ và không có dòng lịch sử mới. |
 
 Các bảng quyền được cấp và mẫu bộ đếm xem [TDD-SUB-005 — Data Model](TDD-SUB-005.md#data-model); dữ liệu giám sát chưa gán rồi gán xem [TDD-SUB-004 — Data Model](TDD-SUB-004.md#data-model). Các bảng User/Plan/Revision làm cha phải tồn tại trước các bản ghi con; ví dụ trích cột không thay thế ràng buộc FK bên dưới.
 
@@ -306,10 +385,13 @@ Bảng dưới là schema mới/điều chỉnh dự kiến. Dùng PostgreSQL uu
 
 | Bảng | Trường chính, khóa và ràng buộc |
 | --- | --- |
-| PaymentConnection | Id uuid PK; Provider varchar(16)=SePay; Environment varchar(8)=Test/Live; Gateway varchar(100), AccountNumber varchar(100), SubAccount varchar(100) NULL; QrBankCode varchar(100); SecretReference text (chỉ trỏ secret store); Enabled bool. Connection đã có đơn không đổi tài khoản nhận; thay tài khoản tạo connection mới. |
+| PaymentConnection | Id uuid PK; Provider varchar(16)=SePay; Environment varchar(8)=Test/Live; Gateway varchar(100), AccountNumber varchar(100), SubAccount varchar(100) NULL; QrBankCode varchar(100); SecretReference text (chỉ trỏ secret store); Enabled bool. Connection đã có đơn không đổi tài khoản nhận; thay tài khoản tạo connection mới. Thêm ở migration `PaymentConnectionAdmin`: UNIQUE(Id, Environment) (`AK_PaymentConnection_Id_Environment`) làm đích FK ghép; Version bigint NN DEFAULT 1; CreatedAtUtc timestamptz NN DEFAULT now() (dòng cũ lấy lúc chạy migration); CreatedBy uuid NULL FK User (NULL với dòng do vận hành chèn trước khi có API); UpdatedAtUtc timestamptz NULL; UpdatedBy uuid NULL FK User. |
+| PaymentActiveConnection | Environment varchar(8) PK CHECK Test/Live; ConnectionId uuid NN; FK (ConnectionId, Environment) tới PaymentConnection(Id, Environment) ON DELETE RESTRICT; SelectedAtUtc timestamptz NN; SelectedBy uuid NN FK User; Version bigint NN >0. |
+| PaymentConnectionEvent | Id uuid PK; ConnectionId uuid NN FK ON DELETE RESTRICT; Action varchar(16) CHECK Created/Updated/Selected; ActorId uuid NN FK User; AtUtc timestamptz; Detail jsonb (giá trị trước/sau của trường đổi, connection cũ/mới khi chọn; không chứa secret). Index (ConnectionId, AtUtc DESC, Id DESC). |
 | AccountCommerceState | AccountId uuid PK FK User; NextOrderSequence bigint >0; LatestPurchaseOrderId uuid NULL; Version bigint. Tạo một lần bằng INSERT ON CONFLICT DO NOTHING rồi khóa hàng. FK ghép (AccountId,LatestPurchaseOrderId) bảo đảm đơn cùng khách. |
 | PaymentOrder | Id uuid PK; AccountId FK User; AccountOrderSequence bigint; PlanId, RevisionId uuid; OfferKey varchar(24)=Month/Year/ConstructionSite; Kind varchar(16)=Design/Supervision; PriceVnd numeric(20,0)>0; Currency char(3)=VND; ConnectionId FK; PaymentCode varchar(32) UNIQUE; CreatedAtUtc, ExpiresAtUtc; CanceledAtUtc/ExpiredAtUtc/PaidAtUtc NULL; State varchar(16); ReceivedAmountVnd/EligibleAmountVnd numeric(20,0)>=0; Version bigint; OrderingDiscrepancy boolean NN DEFAULT false; CreateKey varchar(100); CreateHash char(64). UNIQUE(AccountId,Id), UNIQUE(AccountId,Id,Kind) làm đích cho PaymentFulfillment, UNIQUE(AccountId,AccountOrderSequence), UNIQUE(AccountId,CreateKey); FK(RevisionId,Kind) tới PlanRevision; FK(RevisionId,OfferKey) tới PlanOffer đã mở rộng. Code không có FK(PlanId,RevisionId) như thiết kế ban đầu, chỉ có index PlanId: xem Change Log 26/09/2026. |
-| BankTransaction | Id uuid PK; ConnectionId FK; ProviderTransactionId bigint>0; OccurredAtUtc, ReceivedAtUtc timestamptz; Direction varchar(3); AmountVnd numeric(20,0)>0; Code varchar(100) NULL (lưu dạng đã chuẩn hóa: bỏ khoảng trắng hai đầu, chữ hoa; index (ConnectionId, Code) cho bước kiểm hủy đơn); Content text; ReferenceCode text NULL; AccountNumber/Gateway/SubAccount đã nhận; CanonicalHash char(64); OrderId uuid NULL FK; MatchState varchar(24)=Pending/Matched/Unmatched/IgnoredDirection/ConnectionMismatch; ProcessingState varchar(16)=Pending/Retry/Completed; Attempts int>=0; NextAttemptAtUtc/LeaseUntilUtc NULL; LeaseToken uuid NULL; LastErrorCode varchar(100) NULL. UNIQUE(ConnectionId,ProviderTransactionId). |
+| BankTransaction | Id uuid PK; ConnectionId FK; ProviderTransactionId bigint>0; OccurredAtUtc, ReceivedAtUtc timestamptz; Direction varchar(3); AmountVnd numeric(20,0)>0; Code varchar(100) NULL (lưu dạng đã chuẩn hóa: bỏ khoảng trắng hai đầu, chữ hoa; index (ConnectionId, Code) cho bước kiểm hủy đơn); Content text; ReferenceCode text NULL; AccountNumber/Gateway/SubAccount đã nhận; CanonicalHash char(64); OrderId uuid NULL FK; MatchState varchar(24)=Pending/Matched/Unmatched/IgnoredDirection/ConnectionMismatch; ProcessingState varchar(16)=Pending/Retry/Completed; Attempts int>=0; NextAttemptAtUtc/LeaseUntilUtc NULL; LeaseToken uuid NULL; LastErrorCode varchar(100) NULL; RetryAlertedAtUtc timestamptz NULL (thêm ở migration `PaymentAlerts`). UNIQUE(ConnectionId,ProviderTransactionId). |
+| BankTransactionConflict | Id uuid PK; TransactionId uuid NN FK BankTransaction ON DELETE RESTRICT; ReceivedAtUtc timestamptz; CanonicalHash char(64); OccurredAtUtc timestamptz; Direction varchar(3) CHECK in/out; AmountVnd numeric(20,0) CHECK >0; Code varchar(100) NULL (đã chuẩn hóa); Content text; ReferenceCode text NULL; ReceivedAccountNumber/ReceivedGateway varchar(100); ReceivedSubAccount varchar(100) NULL; Alerted boolean NN. Index (TransactionId, ReceivedAtUtc, Id); UNIQUE (TransactionId, CanonicalHash) WHERE Alerted, tên `UX_BankTransactionConflict_TransactionId_CanonicalHash_Alerted`. Không có cột chữ ký, timestamp chữ ký, secret hay raw body. |
 | PaymentFulfillment | OrderId uuid PK FK PaymentOrder; AccountId uuid NN; Kind varchar(16); Disposition varchar(32)=Activated/SupersededBeforeActivation; DesignPeriodId uuid NULL UNIQUE; SupervisionGrantId uuid NULL UNIQUE; CompletedAtUtc timestamptz; AppliedPaidAtUtc timestamptz NN; AppliedOrderSequence bigint NN. Activated đòi đúng một target đúng loại; SupersededBeforeActivation chỉ Design và hai target NULL. FK ghép tới đơn/target cùng AccountId; không cho một đơn vừa thiết kế vừa giám sát. |
 | PaymentOperation | AccountId uuid, OperationKind varchar(32), RequestKey varchar(100), RequestHash char(64), OrderId uuid FK(AccountId,OrderId), ResultVersion bigint, AtUtc timestamptz; PK(AccountId,OperationKind,RequestKey). Dùng replay hủy; kết quả gắn lịch sử thao tác, trạng thái hiện tại đọc lại riêng. |
 | PaymentEvent | Id uuid PK; OrderId FK; EventKind varchar(32); AtUtc timestamptz; ActorId uuid NULL FK User; TransactionId uuid NULL FK; Detail jsonb không chứa secret. Ghi tạo/hủy/hết hạn/đủ tiền/cấp/sửa thứ tự, không chứa sự kiện đã hoàn tiền. |
@@ -329,6 +411,9 @@ erDiagram
     DesignPeriod o|--o| PaymentFulfillment : design_target
     SupervisionGrant o|--o| PaymentFulfillment : supervision_target
     PaymentOrder ||--o{ PaymentEvent : history
+    BankTransaction ||--o{ BankTransactionConflict : conflicting_webhooks
+    PaymentConnection ||--o| PaymentActiveConnection : selected_for_environment
+    PaymentConnection ||--o{ PaymentConnectionEvent : admin_history
 ```
 
 **Notes**:
@@ -340,18 +425,27 @@ erDiagram
 - Kế hoạch schema cho `OfferKey` (database hiện chỉ có dữ liệu dev/test, không chuyển đổi dữ liệu thật): `PaymentOrder` chưa có trong database nên được tạo mới với `OfferKey varchar(24)` và CHECK chỉ nhận `Month`/`Year`/`ConstructionSite`. `PlanOffer.OfferKey` được nới từ `varchar(8)` lên `varchar(24)` và đổi `Project` thành `ConstructionSite` theo migration của TDD-SUB-001. Khóa ngoại `(RevisionId, OfferKey)` từ `PaymentOrder` tới `PlanOffer` đòi hai cột cùng kiểu, nên migration tạo `PaymentOrder` phải chạy sau migration đó. Kiểm sau: không còn dòng `OfferKey = 'Project'` ở cả hai bảng.
 - Trước migration cần kiểm database thật. Nếu đã có schema theo TDD cũ thì chuyển Cycle→OfferKey cùng FK, bổ sung offer ConstructionSite, backfill từ nguồn giá đã xác minh; không tự đặt giá giám sát hoặc tạo đơn thanh toán giả cho grant cũ. Lịch sử không có đơn được ghi Origin=Legacy ở adapter đọc, không bắt buộc bịa giao dịch.
 - Account/bank/secret thật chưa được cung cấp. Validate cấu hình và chỉ bật checkout Live khi connection/giá/quyền lợi và worker đã sẵn sàng. Không đưa credentials vào tài liệu.
+- Migration `20260926074258_PaymentAlerts` (nhánh `feature/payment-alerts-connections`) thêm cột `BankTransaction.RetryAlertedAtUtc` NULL và bảng BankTransactionConflict kèm cột Alerted và unique index có điều kiện. Bản này sinh lại ở commit `97108bb` thay cho `20260926072356_PaymentAlerts` của `62b226f`, vì migration đó chưa áp dụng ở đâu. Chỉ thêm cột cho phép NULL và bảng mới nên không đổi dữ liệu cũ; giao dịch đã lưu có RetryAlertedAtUtc=NULL, nên giao dịch đang lỗi quá 10 lần lúc triển khai sẽ được báo một lần ở lần lỗi kế tiếp. Down xóa bảng và cột; dòng bản ghi lệch mất theo.
+- BankTransactionConflict tách khỏi PaymentEvent vì PaymentEvent là mốc của một đơn (OrderId bắt buộc), còn webhook lệch có thể thuộc giao dịch chưa khớp đơn nào. Bảng không lặp ConnectionId/ProviderTransactionId của dòng gốc để không có hai nơi lưu cùng một dữ kiện.
+- Migration `20260926075035_PaymentConnectionAdmin` (commit `3256436`): seed dòng Permission `payment.connection.manage` và RolePermission của `admin` qua `HasData`; thêm cột mới của PaymentConnection cùng UNIQUE(Id, Environment); tạo PaymentActiveConnection và PaymentConnectionEvent. Migration không đọc được biến môi trường nên không tự chèn PaymentActiveConnection từ `SePayOption__ActiveConnectionId` cũ; sau khi triển khai, Admin chọn connection qua API, trước đó tạo đơn trả 503 (Q4). API từ chối khởi động khi bảng Permission lệch `PermissionNames`, và cũng từ chối khi thiếu `SePayOption__Environment`, nên phải chạy migration và đặt biến trước khi chạy code mới. Down gặp lỗi nếu vai trò tự tạo đã được gán quyền mới (FK RESTRICT phía Permission); khi đó gỡ quyền khỏi vai trò trước.
 
 ## Internal API
 
 ### Endpoints
 
-Các route là đề xuất mới; Carter đăng ký `/api/v{version:apiVersion}`. API khách dùng default verified-session policy hiện có và kiểm ownership. Tạo và hủy đơn còn kiểm `AccountKind = Customer` trước khi ghi: tài khoản nhân viên không được mua gói theo BR-RBAC-005 khoản 5, nên nhận 403 `AccessForbidden` kể cả khi gọi thẳng API. Kiểm theo loại tài khoản, không theo tên vai trò. Body không có accountId, price hoặc quyền lợi. Customer GET không bao giờ cho sửa trạng thái.
+Các route dưới đây đã có code; Carter đăng ký `/api/v{version:apiVersion}`. API khách dùng default verified-session policy hiện có và kiểm ownership. Tạo và hủy đơn còn kiểm `AccountKind = Customer` trước khi ghi: tài khoản nhân viên không được mua gói theo BR-RBAC-005 khoản 5, nên nhận 403 `AccessForbidden` kể cả khi gọi thẳng API. Kiểm theo loại tài khoản, không theo tên vai trò. Body không có accountId, price hoặc quyền lợi. Customer GET không bao giờ cho sửa trạng thái.
 
-- **POST** `/api/v1/payment-orders` — `{planId,offerKey}`; header Idempotency-Key bắt buộc. Trả 201 Result<OrderDetail>, replay 200. Server chọn connection; lỗi thiếu cấu hình 503, gói ngừng bán 409.
+- **POST** `/api/v1/payment-orders` — `{planId,offerKey}`; header Idempotency-Key bắt buộc. Trả 201 Result<OrderDetail>, replay 200. Server chọn connection; lỗi thiếu cấu hình 503, gói ngừng bán 409. Server chọn connection đang dùng (PaymentActiveConnection) của môi trường máy chủ `SePayOption__Environment`; chưa có connection hợp lệ thì 503 `PaymentUnavailable` (Q4, Q5).
 - **GET** `/api/v1/payment-orders` — Đơn của chính khách, pageIndex/pageSize theo PagedResult hiện có (mặc định 1/10, tối đa 100); sắp CreatedAtUtc DESC,Id DESC.
 - **GET** `/api/v1/payment-orders/{orderId}` — Trả snapshot, state, receivedAmountVnd, eligibleAmountVnd, remainingAmountVnd, extraReceivedAmountVnd, expiresAtUtc, serverNowUtc, version, qrUrl nếu còn chờ và fulfillment nếu có. Không trả raw webhook.
 - **POST** `/api/v1/payment-orders/{orderId}/cancel` — `{expectedVersion}` + Idempotency-Key; cùng key/hash replay, khác body 409; kiểm ownership trước replay.
-- **POST** `/api/v1/payment-webhooks/sepay/{connectionId}` — Endpoint máy, chỉ xác thực HMAC riêng; không yêu cầu cookie. Trả đúng ACK SePay sau commit, không bọc Result.
+- **POST** `/api/v1/payment-webhooks/sepay/{connectionId}` — Endpoint máy, chỉ xác thực HMAC riêng; không yêu cầu cookie. Trả đúng ACK SePay sau commit, không bọc Result. Webhook cùng id nhưng lệch dữ kiện vẫn trả 200, lưu bản ghi lệch và chỉ cảnh báo lần đầu của mỗi nội dung lệch; không cộng tiền.
+- **GET** `/api/v1/admin/payment-connections` — Cần `payment.connection.manage`. Trả ListResult các connection của cả hai môi trường, sắp Environment, CreatedAtUtc DESC, Id DESC; số dòng nhỏ nên không phân trang. Mỗi dòng có tài khoản nhận, enabled, isActive, secretConfigured, accountLocked, webhookPath, secretConfigKeys, version; không có secret.
+- **GET** `/api/v1/admin/payment-connections/{connectionId}` — Cần `payment.connection.manage`. Chi tiết một connection, cùng trường như danh sách cộng mốc tạo/sửa và người tạo/sửa.
+- **POST** `/api/v1/admin/payment-connections` — Cần `payment.connection.manage`. `{environment,gateway,accountNumber,subAccount,qrBankCode,enabled}`; không có trường secret. Trả 201 Result<PaymentConnectionDetail>.
+- **PUT** `/api/v1/admin/payment-connections/{connectionId}` — Cần `payment.connection.manage`. `{expectedVersion,gateway,accountNumber,subAccount,qrBankCode,enabled}`; Environment không đổi được. Connection đã có đơn hoặc giao dịch webhook mà đổi trường tài khoản nhận thì 409 `PaymentConnectionAccountLocked`; tắt connection đang được chọn thì 409 `PaymentConnectionInUse`; gửi đúng giá trị hiện tại thì không đổi version.
+- **PUT** `/api/v1/admin/payment-environments/{environment}/active-connection` — Cần `payment.connection.manage`. `{connectionId,expectedVersion}`; expectedVersion để null khi môi trường chưa từng chọn. Trả 200 kèm lựa chọn mới. Chỉ nhận connection đang bật, cùng môi trường, có secret trên máy chủ xử lý. Không có route bỏ chọn hay xóa connection (Q3, Q4).
+- **GET** `/api/v1/admin/payment-connections/{connectionId}/history` — Cần `payment.connection.manage`. Trả lịch sử thao tác, sắp AtUtc DESC, Id DESC, phân trang theo PagedResult hiện có.
 
 ### Examples
 
@@ -389,10 +483,41 @@ Error Response:
 
 Error Response webhook tương ứng HTTP 401. Các số/tài khoản là dữ liệu minh họa, không phải cấu hình thật; không sao chép chữ ký placeholder để kiểm thử.
 
+#### POST /api/v1/admin/payment-connections
+
+```
+Request:
+{"environment":"Test","gateway":"Vietcombank","accountNumber":"TEST_ACCOUNT_2","subAccount":null,"qrBankCode":"Vietcombank","enabled":true}
+
+Response 201:
+{"value":{"id":"33333333-3333-3333-3333-333333333333","environment":"Test","gateway":"Vietcombank","accountNumber":"TEST_ACCOUNT_2","subAccount":null,"qrBankCode":"Vietcombank","enabled":true,"isActive":false,"secretConfigured":false,"accountLocked":false,"webhookPath":"/api/v1/payment-webhooks/sepay/33333333-3333-3333-3333-333333333333","secretConfigKeys":["SePayOption__Connections__{n}__ConnectionId","SePayOption__Connections__{n}__WebhookSecret"],"version":1,"createdAtUtc":"2026-09-20T02:00:00Z"},"isSuccess":true,"isFailure":false,"error":{"code":"","message":""}}
+
+Error Response:
+{"title":"Unprocessable Entity","code":"PaymentConnectionInputInvalid","status":422,"detail":"Môi trường phải là Test hoặc Live.","messageCode":"PaymentConnectionInputInvalid","errors":null}
+```
+
+`secretConfigured=false` vì vận hành chưa đặt secret cho Id mới; `{n}` là số thứ tự mục cấu hình do vận hành chọn.
+
+#### PUT /api/v1/admin/payment-environments/{environment}/active-connection
+
+```
+Request:
+PUT /api/v1/admin/payment-environments/Test/active-connection
+{"connectionId":"33333333-3333-3333-3333-333333333333","expectedVersion":1}
+
+Response 200:
+{"value":{"environment":"Test","connectionId":"33333333-3333-3333-3333-333333333333","previousConnectionId":"44444444-4444-4444-4444-444444444444","selectedAtUtc":"2026-09-20T02:05:00Z","version":2},"isSuccess":true,"isFailure":false,"error":{"code":"","message":""}}
+
+Error Response:
+{"title":"Conflict","code":"PaymentConnectionNotReady","status":409,"detail":"Connection chưa có secret trên máy chủ này.","messageCode":"PaymentConnectionNotReady","errors":null}
+```
+
+Đổi lựa chọn không sửa đơn đã tạo.
+
 ### Error Codes
 
 - **Unauthorized** (401): phiên khách không hợp lệ.
-- **AccessForbidden** (403): phiên không đạt policy, không có quyền, hoặc tài khoản nhân viên (`AccountKind = Staff`) gọi API tạo hay hủy đơn.
+- **AccessForbidden** (403): phiên không đạt policy, không có quyền, tài khoản nhân viên (`AccountKind = Staff`) gọi API tạo hay hủy đơn, hoặc thiếu `payment.connection.manage` khi gọi API quản trị connection.
 - **PaymentOrderNotFound** (404): không có đơn thuộc khách; không lộ đơn người khác.
 - **PlanNotPurchasable** (409): gói chưa bán/ngừng bán tại lúc tạo đơn mới.
 - **PendingDesignOrderExists** (409): đã có đơn thiết kế chờ.
@@ -404,6 +529,12 @@ Error Response webhook tương ứng HTTP 401. Các số/tài khoản là dữ l
 - **WebhookAuthenticationFailed** (401): HMAC/timestamp không hợp lệ, trả envelope webhook.
 - **WebhookPayloadInvalid** (422): payload không thể chuẩn hóa, không ghi tiền.
 - **WebhookStoreUnavailable** (503): không lưu bền vững được, không ACK thành công.
+- **PaymentConnectionNotFound** (404): không có connection với Id đã gửi.
+- **PaymentConnectionVersionConflict** (409): expectedVersion của connection hoặc của lựa chọn connection đang dùng đã cũ.
+- **PaymentConnectionAccountLocked** (409): đổi ngân hàng, số tài khoản, VA hoặc mã ngân hàng QR của connection đã có đơn hoặc giao dịch.
+- **PaymentConnectionNotReady** (409): chọn làm connection đang dùng một connection đang tắt, khác môi trường hoặc chưa có secret trên máy chủ xử lý.
+- **PaymentConnectionInUse** (409): tắt connection đang dùng của một môi trường.
+- **PaymentConnectionInputInvalid** (422): môi trường, tài khoản hoặc độ dài trường không hợp lệ.
 
 ## External API
 
@@ -428,12 +559,15 @@ SePay cần HTTP 200/201 và JSON `{"success":true}` trong 30 giây; BMT chọn 
 - Đề xuất PaymentCode `BMT` + 10 ký tự A–Z/0–9 ngẫu nhiên; unique index và sinh lại khi va chạm. Cấu hình prefix và độ dài đúng trên SePay, không dùng cấu hình mặc định ngắn hơn. [Mẫu mã thanh toán](https://developer.sepay.vn/vi/sepay-webhooks/cau-hinh-ma-thanh-toan).
 - QR chỉ điền sẵn thông tin, không ngăn khách sửa số tiền hoặc dùng ảnh cũ. Server luôn xét transaction và hạn thật.
 - Tài liệu provider đã đọc ngày 19/09/2026, chưa test với tài khoản thật. HMAC, test/live, tài khoản/VA và payload retry phải được kiểm chứng trước khi bật Live.
+- Tài khoản ảo (VA): chưa biết BMT có dùng. Code hỗ trợ cả tài khoản chính và VA như mô tả ở Architecture; chưa rõ khi tiền vào VA thì SePay gửi số VA ở `subAccount` hay ở `accountNumber`. Phải thử với tài khoản SePay thật trước khi mở nhận tiền thật (quyết định ngày 26/09/2026).
 
 ## References
 
 ### User Stories
 
 - STORY-PAY-001
+- STORY-PAY-003
+- STORY-PAY-003/AC-002
 
 ### Business Rules
 
@@ -441,6 +575,7 @@ SePay cần HTTP 200/201 và JSON `{"success":true}` trong 30 giây; BMT chọn 
 - BR-PAY-002/Then
 - BR-PAY-003/Then
 - BR-PAY-004/Then
+- BR-PAY-006/Then
 - BR-RBAC-005/Then
 - BR-SUB-004/Then
 - BR-SUB-006/Then
@@ -458,10 +593,12 @@ SePay cần HTTP 200/201 và JSON `{"success":true}` trong 30 giây; BMT chọn 
 - [Danh mục gói](TDD-SUB-001.md), [kỳ và quota](TDD-SUB-002.md), [gán giám sát](TDD-SUB-004.md), [hủy/khôi phục](TDD-SUB-005.md), [quản trị tra cứu](TDD-PAY-002.md).
 - [TransactionPipelineBehavior](../../bmt-be/src/bmt-be.application/behaviors/TransactionPipelineBehavior.cs), [EfUnitOfWork](../../bmt-be/src/bmt-be.persistence/repositories/EfUnitOfWork.cs), [middleware lỗi](../../bmt-be/src/bmt-be.api/middlewares/ExceptionHandlingMiddleware.cs).
 - [Bảng truy vết và kiểm thử kỹ thuật](../discovery/payment-technical-design.md).
-- Đặc tả Unit Test: UT-PAY-001 đến UT-PAY-036 và UT-PAY-071 đến UT-PAY-074. Mẫu PackageMutationReceipt của luồng sau cấp gói được kiểm ở UT-PAY-048 (gán), UT-PAY-061 (hủy, khôi phục); không còn thao tác đổi công trình. Mã test ngày 26/09/2026 trên nhánh `feature/payment-order` của `bmt-be`: `test/bmt-be.application.tests/usecases/payment/`, `test/bmt-be.infrastructure.tests/payments/`, và integration test PostgreSQL `PaymentFlowTests`, `PaymentConstraintTests` (ST-PAY-062 đến ST-PAY-065, UT-PAY-034).
+- Đặc tả Unit Test: UT-PAY-001 đến UT-PAY-036, UT-PAY-071 đến UT-PAY-074, UT-PAY-111 đến UT-PAY-127. UT-PAY-022 sửa ngày 26/09/2026 theo quyết định lưu bản ghi lệch và cảnh báo (Q6). System Test của STORY-PAY-003: ST-PAY-089 đến ST-PAY-101. Mã test của API quản trị connection: `test/bmt-be.application.tests/usecases/payment/PaymentConnectionAdminTests.cs` và `test/bmt-be.integration.tests/PaymentConnectionAdminTests.cs`. Mẫu PackageMutationReceipt của luồng sau cấp gói được kiểm ở UT-PAY-048 (gán), UT-PAY-061 (hủy, khôi phục); không còn thao tác đổi công trình. Mã test ngày 26/09/2026 trên nhánh `feature/payment-order` của `bmt-be`: `test/bmt-be.application.tests/usecases/payment/`, `test/bmt-be.infrastructure.tests/payments/`, và integration test PostgreSQL `PaymentFlowTests`, `PaymentConstraintTests` (ST-PAY-062 đến ST-PAY-065, UT-PAY-034).
 
 ## Change Log
 
+- 2026-09-26 (chốt Q1–Q7 và triển khai quản trị connection): Người dùng trả lời Q1–Q7 ngày 26/09/2026, đều theo phương án đề xuất; bảng câu hỏi ở Architecture chuyển thành bảng quyết định đã xác nhận. Q6 đổi hành vi đã code ở `62b226f`: vẫn lưu mỗi webhook lệch nhưng chỉ báo lần đầu của mỗi cặp (giao dịch gốc, CanonicalHash), nhờ cột `BankTransactionConflict.Alerted` và unique index có điều kiện (commit `97108bb`, migration `20260926074258_PaymentAlerts` sinh lại thay bản `20260926072356`). API quản trị connection, quyền `payment.connection.manage`, bảng PaymentActiveConnection và PaymentConnectionEvent, biến `SePayOption__Environment` thay `SePayOption__ActiveConnectionId` đã có code ở commit `3256436`, migration `20260926075035_PaymentConnectionAdmin`; chưa merge, chưa áp dụng lên database dùng chung. Khác bản thiết kế trước: chọn connection đang dùng khóa dòng lựa chọn trước rồi mới chèn khi chưa có, thay cho chèn trước rồi khóa, vì dòng lựa chọn cần ConnectionId hợp lệ ngay lúc chèn. Thêm ST-PAY-089 đến ST-PAY-101 và UT-PAY-113 đến UT-PAY-127.
+- 2026-09-26 (cảnh báo và thiết kế quản trị connection): Theo quyết định người dùng ngày 26/09/2026. (1) Webhook cùng id nhưng khác dữ kiện: vẫn trả 200, giữ dòng gốc, không cộng tiền; lưu nội dung lệch vào bảng mới BankTransactionConflict và gửi cảnh báo Discord `PaymentWebhookConflict` sau commit. Điểm này thay điểm (5) “ghi log cảnh báo (đang chờ xác nhận)” của mục triển khai bên dưới. (2) Worker vẫn thử lại mãi; lần thử thứ 10 gửi cảnh báo `PaymentProcessingRetry`, mỗi giao dịch một lần nhờ cột mới `BankTransaction.RetryAlertedAtUtc`. Hai điểm này đã có code ở commit `62b226f` trên nhánh `feature/payment-alerts-connections` của `bmt-be` (tách từ `develop` `de3c61f`, chưa merge), migration `20260926072356_PaymentAlerts` chưa áp dụng lên database dùng chung; đặc tả UT-PAY-022 (sửa), UT-PAY-111, UT-PAY-112. Phương án báo mỗi lần nhận webhook lệch còn chờ xác nhận (Q6). (3) VA: giữ code hỗ trợ cả tài khoản chính và VA; phải thử với tài khoản SePay thật trước khi bật Live. (4) Thiết kế API quản trị connection với quyền `payment.connection.manage`, bảng PaymentActiveConnection và PaymentConnectionEvent, cột theo dõi thay đổi của PaymentConnection; thêm bản nháp STORY-PAY-003, BR-PAY-006. Phần (4) chưa có code và chưa có đặc tả test, chờ người dùng chốt TDD và các câu hỏi Q1–Q7 ở Architecture.
 - 2026-09-26 (triển khai): Đã có code ở commit `de3c61f` trên nhánh `feature/payment-order` của `bmt-be`, đã rebase lên `develop` (sau phần dự toán `a557993`), chưa merge vào `develop`. Migration `20260926070317_PaymentOrder` (sinh lại sau rebase, chạy sau `20260926040024_EstimateCatalogAndDraft`) tạo sáu bảng PaymentConnection, PaymentOrder, BankTransaction, PaymentFulfillment, PaymentOperation, PaymentEvent và thêm `AccountCommerceState.LatestPurchaseOrderId` với khóa ngoại ghép `(AccountId, LatestPurchaseOrderId)`; chưa áp dụng lên database dùng chung. Có đủ năm route ở Internal API, worker nền `PaymentProcessingWorker` (nhận việc bằng `FOR UPDATE SKIP LOCKED`, lease, thử lại tăng dần 5 giây tới 5 phút, đánh dấu đơn quá hạn), và bước cấp gói gọi thẳng `CommitDesignPeriodCommandHandler` (không qua MediatR để không commit sớm transaction của worker) hoặc tạo `SupervisionGrant` chưa gán. Cấu hình đọc từ `SePayOption__ActiveConnectionId`, `SePayOption__Connections__{n}__ConnectionId`, `SePayOption__Connections__{n}__WebhookSecret` và `PaymentProcessingOption__*`; `SecretReference` chỉ ghi tên khóa cấu hình để vận hành tra, code tìm secret theo Id connection. Điểm khác thiết kế ở trên: (1) bỏ FK(PlanId, RevisionId) tới PlanRevision vì `PlanRevision.PlanId` nằm trong vòng khóa ngoại với con trỏ bản công bố của Plan và EF 8 từ chối dựng mô hình; phiên bản vẫn có FK(RevisionId, Kind) và FK(RevisionId, OfferKey), handler lấy RevisionId từ `Plan.PublishedRevisionId` dưới khóa Plan; (2) BankTransaction.Code lưu dạng đã chuẩn hóa kèm index (ConnectionId, Code); (3) PaymentOperation có thêm AtUtc; (4) mốc dưới của khoản hợp lệ là lúc tạo đơn làm tròn xuống giây, vì SePay chỉ cho thời điểm giao dịch tới giây (đang chờ xác nhận); (5) webhook cùng id nhưng khác dữ kiện được ACK 200, giữ dòng gốc và ghi log cảnh báo (đang chờ xác nhận); (6) `PackageFulfillmentService` đặt ở application/services, không ở persistence. Tài khoản nhận thật, secret và cách tạo dòng PaymentConnection vẫn chưa có.
 - 2026-09-26 (bước nền): Đã tạo bảng `AccountCommerceState` trong code bằng migration `AccountCommerceState` (commit `a53faeb` trên nhánh `feature/account-commerce-state` của `bmt-be`, chưa merge vào `develop`, chưa áp dụng lên database dùng chung). Bảng có `AccountId` (khóa chính, khóa ngoại `RESTRICT` tới `User`), `NextOrderSequence bigint` với CHECK `> 0` và `Version bigint`; dòng mới có cả hai giá trị bằng 1. Chưa có `LatestPurchaseOrderId` và khóa ngoại ghép `(AccountId, LatestPurchaseOrderId)`; hai phần này thêm cùng bảng `PaymentOrder`. `DesignSubscriptionStore.LockAccountAsync` tạo dòng bằng `INSERT ... ON CONFLICT DO NOTHING` rồi khóa `FOR UPDATE`; mọi luồng gói và lượt đang có lấy khóa này đầu tiên, thay cho khóa dòng `User`. Thiết kế không đổi.
 - 2026-09-25 (lần 2): Bỏ đổi công trình và quyền `supervision.reassign` khỏi mẫu PackageMutationReceipt (BR-SUB-009): mẫu còn ba thao tác gán, hủy, khôi phục; bỏ `SupervisionAssignmentEvent` theo TDD-SUB-004. Thứ tự khóa của luồng gán dùng `FOR KEY SHARE` trên công trình đích theo TDD-SUB-004 và TDD-SITE-001.

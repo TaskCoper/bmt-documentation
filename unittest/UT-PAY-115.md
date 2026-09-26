@@ -33,7 +33,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# UT-PAY-022
+# UT-PAY-115
 
 ## Unit Test
 
@@ -42,9 +42,9 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-022 | Payment | RecordBankTransactionCommandHandler | Error | REGRESSION | P1 | Giao dịch SePay id=99 của connection C1 đã lưu với Amount=500000, AccountNumber=TESTACCOUNT, CanonicalHash=H1. Kênh cảnh báo là bản giả ghi lại từng lần báo; hàng việc sau commit là PostCommitActionQueue thật. Mã test: `PaymentOrderLifecycleTests` (EF InMemory) và `PaymentFlowTests.Webhook_SameIdDifferentFacts_StoresConflictAlertsAndDoesNotCredit` (PostgreSQL). | Webhook cùng id=99 nhưng Amount=1500000, AccountNumber=OTHERACCOUNT, CanonicalHash=H2; sau đó gửi lại đúng webhook lệch này một lần nữa. | Mỗi lần: kết quả thành công (API trả 200 cho SePay), HasConflict=true, TransactionId là Id dòng gốc.<br>Dòng BankTransaction gốc giữ Amount=500000, TESTACCOUNT, H1; không có dòng giao dịch mới.<br>Mỗi webhook lệch tạo một dòng BankTransactionConflict trỏ tới dòng gốc, lưu Amount=1500000, OTHERACCOUNT, H2, mã đã chuẩn hóa và ReceivedAtUtc; không lưu chữ ký hay secret.<br>Chỉ dòng đầu có Alerted=true và chỉ có một cảnh báo PaymentWebhookConflict, Subject là Id dòng đó, gửi sau commit.<br>Worker xử lý xong thì đơn chỉ nhận 500000, không cộng 1500000. | TDD-PAY-001/Architecture<br>TDD-PAY-001/Data Model | Quyết định người dùng ngày 26/09/2026: giữ dòng gốc, không cộng tiền, lưu nội dung lệch mỗi lần nhận; theo Q6 chỉ báo Discord lần đầu cho mỗi cặp (giao dịch gốc, CanonicalHash). | [Chưa xác định] | Draft |
+| UT-PAY-115 | Payment connection | Validator của CreatePaymentConnectionCommand, UpdatePaymentConnectionCommand, SelectActivePaymentConnectionCommand | Boundary | REGRESSION | P2 | Không mock. Mã test: `PaymentConnectionAdminTests.Validate_InvalidInput_ReturnsPaymentConnectionInputInvalid`. | Tạo: Environment=Staging, Gateway rỗng, AccountNumber 101 ký tự, SubAccount 101 ký tự, QrBankCode chỉ có khoảng trắng.<br>Sửa: ConnectionId rỗng, ExpectedVersion=0.<br>Chọn: Environment=live (chữ thường), ConnectionId rỗng, ExpectedVersion=0.<br>Ca hợp lệ: Live, AccountNumber đúng 100 ký tự, SubAccount NULL. | Mỗi trường sai nêu trên có một lỗi mã PaymentConnectionInputInvalid (API trả 422). Ca hợp lệ không có lỗi. | TDD-PAY-001/Internal API<br>BR-PAY-006/Then | Biên 100/101 ký tự và giá trị môi trường chỉ nhận đúng Test hoặc Live. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- TDD-PAY-001/Architecture
-- TDD-PAY-001/Data Model
+- TDD-PAY-001/Internal API
+- BR-PAY-006/Then

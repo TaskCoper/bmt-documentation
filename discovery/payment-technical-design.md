@@ -18,10 +18,11 @@ Test bổ sung: ST-PAY-069 (thu hồi `commerce.read` có hiệu lực theo hạ
 
 | User Story | Quy tắc chính | TDD | Unit Test |
 | --- | --- | --- | --- |
-| [STORY-PAY-001](../userstory/STORY-PAY-001.md) | BR-PAY-001–004, BR-RBAC-005 | [TDD-PAY-001](../tdd/TDD-PAY-001.md) | UT-PAY-001–036, UT-PAY-071–074 |
+| [STORY-PAY-001](../userstory/STORY-PAY-001.md) | BR-PAY-001–004, BR-RBAC-005 | [TDD-PAY-001](../tdd/TDD-PAY-001.md) | UT-PAY-001–036, UT-PAY-071–074, UT-PAY-111–113, UT-PAY-120 |
 | [STORY-SUB-004](../userstory/STORY-SUB-004.md) | BR-SUB-022, BR-SUB-009 (BR-SUB-023 đã bỏ) | [TDD-SUB-004](../tdd/TDD-SUB-004.md) | UT-PAY-037–042, 044, 046–048, 075–077 (043, 045 đã rút) |
 | [STORY-SUB-005](../userstory/STORY-SUB-005.md) | BR-SUB-024–025 | [TDD-SUB-005](../tdd/TDD-SUB-005.md) | UT-PAY-049–062, 078–079 |
 | [STORY-PAY-002](../userstory/STORY-PAY-002.md) | BR-PAY-005 | [TDD-PAY-002](../tdd/TDD-PAY-002.md) | UT-PAY-063–070, 080–081 |
+| [STORY-PAY-003](../userstory/STORY-PAY-003.md) (chốt 26/09/2026) | BR-PAY-006 | [TDD-PAY-001](../tdd/TDD-PAY-001.md), mục Quản trị connection | UT-PAY-114–127 (trừ 120); System Test ST-PAY-089–101 |
 
 ## Đã xác nhận
 
@@ -86,7 +87,7 @@ TDD subscription cũ đã có ghi chú chỉ rõ phần bị thay thế và liê
 | [UT-PAY-019](../unittest/UT-PAY-019.md) | SePayEnvelopeVerifier | TDD-PAY-001/External API |
 | [UT-PAY-020](../unittest/UT-PAY-020.md) | SePayEnvelopeVerifier | TDD-PAY-001/External API |
 | [UT-PAY-021](../unittest/UT-PAY-021.md) | RecordBankTransactionHandler | STORY-PAY-001/AC-013, TDD-PAY-001/Architecture |
-| [UT-PAY-022](../unittest/UT-PAY-022.md) | RecordBankTransactionHandler | TDD-PAY-001/Architecture |
+| [UT-PAY-022](../unittest/UT-PAY-022.md) | RecordBankTransactionHandler — webhook lệch dữ kiện, lưu bản ghi lệch, chỉ báo lần đầu mỗi nội dung lệch (sửa ngày 26/09/2026) | TDD-PAY-001/Architecture, TDD-PAY-001/Data Model |
 | [UT-PAY-023](../unittest/UT-PAY-023.md) | PaymentCodeMatcher | BR-PAY-005/Then, TDD-PAY-001/Architecture |
 | [UT-PAY-024](../unittest/UT-PAY-024.md) | PaymentCodeMatcher | TDD-PAY-001/Architecture |
 | [UT-PAY-025](../unittest/UT-PAY-025.md) | ProcessBankTransactionHandler | TDD-PAY-001/Architecture |
@@ -146,6 +147,23 @@ TDD subscription cũ đã có ghi chú chỉ rõ phần bị thay thế và liê
 | [UT-PAY-079](../unittest/UT-PAY-079.md) | RestorePackageCommandHandler — giữ phân công | BR-SUB-025/Then, BR-RBAC-013/Then, STORY-RBAC-003/ALT-06, TDD-SUB-005/Architecture |
 | [UT-PAY-080](../unittest/UT-PAY-080.md) | Projection gói đã mua — tên công trình | STORY-PAY-002/AC-009, BR-PAY-005/Then, TDD-PAY-002/Data Model, TDD-PAY-002/Internal API |
 | [UT-PAY-081](../unittest/UT-PAY-081.md) | Projection lịch sử — mốc gán công trình | TDD-PAY-002/Internal API, TDD-PAY-002/Data Model |
+| [UT-PAY-111](../unittest/UT-PAY-111.md) | PaymentProcessingRunner — cảnh báo ở lần thử thứ 10, mỗi giao dịch một lần | TDD-PAY-001/Architecture |
+| [UT-PAY-112](../unittest/UT-PAY-112.md) | Đánh dấu đã cảnh báo trên PostgreSQL | TDD-PAY-001/Architecture, TDD-PAY-001/Data Model |
+| [UT-PAY-113](../unittest/UT-PAY-113.md) | Cảnh báo một lần cho mỗi nội dung webhook lệch (Q6) | TDD-PAY-001/Architecture, TDD-PAY-001/Data Model |
+| [UT-PAY-114](../unittest/UT-PAY-114.md) | CreatePaymentConnectionCommandHandler | STORY-PAY-003/AC-001, AC-005, BR-PAY-006/Then, TDD-PAY-001/Internal API |
+| [UT-PAY-115](../unittest/UT-PAY-115.md) | Validator API quản trị connection | TDD-PAY-001/Internal API, BR-PAY-006/Then |
+| [UT-PAY-116](../unittest/UT-PAY-116.md) | Handler quản trị connection — kiểm quyền | STORY-PAY-003/AC-004, EXC-01, BR-PAY-006/Then |
+| [UT-PAY-117](../unittest/UT-PAY-117.md) | UpdatePaymentConnectionCommandHandler — connection chưa dùng | STORY-PAY-003/AC-006, ALT-02, BR-PAY-006/Then |
+| [UT-PAY-118](../unittest/UT-PAY-118.md) | UpdatePaymentConnectionCommandHandler — connection đã dùng | STORY-PAY-003/AC-003, AC-007, EXC-02, BR-PAY-006/Then |
+| [UT-PAY-119](../unittest/UT-PAY-119.md) | UpdatePaymentConnectionCommandHandler — tắt, version, không tìm thấy | STORY-PAY-003/AC-008, EXC-03, BR-PAY-006/Then |
+| [UT-PAY-120](../unittest/UT-PAY-120.md) | CreatePaymentOrderCommandHandler — connection đang dùng theo môi trường | STORY-PAY-003/AC-010, EXC-05, BR-PAY-006/Then |
+| [UT-PAY-121](../unittest/UT-PAY-121.md) | SelectActivePaymentConnectionCommandHandler | STORY-PAY-003/AC-002, AC-013, EXC-04, BR-PAY-006/Then |
+| [UT-PAY-122](../unittest/UT-PAY-122.md) | GetPaymentConnectionHistoryQueryHandler | STORY-PAY-003/AC-012, ALT-03, BR-PAY-006/Then |
+| [UT-PAY-123](../unittest/UT-PAY-123.md) | GetPaymentConnectionsQueryHandler | STORY-PAY-003/Main Flow, AC-005, TDD-PAY-001/Internal API |
+| [UT-PAY-124](../unittest/UT-PAY-124.md) | Ràng buộc PostgreSQL của lựa chọn và lịch sử connection | TDD-PAY-001/Data Model, BR-PAY-006/Then |
+| [UT-PAY-125](../unittest/UT-PAY-125.md) | Sửa tài khoản khi đơn đang tạo giữ khóa (PostgreSQL) | TDD-PAY-001/Architecture, STORY-PAY-003/AC-003 |
+| [UT-PAY-126](../unittest/UT-PAY-126.md) | Đổi connection đang dùng đầu cuối (PostgreSQL) | STORY-PAY-003/AC-002, AC-008, BR-PAY-006/Then |
+| [UT-PAY-127](../unittest/UT-PAY-127.md) | SePayOption — kiểm Environment lúc khởi động | STORY-PAY-003/AC-011, EXC-06, BR-PAY-006/Then |
 
 ## Kiểm thử tích hợp bổ sung
 
@@ -156,6 +174,7 @@ TDD subscription cũ đã có ghi chú chỉ rõ phần bị thay thế và liê
 - [ST-PAY-066](../systemtest/ST-PAY-066.md): Hai gói tranh cùng công trình.
 - [ST-PAY-067](../systemtest/ST-PAY-067.md): Hủy lỗi ghi lịch sử.
 - [ST-PAY-068](../systemtest/ST-PAY-068.md): Tra cứu giao dịch không khớp.
+- [ST-PAY-089](../systemtest/ST-PAY-089.md) đến [ST-PAY-101](../systemtest/ST-PAY-101.md): Quản trị kết nối nhận tiền (STORY-PAY-003), mỗi AC một ca.
 
 ## Kết quả kiểm tra tài liệu
 

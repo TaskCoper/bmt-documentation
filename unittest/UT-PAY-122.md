@@ -33,7 +33,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# UT-PAY-022
+# UT-PAY-122
 
 ## Unit Test
 
@@ -42,9 +42,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-022 | Payment | RecordBankTransactionCommandHandler | Error | REGRESSION | P1 | Giao dịch SePay id=99 của connection C1 đã lưu với Amount=500000, AccountNumber=TESTACCOUNT, CanonicalHash=H1. Kênh cảnh báo là bản giả ghi lại từng lần báo; hàng việc sau commit là PostCommitActionQueue thật. Mã test: `PaymentOrderLifecycleTests` (EF InMemory) và `PaymentFlowTests.Webhook_SameIdDifferentFacts_StoresConflictAlertsAndDoesNotCredit` (PostgreSQL). | Webhook cùng id=99 nhưng Amount=1500000, AccountNumber=OTHERACCOUNT, CanonicalHash=H2; sau đó gửi lại đúng webhook lệch này một lần nữa. | Mỗi lần: kết quả thành công (API trả 200 cho SePay), HasConflict=true, TransactionId là Id dòng gốc.<br>Dòng BankTransaction gốc giữ Amount=500000, TESTACCOUNT, H1; không có dòng giao dịch mới.<br>Mỗi webhook lệch tạo một dòng BankTransactionConflict trỏ tới dòng gốc, lưu Amount=1500000, OTHERACCOUNT, H2, mã đã chuẩn hóa và ReceivedAtUtc; không lưu chữ ký hay secret.<br>Chỉ dòng đầu có Alerted=true và chỉ có một cảnh báo PaymentWebhookConflict, Subject là Id dòng đó, gửi sau commit.<br>Worker xử lý xong thì đơn chỉ nhận 500000, không cộng 1500000. | TDD-PAY-001/Architecture<br>TDD-PAY-001/Data Model | Quyết định người dùng ngày 26/09/2026: giữ dòng gốc, không cộng tiền, lưu nội dung lệch mỗi lần nhận; theo Q6 chỉ báo Discord lần đầu cho mỗi cặp (giao dịch gốc, CanonicalHash). | [Chưa xác định] | Draft |
+| UT-PAY-122 | Payment connection | GetPaymentConnectionHistoryQueryHandler | Happy | REGRESSION | P2 | C1 đã được sửa hai lần ở hai thời điểm khác nhau. Mã test: `PaymentConnectionAdminTests.Handle_History_NewestFirstPagedAndParsed`. | Lấy trang 1, cỡ 1; lấy lịch sử của một Id lạ. | totalCount=2, trả một dòng là lần sửa mới nhất, Detail đọc được after.accountNumber=A3. Id lạ ném PaymentConnectionNotFound (404). | STORY-PAY-003/AC-012<br>STORY-PAY-003/ALT-03<br>BR-PAY-006/Then | Q7: lịch sử mới nhất trước, phân trang theo PagedResult hiện có. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- TDD-PAY-001/Architecture
-- TDD-PAY-001/Data Model
+- STORY-PAY-003/AC-012
+- STORY-PAY-003/ALT-03
+- BR-PAY-006/Then

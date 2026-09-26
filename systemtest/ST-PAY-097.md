@@ -11,11 +11,13 @@
 -->
 
 <!-- Mỗi file chứa một test, đúng một dòng dữ liệu và 13 cột theo thứ tự bên dưới.
-Thay UT-001 ở heading và Test ID. Trong ô bảng: xuống dòng bằng <br>, dấu | viết thành \|.
-Loại: Happy / Branch / Boundary / Error / Quirk / Determinism. Suite: SMOKE / REGRESSION / FULL. Priority: P0 / P1 / P2 / P3.
+Thay ST-001 ở heading và Test ID, STORY-001 bằng mã Story cần kiểm thử.
+Trong ô bảng: xuống dòng bằng <br>, dấu | viết thành \|. Steps gồm các bước đánh số.
+Loại: Main / ALT / EXC / NFR / Integration boundary; ghép nhiều loại bằng dấu /.
+Suite: SMOKE / REGRESSION / FULL. Priority: P0 / P1 / P2 / P3.
 TEST_LINKS là nguồn liên kết khi import; cột Trace to chỉ để đọc. Giữ hai nơi nhất quán.
-Mỗi liên kết dùng DOC-KEY/section: ghi chú. Owner là tên hiển thị; phê duyệt thực hiện sau import.
-Expected output và assertion phải suy ra từ Business Rule/contract đã xác nhận. Dữ liệu mock chỉ là dữ liệu kiểm thử minh hoạ, không phải dữ liệu production; không ghi Pass/đã chạy nếu chưa có bằng chứng thực thi.
+Owner là tên hiển thị; phê duyệt thực hiện sau import.
+Steps và Expected result phải bám Flow, AC và Business Rule của Story có thật. Test data là dữ liệu kiểm thử minh hoạ; không tự thêm hành vi nghiệp vụ hoặc ghi Pass/đã chạy nếu chưa có bằng chứng thực thi.
 BẮT BUỘC KHI HOÀN THIỆN MẪU: phải có cả Reviewer và Approver, mỗi tên 1–200 ký tự sau khi bỏ khoảng trắng đầu/cuối. Không xoá hai dòng metadata, để trống, dùng tên bịa hoặc giữ placeholder rồi coi là hoàn tất.
 Nếu chưa biết người review hoặc người phê duyệt, phải hỏi người dùng và báo tài liệu chưa đủ thông tin; không tự lấy Author/Owner làm người thay thế. Tên trong file không tự gán tài khoản hoặc xác nhận đã duyệt; gán thành viên trên giao diện sau import.
 Đây là yêu cầu hoàn thiện mẫu; backend hiện vẫn nhận file cũ thiếu hai trường để tương thích.
@@ -27,24 +29,24 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Không dùng Status trong Markdown hoặc tên Approver để tự xác nhận phê duyệt; import không cấp quyền hay gán tài khoản từ tên. Chạy Kiểm tra file và xử lý lỗi/cảnh báo trước khi nhập.
 - Giới hạn độ dài bên dưới tính theo string.Length của .NET (đơn vị UTF-16); không tự cắt ngắn dữ kiện quan trọng để vượt validation, hãy viết lại có căn cứ hoặc hỏi người dùng.
 - Bảng phải có header, dòng phân cách và đúng một dòng dữ liệu, đủ 13 cột theo thứ tự mẫu. Reviewer/Approver là hai bullet trước bảng, không thêm thành cột. Test ID trong bảng phải nhất quán với heading; mã tài liệu import lấy từ heading.
-- Module tối đa 200 ký tự; Unit under test tối đa 500 (được dùng làm tiêu đề tài liệu); Owner tối đa 200. Trạng thái parser nhận: Draft / Approved; đây không phải kết quả chạy test hoặc quyền phê duyệt.
-- Giữ Loại: Happy / Branch / Boundary / Error / Quirk / Determinism; Suite: SMOKE / REGRESSION / FULL; Priority: P0 / P1 / P2 / P3. Không dùng số ngoài dải Priority 0–3.
-- Không xuống dòng vật lý trong ô: dùng <br>; dấu phân cột trong nội dung phải viết \|. TEST_LINKS mới là nguồn liên kết import; cột Trace to chỉ hiển thị, hai nơi phải nhất quán.
+- Story tối đa 100 ký tự và được dùng làm tiêu đề tài liệu; Owner tối đa 200. Trạng thái parser nhận: Draft / Approved; đây không phải kết quả chạy test hoặc quyền phê duyệt.
+- Giữ Loại: Main / ALT / EXC / NFR / Integration boundary, có thể ghép bằng dấu /; Suite: SMOKE / REGRESSION / FULL; Priority: P0 / P1 / P2 / P3. Không dùng số ngoài dải Priority 0–3.
+- Steps là các bước đánh số trong một ô, tách bằng <br>; không xuống dòng vật lý trong ô, dấu | trong nội dung phải viết \|. TEST_LINKS mới là nguồn liên kết import; cột Trace to chỉ hiển thị, hai nơi phải nhất quán.
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# UT-PAY-022
+# ST-PAY-097
 
-## Unit Test
+## System Test
 
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
 
-| Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
+| Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-022 | Payment | RecordBankTransactionCommandHandler | Error | REGRESSION | P1 | Giao dịch SePay id=99 của connection C1 đã lưu với Amount=500000, AccountNumber=TESTACCOUNT, CanonicalHash=H1. Kênh cảnh báo là bản giả ghi lại từng lần báo; hàng việc sau commit là PostCommitActionQueue thật. Mã test: `PaymentOrderLifecycleTests` (EF InMemory) và `PaymentFlowTests.Webhook_SameIdDifferentFacts_StoresConflictAlertsAndDoesNotCredit` (PostgreSQL). | Webhook cùng id=99 nhưng Amount=1500000, AccountNumber=OTHERACCOUNT, CanonicalHash=H2; sau đó gửi lại đúng webhook lệch này một lần nữa. | Mỗi lần: kết quả thành công (API trả 200 cho SePay), HasConflict=true, TransactionId là Id dòng gốc.<br>Dòng BankTransaction gốc giữ Amount=500000, TESTACCOUNT, H1; không có dòng giao dịch mới.<br>Mỗi webhook lệch tạo một dòng BankTransactionConflict trỏ tới dòng gốc, lưu Amount=1500000, OTHERACCOUNT, H2, mã đã chuẩn hóa và ReceivedAtUtc; không lưu chữ ký hay secret.<br>Chỉ dòng đầu có Alerted=true và chỉ có một cảnh báo PaymentWebhookConflict, Subject là Id dòng đó, gửi sau commit.<br>Worker xử lý xong thì đơn chỉ nhận 500000, không cộng 1500000. | TDD-PAY-001/Architecture<br>TDD-PAY-001/Data Model | Quyết định người dùng ngày 26/09/2026: giữ dòng gốc, không cộng tiền, lưu nội dung lệch mỗi lần nhận; theo Q6 chỉ báo Discord lần đầu cho mỗi cặp (giao dịch gốc, CanonicalHash). | [Chưa xác định] | Draft |
+| ST-PAY-097 | STORY-PAY-003 | EXC | FULL | P2 | Kết nối C1 đã tạo, có lịch sử. Người có quyền P đang đăng nhập. | 1. P tìm thao tác xóa kết nối trên giao diện quản trị.<br>2. P gửi DELETE /api/v1/admin/payment-connections/C1 trực tiếp.<br>3. Kiểm tra C1 và lịch sử. | C1 là kết nối thử. | Giao diện không có thao tác xóa. Yêu cầu DELETE không thành công (API không có route xóa, trả mã lỗi của framework như 405). C1 và lịch sử giữ nguyên. | STORY-PAY-003/AC-009<br>BR-PAY-006/Then | Không xóa kết nối để giữ lịch sử và căn cứ đối chiếu; ngừng dùng bằng cách tắt (Q3). Đặc tả chưa chạy. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- TDD-PAY-001/Architecture
-- TDD-PAY-001/Data Model
+- STORY-PAY-003/AC-009
+- BR-PAY-006/Then

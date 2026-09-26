@@ -33,7 +33,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# UT-PAY-022
+# UT-PAY-112
 
 ## Unit Test
 
@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-022 | Payment | RecordBankTransactionCommandHandler | Error | REGRESSION | P1 | Giao dịch SePay id=99 của connection C1 đã lưu với Amount=500000, AccountNumber=TESTACCOUNT, CanonicalHash=H1. Kênh cảnh báo là bản giả ghi lại từng lần báo; hàng việc sau commit là PostCommitActionQueue thật. Mã test: `PaymentOrderLifecycleTests` (EF InMemory) và `PaymentFlowTests.Webhook_SameIdDifferentFacts_StoresConflictAlertsAndDoesNotCredit` (PostgreSQL). | Webhook cùng id=99 nhưng Amount=1500000, AccountNumber=OTHERACCOUNT, CanonicalHash=H2; sau đó gửi lại đúng webhook lệch này một lần nữa. | Mỗi lần: kết quả thành công (API trả 200 cho SePay), HasConflict=true, TransactionId là Id dòng gốc.<br>Dòng BankTransaction gốc giữ Amount=500000, TESTACCOUNT, H1; không có dòng giao dịch mới.<br>Mỗi webhook lệch tạo một dòng BankTransactionConflict trỏ tới dòng gốc, lưu Amount=1500000, OTHERACCOUNT, H2, mã đã chuẩn hóa và ReceivedAtUtc; không lưu chữ ký hay secret.<br>Chỉ dòng đầu có Alerted=true và chỉ có một cảnh báo PaymentWebhookConflict, Subject là Id dòng đó, gửi sau commit.<br>Worker xử lý xong thì đơn chỉ nhận 500000, không cộng 1500000. | TDD-PAY-001/Architecture<br>TDD-PAY-001/Data Model | Quyết định người dùng ngày 26/09/2026: giữ dòng gốc, không cộng tiền, lưu nội dung lệch mỗi lần nhận; theo Q6 chỉ báo Discord lần đầu cho mỗi cặp (giao dịch gốc, CanonicalHash). | [Chưa xác định] | Draft |
+| UT-PAY-112 | Payment | PaymentStore.TryMarkRetryAlertedAsync và PaymentProcessingRunner trên PostgreSQL | Determinism | REGRESSION | P1 | PostgreSQL thật qua Testcontainers, đủ migration đến `PaymentAlerts`. Đơn thiết kế giá 2000000 và giao dịch đủ tiền T1 đã lưu. Dịch vụ cấp gói luôn ném lỗi. Kênh cảnh báo giả. Mã test: `PaymentFlowTests.Process_FailsRepeatedly_AlertsOnceAtTenthAttemptAndKeepsRetrying` và `PaymentFlowTests.MarkRetryAlerted_TwoConcurrentCalls_OnlyOneSucceeds`. Không chạy được bằng EF InMemory. | Nhận việc T1 với số lần thử 9, 10, 11 rồi xử lý. Ca phụ: hai kết nối cùng gọi đánh dấu đã cảnh báo cho một giao dịch, sau đó gọi thêm lần thứ ba. | Sau mỗi lần: T1 ở Retry, LastErrorCode=InvalidOperationException, đơn vẫn Pending, không có kết quả cấp gói.<br>Sau lần 9: RetryAlertedAtUtc=NULL, không có cảnh báo.<br>Sau lần 10 và 11: RetryAlertedAtUtc là thời điểm của lần 10, có đúng một cảnh báo PaymentProcessingRetry cho T1.<br>Ca phụ: đúng một lời gọi trả true, lần thứ ba trả false. | TDD-PAY-001/Architecture<br>TDD-PAY-001/Data Model | Mỗi giao dịch chỉ báo một lần phải đúng cả khi nhiều worker cùng chạy; điều này dựa vào câu UPDATE có điều kiện của PostgreSQL. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

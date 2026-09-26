@@ -33,7 +33,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# UT-PAY-022
+# UT-PAY-111
 
 ## Unit Test
 
@@ -42,9 +42,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-022 | Payment | RecordBankTransactionCommandHandler | Error | REGRESSION | P1 | Giao dịch SePay id=99 của connection C1 đã lưu với Amount=500000, AccountNumber=TESTACCOUNT, CanonicalHash=H1. Kênh cảnh báo là bản giả ghi lại từng lần báo; hàng việc sau commit là PostCommitActionQueue thật. Mã test: `PaymentOrderLifecycleTests` (EF InMemory) và `PaymentFlowTests.Webhook_SameIdDifferentFacts_StoresConflictAlertsAndDoesNotCredit` (PostgreSQL). | Webhook cùng id=99 nhưng Amount=1500000, AccountNumber=OTHERACCOUNT, CanonicalHash=H2; sau đó gửi lại đúng webhook lệch này một lần nữa. | Mỗi lần: kết quả thành công (API trả 200 cho SePay), HasConflict=true, TransactionId là Id dòng gốc.<br>Dòng BankTransaction gốc giữ Amount=500000, TESTACCOUNT, H1; không có dòng giao dịch mới.<br>Mỗi webhook lệch tạo một dòng BankTransactionConflict trỏ tới dòng gốc, lưu Amount=1500000, OTHERACCOUNT, H2, mã đã chuẩn hóa và ReceivedAtUtc; không lưu chữ ký hay secret.<br>Chỉ dòng đầu có Alerted=true và chỉ có một cảnh báo PaymentWebhookConflict, Subject là Id dòng đó, gửi sau commit.<br>Worker xử lý xong thì đơn chỉ nhận 500000, không cộng 1500000. | TDD-PAY-001/Architecture<br>TDD-PAY-001/Data Model | Quyết định người dùng ngày 26/09/2026: giữ dòng gốc, không cộng tiền, lưu nội dung lệch mỗi lần nhận; theo Q6 chỉ báo Discord lần đầu cho mỗi cặp (giao dịch gốc, CanonicalHash). | [Chưa xác định] | Draft |
+| UT-PAY-111 | Payment | PaymentProcessingRunner — cảnh báo xử lý lỗi lặp lại | Boundary | REGRESSION | P1 | Lệnh xử lý giao dịch T1 luôn ném lỗi mã QuotaStoreDown. Store giả: ReleaseForRetryAsync trả true; TryMarkRetryAlertedAsync trả true ở lần gọi đầu, false ở các lần sau (giống câu UPDATE có điều kiện). Kênh cảnh báo giả. AlertAfterAttempts mặc định 10. Mã test: `PaymentProcessingRunnerTests`. | Lần lượt xử lý các lần nhận việc của T1 với số lần thử 8, 9, 10, 11, 12. Ca phụ: lần thử 10 nhưng ReleaseForRetryAsync trả false (đã mất lease). | Cả năm lần đều hẹn thử lại, không bỏ việc.<br>Lần 8 và 9: không gọi đánh dấu, không cảnh báo.<br>Lần 10: gửi đúng một cảnh báo PaymentProcessingRetry, Subject là Id của T1, Detail có số lần thử 10 và mã lỗi QuotaStoreDown.<br>Lần 11 và 12: không gửi thêm cảnh báo.<br>Ca mất lease: không đánh dấu, không cảnh báo. | TDD-PAY-001/Architecture | Quyết định người dùng ngày 26/09/2026: vẫn thử lại mãi, tới lần thử thứ 10 báo Discord, mỗi giao dịch chỉ báo một lần. Kiểm biên 9/10/11. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - TDD-PAY-001/Architecture
-- TDD-PAY-001/Data Model
