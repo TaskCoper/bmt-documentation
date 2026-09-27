@@ -37,7 +37,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Rule Info
 
-- **Name**: Admin cấu hình gói bằng danh mục quyền lợi do hệ thống định nghĩa sẵn.
+- **Name**: Admin quản lý danh mục gói, thông tin hiển thị và quyền lợi do hệ thống định nghĩa sẵn.
 - **Category**: Subscription và entitlement
 - **Status**: Draft
 - **Version**:
@@ -49,11 +49,11 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Statement
 
-Hệ thống định nghĩa sẵn danh mục quyền lợi gắn với các tính năng. Admin chọn quyền lợi trong danh mục và cấu hình giá trị cho từng gói; không tự tạo định nghĩa quyền lợi mới qua chức năng quản trị gói. Gói chưa có quyền lợi được lưu nháp; khi Công bố, gói thiết kế phải có ít nhất một quyền lợi. Gói giám sát không dùng danh mục quyền lợi; gói được Công bố khi có tên, giá và mô tả dịch vụ tự do.
+Hệ thống định nghĩa sẵn danh mục quyền lợi gắn với các tính năng. Admin chọn quyền lợi trong danh mục và cấu hình giá trị cho từng gói; không tự tạo định nghĩa quyền lợi mới qua chức năng quản trị gói. Gói chưa có quyền lợi được lưu nháp; khi Công bố, gói thiết kế phải có ít nhất một quyền lợi và ảnh bìa. Admin cấu hình trạng thái nổi bật, nhãn đi kèm và nội dung quà tặng để hiển thị cho gói thiết kế. Gói giám sát không dùng danh mục quyền lợi; gói được Công bố khi có tên, giá và mô tả dịch vụ tự do. Người có quyền quản lý gói được xem danh mục của cả hai loại, gồm gói nháp, đang bán và ngừng bán.
 
 ## When
 
-Admin chọn hoặc cấu hình quyền lợi trong bản nháp của gói, hoặc hệ thống kiểm tra quyền đã cấp theo gói thiết kế.
+Admin xem danh mục gói, cấu hình thông tin hiển thị hoặc quyền lợi trong bản nháp, yêu cầu Công bố; hoặc hệ thống kiểm tra quyền đã cấp theo gói thiết kế.
 
 ## Then
 
@@ -75,11 +75,27 @@ Admin chọn hoặc cấu hình quyền lợi trong bản nháp của gói, ho�
 
 12. Trong phạm vi hiện tại, chỉ Số phương án thiết kế mới và Tra cứu thư viện mẫu là quyền dạng lượt có logic kiểm tra sử dụng, giữ/trừ/giải phóng lượt theo quy tắc riêng đã chốt. Các quyền lợi còn lại cấu hình bật/tắt theo gói để lưu và hiển thị; không triển khai kiểm tra quyền sử dụng, bộ đếm hoặc logic tính năng tương ứng. Không cấu hình mức tính năng cụ thể trong đợt này. Bật một quyền hiển thị không tự cấp thêm lượt tạo/tra cứu hoặc bắt đầu dịch vụ. Khả năng hỗ trợ dạng mức trong thiết kế chung không tạo nghĩa vụ triển khai tính năng phân mức hiện tại.
 
+13. Gói thiết kế được lưu nháp khi chưa có ảnh bìa nếu các dữ liệu khác hợp lệ. Khi Công bố, ảnh bìa là bắt buộc; thiếu ảnh thì từ chối, giữ bản nháp và không thay thế bản đang công bố. Điều kiện này bổ sung cho các điều kiện công bố hiện có, gồm hai lựa chọn tháng/năm theo BR-SUB-015 và ít nhất một quyền lợi hợp lệ.
+
+14. Admin được đánh dấu gói thiết kế nổi bật và nhập nhãn đi kèm cho từng gói. Nhiều gói có thể cùng nổi bật; bật cho gói này không tự tắt ở gói khác. Khi bỏ đánh dấu nổi bật và Công bố, gói không còn hiển thị như gói nổi bật hoặc hiện nhãn nổi bật. Trạng thái và nhãn này không tạo bậc gói, không thay giá, hạn mức hoặc quyền sử dụng.
+
+15. Admin được nhập mô tả quà và điều kiện áp dụng cho gói thiết kế để hiển thị. Gói không có quà không phải nhập nội dung này. Không dùng mô tả quà làm quyền lợi có bộ đếm, không tự xét điều kiện, cấp quà, ghi nhận nhận quà hoặc tạo luồng đổi quà. Không mặc định chỉ một gói có quà hoặc lấy giá trị quà trên trang tham khảo làm cấu hình bán.
+
+16. Ảnh bìa, trạng thái nổi bật, nhãn và nội dung quà đi cùng quy trình lưu nháp/Công bố của gói. Lưu nháp không thay nội dung khách đang xem; sau Công bố, danh mục dành cho khách dùng nội dung đã công bố của gói đang bán. Thay đổi nội dung hiển thị không tự sửa giá, hạn mức, thời hạn hoặc quyền đã cấp. Việc hiển thị quà không mở rộng chính sách chốt mô tả tư vấn theo đơn sang quà tặng.
+
+17. API danh sách gói dành cho quản trị yêu cầu quyền `plan.manage`, cùng quyền quản lý gói hiện có. Danh sách cho phép xem mọi gói thiết kế và giám sát ở các trạng thái nháp, đang bán, ngừng bán; trả thông tin nhận diện và trạng thái để Admin chọn mở gói. Người thiếu quyền không được lấy danh sách này, kể cả gọi API trực tiếp. Danh sách dành cho khách vẫn chỉ gồm gói đang bán; danh sách gói quản trị không phải lịch sử gói khách đã mua.
+
 ## Except
 
 Không có luồng Admin tự tạo định nghĩa quyền lợi trong phạm vi đã chốt. Cách bổ sung hoặc thay đổi danh mục khi hệ thống có tính năng mới thuộc thiết kế và triển khai của tính năng đó.
 
+Gói đã công bố trước khi bổ sung yêu cầu ảnh bìa vẫn được bán dù chưa có ảnh. Không tự ẩn, ngừng bán hoặc sửa bản đã công bố; lần Công bố tiếp theo phải bổ sung ảnh theo khoản 13. Người dùng xác nhận cách chuyển đổi này ngày 27/09/2026.
+
 ## Notes
+
+- **Đã xác nhận ngày 27/09/2026:** người dùng đã chốt phần bổ sung US/BR tại khoản 13–17 và STORY-SUB-002/AC-028 đến AC-035. Giữ tháng/năm; ảnh bắt buộc khi Công bố nhưng được thiếu ở bản nháp; nhiều gói có thể cùng nổi bật với nhãn riêng; quà chỉ có mô tả và điều kiện áp dụng; Admin xem được tất cả gói. Các đặc tả ST-SUB-128 đến ST-SUB-135 bao phủ phần bổ sung, chưa chạy. Người dùng đã chốt TDD-SUB-001 ngày 27/09/2026; UT-SUB-095 đến UT-SUB-120 là đặc tả Unit Test bổ sung, chưa có mã test và chưa chạy.
+- **Đề xuất chưa chốt:** mô tả ngắn riêng trên thẻ gói và thứ tự hiển thị do Admin cấu hình. Chưa đưa hai mục này thành điều kiện công bố hoặc tiêu chí nghiệm thu.
+- **Đã xác nhận về dữ liệu cũ:** giữ gói đang bán; ảnh bắt buộc ở lần Công bố tiếp theo, theo Except. Chi tiết migration và tương thích client thuộc TDD-SUB-001/Data Model.
 
 - Người dùng xác nhận ngày 25/09/2026: gói giám sát không dùng danh mục quyền lợi vì lịch và lượt giám sát đang vận hành offline; điều kiện ít nhất một quyền lợi ở khoản 7 chỉ áp dụng cho gói thiết kế.
 
