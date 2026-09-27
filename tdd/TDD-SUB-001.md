@@ -53,6 +53,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ### Problem
 
+**Bổ sung 27/09/2026 — đã triển khai và kiểm thử backend trong workspace:** người dùng đã chốt STORY-SUB-002/AC-028 đến AC-035 và BR-SUB-008 khoản 13–17. Gói thiết kế cần ảnh bìa, đánh dấu nổi bật kèm nhãn, mô tả quà và điều kiện áp dụng; quản trị cần danh sách mọi gói. Người dùng cũng xác nhận giữ gói cũ đang bán khi chưa có ảnh, bắt bổ sung ảnh ở lần Công bố tiếp theo. Các đặc tả ST-SUB-128 đến ST-SUB-135 đã được viết, chưa chạy; người dùng đã chốt phần TDD bổ sung trong hội thoại ngày 27/09/2026. UT-SUB-095 đến UT-SUB-120 có mã test backend theo thiết kế đã chốt. Kết quả thực thi và giới hạn phạm vi nằm trong [bàn giao triển khai](../discovery/plan-presentation-implementation.md#kiểm-chứng); frontend chưa triển khai vì chưa có mã nguồn trong workspace. Trạng thái Draft trong metadata được giữ vì không thực hiện phê duyệt/import trên hệ thống tài liệu.
+
+Khảo sát code trước triển khai ngày 27/09/2026: `CreatePlanCommand`, `SaveDraftCommand`, `PlanRevision`, `Response.RevisionView` chưa có các trường hiển thị mới; `PlanApi` chưa có GET collection cho admin. `BenefitConstants` và migration `PlanCatalog` mới khởi tạo hai mã tính lượt, chưa có `design.render3d`; nhận định trước đây rằng seed 3D đã tồn tại là không đúng. Quyền hiển thị 3D đã có căn cứ tại AC-025, cần bổ sung định nghĩa Boolean để cấu hình được. Không tự bổ sung các quyền quảng cáo khác chưa chốt tên.
+
 **Cập nhật hợp đồng khi bổ sung thanh toán:** TDD-PAY-001/Data Model mở rộng PlanOffer thành OfferKey Month/Year cho gói thiết kế và một lựa chọn giá cho gói giám sát, giá giám sát theo revision và giá thanh toán nguyên VNĐ. Từ 25/09/2026, mã lựa chọn giá của gói giám sát đổi từ `Project` thành `ConstructionSite` vì gói giám sát gắn với công trình, không gắn với bản dự toán. API danh mục phải hỗ trợ cấu hình/công bố offer `ConstructionSite` để checkout giám sát có nguồn giá thật. Snapshot của đơn được chốt lúc tạo, không lúc cấp (BR-PAY-001). Xem [bàn giao thiết kế mới](../discovery/payment-technical-design.md). Các phần còn lại giữ làm nguồn thiết kế; nội dung bị thay phải đọc theo TDD mới trước khi triển khai.
 
 **Cập nhật 25/09/2026 theo nghiệp vụ đã chốt:**
@@ -68,6 +72,8 @@ Nguồn hiện hành là STORY-SUB-002/AC-025, AC-026, AC-027 và quyết địn
 
 ### Goals
 
+- Lưu và trả đủ thông tin hiển thị đã chốt của gói thiết kế; sửa nháp không làm đổi bản khách đang xem. Giữ lựa chọn tháng/năm trên màn hình, hiển thị giá và quota từ đúng offer.
+- Thêm API danh sách quản trị có phân trang, lọc loại/trạng thái và quyền `plan.manage`; mặc định xem cả hai loại, đủ ba trạng thái bán.
 - Tách định nghĩa quyền hệ thống, bản nháp và bản công bố bất biến; kỳ sử dụng tham chiếu đúng phiên bản.
 - Hai lựa chọn tháng/năm có giá và hạn mức riêng; Boolean chung trong cùng phiên bản gói.
 - Kiểm tra giá VND dương, hạn mức ít nhất 1 hoặc không giới hạn; không công bố gói thiết kế có danh sách quyền rỗng.
@@ -76,6 +82,8 @@ Nguồn hiện hành là STORY-SUB-002/AC-025, AC-026, AC-027 và quyết địn
 
 ### Non-goals
 
+- Cấp/nhận/đổi quà hoặc tự xét điều kiện nhận quà; chốt quà thành cam kết của đơn/kỳ mua. `giftDescription` và `giftConditions` chỉ là nội dung hiển thị trong danh mục.
+- Mô tả ngắn riêng (`tagline`) và thứ tự thẻ gói (`sortOrder`) chưa chốt. Không nhầm `displayBenefits[].sortOrder` đang có với thứ tự gói, hoặc dùng nổi bật làm bậc nâng/hạ.
 - Thanh toán, hoàn tiền, khuyến mãi, gia hạn tự động, giao dịch cấp gói thủ công. Luồng mua và cấp gói theo TDD-PAY-001.
 - Logic sử dụng của 3D/tư vấn/các quyền hiển thị; cấu hình quyền dạng mức và kiểm tra sử dụng quyền bật/tắt (STORY-SUB-002/AC-001, AC-015, AC-016 không nghiệm thu đợt này); chức năng chỉnh sửa và tính năng đã hoãn.
 - Danh mục quyền lợi, lượt hoặc bộ đếm cho gói giám sát.
@@ -120,7 +128,7 @@ Kiểm tra trước SaveChanges phải chặn sửa/xóa bản Published và th�
 
 **3. Bản nháp và con trỏ công bố — draft/publish**:
 
-Admin sửa phiên bản Draft. Website đọc `Plan.PublishedRevisionId` để chọn đúng một phiên bản đang công bố của gói OnSale. Bản nháp mới sao chép từ bản công bố hiện tại, nên việc sửa nháp không làm đổi quyền đã cấp hoặc nội dung website.
+Admin sửa phiên bản Draft. Website đọc `Plan.PublishedRevisionId` để chọn đúng một phiên bản đang công bố của gói OnSale. Frontend khởi tạo biểu mẫu từ Draft nếu có, nếu không thì từ bản đang công bố; PUT gửi lại toàn bộ nội dung muốn lưu. Code `SaveDraftCommandHandler` hiện tạo revision mới từ payload, không tự sao chép những trường client bỏ qua. Việc sửa nháp không làm đổi quyền đã cấp hoặc nội dung website.
 
 Ví dụ PublishedRevisionId=R1, Admin đang sửa R2 Draft thì website vẫn đọc R1. Khi công bố R2 thành công, con trỏ chuyển sang R2. R1 vẫn là bản đã công bố và được giữ lại; không trả tất cả revision Published như nhiều lựa chọn gói. Mỗi Plan có tối đa một bản Draft theo ràng buộc database.
 
@@ -193,6 +201,12 @@ flowchart LR
 ```
 
 **Notes**:
+- **Thông tin hiển thị bổ sung:** dùng năm cột của `PlanRevision`: `CoverImageUrl`, `IsHighlighted`, `HighlightLabel`, `GiftDescription`, `GiftConditions`. Mỗi giá trị thuộc một revision, dùng chung cho Month/Year; không đặt ở `Plan`, không lặp theo offer, không biến quà thành `BenefitDefinition`. Cách này giữ một nguồn dữ liệu và tận dụng cơ chế bất biến đang có. Ví dụ bản công bố R2 vẫn hiện ảnh A trong khi Admin lưu ảnh B vào R3 Draft; chỉ khi Công bố R3 thành công website mới đổi ảnh.
+- **Luồng ghi đề xuất:** mở rộng `CreatePlanCommand`, `SaveDraftCommand`, `PlanApi.SaveDraftRequest` và input của `PlanConfigurationPolicy`; truyền đủ năm trường qua create, save, dữ liệu đọc lại để publish, và `PlanViewBuilder`. Chuỗi tùy chọn bỏ khoảng trắng đầu/cuối; rỗng thành NULL, không cắt nội dung quá dài. Lưu nháp được khi thiếu ảnh hoặc nhãn; publish gói Design bắt ảnh và, nếu `isHighlighted=true`, bắt nhãn có nội dung để hiển thị theo quyết định mỗi gói có nhãn riêng. Không tự bật/tắt gói khác. Giữ nhãn đã nhập khi `isHighlighted=false` để Admin dùng lại, nhưng frontend không hiển thị nhãn khi cờ là false. Hai trường quà tùy chọn, không tự kiểm nội dung điều kiện; chỉ hiển thị phần có nội dung.
+- **Ảnh bìa:** tên API là `coverImageUrl` để rõ đây là URL, thống nhất cách đặt tên của module tin tức; không dùng `coverImage` làm alias. Frontend upload qua dịch vụ presign đang dùng rồi gửi URL https cố định, không gửi URL PUT upload tạm thời hoặc dữ liệu nhị phân. Backend kiểm URL tuyệt đối https, không khoảng trắng, tối đa 2048 ký tự; tái sử dụng `IUploadedFileUrlPolicy` để kiểm tên miền kho đã cấu hình. URL mới không được phép trả 422; chưa cấu hình kho khi nhận URL mới trả 503. URL giữ nguyên từ Draft hoặc bản đang công bố của chính gói được dùng lại, không kiểm lại danh sách host giống cách `NewsArticleWriteFlow` đang xử lý. Publish kiểm có ảnh đã lưu; không gọi HTTP để tải ảnh hoặc kiểm sự tồn tại. Điều này không bảo đảm tệp ngoài database luôn truy cập được; frontend xử lý ảnh lỗi, và kho phải giữ URL/tệp của các revision còn dùng.
+- **Giới hạn kỹ thuật đề xuất:** nhãn 200 ký tự; mô tả quà và điều kiện mỗi trường 4000 ký tự. Các trường văn bản là plain text, frontend phải mã hóa khi hiển thị, không render thành HTML. Các trường mới chỉ dùng cho Design trong phạm vi này; Supervision gửi NULL/false, giá trị khác bị từ chối 422 `PlanConfigurationInvalid`; không thêm điều kiện ảnh bìa khi công bố Supervision.
+- **Danh sách quản trị:** thêm `Query.GetAdminPlansQuery`, `Response.AdminPlanItem`, `Response.RevisionSummary` và `GetAdminPlansQueryHandler` trong thư mục `plan` theo các tầng hiện có. Endpoint kiểm `plan.manage`, handler gọi `PlanAdminAccess.RequireActiveActorAsync` như API chi tiết. Chỉ đọc `Plan` và các cột cần thiết của Draft/Published, không gọi `PlanViewBuilder.BuildAsync` cho từng gói vì danh sách không cần tải toàn bộ giá/quota. Đếm sau lọc; lấy trang theo `Plan.Id` tăng dần rồi đọc hai revision summary của các PlanId trong trang theo lô hoặc projection có join. Không khóa bản ghi, tạo nháp hay tăng Version từ GET. Không thêm bảng danh sách hoặc cache. `totalCount` và trang có thể lệch tạm thời nếu danh mục đổi giữa hai lần đọc; tải lại danh sách, không hứa một snapshot cố định xuyên nhiều trang.
+- **Tương thích khi lưu nháp:** PUT vẫn thay toàn bộ bản nháp theo contract hiện có, không đổi thành PATCH. POST thiếu các trường mới dùng NULL/false; PUT thiếu các trường mới cũng lưu NULL/false, không tự giữ giá trị đã bỏ khỏi payload. Frontend quản trị phải đọc và gửi lại đầy đủ các trường mới, kể cả khi chỉ sửa giá; triển khai frontend tương ứng trước khi cho sửa/công bố nội dung mới. Client cũ còn tạo/lưu nháp được nhưng không công bố Design thiếu ảnh. Không coi phần request bổ sung là hoàn toàn tương thích với client cũ. Dữ liệu khách đang thấy không đổi cho tới khi có publish hợp lệ.
 - Không thêm microservice, broker, Redis quota hoặc kiến trúc đa tổ chức. `AccountId` ánh xạ `User.Id` đã có, không tự tạo Organization.
 - Định nghĩa quyền do code/seed quản lý, không có API Admin tạo định nghĩa. `UsageKind` chỉ là `DesignGeneration`, `TemplateDetail` hoặc `None`; Boolean luôn None. Client không được gửi/chỉnh trường này.
 - Hiện biết ba mã: `design.generate`, `catalog.detail`, `design.render3d`; danh mục có thể bổ sung Boolean sau khi tên được chốt. Không coi seed ba mã là ràng buộc chỉ có ba quyền. Tư vấn giữ `ConsultationText`; nếu danh mục có mục tư vấn thì Boolean chỉ là hiển thị, không thay text bằng enum mức.
@@ -213,7 +227,8 @@ sequenceDiagram
     A->>API: POST publish với expectedVersion
     API->>H: Kiểm phiên và mã plan.manage, gửi lệnh ghi trong giao dịch
     H->>DB: Khóa Plan FOR UPDATE
-    H->>H: Kiểm version, draft, giá; thiết kế kiểm quyền và chu kỳ, giám sát kiểm mô tả
+    H->>H: Kiểm version, draft, giá; Design kiểm quyền, tháng/năm, ảnh và nhãn nếu nổi bật
+    H->>H: Supervision kiểm mô tả; kiểm trên dữ liệu đã lưu trước khi đổi trạng thái
     alt Không hợp lệ
         H-->>API: Báo lỗi trước khi ghi hoặc hoàn tác thay đổi
     else Hợp lệ
@@ -232,9 +247,9 @@ flowchart TD
     B -->|Có| C{Đúng mã và loại giá trị theo loại gói?}
     C -->|Không| X
     C -->|Có| D{Chỉ lưu nháp?}
-    D -->|Có| E[Lưu cả khi chưa có quyền hoặc mô tả]
+    D -->|Có| E[Lưu cả khi chưa có quyền, ảnh hoặc mô tả]
     D -->|Không| K{Loại gói?}
-    K -->|Design| F{Có ít nhất một quyền và đủ tháng/năm?}
+    K -->|Design| F{Có quyền, đủ tháng/năm, ảnh và nhãn nếu nổi bật?}
     K -->|Supervision| S{Có tên, giá ConstructionSite và mô tả có nội dung?}
     F -->|Không| X
     S -->|Không| X
@@ -266,6 +281,18 @@ Chưa cung cấp thao tác mở bán lại vì nghiệp vụ này chưa chốt. 
 ## Data Model
 
 Các model dưới đây mô tả danh mục gói và cấu hình được bán. Migration `PlanCatalog` đã tạo các bảng này trong code; phần thay đổi cho gói giám sát theo quyết định ngày 25/09/2026 (mã `ConstructionSite`, độ dài `OfferKey`, quy tắc công bố) đã có trong code và migration `20260925074152_ConstructionSiteAndPackageAssignment`.
+
+Năm cột hiển thị của `PlanRevision` bên dưới là phần bổ sung đề xuất ngày 27/09/2026, chưa có migration hoặc code. Một dòng vẫn đại diện cho một bản cấu hình, không tạo thực thể quà hoặc bảng ảnh mới. Admin tạo/sửa các giá trị ở Draft; publish chỉ đổi trạng thái và con trỏ trong transaction hiện có. Các trường này không phải dữ liệu cá nhân và không có `AccountId`; không sao chép sang kỳ mua hay đơn thanh toán trong phạm vi này.
+
+| Cột mới của PlanRevision | PostgreSQL / C# | Giá trị rỗng và ràng buộc | Ý nghĩa |
+|---|---|---|---|
+| CoverImageUrl | `varchar(2048) NULL` / `string?` | NULL khi chưa có ảnh; bắt buộc lúc publish Design ở policy, không đặt CHECK mọi Published phải có ảnh vì còn dữ liệu cũ. | URL cố định của ảnh bìa; không lưu tệp nhị phân. |
+| IsHighlighted | `boolean NOT NULL DEFAULT false` / `bool` | false cho dữ liệu cũ; không có unique index. | Gói có được trình bày nổi bật không; nhiều gói được cùng true. |
+| HighlightLabel | `varchar(200) NULL` / `string?` | NULL nếu chưa nhập; policy bắt có nội dung khi publish với IsHighlighted=true. | Nhãn Admin nhập cho riêng revision; giữ được khi tắt nổi bật nhưng không hiển thị. |
+| GiftDescription | `varchar(4000) NULL` / `string?` | NULL nếu không nhập; không có FK tới danh mục quyền. | Mô tả quà dạng văn bản. |
+| GiftConditions | `varchar(4000) NULL` / `string?` | NULL nếu không nhập; không phân tích thành biểu thức hoặc trạng thái nhận quà. | Nội dung điều kiện áp dụng do Admin nhập. |
+
+Chuỗi rỗng được chuẩn hóa thành NULL tại đường ghi. Không thêm khóa, quan hệ hay ràng buộc xóa mới. Các cột mới phụ thuộc vào khóa revision; không lặp ở `PlanOffer` nên đổi nội dung không gây lệch giữa tháng/năm. `Response.RevisionSummary` là dữ liệu chọn ra khi đọc, không phải bảng được lưu. Không cần index cho năm cột vì chưa có yêu cầu lọc/sắp xếp bằng chúng; truy vấn danh sách dùng PK và index trạng thái/loại hiện có, chỉ thêm index sau khi đo truy vấn thực tế.
 
 | Model | Ý nghĩa và mục đích | Quan hệ với model khác |
 |---|---|---|
@@ -313,6 +340,15 @@ Các điều kiện liên quan nhiều bảng — loại gói, phạm vi quyền
 ```mermaid
 erDiagram
     Plan ||--o{ PlanRevision : revisions
+    PlanRevision {
+        uuid Id PK
+        uuid PlanId FK
+        string CoverImageUrl "nullable"
+        boolean IsHighlighted
+        string HighlightLabel "nullable"
+        string GiftDescription "nullable"
+        string GiftConditions "nullable"
+    }
     PlanRevision ||--o{ PlanOffer : offers
     PlanRevision ||--o{ RevisionBenefit : benefits
     BenefitDefinition ||--o{ RevisionBenefit : defines
@@ -397,6 +433,17 @@ Cả hai bản của `P1` vẫn có trạng thái `Published` vì đều đã đ
 
 Không có `OfferQuota` cho B3. Hạn mức năm được cấu hình riêng và cấp cho cả kỳ năm, không tự nhân hạn mức tháng với 12. `IsUnlimited=true, Limit=NULL` nghĩa là có quyền không giới hạn; không có dòng quota mới là không được cấp quyền đó. `SR1` không có dòng nào ở cả `RevisionBenefit` lẫn `OfferQuota`.
 
+**Mẫu lưu các cột bổ sung của PlanRevision** — nối với P1/R1/R2 ở trên. R1/R2 minh họa revision cũ trước thay đổi; R3 là bản nháp tiếp theo của P1 (Number=3, Kind=Design, PublishedAtUtc=NULL), có giá/quota/quyền giống R2 ở các bảng mẫu, thay RevisionId thành R3. UUID vẫn viết tắt; tên miền là dữ liệu thử và phải nằm trong cấu hình kho của môi trường kiểm thử, không phải URL production.
+
+| Id | State | CoverImageUrl | IsHighlighted | HighlightLabel | GiftDescription | GiftConditions |
+|---|---|---|---|---|---|---|
+| R1 | Published | NULL | false | NULL | NULL | NULL |
+| R2 | Published | NULL | false | NULL | NULL | NULL |
+| R3 | Draft | https://assets.example.test/plans/basic-v3.webp | true | PHỔ BIẾN | Quà vật liệu mẫu | Áp dụng khi ký hợp đồng thi công |
+| SR1 | Published | NULL | false | NULL | NULL | NULL |
+
+Khi R3 còn Draft, P1 vẫn trỏ R2; API khách trả ảnh NULL của R2 và frontend dùng trạng thái thiếu ảnh, không ẩn gói. Công bố R3 hợp lệ chuyển P1.PublishedRevisionId sang R3, R3 thành Published và có PublishedAtUtc; R1/R2 giữ nguyên. Nếu lưu R3 với ảnh NULL thì lưu được nhưng Công bố bị từ chối; con trỏ vẫn là R2. Nhãn/quà dùng chung hai offer của R3; không tạo dòng quota hoặc dữ liệu cấp quà. `Plan.Version` tăng theo từng thao tác ghi thành công như hiện tại.
+
 Đọc một cấu hình theo đường liên kết: `P1 → R2 → (R2, Month) → (R2, Month, B1)` cho biết gói đang bán có giá tháng 250000 VND và 10 lượt tạo. Kỳ đã mua `R1` vẫn đọc quyền của `R1`; dữ liệu sử dụng của khách xem trong [TDD-SUB-002](TDD-SUB-002.md#data-model). Với giám sát, `P2 → SR1 → (SR1, ConstructionSite)` cho biết giá và mô tả dịch vụ đang bán; đơn mua giám sát lưu `RevisionId=SR1` nên mô tả đã chốt không đổi khi có bản công bố sau.
 
 **Notes**:
@@ -406,41 +453,141 @@ Không có `OfferQuota` cho B3. Hạn mức năm được cấu hình riêng và
 - Không suy “ít nhất một quyền” thành “ít nhất một Boolean=true”. Gói chỉ Boolean hiển thị không cho tạo/tra cứu. Nếu muốn cấm bán gói như vậy thì phải chốt thêm nghiệp vụ, không tự thêm validator.
 - Nếu gói không có quyền tạo/tra cứu thì không có dòng OfferQuota tương ứng, không dùng Limit=0. Với Boolean, DTO phân biệt được quyền có giá trị false với quyền không nằm trong gói; cả hai đều không được coi là bật. Cách trình bày trên website vẫn chưa chốt.
 - Chỉ mục `IX_Plan_SaleState_Kind_Id` hỗ trợ danh sách website; mã duy nhất hỗ trợ tra cứu; `IX_PlanRevision_PlanId_State` hỗ trợ đọc bản nháp. Truy vấn chỉ lấy cột cần thiết và không theo dõi thay đổi bằng EF. Chưa lưu danh sách công khai trong bộ nhớ đệm để tránh tiếp tục hiển thị gói vừa ngừng bán. Nếu thêm cache sau này phải có cách cập nhật/xóa dữ liệu cũ.
-- Khi sửa nháp, công bố hoặc ngừng bán, handler khóa bản ghi Plan rồi so sánh `expectedVersion` do client gửi với `Plan.Version`. Đây là kiểm soát cập nhật đồng thời bằng phiên bản (optimistic concurrency): version cũ bị từ chối với HTTP 409, còn lần cập nhật thành công tăng Version. Hai yêu cầu công bố cùng version chỉ có một yêu cầu thành công. Bản nháp mới sao chép cấu hình đang công bố, không sửa bản cũ; công bố không cập nhật kỳ mua hoặc bộ đếm lượt.
+- Khi sửa nháp, công bố hoặc ngừng bán, handler khóa bản ghi Plan rồi so sánh `expectedVersion` do client gửi với `Plan.Version`. Đây là kiểm soát cập nhật đồng thời bằng phiên bản (optimistic concurrency): version cũ bị từ chối với HTTP 409, còn lần cập nhật thành công tăng Version. Hai yêu cầu công bố cùng version chỉ có một yêu cầu thành công. Frontend dùng bản đang công bố để khởi tạo biểu mẫu nếu chưa có Draft; handler tạo nháp từ payload đầy đủ, không sửa bản cũ. Công bố không cập nhật kỳ mua hoặc bộ đếm lượt.
 - Giá gói giám sát nằm ở dòng `PlanOffer` có `OfferKey=ConstructionSite` của phiên bản tương ứng, theo phụ lục [TDD-PAY-001, Data Model](TDD-PAY-001.md#data-model). Số tiền cụ thể chưa chốt; không áp giá tháng/năm của thiết kế sang giám sát và không tạo `OfferQuota` cho gói giám sát. Gói giám sát đã cấp theo [TDD-SUB-004](TDD-SUB-004.md#data-model) (gán công trình), [TDD-SUB-005](TDD-SUB-005.md#data-model) (hủy/khôi phục) và [TDD-SUB-006](TDD-SUB-006.md#data-model) (hoàn thành/mở lại); TDD-SUB-003 chỉ còn giá trị tra cứu. Thành phần xác minh giao dịch được thiết kế trong [TDD-PAY-001](TDD-PAY-001.md#data-model).
-- Hiện trạng: migration `PlanCatalog` đã tạo các bảng, ràng buộc, chỉ mục và dữ liệu khởi tạo hai mã quyền tính lượt, quyền 3D Boolean và mã `plan.manage`; không khởi tạo giá hoặc gói bán. Không tự chạy migration khi ứng dụng khởi động.
 - Migration cho quyết định 25/09/2026 là bước 2 của migration gộp `20260925074152_ConstructionSiteAndPackageAssignment` (database hiện chỉ có dữ liệu dev/test): bỏ `CK_PlanOffer_KindOfferKey`, nới `PlanOffer.OfferKey` từ `varchar(8)` lên `varchar(24)`, đổi các dòng `OfferKey='Project'` sang `'ConstructionSite'`, rồi tạo lại CHECK với giá trị mới. Vì chỉ có dữ liệu thử, không cần chia lô hay kế hoạch chuyển dữ liệu nhiều bước; Down làm ngược lại. `PaymentOrder.OfferKey` trong TDD-PAY-001 cũng cần cùng độ dài và giá trị khi bảng đó được tạo. Kiểm tra sau migration, chạy tay: `SELECT count(*) FROM "PlanOffer" WHERE "OfferKey" = 'Project'` phải bằng 0. Ngày 25/09/2026 đã chạy thử `Up` và `Down` trên PostgreSQL có lựa chọn giá `Project` cũ: `Up` đổi sang `ConstructionSite`, `Down` đổi ngược lại.
+
+**Kế hoạch thay đổi dữ liệu đề xuất ngày 27/09/2026**:
+
+Hiện trạng đã kiểm tra trong source: .NET 8, EF Core/Npgsql 8.0.0; chưa kiểm tra phiên bản PostgreSQL, số dòng và tải ghi trên môi trường sẽ triển khai. Đã tạo migration `20260927031814_PlanPresentation` và kiểm nâng cấp schema cũ trên PostgreSQL 15 trong container tạm; chưa áp dụng lên database dev/live đang chạy. Không dùng ghi chú dữ liệu dev/test của migration ngày 25/09 để suy ra dữ liệu hiện tại vẫn chỉ là dữ liệu thử.
+
+1. Trước triển khai, thống kê số Plan/PlanRevision theo loại và trạng thái; lưu mốc đối chiếu con trỏ công bố, giá, quota, tham chiếu từ đơn/kỳ đã cấp. Kiểm tra `BenefitDefinition.Code='design.render3d'`: chưa có thì thêm; đã có phải đúng Boolean/None/Design, nếu khác thì dừng để xử lý mâu thuẫn, không ghi đè định nghĩa đang được dùng.
+2. Thêm năm cột vào PlanRevision, bốn chuỗi nullable và `IsHighlighted NOT NULL DEFAULT false`; không đặt NOT NULL hoặc CHECK theo trạng thái Published cho ảnh. Không sửa `SaleState`, `PublishedRevisionId`, giá/quota hoặc nội dung revision cũ. Chỉ false là giá trị mặc định của cờ mới; không tự lấy ảnh, nhãn hoặc quà của BASIC/PLUS/PRO từ website để backfill.
+3. Thêm định nghĩa 3D bằng migration với Code=`design.render3d`, Label=`Phối cảnh 3D`, Kind=`Boolean`, UsageKind=`None`, Scope=`Design` và UUID cố định trong migration. Không sửa hai định nghĩa quota hoặc tự thêm 3D vào các gói. `BenefitDefinitionSeed` hiện chỉ biểu diễn quota: không dùng cấu trúc đó để ép 3D thành quyền tính lượt; có thể thêm dòng Boolean riêng. Mẫu B3 ở Data Model là dữ liệu của thiết kế đích, chưa phải dữ liệu đã seed.
+4. Thử migration trên database riêng được tạo từ schema cũ, gồm gói cũ OnSale chưa có ảnh và kỳ mua tham chiếu revision cũ. Đối chiếu lại số dòng, con trỏ, giá/quota và FK; đọc gói cũ vẫn thành công, không bị lọc khỏi danh mục. Kiểm tra đường ghi Published vẫn bị chặn nếu sửa năm cột mới. Đo thời gian/khóa của DDL theo dữ liệu đại diện; chưa cam kết thao tác không khóa hoặc triển khai không gián đoạn.
+5. Triển khai schema trước, sau đó code đọc/ghi và frontend tương ứng. Không để instance API cũ tiếp tục nhận lệnh publish trong lúc bật quy tắc mới vì code cũ không kiểm ảnh. Tạm dừng thao tác quản trị trong cửa sổ chuyển đổi hoặc dùng cơ chế điều phối release hiện có; sau khi mọi instance đã dùng code mới, mở lại thao tác. Frontend công khai phải chịu được ảnh NULL; frontend quản trị gửi lại đầy đủ năm trường khi PUT.
+6. Sau triển khai, gói legacy OnSale tiếp tục được xem/mua theo quy tắc đã chốt; Admin bổ sung ảnh qua bản nháp rồi publish khi sửa gói. Không cập nhật trực tiếp revision đã công bố để lấp ảnh. Mọi lần publish mới của Design đều kiểm ảnh, kể cả revision Draft đã tồn tại trước migration.
+7. Nếu cần quay lại ứng dụng cũ, giữ schema mở rộng và dữ liệu mới, tạm khóa thao tác quản trị để tránh client/code cũ làm mất trường hoặc bỏ qua kiểm ảnh. Không tự chạy Down: xóa cột làm mất nội dung đã nhập; xóa định nghĩa 3D có thể vướng FK từ RevisionBenefit. Ưu tiên sửa tiến tiếp; chỉ thu hồi cấu trúc sau khi đối chiếu dữ liệu và có kế hoạch bảo toàn riêng. Bước này không cho phép đổi trạng thái bán hoặc quyền đã cấp.
+
+**Phạm vi kiểm chứng và thứ tự triển khai dự kiến**:
+
+| Thứ tự | Thành phần dự kiến sửa/thêm | Kết quả cần kiểm chứng |
+|---|---|---|
+| 1 | `domain/entities/PlanRevision.cs`, `persistence/configurations/PlanRevisionConfiguration.cs`, migration mới, `contract/constants/BenefitConstants.cs` | Các cột đúng kiểu/rỗng; dữ liệu cũ giữ nguyên; định nghĩa 3D Boolean dùng được và không phát sinh quota. |
+| 2 | `contract/services/plan/Command.cs`, `PlanApi.SaveDraftRequest`, validators, `PlanConfigurationInput`, `PlanConfigurationPolicy`, các handler create/save/publish | Lưu/đọc đủ trường mới; quy tắc draft/publish, lỗi và transaction không đổi. |
+| 3 | `contract/services/plan/Response.cs`, `application/usecases/queries/plan/PlanViewBuilder.cs` | Public và detail đọc cùng RevisionView mới; public chỉ đọc con trỏ công bố. |
+| 4 | `Query.GetAdminPlansQuery`, `GetAdminPlansQueryHandler`, GET collection trong `PlanApi` | Mọi loại/trạng thái với quyền plan.manage, lọc/phân trang đúng, không nhân bản gói theo số revision. |
+| 5 | Biểu mẫu quản trị và trang `/vi/plans` của frontend | Trường mới có thể nhập/sửa/xóa; GET detail → PUT bảo toàn dữ liệu; màn hình dùng đúng offer tháng/năm. Vị trí file frontend chưa xác minh trong tác vụ này. |
+
+System Test mới truy vết theo bảng ở References/Others, chưa chạy. Kiểm thử tích hợp khi triển khai phải dùng PostgreSQL để kiểm cơ chế bất biến, rollback/version khi publish lỗi và migration từ schema cũ; mock không chứng minh được các ràng buộc này. Sau khi người dùng chốt TDD ngày 27/09/2026, đã viết đặc tả UT-SUB-095 đến UT-SUB-120 cho validator/policy, đường ghi, mapping DTO và query mới. Đã có mã test backend và kết quả thực thi trong [bàn giao](../discovery/plan-presentation-implementation.md#kiểm-chứng); các bước giao diện của System Test chưa chạy.
 
 ## Internal API
 
 ### Endpoints
 
-Tất cả là API v1, prefix thực tế `/api/v{version:apiVersion}`. Bảng endpoint ghi `/api/v1` để rõ hợp đồng. Các route quản trị đã có trong code và gắn policy `plan.manage`; phần quy tắc riêng của gói giám sát bên dưới cũng đã có trong code từ ngày 25/09/2026. Hai loại gói dùng chung một bộ route; `kind` được chọn lúc tạo gói và không đổi sau đó. Không thêm endpoint tạo definition, xóa lịch sử, mở bán lại hoặc cấp subscription.
+Tất cả là API v1, prefix thực tế `/api/v{version:apiVersion}`. Bảng endpoint ghi `/api/v1` để rõ hợp đồng. GET collection quản trị và năm trường hiển thị là phần đề xuất mới ngày 27/09/2026; các route còn lại đã có trong code và gắn policy `plan.manage` nếu là quản trị. Hai loại gói dùng chung một bộ route; `kind` được chọn lúc tạo gói và không đổi sau đó. Không thêm endpoint tạo definition, xóa lịch sử, mở bán lại hoặc cấp subscription.
 
-- **GET** `/api/v1/plans` — Không cần đăng nhập; trả gói OnSale với phiên bản công bố. Query `kind` nhận `Design` (mặc định) hoặc `Supervision`. Phân trang theo Id, `limit` 1–100, mặc định 20. Gói thiết kế trả tên, phiên bản, giá/hạn mức tháng và năm, Boolean và tư vấn. Gói giám sát trả tên, phiên bản, mô tả dịch vụ và giá `ConstructionSite`; không có hạn mức hay quyền lợi. Không trả nháp.
+- **GET** `/api/v1/plans` — Công khai; chỉ trả OnSale và revision hiện hành, thêm năm trường hiển thị trong `revision`. `kind`: Design mặc định hoặc Supervision. Dùng `pageIndex` mặc định 1, `pageSize` mặc định 20, tối đa 100; sắp Id tăng dần theo code, không dùng `limit`. Không trả Draft.
+- **GET** `/api/v1/admin/plans` — Mới: cần `plan.manage`; trả `Result<PagedResult<AdminPlanItem>>`, có thể lọc `kind`, `saleState`, phân trang `pageIndex/pageSize`. Không truyền bộ lọc thì xem cả Design/Supervision và NotPublished/OnSale/Stopped. Mỗi Plan một mục.
 - **GET** `/api/v1/admin/benefit-definitions` — Người có `plan.manage` đọc danh mục quyền do hệ thống định nghĩa; chỉ dùng khi cấu hình gói thiết kế, không sửa UsageKind.
-- **POST** `/api/v1/admin/plans` — Người có `plan.manage` tạo gói `Design` hoặc `Supervision` cùng bản nháp hợp lệ; Code không trùng. Gói chưa xuất hiện trên website.
+- **POST** `/api/v1/admin/plans` — Người có `plan.manage` tạo gói Design/Supervision cùng bản nháp; Code không trùng. Design nhận thêm `coverImageUrl`, `isHighlighted`, `highlightLabel`, `giftDescription`, `giftConditions`. Draft được thiếu ảnh; trả 201 PlanSaved, chưa xuất hiện trên website.
 - **GET** `/api/v1/admin/plans/{planId}` — Người có `plan.manage` đọc phiên bản đang công bố, bản nháp và Version.
-- **PUT** `/api/v1/admin/plans/{planId}/draft` — Người có `plan.manage` gửi toàn bộ bản nháp và expectedVersion. Nếu chưa có nháp, sao chép bản công bố rồi áp dụng dữ liệu mới trong cùng giao dịch. Không đổi nội dung đang hiển thị công khai. Với gói giám sát: `offers` chỉ có dòng `ConstructionSite` không kèm `quotas`, `displayBenefits` rỗng, `consultationText` rỗng; `description` được để trống khi lưu nháp.
-- **POST** `/api/v1/admin/plans/{planId}/publish` — Người có `plan.manage` gửi `{expectedVersion}` để công bố; chưa cho phép khi Stopped. Gói thiết kế cần đủ Month/Year và ít nhất một quyền lợi. Gói giám sát cần tên, giá `ConstructionSite` > 0 VND và mô tả dịch vụ có nội dung; không xét quyền lợi. Trả mã phiên bản quyền lợi và version dữ liệu mới.
-- **POST** `/api/v1/admin/plans/{planId}/stop-selling` — Người có `plan.manage` gửi `{expectedVersion}`; chuyển OnSale sang Stopped, không thay kỳ hoặc gói giám sát đã cấp. Ngừng bán chỉ chặn tạo đơn mới. Đơn đã tạo trước lúc ngừng bán vẫn được hoàn tất theo giá, quyền lợi hoặc mô tả đã lưu trong đơn nếu thanh toán hợp lệ, theo BR-SUB-013 khoản 2 và [TDD-PAY-001](TDD-PAY-001.md#internal-api).
+- **PUT** `/api/v1/admin/plans/{planId}/draft` — Cần `plan.manage`; gửi toàn bộ bản nháp, năm trường mới và `expectedVersion`. Chưa có nháp thì tạo revision từ payload. Không đổi nội dung công khai; thiếu trường mới lưu NULL/false. Các ràng buộc Supervision giữ nguyên, xem contract chung bên dưới.
+- **POST** `/api/v1/admin/plans/{planId}/publish` — Cần `plan.manage`, `{expectedVersion}`; chưa cho khi Stopped. Design cần Month/Year, ít nhất một quyền, ảnh bìa và nhãn nếu nổi bật. Supervision cần tên, giá ConstructionSite > 0 VND, mô tả dịch vụ; không xét quyền lợi hoặc ảnh. Trả PlanPublished.
+- **POST** `/api/v1/admin/plans/{planId}/stop-selling` — Cần `plan.manage` và `{expectedVersion}`; OnSale → Stopped. Chặn đơn mới, giữ quyền/gói đã cấp. Đơn tạo trước lúc ngừng bán vẫn được hoàn tất theo cấu hình đã chốt nếu thanh toán hợp lệ, theo BR-SUB-013 và TDD-PAY-001.
 
 ### Examples
+
+**Contract bổ sung dùng chung cho POST/PUT và `Response.RevisionView`**:
+
+| Tên JSON | Kiểu | Quy ước |
+|---|---|---|
+| coverImageUrl | string hoặc null | URL ảnh bìa, tối đa 2048; null được lưu nháp, Design publish bắt buộc có ảnh. |
+| isHighlighted | boolean | Mặc định false khi không gửi; không dùng chuỗi hoặc danh sách. |
+| highlightLabel | string hoặc null | Nhãn riêng, tối đa 200; chỉ hiển thị khi isHighlighted=true. |
+| giftDescription | string hoặc null | Mô tả quà, tối đa 4000; không phải mã quyền lợi. |
+| giftConditions | string hoặc null | Điều kiện hiển thị, tối đa 4000; không tự xét khách có đạt điều kiện. |
+
+Năm trường nằm ở gốc body tạo/lưu nháp, cùng cấp `description`, không đặt trong `offers` hoặc `displayBenefits`. GET công khai trả trong `revision`; GET chi tiết admin trả trong từng `draft` và `publishedRevision`. Supervision vẫn dùng `offers=[{offerKey:ConstructionSite,price,currency:VND,quotas:[]}]`, `displayBenefits=[]`, `consultationText=""`; năm trường mới dùng NULL/false, không bắt ảnh khi publish. Giá phải nguyên đồng, >0; `isUnlimited=true` đi cùng `limit=null`, không dùng 0. Gói Design lưu nháp được khi chưa đủ offer; publish cần cả Month và Year. `displayBenefits` chỉ nhận mã Boolean có thật trong danh mục. Mã `design.render3d` trong ví dụ được bổ sung bởi migration `PlanPresentation`.
+
+**Query và DTO danh sách admin đề xuất**:
+
+- `kind` tùy chọn: `Design` hoặc `Supervision`; bỏ trống thì lấy cả hai. `saleState` tùy chọn: `NotPublished`, `OnSale`, `Stopped`; bỏ trống thì lấy mọi trạng thái. Chuỗi rỗng coi như không lọc; mã khác trả 422 `PlanListFilterInvalid`. Không dùng `Draft` làm saleState: gói OnSale vẫn có thể đang mở Draft mới.
+- `pageIndex` bắt đầu 1, mặc định 1; nhỏ hơn 1 dùng 1. `pageSize` mặc định 20; ngoài 1–100 dùng 20, cùng quy ước code API công khai hiện tại. Chuỗi không đọc được thành số nguyên trả 400 theo binding hiện có. Tính offset bằng số nguyên 64 bit; offset vượt khả năng Skip/không còn bản ghi trả trang rỗng với totalCount, không để tràn số.
+- Thứ tự cố định `Plan.Id ASC`; mỗi Plan chỉ một mục. `AdminPlanItem` gồm `planId`, `code`, `kind`, `saleState`, `version`, `publishedRevision`, `draft`. Hai trường revision là `RevisionSummary` hoặc null, mỗi summary có `id`, `number`, `name`, `coverImageUrl`, `isHighlighted`, `highlightLabel`. Không gộp tên nháp vào tên đang công bố; Admin biết rõ nội dung nào đang bán. Xem giá/quota/quà đầy đủ qua API chi tiết đang có.
+- `PagedResult` gồm `items`, `pageIndex`, `pageSize`, `totalCount`, `hasNextPage`, `hasPreviousPage`, bọc trong `Result<T>` hiện có. `totalCount` đếm Plan sau lọc, không đếm revision. Không có dữ liệu hoặc trang vượt cuối trả 200 với `items=[]`, không trả 404. Khi danh mục thay đổi trong lúc duyệt trang, client tải lại; chưa cam kết snapshot xuyên trang.
+
+#### POST /api/v1/admin/plans
+
+```
+Request:
+{
+  "code": "plus-demo",
+  "kind": "Design",
+  "name": "Gói PLUS thử nghiệm",
+  "description": "Gói hỗ trợ tạo phương án thiết kế.",
+  "consultationText": "Tư vấn theo lịch hẹn",
+  "coverImageUrl": "https://assets.example.test/plans/plus.webp",
+  "isHighlighted": true,
+  "highlightLabel": "PHỔ BIẾN NHẤT",
+  "giftDescription": "Quà vật liệu mẫu",
+  "giftConditions": "Áp dụng khi ký hợp đồng thi công",
+  "offers": [
+    {"offerKey":"Month","price":100000,"currency":"VND","quotas":[{"code":"design.generate","isUnlimited":false,"limit":5}]},
+    {"offerKey":"Year","price":900000,"currency":"VND","quotas":[{"code":"design.generate","isUnlimited":true,"limit":null}]}
+  ],
+  "displayBenefits": [{"code":"design.render3d","enabled":true,"displayText":"Phối cảnh 3D","sortOrder":1}]
+}
+
+Response 201:
+{"value":{"planId":"11111111-1111-1111-1111-111111111111","version":1,"saleState":"NotPublished","draftState":"Draft"},"isSuccess":true,"isFailure":false,"error":{"code":"","message":""}}
+
+Error Response:
+{"title":"Validation Failure","code":"ValidationFailure","status":422,"detail":"One or more validation errors occurred","messageCode":"PlanConfigurationInvalid","errors":[{"PropertyName":"CoverImageUrl","ErrorMessage":"Ảnh bìa phải là URL https của kho ảnh được phép."}]}
+```
+
+Tên miền trên chỉ là dữ liệu thử, cần thay bằng URL kho đã cấu hình trong môi trường dùng API. Giá, quà và nhãn không phải cấu hình bán mặc định. Sau POST, Admin phải Công bố riêng; thiếu ảnh hoặc chưa đủ Month/Year chỉ được giữ ở Draft.
+
+#### GET /api/v1/admin/plans
+
+```
+Request:
+GET /api/v1/admin/plans?pageIndex=1&pageSize=20
+
+Response 200:
+{
+  "value": {
+    "items": [
+      {"planId":"11111111-1111-1111-1111-111111111111","code":"plus-demo","kind":"Design","saleState":"NotPublished","version":1,"publishedRevision":null,"draft":{"id":"33333333-3333-3333-3333-333333333333","number":1,"name":"Gói PLUS thử nghiệm","coverImageUrl":"https://assets.example.test/plans/plus.webp","isHighlighted":true,"highlightLabel":"PHỔ BIẾN NHẤT"}},
+      {"planId":"22222222-2222-2222-2222-222222222222","code":"supervision-demo","kind":"Supervision","saleState":"Stopped","version":4,"publishedRevision":{"id":"44444444-4444-4444-4444-444444444444","number":1,"name":"Giám sát công trình","coverImageUrl":null,"isHighlighted":false,"highlightLabel":null},"draft":null}
+    ],
+    "pageIndex":1,"pageSize":20,"totalCount":2,"hasNextPage":false,"hasPreviousPage":false
+  },
+  "isSuccess":true,"isFailure":false,"error":{"code":"","message":""}
+}
+
+Error Response:
+{"title":"Validation Failure","code":"ValidationFailure","status":422,"detail":"One or more validation errors occurred","messageCode":"PlanListFilterInvalid","errors":[{"PropertyName":"SaleState","ErrorMessage":"Trạng thái bán không hợp lệ."}]}
+```
+
+Ví dụ lỗi ứng với query `saleState=Draft`, không phải request hợp lệ phía trên. Có thể lấy riêng gói thiết kế đang bán bằng `?kind=Design&saleState=OnSale&pageIndex=1&pageSize=20`. Endpoint vẫn cần `plan.manage` dù bộ lọc giống danh sách công khai.
 
 #### PUT /api/v1/admin/plans/{planId}/draft
 
 ```
 Request:
-{"expectedVersion":4,"name":"Gói thử","description":"Dữ liệu minh họa","consultationText":"Tư vấn online","offers":[{"offerKey":"Month","price":100000,"currency":"VND","quotas":[{"code":"design.generate","isUnlimited":false,"limit":5}]},{"offerKey":"Year","price":1000000,"currency":"VND","quotas":[{"code":"design.generate","isUnlimited":false,"limit":40}]}],"displayBenefits":[{"code":"design.render3d","enabled":true,"displayText":"Phối cảnh 3D","sortOrder":1}]}
+{"expectedVersion":4,"name":"Gói thử","description":"Dữ liệu minh họa","consultationText":"Tư vấn online","coverImageUrl":"https://assets.example.test/plans/plus-v2.webp","isHighlighted":false,"highlightLabel":"PHỔ BIẾN NHẤT","giftDescription":null,"giftConditions":null,"offers":[{"offerKey":"Month","price":100000,"currency":"VND","quotas":[{"code":"design.generate","isUnlimited":false,"limit":5}]},{"offerKey":"Year","price":1000000,"currency":"VND","quotas":[{"code":"design.generate","isUnlimited":false,"limit":40}]}],"displayBenefits":[{"code":"design.render3d","enabled":true,"displayText":"Phối cảnh 3D","sortOrder":1}]}
 
 Response 200:
-{"value":{"planId":"11111111-1111-1111-1111-111111111111","version":5,"draftState":"Draft"},"isSuccess":true,"isFailure":false,"error":{"code":"","message":""}}
+{"value":{"planId":"11111111-1111-1111-1111-111111111111","version":5,"saleState":"OnSale","draftState":"Draft"},"isSuccess":true,"isFailure":false,"error":{"code":"","message":""}}
 
 Error Response:
 {"title":"Conflict","code":"PlanVersionConflict","status":409,"detail":"Bản nháp đã được thay đổi.","messageCode":"PlanVersionConflict","errors":null}
 ```
 
-Ví dụ không đưa quyền tra cứu vào gói; hệ thống không tự cấp quyền còn thiếu. Phản hồi thành công dùng `Result<T>` hiện có, trường `message` có thể null. DTO quy định rõ cách biểu diễn enum bằng chuỗi, không dựa vào thiết lập JSON toàn cục chưa có. Các mã lỗi dưới đây đã có trong code và nằm ở trường `messageCode` của thân lỗi; `ExceptionHandlingMiddleware` chuyển `ConflictException` thành HTTP 409.
+Ví dụ không đưa quyền tra cứu vào gói; hệ thống không tự cấp quyền còn thiếu. Phản hồi thành công dùng `Result<T>` hiện có, trường `message` có thể null. DTO quy định rõ cách biểu diễn enum bằng chuỗi, không dựa vào thiết lập JSON toàn cục chưa có. Mã lỗi nghiệp vụ nằm ở trường `messageCode` của thân lỗi; mục Error Codes phân biệt các mã đã có với mã mới đề xuất. `ExceptionHandlingMiddleware` chuyển `ConflictException` thành HTTP 409.
+
+Ví dụ PUT độc lập với ví dụ POST: gói đã OnSale ở version 4 và đang sửa bản tiếp theo. Gửi `coverImageUrl=null` để xóa ảnh ở Draft; Công bố sẽ bị từ chối cho tới khi bổ sung ảnh. Gửi `giftDescription=null`, `giftConditions=null` để bỏ nội dung quà. Gửi false cho `isHighlighted` giữ nhãn đã nhập nhưng frontend không hiển thị; muốn xóa nhãn thì gửi null. Không chỉ gửi trường vừa sửa vì PUT thay toàn bộ bản nháp.
 
 #### POST /api/v1/admin/plans/{planId}/publish
 
@@ -457,12 +604,52 @@ Error Response:
 
 Ví dụ là gói giám sát `P2`: bản nháp đã có tên và giá `ConstructionSite`, không có quyền lợi nào. Nếu `description` của bản nháp còn rỗng, yêu cầu nhận lỗi 422 ở trên và dữ liệu giữ nguyên. Sau khi lưu nháp có mô tả, cùng yêu cầu công bố thành công (STORY-SUB-002/AC-027).
 
+Với Design thiếu ảnh, publish đề xuất trả 422, `messageCode=PlanCoverImageRequired`, `errors[].PropertyName=CoverImageUrl`. Đọc lại dữ liệu sau lỗi phải thấy cùng draft, version, saleState và con trỏ công bố như trước yêu cầu; không chỉ kiểm thông báo lỗi trên UI.
+
+#### GET /api/v1/plans
+
+```
+Request:
+GET /api/v1/plans?kind=Design&pageIndex=1&pageSize=20
+
+Response 200:
+{
+  "value": {
+    "items": [{
+      "planId":"11111111-1111-1111-1111-111111111111","code":"plus-demo","kind":"Design",
+      "revision": {
+        "id":"33333333-3333-3333-3333-333333333333","number":1,"state":"Published",
+        "name":"Gói PLUS thử nghiệm","description":"Gói hỗ trợ tạo phương án thiết kế.","consultationText":"Tư vấn theo lịch hẹn",
+        "coverImageUrl":"https://assets.example.test/plans/plus.webp","isHighlighted":true,"highlightLabel":"PHỔ BIẾN NHẤT",
+        "giftDescription":"Quà vật liệu mẫu","giftConditions":"Áp dụng khi ký hợp đồng thi công",
+        "publishedAtUtc":"2026-09-27T03:00:00Z",
+        "offers":[
+          {"offerKey":"Month","price":100000,"currency":"VND","quotas":[{"code":"design.generate","label":"Số phương án thiết kế mới","isUnlimited":false,"limit":5}]},
+          {"offerKey":"Year","price":900000,"currency":"VND","quotas":[{"code":"design.generate","label":"Số phương án thiết kế mới","isUnlimited":true,"limit":null}]}
+        ],
+        "displayBenefits":[{"code":"design.render3d","label":"Phối cảnh 3D","enabled":true,"displayText":"Phối cảnh 3D","sortOrder":1}]
+      }
+    }],
+    "pageIndex":1,"pageSize":20,"totalCount":1,"hasNextPage":false,"hasPreviousPage":false
+  },
+  "isSuccess":true,"isFailure":false,"error":{"code":"","message":""}
+}
+
+Error Response:
+HTTP 400 nếu pageIndex/pageSize không đọc được thành số nguyên theo binding hiện có.
+```
+
+Frontend chọn offer bằng `offerKey`, không suy ra chu kỳ theo thứ tự mảng. Gói legacy có `coverImageUrl=null` vẫn hiện và vẫn được mua nếu OnSale; frontend dùng trạng thái thiếu ảnh thay vì bỏ thẻ gói. Nhãn chỉ hiện khi `isHighlighted=true`; hai trường quà và nội dung tư vấn hiển thị riêng, không đổi quota. Những hàng giao diện về so sánh thiết kế, tối ưu ngân sách hoặc lượt chỉnh sửa đã ngoài phạm vi không được suy thành quyền từ tên gói.
+
 ### Error Codes
 
+- **PlanCoverImageRequired** (422): đề xuất mới; publish Design thiếu ảnh bìa, kể cả công bố bản tiếp theo của gói legacy.
+- **PlanListFilterInvalid** (422): đề xuất mới; bộ lọc kind/saleState của danh sách admin không thuộc danh mục cho phép.
+- **PlanStorageUnavailable** (503): đề xuất mới; yêu cầu có URL ảnh mới nhưng chưa cấu hình tên miền kho ảnh. Không lưu dở bản nháp; URL đang lưu và giữ nguyên không bị kiểm lại host.
 - **Unauthorized** (401): thiếu/không hợp lệ phiên xác thực.
 - **AccessForbidden** (403): thiếu mã quyền `plan.manage`, phiên không đáp ứng policy, hoặc tài khoản người thao tác đã bị xóa; handler trả NotPermissionException có messageCode này.
 - **PlanNotFound** (404): không thấy gói.
-- **PlanConfigurationInvalid** (422): giá, currency, quota, loại quyền, duplicate/unknown key hoặc payload sai; gói giám sát gửi kèm quyền lợi, hạn mức, nội dung tư vấn hoặc lựa chọn giá khác `ConstructionSite`; công bố gói giám sát thiếu giá `ConstructionSite` (lỗi trường `Offers[ConstructionSite]`, cùng cách gói thiết kế thiếu giá Month/Year; người dùng xác nhận ngày 25/09/2026).
+- **PlanConfigurationInvalid** (422): giá/currency/quota, mã quyền hoặc payload sai; Supervision có quyền lợi, tư vấn, offer sai hay thiếu ConstructionSite khi publish. Bổ sung đề xuất: URL ảnh sai, trường mới quá dài, Supervision có thông tin hiển thị Design hoặc publish nổi bật thiếu nhãn.
 - **PlanHasNoBenefits** (422): công bố gói thiết kế rỗng quyền.
 - **PlanDescriptionRequired** (422): công bố gói giám sát khi mô tả dịch vụ rỗng hoặc chỉ có khoảng trắng. Mã mới ngày 25/09/2026, đã có trong `SubscriptionErrorCodes`.
 - **PlanVersionConflict** (409): expectedVersion không khớp.
@@ -491,6 +678,14 @@ Ví dụ là gói giám sát `P2`: bản nháp đã có tên và giá `Construct
 - STORY-SUB-002/AC-025
 - STORY-SUB-002/AC-026
 - STORY-SUB-002/AC-027
+- STORY-SUB-002/AC-028
+- STORY-SUB-002/AC-029
+- STORY-SUB-002/AC-030
+- STORY-SUB-002/AC-031
+- STORY-SUB-002/AC-032
+- STORY-SUB-002/AC-033
+- STORY-SUB-002/AC-034
+- STORY-SUB-002/AC-035
 
 ### Business Rules
 
@@ -498,6 +693,7 @@ Ví dụ là gói giám sát `P2`: bản nháp đã có tên và giá `Construct
 - BR-SUB-005/Statement
 - BR-SUB-008/Statement
 - BR-SUB-008/Then
+- BR-SUB-008/Except
 - BR-SUB-013/Then
 - BR-SUB-015/Then
 - BR-SUB-017/Then
@@ -510,8 +706,50 @@ Ví dụ là gói giám sát `P2`: bản nháp đã có tên và giá `Construct
 - STORY-SUB-002/ALT-02
 - STORY-SUB-002/EXC-03
 - STORY-SUB-002/EXC-06
+- STORY-SUB-002/ALT-03
+- STORY-SUB-002/ALT-04
+- STORY-SUB-002/EXC-07
+- STORY-SUB-002/EXC-08
 
 ### Others
+
+Phần bổ sung 27/09/2026 dùng các đặc tả sau; tất cả chưa chạy, không dùng kết quả test cũ để kết luận phần mới đã đạt:
+
+| Story / AC | Quy tắc | Phần TDD thực hiện | System Test |
+|---|---|---|---|
+| STORY-SUB-002/AC-028 | BR-SUB-008/Then khoản 13 | Data Model và POST/PUT draft | [ST-SUB-128](../systemtest/ST-SUB-128.md) |
+| STORY-SUB-002/AC-029 | BR-SUB-008/Then khoản 13 | Publish, PlanCoverImageRequired, transaction | [ST-SUB-129](../systemtest/ST-SUB-129.md) |
+| STORY-SUB-002/AC-030 | BR-SUB-008/Then khoản 14 | IsHighlighted/HighlightLabel, không có unique index | [ST-SUB-130](../systemtest/ST-SUB-130.md) |
+| STORY-SUB-002/AC-031 | BR-SUB-008/Then khoản 16 | RevisionView, con trỏ PublishedRevisionId | [ST-SUB-131](../systemtest/ST-SUB-131.md) |
+| STORY-SUB-002/AC-032 | BR-SUB-008/Then khoản 15–16 | Hai cột quà, không có luồng cấp/nhận | [ST-SUB-132](../systemtest/ST-SUB-132.md) |
+| STORY-SUB-002/AC-033 | BR-SUB-008/Then khoản 17 | GET admin/plans, PagedResult và RevisionSummary | [ST-SUB-133](../systemtest/ST-SUB-133.md) |
+| STORY-SUB-002/AC-034 | BR-SUB-008/Then khoản 17 | Policy plan.manage và PlanAdminAccess | [ST-SUB-134](../systemtest/ST-SUB-134.md) |
+| STORY-SUB-002/AC-035 | BR-SUB-015/Then | GET plans và chọn đúng offer trên frontend | [ST-SUB-135](../systemtest/ST-SUB-135.md) |
+
+**Đặc tả Unit Test bổ sung sau khi chốt TDD**:
+
+Các unit được gọi tên theo thành phần của TDD; phần mở rộng backend đã được triển khai trong workspace. Dùng xUnit 2.5.3/NSubstitute và fixture hiện có của dự án, không đổi framework theo ví dụ xUnit v3 trong skill. Các ca handler dùng EF InMemory chỉ kiểm logic/mapping; SQL, transaction, khóa, index, migration và phân quyền HTTP cần kiểm thử tích hợp/System Test trên môi trường phù hợp.
+
+| Phạm vi | Đặc tả Unit Test |
+|---|---|
+| Nháp thiếu ảnh/nhãn; publish thiếu ảnh hoặc nhãn | [UT-SUB-095](../unittest/UT-SUB-095.md), [UT-SUB-096](../unittest/UT-SUB-096.md), [UT-SUB-097](../unittest/UT-SUB-097.md) |
+| Nhiều gói cùng nổi bật | [UT-SUB-098](../unittest/UT-SUB-098.md) |
+| Độ dài văn bản, URL và chính sách kho ảnh | [UT-SUB-099](../unittest/UT-SUB-099.md), [UT-SUB-100](../unittest/UT-SUB-100.md), [UT-SUB-101](../unittest/UT-SUB-101.md), [UT-SUB-102](../unittest/UT-SUB-102.md), [UT-SUB-103](../unittest/UT-SUB-103.md) |
+| Chuẩn hóa, PUT xóa nội dung, tách nháp và công bố | [UT-SUB-104](../unittest/UT-SUB-104.md), [UT-SUB-105](../unittest/UT-SUB-105.md), [UT-SUB-106](../unittest/UT-SUB-106.md) |
+| Publish kiểm ảnh từ Draft đã lưu; dữ liệu legacy | [UT-SUB-107](../unittest/UT-SUB-107.md) |
+| Chi tiết quản trị trả đúng từng revision | [UT-SUB-108](../unittest/UT-SUB-108.md) |
+| Supervision không nhận thông tin Design; cấu hình 3D Boolean | [UT-SUB-109](../unittest/UT-SUB-109.md), [UT-SUB-110](../unittest/UT-SUB-110.md) |
+| Bộ lọc danh sách quản trị và mặc định mọi loại/trạng thái | [UT-SUB-111](../unittest/UT-SUB-111.md), [UT-SUB-112](../unittest/UT-SUB-112.md), [UT-SUB-113](../unittest/UT-SUB-113.md) |
+| Thứ tự, phân trang, offset lớn, tập rỗng | [UT-SUB-114](../unittest/UT-SUB-114.md), [UT-SUB-115](../unittest/UT-SUB-115.md), [UT-SUB-116](../unittest/UT-SUB-116.md) |
+| RevisionSummary và actor trong handler quản trị | [UT-SUB-117](../unittest/UT-SUB-117.md), [UT-SUB-118](../unittest/UT-SUB-118.md) |
+| Danh sách public giữ gói legacy, không lộ Draft | [UT-SUB-119](../unittest/UT-SUB-119.md) |
+| Quà dạng văn bản tùy chọn | [UT-SUB-120](../unittest/UT-SUB-120.md) |
+
+Mỗi đặc tả có input, điều kiện/mock và expected output độc lập, cùng Trace to/TEST_LINKS tới Story, BR và section TDD. Không dùng việc gọi handler trực tiếp để kết luận policy `plan.manage` ở endpoint đã hoạt động; phần đó thuộc ST-SUB-134. Không dùng catalogue 3D dựng trong unit test để kết luận migration đã seed đúng. Kiểm thử hồi quy công bố Design vốn hợp lệ phải bổ sung ảnh hợp lệ vào fixture; các ca chủ đích thiếu ảnh giữ NULL. Không thay đổi kỳ vọng lỗi giá/quota hoặc Supervision chỉ để phù hợp quy tắc ảnh mới.
+
+Owner trong đặc tả vẫn chưa được phân công. Các tài liệu UT/ST giữ trạng thái Draft. Theo yêu cầu triển khai trong hội thoại, backend đã có code, migration và kiểm thử tự động; xem [bàn giao](../discovery/plan-presentation-implementation.md#kiểm-chứng) để biết kết quả, mã test và các bước giao diện chưa thực hiện. Code và tài liệu được bàn giao trên nhánh `feature/plan-presentation`; chưa deploy hoặc áp dụng migration lên database dev/live.
+
+Căn cứ code cho phần mở rộng: [PlanApi](../../bmt-be/src/bmt-be.presentation/apis/plan/PlanApi.cs), [Command](../../bmt-be/src/bmt-be.contract/services/plan/Command.cs), [Response](../../bmt-be/src/bmt-be.contract/services/plan/Response.cs), [PlanRevision](../../bmt-be/src/bmt-be.domain/entities/PlanRevision.cs), [PlanRevisionConfiguration](../../bmt-be/src/bmt-be.persistence/configurations/PlanRevisionConfiguration.cs), [GetPublishedPlansQueryHandler](../../bmt-be/src/bmt-be.application/usecases/queries/plan/GetPublishedPlansQueryHandler.cs), [UploadedFileUrlPolicy](../../bmt-be/src/bmt-be.application/services/UploadedFileUrlPolicy.cs), [NewsArticleWriteFlow](../../bmt-be/src/bmt-be.application/usecases/commands/news/NewsArticleWriteFlow.cs). Các file này đã có phần mở rộng Plan trong workspace; migration và test mới được liên kết tại tài liệu bàn giao.
 
 - Không bao phủ AC-001, AC-015 và AC-016 của STORY-SUB-002: ba tiêu chí này không nghiệm thu đợt này theo BR-SUB-008 khoản 12, nên TDD không thiết kế cấu hình quyền dạng mức hoặc kiểm tra sử dụng quyền bật/tắt.
 
