@@ -69,7 +69,7 @@ Khảo sát code còn cho thấy ba điểm phải xử lý cùng thay đổi n�
 
 Khảo sát còn cho thấy đăng nhập web sai mật khẩu hiện trả HTTP 500 thay vì 401. Người dùng đã chốt cách xử lý cho mobile ngày 26/09/2026, ghi ở Architecture/Notes.
 
-**Hiện trạng code:** thiết kế này đã được triển khai ngày 26/09/2026 trên nhánh `feature/mobile-auth` của `bmt-be` (tách từ `develop` ở commit `624e212`), chưa commit. Build và toàn bộ test đều qua: application 1.169, infrastructure 144, API 294, integration 400 (chạy với Docker, gồm 3 test trên Redis thật), persistence 17, domain 1. Chưa chạy System Test ST-AUTH-* và chưa kiểm trên môi trường đã triển khai.
+**Hiện trạng code:** thiết kế này đã được triển khai ngày 26/09/2026 trên nhánh `feature/mobile-auth` của `bmt-be` (tách từ `develop` ở commit `624e212`), commit `532ee6d`, và đã merge vào `develop` (đối chiếu ngày 28/09/2026). Build và toàn bộ test đều qua: application 1.169, infrastructure 144, API 294, integration 400 (chạy với Docker, gồm 3 test trên Redis thật), persistence 17, domain 1. Chưa chạy System Test ST-AUTH-* và chưa kiểm trên môi trường đã triển khai.
 
 ### Goals
 

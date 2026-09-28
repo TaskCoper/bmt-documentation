@@ -88,7 +88,7 @@ Vì vậy bản thiết kế trước có hai endpoint `POST /api/v1/admin/news/
 
 **Hiện trạng đã kiểm tra**
 
-Hiện trạng code kiểm ngày 26/09/2026: thiết kế này và [TDD-NEWS-002](TDD-NEWS-002.md) đã được triển khai ở commit `4714e68` trên nhánh `feature/news` của `bmt-be`, tách từ `develop` tại `f21d749`, chưa merge; commit `e390e2d` thêm các quyết định ngày 26/09/2026 (lần 2) ở mục bên dưới. Migration `20260926092623_NewsArticlesAndCategories` tạo ba bảng của Data Model và seed quyền `news.manage` cho vai trò `admin`; migration `20260926092932_NewsArticleTextLimits` thêm giới hạn độ dài. Hai migration mới được tạo, chưa áp dụng lên database dùng chung. Phần chưa làm ghi ở Notes bên dưới.
+Hiện trạng code kiểm ngày 26/09/2026: thiết kế này và [TDD-NEWS-002](TDD-NEWS-002.md) đã được triển khai ở commit `4714e68` trên nhánh `feature/news` của `bmt-be`, tách từ `develop` tại `f21d749`, nay đã merge vào `develop` (đối chiếu ngày 28/09/2026); commit `e390e2d`, cũng đã có trên `develop`, thêm các quyết định ngày 26/09/2026 (lần 2) ở mục bên dưới. Migration `20260926092623_NewsArticlesAndCategories` tạo ba bảng của Data Model và seed quyền `news.manage` cho vai trò `admin`; migration `20260926092932_NewsArticleTextLimits` thêm giới hạn độ dài. Hai migration mới được tạo, chưa áp dụng lên database dùng chung. Phần chưa làm ghi ở Notes bên dưới.
 
 Backend dùng .NET 8, MediatR, FluentValidation, Carter, EF Core/Npgsql 8; Docker Compose dùng PostgreSQL 15. Tin tức không có tenant filter và không thêm tenant.
 
@@ -442,6 +442,7 @@ Lỗi xin URL upload hoặc upload ảnh xảy ra giữa frontend và dịch v�
 
 ## Change Log
 
+- 2026-09-28 (đối chiếu code): Ghi ở Context & Goals rằng commit `4714e68` và `e390e2d` đã có trên `develop` của `bmt-be`. Mục “Phần chưa triển khai” trong Notes vẫn đúng: handler Tin tức chưa ghi log có cấu trúc riêng. Không đổi thiết kế.
 - 2026-09-26 (quyết định lần 2): Ghi bốn quyết định người dùng xác nhận: giới hạn tiêu đề 200, mô tả ngắn 500, nội dung sau làm sạch 200.000 ký tự (đếm Rune, 422, không cắt; cột varchar và CHECK mới ở migration `20260926092932_NewsArticleTextLimits`); từ chối cả yêu cầu khi ảnh sai tên miền hoặc mất src và chỉ kiểm URL mới; dùng HtmlSanitizer 9.2.1039; cho `target="_blank"` với rel `noopener noreferrer` do backend đặt. Cập nhật SHA sau khi rebase lên `develop` `f21d749` (`4714e68`, `bce2eb2`, `e390e2d`) và tên migration sinh lại `20260926092623_NewsArticlesAndCategories`.
 - 2026-09-26 (ảnh): Áp dụng quyết định đã xác nhận ngày 26/09/2026 về tệp và ảnh: bỏ hai endpoint `POST /api/v1/admin/news/image-uploads/presign`, `.../complete`, cổng `INewsImageUploadGateway` và hai mã lỗi `NewsImageNotReady`, `NewsUploadTicketInvalid`. Ảnh bìa và `src` của mọi `img` trong rich text (kiểm sau khi làm sạch HTML) chỉ nhận URL https thuộc `UploadedFileOption__AllowedHosts`, dùng lại `IUploadedFileUrlPolicy`; `NewsStorageUnavailable` (503) đổi nghĩa thành chưa cấu hình tên miền kho ảnh. Ghi hiện trạng triển khai ở commit `4714e68` nhánh `feature/news`, bộ làm sạch HtmlSanitizer, snapshot đọc REPEATABLE READ và cách viết lại CHECK ngày công bố đầu.
 - 2026-09-26 (CSRF): Chống CSRF dẫn tới [TDD-AUTH-001](TDD-AUTH-001.md), bỏ antiforgery token; mã lỗi đổi từ `CsrfRejected` thành mã chung `CsrfInvalid`.

@@ -63,7 +63,9 @@ STORY-SUB-005 cho nhân viên có quyền riêng hủy gói thiết kế hoặc 
 
 Nguồn quyền nhân viên do [TDD-RBAC-001](TDD-RBAC-001.md) cung cấp theo mô hình RBAC chuẩn `User` → `UserRole` → `Role` → `RolePermission` → `Permission`. Mã quyền của tính năng này là `package.cancel`; `package.restore` bỏ ngày 25/09/2026 cùng thao tác khôi phục, `supervision.reassign` bỏ cùng ngày theo BR-SUB-009. Tư cách nhân viên xác định bằng `User.AccountKind = 'Staff'`, không suy ra từ việc tài khoản có vai trò khác Khách hàng.
 
-**Hiện trạng code** (`bmt-be` nhánh `develop`, commit `1ffdfbf`), khác với thiết kế dưới đây, **chưa đổi theo cập nhật ngày 25/09/2026**:
+**Hiện trạng code đối chiếu ngày 28/09/2026:** thiết kế dưới đây đã có trên `develop` của `bmt-be`. Commit `5689f4d` bỏ khôi phục gói, thêm `Unassign` và bản lưu công trình trong `PackageLifecycleEvent` (CHECK `CK_PackageLifecycleEvent_SiteSnapshot`). Commit `a53faeb` chuyển khóa sang dòng `AccountCommerceState`. Bảng dưới đây mô tả code cũ tại commit `1ffdfbf`, giữ lại để tra cứu lịch sử.
+
+**Hiện trạng code cũ** (`bmt-be` nhánh `develop`, commit `1ffdfbf`), khác với thiết kế dưới đây, **chưa đổi theo cập nhật ngày 25/09/2026**:
 
 | Thành phần trong code | Hiện trạng | Thiết kế mới |
 | --- | --- | --- |
@@ -73,9 +75,9 @@ Nguồn quyền nhân viên do [TDD-RBAC-001](TDD-RBAC-001.md) cung cấp theo m
 | `PermissionNames.PackageRestore`, `PackageOperations.RestorePackage` | Có. | Bỏ; migration gỡ mã quyền theo [TDD-RBAC-001](TDD-RBAC-001.md). |
 | `PackageLifecycleEvent` | Chưa có ba cột bản lưu công trình; CHECK `Action` gồm `Cancel`, `Restore`, `Complete`, `Reopen`. | Thêm ba cột, thêm `Unassign` ([TDD-SUB-007](TDD-SUB-007.md)), thêm CHECK `CK_PackageLifecycleEvent_SiteSnapshot`. |
 
-Thiết kế mới đã có trong code ở nhánh `feature/supervision-unassign` của `bmt-be` ngày 25/09/2026, chưa merge vào `develop`; bảng trên giữ để đối chiếu với `develop`.
+Code theo thiết kế mới được viết trên nhánh `feature/supervision-unassign` của `bmt-be` ngày 25/09/2026, nay đã merge vào `develop` ở commit `5689f4d`.
 
-Các thao tác khóa dòng `AccountCommerceState` của chủ gói qua `LockAccountAsync`, thay cho dòng `User`. Thay đổi này có từ commit `a53faeb` trên nhánh `feature/account-commerce-state` của `bmt-be`, chưa merge vào `develop`.
+Các thao tác khóa dòng `AccountCommerceState` của chủ gói qua `LockAccountAsync`, thay cho dòng `User`. Thay đổi này có từ commit `a53faeb` trên nhánh `feature/account-commerce-state` của `bmt-be`, nay đã có trên `develop`.
 
 ### Goals
 
@@ -415,6 +417,7 @@ Phản hồi theo dạng `PackageMutated` đang có trong code. Không trả "đ
 
 ## Change Log
 
+- 2026-09-28 (đối chiếu code): Ghi rằng thiết kế đã có trên `develop` của `bmt-be` (commit `5689f4d` và `a53faeb`); bảng hiện trạng tại `1ffdfbf` đổi thành bảng lịch sử. Không đổi thiết kế.
 - 2026-09-26 (CSRF): Chống CSRF dẫn tới [TDD-AUTH-001](TDD-AUTH-001.md).
 - 2026-09-26 (đồng bộ code): Khóa tài khoản chủ gói trong code là dòng `AccountCommerceState` từ commit `a53faeb`, không còn dòng `User`; sửa Context, thứ tự khóa khi hủy gói giám sát và Sequence Diagram. Bảng hiện trạng của `develop` trước lần 3 giữ nguyên để đối chiếu.
 - 2026-09-25 (lần 3): Theo quyết định người dùng ngày 25/09/2026: bỏ khôi phục cho cả hai loại gói (BR-SUB-025 đã bỏ) — gỡ endpoint, handler, policy, mã quyền `package.restore` và dữ liệu mẫu khôi phục; kỳ thiết kế `CanceledByStaff` là trạng thái cuối. Hủy gói giám sát kết thúc phân công (`EndReason = PackageCanceled`, nhật ký `AssignmentEnded`) theo thứ tự khóa tài khoản → `Assignment` → `SupervisionGrant`, có truy vấn lại phân công sau khi khóa gói và ánh xạ `40P01` thành 409 `PackageVersionConflict`. `PackageLifecycleEvent` thêm `Unassign` (TDD-SUB-007) và ba cột bản lưu công trình với CHECK `CK_PackageLifecycleEvent_SiteSnapshot`, ghi khi hủy gói giám sát có công trình. Ghi hộp xác nhận là việc của giao diện. Thêm phần migration và cập nhật truy vết ST-PAY-073, ST-PAY-085–088, ST-SUB-127; ST-PAY-038–046 đã bỏ. Thiết kế chưa có trong code.

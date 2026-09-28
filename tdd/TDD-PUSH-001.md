@@ -324,11 +324,11 @@ Migration và triển khai an toàn:
 
 ### Endpoints
 
-Các route dưới đây là đề xuất mới. Tên contract/handler tuân CQRS của repo; API web hiện có giữ cookie và response hiện tại. Mobile dùng HTTPS/Bearer, lưu token trong kho bảo mật; không bật trả token JSON cho toàn bộ web chỉ vì thêm mobile.
+Các route dưới đây là đề xuất mới. Riêng ba route đăng nhập, làm mới phiên và đăng xuất của mobile đã có trong code theo [TDD-AUTH-002](TDD-AUTH-002.md), dưới nhóm `/api/v1/mobile/auth`; phần mô tả dưới đây là những gì push dự kiến thêm vào ba route đó (AuthSession, sid, gắn bản cài), chưa triển khai. Tên contract/handler tuân CQRS của repo; API web hiện có giữ cookie và response hiện tại. Mobile dùng HTTPS/Bearer, lưu token trong kho bảo mật; không bật trả token JSON cho toàn bộ web chỉ vì thêm mobile.
 
-- **POST** `/api/v1/mobile-auth/login` — Customer xác thực email/password; tạo AuthSession và token có sid. Có thể nhận InstallationId/installation secret của bản cài đã biết để bind lại. Push permission/token không phải tham số bắt buộc. Lỗi xử lý đăng ký push được trả thành trạng thái pending riêng, không làm mất kết quả xác thực thành công; không được coi bind đã thành công nếu transaction bind lỗi.
-- **POST** `/api/v1/mobile-auth/refresh` — Body refreshToken; giữ sid, kiểm SQL/Redis/stamp và rotate một lần. Không nhận UserId từ client.
-- **POST** `/api/v1/mobile-auth/logout` — Thu hồi đúng sid từ access token hợp lệ hoặc refresh token đã được tra và đối chiếu chủ sở hữu. Cookie không bắt buộc cho mobile. Logout idempotent; không cho sid từ body vô hiệu hóa phiên của người khác.
+- **POST** `/api/v1/mobile/auth/login` — Customer xác thực email/password; tạo AuthSession và token có sid. Có thể nhận InstallationId/installation secret của bản cài đã biết để bind lại. Push permission/token không phải tham số bắt buộc. Lỗi xử lý đăng ký push được trả thành trạng thái pending riêng, không làm mất kết quả xác thực thành công; không được coi bind đã thành công nếu transaction bind lỗi.
+- **POST** `/api/v1/mobile/auth/refresh` — Body refreshToken; giữ sid, kiểm SQL/Redis/stamp và rotate một lần. Không nhận UserId từ client.
+- **POST** `/api/v1/mobile/auth/logout` — Thu hồi đúng sid từ access token hợp lệ hoặc refresh token đã được tra và đối chiếu chủ sở hữu. Cookie không bắt buộc cho mobile. Logout idempotent; không cho sid từ body vô hiệu hóa phiên của người khác.
 - **PUT** `/api/v1/me/push-installations/{installationId}` — Customer Login session; header `X-Installation-Secret`; body token/quyền/platform/sequence/requestId. Lần đầu tạo registration; các lần sau kiểm secret, sid/LoginOrder và sequence. Token đang gắn với bản cài khác thì được chuyển sang registration này và registration cũ bị tắt, khi sid gọi có LoginOrder lớn hơn sid đang giữ token; ngược lại trả 409 PushRegistrationStale. Lấy project từ cấu hình app/environment được server cho phép.
 - **DELETE** `/api/v1/me/push-installations/{installationId}` — Tắt nhận push của registration đang thuộc sid gọi; không logout và không tác động phiên khác. Cần bí mật bản cài, điều kiện phiên và header If-Match chứa Version hiện tại; version cũ trả PushRegistrationStale, không tắt đăng ký mới.
 
@@ -353,7 +353,7 @@ Error Response:
 
 Với Denied/Unknown, token có thể NULL; cập nhật quyền được phép làm tắt registration. Provisional chỉ áp dụng iOS. Độ dài token tối đa 512 là giới hạn kỹ thuật đề xuất, không phải cam kết độ dài token của Expo. Không nhận token FCM/APNs vào trường ExpoPushToken. Validate dạng chuỗi không chứng minh client sở hữu thiết bị.
 
-#### POST /api/v1/mobile-auth/login
+#### POST /api/v1/mobile/auth/login
 
 ```text
 Request:
@@ -368,7 +368,7 @@ Error Response:
 
 Response thực tế cần giữ thời hạn token theo contract Authenticated; ví dụ lược trường thời hạn, không đổi cách tính TTL đang cấu hình. Password/installation secret/token không đưa vào cache key, telemetry hoặc URL.
 
-#### POST /api/v1/mobile-auth/refresh
+#### POST /api/v1/mobile/auth/refresh
 
 ```text
 Request:
@@ -381,7 +381,7 @@ Error Response:
 {"status":401,"code":"InvalidRefreshToken","messageCode":"InvalidRefreshToken","detail":"Phiên không còn hợp lệ."}
 ```
 
-#### POST /api/v1/mobile-auth/logout
+#### POST /api/v1/mobile/auth/logout
 
 ```text
 Request:
@@ -498,6 +498,7 @@ Bật bảo vệ access token của Expo cho môi trường production nếu c�
 
 ## Change Log
 
+- 2026-09-28 (đồng bộ đường dẫn): Đổi ba route đăng nhập, làm mới phiên và đăng xuất từ `/api/v1/mobile-auth/*` sang `/api/v1/mobile/auth/*` cho khớp route đã triển khai theo TDD-AUTH-002 (`MobileAuthApi`, commit `532ee6d` trên `develop` của `bmt-be`). Ghi rõ ở Internal API rằng nội dung của ba route này là phần push dự kiến bổ sung. Không đổi nghiệp vụ; tài liệu vẫn tạm hoãn.
 - 2026-09-26 (API mobile trả token): Người dùng chốt TDD-AUTH-002 cho phiên mobile. Bỏ "API mobile trả token riêng" khỏi nhóm đề xuất chưa chốt và ghi rõ phần AuthSession/sid của tài liệu này vẫn là đề xuất.
 - 2026-09-25 (tạm hoãn): Người dùng xác nhận đội mobile chưa chọn công nghệ cho app. Tài liệu giữ trạng thái chờ; chưa viết đặc tả Unit Test và chưa triển khai code cho tới khi chốt app có dùng Expo hay không.
 - 2026-09-25: Theo BR-PUSH-001 khoản 6 và STORY-PUSH-001/AC-010, token đang gắn với bản cài khác được chuyển sang registration của bản cài mới và registration cũ bị tắt (DisabledReason=TokenMovedToNewInstallation) trong cùng transaction; bỏ mã lỗi `PushTokenAlreadyBound` và phương án challenge khôi phục. Giữ rào chắn yêu cầu đến muộn bằng LoginOrder (sid cũ hơn nhận 409 PushRegistrationStale); thêm mẫu dữ liệu nhánh cài lại app. `CustomerOnly` và điều kiện chọn đích ghi rõ kiểm User.AccountKind=Customer. Câu về thông báo website trỏ tới STORY-PUSH-001/Out of Scope thay cho ghi nhận technical debt riêng.

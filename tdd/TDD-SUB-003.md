@@ -58,11 +58,13 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 | Phần | Thiết kế hiện hành |
 | --- | --- |
 | Cấp gói chưa gán sau thanh toán, hạn gán lần đầu một năm, khách gán công trình (gói đã gắn không đổi công trình, quyết định 25/09/2026), schema `SupervisionGrant` | [TDD-SUB-004](TDD-SUB-004.md) |
-| Nhân viên hủy và khôi phục gói, `PackageLifecycleEvent`, `PackageMutationReceipt` | [TDD-SUB-005](TDD-SUB-005.md) |
+| Nhân viên hủy gói (thao tác khôi phục đã bỏ ngày 25/09/2026), `PackageLifecycleEvent`, `PackageMutationReceipt` | [TDD-SUB-005](TDD-SUB-005.md) |
 | Hoàn thành và mở lại, trạng thái `Completed`, gói `Completed` vẫn giữ chỗ trên công trình, quyền `supervision.complete` cùng phân công theo gói | [TDD-SUB-006](TDD-SUB-006.md) |
 | Mua gói và nguồn cấp gói từ đơn đã thanh toán | [TDD-PAY-001](TDD-PAY-001.md) |
 
 Hai quyết định ngày 25/09/2026 cũng làm phần còn lại của tài liệu này lỗi thời: gói giám sát gắn với công trình (`ConstructionSite`), một thực thể riêng khác bản dự toán; đợt này nhân viên được phân công theo từng gói giám sát, mỗi gói một người phụ trách (BR-RBAC-013); gói đã gắn công trình thì không đổi công trình (BR-SUB-009). Các chỗ ghi `Project`/`ProjectId`, sửa liên kết hay phân công công trình bên dưới là nội dung của bản cũ.
+
+**Đối chiếu code ngày 28/09/2026** (`develop` của `bmt-be`): hoàn thành và mở lại chạy ở `POST /api/v1/admin/supervision-grants/{grantId}/complete` và `POST /api/v1/admin/supervision-grants/{grantId}/reopen` theo [TDD-SUB-006](TDD-SUB-006.md), không phải hai route `/api/v1/projects/{projectId}/supervision-grants/...` ở Internal API bên dưới. Module công trình (`ConstructionSite`) và phân công theo gói đã có từ commit `182e2a8`. Các câu “chưa có module công trình”, “chưa có phân công nhân viên” ở phần dưới là hiện trạng lúc viết bản cũ.
 
 **Cập nhật 24/09/2026:** Hoàn thành và mở lại vẫn thuộc phạm vi. Thiết kế hiện hành của hai thao tác này là [TDD-SUB-006](TDD-SUB-006.md): trạng thái `Completed` nằm trên vòng đời `Unassigned`/`Assigned`/`CanceledByStaff`, và nhân viên phải được phân công công trình đó. Không dùng Architecture, sơ đồ, Internal API hay Data Model của tài liệu này để triển khai.
 
@@ -430,6 +432,7 @@ Error Response:
 
 ## Change Log
 
+- 2026-09-28 (đối chiếu code): Thêm ghi chú ở đầu Context & Goals: route hoàn thành và mở lại thực tế nằm dưới `/api/v1/admin/supervision-grants` theo TDD-SUB-006; module công trình và phân công đã có từ commit `182e2a8`. Sửa dòng TDD-SUB-005 trong bảng thay thế vì thao tác khôi phục đã bỏ. Nội dung lịch sử bên dưới giữ nguyên.
 - 2026-09-25 (lần 2): Sửa ghi chú thay thế ở đầu tài liệu theo quyết định mới: phân công theo gói, gói đã gắn không đổi công trình, TDD-SUB-004 không còn bảng `SupervisionAssignmentEvent`. Nội dung lịch sử bên dưới giữ nguyên.
 - 2026-09-25: Thêm ghi chú ở đầu Context & Goals và References rằng toàn bộ thiết kế gói giám sát đã cấp của tài liệu này đã được thay: gán/đổi công trình theo TDD-SUB-004, hủy/khôi phục theo TDD-SUB-005, hoàn thành/mở lại theo TDD-SUB-006, cấp gói theo TDD-PAY-001. Ghi rõ gói giám sát gắn với công trình (`ConstructionSite`) và phân công chỉ theo công trình. Sửa ghi chú Data Model: `Completed` đã được TDD-SUB-006 bổ sung lại. Không xóa nội dung cũ.
 - 2026-09-20: Tách `IProjectAssignmentReader` thành `IProjectOwnershipReader` cho quyền sở hữu công trình và `IAssignmentAuthorizer` cho phân công, theo [TDD-RBAC-003](TDD-RBAC-003.md). Bỏ cờ `IsEmployee` vì tư cách nhân viên nay đọc từ `User.AccountKind` và quyền `supervision.complete`. Nghiệp vụ hoàn thành và mở lại gói giám sát không đổi.
