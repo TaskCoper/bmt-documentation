@@ -45,8 +45,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Priority**: Must
 - **Status**: Todo
 - **Creator**: [Chưa xác định]
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 - **Assignee**:
   - Backend: [Chưa xác định]
   - QA: [Chưa xác định]
@@ -56,7 +56,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 ### Preconditions
 
 - Người quản lý đã đăng nhập và được cấp quyền Quản lý hướng dẫn trong hệ thống phân quyền hiện có.
-- Video được lưu trên YouTube; người quản lý có link để gán vào hướng dẫn.
+- Khi gán video hoặc xuất bản, người quản lý có link tới video trên YouTube. Có thể bắt đầu lưu nháp trước khi có link.
 
 ### Trigger
 
@@ -90,8 +90,9 @@ Người quản lý chưa nhập đủ thông tin và muốn lưu lại để l�
 Người quản lý sửa hướng dẫn đang xuất bản.
 
 1. Người quản lý mở hướng dẫn, thay đổi nội dung rồi lưu.
-2. Sau khi lưu thành công, nội dung sửa có hiệu lực ngay trên phần công khai; không tạo bản sửa chờ xuất bản riêng.
-3. Nếu cần chuẩn bị nội dung trước, người quản lý ẩn hướng dẫn rồi mới sửa.
+2. Hệ thống kiểm tra bản sửa vẫn đủ tiêu đề, mô tả ngắn và link hợp lệ; nếu thay video, kiểm tra video mới theo BR-GUIDE-002. Nếu không đạt, chuyển EXC-05.
+3. Sau khi lưu thành công, nội dung sửa có hiệu lực ngay trên phần công khai; không tạo bản sửa chờ xuất bản riêng.
+4. Nếu cần chuẩn bị nội dung trước, người quản lý ẩn hướng dẫn rồi mới sửa.
 
 #### ALT-03
 
@@ -121,6 +122,14 @@ Người quản lý muốn thay đổi thứ tự hiển thị.
 1. Người quản lý sắp xếp các hướng dẫn và lưu thứ tự.
 2. Phần công khai hiển thị các hướng dẫn đang xuất bản theo thứ tự đã lưu.
 
+#### ALT-07
+
+YouTube tạm thời lỗi trong lúc lấy thông tin video cho bản nháp.
+
+1. Hệ thống báo chưa lấy hoặc kiểm tra được thông tin video.
+2. Người quản lý vẫn được lưu link đúng định dạng vào bản Nháp; hệ thống không trình bày thông tin của video cũ như thông tin của link mới.
+3. Người quản lý thử lấy thông tin lại sau. Hướng dẫn chỉ được xuất bản khi kiểm tra video thành công và đủ các trường bắt buộc.
+
 ### Exception Flow
 
 #### EXC-01
@@ -149,6 +158,14 @@ Người quản lý yêu cầu xóa hướng dẫn đang xuất bản.
 
 1. Hệ thống từ chối xóa, giữ nguyên hướng dẫn và yêu cầu ẩn trước.
 2. Sau khi ẩn thành công, người quản lý có thể thực hiện ALT-05.
+
+#### EXC-05
+
+Người quản lý lưu sửa hướng dẫn đang xuất bản nhưng thiếu thông tin bắt buộc, link không hợp lệ hoặc video mới chưa kiểm tra được.
+
+1. Hệ thống từ chối lưu và chỉ rõ thông tin còn thiếu hoặc vấn đề kiểm tra video.
+2. Toàn bộ bản đang hiển thị được giữ nguyên, gồm nội dung, link video, ảnh đại diện và thời lượng.
+3. Người quản lý sửa thông tin và thử lại; nếu cần chuẩn bị trước, người quản lý có thể ẩn hướng dẫn rồi sửa.
 
 ## Acceptance Criteria
 
@@ -221,6 +238,34 @@ Người quản lý yêu cầu xóa hướng dẫn đang xuất bản.
 - **When**: Người quản lý lưu thứ tự mới.
 - **Then**: Danh sách công khai thể hiện thứ tự mới đó.
 - **And**: Việc sắp xếp không làm xuất bản các hướng dẫn đang nháp hoặc ẩn.
+
+#### AC-011
+
+- **Given**: Người quản lý đang lưu bản Nháp với link YouTube đúng định dạng nhưng YouTube tạm thời lỗi.
+- **When**: Người đó chọn lưu nháp.
+- **Then**: Hệ thống lưu bản Nháp cùng link đã nhập và thông báo chưa kiểm tra được video.
+- **And**: Không xuất bản hướng dẫn hoặc hiển thị ảnh, thời lượng của video cũ như dữ liệu của link mới.
+
+#### AC-012
+
+- **Given**: Hướng dẫn đang xuất bản và bản sửa thiếu tiêu đề, mô tả ngắn hoặc link hợp lệ.
+- **When**: Người quản lý chọn lưu.
+- **Then**: Hệ thống từ chối lưu và thông báo thông tin không hợp lệ.
+- **And**: Toàn bộ bản đang hiển thị được giữ nguyên.
+
+#### AC-013
+
+- **Given**: Hướng dẫn đang xuất bản và người quản lý thay sang video mới nhưng chưa kiểm tra được video đó.
+- **When**: Người quản lý chọn lưu.
+- **Then**: Hệ thống từ chối lưu và thông báo lỗi kiểm tra video.
+- **And**: Nội dung, link video, ảnh đại diện và thời lượng của bản đang hiển thị không thay đổi.
+
+#### AC-014
+
+- **Given**: Bản Nháp đã lưu link nhưng chưa kiểm tra được video do YouTube tạm thời lỗi.
+- **When**: Người quản lý thử lấy thông tin lại và YouTube trả kết quả thành công.
+- **Then**: Hệ thống hiển thị ảnh đại diện và thời lượng của đúng video được gán.
+- **And**: Hướng dẫn vẫn là Nháp cho đến khi người quản lý chủ động xuất bản và các điều kiện xuất bản được đáp ứng.
 
 ## References
 

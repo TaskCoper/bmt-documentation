@@ -42,8 +42,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Version**:
 - **Effective Date**:
 - **Owner**: [Chưa xác định]
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 - **Source**: Các quyết định người dùng xác nhận trong hội thoại chuẩn bị tính năng video hướng dẫn BMT ngày 30/09/2026.
 
 ## Statement
@@ -59,7 +59,7 @@ Người dùng truy cập phần quản trị hoặc yêu cầu thay đổi nộ
 1. Kiểm quyền Quản lý hướng dẫn theo cơ chế phân quyền hiện có. Người chưa đăng nhập hoặc không có quyền không được thực hiện thao tác quản trị.
 2. Hướng dẫn có ba trạng thái Nháp, Xuất bản và Ẩn. Tạo mới chỉ lưu Nháp, không tự xuất bản.
 3. Cho lưu nháp thiếu thông tin. Khi xuất bản bản Nháp hoặc Ẩn, phải có tiêu đề, mô tả ngắn và link video YouTube hợp lệ; kiểm tra video theo BR-GUIDE-002.
-4. Sửa hướng dẫn đang xuất bản có hiệu lực ngay khi lưu thành công, không tạo bản sửa chờ xuất bản riêng. Nếu cần chuẩn bị, người quản lý ẩn trước rồi sửa.
+4. Sửa hướng dẫn đang xuất bản có hiệu lực ngay khi lưu thành công, không tạo bản sửa chờ xuất bản riêng. Bản sửa vẫn phải đủ tiêu đề, mô tả ngắn và link hợp lệ; nếu thay video thì video mới phải được kiểm tra thành công. Nếu thiếu thông tin hoặc chưa kiểm tra được video mới, từ chối lưu, báo lỗi và giữ nguyên toàn bộ bản đang hiển thị. Nếu cần chuẩn bị, người quản lý ẩn trước rồi sửa.
 5. Ẩn hướng dẫn làm hướng dẫn không xuất hiện trong danh sách công khai và không được trả về qua yêu cầu đọc công khai mới. Người quản lý được xuất bản lại sau khi đáp ứng điều kiện xuất bản.
 6. Chỉ được xóa hẳn hướng dẫn đang nháp hoặc đã ẩn. Yêu cầu xóa hướng dẫn đang xuất bản bị từ chối, giữ nguyên dữ liệu và yêu cầu ẩn trước.
 7. Xóa hẳn là xóa hướng dẫn khỏi BMT, không có thùng rác hoặc khôi phục trong tính năng này và không xóa video trên YouTube.
@@ -73,4 +73,4 @@ Bản nháp được thiếu thông tin bắt buộc khi xuất bản. Quyền x
 
 Quy tắc này áp dụng cho cả giao diện và yêu cầu gửi trực tiếp đến API. Tên và phạm vi quyền đã được xác nhận; mã quyền kỹ thuật và cách bổ sung vào các vai trò thuộc bước thiết kế.
 
-Bản nháp chưa được chốt toàn văn. Reviewer, Approver, Owner và ngày hiệu lực chưa xác định. Cần chốt bổ sung điều kiện lưu sửa một hướng dẫn đang xuất bản khi nội dung bị xóa bớt hoặc khi thay video mà việc kiểm tra thất bại; đề xuất giữ bản đang lưu và báo lỗi.
+Người dùng đã xác nhận quy tắc giữ bản đang hiển thị khi lưu sửa thất bại. Reviewer và Approver là Tân Trần. Bản US/BR sau cập nhật chưa được chốt toàn văn; tên người phê duyệt không tự xác nhận tài liệu đã được duyệt. Owner và ngày hiệu lực chưa được cung cấp.

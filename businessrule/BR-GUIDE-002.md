@@ -42,8 +42,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Version**:
 - **Effective Date**:
 - **Owner**: [Chưa xác định]
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 - **Source**: Các quyết định người dùng xác nhận trong hội thoại chuẩn bị tính năng video hướng dẫn BMT ngày 30/09/2026.
 
 ## Statement
@@ -62,6 +62,8 @@ Người quản lý gán video, yêu cầu xuất bản hoặc người dùng ph
 4. Khi yêu cầu xuất bản, nếu không kiểm tra được video do YouTube lỗi, video không tồn tại hoặc không cho phát trên website, hệ thống báo lỗi và giữ nguyên trạng thái hướng dẫn.
 5. Khi hướng dẫn đã xuất bản nhưng video không phát được, hệ thống báo cho người xem. Không tự ẩn hướng dẫn chỉ vì lỗi phát; người quản lý chủ động sửa hoặc ẩn.
 6. Không coi ảnh đại diện hoặc thời lượng của video cũ là thông tin của link video mới khi người quản lý thay link.
+7. Khi YouTube tạm thời lỗi, vẫn cho lưu link đúng định dạng vào bản Nháp và thông báo chưa lấy hoặc kiểm tra được thông tin video. Người quản lý được thử lấy lại sau; việc xuất bản vẫn bị chặn cho đến khi kiểm tra thành công.
+8. Khi sửa hướng dẫn đang xuất bản mà thay video, chỉ lưu thay đổi nếu kiểm tra video mới thành công. Nếu thất bại, giữ toàn bộ bản đang hiển thị, bao gồm link, ảnh đại diện và thời lượng cũ, theo BR-GUIDE-001.
 
 ## Except
 
@@ -71,6 +73,6 @@ Lưu nháp có thể thiếu thông tin bắt buộc khi xuất bản theo BR-GU
 
 Theo [tài liệu YouTube về video](https://developers.google.com/youtube/v3/docs/videos), API có thông tin ảnh đại diện, thời lượng và cờ cho phép nhúng. Cờ cho phép nhúng không bảo đảm mọi lần phát đều thành công; thiết kế cần xử lý lỗi thực tế của trình phát theo [IFrame Player API](https://developers.google.com/youtube/iframe_api_reference).
 
-Đề xuất chưa chốt: khi lấy thông tin YouTube tạm thời thất bại, vẫn cho lưu link đúng định dạng vào bản Nháp và thử lấy lại sau; việc xuất bản vẫn bị chặn cho đến khi kiểm tra thành công. Giới hạn độ dài nội dung, dạng link hỗ trợ và các trường hợp video đặc biệt sẽ được làm rõ trước khi chốt thiết kế.
+Người dùng đã xác nhận cách lưu nháp khi YouTube tạm thời lỗi và cách giữ bản đang hiển thị khi thay video chưa kiểm tra được. Giới hạn độ dài nội dung, dạng link hỗ trợ và các trường hợp video đặc biệt sẽ được làm rõ trong bước thiết kế; không tự suy ra giới hạn thời lượng từ dòng giới thiệu trên giao diện.
 
-Bản nháp chưa được chốt toàn văn. Reviewer, Approver, Owner và ngày hiệu lực chưa xác định.
+Reviewer và Approver là Tân Trần. Bản US/BR sau cập nhật chưa được chốt toàn văn; tên người phê duyệt không tự xác nhận tài liệu đã được duyệt. Owner và ngày hiệu lực chưa được cung cấp.

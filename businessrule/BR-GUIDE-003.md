@@ -42,8 +42,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Version**:
 - **Effective Date**:
 - **Owner**: [Chưa xác định]
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 - **Source**: Các quyết định người dùng xác nhận trong hội thoại chuẩn bị tính năng video hướng dẫn BMT ngày 30/09/2026.
 
 ## Statement
@@ -63,6 +63,8 @@ Người dùng yêu cầu danh sách hoặc mở một hướng dẫn trên ph�
 5. Khi không có hướng dẫn đang xuất bản, trả danh sách trống và hiển thị thông báo phù hợp; không dùng bản nháp hoặc bản ẩn thay thế.
 6. Yêu cầu đọc công khai mới tới hướng dẫn đã ẩn hoặc xóa không nhận được nội dung của hướng dẫn đó.
 7. Khi video phát lỗi, áp dụng BR-GUIDE-002; lỗi không tự thay đổi trạng thái hướng dẫn.
+8. Giữ ô tìm kiếm trên trang hướng dẫn. Tìm trong cả tiêu đề và mô tả ngắn; một hướng dẫn khớp ở một trong hai trường được đưa vào kết quả. Chỉ tìm trong hướng dẫn đang xuất bản và giữ thứ tự quản trị.
+9. Khi không có kết quả phù hợp, thông báo không tìm thấy hướng dẫn; người dùng có thể đổi hoặc xóa từ khóa để tìm tiếp.
 
 ## Except
 
@@ -70,6 +72,6 @@ Người dùng yêu cầu danh sách hoặc mở một hướng dẫn trên ph�
 
 ## Notes
 
-Đề xuất chưa chốt: giữ ô tìm kiếm trên trang hiện tại, tìm theo tiêu đề và mô tả ngắn; kết quả vẫn tuân theo trạng thái và thứ tự quản trị. Cách đặt vị trí khi xuất bản lần đầu hoặc xuất bản lại sẽ được nêu rõ trong thiết kế để không tự thay đổi thứ tự admin đã chọn.
+Người dùng đã xác nhận tìm trong cả tiêu đề và mô tả ngắn. Cách so khớp từ khóa và cách đặt vị trí khi xuất bản lần đầu hoặc xuất bản lại sẽ được nêu rõ trong thiết kế, bám thứ tự admin đã chọn.
 
-Bản nháp chưa được chốt toàn văn. Reviewer, Approver, Owner và ngày hiệu lực chưa xác định.
+Reviewer và Approver là Tân Trần. Bản US/BR sau cập nhật chưa được chốt toàn văn; tên người phê duyệt không tự xác nhận tài liệu đã được duyệt. Owner và ngày hiệu lực chưa được cung cấp.

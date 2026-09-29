@@ -39,14 +39,14 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Metadata
 
-- **Story**: Là người truy cập BMT, tôi muốn xem danh sách và phát video hướng dẫn ngay trên trang để biết cách sử dụng các chức năng mà không cần đăng nhập.
+- **Story**: Là người truy cập BMT, tôi muốn tìm kiếm, xem danh sách và phát video hướng dẫn ngay trên trang để biết cách sử dụng các chức năng mà không cần đăng nhập.
 - **Context**: Dùng trang hướng dẫn hiện tại để hiển thị nội dung do người có quyền quản lý xuất bản. Video phát từ YouTube; nội dung hướng dẫn có một bản tiếng Việt, không chia danh mục. Bản nháp được soạn từ các quyết định ngày 30/09/2026; chưa được chốt toàn văn.
 - **Sprint**:
 - **Priority**: Must
 - **Status**: Todo
 - **Creator**: [Chưa xác định]
-- **Reviewer**: [Chưa xác định]
-- **Approver**: [Chưa xác định]
+- **Reviewer**: Tân Trần
+- **Approver**: Tân Trần
 - **Assignee**:
   - Backend: [Chưa xác định]
   - QA: [Chưa xác định]
@@ -59,7 +59,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ### Trigger
 
-Người dùng mở trang hướng dẫn hoặc chọn một hướng dẫn trong danh sách.
+Người dùng mở trang hướng dẫn, nhập từ khóa tìm kiếm hoặc chọn một hướng dẫn trong danh sách.
 
 ## Flow
 
@@ -79,6 +79,21 @@ Chưa có hướng dẫn nào đang xuất bản.
 
 1. Hệ thống hiển thị trạng thái danh sách trống để người dùng biết chưa có hướng dẫn.
 2. Không lấy bản nháp hoặc bản ẩn để lấp danh sách.
+
+#### ALT-02
+
+Người dùng muốn tìm hướng dẫn theo từ khóa.
+
+1. Người dùng nhập từ khóa vào ô tìm kiếm.
+2. Hệ thống tìm trong tiêu đề và mô tả ngắn của các hướng dẫn đang xuất bản, hiển thị các hướng dẫn khớp ở ít nhất một trong hai trường theo thứ tự admin đã sắp xếp.
+3. Người dùng chọn kết quả để tiếp tục bước 4 của Main Flow hoặc xóa từ khóa để xem lại danh sách.
+
+#### ALT-03
+
+Không có hướng dẫn đang xuất bản khớp từ khóa tìm kiếm.
+
+1. Hệ thống hiển thị thông báo không tìm thấy hướng dẫn phù hợp.
+2. Người dùng đổi hoặc xóa từ khóa; hệ thống cập nhật lại danh sách theo điều kiện mới.
 
 ### Exception Flow
 
@@ -147,6 +162,27 @@ Video của hướng dẫn đang xuất bản không phát được do YouTube h
 - **When**: Người dùng mở trang hướng dẫn.
 - **Then**: Hệ thống hiển thị trạng thái danh sách trống.
 - **And**: Không hiển thị dữ liệu nháp, ẩn hoặc nội dung minh họa như hướng dẫn đã xuất bản.
+
+#### AC-008
+
+- **Given**: Có hướng dẫn đang xuất bản có tiêu đề khớp từ khóa và hướng dẫn đang nháp hoặc ẩn cũng khớp từ khóa đó.
+- **When**: Người dùng tìm kiếm bằng từ khóa này.
+- **Then**: Kết quả bao gồm hướng dẫn đang xuất bản khớp tiêu đề.
+- **And**: Không bao gồm hướng dẫn đang nháp hoặc ẩn; kết quả giữ thứ tự quản trị.
+
+#### AC-009
+
+- **Given**: Có hướng dẫn đang xuất bản chỉ khớp từ khóa trong mô tả ngắn, không khớp trong tiêu đề.
+- **When**: Người dùng tìm kiếm bằng từ khóa này.
+- **Then**: Hướng dẫn đó xuất hiện trong kết quả.
+- **And**: Hướng dẫn khớp đồng thời cả tiêu đề và mô tả chỉ xuất hiện một lần.
+
+#### AC-010
+
+- **Given**: Không có hướng dẫn đang xuất bản khớp từ khóa trong tiêu đề hoặc mô tả ngắn.
+- **When**: Người dùng tìm kiếm.
+- **Then**: Hệ thống hiển thị thông báo không tìm thấy hướng dẫn phù hợp.
+- **And**: Người dùng có thể xóa từ khóa để xem lại danh sách hướng dẫn đang xuất bản theo thứ tự quản trị.
 
 ## References
 

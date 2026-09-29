@@ -2,7 +2,7 @@
 
 ## Trạng thái
 
-Đang làm rõ nghiệp vụ theo yêu cầu ngày 30/09/2026. Đã có hai User Story và ba Business Rule ở dạng bản nháp; còn các điểm cần chốt bổ sung và thông tin người rà soát/phê duyệt. Các quyết định dưới đây được ghi theo câu trả lời trong hội thoại; chưa được chốt toàn văn bộ US/BR. Chưa viết đặc tả System Test, TDD hoặc Unit Test. Chưa sửa mã ứng dụng, chạy migration hay triển khai.
+Đã cập nhật hai User Story và ba Business Rule theo các câu trả lời trong hội thoại chuẩn bị tính năng ngày 30/09/2026. Người dùng đã xác nhận các quyết định nghiệp vụ bên dưới; Reviewer và Approver đều là Tân Trần. Bộ US/BR sau cập nhật đang chờ chốt toàn văn trước khi viết System Test. Creator, Assignee, Owner, Sprint và ngày hiệu lực chưa được cung cấp; không tự gán. Chưa viết đặc tả System Test, TDD hoặc Unit Test. Chưa sửa mã ứng dụng, chạy migration hay triển khai.
 
 ## Bộ tài liệu đang soạn
 
@@ -29,17 +29,19 @@
 11. Cho lưu nháp khi chưa nhập đủ thông tin. Khi xuất bản phải có tiêu đề, mô tả ngắn và link video YouTube hợp lệ.
 12. Nếu không kiểm tra được video do YouTube lỗi, video không tồn tại hoặc không cho phát trên website, từ chối xuất bản và giữ nguyên trạng thái. Với hướng dẫn đã xuất bản nhưng video phát lỗi, thông báo cho người xem; admin chủ động sửa hoặc ẩn, hệ thống không tự ẩn.
 13. Quản lý một bản nội dung tiếng Việt trong đợt này.
+14. Giữ ô tìm kiếm, tìm trong cả tiêu đề và mô tả ngắn. Kết quả chỉ gồm hướng dẫn đang xuất bản, theo thứ tự admin đã chọn.
+15. Khi YouTube tạm thời lỗi, cho lưu link đúng định dạng vào bản Nháp và thử lấy thông tin lại sau. Hướng dẫn đang xuất bản chỉ lưu sửa khi còn đủ trường bắt buộc và, nếu thay video, video mới đã được kiểm tra thành công. Nếu không đạt, từ chối lưu, báo lỗi và giữ nguyên toàn bộ bản đang hiển thị.
+16. Reviewer và Approver: Tân Trần. Việc điền tên không tự xác nhận tài liệu đã được phê duyệt.
 
 ## Đề xuất chưa chốt
 
-- Giữ ô tìm kiếm; tìm trong tiêu đề và mô tả ngắn, kết quả vẫn theo thứ tự quản trị.
-- Khi YouTube tạm thời lỗi, cho lưu link đúng định dạng vào Nháp và thử lấy thông tin lại sau. Hướng dẫn đang xuất bản chỉ lưu sửa khi còn đủ trường bắt buộc và video mới đã được kiểm tra; nếu thất bại thì giữ bản đang lưu.
+Hai đề xuất về tìm kiếm và cách lưu khi YouTube lỗi đã được người dùng xác nhận, chuyển vào mục Đã xác nhận. Chưa chốt schema, API hoặc cách tích hợp kỹ thuật.
 
 ## Cần làm rõ
 
-- Phạm vi tìm kiếm và quy tắc lưu khi không kiểm tra được video: đang chờ câu trả lời.
-- Giới hạn độ dài nội dung và dạng link hỗ trợ sẽ được nêu trong thiết kế, chưa tự đặt ngưỡng nghiệp vụ hoặc giới hạn thời lượng video từ dòng giới thiệu trên giao diện.
-- Reviewer, Approver và các thông tin người phụ trách tài liệu chưa được cung cấp cho tính năng này.
+- Bộ US/BR sau cập nhật cần được người dùng chốt toàn văn trước khi viết đặc tả System Test.
+- Giới hạn độ dài nội dung, dạng link hỗ trợ, cách so khớp từ khóa và cách đặt vị trí khi xuất bản sẽ được nêu trong bước thiết kế. Nếu phát sinh thay đổi nghiệp vụ, cần xác nhận phần đó; không tự đặt giới hạn thời lượng video từ dòng giới thiệu trên giao diện.
+- Creator, Assignee, Owner, Sprint và ngày hiệu lực chưa được cung cấp; tài liệu chưa đủ các thông tin quản trị này.
 
 ## Hiện trạng đã kiểm tra
 
@@ -58,7 +60,7 @@
 
 ## Thứ tự công việc
 
-1. Hoàn tất các quyết định nghiệp vụ còn mở, soạn hai User Story cho quản trị và xem hướng dẫn, cùng các Business Rule theo template.
+1. Đã cập nhật hai User Story và ba Business Rule theo các quyết định được xác nhận; bổ sung luồng và tiêu chí nghiệm thu cho tìm kiếm, lưu nháp khi YouTube lỗi và giữ bản đang hiển thị khi sửa không hợp lệ.
 2. Bàn giao toàn văn US/BR để người dùng chốt, sau đó mới viết đặc tả System Test theo quy trình dự án.
 3. Thiết kế lưu trữ, quyền, API, tích hợp YouTube và giao diện; giải thích lựa chọn bằng dữ liệu mẫu và các luồng thành công/thất bại. Đọc đủ phụ thuộc RBAC trước khi chốt phần quyền; việc khảo sát hiện tại chưa hoàn thành toàn bộ chuỗi tham chiếu.
 4. Bàn giao TDD; sau khi được chốt mới viết đặc tả Unit Test. Bước này chỉ lập kế hoạch và tài liệu, chưa triển khai ứng dụng.
@@ -68,7 +70,7 @@
 | Phần | Nội dung dự kiến | Căn cứ và điều kiện |
 |---|---|---|
 | Admin | Danh sách mọi trạng thái, form tiêu đề/mô tả/link, ảnh và thời lượng tự lấy, các thao tác xuất bản/ẩn/xóa/sắp xếp | STORY-GUIDE-001; chưa có mã frontend trong workspace để xác định file |
-| Trang hướng dẫn | Danh sách lấy từ dữ liệu đã xuất bản, trình phát YouTube, danh sách trống và thông báo video lỗi | STORY-GUIDE-002; tìm kiếm đang chờ chốt |
+| Trang hướng dẫn | Danh sách lấy từ dữ liệu đã xuất bản, tìm trong tiêu đề/mô tả ngắn, trình phát YouTube, danh sách trống và thông báo video lỗi | STORY-GUIDE-002 |
 | Backend | Thêm module hướng dẫn theo cấu trúc contract, handler, endpoint, dữ liệu và kiểm quyền hiện có | Chưa tạo lớp, API hoặc migration; thiết kế chi tiết sau khi bộ nghiệp vụ được chốt |
 | YouTube | Lấy thông tin theo video được gán; phân biệt lỗi kiểm tra trước xuất bản với lỗi phát thực tế | BR-GUIDE-002; cần cấu hình tích hợp, không cần nhận tệp video vào BMT |
 | Phân quyền | Bổ sung quyền Quản lý hướng dẫn vào danh mục quyền và dùng cho các thao tác quản trị | BR-GUIDE-001; đọc đủ phụ thuộc RBAC trước khi chốt cách bổ sung |
