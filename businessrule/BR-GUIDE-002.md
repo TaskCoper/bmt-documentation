@@ -65,6 +65,9 @@ Người quản lý gán video, yêu cầu xuất bản hoặc người dùng ph
 7. Khi YouTube tạm thời lỗi, vẫn cho lưu link đúng định dạng vào bản Nháp và thông báo chưa lấy hoặc kiểm tra được thông tin video. Người quản lý được thử lấy lại sau; việc xuất bản vẫn bị chặn cho đến khi kiểm tra thành công.
 8. Khi sửa hướng dẫn đang xuất bản mà thay video, chỉ lưu thay đổi nếu kiểm tra video mới thành công. Nếu thất bại, giữ toàn bộ bản đang hiển thị, bao gồm link, ảnh đại diện và thời lượng cũ, theo BR-GUIDE-001.
 
+9. Tiêu đề tối đa 200 ký tự, mô tả ngắn tối đa 2.000 ký tự. Áp dụng cả khi lưu nháp và xuất bản; vượt giới hạn thì báo lỗi, không tự cắt nội dung.
+10. Chỉ nhận video đã đăng, gồm cả Shorts. Không nhận livestream đang diễn ra hoặc sắp phát; video phải có thời lượng xác định khi kiểm tra để xuất bản.
+
 ## Except
 
 Lưu nháp có thể thiếu thông tin bắt buộc khi xuất bản theo BR-GUIDE-001. Kiểm tra trước xuất bản không bảo đảm video phát được mãi mãi hoặc trên mọi thiết bị, khu vực và cấu hình trình duyệt.
@@ -73,6 +76,6 @@ Lưu nháp có thể thiếu thông tin bắt buộc khi xuất bản theo BR-GU
 
 Theo [tài liệu YouTube về video](https://developers.google.com/youtube/v3/docs/videos), API có thông tin ảnh đại diện, thời lượng và cờ cho phép nhúng. Cờ cho phép nhúng không bảo đảm mọi lần phát đều thành công; thiết kế cần xử lý lỗi thực tế của trình phát theo [IFrame Player API](https://developers.google.com/youtube/iframe_api_reference).
 
-Người dùng đã xác nhận cách lưu nháp khi YouTube tạm thời lỗi và cách giữ bản đang hiển thị khi thay video chưa kiểm tra được. Giới hạn độ dài nội dung, dạng link hỗ trợ và các trường hợp video đặc biệt sẽ được làm rõ trong bước thiết kế; không tự suy ra giới hạn thời lượng từ dòng giới thiệu trên giao diện.
+Người dùng đã xác nhận cách lưu nháp khi YouTube tạm thời lỗi và cách giữ bản đang hiển thị khi thay video chưa kiểm tra được. Người dùng xác nhận bổ sung giới hạn 200/2.000 ký tự và chỉ nhận video đã đăng, gồm Shorts; loại livestream đang diễn ra hoặc sắp phát. Dạng link hỗ trợ được mô tả trong thiết kế; không tự suy ra giới hạn thời lượng từ dòng giới thiệu trên giao diện.
 
-Reviewer và Approver là Tân Trần. Bản US/BR sau cập nhật chưa được chốt toàn văn; tên người phê duyệt không tự xác nhận tài liệu đã được duyệt. Owner và ngày hiệu lực chưa được cung cấp.
+Reviewer và Approver là Tân Trần. Bộ US/BR đã được người dùng chốt toàn văn trong hội thoại; tên người phê duyệt không tự xác nhận tài liệu đã được duyệt. Owner và ngày hiệu lực chưa được cung cấp.

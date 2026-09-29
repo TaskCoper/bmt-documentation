@@ -74,4 +74,4 @@ Người dùng yêu cầu danh sách hoặc mở một hướng dẫn trên ph�
 
 Người dùng đã xác nhận tìm trong cả tiêu đề và mô tả ngắn. Cách so khớp từ khóa và cách đặt vị trí khi xuất bản lần đầu hoặc xuất bản lại sẽ được nêu rõ trong thiết kế, bám thứ tự admin đã chọn.
 
-Reviewer và Approver là Tân Trần. Bản US/BR sau cập nhật chưa được chốt toàn văn; tên người phê duyệt không tự xác nhận tài liệu đã được duyệt. Owner và ngày hiệu lực chưa được cung cấp.
+Reviewer và Approver là Tân Trần. Bộ US/BR đã được người dùng chốt toàn văn trong hội thoại; tên người phê duyệt không tự xác nhận tài liệu đã được duyệt. Owner và ngày hiệu lực chưa được cung cấp.

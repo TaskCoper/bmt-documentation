@@ -40,7 +40,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 ## Metadata
 
 - **Story**: Là người có quyền Quản lý hướng dẫn, tôi muốn tạo, chỉnh sửa, xuất bản, ẩn, xóa và sắp xếp video hướng dẫn để người dùng xem được nội dung sử dụng BMT phù hợp.
-- **Context**: Trang hướng dẫn hiện có các mục video nhưng mục đã kiểm tra còn hiển thị thông báo đang biên tập. Cần quản lý nội dung từ admin, gán video đã lưu trên YouTube và chủ động quyết định khi nào hiển thị. Bản nháp được soạn từ các quyết định ngày 30/09/2026; chưa được chốt toàn văn.
+- **Context**: Trang hướng dẫn hiện có các mục video nhưng mục đã kiểm tra còn hiển thị thông báo đang biên tập. Cần quản lý nội dung từ admin, gán video đã lưu trên YouTube và chủ động quyết định khi nào hiển thị. Bản nháp được soạn từ các quyết định ngày 30/09/2026; đã được người dùng chốt toàn văn trong hội thoại.
 - **Sprint**:
 - **Priority**: Must
 - **Status**: Todo
@@ -67,7 +67,7 @@ Người quản lý mở phần quản lý hướng dẫn để thêm mới ho�
 ### Main Flow
 
 1. Người quản lý mở danh sách hướng dẫn và chọn tạo mới.
-2. Hệ thống hiển thị form tiêu đề, mô tả ngắn và link của một video YouTube; nội dung được quản lý bằng một bản tiếng Việt.
+2. Hệ thống hiển thị form tiêu đề tối đa 200 ký tự, mô tả ngắn tối đa 2.000 ký tự và link của một video YouTube đã đăng (gồm Shorts); nội dung được quản lý bằng một bản tiếng Việt.
 3. Người quản lý nhập nội dung và dán link YouTube.
 4. Hệ thống lấy ảnh đại diện và thời lượng của video từ YouTube, hiển thị để người quản lý kiểm tra.
 5. Người quản lý lưu hướng dẫn. Hệ thống tạo bản Nháp, chưa cung cấp cho người dùng công khai.
@@ -166,6 +166,14 @@ Người quản lý lưu sửa hướng dẫn đang xuất bản nhưng thiếu 
 1. Hệ thống từ chối lưu và chỉ rõ thông tin còn thiếu hoặc vấn đề kiểm tra video.
 2. Toàn bộ bản đang hiển thị được giữ nguyên, gồm nội dung, link video, ảnh đại diện và thời lượng.
 3. Người quản lý sửa thông tin và thử lại; nếu cần chuẩn bị trước, người quản lý có thể ẩn hướng dẫn rồi sửa.
+
+#### EXC-06
+
+Nội dung vượt giới hạn hoặc video là livestream đang diễn ra hay sắp phát.
+
+1. Hệ thống báo trường vượt giới hạn, không lưu và không tự cắt nội dung.
+2. Khi kiểm tra phát hiện livestream đang diễn ra hoặc sắp phát, hệ thống báo loại video chưa được hỗ trợ và từ chối gán video đó.
+3. Yêu cầu bị từ chối không thay đổi dữ liệu hoặc trạng thái đang lưu.
 
 ## Acceptance Criteria
 
@@ -267,9 +275,25 @@ Người quản lý lưu sửa hướng dẫn đang xuất bản nhưng thiếu 
 - **Then**: Hệ thống hiển thị ảnh đại diện và thời lượng của đúng video được gán.
 - **And**: Hướng dẫn vẫn là Nháp cho đến khi người quản lý chủ động xuất bản và các điều kiện xuất bản được đáp ứng.
 
+#### AC-015
+
+- **Given**: Người quản lý nhập tiêu đề và mô tả ngắn.
+- **When**: Người đó lưu nháp, sửa hoặc xuất bản.
+- **Then**: Giới hạn là 200 ký tự cho tiêu đề và 2.000 ký tự cho mô tả.
+- **And**: Vượt một trong hai giới hạn thì từ chối, chỉ rõ trường lỗi, giữ dữ liệu cũ và không tự cắt nội dung.
+
+#### AC-016
+
+- **Given**: Người quản lý gán link YouTube và hệ thống kiểm tra được video.
+- **When**: Video đã đăng, bao gồm Shorts, đáp ứng các điều kiện còn lại.
+- **Then**: Hệ thống chấp nhận video.
+- **And**: Nếu là livestream đang diễn ra hoặc sắp phát, hệ thống từ chối và báo loại video chưa được hỗ trợ; dữ liệu đang lưu không đổi.
+
 ## References
 
 ### TDDs
+
+- TDD-GUIDE-001
 
 ### Rules
 

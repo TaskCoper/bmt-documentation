@@ -73,4 +73,4 @@ Bản nháp được thiếu thông tin bắt buộc khi xuất bản. Quyền x
 
 Quy tắc này áp dụng cho cả giao diện và yêu cầu gửi trực tiếp đến API. Tên và phạm vi quyền đã được xác nhận; mã quyền kỹ thuật và cách bổ sung vào các vai trò thuộc bước thiết kế.
 
-Người dùng đã xác nhận quy tắc giữ bản đang hiển thị khi lưu sửa thất bại. Reviewer và Approver là Tân Trần. Bản US/BR sau cập nhật chưa được chốt toàn văn; tên người phê duyệt không tự xác nhận tài liệu đã được duyệt. Owner và ngày hiệu lực chưa được cung cấp.
+Người dùng đã xác nhận quy tắc giữ bản đang hiển thị khi lưu sửa thất bại. Reviewer và Approver là Tân Trần. Bộ US/BR đã được người dùng chốt toàn văn trong hội thoại; tên người phê duyệt không tự xác nhận tài liệu đã được duyệt. Owner và ngày hiệu lực chưa được cung cấp.

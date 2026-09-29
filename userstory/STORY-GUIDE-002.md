@@ -40,7 +40,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 ## Metadata
 
 - **Story**: Là người truy cập BMT, tôi muốn tìm kiếm, xem danh sách và phát video hướng dẫn ngay trên trang để biết cách sử dụng các chức năng mà không cần đăng nhập.
-- **Context**: Dùng trang hướng dẫn hiện tại để hiển thị nội dung do người có quyền quản lý xuất bản. Video phát từ YouTube; nội dung hướng dẫn có một bản tiếng Việt, không chia danh mục. Bản nháp được soạn từ các quyết định ngày 30/09/2026; chưa được chốt toàn văn.
+- **Context**: Dùng trang hướng dẫn hiện tại để hiển thị nội dung do người có quyền quản lý xuất bản. Video phát từ YouTube; nội dung hướng dẫn có một bản tiếng Việt, không chia danh mục. Bản nháp được soạn từ các quyết định ngày 30/09/2026; đã được người dùng chốt toàn văn trong hội thoại.
 - **Sprint**:
 - **Priority**: Must
 - **Status**: Todo
@@ -187,6 +187,8 @@ Video của hướng dẫn đang xuất bản không phát được do YouTube h
 ## References
 
 ### TDDs
+
+- TDD-GUIDE-001
 
 ### Rules
 
