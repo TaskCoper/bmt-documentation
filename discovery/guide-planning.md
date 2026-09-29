@@ -2,7 +2,7 @@
 
 ## Trạng thái
 
-Đã cập nhật hai User Story và ba Business Rule theo các câu trả lời trong hội thoại chuẩn bị tính năng ngày 30/09/2026. Người dùng đã xác nhận các quyết định nghiệp vụ bên dưới; Reviewer và Approver đều là Tân Trần. Người dùng đã xác nhận “chốt” bộ US/BR sau cập nhật; được chuyển sang viết System Test và thiết kế TDD. Creator, Assignee, Owner, Sprint và ngày hiệu lực chưa được cung cấp; không tự gán. Đã soạn 34 đặc tả System Test và bản nháp TDD-GUIDE-001. Chưa soạn Unit Test; TDD chưa được chốt và phần rà soát chuỗi phụ thuộc liên module chưa hoàn tất. Chưa sửa mã ứng dụng, chạy migration hay triển khai.
+Đã cập nhật hai User Story và ba Business Rule theo các câu trả lời trong hội thoại chuẩn bị tính năng ngày 30/09/2026. Người dùng đã xác nhận các quyết định nghiệp vụ bên dưới; Reviewer và Approver đều là Tân Trần. Người dùng đã xác nhận “chốt” bộ US/BR sau cập nhật; được chuyển sang viết System Test và thiết kế TDD. Creator, Assignee, Owner, Sprint và ngày hiệu lực chưa được cung cấp; không tự gán. Đã soạn 43 đặc tả System Test và 44 đặc tả Unit Test. Người dùng đã chốt TDD-GUIDE-001 tại commit f9d659d bằng câu “ok chốt”; xác nhận này là căn cứ viết Unit Test. Phần rà soát toàn bộ chuỗi phụ thuộc liên module chưa hoàn tất và không được coi là đã hoàn tất chỉ vì TDD được chốt. Chưa sửa mã ứng dụng, chạy migration hay triển khai.
 
 ## Bộ tài liệu đang soạn
 
@@ -13,8 +13,9 @@
 | Quyền và vòng đời hướng dẫn | [BR-GUIDE-001](../businessrule/BR-GUIDE-001.md) |
 | Nội dung và tích hợp YouTube | [BR-GUIDE-002](../businessrule/BR-GUIDE-002.md) |
 | Hiển thị công khai và thứ tự | [BR-GUIDE-003](../businessrule/BR-GUIDE-003.md) |
-| Thiết kế kỹ thuật bản nháp | [TDD-GUIDE-001](../tdd/TDD-GUIDE-001.md) |
-| 34 đặc tả System Test và bảng phủ AC | [Bảng đối chiếu](guide-system-test-coverage.md) |
+| Thiết kế kỹ thuật đã chốt trong hội thoại | [TDD-GUIDE-001](../tdd/TDD-GUIDE-001.md) |
+| 43 đặc tả System Test và bảng phủ AC | [Bảng đối chiếu](guide-system-test-coverage.md) |
+| 44 đặc tả Unit Test | [Bảng phủ Unit Test](guide-unit-test-coverage.md) |
 
 ## Đã xác nhận
 
@@ -40,7 +41,7 @@
 
 ## Đề xuất chưa chốt
 
-Bản nháp TDD đề xuất hai bảng Guide/GuideOrderState, quyền guide.manage, phiên bản chống ghi đè, API quản trị/công khai và cache metadata YouTube với TTL tuyệt đối 24 giờ. Khi đọc metadata thất bại, đề xuất vẫn trả nội dung hướng dẫn, dùng ảnh thay thế và không hiển thị thời lượng giả. Các lựa chọn này chưa được người dùng chốt thành TDD.
+Không còn đề xuất kỹ thuật GUIDE chờ xác nhận trong bản TDD đã bàn giao. Hai bảng Guide/GuideOrderState, quyền guide.manage, chống ghi đè bằng phiên bản, API quản trị/công khai và cache YouTube 24 giờ thuộc phạm vi TDD người dùng đã chốt. Khi không lấy lại được metadata, vẫn trả nội dung, dùng ảnh thay thế và không hiển thị thời lượng giả theo thiết kế đã chốt.
 
 ## Cần làm rõ
 
@@ -66,9 +67,9 @@ Bản nháp TDD đề xuất hai bảng Guide/GuideOrderState, quyền guide.man
 ## Thứ tự công việc
 
 1. Đã cập nhật hai User Story và ba Business Rule theo các quyết định được xác nhận; bổ sung luồng và tiêu chí nghiệm thu cho tìm kiếm, lưu nháp khi YouTube lỗi và giữ bản đang hiển thị khi sửa không hợp lệ.
-2. Người dùng đã chốt US/BR; đã viết 34 đặc tả System Test, phủ 26 AC bằng tham chiếu. Chưa chạy kiểm thử.
-3. Đã lưu bản nháp TDD với dữ liệu mẫu, API và sơ đồ. Cần hoàn tất rà soát chuỗi phụ thuộc trước khi coi phần quyền và tác động liên module đã được kiểm chứng đầy đủ.
-4. Bàn giao TDD; sau khi được chốt mới viết đặc tả Unit Test. Bước này chỉ lập kế hoạch và tài liệu, chưa triển khai ứng dụng.
+2. Người dùng đã chốt US/BR và TDD; đã viết 43 đặc tả System Test, phủ 26 AC bằng tham chiếu và bổ sung các ràng buộc kỹ thuật. Chưa chạy kiểm thử.
+3. Đã ghi nhận TDD được người dùng chốt, giữ nguyên phương án dữ liệu, API và sơ đồ. Cần hoàn tất rà soát chuỗi phụ thuộc trước khi coi phần quyền và tác động liên module đã được kiểm chứng đầy đủ.
+4. Đã soạn 44 đặc tả Unit Test theo TDD đã chốt và bảng phủ. Bước này chỉ lập kế hoạch và tài liệu, chưa triển khai ứng dụng.
 
 ## Phần dự kiến thay đổi
 
@@ -79,8 +80,8 @@ Bản nháp TDD đề xuất hai bảng Guide/GuideOrderState, quyền guide.man
 | Backend | Thêm module hướng dẫn theo cấu trúc contract, handler, endpoint, dữ liệu và kiểm quyền hiện có | Thiết kế dự kiến trong TDD-GUIDE-001; chưa tạo lớp, API hoặc migration |
 | YouTube | Lấy thông tin theo video được gán; phân biệt lỗi kiểm tra trước xuất bản với lỗi phát thực tế | BR-GUIDE-002; cần cấu hình tích hợp, không cần nhận tệp video vào BMT |
 | Phân quyền | Bổ sung quyền Quản lý hướng dẫn vào danh mục quyền và dùng cho các thao tác quản trị | BR-GUIDE-001; đọc đủ phụ thuộc RBAC trước khi chốt cách bổ sung |
-| Kiểm thử | Đối chiếu luồng quản trị và công khai với AC, kiểm tích hợp YouTube và ràng buộc dữ liệu thực tế | Có 34 đặc tả ST; chưa viết UT hoặc chạy kiểm thử |
+| Kiểm thử | Đối chiếu luồng quản trị và công khai với AC, kiểm tích hợp YouTube và ràng buộc dữ liệu thực tế | Có 43 đặc tả ST và 44 đặc tả UT; chưa viết mã hoặc chạy kiểm thử |
 
 ## Phạm vi kiểm chứng dự kiến
 
-Kiểm chứng luồng admin tạo nháp, gán video, xuất bản, sửa, ẩn và xóa; quyền của người quản lý; danh sách công khai chỉ trả hướng dẫn đang xuất bản; phát video và xử lý lỗi YouTube; ảnh đại diện, thời lượng lấy đúng video. Bổ sung kiểm chứng tìm kiếm, sắp xếp và cập nhật đồng thời theo thiết kế được chốt. 34 đặc tả nghiệp vụ và giới hạn kiểm chứng nằm trong bảng phủ System Test. Phần kiểm thử kỹ thuật bổ sung phụ thuộc TDD được chốt; chưa có kết quả chạy.
+Kiểm chứng luồng admin tạo nháp, gán video, xuất bản, sửa, ẩn và xóa; quyền của người quản lý; danh sách công khai chỉ trả hướng dẫn đang xuất bản; phát video và xử lý lỗi YouTube; ảnh đại diện, thời lượng lấy đúng video. Bổ sung kiểm chứng tìm kiếm, sắp xếp và cập nhật đồng thời theo thiết kế được chốt. 43 đặc tả System Test, 44 đặc tả Unit Test và giới hạn kiểm chứng nằm trong các bảng phủ tương ứng. Chưa có kết quả chạy.

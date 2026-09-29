@@ -55,7 +55,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 Trang `/vi/guide` đã có danh sách và cửa sổ xem hướng dẫn, nhưng mục đã kiểm tra còn báo video đang biên tập. Backend chưa có module hướng dẫn. Cần cho người có quyền Quản lý hướng dẫn nhập nội dung, gán video YouTube, xuất bản và chủ động sắp xếp; khách chưa đăng nhập cũng xem được nội dung đã xuất bản.
 
-Nghiệp vụ căn cứ hai Story và ba BR của GUIDE đã được chốt trong hội thoại. Hai xác nhận bổ sung là giới hạn tiêu đề 200/mô tả 2.000 ký tự và chỉ nhận video đã đăng, gồm Shorts. Thiết kế dưới đây là đề xuất mới, chưa triển khai hay được phê duyệt. Chuỗi tài liệu phụ thuộc liên module chưa được đọc hết; giới hạn khảo sát ghi trong `discovery/guide-system-test-coverage.md`. Không dùng bản nháp này để tuyên bố đã hoàn tất rà soát toàn bộ RBAC.
+Nghiệp vụ căn cứ hai Story và ba BR của GUIDE đã được chốt trong hội thoại. Hai xác nhận bổ sung là giới hạn tiêu đề 200/mô tả 2.000 ký tự và chỉ nhận video đã đăng, gồm Shorts. Người dùng đã chốt toàn bộ TDD được bàn giao tại commit f9d659d bằng câu “ok chốt” trong hội thoại. Được chuyển sang soạn đặc tả Unit Test theo thiết kế này; chưa triển khai. Status vẫn Draft theo mẫu nhập tài liệu, không đại diện cho thao tác phê duyệt trong Document First. Chuỗi tài liệu phụ thuộc liên module chưa được đọc hết; giới hạn khảo sát ghi trong `discovery/guide-system-test-coverage.md`. Không dùng bản nháp này để tuyên bố đã hoàn tất rà soát toàn bộ RBAC.
 
 ### Goals
 
@@ -257,7 +257,7 @@ Dùng lại User, Permission, Role và RolePermission theo TDD-RBAC-001/Data Mod
 Ảnh và thời lượng chỉ lưu tạm trong Redis theo key `guide:youtube:v1:{videoId}` với thời hạn tuyệt đối 24 giờ kể từ lúc lấy từ YouTube; đọc cache không kéo dài thời hạn. Một mục gồm videoId, thumbnailUrl, durationSeconds, embeddable, liveBroadcastContent và fetchedAtUtc. Ví dụ ID `abcDEF123_-` trả thời lượng `PT3M20S` thì lưu durationSeconds=200. URL ảnh phải lấy từ phản hồi, không chế đường dẫn như dữ liệu đã được xác minh. Không lưu payload YouTube vào log hoặc bản sao lâu dài trong SQL.
 
 **Notes**:
-- Chuẩn hóa nội dung về Unicode NFC và trim trước khi đếm; đếm Unicode scalar ở cả frontend và backend để khớp `char_length` PostgreSQL. Chuỗi rỗng thành NULL; không cắt chuỗi quá dài. Giới hạn 200/2.000 là nghiệp vụ đã chốt; cách đếm là đề xuất kỹ thuật, cần ghi rõ trên contract cho frontend.
+- Chuẩn hóa nội dung về Unicode NFC và trim trước khi đếm; đếm Unicode scalar ở cả frontend và backend để khớp `char_length` PostgreSQL. Chuỗi rỗng thành NULL; không cắt chuỗi quá dài. Giới hạn 200/2.000 là nghiệp vụ đã chốt; cách đếm thuộc TDD đã chốt, cần ghi rõ trên contract cho frontend.
 - Chuẩn hóa dữ liệu: Guide.Id xác định nội dung, trạng thái và vị trí; YoutubeVideoId xác định metadata trong cache riêng. Không lưu thêm canonical URL, embed URL, tên người sửa hoặc nhãn trạng thái vào Guide; tính từ ID/quan hệ khi đọc. OrderState lưu một sự kiện độc lập là phiên bản thứ tự, không lặp dữ liệu Guide.
 - Index `(SortOrder, Id)` phục vụ danh sách; thêm index từng FK audit theo quy ước EF. Truy vấn luôn sắp SortOrder rồi Id để ổn định. Chưa thêm trigram/index tìm kiếm: chưa có số liệu về lượng hướng dẫn hoặc tải để biện minh.
 - Tạo mới lấy max(SortOrder)+1 khi đã giữ khóa OrderState. Di chuyển đọc toàn bộ thứ tự dưới khóa rồi đánh số lại 1..N, chỉ tăng Version/ModifiedAt của Guide có vị trí đổi. Không đặt UNIQUE SortOrder vì việc cập nhật nhiều dòng trong một transaction có thể tạm trùng; invariant được bảo vệ bằng khóa chung và kiểm thử PostgreSQL thật. Cách này phù hợp danh sách hướng dẫn nhỏ, chi phí O(N); cần đánh giá lại khi số lượng thực tế lớn.
@@ -268,7 +268,7 @@ Dùng lại User, Permission, Role và RolePermission theo TDD-RBAC-001/Data Mod
 
 ## Internal API
 
-Tất cả endpoint dưới đây là đề xuất phiên bản 1. Admin cần `guide.manage`; public AllowAnonymous. Body JSON; GUID sai định dạng trả 400 theo binding. Giữ envelope `Result<T>` hiện có cho thành công; lỗi dùng middleware hiện có. Các mã cụ thể của module đặt trong `messageCode`, không thay `code` chung của exception.
+Tất cả endpoint dưới đây là contract phiên bản 1 trong TDD đã chốt; chưa có implementation GUIDE. Admin cần `guide.manage`; public AllowAnonymous. Body JSON; GUID sai định dạng trả 400 theo binding. Giữ envelope `Result<T>` hiện có cho thành công; lỗi dùng middleware hiện có. Các mã cụ thể của module đặt trong `messageCode`, không thay `code` chung của exception.
 
 DTO đọc admin gồm id, title, description, youtubeUrl, youtubeVideoId, state, sortOrder, version, createdAtUtc, modifiedAtUtc, metadata và videoWarning. DTO public chỉ gồm id, title, description, youtubeVideoId, youtubeUrl và metadata; không trả tác giả, trạng thái nháp hay phiên bản sửa. `metadata` gồm thumbnailUrl, durationSeconds, fetchedAtUtc; null khi chưa lấy được. `videoWarning` là mã hoặc null, không coi đây là kết quả xuất bản đã xác thực.
 
@@ -290,7 +290,7 @@ Các phiên bản phải là số nguyên dương. Move từ chối beforeId b�
 
 Keyword trim, tìm literal không phân biệt hoa/thường nhưng có phân biệt dấu, trong Title OR Description. Escape `%`, `_`, `\` trước ILike có tham số, không ghép SQL từ chuỗi nhập. Một Guide chỉ xuất hiện một lần. Keyword rỗng nghĩa là không lọc. Phân trang theo PagedResult hiện có: mặc định 1/10, giá trị không dương về mặc định, pageSize tối đa 100; từ chối offset tràn số. Admin trả page và orderVersion từ cùng snapshot SQL để không ghép hai thời điểm khác nhau.
 
-Cả GET danh sách lẫn chi tiết đều truy vấn điều kiện Published ở SQL. Đọc metadata sau khi đọc page, batch các ID khác nhau; tối đa 50 ID/lần YouTube. Nếu cache hết hạn và YouTube lỗi, vẫn trả nội dung SQL, metadata=null; giao diện hiện ảnh thay thế, không hiển thị thời lượng giả và vẫn cho thử phát. Không tự ẩn. Đây là xử lý dự phòng kỹ thuật đang đề xuất; không bảo đảm giữ nguyên bản sao metadata đã hết hạn khi YouTube thay đổi video.
+Cả GET danh sách lẫn chi tiết đều truy vấn điều kiện Published ở SQL. Đọc metadata sau khi đọc page, batch các ID khác nhau; tối đa 50 ID/lần YouTube. Nếu cache hết hạn và YouTube lỗi, vẫn trả nội dung SQL, metadata=null; giao diện hiện ảnh thay thế, không hiển thị thời lượng giả và vẫn cho thử phát. Không tự ẩn. Đây là xử lý dự phòng kỹ thuật trong TDD đã chốt; không bảo đảm giữ nguyên bản sao metadata đã hết hạn khi YouTube thay đổi video.
 
 ### Examples
 
@@ -387,11 +387,12 @@ Player báo video không phát được thì hiện thông báo và nút đóng/
 
 ### Others
 
-- [Bảng phủ System Test](../discovery/guide-system-test-coverage.md): ST-GUIDE-001 đến ST-GUIDE-034; đây là đặc tả chưa chạy.
+- [Bảng phủ System Test](../discovery/guide-system-test-coverage.md): ST-GUIDE-001 đến ST-GUIDE-043; đây là đặc tả chưa chạy.
+- [Bảng phủ Unit Test](../discovery/guide-unit-test-coverage.md): 44 đặc tả unit dự kiến, cùng ranh giới với integration/system test.
 - [Kế hoạch và xác nhận nghiệp vụ](../discovery/guide-planning.md).
 - [TDD-RBAC-001](TDD-RBAC-001.md): danh mục quyền, policy và dữ liệu phân quyền dùng lại.
 - [TDD-AUTH-001](TDD-AUTH-001.md): kiểm Origin cho request ghi dùng cookie.
 - Mã hiện có làm căn cứ: `src/bmt-be.presentation/apis/news/NewsArticleApi.cs`, `src/bmt-be.contract/constants/PermissionNames.cs`, `src/bmt-be.api/dependencyInjection/extensions/JwtExtensions.cs`, `src/bmt-be.api/startup/PermissionCatalogGuard.cs`, `src/bmt-be.persistence/ApplicationDbContext.cs`, `src/bmt-be.application/behaviors/TransactionPipelineBehavior.cs`, `src/bmt-be.application/abstractions/ICacheService.cs`, `src/bmt-be.contract/abstractions/shared/PagedResult.cs` trong repository bmt-be.
-- Kiểm chứng dự kiến: validator/domain bằng unit test sau khi chốt TDD; policy/HTTP bằng API integration; CHECK/FK/rollback và cập nhật đồng thời bằng PostgreSQL thật; player/Shorts bằng trình duyệt với video thật. Mock YouTube chỉ chứng minh nhánh xử lý API, không chứng minh video phát được. Chưa soạn đặc tả Unit Test hoặc chạy test.
+- Kiểm chứng dự kiến: validator/domain bằng unit test theo TDD đã chốt; policy/HTTP bằng API integration; CHECK/FK/rollback và cập nhật đồng thời bằng PostgreSQL thật; player/Shorts bằng trình duyệt với video thật. Mock YouTube chỉ chứng minh nhánh xử lý API, không chứng minh video phát được. Đã soạn UT-GUIDE-001 đến UT-GUIDE-044 theo TDD đã chốt; chưa viết mã hoặc chạy test.
 
 ## Change Log
