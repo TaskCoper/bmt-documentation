@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-CONSULT-009 | Tư vấn kiến trúc sư | Handler sửa hồ sơ: version cũ (unit dự kiến theo TDD) | Error | REGRESSION | P1 | Đặc tả chưa thực thi. Dữ liệu minh họa; mock/fake trong bộ nhớ, không chứng minh PostgreSQL/broker. Hồ sơ Version=V2; command V1 khác V2. | Thay tên và categories. | ConcurrencyConflict; snapshot hồ sơ/links không đổi; không gọi ghi. | BR-CONSULT-001/Then<br>TDD-CONSULT-001/Architecture | Kiểm nhánh và kết quả quan sát được theo hợp đồng đã chốt. | Tân Trần | Draft |
+| UT-CONSULT-009 | Tư vấn kiến trúc sư | Handler sửa hồ sơ: version cũ (unit dự kiến theo TDD) | Error | REGRESSION | P1 | Đặc tả chưa thực thi. Dữ liệu minh họa; mock/fake trong bộ nhớ, không chứng minh PostgreSQL/broker. Hồ sơ Version=V2; command V1 khác V2. | Thay tên, categories, CompanyName, Rating và ReviewCount bằng bộ dữ liệu hợp lệ khác; command có công ty và đủ hai số. | ConcurrencyConflict; snapshot hồ sơ/links không đổi, gồm CompanyName/Rating/ReviewCount và Version; không gọi ghi. | BR-CONSULT-001/Then<br>TDD-CONSULT-001/Architecture | Kiểm nhánh và kết quả quan sát được theo hợp đồng đã chốt. | Tân Trần | Draft |
 
 ## TEST_LINKS
 

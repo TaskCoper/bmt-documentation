@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-CONSULT-015 | Tư vấn kiến trúc sư | Handler chi tiết public: ẩn hoặc thiếu (unit dự kiến theo TDD) | Branch | REGRESSION | P1 | Đặc tả chưa thực thi. Dữ liệu minh họa; mock/fake trong bộ nhớ, không chứng minh PostgreSQL/broker. Repository lần lượt trả null, hồ sơ ẩn, hồ sơ hiện. | ID hồ sơ. | Null/ẩn trả ArchitectNotFound; hồ sơ hiện trả đủ dữ liệu public và categories; không lộ trường quản trị. | BR-CONSULT-001/Then<br>TDD-CONSULT-001/Architecture | Kiểm nhánh và kết quả quan sát được theo hợp đồng đã chốt. | Tân Trần | Draft |
+| UT-CONSULT-015 | Tư vấn kiến trúc sư | Handler chi tiết public: ẩn hoặc thiếu (unit dự kiến theo TDD) | Branch | REGRESSION | P1 | Đặc tả chưa thực thi. Dữ liệu minh họa; mock/fake trong bộ nhớ, không chứng minh PostgreSQL/broker. InMemoryDbFixture/repository thật như ArchitectQueryTests: lần lượt không có hồ sơ, hồ sơ ẩn, hồ sơ hiện/Công ty An/4.8/120 và hồ sơ cũ hiện/CompanyName=null/0/0. Không giả lập sẵn response. | ID hồ sơ. | Null/ẩn trả ArchitectNotFound; hai hồ sơ hiện trả đủ dữ liệu public và categories, CompanyName/Rating/ReviewCount lần lượt Công ty An/4.8/120 và null/0/0; hồ sơ cũ không bị chặn hoặc tự điền tên công ty; query không đổi entity; không lộ trường quản trị. | BR-CONSULT-001/Then<br>TDD-CONSULT-001/Architecture | Kiểm nhánh và kết quả quan sát được theo hợp đồng đã chốt. | Tân Trần | Draft |
 
 ## TEST_LINKS
 

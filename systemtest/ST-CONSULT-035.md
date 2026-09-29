@@ -35,7 +35,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# ST-CONSULT-001
+# ST-CONSULT-035
 
 ## System Test
 
@@ -44,10 +44,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-CONSULT-001 | STORY-CONSULT-001 | Main | SMOKE | P1 | Môi trường thử đã triển khai tính năng, có frontend, API, database và tài khoản thử với quyền tương ứng. Có thể đọc dữ liệu đã lưu; chỉ dùng dữ liệu và email thử. | 1. Tạo KTS đủ mười nhóm thông tin, chọn Hiện<br>2. Mở lại hồ sơ<br>3. Sửa giới thiệu, số công trình, công ty, số sao và số đánh giá rồi lưu<br>4. Tải lại và đối chiếu dữ liệu lưu | KTS A; ảnh thử nằm trên kho ảnh của hệ thống; Nguyễn An; KTS; category Nhà phố; 5 năm; 12 công trình; giới thiệu Bản đầu, sửa Bản mới; Công ty An sửa Công ty Bình; 4,8 sao và 120 đánh giá sửa 4,9 sao và 121 đánh giá; dữ liệu minh họa, không phải cấu hình sản phẩm. | Lưu và đọc lại được đầy đủ mười nhóm thông tin đã xác nhận. Không tự thêm tài khoản đăng nhập cho KTS. Đối chiếu ảnh và tất cả trường; không chỉ kiểm tra thông báo thành công. | STORY-CONSULT-001/AC-001<br>BR-CONSULT-001/Then<br>STORY-CONSULT-001/ALT-01 | Đặc tả chưa thực thi; đối chiếu hành vi với dữ liệu thực lưu và nguồn đã chốt. | [Chưa xác định] | Draft |
+| ST-CONSULT-035 | STORY-CONSULT-001 | EXC | REGRESSION | P1 | Môi trường thử có frontend, API mới và PostgreSQL; tài khoản có consultation.manage; có category và ảnh hợp lệ. Các trường ngoài dữ liệu đang kiểm đều hợp lệ. Chỉ dùng dữ liệu thử. | 1. Với từng số sao không hợp lệ, thử tạo và sửa cả qua giao diện lẫn API trực tiếp<br>2. Khi sửa, đồng thời đổi tên công ty để phát hiện lưu một phần<br>3. Đọc lại hồ sơ, số bản ghi và liên kết category | Số sao: -0,1; 5,1; 4,85; 5,01. Số đánh giá 120. Hồ sơ đối chứng: Công ty An, 4,8 sao; bản sửa đổi Công ty Bình. | Mọi biến thể bị từ chối với lỗi Số sao. Không làm tròn 4,85 hoặc 5,01 để chấp nhận. Không thêm hồ sơ, không đổi công ty, số sao, số đánh giá hoặc category của hồ sơ đối chứng. | STORY-CONSULT-001/AC-014<br>STORY-CONSULT-001/EXC-04<br>BR-CONSULT-001/Then | Kiểm đầu cuối và đối chiếu dữ liệu lưu theo nghiệp vụ đã chốt; đặc tả chưa thực thi. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- STORY-CONSULT-001/AC-001
+- STORY-CONSULT-001/AC-014
+- STORY-CONSULT-001/EXC-04
 - BR-CONSULT-001/Then
-- STORY-CONSULT-001/ALT-01

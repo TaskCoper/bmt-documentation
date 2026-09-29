@@ -35,7 +35,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# ST-CONSULT-001
+# ST-CONSULT-033
 
 ## System Test
 
@@ -44,10 +44,11 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-CONSULT-001 | STORY-CONSULT-001 | Main | SMOKE | P1 | Môi trường thử đã triển khai tính năng, có frontend, API, database và tài khoản thử với quyền tương ứng. Có thể đọc dữ liệu đã lưu; chỉ dùng dữ liệu và email thử. | 1. Tạo KTS đủ mười nhóm thông tin, chọn Hiện<br>2. Mở lại hồ sơ<br>3. Sửa giới thiệu, số công trình, công ty, số sao và số đánh giá rồi lưu<br>4. Tải lại và đối chiếu dữ liệu lưu | KTS A; ảnh thử nằm trên kho ảnh của hệ thống; Nguyễn An; KTS; category Nhà phố; 5 năm; 12 công trình; giới thiệu Bản đầu, sửa Bản mới; Công ty An sửa Công ty Bình; 4,8 sao và 120 đánh giá sửa 4,9 sao và 121 đánh giá; dữ liệu minh họa, không phải cấu hình sản phẩm. | Lưu và đọc lại được đầy đủ mười nhóm thông tin đã xác nhận. Không tự thêm tài khoản đăng nhập cho KTS. Đối chiếu ảnh và tất cả trường; không chỉ kiểm tra thông báo thành công. | STORY-CONSULT-001/AC-001<br>BR-CONSULT-001/Then<br>STORY-CONSULT-001/ALT-01 | Đặc tả chưa thực thi; đối chiếu hành vi với dữ liệu thực lưu và nguồn đã chốt. | [Chưa xác định] | Draft |
+| ST-CONSULT-033 | STORY-CONSULT-001 | EXC | REGRESSION | P1 | Môi trường thử có frontend, API mới và PostgreSQL; tài khoản có consultation.manage; có category và ảnh hợp lệ. Các trường ngoài dữ liệu đang kiểm đều hợp lệ. Chỉ dùng dữ liệu thử. | 1. Ghi lại hồ sơ A trước khi sửa<br>2. Lần lượt thử tạo và sửa với từng biến thể Công ty thiếu/rỗng<br>3. Gửi trực tiếp tới API để kiểm tra cả trường hợp bỏ qua kiểm tra giao diện<br>4. Đọc lại database<br>5. Nhập tên công ty hợp lệ rồi lưu và đọc lại | Tên công ty: thiếu, null, chuỗi rỗng, chỉ dấu cách, chỉ tab; sau đó Công ty An. A ban đầu thuộc Công ty Bình, 4,8 sao, 120 đánh giá. | Mỗi biến thể thiếu/rỗng bị từ chối và chỉ rõ lỗi Công ty; không tạo bản ghi mới hoặc thay một phần hồ sơ A. Tên hợp lệ được lưu và đọc lại đúng; không yêu cầu chọn danh mục công ty. | STORY-CONSULT-001/AC-008<br>STORY-CONSULT-001/AC-011<br>STORY-CONSULT-001/EXC-02<br>BR-CONSULT-001/Then | Kiểm đầu cuối và đối chiếu dữ liệu lưu theo nghiệp vụ đã chốt; đặc tả chưa thực thi. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- STORY-CONSULT-001/AC-001
+- STORY-CONSULT-001/AC-008
+- STORY-CONSULT-001/AC-011
+- STORY-CONSULT-001/EXC-02
 - BR-CONSULT-001/Then
-- STORY-CONSULT-001/ALT-01

@@ -35,7 +35,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# ST-CONSULT-001
+# ST-CONSULT-038
 
 ## System Test
 
@@ -44,10 +44,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-CONSULT-001 | STORY-CONSULT-001 | Main | SMOKE | P1 | Môi trường thử đã triển khai tính năng, có frontend, API, database và tài khoản thử với quyền tương ứng. Có thể đọc dữ liệu đã lưu; chỉ dùng dữ liệu và email thử. | 1. Tạo KTS đủ mười nhóm thông tin, chọn Hiện<br>2. Mở lại hồ sơ<br>3. Sửa giới thiệu, số công trình, công ty, số sao và số đánh giá rồi lưu<br>4. Tải lại và đối chiếu dữ liệu lưu | KTS A; ảnh thử nằm trên kho ảnh của hệ thống; Nguyễn An; KTS; category Nhà phố; 5 năm; 12 công trình; giới thiệu Bản đầu, sửa Bản mới; Công ty An sửa Công ty Bình; 4,8 sao và 120 đánh giá sửa 4,9 sao và 121 đánh giá; dữ liệu minh họa, không phải cấu hình sản phẩm. | Lưu và đọc lại được đầy đủ mười nhóm thông tin đã xác nhận. Không tự thêm tài khoản đăng nhập cho KTS. Đối chiếu ảnh và tất cả trường; không chỉ kiểm tra thông báo thành công. | STORY-CONSULT-001/AC-001<br>BR-CONSULT-001/Then<br>STORY-CONSULT-001/ALT-01 | Đặc tả chưa thực thi; đối chiếu hành vi với dữ liệu thực lưu và nguồn đã chốt. | [Chưa xác định] | Draft |
+| ST-CONSULT-038 | STORY-CONSULT-001 | Main | REGRESSION | P1 | Môi trường thử có frontend, API mới và PostgreSQL; tài khoản có consultation.manage; có category và ảnh hợp lệ. Các trường ngoài dữ liệu đang kiểm đều hợp lệ. Chỉ dùng dữ liệu thử. | 1. Mở form tạo hồ sơ, điền đủ trường bắt buộc và giữ mặc định hai số mới<br>2. Lưu rồi đọc lại qua quản trị và database<br>3. Mở danh sách và chi tiết KTS phía khách | Công ty An; trạng thái Hiện; số sao và số đánh giá giữ mặc định 0. | Hai ô số mặc định bằng 0. Hồ sơ lưu được và trả đúng 0 sao, 0 đánh giá; cả danh sách và chi tiết phía khách hiển thị hai số 0. | STORY-CONSULT-001/AC-013<br>STORY-CONSULT-001/AC-015<br>BR-CONSULT-001/Then | Kiểm đầu cuối và đối chiếu dữ liệu lưu theo nghiệp vụ đã chốt; đặc tả chưa thực thi. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- STORY-CONSULT-001/AC-001
+- STORY-CONSULT-001/AC-013
+- STORY-CONSULT-001/AC-015
 - BR-CONSULT-001/Then
-- STORY-CONSULT-001/ALT-01

@@ -35,7 +35,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# ST-CONSULT-001
+# ST-CONSULT-041
 
 ## System Test
 
@@ -44,10 +44,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-CONSULT-001 | STORY-CONSULT-001 | Main | SMOKE | P1 | Môi trường thử đã triển khai tính năng, có frontend, API, database và tài khoản thử với quyền tương ứng. Có thể đọc dữ liệu đã lưu; chỉ dùng dữ liệu và email thử. | 1. Tạo KTS đủ mười nhóm thông tin, chọn Hiện<br>2. Mở lại hồ sơ<br>3. Sửa giới thiệu, số công trình, công ty, số sao và số đánh giá rồi lưu<br>4. Tải lại và đối chiếu dữ liệu lưu | KTS A; ảnh thử nằm trên kho ảnh của hệ thống; Nguyễn An; KTS; category Nhà phố; 5 năm; 12 công trình; giới thiệu Bản đầu, sửa Bản mới; Công ty An sửa Công ty Bình; 4,8 sao và 120 đánh giá sửa 4,9 sao và 121 đánh giá; dữ liệu minh họa, không phải cấu hình sản phẩm. | Lưu và đọc lại được đầy đủ mười nhóm thông tin đã xác nhận. Không tự thêm tài khoản đăng nhập cho KTS. Đối chiếu ảnh và tất cả trường; không chỉ kiểm tra thông báo thành công. | STORY-CONSULT-001/AC-001<br>BR-CONSULT-001/Then<br>STORY-CONSULT-001/ALT-01 | Đặc tả chưa thực thi; đối chiếu hành vi với dữ liệu thực lưu và nguồn đã chốt. | [Chưa xác định] | Draft |
+| ST-CONSULT-041 | STORY-CONSULT-001 | Integration boundary | REGRESSION | P1 | PostgreSQL 15 riêng có migration mới và EF mapping thật; A đã lưu Công ty An, Rating=4.8, ReviewCount=120. Các cột cũ hợp lệ. Chỉ dùng dữ liệu thử; không dùng EF InMemory để kết luận về CHECK. | 1. Đọc mapping và snapshot A<br>2. Trong từng transaction độc lập, thử UPDATE trực tiếp mỗi biến thể sai, rồi rollback sau lỗi<br>3. Dùng EF/Npgsql lưu Rating=4.85 để kiểm kiểu cột không tự làm tròn<br>4. Sau mỗi lần, đọc A qua kết nối mới<br>5. Thử các cặp hợp lệ trong transaction riêng rồi đọc lại | Biến thể sai: CompanyName rỗng hoặc chỉ dấu cách; Rating=-0.1, 5.1, 4.85; ReviewCount=-1; cặp (Rating=4.8,ReviewCount=0). Biến thể hợp lệ: (0,0), (0,1), (5,1). Các trường không đang kiểm giữ hợp lệ; mỗi biến thể có dữ liệu đối chứng riêng. | Các biến thể sai bị CHECK tương ứng từ chối; A không thay một phần dữ liệu sau rollback. Cột Rating có kiểu numeric không khai báo scale cố định; EF không làm tròn 4.85 trước khi gửi, giá trị này bị từ chối. Các cặp hợp lệ lưu và đọc đúng. CHECK Công ty không chứng minh quy tắc bắt buộc tên cho hồ sơ mới vì cột cho phép NULL để giữ hồ sơ cũ; quy tắc đó kiểm qua API ở ST-CONSULT-033. | STORY-CONSULT-001/AC-014<br>BR-CONSULT-001/Then<br>TDD-CONSULT-001/Data Model | Kiểm ràng buộc thật và tương thích ORM với PostgreSQL theo TDD đã chốt; đặc tả chưa thực thi. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- STORY-CONSULT-001/AC-001
+- STORY-CONSULT-001/AC-014
 - BR-CONSULT-001/Then
-- STORY-CONSULT-001/ALT-01
+- TDD-CONSULT-001/Data Model

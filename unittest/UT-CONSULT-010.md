@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-CONSULT-010 | Tư vấn kiến trúc sư | Handler sửa hồ sơ: chỉ đổi chuyên môn (unit dự kiến theo TDD) | Branch | REGRESSION | P1 | Đặc tả chưa thực thi. Dữ liệu minh họa; mock/fake trong bộ nhớ, không chứng minh PostgreSQL/broker. Hồ sơ C1, Version=V1; C2 tồn tại. | Giữ các trường hồ sơ; thay tập thành C2; expectedVersion=V1. | Links thành C2; Version mới khác V1; ModifiedOnUtc=T; Id/CreatedOnUtc giữ nguyên. | BR-CONSULT-001/Then<br>TDD-CONSULT-001/Architecture | Kiểm nhánh và kết quả quan sát được theo hợp đồng đã chốt. | Tân Trần | Draft |
+| UT-CONSULT-010 | Tư vấn kiến trúc sư | Handler sửa hồ sơ: chỉ đổi chuyên môn (unit dự kiến theo TDD) | Branch | REGRESSION | P1 | Đặc tả chưa thực thi. Dữ liệu minh họa; mock/fake trong bộ nhớ, không chứng minh PostgreSQL/broker. Hồ sơ C1, Version=V1; CompanyName=Công ty An, Rating=4.8m, ReviewCount=120; C2 tồn tại. | Gửi lại nguyên CompanyName=Công ty An, Rating=4.8m, ReviewCount=120 và các trường hồ sơ khác; thay tập thành C2; expectedVersion=V1. | Links thành C2; Version mới khác V1; ModifiedOnUtc=T; Id/CreatedOnUtc và cả ba trường mới giữ nguyên; không reset hai số về 0. | BR-CONSULT-001/Then<br>TDD-CONSULT-001/Architecture | Kiểm nhánh và kết quả quan sát được theo hợp đồng đã chốt. | Tân Trần | Draft |
 
 ## TEST_LINKS
 
