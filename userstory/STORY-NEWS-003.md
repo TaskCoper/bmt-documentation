@@ -68,7 +68,7 @@ Người đọc mở phần Tin tức trong Cẩm nang hoặc đường dẫn b�
 1. Hiển thị các bài đang công bố theo ngày công bố đầu tiên, mới nhất trước, có phân trang.
 2. Người đọc nhập từ khóa tiêu đề và có thể chọn một danh mục.
 3. Lọc bài khớp từ khóa và thuộc danh mục đã chọn hoặc các danh mục con ở mọi cấp; loại trùng trước khi phân trang.
-4. Mở bài và hiển thị nội dung rich text cùng ảnh; không kiểm gói và không trừ lượt.
+4. Mở bài và hiển thị nội dung rich text cùng ảnh và số phút đọc do người viết nhập (nếu đã có); không kiểm gói và không trừ lượt.
 
 ### Alternative Flow
 
@@ -98,7 +98,7 @@ Mở bài nháp, ẩn hoặc đã xóa bằng đường dẫn trực tiếp.
 
 - **Given**: Người chưa đăng nhập hoặc không có gói
 - **When**: Mở một bài đang công bố
-- **Then**: Đọc được miễn phí, không trừ lượt hoặc yêu cầu mua gói.
+- **Then**: Đọc được miễn phí, không trừ lượt hoặc yêu cầu mua gói; dữ liệu danh sách và chi tiết có số phút đọc đã nhập, không có mô tả ngắn. Bài cũ chưa nhập số phút vẫn đọc được.
 
 #### AC-002
 

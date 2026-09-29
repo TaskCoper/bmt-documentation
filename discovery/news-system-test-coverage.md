@@ -1,14 +1,16 @@
 # Phạm vi và độ phủ System Test Tin tức
 
-Người dùng đã chốt STORY-NEWS-001–003 và BR-NEWS-001–003 trong hội thoại. Bộ đặc tả gồm 30 ca, phủ 22 tiêu chí nghiệm thu, các nhánh thay thế, ngoại lệ và yêu cầu hiển thị rich text an toàn. Đây là đặc tả chưa thực thi, không phải kết quả Pass.
+Người dùng đã chốt STORY-NEWS-001–003 và BR-NEWS-001–003 trong hội thoại. Bộ đặc tả gồm 31 ca, phủ 23 tiêu chí nghiệm thu, các nhánh thay thế, ngoại lệ và yêu cầu hiển thị rich text an toàn. Đây là đặc tả chưa thực thi, không phải kết quả Pass.
 
 **Cập nhật 26/09/2026:** người dùng xác nhận giới hạn tiêu đề 200, mô tả ngắn 500 và nội dung 200.000 ký tự (BR-NEWS-001 khoản 9, STORY-NEWS-001/AC-009, EXC-04); ST-NEWS-030 kiểm các biên này.
 
 **Cập nhật 25/09/2026:** người dùng xác nhận tên danh mục tối đa 200 ký tự, ghi tại BR-NEWS-002 khoản 1 và STORY-NEWS-002/AC-008; ST-NEWS-028 kiểm biên 200/201 ký tự. Quyền quản lý tin tức theo STORY-RBAC-001 có mã kỹ thuật `news.manage` trong TDD-RBAC-001, không gắn phân công; ST-NEWS-011 và ST-NEWS-019 kiểm thêm vai trò tùy chỉnh được cấp mã này. ST-NEWS-029 kiểm lọc theo danh mục không còn tồn tại trả danh sách rỗng.
 
+**Cập nhật 29/09/2026:** bỏ mô tả ngắn, số phút đọc do người viết nhập. ST-NEWS-031 kiểm dữ liệu mới và ngoại lệ bài cũ.
+
 ## Phạm vi đã chốt
 
-- Bài rich text có ảnh cloud qua URL; lưu nháp thiếu thông tin, công bố kiểm đủ; sửa tại chỗ, ẩn/hiện và xóa mọi trạng thái, không khôi phục; tiêu đề tối đa 200, mô tả ngắn 500, nội dung 200.000 ký tự.
+- Bài rich text có ảnh cloud qua URL; lưu nháp thiếu thông tin, công bố kiểm đủ; sửa tại chỗ, ẩn/hiện và xóa mọi trạng thái, không khôi phục; tiêu đề tối đa 200, nội dung 200.000 ký tự; số phút đọc nhập tay theo BR-NEWS-001 khoản 10.
 - Danh mục riêng đa cấp không giới hạn số cấp; tên tối đa 200 ký tự; một bài nhiều danh mục; kiểm tên cùng cha, ngăn vòng lặp và chặn xóa danh mục đang dùng.
 - Đọc công khai miễn phí; tìm tiêu đề và lọc một nhánh, loại trùng trước phân trang; giữ ngày công bố đầu tiên.
 
@@ -38,6 +40,7 @@ Người dùng đã chốt STORY-NEWS-001–003 và BR-NEWS-001–003 trong hộ
 | [STORY-NEWS-003/AC-003](../userstory/STORY-NEWS-003.md#ac-003) | [ST-NEWS-022](../systemtest/ST-NEWS-022.md), [ST-NEWS-023](../systemtest/ST-NEWS-023.md), [ST-NEWS-024](../systemtest/ST-NEWS-024.md), [ST-NEWS-029](../systemtest/ST-NEWS-029.md) |
 | [STORY-NEWS-003/AC-004](../userstory/STORY-NEWS-003.md#ac-004) | [ST-NEWS-025](../systemtest/ST-NEWS-025.md) |
 | [STORY-NEWS-003/AC-005](../userstory/STORY-NEWS-003.md#ac-005) | [ST-NEWS-026](../systemtest/ST-NEWS-026.md) |
+| [STORY-NEWS-001/AC-010](../userstory/STORY-NEWS-001.md#ac-010) | [ST-NEWS-031](../systemtest/ST-NEWS-031.md) |
 
 ## Luồng và ngoại lệ
 
@@ -45,6 +48,7 @@ Người dùng đã chốt STORY-NEWS-001–003 và BR-NEWS-001–003 trong hộ
 - STORY-NEWS-001/EXC-02: ST-NEWS-003, ST-NEWS-007, ST-NEWS-008.
 - STORY-NEWS-001/EXC-03: ST-NEWS-005.
 - STORY-NEWS-001/EXC-04: ST-NEWS-030.
+- STORY-NEWS-001/EXC-05: ST-NEWS-031.
 - STORY-NEWS-001/ALT-02: ST-NEWS-009.
 - STORY-NEWS-001/ALT-03: ST-NEWS-010.
 - STORY-NEWS-001/EXC-01: ST-NEWS-011.

@@ -65,7 +65,7 @@ Người quản lý tạo hoặc cập nhật bài.
 
 ### Main Flow
 
-1. Tạo bài và nhập tiêu đề, ảnh đại diện, mô tả ngắn, nội dung rich text; chọn một hoặc nhiều danh mục khi sẵn sàng.
+1. Tạo bài và nhập tiêu đề, ảnh đại diện, số phút đọc do người viết nhập, nội dung rich text; chọn một hoặc nhiều danh mục khi sẵn sàng.
 2. Khi chèn ảnh nội dung, FE tải ảnh lên cloud rồi chèn URL vào rich text.
 3. Lưu nháp để nhập dần hoặc chọn công bố; hệ thống kiểm đủ dữ liệu trước công bố.
 4. Công bố bài hợp lệ trực tiếp, không qua người duyệt; ghi ngày công bố đầu tiên.
@@ -115,9 +115,15 @@ Upload ảnh thất bại.
 
 #### EXC-04
 
-Tiêu đề, mô tả ngắn hoặc nội dung vượt giới hạn độ dài.
+Tiêu đề hoặc nội dung vượt giới hạn độ dài.
 
 1. Từ chối lưu, chỉ rõ phần vượt giới hạn; giữ nguyên bài hiện tại và không tự cắt ngắn.
+
+#### EXC-05
+
+Số phút đọc không phải số nguyên lớn hơn 0.
+
+1. Từ chối lưu, chỉ rõ trường sai; giữ bài hiện tại.
 
 ## Acceptance Criteria
 
@@ -131,7 +137,7 @@ Tiêu đề, mô tả ngắn hoặc nội dung vượt giới hạn độ dài.
 
 - **Given**: Bài thiếu một trong năm thành phần bắt buộc
 - **When**: Công bố
-- **Then**: Từ chối; chỉ công bố khi có tiêu đề, ảnh đại diện, mô tả ngắn, nội dung và ít nhất một danh mục hợp lệ.
+- **Then**: Từ chối; chỉ công bố khi có tiêu đề, ảnh đại diện, số phút đọc do người viết nhập, nội dung và ít nhất một danh mục hợp lệ.
 
 #### AC-003
 
@@ -172,9 +178,16 @@ Tiêu đề, mô tả ngắn hoặc nội dung vượt giới hạn độ dài.
 #### AC-009
 
 - **Given**: Người có quyền đang lưu nháp hoặc sửa một bài
-- **When**: Tiêu đề dài 200 ký tự, mô tả ngắn 500 ký tự sau khi bỏ khoảng trắng đầu/cuối và nội dung 200.000 ký tự, rồi thử lại với 201, 501 hoặc 200.001 ký tự
+- **When**: Tiêu đề dài 200 ký tự sau khi bỏ khoảng trắng đầu/cuối và nội dung 200.000 ký tự, rồi thử lại với 201 hoặc 200.001 ký tự
 - **Then**: Lần đầu lưu được; mỗi lần vượt giới hạn bị từ chối, không tự cắt ngắn.
 - **And**: Yêu cầu bị từ chối không thay đổi bài hiện tại.
+
+#### AC-010
+
+- **Given**: Người có quyền tạo hoặc sửa bài
+- **When**: Nhập số phút đọc hoặc để trống
+- **Then**: Số nguyên lớn hơn 0 được lưu đúng giá trị đã nhập; 0, số âm hoặc số không nguyên bị từ chối. Nháp được để trống; công bố hoặc lưu sửa bài đang công bố phải có số phút đọc.
+- **And**: Không còn trường mô tả ngắn. Bài cũ giữ số phút đọc trống và vẫn đọc được nếu đang công bố; bổ sung khi lưu sửa bài đang công bố, không tự gán mặc định.
 
 ## References
 
