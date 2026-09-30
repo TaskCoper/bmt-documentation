@@ -39,7 +39,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Metadata
 
-- **Story**: Là khách đã đăng nhập, tôi muốn gửi yêu cầu tư vấn với KTS và giờ mong muốn để admin gọi lại sắp xếp lịch.
+- **Story**: Là khách đã đăng nhập và xác minh email, tôi muốn gửi yêu cầu tư vấn với KTS và giờ mong muốn để admin gọi lại sắp xếp lịch.
 - **Context**: Tư vấn miễn phí, độc lập với gói dịch vụ. Khách không cần trang theo dõi yêu cầu. Nghiệp vụ trước lần bổ sung này đã được người dùng chốt trong hội thoại. Ngày 29/09/2026, người dùng xác nhận hiển thị công ty, số sao và số đánh giá ở cả danh sách và chi tiết KTS; các giá trị do người có quyền quản lý tư vấn KTS nhập thủ công theo BR-CONSULT-001. Người dùng đã chốt bản cập nhật US/BR ngày 29/09/2026. Hồ sơ cũ chưa có Công ty vẫn hiển thị theo trạng thái hiện có, theo ngoại lệ ở BR-CONSULT-001. Metadata chưa đầy đủ. Còn cần làm rõ: danh sách giờ cụ thể, định dạng số liên lạc và giới hạn độ dài nội dung.
 - **Sprint**:
 - **Priority**: Must
@@ -55,7 +55,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ### Preconditions
 
-- Khách đã đăng nhập.
+- Khách đã đăng nhập và xác minh email tài khoản.
 - KTS được chọn đang hiển thị.
 
 ### Trigger
@@ -69,7 +69,7 @@ Khách chọn KTS và bắt đầu gửi yêu cầu tư vấn.
 1. Khách xem các hồ sơ đang hiển thị; danh sách và trang chi tiết KTS đều có công ty, số sao và số đánh giá hiện tại. Khách chọn KTS, ngày và khung giờ mong muốn từ danh sách dùng chung trên frontend, theo giờ Việt Nam (UTC+7).
 2. Hệ thống điền số liên lạc từ tài khoản nếu có; khách kiểm tra hoặc đổi số riêng cho đơn.
 3. Khách có thể nhập nội dung cần tư vấn hoặc để trống rồi bấm gửi.
-4. Backend kiểm tra đăng nhập, KTS còn hiển thị, có số liên lạc và thời gian mong muốn còn ở tương lai.
+4. Backend kiểm tra đăng nhập hợp lệ, email tài khoản đã xác minh, KTS còn hiển thị, có số liên lạc và thời gian mong muốn còn ở tương lai.
 5. Hệ thống lưu yêu cầu ở trạng thái Chưa xử lý và thông báo đã tiếp nhận; admin sẽ gọi lại xác nhận lịch.
 6. Hệ thống gửi email đến tài khoản với KTS, ngày giờ mong muốn, số liên lạc, nội dung nếu có và lời nhắc admin gọi lại.
 
@@ -93,9 +93,10 @@ Tài khoản chưa có số điện thoại hoặc khách muốn dùng số khá
 
 #### EXC-01
 
-Chưa đăng nhập hoặc phiên không còn hợp lệ.
+Chưa đăng nhập, phiên không còn hợp lệ hoặc email tài khoản chưa xác minh.
 
-1. Hệ thống yêu cầu đăng nhập hợp lệ trước khi gửi; không tiếp nhận yêu cầu chưa xác thực.
+1. Hệ thống từ chối tiếp nhận; khách phải đăng nhập hợp lệ và xác minh email trước khi gửi.
+2. Không tạo yêu cầu tư vấn hoặc email tiếp nhận cho lần gửi bị từ chối.
 
 #### EXC-02
 
@@ -114,14 +115,14 @@ Gửi email thất bại sau khi đã tiếp nhận.
 
 #### AC-001
 
-- **Given**: Khách đã đăng nhập, KTS đang hiển thị và dữ liệu hợp lệ.
+- **Given**: Khách đã đăng nhập, email tài khoản đã xác minh, KTS đang hiển thị và dữ liệu hợp lệ.
 - **When**: Khách gửi yêu cầu.
 - **Then**: Lưu đúng KTS, ngày giờ mong muốn, số liên lạc và nội dung nếu có; trạng thái Chưa xử lý.
 - **And**: Thông báo tiếp nhận không khẳng định lịch đã được xác nhận.
 
 #### AC-002
 
-- **Given**: Khách chưa mua gói nhưng đã đăng nhập.
+- **Given**: Khách chưa mua gói nhưng đã đăng nhập và xác minh email tài khoản.
 - **When**: Gửi yêu cầu hợp lệ.
 - **Then**: Yêu cầu vẫn được tiếp nhận miễn phí.
 - **And**: Không kiểm tra hoặc trừ lượt gói dịch vụ.
@@ -184,10 +185,10 @@ Gửi email thất bại sau khi đã tiếp nhận.
 
 #### AC-011
 
-- **Given**: Khách chưa đăng nhập.
-- **When**: Gửi yêu cầu.
-- **Then**: Hệ thống từ chối tiếp nhận.
-- **And**: Phải đăng nhập hợp lệ trước khi gửi.
+- **Given**: Khách chưa đăng nhập, phiên đã hết hạn hoặc đã đăng nhập nhưng chưa xác minh email tài khoản.
+- **When**: Gửi yêu cầu, kể cả gọi trực tiếp backend từ web hoặc app.
+- **Then**: Hệ thống từ chối tiếp nhận; không tạo yêu cầu hoặc email tiếp nhận.
+- **And**: Khách phải đăng nhập hợp lệ và xác minh email trước khi gửi; sau đó yêu cầu hợp lệ được tiếp nhận theo AC-001.
 
 #### AC-012
 

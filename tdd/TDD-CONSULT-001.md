@@ -55,7 +55,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 Bộ STORY-CONSULT-001, STORY-CONSULT-002, STORY-CONSULT-003 và BR-CONSULT-001 đến BR-CONSULT-005 đã được người dùng chốt trong hội thoại; 41 System Test hiện có là đặc tả; chưa chạy trọn bộ từ giao diện đến database; phần bổ sung ba trường đã được chốt trong US/BR ngày 29/09/2026. Người dùng bổ sung ảnh đại diện bằng đường dẫn ảnh có sẵn, không tải file từ máy lên. Hồ sơ và category do người có quyền quản lý trực tiếp; không có bước phê duyệt trong sản phẩm.
 
-Thiết kế phải tiếp nhận yêu cầu miễn phí từ khách đã đăng nhập, lưu giờ mong muốn và số liên lạc trên đơn, rồi để admin liên hệ ngoài hệ thống. Hệ thống không giữ chỗ theo giờ, không thu phí, không kiểm quyền lợi gói và không tạo lịch hẹn chính thức.
+Thiết kế phải tiếp nhận yêu cầu miễn phí từ khách đã đăng nhập và xác minh email tài khoản, lưu giờ mong muốn và số liên lạc trên đơn, rồi để admin liên hệ ngoài hệ thống. Hệ thống không giữ chỗ theo giờ, không thu phí, không kiểm quyền lợi gói và không tạo lịch hẹn chính thức.
 
 Checkout khảo sát có .NET 8, Carter/MediatR/FluentValidation, EF Core/Npgsql 8.0.0; cấu hình Docker dùng PostgreSQL 15. MassTransit RabbitMQ và EF Core Outbox cùng phiên bản 8.4.1. Phiên bản PostgreSQL của môi trường triển khai chưa được kiểm tra. Chưa có entity/API tư vấn trong source. Các file source đang có thay đổi chưa commit; thiết kế lấy nội dung hiện tại làm mốc, không thay các thay đổi đó.
 
@@ -129,7 +129,7 @@ Các đường dẫn trong bảng tính từ `bmt-be/src/`. Phạm vi kiểm ch�
 
 ```mermaid
 flowchart LR
-    C[Khách đã đăng nhập] --> F[Form tư vấn UTC+7]
+    C[Khách đã đăng nhập và xác minh email] --> F[Form tư vấn UTC+7]
     A[Người có quyền] --> M[Quản trị KTS và yêu cầu]
     F --> API[Carter API v1]
     M --> API
@@ -150,7 +150,7 @@ Toàn bộ chức năng quản trị tư vấn KTS dùng một mã quyền `cons
 
 Policy quản trị kiểm theo mã quyền qua cơ chế RBAC chung, không kiểm tên hay mã vai trò và không tin nút ẩn trên frontend. Đường phát hành và làm mới claim quyền, policy theo mã quyền và kiểm dấu phiên đã có theo TDD-RBAC-001; module này chỉ thêm mã `consultation.manage` và gắn policy vào endpoint. Không tự xây một bộ phân quyền riêng chỉ cho tư vấn. Thiếu quyền trả 403 theo BR-RBAC-011; yêu cầu bị từ chối không ghi dữ liệu nào của module. Phiên reset mật khẩu không được dùng để gọi API nghiệp vụ; tài khoản khóa/xóa hoặc phiên đã bị thu hồi bị chặn bởi cơ chế xác thực chung. Khi triển khai vẫn phải kiểm chứng các điều kiện này trên endpoint mới.
 
-Gửi yêu cầu dùng policy riêng `ConsultationCustomer`: phiên đăng nhập thông thường hợp lệ, User tồn tại và thuộc Customer; không thêm điều kiện `IsVerified=true` hay có gói dịch vụ. Đọc số và email từ User theo UserId lấy từ phiên. Không nhận customerId, email nhận thư, trạng thái hoặc ghi chú từ body khách. `GET /users/me` tiếp tục policy hiện có; chỉ thêm phoneNumber nullable để điền form.
+Gửi yêu cầu dùng policy `ConsultationCustomer`, dùng chung `BaseAccessPolicy`: phiên đăng nhập thông thường hợp lệ, bắt buộc claim `IsVerified=true`; User tồn tại và thuộc Customer. Claim này được dựng từ `User.IsEmailVerified` khi cấp phiên. Không yêu cầu có gói dịch vụ. Email chưa xác minh hoặc thiếu claim xác minh trả 403 `AccessForbidden` trước khi gọi handler, không ghi đơn hoặc email vào outbox. Điều kiện áp dụng cho cả cookie web, Bearer mobile và yêu cầu gửi lại. Đọc số và email từ User theo UserId lấy từ phiên. Không nhận customerId, email nhận thư, trạng thái hoặc ghi chú từ body khách. `GET /users/me` tiếp tục policy hiện có; chỉ thêm phoneNumber nullable để điền form.
 
 Đường đọc hồ sơ cùng category gắn trên hồ sơ cho trang tư vấn là dữ liệu công khai; hồ sơ ẩn trả 404 tại đường public. Đường quản trị không dùng bộ lọc `IsVisible` để đọc hồ sơ hoặc đơn cũ. Xem và cập nhật yêu cầu dùng chung `consultation.manage`; PATCH vẫn chỉ trả xác nhận tối thiểu (id, version), không trả lại dữ liệu cá nhân.
 
@@ -176,7 +176,7 @@ API mới chỉ nhận JSON cho thao tác ghi. Chống CSRF dùng lớp chung �
 | --- | --- | --- |
 | BR-CONSULT-001/Then: hồ sơ, chuyên môn, ẩn/hiện, xóa category | Validator hồ sơ/category; transaction hồ sơ-links; FK RESTRICT và protocol khóa; public projection | ST-CONSULT-001 đến ST-CONSULT-010; ST-CONSULT-018; ST-CONSULT-029 |
 | BR-CONSULT-001 khoản 7, 10–13 và Except: ba trường nhập thủ công, hiển thị và hồ sơ cũ | Validator, mapping, CHECK số, projection và migration cộng thêm cột | ST-CONSULT-001, ST-CONSULT-008, ST-CONSULT-033 đến ST-CONSULT-040 |
-| BR-CONSULT-002/Then: đăng nhập, số liên lạc, không phụ thuộc gói | ConsultationCustomer; GetMeBasic.PhoneNumber; handler lựa chọn số; không gọi dịch vụ gói | ST-CONSULT-011 đến ST-CONSULT-015; ST-CONSULT-021 |
+| BR-CONSULT-002/Then: đăng nhập, xác minh email, số liên lạc, không phụ thuộc gói | ConsultationCustomer; GetMeBasic.PhoneNumber; handler lựa chọn số; không gọi dịch vụ gói | ST-CONSULT-011 đến ST-CONSULT-015; ST-CONSULT-021 |
 | BR-CONSULT-003/Then: giờ mong muốn tương lai, trùng giờ, UTC+7 | Handler TimeProvider và DateTimeOffset; không unique theo KTS/giờ; FE/email format UTC+7 | ST-CONSULT-016, ST-CONSULT-017, ST-CONSULT-022 |
 | BR-CONSULT-004/Then và Except: hai trạng thái, mở lại, note nội bộ | CHECK status; command quản trị có version; DTO public không note | ST-CONSULT-023 đến ST-CONSULT-029 |
 | BR-CONSULT-005/Then và Except: email tiếp nhận và xử lý lỗi | Template allowlist; scoped Publish và Bus Outbox; consumer retry/error queue | ST-CONSULT-019, ST-CONSULT-020, ST-CONSULT-024, ST-CONSULT-030 |
@@ -204,7 +204,7 @@ Các hợp đồng kỹ thuật mới cần được kiểm chứng thêm khi tr
 - Chiến lược kiểm thử: Unit kiểm tra validation, ánh xạ và quyết định handler; PostgreSQL thật kiểm FK, lock, version, idempotency và rollback đơn/outbox; RabbitMQ/SMTP thử kiểm email. Phần bổ sung ba trường có đặc tả UT-CONSULT-049 đến UT-CONSULT-059 cùng các UT hiện có được cập nhật sau khi người dùng chốt TDD ngày 29/09/2026; CHECK và kiểu numeric kiểm riêng tại ST-CONSULT-041.
 - Thứ tự triển khai dự kiến: thêm mã `consultation.manage` và policy → cấu hình schema/repository → quản trị hồ sơ/category → đọc public và bổ sung phoneNumber → gửi đơn/outbox → quản trị đơn → tích hợp FE và kiểm chứng. Xem Data Model/Notes về cửa sổ nâng cấp quyền.
 - Khi triển khai (26/09/2026), ảnh đại diện được kiểm cú pháp rồi kiểm tên miền kho presign như mục Bảo vệ request và dữ liệu. Người dùng xác nhận quyết định này ngày 26/09/2026.
-- Khi triển khai, policy `ConsultationCustomer` chỉ kiểm phiên: đã đăng nhập, không phải phiên quên mật khẩu, không bị bắt đổi mật khẩu. Token không mang loại tài khoản, nên handler đọc User để kiểm chưa xóa, `Status=Active` và `AccountKind=Customer`; sai một điều kiện thì trả 403 `AccessForbidden`. Tài khoản bị khóa hoặc phiên bị thu hồi đã bị chặn ở bước so dấu phiên.
+- Theo yêu cầu ngày 30/09/2026, policy `ConsultationCustomer` kiểm phiên: đã đăng nhập, email đã xác minh (`IsVerified=true`), không phải phiên quên mật khẩu, không bị bắt đổi mật khẩu. Token không mang loại tài khoản, nên handler đọc User để kiểm chưa xóa, `Status=Active` và `AccountKind=Customer`; sai một điều kiện thì trả 403 `AccessForbidden`. Tài khoản bị khóa hoặc phiên bị thu hồi đã bị chặn ở bước so dấu phiên.
 - Khi triển khai, lỗi 503 `ConsultationTemporarilyUnavailable` chỉ dùng cho lệnh ghi của module khi PostgreSQL báo chờ vòng (40P01), không lấy được khóa (55P03), câu lệnh bị hủy (57014), lỗi tuần tự hóa (40001), hoặc Npgsql báo hết thời gian chờ. Transaction đã rollback nên client gửi lại với cùng Idempotency-Key.
 - `internalNote` được bỏ khoảng trắng đầu/cuối; chuỗi chỉ có khoảng trắng được lưu thành NULL, giống cách chuẩn hóa `message`. Người dùng xác nhận ngày 26/09/2026.
 - Người dùng đồng ý timeout SMTP 30 giây ngày 26/09/2026 và làm ở một thay đổi riêng vì ảnh hưởng mọi loại email (xác thực tài khoản, quên mật khẩu, tư vấn). Đã làm ở commit `e451773` trên nhánh `feature/smtp-timeout` của `bmt-be`, chưa merge vào `develop`. Tên `SmtpTimeoutSeconds` trong đề xuất trước được đổi thành `TimeoutSeconds` nằm trong `MailOption`: biến môi trường `MailOption__TimeoutSeconds`, trong compose và workflow deploy là `MAIL_TIMEOUT_SECONDS`, để trống thì dùng 30. Hạn này áp cho từng bước kết nối, xác thực, gửi thư và ngắt kết nối. Quá hạn thì adapter ném `TimeoutException`, `SendEmailConsumer` ném lại để MassTransit thử lại theo cấu hình retry hiện có. Giá trị 0 hoặc âm làm API từ chối khởi động. `SendEmailConsumer` ghi địa chỉ người nhận ở dạng che, ví dụ `c***@example.test`, cho mọi loại email.
@@ -251,7 +251,11 @@ sequenceDiagram
     participant S as SMTP
     C->>FE: Chọn KTS, giờ, số liên lạc
     FE->>API: POST + Idempotency-Key
-    API->>API: Xác thực, kiểm cú pháp
+    API->>API: Xác thực, kiểm policy và email đã xác minh
+    break Email chưa xác minh hoặc thiếu claim IsVerified=true
+        API-->>FE: 403 AccessForbidden, không tạo đơn hoặc email
+    end
+    API->>API: Kiểm cú pháp
     API->>DB: Begin — advisory lock theo khách và key
     API->>DB: Tìm receipt cùng khách/key
     alt Đã có, fingerprint khớp
@@ -294,7 +298,9 @@ flowchart TD
     G --> H{Có KTS đang dùng?}
     H -->|Có| X
     H -->|Không| I[Xóa theo version và FK RESTRICT]
-    C -->|Gửi đơn| J[Khóa key và kiểm receipt]
+    C -->|Gửi đơn| V{Email tài khoản đã xác minh?}
+    V -->|Không| X
+    V -->|Có| J[Khóa key và kiểm receipt]
     J --> K{Đã tiếp nhận cùng nội dung?}
     K -->|Có| L[Trả receipt cũ]
     K -->|Không, key mới| M[Khóa shared KTS, kiểm giờ và số]
@@ -317,7 +323,7 @@ stateDiagram-v2
         Hien --> An: Có quyền, version khớp, hồ sơ sửa hợp lệ
     }
     state YeuCauTuVan {
-        [*] --> Pending: Tiếp nhận hợp lệ và commit
+        [*] --> Pending: Email đã xác minh, tiếp nhận hợp lệ và commit
         Pending --> Pending: Chưa liên lạc được, sửa note
         Pending --> Resolved: Đã liên hệ và xử lý xong
         Resolved --> Resolved: Sửa note
@@ -560,7 +566,7 @@ Các đường dẫn dưới đây là hợp đồng v1 đã triển khai; Carte
 | Quản trị hồ sơ | consultation.manage |
 | Đọc category để chọn | consultation.manage |
 | Tạo/sửa/xóa category | consultation.manage |
-| Gửi đơn | ConsultationCustomer, không đòi mua gói hoặc xác minh email bổ sung |
+| Gửi đơn | ConsultationCustomer, bắt buộc email đã xác minh; không đòi mua gói |
 | Đọc đơn quản trị | consultation.manage |
 | Cập nhật đơn | consultation.manage |
 
@@ -575,7 +581,7 @@ Các đường dẫn dưới đây là hợp đồng v1 đã triển khai; Carte
 - **PUT** `/api/v1/admin/architect-categories/{id}` — Body name, expectedVersion; 200, trả id/name/version.
 - **DELETE** `/api/v1/admin/architect-categories/{id}` — JSON body expectedVersion; 204 nếu không còn KTS sử dụng; 409 nếu đang dùng hoặc stale version.
 - **GET** `/api/v1/users/me` — Endpoint đã có; thêm phoneNumber nullable, giữ các trường/policy khác; không trả ghi chú hoặc đơn tư vấn.
-- **POST** `/api/v1/consultation-requests` — Idempotency-Key bắt buộc; body architectId, desiredAt, contactPhone nullable, message nullable; 201 cho mới hoặc 200 cho replay; receipt chỉ id, receivedAtUtc, message.
+- **POST** `/api/v1/consultation-requests` — Bắt buộc đăng nhập và email đã xác minh; chưa xác minh trả 403 `AccessForbidden`. Idempotency-Key bắt buộc; body architectId, desiredAt, contactPhone nullable, message nullable; 201 cho mới hoặc 200 cho replay; receipt chỉ id, receivedAtUtc, message.
 - **GET** `/api/v1/admin/consultation-requests` — Query status tùy chọn: Pending/Resolved, phân trang. Trả id, customerId/customerName, architectId/architectName, desiredAtUtc, contactPhone, status, createdOnUtc, version; không đưa note/message dài vào list.
 - **GET** `/api/v1/admin/consultation-requests/{id}` — Chi tiết gồm các trường list và message, internalNote, modifiedOnUtc; đọc được khi KTS đã ẩn.
 - **PATCH** `/api/v1/admin/consultation-requests/{id}` — Body status, internalNote nullable, expectedVersion đều có mặt; kiểm sự hiện diện của internalNote bằng required JSON member/DTO riêng, không coi trường bị bỏ là lệnh xóa note; đây là cập nhật phần xử lý nguyên khối, note null nghĩa xóa note. Không nhận các trường khách đã gửi. 200 trả id/version.
@@ -709,7 +715,7 @@ Các mã nghiệp vụ dưới đây dùng messageCode khi đi qua DomainExcepti
 
 - **InvalidAccessToken** (401): Không có phiên hợp lệ; giữ cách trả Unauthorized hiện có.
 - **ExpiredAccessToken** (401): Phiên hết hạn.
-- **AccessForbidden** (403): Thiếu quyền, sai loại phiên hoặc vi phạm điều kiện policy.
+- **AccessForbidden** (403): Thiếu quyền, sai loại phiên, email chưa xác minh khi gửi tư vấn hoặc vi phạm điều kiện policy.
 - **CsrfInvalid** (403): Request ghi dùng cookie có `Origin`/`Referer` ngoài danh sách được phép, hoặc thiếu cả hai; theo [TDD-AUTH-001](TDD-AUTH-001.md).
 - **ArchitectNotFound** (404): Không có hồ sơ; public coi hồ sơ ẩn là không tìm thấy.
 - **ArchitectUnavailable** (409): KTS bị ẩn khi tiếp nhận yêu cầu mới.
@@ -807,6 +813,8 @@ Mặc định source hiện là 3 lần retry, khoảng đầu 5 giây, mỗi l�
 - Bằng chứng source nằm ở Architecture; migration ba trường mới đã kiểm trên PostgreSQL riêng. DDL đích dùng để giải thích schema, không phải script đã chạy trên môi trường triển khai.
 
 ## Change Log
+
+- 2026-09-30 (xác minh tài khoản): Theo yêu cầu của người dùng, bắt buộc xác minh email trước khi gửi yêu cầu tư vấn. Policy `ConsultationCustomer` dùng `BaseAccessPolicy`; chưa xác minh trả 403 `AccessForbidden` trước handler cho cả cookie và Bearer. Cập nhật STORY-CONSULT-002, BR-CONSULT-002, UT-CONSULT-016 và ST-CONSULT-021.
 
 - 2026-09-30: Backend được ghi trong commit [ae1bc8b](https://github.com/TaskCoper/bmt-be/commit/ae1bc8b32dab77d1218efa20122545f35d9f9706) trên `develop`, dựa trên bản có thay đổi Tin tức `580bf16`. Đã kiểm lại toàn bộ solution Release: 2.335 test qua, không lỗi hoặc bỏ qua; model khớp migration snapshot. Push `develop` kích hoạt workflow triển khai Dev có bước áp dụng migration; kết quả local không thay bằng chứng triển khai CI. Chi tiết trong [bảng độ phủ](../discovery/consult-system-test-coverage.md#kiểm-chứng-trước-khi-push-ngày-30092026).
 

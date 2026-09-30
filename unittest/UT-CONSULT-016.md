@@ -42,9 +42,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-CONSULT-016 | Tư vấn kiến trúc sư | Policy ConsultationCustomer (unit dự kiến theo TDD) | Branch | REGRESSION | P1 | Đặc tả chưa thực thi. Dữ liệu minh họa; mock/fake trong bộ nhớ, không chứng minh PostgreSQL/broker. Principal/User giả lập; kiểm policy unit, không kiểm JWT middleware. | Customer phiên thường hợp lệ chưa verified/chưa có gói; không xác thực; phiên reset; User khóa/xóa; phiên thu hồi; sai loại User. | Chỉ Customer phiên thường hợp lệ được phép; chưa verified/chưa có gói không chặn. Các trường hợp phiên/User không hợp lệ bị từ chối. | BR-CONSULT-002/Then<br>TDD-CONSULT-001/Architecture | Kiểm nhánh và kết quả quan sát được theo hợp đồng đã chốt. | Tân Trần | Draft |
+| UT-CONSULT-016 | Tư vấn kiến trúc sư | Policy ConsultationCustomer và kiểm tra tại pipeline HTTP | Branch | REGRESSION | P1 | Principal giả lập cho test policy. Test HTTP dùng JWT ký bằng khóa thử, cookie hoặc Bearer; MediatR và dịch vụ kiểm dấu phiên được giả lập. Trạng thái và loại User được kiểm riêng ở test handler; không dùng các test này để kết luận về PostgreSQL hoặc broker. | Customer phiên thường hợp lệ đã xác minh email, chưa có gói; email chưa xác minh; thiếu claim IsVerified; không xác thực; phiên reset; bắt đổi mật khẩu; User khóa/xóa; phiên thu hồi; sai loại User. | Chỉ Customer phiên thường hợp lệ đã xác minh email được phép; chưa có gói không chặn. Email chưa xác minh hoặc thiếu claim IsVerified bị từ chối. Các trường hợp phiên/User không hợp lệ vẫn bị từ chối. Kiểm thêm ở pipeline HTTP cho cookie và Bearer: chưa xác minh trả 403 AccessForbidden, không gọi handler; đã xác minh thì gọi handler và nhận biên nhận 201. | BR-CONSULT-002/Then<br>TDD-CONSULT-001/Architecture<br>STORY-CONSULT-002/AC-011 | Kiểm nhánh và kết quả quan sát được theo hợp đồng đã chốt. | Tân Trần | Draft |
 
 ## TEST_LINKS
 
 - BR-CONSULT-002/Then
 - TDD-CONSULT-001/Architecture
+- STORY-CONSULT-002/AC-011

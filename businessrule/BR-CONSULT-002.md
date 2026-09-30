@@ -44,11 +44,11 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Owner**: [Chưa xác định]
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
-- **Source**: Người dùng xác nhận trong hội thoại nghiên cứu tính năng tư vấn KTS ngày 2026-09-23. Người dùng đã chốt bộ US/BR trong hội thoại.
+- **Source**: Người dùng xác nhận trong hội thoại nghiên cứu tính năng tư vấn KTS ngày 2026-09-23. Người dùng đã chốt bộ US/BR trong hội thoại. Ngày 30/09/2026, người dùng yêu cầu bắt buộc xác minh email tài khoản trước khi gửi yêu cầu tư vấn.
 
 ## Statement
 
-Mọi khách đã đăng nhập được gửi yêu cầu tư vấn miễn phí, độc lập với gói dịch vụ.
+Khách đã đăng nhập và xác minh email tài khoản được gửi yêu cầu tư vấn miễn phí, độc lập với gói dịch vụ.
 
 ## When
 
@@ -56,7 +56,7 @@ Khách chuẩn bị hoặc gửi yêu cầu tư vấn.
 
 ## Then
 
-1. Phải đăng nhập để gửi yêu cầu. Không yêu cầu mua gói và không trừ lượt của gói.
+1. Phải đăng nhập hợp lệ và xác minh email tài khoản trước khi gửi yêu cầu. Tài khoản chưa xác minh email bị từ chối; không tạo yêu cầu hoặc email tiếp nhận. Không yêu cầu mua gói và không trừ lượt của gói.
 2. Số liên lạc mặc định lấy từ tài khoản; khách được thay số cho riêng yêu cầu đang gửi.
 3. Nếu tài khoản chưa có số điện thoại, khách phải nhập số liên lạc trước khi gửi. Không tiếp nhận yêu cầu thiếu số liên lạc.
 4. Thay số trên yêu cầu không cập nhật số trong tài khoản.
@@ -64,7 +64,7 @@ Khách chuẩn bị hoặc gửi yêu cầu tư vấn.
 
 ## Except
 
-Không có ngoại lệ cho điều kiện đăng nhập hoặc yêu cầu phải có số liên lạc.
+Không có ngoại lệ cho điều kiện đăng nhập, xác minh email tài khoản hoặc yêu cầu phải có số liên lạc.
 
 ## Notes
 

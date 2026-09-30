@@ -44,10 +44,11 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-CONSULT-021 | STORY-CONSULT-002 | EXC / NFR | REGRESSION | P1 | Môi trường thử đã triển khai tính năng, có frontend, API, database và tài khoản thử với quyền tương ứng. Có thể đọc dữ liệu đã lưu; chỉ dùng dữ liệu và email thử. | 1. Gửi trực tiếp yêu cầu không có phiên rồi với phiên hết hạn<br>2. Kiểm tra phản hồi, danh sách admin và dữ liệu lưu | Hai biến thể xác thực; dữ liệu đơn hợp lệ; dữ liệu minh họa, không phải cấu hình sản phẩm. | Hệ thống từ chối tiếp nhận. Phải đăng nhập hợp lệ trước khi gửi. Không tiếp nhận ở cả hai biến thể; yêu cầu đăng nhập hợp lệ. | STORY-CONSULT-002/AC-011<br>BR-CONSULT-002/Then<br>STORY-CONSULT-002/EXC-01 | Đặc tả chưa thực thi; đối chiếu hành vi với dữ liệu thực lưu và nguồn đã chốt. | [Chưa xác định] | Draft |
+| ST-CONSULT-021 | STORY-CONSULT-002 | EXC / NFR | REGRESSION | P1 | Môi trường thử đã triển khai tính năng, có frontend, API, database và tài khoản thử với quyền tương ứng. Có thể đọc dữ liệu đã lưu; chỉ dùng dữ liệu và email thử. | 1. Gửi trực tiếp yêu cầu không có phiên rồi với phiên hết hạn<br>2. Đăng nhập tài khoản chưa xác minh email, gửi cùng dữ liệu hợp lệ qua cookie web và Bearer mobile<br>3. Sau mỗi lần bị từ chối, kiểm tra phản hồi, danh sách admin, bảng yêu cầu và outbox email<br>4. Xác minh email theo luồng hiện có, dùng phiên mới gửi lại yêu cầu hợp lệ và kiểm tra dữ liệu lưu | Khách C1 đang hoạt động, chưa xác minh email, có số liên lạc hợp lệ; KTS đang hiện; giờ mong muốn còn tương lai. Dùng Idempotency-Key riêng cho mỗi ca; dữ liệu và email thử. | Không có phiên hoặc phiên hết hạn trả 401. Phiên hợp lệ nhưng chưa xác minh email trả 403 AccessForbidden trên cả web và mobile. Các lần bị từ chối không tạo yêu cầu hoặc email tiếp nhận trong outbox. Sau xác minh, phiên mới gửi thành công với 201, lưu đúng một yêu cầu và một email tiếp nhận; việc gửi bị từ chối trước đó không tạo dữ liệu. | STORY-CONSULT-002/AC-011<br>BR-CONSULT-002/Then<br>STORY-CONSULT-002/EXC-01<br>STORY-CONSULT-002/AC-001 | Đặc tả chưa thực thi; đối chiếu hành vi với dữ liệu thực lưu và nguồn đã chốt. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-CONSULT-002/AC-011
 - BR-CONSULT-002/Then
 - STORY-CONSULT-002/EXC-01
+- STORY-CONSULT-002/AC-001
