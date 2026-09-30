@@ -57,6 +57,8 @@ Người dùng đã chốt STORY-LIB-001–003 và BR-LIB-001–003; có 28 đ�
 
 Tài liệu này sở hữu LibraryAccess, phần bổ sung UsageOperation và các API tra cứu/lịch sử/tải file. Định nghĩa nội dung, file, phiên bản và catalog được dùng lại từ [TDD-LIB-001](TDD-LIB-001.md). Phần tra cứu cũ của TDD-SUB-002 được thay bằng hợp đồng ở đây.
 
+**Bổ sung ngày 30/09/2026 — đã triển khai backend trong workspace:** đọc hai tập phong cách của phiên bản theo schema ở TDD-LIB-001. Tìm mẫu từ dự toán là danh sách công khai, không tạo Access hay UsageOperation. Quy tắc mở, tính lượt và lịch sử trong tài liệu này giữ nguyên.
+
 ### Goals
 
 - Một tài khoản/phiên bản chỉ ghi nhận một lượt, kể cả gửi lại hoặc mở đồng thời.
@@ -123,6 +125,14 @@ flowchart LR
 Người có `library.manage` (kiểm theo mã quyền, không theo tên vai trò Admin; BR-RBAC-001, BR-RBAC-011) preview bản nháp/current/old không tính quota và không tạo lịch sử khách. Không dùng preview quản trị để cấp quyền xem cho tài khoản khách. Khách mở chi tiết/history phải có phiên Customer hợp lệ; AccountId lấy từ phiên, không nhận từ body. Phiên bị khóa/thu hồi vẫn bị từ chối: xem lại miễn gói không có nghĩa bỏ kiểm xác thực.
 
 Permission library.manage được định nghĩa tại TDD-LIB-001; endpoint khách lấy AccountId từ phiên, không từ body. POST mở dùng cookie được kiểm Origin theo [TDD-AUTH-001](TDD-AUTH-001.md). Danh sách và thumbnail công khai theo TDD-LIB-001 không được trả manifest bảo vệ.
+
+**Đọc phong cách của phiên bản — bổ sung ngày 30/09/2026**
+
+`GET /api/v1/library-versions/{versionId}` bổ sung `architectureStyles` và `interiorStyles`, mỗi mục `{styleId,name,imageUrl}`. Đọc LibraryVersionStyle rồi nối CatalogStyle bằng CatalogRevisionId/StyleId/Group của chính link; không lấy tên/ảnh current. Đây là ảnh minh họa danh mục, không phải URL tài nguyên mẫu được bảo vệ. Với 2D hoặc không có lựa chọn trả []. Quyền đọc vẫn kiểm Access hoặc library.manage trước khi lấy nội dung.
+
+Metadata, EditVersion và các link/tên phong cách phải cùng một snapshot; dùng một projection hoặc read-only transaction ngắn theo quy ước hiện có. Không trả metadata trước sửa nhưng phong cách sau sửa. Sửa tại chỗ giữ VersionId và quyền xem, tăng EditVersion; tạo bản mới sao link sang VersionId mới, quyền xem bản cũ không chuyển theo. Tìm thấy mẫu qua API matches không có nghĩa đã được mở mẫu; vẫn đi access-info và xác nhận lượt khi cần.
+
+Không thêm phong cách vào bảng Access, UsageOperation hoặc sao chép sang lịch sử. Danh sách lịch sử giữ dạng gọn; người dùng mở detail để đọc phong cách của phiên bản đã có quyền. Schema, index, ví dụ dữ liệu và migration link thuộc [TDD-LIB-001/Data Model](TDD-LIB-001.md#data-model). Người dùng xác nhận chưa có mẫu 3D, không cần backfill phong cách; vẫn giữ nguyên Access và phiên bản hiện có như TDD-LIB-001.
 
 **Lượt và quyền xem: cùng lưu hoặc cùng hoàn tác**
 
@@ -332,7 +342,7 @@ Các route dưới đây đã có trong code ở commit `0263297` (nhánh `featu
 - **GET** `/api/v1/design-templates/{templateId}/access-info` — Phiên khách; trả currentVersionId,editVersion,alreadyOpened,requiresConfirmation,canOpen,deniedCode; không trả nội dung bảo vệ. Chỉ là gợi ý, POST kiểm lại. Trong code trả thêm templateId và number; deniedCode là `LibraryHidden` hoặc mã SUB; mẫu không tồn tại hoặc chưa công bố trả 404 `LibraryNotFound`.
 - **POST** `/api/v1/design-templates/{templateId}/open` — Phiên khách; `{versionId,expectedEditVersion,confirmUse}`. Trả `{templateId,versionId,number,editVersion,charged,detailUrl}`. Đã có Access thì charged=false, không yêu cầu confirmUse hoặc gói; chưa có phải confirmUse=true và điều kiện hiện hành.
 - **GET** `/api/v1/me/library-history` — Phiên khách; phân trang các version có Access, sort ngày mở đầu tiên DESC rồi VersionId DESC; mỗi version một dòng, có tên/cover theo nội dung version đó, kể cả hidden/old. Trong code mỗi dòng có templateId, versionId, number, name, drawingKind, isCurrent, firstOpenedAtUtc, coverContentUrl, detailUrl. Cover của phiên bản trong lịch sử vẫn lấy qua route file có quyền, không dùng `thumbnailUrl` của danh sách công khai (danh sách đó chỉ có cover của phiên bản hiện hành không ẩn).
-- **GET** `/api/v1/library-versions/{versionId}` — Phiên khách có Access hoặc Staff có library.manage; trả metadata, cover reference và URL trang assets. Không tự mua quyền xem qua GET.
+- **GET** `/api/v1/library-versions/{versionId}` — Phiên khách có Access hoặc Staff có library.manage; trả metadata, cover reference và URL trang assets. Thiết kế bổ sung thêm architectureStyles/interiorStyles theo revision mẫu như Architecture. Không tự mua quyền xem qua GET.
 - **GET** `/api/v1/library-versions/{versionId}/assets` — Cùng quyền đọc version, query pageIndex/pageSize/expectedEditVersion, phân trang theo Position,AssetId; trả editVersion và assetId,kind,name,size,contentUrl; `contentUrl` là route content bên dưới, không trả URL gốc ở kho (đã xác nhận ngày 26/09/2026, Architecture). expectedEditVersion khác EditVersion hiện tại thì trả 409 LibraryVersionChanged để client tải lại từ trang đầu, không ghép danh sách của hai lần sửa.
 - **GET** `/api/v1/library-versions/{versionId}/assets/{assetId}/content` — Kiểm quyền version và membership; backend đọc URL đã lưu và stream ảnh hoặc tệp đính kèm về (tên tải xuống lấy từ OriginalName), chuyển tiếp Range hợp lệ nếu kho hỗ trợ. Không tính lượt. AssetId không thuộc phiên bản, kể cả tài nguyên đã gỡ khi sửa tại chỗ, trả 404 LibraryNotFound trước khi gọi URL tệp.
 
@@ -421,6 +431,7 @@ Chuẩn bị nội dung lỗi trước commit không tính lượt. Lỗi tải 
 
 - Unit Test: UT-LIB-033 đến UT-LIB-050 cho mở mẫu, quyền xem, lượt, lịch sử và tải tài nguyên; UT-LIB-001 đến UT-LIB-032 thuộc TDD-LIB-001. Mã test có ở commit `0263297`, mỗi đặc tả ghi tên test.
 
+- Bổ sung sau khi người dùng chốt TDD ngày 30/09/2026: [UT-LIB-074](../unittest/UT-LIB-074.md) kiểm quyền và mapping phong cách trong detail; [ST-LIB-051](../systemtest/ST-LIB-051.md) kiểm join theo revision, quyền lịch sử và snapshot đọc đồng thời trên PostgreSQL. [Bảng Unit Test bổ sung](../discovery/library-unit-test-coverage.md) nêu ranh giới kiểm thử; đã có kiểm thử backend cho mapping theo revision, quyền đọc và snapshot khi sửa đồng thời; xem kết quả thực thi trong bảng này.
 - [Bảng System Test LIB](../discovery/library-system-test-coverage.md) — đặc tả System Test chưa thực thi.
 - [TDD-PROJ-001](TDD-PROJ-001.md) — catalog revision, kiểu số, UoW và quy ước lưu URL tệp.
 - [TDD-PROJ-003](TDD-PROJ-003.md) — cách backend chuyển tiếp tệp qua route có kiểm link chia sẻ, dùng làm mẫu cho cách tải nội dung được bảo vệ.
@@ -434,6 +445,12 @@ Chuẩn bị nội dung lỗi trước commit không tính lượt. Lỗi tải 
 - Chưa hoàn tất rà soát toàn bộ chuỗi phụ thuộc ngoài LIB; các UT-SUB và phần TDD-SUB lịch sử về bytes replay cần đối chiếu khi cập nhật thiết kế được chốt. Không dùng ghi chú cũ để ghi đè BR-LIB-003.
 
 ## Change Log
+
+- 2026-09-30 (triển khai BE): Detail trả `architectureStyles` và `interiorStyles` theo revision mẫu, kiểm quyền trước khi đọc và dùng chung snapshot cho metadata/phong cách. Kiểm thử PostgreSQL xác nhận đọc đồng thời không ghép dữ liệu trước/sau lần sửa. Quyền xem, tính lượt và lịch sử giữ nguyên. Chưa triển khai dịch vụ hoặc FE.
+
+- 2026-09-30 (đặc tả kiểm thử sau khi chốt TDD): Thêm tham chiếu UT-LIB-074 và ST-LIB-051 cho phần đọc phong cách; không đổi contract, quyền hoặc lượt. Chưa triển khai hay chạy test cho phần bổ sung.
+
+- 2026-09-30: Bổ sung projection đọc phong cách theo revision mẫu trong cùng snapshot; quyền xem, lượt và lịch sử giữ nguyên. Schema/link và API tìm mẫu thuộc TDD-LIB-001; chưa cập nhật code hoặc Unit Test.
 
 - 2026-09-26 (triển khai): Triển khai toàn bộ phạm vi tài liệu này ở nhánh `feature/library-access` của `bmt-be`, commit `0263297` (tách từ `develop` tại `1d39450`, chưa merge): bảng LibraryAccess, phần mở rộng UsageOperation, migration `20260926115537_LibraryAccess`, sáu route khách/xem trước, tải tệp chuyển tiếp qua backend, log cấp quyền xem và log thao tác quản trị của TDD-LIB-001. Ghi hiện trạng ở Architecture, Data Model, Internal API và External API: thứ tự kiểm khi mở, tài khoản nhân viên nhận 403 ở route khách, thăm dò tệp theo lô và dự phòng khi kho không nhận HEAD, thời gian chờ mặc định 30 giây (chưa được bên vận hành xác nhận), header bảo vệ của route tải, khóa ngoại ghép thêm bằng SQL. Sửa index lịch sử thành (AccountId, SettledAtUtc DESC, TemplateVersionId DESC) cho khớp thứ tự của API; thêm mã `ConcurrencyConflict` (409) cho đường ghi bỏ qua khóa. Nghiệp vụ BR-LIB-001–003 không đổi.
 - 2026-09-26 (log quản trị gộp vào đợt này): Người dùng xác nhận ngày 26/09/2026 log thao tác quản trị của TDD-LIB-001 (operationId, kết quả) làm cùng đợt triển khai tài liệu này; ghi ở Notes. Route đọc tài nguyên cho người quản lý thuộc TDD-LIB-001, khác route đọc tài nguyên của khách ở đây. Nghiệp vụ không đổi.

@@ -40,7 +40,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 ## Metadata
 
 - **Story**: Là người có quyền quản lý thư viện, tôi muốn quản lý mẫu và công bố từng phiên bản để cung cấp bản vẽ tham khảo cho khách.
-- **Context**: Sửa tại chỗ không tạo phiên bản; công bố phiên bản mới tách khỏi thao tác sửa.
+- **Context**: Sửa tại chỗ không tạo phiên bản; công bố phiên bản mới tách khỏi thao tác sửa. Mẫu dùng chung danh mục dự toán để tìm mẫu tham khảo phù hợp; mẫu 3D chọn nhiều phong cách kiến trúc và nội thất theo loại công trình.
 - **Sprint**: [Chưa xác định]
 - **Priority**: Must
 - **Status**: Todo
@@ -65,8 +65,8 @@ Người quản lý tạo mẫu, sửa hoặc chuẩn bị phiên bản mới.
 
 ### Main Flow
 
-1. Nhập tên, loại 2D/3D, ảnh, ảnh đại diện, thứ tự ảnh, kích thước và phân loại dùng chung theo BR-LIB-001; thêm mô tả và PDF/DWG/DXF nếu có.
-2. Cho phép lưu nháp thiếu thông tin để nhập dần; dữ liệu đã nhập vẫn phải hợp lệ. Kiểm tra đủ dữ liệu trước khi công bố; công bố mẫu hợp lệ để khách tìm thấy.
+1. Nhập tên, loại 2D/3D, ảnh, ảnh đại diện, thứ tự ảnh, kích thước và phân loại dùng chung theo BR-LIB-001; thêm mô tả và PDF/DWG/DXF nếu có. Cả 2D và 3D chọn loại công trình, tầng và tum theo cấu hình. Riêng 3D chọn nhiều phong cách kiến trúc và nội thất từ các mục được gán cho loại công trình trong danh mục dự toán; nhóm tắt không cho chọn.
+2. Cho phép lưu nháp thiếu thông tin để nhập dần; dữ liệu đã nhập vẫn phải hợp lệ. Kiểm tra đủ dữ liệu trước khi công bố, gồm ít nhất một phong cách trong mỗi nhóm đang bật với mẫu 3D; công bố mẫu hợp lệ để khách tìm thấy.
 3. Khi cần đính chính phiên bản hiện tại, dùng Sửa; lưu thay đổi vào cùng phiên bản, không cấp phiên bản mới.
 4. Khi cần phát hành bản mới, tạo bản nháp riêng, chỉnh sửa và Công bố phiên bản mới; bản trước khóa sửa và được giữ cho lịch sử.
 5. Ẩn hoặc hiện lại mẫu khi cần; chỉ xóa bản nháp chưa công bố.
@@ -75,7 +75,7 @@ Người quản lý tạo mẫu, sửa hoặc chuẩn bị phiên bản mới.
 
 #### ALT-01
 
-Danh mục tầng/tum đã thay đổi.
+Danh mục hoặc cấu hình tầng, tum, phong cách đã thay đổi.
 
 1. Giữ phân loại cũ khi sửa nội dung khác; thay phân loại hoặc công bố phiên bản mới phải dùng lựa chọn hợp lệ hiện hành.
 
@@ -131,6 +131,32 @@ Thiếu quyền hoặc nội dung công bố không hợp lệ.
 - **When**: Kiểm tra nội dung
 - **Then**: Ba kích thước bắt buộc, dương, tối đa hai số lẻ; diện tích độc lập. Chỉ nhận định dạng đã chốt, không tự áp giới hạn nghiệp vụ số lượng/dung lượng.
 
+#### AC-008
+
+- **Given**: Người quản lý tạo hoặc sửa phân loại mẫu 3D; loại công trình đã có cấu hình phong cách trong danh mục dự toán.
+- **When**: Chọn phong cách kiến trúc và phong cách nội thất.
+- **Then**: Cho phép chọn nhiều mục trong từng nhóm, dùng lại ID của danh mục có sẵn; chỉ nhận mục đúng nhóm và được gán cho loại công trình theo cấu hình áp dụng.
+- **And**: Không tạo danh mục phong cách riêng cho thư viện; từ chối lựa chọn sai nhóm hoặc không được gán cho loại công trình.
+
+#### AC-009
+
+- **Given**: Mẫu 3D có ít nhất một nhóm phong cách đang bật.
+- **When**: Lưu nháp hoặc công bố mẫu.
+- **Then**: Nháp được thiếu lựa chọn nhưng dữ liệu đã nhập phải hợp lệ; khi công bố, mỗi nhóm đang bật phải có ít nhất một phong cách hợp lệ.
+- **And**: Thiếu phong cách của bất kỳ nhóm bắt buộc nào thì từ chối công bố, không thay phiên bản đang phục vụ.
+
+#### AC-010
+
+- **Given**: Mẫu 2D, hoặc mẫu 3D có nhóm phong cách bị tắt theo cấu hình loại công trình.
+- **When**: Lưu phân loại mẫu.
+- **Then**: Mẫu 2D không gắn phong cách kiến trúc/nội thất; mẫu 3D không cho gắn phong cách thuộc nhóm bị tắt, và không yêu cầu lựa chọn của nhóm đó khi công bố.
+
+#### AC-011
+
+- **Given**: Mẫu 3D đã công bố có các phong cách hợp lệ ở phiên bản danh mục đã áp dụng; Admin thay đổi danh mục hoặc cấu hình sau đó.
+- **When**: Sửa tên, ảnh hoặc tệp; sửa phân loại; hoặc công bố phiên bản mẫu mới.
+- **Then**: Chỉ sửa nội dung khác thì giữ phân loại cũ; sửa phân loại hoặc công bố phiên bản mới phải kiểm lựa chọn phong cách theo cấu hình hiện hành, cùng nguyên tắc với tầng/tum.
+
 ## References
 
 ### TDDs
@@ -146,10 +172,14 @@ Thiếu quyền hoặc nội dung công bố không hợp lệ.
 
 ### Dependencies
 
+- STORY-PROJ-005: Danh mục dùng chung và cấu hình phong cách theo loại công trình.
+- STORY-LIB-002: Dùng phân loại của mẫu để tìm mẫu tham khảo từ dự toán.
+
 ## Non-Functional
 
 - Kiểm tra quyền tại backend, kể cả yêu cầu trực tiếp; không chỉ ẩn nút trên giao diện.
 - Chưa đặt ngưỡng hiệu năng hay giới hạn hạ tầng khi chưa có căn cứ. Chưa triển khai hoặc thực thi test.
+- Phần bổ sung ngày 30/09/2026 tại AC-008–AC-011 ghi nghiệp vụ đã chốt; đã bổ sung đặc tả System Test ST-LIB-032–041 sau khi người dùng chốt US/BR; Người dùng đã chốt TDD bổ sung trong hội thoại. Đã bổ sung ST-LIB-042–051 và UT-LIB-053–078; xem bảng truy vết trong discovery/library-system-test-coverage.md và discovery/library-unit-test-coverage.md. Chưa sửa mã ứng dụng hoặc thực thi các ca mới.
 
 ## Out of Scope
 

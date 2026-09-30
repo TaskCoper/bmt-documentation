@@ -55,13 +55,18 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 Người dùng đã chốt STORY-LIB-001–003 và BR-LIB-001–003; có 31 đặc tả ST-LIB-001–031. Việc tách tài liệu không thay nghiệp vụ, schema hoặc API đã đề xuất. Người dùng chốt thiết kế ngày 25/09/2026. Ngày 26/09/2026, phần của tài liệu này đã được triển khai ở nhánh `feature/library-admin` của `bmt-be` (commit `66e4671`, chưa merge vào `develop`); hiện trạng ghi ở Architecture.
 
-Tài liệu này sở hữu năm bảng nội dung/quản trị và các API quản lý, danh sách công khai. Quyền xem, tính lượt, lịch sử và tải nội dung bảo vệ nằm ở [TDD-LIB-002](TDD-LIB-002.md).
+Tài liệu này sở hữu năm bảng nội dung/quản trị đã triển khai, bảng LibraryVersionStyle bổ sung trong thiết kế ngày 30/09/2026 và các API quản lý, danh sách công khai. Quyền xem, tính lượt, lịch sử và tải nội dung bảo vệ nằm ở [TDD-LIB-002](TDD-LIB-002.md).
+
+**Bổ sung ngày 30/09/2026 — đã triển khai backend trong workspace:** người dùng đã chốt STORY-LIB-001/AC-008–AC-011, STORY-LIB-002/AC-005–AC-009 và BR-LIB-001 khoản 9–14; đã có ST-LIB-032–041. Người dùng đã chốt thiết kế và yêu cầu chỉ triển khai BE. Phần bổ sung thay các mô tả cũ chỉ có loại/tầng/tum ở những điểm tương ứng; giao diện nằm ngoài đợt này. Các ghi nhận commit/migration trước ngày này chỉ chứng minh phạm vi cũ.
+
+Tài liệu tiếp tục sở hữu nội dung và tìm kiếm; thêm bảng liên kết phong cách và API tìm mẫu bằng thông tin dự toán. TDD-LIB-002 chỉ bổ sung cách đọc phong cách của phiên bản có quyền xem; quyền và lượt không đổi.
 
 ### Goals
 
 - Lưu nháp thiếu dữ liệu, kiểm đủ trước công bố.
 - Sửa tại chỗ giữ VersionId; công bố mới giữ nguyên phiên bản cũ.
 - Dùng chung catalog PROJ và phục vụ tìm/lọc công khai.
+- Mẫu 3D chọn nhiều phong cách trong từng nhóm; tìm mẫu khớp mọi điều kiện áp dụng qua ID ổn định, không yêu cầu cùng CatalogRevisionId.
 
 ### Non-goals
 
@@ -92,6 +97,82 @@ Kiểm tra lại ngày 26/09/2026 trên `develop` tại `9c7b147`: chưa có cod
 - Route ở `presentation/apis/library/LibraryApi.cs`: `DesignTemplateApi` (công khai) và `AdminLibraryApi` (quản trị, policy `library.manage`). Mã quyền `library.manage` đã thêm vào `PermissionNames`, seed cho vai trò `admin` trong migration `20260926102541_LibraryTemplates`; policy đăng ký tự động từ `PermissionNames.All`.
 - Kiểm thử: unit test ở `test/bmt-be.application.tests/usecases/library/`, integration test PostgreSQL ở `test/bmt-be.integration.tests/Library*Tests.cs`, test API ở `test/bmt-be.api.tests/library/`. Ánh xạ từng đặc tả UT-LIB ghi trong chính đặc tả đó.
 
+**Đối chiếu code trước khi triển khai ngày 30/09/2026**
+
+- `domain/entities/Library.cs` chưa có liên kết phong cách; `LibraryVersion` mới lưu CatalogRevisionId/BuildingTypeId/FloorCount/HasTum. `EstimateCatalog.cs` đã có EstimateStyle, CatalogStyle và CatalogTypeStyle; dùng lại cả hai nhóm Architecture/Interior, không tạo danh mục mới.
+- `contract/services/library/Command.cs`, `Query.cs`, `Response.cs`, `LibraryText.cs`, `validators/LibraryValidators.cs` và `presentation/apis/library/LibraryApi.cs` cần thêm contract lưu/đọc phong cách và truy vấn đối chiếu. Các đường dẫn code trong phần này tính từ `bmt-be/src/`.
+- `SaveLibraryVersionCommandHandler` hiện so loại/tầng/tum để quyết định khóa catalog và đổi revision. Mở rộng phép so sang DrawingKind và hai tập StyleId. `CreateLibraryDraftCommandHandler`, `PublishLibraryVersionCommandHandler`, `DeleteLibraryDraftCommandHandler` phải cùng xử lý link phong cách; không chỉ sửa DTO.
+- `ILibraryCatalogReader` hiện chỉ có ReadCurrentAsync; bổ sung ReadRevisionAsync(revisionId) qua IEstimateStore để đọc đúng cấu hình của mẫu/dự toán cũ. LIB chỉ đọc catalog của PROJ. `ILibraryStore` thêm đọc/ghi/xóa link; `ILibraryReadStore` thêm truy vấn match. `LibraryAccessStore` và DTO detail phải đọc hai tập phong cách trong cùng snapshot với metadata.
+- Thành phần mới dự kiến: `LibraryVersionStyle` (domain), cấu hình tương ứng trong `LibraryConfigurations.cs`, `GetMatchingDesignTemplatesQueryHandler` và policy tạo điều kiện match. Giữ PostgreSQL, EF Core và UoW hiện có; không thêm cache, broker hoặc bảng kết quả gợi ý.
+
+**Kết quả triển khai backend ngày 30/09/2026**
+
+- `LibraryVersionStyle` và `LibraryVersionStyleConfiguration` lưu tập phong cách của từng phiên bản. Migration `20260930101013_AddLibraryVersionStyles` thêm bảng, khóa ghép, index và FK kiểm revision/type của parent bằng SQL. Không backfill hoặc sửa dữ liệu 2D. Migration đã chạy trên PostgreSQL 15 tạm của bộ test; chưa áp dụng lên môi trường dùng chung.
+- `LibraryContent` phân biệt null/không gửi với mảng rỗng, so sánh tập và giữ thuật toán hash cũ khi hai mảng đều không gửi. `LibraryStyles` kiểm nhóm/loại, số lựa chọn và thực hiện thay link trong transaction. Tạo, sửa, sao nháp, công bố, xóa nháp đều xử lý link; attach/detach/reorder kiểm phong cách của Published theo revision đã ghim.
+- `GetMatchingDesignTemplatesQueryHandler` đọc revision đầu vào rồi dùng chung truy vấn công khai trong `LibraryReadStore`; các điều kiện phong cách dùng EXISTS. Có `GET /api/v1/admin/library/classification-options`, có hai mảng lọc ở danh sách công khai và hai tập lựa chọn ở filters. `AdminVersionItem` và detail trả tên/ảnh theo revision mẫu, đọc cùng snapshot với metadata.
+- Phân trang tính offset bằng số 64 bit, chặn ở `int.MaxValue` trước khi truyền vào EF để không tràn số. Trang vượt tổng kết quả trả rỗng; không thay điều kiện tìm.
+- Kết quả và giới hạn kiểm chứng ở [bảng kiểm thử](../discovery/library-unit-test-coverage.md). Đợt bàn giao này commit và đẩy code lên `develop` theo yêu cầu người dùng; migration chưa áp dụng lên database dùng chung. Trước phát hành vẫn cần kiểm tra môi trường đích chưa có mẫu 3D và thực hiện các bước migration bên dưới; FE do bên tích hợp thực hiện theo phạm vi người dùng đã chốt.
+
+**Phong cách của mẫu — cách lưu và cập nhật**
+
+Danh mục PROJ sở hữu định danh, tên, ảnh, nhóm và việc gán phong cách cho loại công trình. LIB chỉ sở hữu việc một phiên bản mẫu chọn những phong cách nào. Chọn quan hệ nhiều–nhiều qua `LibraryVersionStyle`, không lưu chuỗi ID, JSON hoặc các cột Style1/Style2. Mỗi link thuộc một VersionId nên bản nháp có thể sửa riêng, bản cũ giữ lựa chọn của nó.
+
+Luồng ghi đề xuất:
+
+1. Xác thực library.manage và kiểm receipt như hiện tại. Chuẩn hóa mỗi mảng StyleId theo thứ tự UUID cố định trước khi băm; từ chối Guid.Empty, mục trùng và mục sai nhóm. Hai mảng là tập hợp không có thứ tự nghiệp vụ. Phân biệt mảng không gửi/null với mảng rỗng trong hash để không nhầm “giữ nguyên” với “xóa hết”.
+2. Đọc sơ bộ metadata và các link trong cùng snapshot; so DrawingKind, loại/tầng/tum và hai tập phong cách hiệu lực để biết có cần khóa catalog. Sau khóa Template/Version, đọc lại link và kiểm expectedEditVersion. Nếu giờ mới phát hiện cần khóa catalog mà chưa khóa, trả 409 LibraryVersionConflict; không lấy khóa catalog sau Template.
+3. Khi thay phân loại, kiểm toàn bộ bộ dữ liệu theo current catalog dưới khóa SHARE rồi ghim revision mới. Khi chỉ sửa tên/ảnh/tệp, giữ revision và lựa chọn cũ. Sửa Published vẫn phải giữ đủ nội dung theo cấu hình đã ghim; nháp cho thiếu dữ liệu. Chỉ 3D được gắn phong cách; từng mục phải đúng nhóm, được gán cho loại và nhóm đó đang bật. Công bố yêu cầu ít nhất một mục ở mỗi nhóm bật. 2D hoặc chưa chọn DrawingKind/loại thì hai tập phải rỗng; không tự suy ra loại hoặc nhóm.
+4. Tạo nháp sao chép tất cả link sang VersionId mới, giữ revision nguồn. Công bố luôn kiểm lại catalog hiện hành và chuyển mọi link sang revision mới trong cùng transaction; nếu bất kỳ mục không còn hợp lệ thì từ chối, không tự xóa hay thay phong cách. Khi đổi 3D thành 2D, client gửi rõ hai mảng rỗng; không tự xóa lựa chọn ngầm.
+5. Ghi metadata, link, EditVersion và receipt cùng transaction. Khi đổi revision/type: kiểm hết trước khi ghi; xóa link cũ và SaveChanges, cập nhật parent và SaveChanges, rồi thêm link mới và ghi receipt. Các bước SaveChanges không commit riêng. Lỗi bất kỳ bước nào phải ném exception để UoW rollback cả bộ. Với cùng revision/type chỉ sửa phần chênh lệch. Xóa nháp xóa link phong cách trước parent; không xóa catalog.
+
+Một lần đổi tập phong cách tăng EditVersion của chính phiên bản, không tạo Number mới, không đổi PublishedAtUtc, không cấp hay xóa Access. Thay đổi chen vào lúc mở mẫu được phát hiện bằng EditVersion theo TDD-LIB-002. Mọi mutation ảnh/tệp đang kiểm điều kiện Published phải được rà để dùng chung policy hoàn chỉnh, tránh một đường ghi bỏ qua quy tắc phong cách.
+
+**Hai luồng tìm mẫu — làm rõ sau bản thiết kế đầu tiên**
+
+1. Trang thư viện (`/vi/handbook?tab=library`) dùng GET danh sách/filter công khai. Khách chọn tùy ý các điều kiện loại công trình, tầng/tum và hai nhóm phong cách của 3D; điều kiện chưa chọn không chặn tìm kiếm. Bổ sung hai nhóm phong cách vào contract bộ lọc, dùng ID ổn định. Mỗi nhóm nhận tập StyleId. Trong nhóm dùng OR (khớp ít nhất một), giữa hai nhóm và các điều kiện loại/tầng/tum dùng AND (đồng thời). Tập rỗng nghĩa không lọc nhóm đó.
+2. Trang tạo dự toán (`/vi/design/{id}/input`) tự gọi match 2D và 3D khi AI đang xử lý. FE dùng đúng CatalogRevisionId và phân loại của đầu vào đã được chấp nhận gửi AI, không dùng dữ liệu chưa lưu hoặc filter của trang thư viện. Đây là thời điểm tích hợp đã xác nhận, thay câu hỏi cũ về tự tìm ngay khi nhập hay bấm nút tìm.
+
+Theo TDD-PROJ-002/Internal API, FE đợi lưu đầu vào hoàn tất rồi gửi inputVersion; khi tác vụ được tiếp nhận/Pending, có thể gửi hai request matches với drawingKind=2D và 3D từ cùng bộ phân loại. Gắn kết quả bất đồng bộ với estimateId/operationId/inputVersion ở FE, hủy hoặc bỏ phản hồi thuộc tác vụ/trang trước khi điều hướng hay bắt đầu tác vụ khác. Khi tải lại trang, đọc dự toán qua route đã có quyền và kiểm đúng tác vụ đang hiển thị trước khi gọi match; không cấp quyền đọc dự toán qua API thư viện công khai.
+
+Hai lời gọi match có thể chạy độc lập với polling trạng thái AI; lỗi thư viện không đổi trạng thái AI, không gửi lại tác vụ tạo thiết kế và không tác động lượt tạo. Hiển thị rõ mẫu tham khảo có sẵn. Backend match chỉ đọc danh sách; không xác nhận tác vụ AI dựa trên body do client khai và không cần mở truy cập operation cho người khác. Chưa chốt tần suất gọi lại khi thư viện thay đổi trong lúc chờ; không tự đặt polling thư viện.
+
+**Tìm mẫu từ dự toán — tách cấu hình đầu vào và điều kiện đối chiếu**
+
+Đề xuất API chỉ đọc nhận bộ thông tin phân loại và CatalogRevisionId của dự toán, không nhận hoặc đọc EstimateId. Frontend lấy dữ liệu từ dự toán người dùng đang được phép xem; API tìm chỉ trả nội dung thư viện công khai, không tra hoặc tiết lộ dữ liệu riêng của dự toán. Gửi một bộ điều kiện khác chỉ thay kết quả tìm, không ghi vào dự toán hoặc cấp quyền xem. Như vậy không cần quyền quản trị catalog hay quyền tạo thiết kế để dùng API danh sách.
+
+Policy đọc `CatalogBuildingType` tại revision đầu vào, kiểm type và các lựa chọn đã gửi, rồi tạo các điều kiện có áp dụng. Với 2D chỉ dùng loại/tầng/tum; bỏ qua hai lựa chọn phong cách của dự toán dù chúng đang có giá trị. Với 3D kiểm mỗi nhóm đang bật có một StyleId hợp lệ; đối chiếu kiểu Architecture với Architecture, Interior với Interior. Trường/nhóm tắt không thành điều kiện; không dùng cấu hình current thay cấu hình dự toán. Luồng dự toán chạy sau khi AI đã tiếp nhận đầu vào hợp lệ, nên các phân loại áp dụng đã đủ. Request match thiếu trường áp dụng là dữ liệu gọi API không hợp lệ; không tự chuyển sang “Tất cả”. Quy tắc này không áp cho trang thư viện lọc tự do.
+
+Truy vấn bắt đầu từ `LibraryTemplate.CurrentVersionId`, IsHidden=false và Version.State=Published; so DrawingKind và BuildingTypeId. Nếu tầng/tum áp dụng thì so bằng giá trị, dùng cờ áp dụng riêng để không làm mất điều kiện HasTum=false. Với 3D, thêm một EXISTS cho mỗi nhóm áp dụng. EXISTS kiểm có link chứa StyleId, không JOIN nhân số dòng, không so bằng toàn bộ tập phong cách. Mỗi mẫu xuất hiện một lần; count, sort và page thực hiện sau tất cả điều kiện, trong cùng snapshot ngắn như read store hiện có.
+
+Ví dụ biểu thức SQL có tham số, chỉ minh họa điều kiện, không phải script triển khai:
+
+```sql
+WHERE t."IsHidden" = false
+  AND t."CurrentVersionId" = v."Id"
+  AND v."State" = 'Published'
+  AND v."DrawingKind" = @drawingKind
+  AND v."BuildingTypeId" = @buildingTypeId
+  AND (NOT @floorsApplicable OR v."FloorCount" = @floorCount)
+  AND (NOT @tumApplicable OR v."HasTum" = @hasTum)
+  AND (NOT @architectureApplicable OR EXISTS (
+      SELECT 1 FROM "LibraryVersionStyle" s
+      WHERE s."VersionId" = v."Id"
+        AND s."Group" = 'Architecture' AND s."StyleId" = @architectureStyleId))
+  AND (NOT @interiorApplicable OR EXISTS (
+      SELECT 1 FROM "LibraryVersionStyle" s
+      WHERE s."VersionId" = v."Id"
+        AND s."Group" = 'Interior' AND s."StyleId" = @interiorStyleId))
+```
+
+Không thêm `v.CatalogRevisionId = @catalogRevisionId`. FK revision ở dữ liệu lưu kiểm sự hợp lệ của từng bên, không phải điều kiện hai bên bằng nhau khi tìm. TypeId/StyleId giữ nguyên qua đổi tên/ảnh; hai mục trùng tên nhưng khác ID không khớp. Tên hiển thị của mẫu vẫn đọc theo revision mẫu. Không có kết quả thì trả trang rỗng, không tìm gần giống, không giữ/trừ lượt và không ghi lịch sử. Mở mẫu từ kết quả vẫn đi access-info/open như trước.
+
+**Phần đã rõ và điểm còn mở**
+
+- Đã xác nhận: danh mục dùng chung; 3D nhiều phong cách; tối thiểu một mục/nhóm bật khi công bố; match mọi điều kiện; so ID ổn định qua revision; không tự nới điều kiện.
+- Thiết kế đề xuất để duyệt: bảng/link, contract, transaction, chỉ mục và API dưới đây. Chưa có migration hoặc mã ứng dụng cho phần này.
+- Đã xác nhận thêm: trang thư viện lọc tự do; trang dự toán tự lấy mẫu khi AI đang làm việc; hiện chưa có mẫu 3D nên không cần chuyển đổi phong cách của mẫu 3D cũ.
+- Đã xác nhận bộ lọc tự do: nhiều mục mỗi nhóm, khớp ít nhất một trong từng nhóm đã chọn; hai nhóm kết hợp AND. Match từ dự toán vẫn nhận một lựa chọn mỗi nhóm theo đầu vào đã gửi AI. Không còn câu hỏi nghiệp vụ mở trong nhóm vấn đề vừa trao đổi; TDD bổ sung chưa được duyệt.
+
 **Phân chia trách nhiệm**
 
 | Thành phần dự kiến | Trách nhiệm |
@@ -99,7 +180,7 @@ Kiểm tra lại ngày 26/09/2026 trên `develop` tại `9c7b147`: chưa có cod
 | LibraryApi, AdminLibraryApi | Carter routes, policy, DTO; không tự tính quota. Chống CSRF do lớp dùng chung ở [TDD-AUTH-001](TDD-AUTH-001.md) đảm nhận. |
 | LibraryContentPolicy | Kiểm tên, kích thước, ảnh đại diện, phân loại và điều kiện công bố. Không kiểm định dạng hay dung lượng tệp; phần này do frontend kiểm (xác nhận ngày 26/09/2026). |
 | LibraryVersionService | Sửa tại chỗ, nháp riêng, công bố, ẩn/hiện, xóa nháp; kiểm version chống ghi đè. |
-| ILibraryCatalogReader | Đọc cùng EstimateCatalog/CatalogBuildingType/CatalogFloor của PROJ; trả revision và lựa chọn hợp lệ. Không có bản sao danh mục LIB. |
+| ILibraryCatalogReader | Đọc cùng EstimateCatalog/CatalogBuildingType/CatalogFloor/CatalogStyle/CatalogTypeStyle của PROJ; đọc current khi ghi phân loại hoặc revision cụ thể khi giữ lịch sử/tìm mẫu. Không có bản sao danh mục LIB. |
 | IUploadedFileUrlPolicy (đã có trong code) | Kiểm URL tệp mới là https và thuộc tên miền kho presign trong `UploadedFileOption__AllowedHosts`; dùng chung với PROJ, không tạo bản kiểm URL thứ hai cho LIB. |
 
 ```mermaid
@@ -127,15 +208,15 @@ Preview quản trị và các route đọc nội dung bảo vệ theo TDD-LIB-00
 
 Phiên bản có State Draft hoặc Published. Phiên bản cũ là Published nhưng không còn được CurrentVersionId trỏ tới; không lưu thêm trạng thái Superseded để tránh lệch hai nguồn. Number được cấp lúc công bố bằng max Number đã công bố + 1 dưới khóa Template. Nháp có Number/PublishedAtUtc NULL. Có thể có nhiều nháp kỹ thuật; công bố phải gửi expectedCurrentVersionId nên nháp dựa trên bản cũ không tự ghi đè bản mới. Không tự thêm luồng gộp nháp. BaseVersionId là dấu nguồn sao chép, không bị so bằng current mỗi lần công bố: Admin có thể xem xét một nháp cũ rồi gửi expectedCurrentVersionId hiện hành, nhưng server không tự đổi giá trị kỳ vọng thay khách.
 
-Tạo nháp từ current sao chép metadata và các dòng liên kết tài nguyên; mỗi LibraryAsset (một URL tệp) được dùng chung bằng AssetId, không lặp URL. Thay tệp luôn là thêm LibraryAsset mới với URL mới; backend không sửa URL của asset đang được bản khác tham chiếu. Khi công bố, dữ liệu nháp phải đủ, phân loại phải hợp lệ theo catalog hiện hành. Transaction đổi con trỏ và chuyển Draft sang Published. Bản trước không còn sửa được, kể cả API trực tiếp.
+Tạo nháp từ current sao chép metadata, các dòng liên kết tài nguyên và liên kết phong cách theo thiết kế bổ sung; mỗi LibraryAsset (một URL tệp) được dùng chung bằng AssetId, không lặp URL. Thay tệp luôn là thêm LibraryAsset mới với URL mới; backend không sửa URL của asset đang được bản khác tham chiếu. Khi công bố, dữ liệu nháp phải đủ, phân loại phải hợp lệ theo catalog hiện hành. Transaction đổi con trỏ và chuyển Draft sang Published. Bản trước không còn sửa được, kể cả API trực tiếp.
 
 Ẩn/hiện chỉ đổi Template.IsHidden, không thay phiên bản, lượt hoặc quyền xem. Mẫu chưa công bố không xuất hiện dù IsHidden=false. Xóa nháp xóa các liên kết của riêng nháp; không xóa dòng LibraryAsset, tệp ở kho presign hoặc template identity dùng bởi lịch sử/receipt. Công bố không tự đảo IsHidden; mẫu đang ẩn tiếp tục ẩn tới khi người quản lý chọn Hiện lại.
 
 **Dùng chung catalog mà vẫn giữ phân loại cũ**
 
-Version lưu CatalogRevisionId, BuildingTypeId, FloorCount, HasTum. Tên và cờ lấy từ revision đã ghim, không sao chép tên vào bảng LIB. Nullable HasTum phân biệt false=Không tum và NULL=Không áp dụng/nháp chưa nhập. Cờ từ catalog phân biệt hai nghĩa NULL này.
+Version lưu CatalogRevisionId, BuildingTypeId, FloorCount, HasTum; thiết kế bổ sung lưu hai tập phong cách trong LibraryVersionStyle. Tên và cờ lấy từ revision đã ghim, không sao chép tên vào bảng LIB. Nullable HasTum phân biệt false=Không tum và NULL=Không áp dụng/nháp chưa nhập. Cờ từ catalog phân biệt hai nghĩa NULL này.
 
-Sửa tên/ảnh/file không đổi revision phân loại. Nếu đổi bất kỳ trường phân loại nào, revalidate toàn bộ bộ loại/tầng/tum theo current catalog và ghim revision mới trong cùng transaction. Công bố nháp luôn revalidate và ghim current revision, kể cả khi được sao từ bản cũ. Phần tầng dùng đúng FloorCount của PROJ: 1 là trệt, 3 là tổng ba tầng; nhãn phải thống nhất với catalog, không tự cộng thêm một tầng hoặc tính tum thành tầng.
+Sửa tên/ảnh/file không đổi revision phân loại. Nếu đổi bất kỳ trường phân loại nào, revalidate toàn bộ bộ loại/tầng/tum và phong cách áp dụng theo current catalog và ghim revision mới trong cùng transaction. Công bố nháp luôn revalidate và ghim current revision, kể cả khi được sao từ bản cũ. Phần tầng dùng đúng FloorCount của PROJ: 1 là trệt, 3 là tổng ba tầng; nhãn phải thống nhất với catalog, không tự cộng thêm một tầng hoặc tính tum thành tầng.
 
 Bộ lọc dùng UNION DISTINCT của lựa chọn catalog hiện hành và phân loại trên các phiên bản current công khai. Lọc tầng giới hạn theo BuildingTypeId khi được chọn. Tầng cũ chỉ được thêm vào filter vì đang có mẫu public, không trở lại thành lựa chọn hợp lệ cho công bố mới. Mẫu ẩn, nháp và phiên bản lịch sử không làm xuất hiện giá trị filter. Tên loại trên từng mẫu dùng revision của mẫu; nhãn bộ lọc ưu tiên tên current của cùng định danh.
 
@@ -178,6 +259,17 @@ Chi tiết triển khai nội dung/quản trị thuộc tài liệu này; bướ
 | BR-LIB-001: catalog và filter | ILibraryCatalogReader, FKs ghép, query projections | ST-LIB-010, ST-LIB-012–016 | UT-LIB-006–008, UT-LIB-028–032 |
 | BR-LIB-002: sửa/công bố/ẩn/xóa | VersionService, mutex Template, receipt, state guard | ST-LIB-006–009, ST-LIB-011 | UT-LIB-012–024, UT-LIB-026–027 |
 
+Bảng bổ sung cho nghiệp vụ ngày 30/09/2026:
+
+| Quy tắc | Nơi thực hiện | Đặc tả hệ thống | Đặc tả Unit Test |
+|---|---|---|---|
+| BR-LIB-001 khoản 9–10: nhiều phong cách và nhóm áp dụng | LibraryContentPolicy, link và FK, các handler tạo/sửa/nháp/công bố | ST-LIB-032–035, ST-LIB-049–051 | UT-LIB-053–065, UT-LIB-073, UT-LIB-075–078 |
+| BR-LIB-001 khoản 11–14: khớp đủ qua revision | Policy tạo điều kiện, GetMatchingDesignTemplatesQueryHandler, EXISTS trong read store | ST-LIB-036–041, ST-LIB-048 | UT-LIB-066–070, UT-LIB-072 |
+| BR-LIB-001 khoản 15–16: hai luồng tìm | GET danh sách/filter, matches, điều phối bất đồng bộ tại FE | ST-LIB-042–048 | UT-LIB-071–072; luồng FE kiểm qua System Test |
+| Đọc phong cách theo revision có quyền | AdminVersionItem, LibraryVersionDetail, snapshot đọc | ST-LIB-051 | UT-LIB-074, UT-LIB-077 |
+
+Bổ sung integration PostgreSQL để kiểm FK ghép, rollback giữa các bước thay link, đổi catalog cùng lúc công bố và hai yêu cầu sửa cùng EditVersion. Kiểm SQL thực tế lọc trước phân trang, count không trùng và query plan với bộ dữ liệu đại diện; chưa có số liệu tải để cam kết độ trễ hoặc thêm chỉ mục ngoài các chỉ mục được giải thích ở Data Model. Hồi quy bản cũ, lịch sử/quyền xem và receipt gửi lại. Đặc tả bổ sung được liệt kê trong bảng trên và bảng truy vết tại References; chưa có mã test hoặc kết quả chạy cho phần bổ sung.
+
 Đặc tả UT-LIB-001–032 kiểm validator, policy, service quản trị, receipt, thứ tự gọi khóa và truy vấn công khai ở biên unit; mã test đã có ở commit `66e4671`, mỗi đặc tả ghi tên test tương ứng. Không dùng mock để kết luận mutex/UNIQUE/rollback đúng: các phần này kiểm bằng integration test PostgreSQL 15 (`LibraryConstraintTests`, `LibraryFlowTests`, `LibraryConcurrencyTests`, `LibraryReadTests`). Integration dùng PostgreSQL 15 thật và hai connection cho lượt cuối, cùng phiên bản, đổi kỳ, sửa/công bố chen lúc mở. Kiểm URL tệp (tên miền, https, độ dài) dùng lại test của `UploadedFileUrlPolicy`; backend không có test định dạng hay dung lượng tệp vì phần này thuộc frontend. Bổ sung thực nghiệm công bố lúc xác nhận và upload lớn qua dịch vụ presign trên môi trường thử; không báo đạt từ việc viết đặc tả.
 
 Đặc tả UT-LIB-009, UT-LIB-010 và UT-LIB-032 đã được viết lại ngày 26/09/2026 theo thiết kế lưu URL: kiểm URL khi thêm tài nguyên, không kiểm định dạng ở backend, và danh sách công khai trả thẳng URL ảnh cover của phiên bản hiện hành không ẩn.
@@ -219,6 +311,25 @@ sequenceDiagram
     end
 ```
 
+Luồng tìm mẫu bổ sung, áp dụng khi dữ liệu phân loại đầu vào đã đủ:
+
+```mermaid
+sequenceDiagram
+    actor C as Giao diện dự toán
+    participant API as Library API
+    participant CAT as Catalog reader
+    participant DB as PostgreSQL
+    C->>API: POST matches với revision và phân loại dự toán
+    API->>CAT: Đọc đúng revision đầu vào
+    CAT-->>API: Cấu hình loại và lựa chọn hợp lệ
+    API->>API: Tạo điều kiện theo nhóm áp dụng
+    API->>DB: Lọc current công khai, ID và EXISTS phong cách
+    Note over API,DB: Không so revision dự toán bằng revision mẫu
+    DB-->>API: Count và trang kết quả cùng snapshot
+    API-->>C: Summary hoặc trang rỗng, không tính lượt
+```
+
+
 ## Activity Diagram
 
 ```mermaid
@@ -233,7 +344,7 @@ flowchart TD
     D -->|Có| E{Thao tác}
     E -->|Lưu nháp| F[Kiểm giá trị đã nhập; cho thiếu trường]
     E -->|Sửa current| G[Giữ đủ nội dung Published]
-    E -->|Công bố| H[Kiểm đủ dữ liệu và catalog hiện hành]
+    E -->|Công bố| H[Kiểm đủ dữ liệu, phong cách và catalog hiện hành]
     E -->|Ẩn hoặc hiện| I[Đổi IsHidden]
     E -->|Xóa| J{Là Draft?}
     J -->|Không| X
@@ -250,7 +361,7 @@ flowchart TD
 ```mermaid
 stateDiagram-v2
     [*] --> Draft: Tạo mẫu hoặc nháp riêng
-    Draft --> Current: Công bố hợp lệ và đổi con trỏ
+    Draft --> Current: Đủ dữ liệu và phong cách áp dụng, đổi con trỏ
     Draft --> [*]: Xóa nháp
     Current --> Current: Sửa tại chỗ tăng EditVersion
     Current --> Historical: Công bố phiên bản kế tiếp
@@ -344,8 +455,75 @@ Index theo truy vấn: Version(TemplateId,Number) unique; Version(PublishedAtUtc
 
 Danh sách public JOIN Template.CurrentVersionId, IsHidden=false; sort PublishedAtUtc DESC, VersionId DESC để ổn định khi trùng thời gian; pageIndex/pageSize dùng chuẩn PagedResult của repo. Không lưu LastPublishedAt thứ hai trên Template. Assets cũng phân trang để số tệp không biến thành payload/RAM không giới hạn. Trang assets nhận expectedEditVersion; nội dung đổi giữa hai trang trả 409 và client tải lại từ đầu, không ghép danh sách hai lần sửa. Các khóa/hình dạng DTO này là kiểm soát kỹ thuật, không thêm phiên bản tính lượt.
 
-Migration là công việc triển khai sau: kiểm tra schema thực tế trước; tạo bảng Template/Version/Asset/link/receipt, các FK vòng sau bảng; thêm UsageOperation.TemplateVersionId và Access sau module SUB, thêm permission. Không chạy migration ở tác vụ này. Code đọc hiện chưa có module LIB/SUB, nhưng không suy ra production trống: nếu đã có lượt tra cứu kiểu cũ thì dừng backfill tự động, cần ánh xạ phiên bản thật từ dữ liệu cũ; không gán mọi lượt cũ vào current version. Rollback sau có Access không được drop lịch sử/asset; ưu tiên tắt route mới và sửa tiếp trên schema giữ dữ liệu.
+**Ghi chú thiết kế ban đầu, đã có migration bên dưới; không dùng làm kế hoạch migration cho bổ sung phong cách:** kiểm tra schema thực tế trước; tạo bảng Template/Version/Asset/link/receipt, các FK vòng sau bảng; thêm UsageOperation.TemplateVersionId và Access sau module SUB, thêm permission. Không chạy migration ở tác vụ này. Code đọc hiện chưa có module LIB/SUB, nhưng không suy ra production trống: nếu đã có lượt tra cứu kiểu cũ thì dừng backfill tự động, cần ánh xạ phiên bản thật từ dữ liệu cũ; không gán mọi lượt cũ vào current version. Rollback sau có Access không được drop lịch sử/asset; ưu tiên tắt route mới và sửa tiếp trên schema giữ dữ liệu.
 Schema quota/Access được triển khai theo TDD-LIB-002 sau bảng Version; không tạo thêm bảng do tách tài liệu.
+
+**Bổ sung Data Model ngày 30/09/2026 — LibraryVersionStyle**
+
+Một dòng là một phong cách được người quản lý chọn cho một phiên bản mẫu 3D. Ví dụ chọn hai kiến trúc và ba nội thất thì có năm dòng. Link được tạo/sửa cùng metadata, sao chép khi tạo nháp và xóa khi xóa nháp. Không thêm bảng danh mục, không lưu tên/ảnh phong cách trong LIB.
+
+| Bảng/cột | Kiểu, NULL và ý nghĩa |
+|---|---|
+| LibraryVersionStyle.VersionId | uuid NN; phiên bản sở hữu lựa chọn, FK đơn tới LibraryVersion.Id cho EF theo dõi thứ tự parent/con. |
+| LibraryVersionStyle.CatalogRevisionId | uuid NN; phải bằng revision của phiên bản mẫu. |
+| LibraryVersionStyle.BuildingTypeId | uuid NN; phải bằng loại công trình của phiên bản mẫu. |
+| LibraryVersionStyle.Group | varchar(16) NN; CHECK Architecture hoặc Interior. |
+| LibraryVersionStyle.StyleId | uuid NN; định danh phong cách có sẵn, không phát sinh ID phong cách khi gắn mẫu. |
+| LibraryVersion — cấu trúc bổ sung | Không thêm cột nghiệp vụ; thêm unique index không lọc UX_LibraryVersion_ClassificationKey trên (Id,CatalogRevisionId,BuildingTypeId) làm đích FK ghép. CatalogRevisionId/BuildingTypeId vẫn nullable cho nháp. |
+
+PK `LibraryVersionStyle(VersionId,Group,StyleId)` chặn trùng trong nhóm. FK `FK_LibraryVersionStyle_Classification` từ (VersionId,CatalogRevisionId,BuildingTypeId) tới LibraryVersion(Id,CatalogRevisionId,BuildingTypeId); FK `FK_LibraryVersionStyle_CatalogTypeStyle` từ (CatalogRevisionId,BuildingTypeId,Group,StyleId) tới CatalogTypeStyle(RevisionId,BuildingTypeId,Group,StyleId). FK thứ hai kéo theo phong cách đúng nhóm qua các ràng buộc PROJ hiện có. Mọi cột link NN nên không thể né FK bằng NULL. Nháp chưa có phân loại chưa được có link.
+
+Cả ba FK dùng ON DELETE RESTRICT; xóa link của nháp trước khi xóa phiên bản. Không cascade sang catalog, không xóa link của bản cũ khi current đổi. Database chặn link sai revision/type/nhóm và phong cách chưa được gán. Policy trong transaction kiểm chỉ 3D có link, cờ nhóm bật/tắt và tối thiểu một mục/nhóm bật khi Published; FK không tự kiểm ba điều kiện đó. Không dùng CHECK truy vấn bảng khác để giả lập kiểm số phần tử. [PostgreSQL 15 — constraints](https://www.postgresql.org/docs/15/ddl-constraints.html).
+
+Ánh xạ EF: khai FK đơn VersionId và FK tới CatalogTypeStyle bằng Fluent API. Khai unique index trên parent bằng HasIndex(...).IsUnique(); thêm FK ghép tới parent bằng SQL trong migration, cùng cách repository đang xử lý FK nullable ở LibraryAccess/UsageOperation. Không biến ba cột parent thành alternate key EF vì revision/type cần giữ nullable và có thể được ghim lại khi sửa; alternate key mang ngữ nghĩa chỉ đọc trong EF. Phải giữ SQL bổ sung khi tạo migration sau này và kiểm model/migration trên PostgreSQL. [EF Core — keys](https://learn.microsoft.com/en-us/ef/core/modeling/keys).
+
+```mermaid
+erDiagram
+    LibraryVersion ||--o{ LibraryVersionStyle : selects
+    CatalogTypeStyle ||--o{ LibraryVersionStyle : permits
+    CatalogStyle ||--o{ CatalogTypeStyle : assigned
+    EstimateStyle ||--o{ CatalogStyle : stable_identity
+```
+
+| Quan hệ | Số lượng và bên giữ FK | Xóa | Ý nghĩa |
+|---|---|---|---|
+| Version → VersionStyle | Một version có 0..n link; mỗi link bắt buộc một version đúng revision/type | RESTRICT | Nháp/2D có thể không có link; tối thiểu ở 3D Published do policy kiểm. |
+| CatalogTypeStyle → VersionStyle | Một mục gán có 0..n link từ các mẫu; mỗi link trỏ đúng một mục | RESTRICT | LIB dùng lại cấu hình PROJ, không tự gán phong cách cho loại. |
+
+**Ví dụ phong cách và match giữa hai revision**
+
+Dữ liệu giả định, bí danh UUID, chỉ trích cột; không phải seed hoặc dữ liệu thật. Ví dụ này độc lập với M1/V1 ở phần trên. Schema/mẫu đầy đủ của bảng catalog và Estimate dùng lại TDD-PROJ-001/Data Model.
+
+| Bảng | Dòng minh họa |
+|---|---|
+| EstimateBuildingType; EstimateStyle (dùng lại) | Type BT1; phong cách AR1, AR2 thuộc Architecture; IN1, IN2, IN3 thuộc Interior. Các ID ổn định. |
+| CatalogBuildingType (dùng lại) | RA/BT1 và RB/BT1 cùng bật tầng, tum và hai nhóm phong cách; tên Villa ở RA, Villa mới ở RB. |
+| CatalogFloor (dùng lại) | RA/BT1/3 và RB/BT1/3. |
+| CatalogStyle (dùng lại) | RA có AR1/IN1; RB có AR1,AR2,IN1,IN2,IN3, đúng Group. Tên/ảnh AR1 có thể khác giữa RA/RB. |
+| CatalogTypeStyle (dùng lại) | RA/BT1/Architecture/AR1, RA/BT1/Interior/IN1; RB gán cả năm phong cách đúng nhóm cho BT1. |
+| Estimate (chỉ đọc đầu vào) | E10, CatalogRevisionId=RA, BuildingTypeId=BT1, FloorCount=3, HasTum=false, ArchitectureStyleId=AR1, InteriorStyleId=IN1. |
+| LibraryTemplate | M10, CurrentVersionId=V10, IsHidden=false; các cột bắt buộc còn lại theo bảng gốc. |
+| LibraryVersion | V10/M10, DrawingKind=3D, State=Published, CatalogRevisionId=RB, BuildingTypeId=BT1, FloorCount=3, HasTum=false; có đủ tên/kích thước/cover/Number/PublishedAtUtc. |
+| LibraryVersionStyle | Năm dòng: V10/RB/BT1/Architecture/AR1; V10/RB/BT1/Architecture/AR2; V10/RB/BT1/Interior/IN1; V10/RB/BT1/Interior/IN2; V10/RB/BT1/Interior/IN3. |
+
+Kết quả: tìm 3D từ E10 lấy được V10 dù RA khác RB, vì loại/tầng/tum khớp và hai tập chứa AR1/IN1. Tạo nháp V11 sao chép năm dòng với VersionId=V11; sửa nháp không đổi V10. Xóa nháp V11 xóa đúng năm link của nó. Nếu current catalog RC không còn gán AR1 cho BT1, công bố V11 khi vẫn giữ AR1 bị từ chối; V10 giữ link RB. Không có dòng ở bảng kết quả tìm mẫu vì kết quả là projection đọc.
+
+**Chuẩn hóa và chỉ mục bổ sung**
+
+Dữ kiện chọn phong cách có khóa (VersionId,Group,StyleId). CatalogRevisionId/BuildingTypeId phụ thuộc VersionId, Group phụ thuộc StyleId: đây là lặp dữ liệu có chủ đích để FK kiểm được đúng phiên bản, loại và nhóm, không khẳng định bảng đạt BCNF. Mọi giá trị lặp được FK ghép ràng buộc với nguồn duy nhất; chúng không được sửa độc lập. Tên, ảnh, cờ áp dụng và số lượng phong cách không sao chép. So với link chỉ VersionId/StyleId, thiết kế tốn thêm cột và bước ghi nhưng database chặn được lỗi gắn nhầm revision hoặc loại.
+
+PK phục vụ EXISTS theo VersionId/Group/StyleId và đọc hai tập của mẫu. Thêm index `IX_LibraryVersionStyle_CatalogAssignment` trên (CatalogRevisionId,BuildingTypeId,Group,StyleId) phục vụ FK và đối soát. Giữ index lọc Version hiện có; chưa thêm index theo StyleId đứng đầu khi chưa có query plan chứng minh cần. Đọc danh sách quản trị lấy các link theo tập VersionId của một trang, không query riêng từng mẫu; metadata và link nằm trong cùng snapshot. Summary công khai không kèm toàn bộ tập phong cách nên không làm payload phình theo số lựa chọn.
+
+**Migration, dữ liệu cũ và tương thích — đề xuất, chưa thực hiện**
+
+1. Người dùng xác nhận hiện chưa có mẫu 3D. Trước triển khai, kiểm read-only môi trường đích còn đúng điều kiện này và khảo sát dung lượng bảng/thời gian triển khai cho phép. Không suy ra không có mẫu 2D. Nếu thực tế xuất hiện 3D từ thời điểm chốt đến triển khai, báo sai khác trước khi chuyển đổi; không tự gán phong cách.
+2. Thêm unique index parent, bảng link, CHECK/FK/index con; không thay tên, ID, revision hoặc trạng thái các dòng cũ. Migration không tự tạo StyleId hoặc gán theo tên/ảnh. Tạo index parent có thể khóa ghi; chọn cửa sổ triển khai sau khi có số liệu. Chưa cam kết zero downtime hoặc tự chọn CONCURRENTLY.
+3. Triển khai backend/DTO mới và giao diện quản trị cùng đợt. Payload cũ không có mảng phong cách không được làm mất link mới: update giữ nhóm không gửi; [] xóa rõ ràng, vẫn qua validation. Backend cũ không hiểu link và có thể đổi parent/sao nháp sai, nên không cho backend cũ và mới cùng nhận ghi LIB sau khi đã có link. Không dùng tính tương thích payload để suy ra tương thích nhiều phiên bản server.
+4. Không backfill phong cách vì chưa có mẫu 3D. Sau triển khai, mọi mẫu 3D công bố phải có ít nhất một phong cách trong mỗi nhóm đang bật; không có ngoại lệ cho dữ liệu cũ. Giữ nguyên mẫu 2D, phiên bản và Access hiện có.
+5. Kiểm trước/sau: count các bảng gốc và Access/UsageOperation không đổi do migration; không có orphan/khác revision/type/nhóm; 2D không có link; Published 3D đáp ứng nhóm áp dụng theo phương án chuyển đổi đã duyệt. Chạy migration từ schema cũ trên PostgreSQL tạm và thử ngắt giao dịch thay link rồi rollback; chạy ST-LIB-032–041 khi API/fixture sẵn sàng.
+6. Trước khi có link mới, có thể quay code về phiên bản cũ với schema bổ sung còn nguyên nếu đã kiểm tương thích. Sau khi có link, không drop bảng hoặc để code cũ ghi LIB; tạm ngừng ghi hoặc dùng bản sửa tiếp hiểu schema mới. Bảo toàn link, phiên bản và quyền xem. Backup database phải gồm bảng mới; chưa có RPO/RTO và chưa diễn tập khôi phục.
+
+Không thay migration đã chạy; tạo migration EF mới ở bước triển khai. Không thực hiện backfill, DDL hoặc đổi dịch vụ trong tác vụ tài liệu này.
 
 **Hiện trạng migration (26/09/2026, commit `66e4671`)**: migration `20260926102541_LibraryTemplates` tạo năm bảng, CHECK, index và seed `library.manage` cho `Permission` và `RolePermission` của `admin`. Mới áp dụng lên PostgreSQL 15 trong container kiểm thử và đã chạy thử Up → Down → Up; chưa áp dụng lên database dùng chung. Phần `UsageOperation.TemplateVersionId` và `LibraryAccess` của TDD-LIB-002 nằm ở migration `20260926115537_LibraryAccess` (commit `0263297`). Các điểm cài đặt cụ thể:
 
@@ -378,6 +556,36 @@ Các route dưới đây đã có trong code ở commit `66e4671` (nhánh `featu
 
 Các API mở, preview/chi tiết và tải tài nguyên được định nghĩa duy nhất tại TDD-LIB-002/Internal API.
 
+**Hợp đồng bổ sung ngày 30/09/2026 — đề xuất, chưa có trong code**
+
+- **POST** `/api/v1/design-templates/matches` — Tìm mẫu công khai từ thông tin phân loại dự toán; chỉ đọc, không yêu cầu đăng nhập/gói và không tính lượt. Body và phản hồi mô tả dưới đây. Dùng Query, không có hậu tố Command hoặc marker transaction ghi; không nhận Idempotency-Key.
+
+`CreateLibraryTemplateCommand` và `SaveLibraryVersionCommand` thêm `architectureStyleIds` và `interiorStyleIds` vào LibraryContentInput. Mỗi phần tử là UUID khác rỗng; mảng không trùng. Tạo mới: bỏ qua/null nghĩa tập rỗng. Update: bỏ qua/null nghĩa giữ tập đã lưu của nhóm, [] nghĩa xóa hết; mảng có phần tử thay toàn bộ tập của nhóm. Metadata khác giữ hợp đồng PUT hiện có. Khi thay loại hoặc DrawingKind, giữ ngầm một tập không còn hợp lệ sẽ bị từ chối; client phải gửi tập mới/rỗng phù hợp. Mảng không có thứ tự; response sắp theo StyleId cho ổn định. Receipt băm cả hai giá trị và dấu giữ nguyên trước khi đọc dữ liệu hiệu lực. Cần phiên bản hóa nội bộ thuật toán hash khi triển khai: giữ cách băm cũ cho payload mà cả hai mảng đều bỏ qua/null; payload có mảng dùng dấu phiên bản mới để receipt trước triển khai vẫn replay được.
+
+`GET .../templates/{templateId}/versions` bổ sung vào từng AdminVersionItem `architectureStyles` và `interiorStyles`, mỗi phần tử `{styleId,name,imageUrl}` theo revision mẫu; tập rỗng trả [], không null. Đây là tên/ảnh danh mục, không phải tài nguyên mẫu. Đọc chi tiết có quyền ở TDD-LIB-002 trả cùng hai tập; summary công khai và lịch sử dạng danh sách giữ payload gọn hiện có. Dropdown quản trị dùng lại danh mục hiện có qua luồng có quyền phù hợp, không bắt người chỉ có library.manage phải được cấp thêm estimate.catalog.manage.
+
+Để người quản lý LIB đọc được lựa chọn mà không có quyền sửa catalog, bổ sung route chỉ đọc:
+
+- **GET** `/api/v1/admin/library/classification-options` — Cần library.manage; query buildingTypeId tùy chọn. Đọc current catalog, trả `{catalogRevisionId,buildingTypes:[{buildingTypeId,name,floorsEnabled,tumEnabled,architectureEnabled,interiorEnabled,floorCounts,architectureStyles,interiorStyles}]}`; mỗi style `{styleId,name,imageUrl}`. Có type thì thu hẹp theo type; nhóm tắt trả danh sách chọn rỗng dù PROJ còn giữ các dòng gán. Không có current catalog trả revision null và danh sách rỗng; type không thuộc current trả 422 InvalidLibraryContent. Chỉ là projection của catalog, không sao chép dữ liệu và không cho sửa danh mục. Lưu/công bố kiểm lại current dưới khóa; dropdown không khóa catalog lâu qua thao tác người dùng.
+
+Body tìm mẫu: `{drawingKind,catalogRevisionId,buildingTypeId,floorCount,hasTum,architectureStyleId,interiorStyleId,pageIndex,pageSize}`. DrawingKind bắt buộc 2D hoặc 3D; revision và type là UUID bắt buộc. Các trường còn lại nullable theo cấu hình revision đầu vào. Chỉ nhận một StyleId mỗi nhóm vì đó là lựa chọn của dự toán, khác các mảng của mẫu. Backend đọc revision/type để suy ra cờ áp dụng, không nhận cờ do client khai. Tầng/tum thuộc nhóm tắt bỏ khỏi điều kiện; 2D bỏ hai phong cách khỏi điều kiện; 3D kiểm ID được gán cho type ở đúng nhóm bật. Không kiểm theo current catalog nên đầu vào cũ hợp lệ không bị mất kết quả khi current đã đổi.
+
+Phản hồi 200 dùng `PagedResult<DesignTemplateSummary>` hiện có (payload gồm items,pageIndex,pageSize,totalCount,hasNextPage,hasPreviousPage); không có kết quả là items=[] và totalCount=0. Chuẩn trang theo LibraryPaging hiện có: mặc định 1/10, pageSize tối đa 100; kiểm offset bằng số đủ lớn trước khi chuyển kiểu để tránh tràn. Không trả version cũ, nháp, mẫu ẩn, URL tệp chi tiết hoặc manifest. Route không truy cập EstimateId, không ghi đầu vào dự toán; tên và ảnh cover kết quả vẫn theo mẫu.
+
+Đề xuất lỗi kỹ thuật cho match: 422 `InvalidLibraryMatchCriteria` nếu revision/type không tồn tại, không đúng quan hệ, thiếu trường hoặc lựa chọn áp dụng không hợp lệ. Luồng FE hợp lệ gọi khi AI đang xử lý với đầu vào đã đủ; không dùng endpoint này để chặn việc lọc tự do tại trang thư viện. Sai kiểu JSON/UUID dùng 400 theo binding hiện có. Cache-Control no-store; mở chi tiết giữ nguyên TDD-LIB-002.
+
+Route classification-options và matches đã được triển khai trong backend của workspace ngày 30/09/2026. Route GET danh sách và filters giữ chức năng lọc thủ công, bổ sung hai nhóm phong cách cho 3D; không yêu cầu nhập đủ như match.
+
+**Contract bộ lọc tự do — đã chốt nghiệp vụ**
+
+`GET /api/v1/design-templates` thêm hai tham số mảng UUID `architectureStyleIds` và `interiorStyleIds`; truyền lặp tên tham số, ví dụ `architectureStyleIds=id1&architectureStyleIds=id2`. Không truyền nghĩa tập rỗng/không lọc. Chuẩn hóa ID trùng thành một phần tử; UUID sai cú pháp dùng lỗi binding chung, Guid.Empty từ chối ở validator. Giữ nguyên name, loại, tầng/tum và phân trang. Không nhận catalogRevisionId cho bộ lọc tự do, không kiểm lựa chọn phải thuộc current catalog để tránh loại mẫu dùng danh mục cũ. ID khác nhóm hoặc không tồn tại không khớp link nào; không chuyển sang so tên.
+
+Mỗi nhóm có lựa chọn tạo một EXISTS: VersionId đúng mẫu, Group đúng nhóm và StyleId thuộc tập ID gửi lên. Hai EXISTS kết hợp AND với các điều kiện khác; tập rỗng bỏ EXISTS tương ứng. Nếu drawingKind=2D thì bỏ qua cả hai tập phong cách vì không áp dụng. Nếu không chỉ định drawingKind nhưng có phong cách thì chỉ mẫu 3D có link khớp có thể xuất hiện; không tự cho 2D vượt qua điều kiện phong cách. Dùng cùng quy tắc lọc trước count/page, không trả trùng như matches.
+
+`GET /api/v1/design-templates/filters` thêm `architectureStyles` và `interiorStyles` dạng `[{styleId,name}]`. Đề xuất tập lựa chọn từ các link của phiên bản 3D hiện hành công khai, kết hợp các lựa chọn current catalog thuộc nhóm đang bật; nếu có buildingTypeId thì thu hẹp cả hai nguồn theo loại đó. Loại bỏ trùng bằng StyleId, nhãn ưu tiên current cùng ID, nếu không có thì dùng tên ở revision mới nhất trong các mẫu công khai liên quan. Không thêm lựa chọn chỉ từ mẫu ẩn/nháp/lịch sử; vẫn giữ mục cũ đang có mẫu công khai sử dụng. drawingKind=2D trả hai tập rỗng. Đây là projection đọc, không gán thêm phong cách hoặc thay danh mục PROJ.
+
+Ví dụ: khách chọn kiến trúc [AR1,AR2] và nội thất [IN1,IN2]. Mẫu có [AR2,AR3] và [IN2] được trả nếu khớp các điều kiện khác; mẫu chỉ khớp AR1 nhưng không chứa IN1/IN2 bị loại. Khi bỏ nhóm nội thất, chỉ còn điều kiện kiến trúc. Đây là dữ liệu minh họa, không phải danh mục mặc định.
+
 ### Examples
 
 #### POST /api/v1/admin/library/templates/{templateId}/versions/{versionId}/publish
@@ -394,6 +602,24 @@ Error Response:
 {"code":"InvalidLibraryContent","detail":"Cần chọn số tầng hợp lệ theo cấu hình hiện hành trước khi công bố."}
 ```
 
+#### POST /api/v1/design-templates/matches
+
+Dữ liệu ví dụ giả định: revision đầu vào RA chứa type và AR1/IN1 hợp lệ; có thể lấy mẫu ở RB. Ví dụ trang rỗng không có nghĩa dữ liệu đầu vào thiếu.
+
+```
+Request:
+{"drawingKind":"3D","catalogRevisionId":"10000000-0000-0000-0000-000000000001","buildingTypeId":"20000000-0000-0000-0000-000000000001","floorCount":3,"hasTum":false,"architectureStyleId":"30000000-0000-0000-0000-000000000001","interiorStyleId":"40000000-0000-0000-0000-000000000001","pageIndex":1,"pageSize":10}
+
+Response 200:
+{"items":[],"pageIndex":1,"pageSize":10,"totalCount":0,"hasNextPage":false,"hasPreviousPage":false}
+
+Error Response:
+{"messageCode":"InvalidLibraryMatchCriteria","detail":"Phong cách kiến trúc không thuộc loại công trình trong phiên bản danh mục được gửi."}
+```
+
+Ví dụ chỉ là payload; dùng wrapper/lỗi chung của ApiEndpoint khi triển khai, không tạo cấu trúc lỗi riêng.
+
+
 ### Error Codes
 
 - **Unauthorized** (401): Phiên thiếu/không hợp lệ; dùng mã xác thực hiện có khi tích hợp.
@@ -403,7 +629,8 @@ Error Response:
 - **LibraryVersionReadOnly** (409): Sửa phiên bản đã bị thay thế hoặc xóa Published.
 - **LibraryPositionConflict** (409): Vị trí liên kết tài nguyên bị trùng.
 - **IdempotencyConflict** (409): Cùng mutation key nhưng khác nội dung.
-- **InvalidLibraryContent** (422): Thiếu dữ liệu khi công bố, sai kích thước/phân loại/cover/membership hoặc dữ liệu có giá trị không hợp lệ.
+- **InvalidLibraryContent** (422): Thiếu dữ liệu khi công bố, sai kích thước/phân loại/cover/membership hoặc dữ liệu có giá trị không hợp lệ; bổ sung phong cách sai nhóm/loại, nhóm tắt, gắn vào 2D, UUID trùng/rỗng hoặc thiếu phong cách nhóm bật khi công bố.
+- **InvalidLibraryMatchCriteria** (422): Mã mới đề xuất; revision/type hoặc lựa chọn đầu vào tìm mẫu không hợp lệ. Thiếu trường áp dụng là request match không hợp lệ; không dùng lỗi này để yêu cầu người dùng chọn đủ filter ở trang thư viện.
 - **UnsupportedLibraryFile** (422): `kind` không phải Image hoặc Attachment, hoặc `url` không phải URL tuyệt đối https, dài hơn 2048 ký tự hay không thuộc tên miền trong `UploadedFileOption__AllowedHosts`. Không dùng cho sai định dạng hay dung lượng, vì backend không kiểm hai điều này.
 - **LibraryStorageUnavailable** (503): Chưa cấu hình tên miền kho presign khi gửi URL tệp mới, hoặc không đọc được tệp khi chuẩn bị/phục vụ nội dung (TDD-LIB-002); không tính lượt nếu trước commit mở đầu.
 
@@ -454,11 +681,15 @@ Upload lỗi thì frontend không gọi API, nội dung cũ giữ nguyên. Uploa
 
 ### Others
 
+- [TDD-PROJ-002/Internal API](TDD-PROJ-002.md#internal-api): FE đợi lưu inputVersion rồi bắt đầu tác vụ; lấy mẫu tham khảo khi AI đang xử lý, độc lập với kết quả AI.
+
 - Phạm vi use case: Quản lý mẫu, sửa tại chỗ, công bố phiên bản mới, ẩn/hiện và xóa nháp. Tìm/lọc, mở lần đầu, xem lại và tải tài nguyên từ lịch sử.
 
 - [TDD-LIB-002](TDD-LIB-002.md): LibraryAccess, quota, lịch sử, tải có quyền và thứ tự khóa chung.
 
 - Unit Test: UT-LIB-001 đến UT-LIB-032 cho nội dung, phiên bản, quyền quản trị và danh sách công khai; UT-LIB-051 và UT-LIB-052 cho route đọc tài nguyên của người quản lý; UT-LIB-033 đến UT-LIB-050 thuộc TDD-LIB-002. System Test ST-LIB-031 cho route đọc tài nguyên của người quản lý. Mã test của UT-LIB-001–032 có ở commit `66e4671`, mỗi đặc tả ghi tên test; mã test của UT-LIB-033–050 có ở commit `0263297`.
+
+- Bổ sung ngày 30/09/2026: [ST-LIB-032](../systemtest/ST-LIB-032.md) đến [ST-LIB-051](../systemtest/ST-LIB-051.md) phủ nhiều phong cách, đối chiếu qua revision, hai luồng tìm và các biên tích hợp. Sau khi người dùng chốt TDD, đã soạn [UT-LIB-053](../unittest/UT-LIB-053.md) đến [UT-LIB-078](../unittest/UT-LIB-078.md); riêng UT-LIB-074 thuộc phần đọc chi tiết của TDD-LIB-002. Xem [bảng Unit Test bổ sung](../discovery/library-unit-test-coverage.md). Đã bổ sung mã test backend; kết quả thực thi và phạm vi chưa kiểm ở bảng kiểm thử này.
 
 - [Bảng System Test LIB](../discovery/library-system-test-coverage.md) — đặc tả System Test chưa thực thi.
 - [TDD-PROJ-001](TDD-PROJ-001.md) — catalog revision, kiểu số, UoW và quy ước lưu URL tệp (`UploadedFileOption__AllowedHosts`, `IUploadedFileUrlPolicy`).
@@ -472,6 +703,14 @@ Upload lỗi thì frontend không gọi API, nội dung cũ giữ nguyên. Uploa
 - Chưa hoàn tất rà soát toàn bộ chuỗi phụ thuộc ngoài LIB; các UT-SUB và phần TDD-SUB lịch sử về bytes replay cần đối chiếu khi cập nhật thiết kế được chốt. Không dùng ghi chú cũ để ghi đè BR-LIB-003.
 
 ## Change Log
+
+- 2026-09-30 (triển khai BE): Thêm nhiều phong cách 3D theo phiên bản, dùng lại catalog PROJ; triển khai lưu/đọc, bộ lọc tự do, match theo dữ liệu dự toán và classification-options. Thêm migration `20260930101013_AddLibraryVersionStyles`, kiểm thử unit, HTTP và PostgreSQL. Người dùng giới hạn phạm vi ở BE; chưa triển khai FE hoặc môi trường dùng chung.
+
+- 2026-09-30 (đặc tả kiểm thử sau khi chốt TDD): Người dùng xác nhận bản TDD bổ sung trong hội thoại; thêm ST-LIB-042–051 và UT-LIB-053–078, cập nhật truy vết. Chưa sửa mã ứng dụng, chạy migration hoặc thực thi test. Giữ nguyên trạng thái phê duyệt trên hệ thống.
+
+- 2026-09-30 (làm rõ hai luồng): trang thư viện lọc tự do, thêm phong cách; trang dự toán gọi match khi AI đang xử lý bằng đầu vào đã gửi. Người dùng xác nhận chưa có mẫu 3D, bỏ phương án backfill cũ. Bộ lọc tự do đã chốt chọn nhiều mục, khớp ít nhất một trong mỗi nhóm và AND giữa các nhóm.
+
+- 2026-09-30: Bổ sung thiết kế nhiều phong cách 3D bằng LibraryVersionStyle, đọc danh mục dùng chung, contract lưu/đọc, API match theo ID ổn định qua revision, ERD/mẫu dữ liệu, transaction, migration và tương thích. Dẫn ST-LIB-032–041. Còn mở hành vi tìm khi thiếu dữ liệu, thời điểm gọi ở UI và chính sách cho mẫu 3D cũ; chưa triển khai hoặc chạy test.
 
 - 2026-09-28 (đối chiếu code): Ghi ở Context & Goals rằng thiết kế đã có trên `develop` của `bmt-be` từ commit `66e4671`; các câu “chưa có code LIB” là hiện trạng lúc thiết kế. Không đổi thiết kế.
 - 2026-09-26 (log quản trị đã triển khai cùng TDD-LIB-002): Log thao tác quản trị thư viện đã có ở nhánh `feature/library-access` của `bmt-be`, commit `0263297`; ghi ở Notes. Sửa các câu nói phần của TDD-LIB-002 chưa làm ở Architecture, Data Model và References. Nghiệp vụ không đổi.

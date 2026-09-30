@@ -1,19 +1,41 @@
 # Truy vết System Test thư viện mẫu
 
-US và BR đã được người dùng chốt trong hội thoại. 31 ca dưới đây là đặc tả, chưa thực thi; không phải kết quả Pass. Reviewer/Approver: Tân Trần. Owner kiểm thử chưa xác định.
+**Cập nhật triển khai BE ngày 30/09/2026:** đã có kiểm thử unit, HTTP và PostgreSQL cho phần nhiều phong cách/hai luồng tìm. Xem [kết quả và giới hạn kiểm chứng](library-unit-test-coverage.md#kết-quả-triển-khai-be-ngày-30092026). Các dòng “chưa thực thi” bên dưới ghi thời điểm soạn đặc tả; không dùng để thay kết quả thực chạy. FE ST-LIB-045–047 nằm ngoài phạm vi người dùng giao lần này.
+
+US và BR đã được người dùng chốt trong hội thoại. 51 ca dưới đây là đặc tả, chưa thực thi; không phải kết quả Pass. Reviewer/Approver: Tân Trần. Owner kiểm thử chưa xác định.
 
 **Cập nhật 25/09/2026:** quyền quản lý thư viện mẫu theo STORY-RBAC-001 và BR-LIB-002 có mã kỹ thuật `library.manage` trong TDD-RBAC-001, không gắn phân công; ST-LIB-011 kiểm thêm nhân viên thuộc vai trò tùy chỉnh được cấp mã này. Đã thêm ST-LIB-028 kiểm việc mở mẫu lần đầu và thay đổi gói của cùng khách chạy đồng thời. Bổ sung sau đó: ST-LIB-029 kiểm sửa tại chỗ cùng phiên bản không tính lượt mới (STORY-LIB-003/ALT-01), ST-LIB-030 kiểm mẫu bị ẩn không nhận lượt mở mới nhưng người đã có quyền vẫn xem lại được (STORY-LIB-003/EXC-01); các ca đang phủ luồng ALT/EXC được ghi thêm mã luồng trong TEST_LINKS.
 
+**Cập nhật 30/09/2026:** người dùng đã chốt phần US/BR bổ sung. Thêm ST-LIB-032–041 cho nhiều phong cách 3D, danh mục dùng chung và tìm mẫu khớp mọi điều kiện giữa các phiên bản danh mục. Các ca mới chưa có code hoặc kết quả chạy; không thay trạng thái các ca cũ.
+
+**Bổ sung sau khi chốt TDD ngày 30/09/2026:** ST-LIB-042–051 kiểm hai luồng tìm, API, lựa chọn danh mục, khóa ngoại/rollback và đọc theo phiên bản. Tất cả là đặc tả Draft, chưa thực thi. Các ca Integration boundary yêu cầu PostgreSQL thật; không dùng mock để kết luận ràng buộc dữ liệu đã đúng.
+
 | Tiêu chí | System Test |
 | --- | --- |
+| STORY-LIB-002/AC-010 | [ST-LIB-042](../systemtest/ST-LIB-042.md), [ST-LIB-043](../systemtest/ST-LIB-043.md), [ST-LIB-044](../systemtest/ST-LIB-044.md) |
+| STORY-LIB-002/AC-011 | [ST-LIB-045](../systemtest/ST-LIB-045.md), [ST-LIB-046](../systemtest/ST-LIB-046.md), [ST-LIB-047](../systemtest/ST-LIB-047.md) |
+| TDD-LIB-001/Internal API: match công khai, dữ liệu áp dụng | [ST-LIB-048](../systemtest/ST-LIB-048.md) |
+| TDD-LIB-001/Internal API: classification-options và quyền | [ST-LIB-049](../systemtest/ST-LIB-049.md) |
+| TDD-LIB-001/Data Model: FK và rollback đổi revision | [ST-LIB-050](../systemtest/ST-LIB-050.md) |
+| TDD-LIB-001/Data Model, TDD-LIB-002/Architecture: link theo phiên bản, quyền và snapshot đọc | [ST-LIB-051](../systemtest/ST-LIB-051.md) |
+| STORY-LIB-002/AC-009 | [ST-LIB-041](../systemtest/ST-LIB-041.md), [ST-LIB-047](../systemtest/ST-LIB-047.md) |
+| STORY-LIB-002/AC-008 | [ST-LIB-040](../systemtest/ST-LIB-040.md) |
+| STORY-LIB-002/ALT-02 | [ST-LIB-039](../systemtest/ST-LIB-039.md), [ST-LIB-040](../systemtest/ST-LIB-040.md), [ST-LIB-044](../systemtest/ST-LIB-044.md) |
+| STORY-LIB-002/AC-007 | [ST-LIB-038](../systemtest/ST-LIB-038.md), [ST-LIB-039](../systemtest/ST-LIB-039.md), [ST-LIB-048](../systemtest/ST-LIB-048.md) |
+| STORY-LIB-002/AC-006 | [ST-LIB-037](../systemtest/ST-LIB-037.md), [ST-LIB-038](../systemtest/ST-LIB-038.md), [ST-LIB-045](../systemtest/ST-LIB-045.md) |
+| STORY-LIB-002/AC-005 | [ST-LIB-036](../systemtest/ST-LIB-036.md), [ST-LIB-038](../systemtest/ST-LIB-038.md), [ST-LIB-045](../systemtest/ST-LIB-045.md), [ST-LIB-048](../systemtest/ST-LIB-048.md) |
+| STORY-LIB-001/AC-011 | [ST-LIB-035](../systemtest/ST-LIB-035.md), [ST-LIB-050](../systemtest/ST-LIB-050.md), [ST-LIB-051](../systemtest/ST-LIB-051.md) |
+| STORY-LIB-001/AC-010 | [ST-LIB-034](../systemtest/ST-LIB-034.md), [ST-LIB-049](../systemtest/ST-LIB-049.md) |
+| STORY-LIB-001/AC-009 | [ST-LIB-033](../systemtest/ST-LIB-033.md) |
+| STORY-LIB-001/AC-008 | [ST-LIB-032](../systemtest/ST-LIB-032.md), [ST-LIB-034](../systemtest/ST-LIB-034.md), [ST-LIB-049](../systemtest/ST-LIB-049.md), [ST-LIB-050](../systemtest/ST-LIB-050.md) |
 | STORY-LIB-001/AC-001 | [ST-LIB-001](../systemtest/ST-LIB-001.md), [ST-LIB-002](../systemtest/ST-LIB-002.md), [ST-LIB-011](../systemtest/ST-LIB-011.md) |
 | STORY-LIB-001/AC-002 | [ST-LIB-006](../systemtest/ST-LIB-006.md), [ST-LIB-010](../systemtest/ST-LIB-010.md) |
-| STORY-LIB-001/AC-003 | [ST-LIB-007](../systemtest/ST-LIB-007.md) |
+| STORY-LIB-001/AC-003 | [ST-LIB-007](../systemtest/ST-LIB-007.md), [ST-LIB-051](../systemtest/ST-LIB-051.md) |
 | STORY-LIB-001/AC-004 | [ST-LIB-008](../systemtest/ST-LIB-008.md) |
 | STORY-LIB-001/AC-005 | [ST-LIB-009](../systemtest/ST-LIB-009.md) |
 | STORY-LIB-001/AC-006 | [ST-LIB-005](../systemtest/ST-LIB-005.md) |
 | STORY-LIB-001/AC-007 | [ST-LIB-003](../systemtest/ST-LIB-003.md), [ST-LIB-004](../systemtest/ST-LIB-004.md) |
-| STORY-LIB-002/AC-001 | [ST-LIB-012](../systemtest/ST-LIB-012.md), [ST-LIB-016](../systemtest/ST-LIB-016.md) |
+| STORY-LIB-002/AC-001 | [ST-LIB-012](../systemtest/ST-LIB-012.md), [ST-LIB-016](../systemtest/ST-LIB-016.md), [ST-LIB-048](../systemtest/ST-LIB-048.md) |
 | STORY-LIB-002/AC-002 | [ST-LIB-013](../systemtest/ST-LIB-013.md) |
 | STORY-LIB-002/AC-003 | [ST-LIB-014](../systemtest/ST-LIB-014.md) |
 | STORY-LIB-002/AC-004 | [ST-LIB-015](../systemtest/ST-LIB-015.md) |
@@ -24,11 +46,11 @@ US và BR đã được người dùng chốt trong hội thoại. 31 ca dưới
 | STORY-LIB-003/AC-005 | [ST-LIB-022](../systemtest/ST-LIB-022.md), [ST-LIB-023](../systemtest/ST-LIB-023.md), [ST-LIB-025](../systemtest/ST-LIB-025.md) |
 | STORY-LIB-003/AC-006 | [ST-LIB-024](../systemtest/ST-LIB-024.md) |
 | STORY-LIB-003/AC-007 | [ST-LIB-026](../systemtest/ST-LIB-026.md) |
-| STORY-LIB-001/ALT-01 | [ST-LIB-010](../systemtest/ST-LIB-010.md) |
-| STORY-LIB-001/EXC-01 | [ST-LIB-011](../systemtest/ST-LIB-011.md) |
+| STORY-LIB-001/ALT-01 | [ST-LIB-010](../systemtest/ST-LIB-010.md), [ST-LIB-035](../systemtest/ST-LIB-035.md) |
+| STORY-LIB-001/EXC-01 | [ST-LIB-011](../systemtest/ST-LIB-011.md), [ST-LIB-033](../systemtest/ST-LIB-033.md), [ST-LIB-034](../systemtest/ST-LIB-034.md) |
 | STORY-LIB-001/Main Flow | [ST-LIB-031](../systemtest/ST-LIB-031.md) |
 | STORY-LIB-002/ALT-01 | [ST-LIB-014](../systemtest/ST-LIB-014.md) |
-| STORY-LIB-002/EXC-01 | [ST-LIB-016](../systemtest/ST-LIB-016.md) |
+| STORY-LIB-002/EXC-01 | [ST-LIB-016](../systemtest/ST-LIB-016.md), [ST-LIB-041](../systemtest/ST-LIB-041.md) |
 | STORY-LIB-003/ALT-01 | [ST-LIB-018](../systemtest/ST-LIB-018.md), [ST-LIB-029](../systemtest/ST-LIB-029.md) |
 | STORY-LIB-003/EXC-01 | [ST-LIB-021](../systemtest/ST-LIB-021.md), [ST-LIB-022](../systemtest/ST-LIB-022.md), [ST-LIB-027](../systemtest/ST-LIB-027.md), [ST-LIB-030](../systemtest/ST-LIB-030.md) |
 

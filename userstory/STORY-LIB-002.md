@@ -39,8 +39,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Metadata
 
-- **Story**: Là khách tham khảo, tôi muốn tìm và lọc mẫu 2D/3D để chọn bản vẽ phù hợp.
-- **Context**: Danh sách công khai không dùng lượt; bộ lọc dùng chung danh mục tạo dự toán.
+- **Story**: Là khách tham khảo, tôi muốn tìm và lọc mẫu 2D/3D, gồm tìm theo thông tin dự toán, để chọn bản vẽ phù hợp.
+- **Context**: Danh sách công khai không dùng lượt; bộ lọc dùng chung danh mục tạo dự toán. Tìm mẫu từ dự toán phải khớp mọi thông tin áp dụng bằng ID danh mục ổn định và giá trị tầng/tum, không bắt buộc cùng phiên bản danh mục.
 - **Sprint**: [Chưa xác định]
 - **Priority**: Must
 - **Status**: Todo
@@ -59,16 +59,17 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ### Trigger
 
-Khách mở trang thư viện.
+Khách mở hoặc thay bộ lọc ở trang thư viện; hoặc frontend tự tìm mẫu theo đầu vào dự toán khi AI đang xử lý yêu cầu tạo thiết kế đã tiếp nhận.
 
 ## Flow
 
 ### Main Flow
 
 1. Hiển thị phiên bản mới nhất của các mẫu không bị ẩn, chỉ gồm ảnh đại diện và thông tin tóm tắt.
-2. Cho chọn 2D/3D, loại công trình, số tầng, Có tum/Không tum hoặc Tất cả; thu hẹp số tầng theo loại.
-3. Tìm theo tên, phân trang và xếp theo lần công bố gần nhất; không tính lượt.
-4. Chuyển sang luồng mở chi tiết STORY-LIB-003 khi khách chọn mẫu.
+2. Ở trang thư viện, cho chọn 2D/3D, loại công trình, số tầng, Có tum/Không tum hoặc Tất cả; thu hẹp số tầng theo loại. Với 3D, cho lọc thêm phong cách kiến trúc và nội thất. Chỉ lọc theo lựa chọn đã nhập, không đòi đủ mọi trường.
+3. Ở trang tạo dự toán, khi AI đang xử lý, frontend tự tìm cả 2D và 3D bằng đúng phân loại của đầu vào đã gửi AI. Khi tìm bằng thông tin dự toán, dùng loại công trình và các giá trị tầng/tum áp dụng của dự toán làm điều kiện cho cả 2D và 3D. Với 3D, thêm phong cách kiến trúc và nội thất dự toán đã chọn trong các nhóm đang áp dụng; từng danh sách phong cách của mẫu phải chứa lựa chọn tương ứng. Kết hợp tất cả điều kiện theo BR-LIB-001 khoản 11–14.
+4. Tìm theo tên, phân trang và xếp theo lần công bố gần nhất; không tính lượt.
+5. Chuyển sang luồng mở chi tiết STORY-LIB-003 khi khách chọn mẫu.
 
 ### Alternative Flow
 
@@ -78,13 +79,20 @@ Mẫu công khai dùng số tầng đã bị bỏ khỏi cấu hình hiện hàn
 
 1. Vẫn giữ giá trị này trong bộ lọc để khách tìm được mẫu.
 
+#### ALT-02
+
+Dự toán và mẫu dùng hai phiên bản danh mục khác nhau.
+
+1. Đối chiếu ID ổn định của loại công trình và phong cách, cùng giá trị tầng/tum; không yêu cầu trùng phiên bản danh mục hoặc tên hiển thị.
+2. Giữ cấu hình đã áp dụng cho từng bên; chỉ trả mẫu khớp tất cả điều kiện áp dụng của dự toán. Không tự ghép hai mục khác ID chỉ vì cùng tên.
+
 ### Exception Flow
 
 #### EXC-01
 
 Không có kết quả phù hợp.
 
-1. Hiển thị danh sách trống, không tính lượt.
+1. Hiển thị danh sách trống, không tính lượt; không tự nới điều kiện để lấy mẫu gần giống.
 
 ## Acceptance Criteria
 
@@ -112,6 +120,54 @@ Không có kết quả phù hợp.
 - **When**: Xem danh sách
 - **Then**: Thứ tự theo lần công bố gần nhất; sửa nhỏ không đẩy mẫu lên đầu. Tìm theo tên, không có tìm kích thước hoặc chọn sắp xếp.
 
+#### AC-005
+
+- **Given**: Dự toán có loại công trình và các giá trị tầng/tum hợp lệ theo cấu hình đã áp dụng.
+- **When**: Tìm mẫu 2D tham khảo bằng thông tin dự toán.
+- **Then**: Chỉ trả mẫu khớp ID loại công trình và mọi giá trị tầng/tum đang áp dụng; không xét hai nhóm phong cách.
+- **And**: Trường bị tắt trong cấu hình của dự toán không tham gia điều kiện; Không áp dụng không được thay thế một giá trị cụ thể đang cần khớp.
+
+#### AC-006
+
+- **Given**: Dự toán có phong cách kiến trúc và nội thất đã chọn ở hai nhóm đang bật; mẫu 3D có thể thuộc nhiều phong cách trong mỗi nhóm.
+- **When**: Tìm mẫu 3D tham khảo bằng thông tin dự toán.
+- **Then**: Mẫu phải khớp loại công trình, tầng/tum áp dụng và chứa ID phong cách đã chọn trong đúng từng nhóm. Khớp một nhóm nhưng không khớp nhóm còn lại thì bị loại.
+- **And**: Mẫu có thêm các phong cách khác vẫn được lấy ra; nhóm bị tắt trong cấu hình của dự toán không tham gia điều kiện tìm kiếm.
+
+#### AC-007
+
+- **Given**: Dự toán dùng danh mục phiên bản A, mẫu dùng phiên bản B; các ID loại công trình/phong cách và mọi giá trị cần đối chiếu đều khớp.
+- **When**: Tìm mẫu tham khảo từ dự toán.
+- **Then**: Mẫu vẫn được lấy ra dù A khác B hoặc tên/ảnh của mục danh mục đã đổi; không dùng phiên bản danh mục làm điều kiện bắt buộc phải bằng nhau.
+- **And**: Không chuyển danh mục hoặc cấu hình đã áp dụng của dự toán hay mẫu sang phiên bản khác.
+
+#### AC-008
+
+- **Given**: Dự toán và mẫu có loại công trình hoặc phong cách trùng tên nhưng khác ID.
+- **When**: Đối chiếu điều kiện tương ứng khi tìm mẫu.
+- **Then**: Không coi hai mục là một; loại mẫu nếu không khớp ID cần tìm, dù tên hiển thị giống nhau.
+
+#### AC-009
+
+- **Given**: Không có mẫu công khai nào khớp toàn bộ điều kiện áp dụng của dự toán.
+- **When**: Tìm mẫu tham khảo.
+- **Then**: Trả danh sách rỗng, không tự bỏ điều kiện hoặc bổ sung mẫu gần giống.
+- **And**: Kết quả vẫn chỉ gồm phiên bản hiện hành của mẫu không ẩn, ảnh đại diện và thông tin tóm tắt; không tính lượt khi tìm. Mở chi tiết tuân theo STORY-LIB-003.
+
+#### AC-010
+
+- **Given**: Khách đang ở trang thư viện.
+- **When**: Chọn, bỏ hoặc thay các bộ lọc loại công trình, số tầng/tum và phong cách của mẫu 3D.
+- **Then**: Tìm theo các bộ lọc đã chọn; không chặn chỉ vì chưa chọn đủ thông tin như khi tạo dự toán.
+- **And**: Hai nhóm phong cách dùng danh mục có sẵn và chỉ áp dụng với 3D; mỗi nhóm cho chọn nhiều mục; trong nhóm khớp ít nhất một mục đã chọn, giữa các nhóm và các điều kiện khác phải khớp đồng thời. Nhóm không chọn không lọc.
+
+#### AC-011
+
+- **Given**: Yêu cầu tạo thiết kế đã được tiếp nhận và AI đang xử lý.
+- **When**: Frontend hiển thị mẫu tham khảo cho dự toán.
+- **Then**: Frontend tự gọi tìm mẫu 2D và 3D theo phân loại của đúng đầu vào đã gửi AI, áp dụng AC-005–AC-009; không đợi kết quả AI mới tìm mẫu.
+- **And**: Không dùng bộ lọc tự do ở trang thư viện để thay các điều kiện của dự toán; mẫu tìm thấy không được trình bày như kết quả do AI vừa tạo.
+
 ## References
 
 ### TDDs
@@ -124,13 +180,20 @@ Không có kết quả phù hợp.
 - BR-LIB-001
 - BR-LIB-002
 - BR-LIB-003
+- BR-PROJ-004: Cấu hình và lựa chọn danh mục đã áp dụng cho dự toán.
 
 ### Dependencies
+
+- STORY-LIB-001: Phân loại mẫu, gồm nhiều phong cách cho mẫu 3D.
+- STORY-PROJ-005: ID danh mục dùng chung và cấu hình theo loại công trình.
+- STORY-PROJ-002: Thời điểm tác vụ AI được tiếp nhận và đang xử lý.
+- ST-LIB-042–048: bộ lọc tự do, contract match và tự lấy mẫu khi AI đang xử lý; xem bảng truy vết tại discovery/library-system-test-coverage.md.
 
 ## Non-Functional
 
 - Kiểm tra quyền tại backend, kể cả yêu cầu trực tiếp; không chỉ ẩn nút trên giao diện.
 - Chưa đặt ngưỡng hiệu năng hay giới hạn hạ tầng khi chưa có căn cứ. Chưa triển khai hoặc thực thi test.
+- Phần bổ sung ngày 30/09/2026 tại AC-005–AC-009 ghi nghiệp vụ đã chốt; đã bổ sung đặc tả System Test ST-LIB-032–041 sau khi người dùng chốt US/BR; Người dùng đã chốt TDD bổ sung trong hội thoại. Đã bổ sung ST-LIB-042–051 và UT-LIB-053–078; xem bảng truy vết trong discovery/library-system-test-coverage.md và discovery/library-unit-test-coverage.md. Chưa sửa mã ứng dụng hoặc thực thi các ca mới.
 
 ## Out of Scope
 

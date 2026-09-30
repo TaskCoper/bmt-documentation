@@ -2,7 +2,15 @@
 
 ## Trạng thái
 
-Các quyết định nghiệp vụ đã được xác nhận qua hội thoại. Người dùng đã xác nhận “chốt US và BR” cho ba User Story và ba Business Rule cùng quy tắc lượt liên quan. Đã bổ sung 28 đặc tả System Test; xem [bảng truy vết](library-system-test-coverage.md). Reviewer và Approver: Tân Trần. Creator, Assignee, Owner và ngày hiệu lực chưa được cung cấp; không tự gán. Chưa triển khai, chạy test hoặc chốt thiết kế dữ liệu/API.
+**Cập nhật 30/09/2026:** đã cập nhật [BR-LIB-001](../businessrule/BR-LIB-001.md), [STORY-LIB-001](../userstory/STORY-LIB-001.md) và [STORY-LIB-002](../userstory/STORY-LIB-002.md) theo quyết định mới trong hội thoại. Mẫu 3D dùng nhiều phong cách kiến trúc/nội thất từ danh mục dự toán; mỗi nhóm đang bật cần ít nhất một lựa chọn khi công bố. Tìm mẫu từ dự toán phải khớp tất cả điều kiện áp dụng bằng ID ổn định và giá trị tầng/tum, không yêu cầu cùng phiên bản danh mục. Cùng tên nhưng khác ID không được tự ghép; không có kết quả thì trả rỗng. Mẫu 2D không áp dụng phong cách.
+
+Người dùng đã chốt US/BR và TDD bổ sung trong hội thoại. Đã có 20 đặc tả System Test ST-LIB-032–051 cho phần bổ sung, trong đó 10 ca ST-LIB-042–051 viết sau khi chốt hai luồng tìm; thêm 26 đặc tả Unit Test UT-LIB-053–078 theo TDD. Xem [bảng System Test](library-system-test-coverage.md) và [bảng Unit Test bổ sung](library-unit-test-coverage.md). Đã triển khai phần BE trong workspace, thêm migration và chạy kiểm thử backend. Người dùng yêu cầu chỉ tập trung BE; chưa triển khai giao diện hoặc áp migration lên môi trường dùng chung. Kết quả chi tiết ở bảng Unit Test bổ sung; các ghi nhận lịch sử bên dưới thuộc những đợt trước.
+
+Thiết kế dùng bảng liên kết nhiều phong cách theo phiên bản mẫu và ID danh mục ổn định để tìm qua các phiên bản danh mục. Người dùng xác nhận chưa có mẫu 3D nên không cần backfill; trước triển khai vẫn phải kiểm lại môi trường đích. Trang thư viện lọc tự do: nhiều mục mỗi nhóm, khớp ít nhất một trong nhóm và đồng thời giữa các nhóm. Khi AI đang xử lý, FE tự lấy mẫu 2D/3D theo đúng đầu vào dự toán đã được tiếp nhận; bỏ phản hồi cũ, không dùng filter handbook thay đầu vào đó.
+
+Không còn quyết định nghiệp vụ mở trong nhóm trao đổi này. Tần suất tự làm mới khi thư viện đổi trong lúc chờ chưa được đặt ra; không tự thêm polling thư viện. Hai trang tham khảo không truy cập được bằng công cụ trong lần đối chiếu này; mô tả của người dùng là nguồn nghiệp vụ. Chuỗi phụ thuộc ngoài LIB và danh mục trực tiếp chưa được rà soát đầy đủ trong lần cập nhật này.
+
+**Ghi nhận giai đoạn chuẩn bị ban đầu:** các quyết định nghiệp vụ đã được xác nhận qua hội thoại. Người dùng đã xác nhận “chốt US và BR” cho ba User Story và ba Business Rule cùng quy tắc lượt liên quan. Đã bổ sung 28 đặc tả System Test; xem [bảng truy vết](library-system-test-coverage.md). Reviewer và Approver: Tân Trần. Creator, Assignee, Owner và ngày hiệu lực chưa được cung cấp; không tự gán. Chưa triển khai, chạy test hoặc chốt thiết kế dữ liệu/API.
 
 ## Cập nhật ngày 25/09/2026
 
