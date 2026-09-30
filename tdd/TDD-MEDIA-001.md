@@ -184,6 +184,20 @@ Kết quả đối soát cho phép dọn phải là run gần nhất của store
 - SDK không tự retry DELETE/PUT ở nhiều tầng. Worker lưu NextDeleteAttemptAtUtc theo khoảng chờ tăng dần 1, 5, 15, 60 phút rồi tối đa 60 phút, có jitter; 403/cấu hình sai chờ sửa cấu hình, không lặp nhanh. Không bỏ vĩnh viễn một file chỉ vì đã thử nhiều lần.
 - Log mỗi attempt có correlationId, objectId, uploadId nếu có, stage, kết quả, mã lỗi và thời gian; không log tên file/URL gốc. Metric: upload hoàn tất/từ chối, ticket kẹt, đối soát thất bại, ảnh chờ xóa, xóa lỗi, độ trễ sau hạn. RPO/RTO và ngưỡng cảnh báo chưa có số liệu, cần xác định khi vận hành.
 
+Cấu hình lịch chạy theo từng giai đoạn:
+
+| Biến | Triển khai lần đầu, đang đối soát | Vận hành sau khi kiểm tra chuyển đổi đạt |
+|---|---|---|
+| `MEDIA_ENABLED` | `true` | `true` |
+| `MEDIA_RECONCILE_INTERVAL_SECONDS` | `300` | `300` |
+| `MEDIA_CLEANUP_ENABLED` | `false` | `true` |
+| `MEDIA_CUTOVER_VERIFIED` | `false` | `true` |
+| `MEDIA_CLEANUP_INTERVAL_SECONDS` | `0` | `300` |
+
+`300` là chu kỳ 5 phút giữa các lượt kiểm tra, không phải thời hạn giữ ảnh. Tác vụ dọn chỉ nhận ảnh đủ điều kiện sau ít nhất 24 giờ không sử dụng; ảnh cũ không rõ lịch sử bắt đầu chờ từ lần đối soát đầy đủ đầu tiên chứng minh không còn nơi dùng. `0` tắt lịch của tác vụ tương ứng, kể cả khi cờ tính năng đã bật. File env mẫu giữ các cờ `false` và interval `0` để người triển khai chọn đúng giai đoạn.
+
+Trước khi dùng cột vận hành, phải có lần đối soát gần nhất `Completed` đúng `ConfigurationHash`/`SourceSetVersion`, không còn ảnh `Review` chưa phân loại, đã kiểm quyền kho và ngừng signer/writer cũ. Đổi file env chưa làm container đang chạy nhận giá trị mới: cần tạo lại container API; nếu deploy qua GitHub Actions, đồng bộ secret rồi chạy workflow deploy.
+
 **Notes**:
 - Chọn bốn bảng dùng chung và các extractor tường minh; không tạo bảng theo từng loại ảnh, không thêm database khác. Chi phí chính là tích hợp các đường ghi và backfill, không phải thao tác ký URL.
 - Giới hạn file được xác minh trước khi cấp kết quả Ready. Khóa đồng thời và quyền trên object phải được kiểm chứng với PostgreSQL thật; SDK/kho tương thích phải kiểm trên bucket thử BizFly.
