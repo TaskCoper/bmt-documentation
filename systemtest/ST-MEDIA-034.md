@@ -44,7 +44,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-MEDIA-034 | STORY-MEDIA-002 | EXC | FULL | P0 | Môi trường thử cô lập; dùng dữ liệu có dấu nhận diện test, không dùng bucket thật đang phục vụ khách. Ảnh trong kho có thể liên quan URL cũ nhưng thiếu cấu hình alias để chứng minh. | 1. Đối soát<br>2. Chạy dọn sau hơn 24 giờ<br>3. Kiểm tra file và báo cáo thiếu ánh xạ | URL cũ có host chưa có mapping. | Giữ ảnh chưa đủ căn cứ; ghi rõ vấn đề đối soát; không suy ra không có nơi sử dụng từ một URL không ánh xạ được. | STORY-MEDIA-002/AC-006<br>STORY-MEDIA-002/AC-005<br>BR-MEDIA-002/Then | URL cũ chưa ánh xạ chắc chắn phải giữ | Tân Trần | Draft |
+| ST-MEDIA-034 | STORY-MEDIA-002 | EXC | FULL | P0 | Môi trường thử cô lập; dùng dữ liệu có dấu nhận diện test, không dùng bucket thật đang phục vụ khách. Ảnh trong kho có thể liên quan URL cũ nhưng không thuộc hai dạng URL suy ra từ endpoint/bucket. Host cũ có trong UPLOADED_FILE_ALLOWED_HOST nhưng chưa ánh xạ được. | 1. Đối soát<br>2. Chạy dọn sau hơn 24 giờ<br>3. Kiểm tra file và báo cáo thiếu ánh xạ | URL cũ có host chưa có mapping. | Giữ ảnh chưa đủ căn cứ; ghi rõ vấn đề đối soát; không suy ra không có nơi sử dụng từ một URL không ánh xạ được. | STORY-MEDIA-002/AC-006<br>STORY-MEDIA-002/AC-005<br>BR-MEDIA-002/Then | URL cũ chưa ánh xạ chắc chắn phải giữ | Tân Trần | Draft |
 
 ## TEST_LINKS
 

@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-MEDIA-043 | Media | IMediaUrlResolver — host gần giống (dự kiến) | Error | FULL | P0 | Unit dự kiến theo TDD, chưa có mã thực thi. Chỉ cdn.example.test được cấu hình. | URL https://cdn.example.test.attacker.test/a.png. | Không ánh xạ thành object S1; không phát sinh HTTP GET tới URL này. | TDD-MEDIA-001/Architecture<br>BR-MEDIA-002/Then | So host chính xác, không dùng chứa chuỗi. | Tân Trần | Draft |
+| UT-MEDIA-043 | Media | IMediaUrlResolver — host gần giống (dự kiến) | Error | FULL | P0 | Unit dự kiến theo TDD, chưa có mã thực thi. Endpoint=https://s3.example.test, BucketName=bucket; host suy ra là bucket.s3.example.test. | URL https://bucket.s3.example.test.attacker.test/a.png. | Không ánh xạ thành object S1; không phát sinh HTTP GET tới URL này. | TDD-MEDIA-001/Architecture<br>BR-MEDIA-002/Then | So host chính xác, không dùng chứa chuỗi. | Tân Trần | Draft |
 
 ## TEST_LINKS
 

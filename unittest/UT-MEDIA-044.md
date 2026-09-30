@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-MEDIA-044 | Media | IMediaUrlResolver — alias cũ chưa biết (dự kiến) | Branch | FULL | P0 | Unit dự kiến theo TDD, chưa có mã thực thi. Inventory biết store S1; URL legacy có thể thuộc S1 nhưng mapping chưa được cấu hình. | Đối soát URL legacy chưa ánh xạ. | Kết quả chưa đủ căn cứ cho store; không coi đây là chứng cứ ảnh không có reference. | TDD-MEDIA-001/Architecture<br>BR-MEDIA-002/Then | Thiếu mapping phải chặn dọn. | Tân Trần | Draft |
+| UT-MEDIA-044 | Media | IMediaUrlResolver — alias cũ chưa biết (dự kiến) | Branch | FULL | P0 | Unit dự kiến theo TDD, chưa có mã thực thi. Inventory biết store S1; Host legacy có trong UploadedFileOption.AllowedHosts nhưng không khớp hai dạng URL suy ra từ endpoint/bucket của S1. | Đối soát URL legacy chưa ánh xạ. | Kết quả chưa đủ căn cứ cho store; không coi đây là chứng cứ ảnh không có reference. | TDD-MEDIA-001/Architecture<br>BR-MEDIA-002/Then | Thiếu mapping phải chặn dọn. | Tân Trần | Draft |
 
 ## TEST_LINKS
 

@@ -44,7 +44,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-MEDIA-025 | STORY-MEDIA-002 | ALT / Integration boundary | FULL | P0 | Môi trường thử cô lập; dùng dữ liệu có dấu nhận diện test, không dùng bucket thật đang phục vụ khách. Một object cũ có URL CDN và URL endpoint cùng trỏ tới nó; nội dung đang lưu URL CDN. | 1. Đối soát danh sách object từ kho<br>2. Ánh xạ các URL<br>3. Chạy dọn sau hơn 24 giờ | Alias được cấu hình đúng cho bucket thử; đường dẫn chứa ký tự cần mã hóa. | Nhận ra cùng một file và giữ ảnh đang dùng; không tạo bản ghi ảnh bỏ rơi chỉ vì chuỗi URL khác dạng. | STORY-MEDIA-002/AC-005<br>STORY-MEDIA-002/AC-004<br>BR-MEDIA-002/Then | Giữ ảnh cũ còn sử dụng qua URL khác dạng | Tân Trần | Draft |
+| ST-MEDIA-025 | STORY-MEDIA-002 | ALT / Integration boundary | FULL | P0 | Môi trường thử cô lập; dùng dữ liệu có dấu nhận diện test, không dùng bucket thật đang phục vụ khách. Một object cũ có URL có bucket trong host và URL endpoint/bucket cùng trỏ tới nó; nội dung đang lưu URL có bucket trong host. | 1. Đối soát danh sách object từ kho<br>2. Ánh xạ các URL<br>3. Chạy dọn sau hơn 24 giờ | Chỉ cấu hình endpoint và bucket thử, không khai URL/alias riêng; đường dẫn chứa ký tự cần mã hóa. | Nhận ra cùng một file và giữ ảnh đang dùng; không tạo bản ghi ảnh bỏ rơi chỉ vì chuỗi URL khác dạng. | STORY-MEDIA-002/AC-005<br>STORY-MEDIA-002/AC-004<br>BR-MEDIA-002/Then | Giữ ảnh cũ còn sử dụng qua URL khác dạng | Tân Trần | Draft |
 
 ## TEST_LINKS
 
