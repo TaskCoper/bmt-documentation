@@ -32,50 +32,54 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Form còn kiểm tra Version và Effective Date không rỗng; với file nhập mới, vẫn để Version trống theo hợp đồng import vì hệ thống quản lý phiên bản. Thiếu ngày hiệu lực thì hỏi lại, không bịa để thoả form.
 -->
 
-# BR-PROJ-002
+# BR-MEDIA-002
 
 ## Rule Info
 
-- **Name**: Đầu vào thiết kế có ảnh hoặc mô tả và tuân thủ giới hạn dữ liệu.
-- **Category**: Tạo dự toán — thông tin đầu vào
+- **Name**: Dọn ảnh mới và ảnh cũ không còn được sử dụng
+- **Category**: Quản lý ảnh
 - **Status**: Draft
 - **Version**:
 - **Effective Date**:
-- **Owner**: [Chưa xác định]
+- **Owner**: Tân Trần
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
-- **Source**: Người dùng xác nhận trong hội thoại: có ít nhất ảnh hoặc mô tả, không bắt buộc đồng thời cả hai; một ảnh hoặc mô tả tối đa 500 ký tự; ảnh upload mới theo BR-MEDIA-001 đã chốt trong hội thoại.
+- **Source**: Người dùng xác nhận trong hội thoại ngày 30/09/2026: dọn ảnh trong đợt này; chờ 24 giờ; xử lý cả ảnh cũ; ảnh cũ nằm trong bucket riêng của BMT.
 
 ## Statement
 
-Thông tin dùng để tạo thiết kế phải có ít nhất ảnh hoặc mô tả. Khách được cung cấp chỉ ảnh, chỉ mô tả hoặc cả hai. Mỗi bản dự toán nhận tối đa một ảnh thuộc định dạng JPG, PNG hoặc WebP, dung lượng tối đa 5 MiB (5.242.880 byte) cho upload mới theo BR-MEDIA-001; trường Mô tả chi tiết tối đa 500 ký tự, dùng làm đầu vào gửi AI. Không có trường ghi chú riêng trong phạm vi Tạo dự toán.
+Hệ thống tự dọn ảnh không còn được sử dụng trong bucket riêng của BMT, gồm ảnh upload qua API mới và ảnh cũ. Ảnh upload nhưng bỏ form được dọn sau 24 giờ; ảnh đã bị thay hoặc gỡ được dọn sau 24 giờ kể từ khi không còn nơi nào sử dụng. Chỉ có bản ghi đăng ký ảnh cho mẫu thư viện không được coi là ảnh đang được sử dụng. Ảnh còn được bản nháp, nội dung đang ẩn hoặc phiên bản lịch sử sử dụng phải được giữ.
 
 ## When
 
-Hệ thống kiểm tra tính đầy đủ của thông tin bản dự toán dùng làm đầu vào cho AI service.
+- Hệ thống đối soát ảnh trong kho hoặc xét một ảnh đến hạn dọn.
+- Ảnh vừa upload chưa được lưu vào nội dung nào.
+- Một thao tác nghiệp vụ đã lưu thành công làm ảnh không còn được sử dụng, hoặc làm ảnh đang chờ dọn được dùng trở lại.
 
 ## Then
 
-1. Có ảnh mà không có mô tả thì đáp ứng điều kiện về sự hiện diện của ảnh/mô tả.
-2. Có mô tả mà không có ảnh thì đáp ứng điều kiện này.
-3. Có cả ảnh và mô tả thì đáp ứng điều kiện này; không bắt khách bỏ một trong hai.
-4. Không có cả ảnh lẫn mô tả thì thông tin chưa đủ để gửi AI; yêu cầu khách bổ sung ít nhất một trong hai.
-5. Đáp ứng điều kiện ảnh/mô tả không thay thế yêu cầu về diện tích hoặc các trường đầu vào khác được chốt riêng.
-6. Khi có ảnh, chỉ nhận tối đa một ảnh JPG, PNG hoặc WebP, không vượt quá 5 MiB (5.242.880 byte) khi upload mới theo BR-MEDIA-001. Ảnh ngoài định dạng hoặc vượt giới hạn không được coi là ảnh đầu vào hợp lệ.
-7. Khi có Mô tả chi tiết, nội dung không vượt quá 500 ký tự. Nội dung vượt giới hạn không được coi là mô tả đầu vào hợp lệ.
-
-8. Khi thay ảnh đầu vào, giữ ảnh cũ đang gắn với bản dự toán cho đến khi ảnh mới hợp lệ, tải lên và lưu thay thế thành công. Nếu tải hoặc lưu ảnh mới thất bại, ảnh cũ vẫn là ảnh đầu vào đã lưu; không báo đã thay ảnh thành công.
-9. Sau khi thay thành công, bản dự toán chỉ có một ảnh đầu vào là ảnh mới. Việc xử lý tệp tải tạm không có nghĩa cho phép nhiều ảnh đầu vào.
+1. Đối soát cả ảnh mới lẫn ảnh cũ trong bucket riêng của BMT, kể cả ảnh không còn URL trong database.
+2. Với ảnh upload mới nhưng không được dùng ở đâu, chỉ xét xóa khi đã qua 24 giờ tính từ khi upload thành công.
+3. Với ảnh từng được dùng, chỉ xét xóa khi đã qua 24 giờ liên tục kể từ khi nơi sử dụng cuối cùng được gỡ thành công.
+4. Kiểm tra mọi nơi còn sử dụng ảnh trước khi xóa. Một ảnh được dùng ở nhiều nơi chỉ đủ điều kiện dọn khi không còn nơi nào sử dụng; không chỉ kiểm tra màn hình hoặc nội dung vừa sửa.
+5. Giữ ảnh còn được bản nháp, nội dung đang ẩn, phiên bản lịch sử hoặc bản chụp dữ liệu còn được lưu sử dụng.
+6. Khi ảnh được dùng trở lại trong thời gian chờ, hủy lần chờ đó. Nếu sau này ảnh lại không còn được dùng, tính một lần chờ mới.
+7. Chỉ ghi nhận đã xóa sau khi xác định kết quả ở BizFly. Nếu thao tác xóa lỗi hoặc chưa rõ kết quả, theo dõi để xử lý lại và kiểm tra lại nơi sử dụng trước lần thử tiếp theo.
+8. Việc dọn diễn ra theo lượt xử lý; 24 giờ là thời gian tối thiểu phải chờ, không phải cam kết file sẽ bị xóa đúng thời điểm đủ 24 giờ.
+9. Với ảnh cũ không biết thời điểm ngừng sử dụng, bắt đầu chờ 24 giờ từ lần đầu đối soát đầy đủ và xác định ảnh không còn được dùng. Không lấy ngày tạo file làm thời điểm ngừng sử dụng. Nếu ảnh được dùng trở lại thì hủy lần chờ theo khoản 6.
+10. Ảnh đã đăng ký cho mẫu thư viện nhưng chưa gắn hoặc đã được gỡ khỏi mọi phiên bản cũng phải dọn sau 24 giờ nếu không còn nội dung nào khác sử dụng. Bản ghi đăng ký tài nguyên không tự tạo ngoại lệ giữ ảnh. Ảnh chưa từng được dùng áp dụng khoản 2; ảnh đã bị gỡ khỏi nơi sử dụng cuối cùng áp dụng khoản 3; ảnh cũ thiếu lịch sử áp dụng khoản 9. Sau khi ảnh bị dọn, muốn dùng lại phải upload lại.
 
 ## Except
 
-Được tạo dự toán bằng tên và tự lưu tiến độ khi chưa có ảnh hoặc mô tả theo BR-PROJ-003. Điều kiện có ít nhất một trong hai áp dụng trước khi gửi AI, không chặn lưu thông tin chưa đầy đủ.
+- Chưa đối soát đầy đủ, chưa xác định được ảnh thuộc phạm vi BMT hoặc chưa đủ thông tin tính thời gian chờ: giữ ảnh, không tự coi là ảnh được phép xóa.
+- File không phải ảnh nằm ngoài phạm vi dọn của tính năng này.
+- Không xóa ảnh cũ chỉ vì ảnh không đáp ứng giới hạn định dạng hoặc dung lượng của luồng upload mới.
 
 ## Notes
 
-- Người dùng đã chốt bộ US/BR trong hội thoại. Trạng thái Draft của file không phải bằng chứng phê duyệt hoặc import trên hệ thống quản lý tài liệu.
-- Đã chốt số lượng ảnh, định dạng, dung lượng và giới hạn mô tả. Đã chốt giữ ảnh cũ đến khi ảnh mới tải và lưu thay thế thành công; trường hợp chưa có ảnh cũ mà tải ảnh mới lỗi thì bản dự toán vẫn chưa có ảnh hợp lệ. Dấu bắt buộc trên giao diện mẫu không thay thế quyết định cho phép chỉ có mô tả.
-- Mô tả chi tiết là trường mô tả thiết kế duy nhất, được gửi AI khi khách cung cấp. Người dùng đã chọn không thêm ghi chú riêng; đề xuất ghi chú riêng tùy chọn 500 ký tự trước đó không áp dụng. Giới hạn tên bản dự toán được quy định riêng tại BR-PROJ-003.
-- Quy tắc này chỉ xác định sự hiện diện của dữ liệu, không khẳng định mọi tệp hoặc nội dung mô tả đều hợp lệ.
-- Tầng thực thi hiện tại: ảnh mới đi qua [BR-MEDIA-001](BR-MEDIA-001.md) và [TDD-MEDIA-001](../tdd/TDD-MEDIA-001.md). Frontend PUT lên kho; backend xác minh bytes, định dạng và dung lượng khi complete, rồi trả URL công khai cố định. API dự toán lưu URL và nơi sử dụng trong cùng transaction. Ảnh cũ đang dùng không bị loại theo giới hạn upload mới. Khi thay ảnh, URL cũ chỉ được gỡ sau khi lưu URL mới thành công; dọn sau ít nhất 24 giờ không còn bất kỳ nơi sử dụng nào theo [BR-MEDIA-002](BR-MEDIA-002.md). Quyết định này thay phần frontend tự kiểm và giới hạn HEIC/10 MB trước đây cho upload mới.
-- Reviewer và Approver là Tân Trần theo xác nhận trong hội thoại; việc ghi tên không có nghĩa tài liệu đã được phê duyệt. Owner và ngày hiệu lực chưa xác định; chưa có kết quả kiểm thử.
+- **Đã xác nhận:** có dọn ảnh trong đợt này; chờ 24 giờ; bao gồm ảnh cũ; bucket riêng của BMT.
+- **Đã xác nhận — ảnh cũ thiếu lịch sử:** người dùng đồng ý chờ 24 giờ từ lần đầu xác định ảnh không còn được dùng; áp dụng khoản 9 của Then.
+- **Đã xác nhận — tài nguyên thư viện:** người dùng chọn dọn sau 24 giờ đối với ảnh không còn phiên bản hay nội dung nào sử dụng, dù bản ghi đăng ký ảnh cho mẫu thư viện vẫn còn; áp dụng khoản 10 của Then.
+- Tên bucket, endpoint và cách ánh xạ URL cũ về file trong kho cần được kiểm chứng khi thiết kế và cấu hình. Việc xác nhận bucket riêng chưa thay thế thông tin cấu hình thật.
+- Lịch chạy là cấu hình kỹ thuật tại TDD-MEDIA-001/Architecture; không làm thay đổi thời gian chờ tối thiểu 24 giờ.
+- Reviewer và Approver là Tân Trần theo thông tin người dùng cung cấp. Owner là Tân Trần theo xác nhận bổ sung của người dùng; ngày hiệu lực chưa xác định. Người dùng đã chốt nội dung bộ US/BR trong hội thoại ngày 30/09/2026. Status vẫn là Draft vì chưa thực hiện phê duyệt trên hệ thống tài liệu.

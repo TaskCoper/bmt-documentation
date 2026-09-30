@@ -32,50 +32,48 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Form còn kiểm tra Version và Effective Date không rỗng; với file nhập mới, vẫn để Version trống theo hợp đồng import vì hệ thống quản lý phiên bản. Thiếu ngày hiệu lực thì hỏi lại, không bịa để thoả form.
 -->
 
-# BR-PROJ-002
+# BR-MEDIA-001
 
 ## Rule Info
 
-- **Name**: Đầu vào thiết kế có ảnh hoặc mô tả và tuân thủ giới hạn dữ liệu.
-- **Category**: Tạo dự toán — thông tin đầu vào
+- **Name**: Cấp presigned URL và sử dụng ảnh upload
+- **Category**: Quản lý ảnh
 - **Status**: Draft
 - **Version**:
 - **Effective Date**:
-- **Owner**: [Chưa xác định]
+- **Owner**: Tân Trần
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
-- **Source**: Người dùng xác nhận trong hội thoại: có ít nhất ảnh hoặc mô tả, không bắt buộc đồng thời cả hai; một ảnh hoặc mô tả tối đa 500 ký tự; ảnh upload mới theo BR-MEDIA-001 đã chốt trong hội thoại.
+- **Source**: Các quyết định của người dùng trong hội thoại xây dựng presigned URL cho BMT ngày 30/09/2026; tham khảo code Taskcoper, không lấy hành vi Taskcoper làm quy tắc mặc định.
 
 ## Statement
 
-Thông tin dùng để tạo thiết kế phải có ít nhất ảnh hoặc mô tả. Khách được cung cấp chỉ ảnh, chỉ mô tả hoặc cả hai. Mỗi bản dự toán nhận tối đa một ảnh thuộc định dạng JPG, PNG hoặc WebP, dung lượng tối đa 5 MiB (5.242.880 byte) cho upload mới theo BR-MEDIA-001; trường Mô tả chi tiết tối đa 500 ký tự, dùng làm đầu vào gửi AI. Không có trường ghi chú riêng trong phạm vi Tạo dự toán.
+Backend BMT cấp presigned URL qua BizFly cho mọi tài khoản đã đăng nhập, gồm quản trị viên và khách hàng. Luồng upload mới nhận ảnh JPG, PNG hoặc WebP, tối đa 5 MiB mỗi ảnh. URL xem ảnh tạm thời là URL công khai, cố định; quyền upload độc lập với quyền sửa nội dung sử dụng ảnh.
 
 ## When
 
-Hệ thống kiểm tra tính đầy đủ của thông tin bản dự toán dùng làm đầu vào cho AI service.
+- Người dùng xin URL upload hoặc gửi ảnh qua luồng upload mới.
+- Người dùng gửi URL ảnh đã upload vào một API nghiệp vụ của BMT.
+- Một người mở URL công khai của ảnh còn tồn tại trong kho.
 
 ## Then
 
-1. Có ảnh mà không có mô tả thì đáp ứng điều kiện về sự hiện diện của ảnh/mô tả.
-2. Có mô tả mà không có ảnh thì đáp ứng điều kiện này.
-3. Có cả ảnh và mô tả thì đáp ứng điều kiện này; không bắt khách bỏ một trong hai.
-4. Không có cả ảnh lẫn mô tả thì thông tin chưa đủ để gửi AI; yêu cầu khách bổ sung ít nhất một trong hai.
-5. Đáp ứng điều kiện ảnh/mô tả không thay thế yêu cầu về diện tích hoặc các trường đầu vào khác được chốt riêng.
-6. Khi có ảnh, chỉ nhận tối đa một ảnh JPG, PNG hoặc WebP, không vượt quá 5 MiB (5.242.880 byte) khi upload mới theo BR-MEDIA-001. Ảnh ngoài định dạng hoặc vượt giới hạn không được coi là ảnh đầu vào hợp lệ.
-7. Khi có Mô tả chi tiết, nội dung không vượt quá 500 ký tự. Nội dung vượt giới hạn không được coi là mô tả đầu vào hợp lệ.
-
-8. Khi thay ảnh đầu vào, giữ ảnh cũ đang gắn với bản dự toán cho đến khi ảnh mới hợp lệ, tải lên và lưu thay thế thành công. Nếu tải hoặc lưu ảnh mới thất bại, ảnh cũ vẫn là ảnh đầu vào đã lưu; không báo đã thay ảnh thành công.
-9. Sau khi thay thành công, bản dự toán chỉ có một ảnh đầu vào là ảnh mới. Việc xử lý tệp tải tạm không có nghĩa cho phép nhiều ảnh đầu vào.
+1. Chỉ cấp URL upload khi phiên đăng nhập hợp lệ; không yêu cầu riêng vai trò quản trị.
+2. Chỉ chấp nhận JPG, PNG hoặc WebP, dung lượng không quá 5 MiB (5.242.880 byte) mỗi ảnh qua luồng upload mới.
+3. Frontend upload trực tiếp lên BizFly bằng presigned URL do backend BMT cấp.
+4. URL upload có thời hạn. URL xem ảnh là URL https cố định, không hết hạn theo thời hạn URL upload; người có URL xem ảnh không cần đăng nhập BMT.
+5. API nghiệp vụ vẫn kiểm tra quyền và các điều kiện lưu hiện có. Có quyền upload không cấp thêm quyền tạo hoặc sửa bài viết, dự toán hay nội dung khác.
+6. Khi thay ảnh, chỉ thay URL đã lưu sau khi API nghiệp vụ lưu thành công. Thao tác lưu thất bại không làm mất liên kết tới ảnh cũ.
+7. Ảnh upload không được dùng hoặc ảnh đã bị gỡ/thay được xét dọn theo BR-MEDIA-002.
 
 ## Except
 
-Được tạo dự toán bằng tên và tự lưu tiến độ khi chưa có ảnh hoặc mô tả theo BR-PROJ-003. Điều kiện có ít nhất một trong hai áp dụng trước khi gửi AI, không chặn lưu thông tin chưa đầy đủ.
+- Quy tắc định dạng và dung lượng ở đây áp dụng cho luồng upload ảnh mới; không tự biến thành điều kiện xóa các ảnh cũ đã tồn tại.
+- URL xem ảnh không còn bảo đảm đọc được sau khi ảnh đủ điều kiện dọn và đã bị xóa theo BR-MEDIA-002.
 
 ## Notes
 
-- Người dùng đã chốt bộ US/BR trong hội thoại. Trạng thái Draft của file không phải bằng chứng phê duyệt hoặc import trên hệ thống quản lý tài liệu.
-- Đã chốt số lượng ảnh, định dạng, dung lượng và giới hạn mô tả. Đã chốt giữ ảnh cũ đến khi ảnh mới tải và lưu thay thế thành công; trường hợp chưa có ảnh cũ mà tải ảnh mới lỗi thì bản dự toán vẫn chưa có ảnh hợp lệ. Dấu bắt buộc trên giao diện mẫu không thay thế quyết định cho phép chỉ có mô tả.
-- Mô tả chi tiết là trường mô tả thiết kế duy nhất, được gửi AI khi khách cung cấp. Người dùng đã chọn không thêm ghi chú riêng; đề xuất ghi chú riêng tùy chọn 500 ký tự trước đó không áp dụng. Giới hạn tên bản dự toán được quy định riêng tại BR-PROJ-003.
-- Quy tắc này chỉ xác định sự hiện diện của dữ liệu, không khẳng định mọi tệp hoặc nội dung mô tả đều hợp lệ.
-- Tầng thực thi hiện tại: ảnh mới đi qua [BR-MEDIA-001](BR-MEDIA-001.md) và [TDD-MEDIA-001](../tdd/TDD-MEDIA-001.md). Frontend PUT lên kho; backend xác minh bytes, định dạng và dung lượng khi complete, rồi trả URL công khai cố định. API dự toán lưu URL và nơi sử dụng trong cùng transaction. Ảnh cũ đang dùng không bị loại theo giới hạn upload mới. Khi thay ảnh, URL cũ chỉ được gỡ sau khi lưu URL mới thành công; dọn sau ít nhất 24 giờ không còn bất kỳ nơi sử dụng nào theo [BR-MEDIA-002](BR-MEDIA-002.md). Quyết định này thay phần frontend tự kiểm và giới hạn HEIC/10 MB trước đây cho upload mới.
-- Reviewer và Approver là Tân Trần theo xác nhận trong hội thoại; việc ghi tên không có nghĩa tài liệu đã được phê duyệt. Owner và ngày hiệu lực chưa xác định; chưa có kết quả kiểm thử.
+- Đã xác nhận: dùng BizFly, cấp presign trong backend BMT, phục vụ cả quản trị viên và khách hàng, yêu cầu đăng nhập, JPG/PNG/WebP tối đa 5 MiB, URL xem công khai và cố định.
+- Thời hạn cụ thể của URL upload và cách kiểm tra file thực tế thuộc thiết kế tiếp theo; không xem giới hạn frontend hoặc tham số chưa được thực thi là bằng chứng file đã đạt điều kiện.
+- Đây là thay đổi so với cách một số tài liệu cũ mô tả dịch vụ presign nằm ngoài backend. Cần đối chiếu và cập nhật các tài liệu bị ảnh hưởng trước khi triển khai; bộ US/BR này đã được người dùng chốt.
+- Reviewer và Approver là Tân Trần theo thông tin người dùng cung cấp. Owner là Tân Trần theo xác nhận bổ sung của người dùng; ngày hiệu lực chưa xác định. Người dùng đã chốt nội dung bộ US/BR trong hội thoại ngày 30/09/2026. Status vẫn là Draft vì chưa thực hiện phê duyệt trên hệ thống tài liệu.

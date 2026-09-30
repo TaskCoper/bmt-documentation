@@ -88,6 +88,8 @@ Vì vậy bản thiết kế trước có hai endpoint `POST /api/v1/admin/news/
 
 ## Architecture
 
+**Upload và dọn ảnh — áp dụng MEDIA:** [TDD-MEDIA-001](TDD-MEDIA-001.md) thay các mô tả trước đây trong tài liệu này về dịch vụ presign ngoài backend, chỉ frontend kiểm ảnh và backend không dọn file. Upload ảnh mới dùng ba route MEDIA của BMT, nhận JPG/PNG/WebP tối đa 5 MiB và chỉ có URL xem sau khi backend xác minh bytes. API nghiệp vụ tiếp tục nhận URL; khi bật MEDIA, SaveChangesAsync kiểm trạng thái ảnh và đồng bộ nơi sử dụng cùng transaction. Ảnh còn trong nháp, nội dung ẩn hoặc lịch sử được giữ. Sau khi mất nơi sử dụng cuối phải chờ ít nhất 24 giờ; ảnh cũ thiếu lịch sử chờ từ lần đối soát đầy đủ đầu tiên. Ảnh Deleting/Deleted không được gắn lại. Các đoạn mô tả giới hạn hoặc trách nhiệm upload cũ bên dưới chỉ ghi bối cảnh trước MEDIA, không là yêu cầu hiện hành cho ảnh mới. Tệp đính kèm không phải ảnh và luồng đọc nội dung riêng tư vẫn theo hợp đồng riêng của module.
+
 **Hiện trạng đã kiểm tra**
 
 Hiện trạng code kiểm ngày 26/09/2026: thiết kế này và [TDD-NEWS-002](TDD-NEWS-002.md) đã được triển khai ở commit `4714e68` trên nhánh `feature/news` của `bmt-be`, tách từ `develop` tại `f21d749`, nay đã merge vào `develop` (đối chiếu ngày 28/09/2026); commit `e390e2d`, cũng đã có trên `develop`, thêm các quyết định ngày 26/09/2026 (lần 2) ở mục bên dưới. Migration `20260926092623_NewsArticlesAndCategories` tạo ba bảng của Data Model và seed quyền `news.manage` cho vai trò `admin`; migration `20260926092932_NewsArticleTextLimits` thêm giới hạn độ dài. Hai migration mới được tạo, chưa áp dụng lên database dùng chung. Phần chưa làm ghi ở Notes bên dưới.

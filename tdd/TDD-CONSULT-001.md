@@ -84,6 +84,8 @@ Checkout khảo sát có .NET 8, Carter/MediatR/FluentValidation, EF Core/Npgsql
 
 ## Architecture
 
+**Upload và dọn ảnh — áp dụng MEDIA:** [TDD-MEDIA-001](TDD-MEDIA-001.md) thay các mô tả trước đây trong tài liệu này về dịch vụ presign ngoài backend, chỉ frontend kiểm ảnh và backend không dọn file. Upload ảnh mới dùng ba route MEDIA của BMT, nhận JPG/PNG/WebP tối đa 5 MiB và chỉ có URL xem sau khi backend xác minh bytes. API nghiệp vụ tiếp tục nhận URL; khi bật MEDIA, SaveChangesAsync kiểm trạng thái ảnh và đồng bộ nơi sử dụng cùng transaction. Ảnh còn trong nháp, nội dung ẩn hoặc lịch sử được giữ. Sau khi mất nơi sử dụng cuối phải chờ ít nhất 24 giờ; ảnh cũ thiếu lịch sử chờ từ lần đối soát đầy đủ đầu tiên. Ảnh Deleting/Deleted không được gắn lại. Các đoạn mô tả giới hạn hoặc trách nhiệm upload cũ bên dưới chỉ ghi bối cảnh trước MEDIA, không là yêu cầu hiện hành cho ảnh mới. Tệp đính kèm không phải ảnh và luồng đọc nội dung riêng tư vẫn theo hợp đồng riêng của module.
+
 **Phần bổ sung ba trường (29/09/2026):** tiếp tục dùng bảng `Architect`, các API hồ sơ và quyền `consultation.manage`. Công ty là tên nhập trên từng hồ sơ; số sao/số đánh giá là dữ liệu gốc do người có quyền nhập. Không thêm bảng Company, Review, dịch vụ hoặc tác vụ tổng hợp. Cập nhật cả ba trường cùng hồ sơ/category trong transaction hiện có; giữ khóa và `Version` để tránh ghi đè thay đổi của người khác.
 
 | Thành phần đã kiểm tra | Thay đổi backend và phần frontend còn lại |
