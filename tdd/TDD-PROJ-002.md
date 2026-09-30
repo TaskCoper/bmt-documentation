@@ -86,6 +86,8 @@ Người dùng xác nhận ngày 26/09/2026 về tệp: backend không có kho t
 
 ## Architecture
 
+**Bổ sung ngày 30/09/2026 — đã triển khai trên nhánh `feature/my-estimates`, chưa triển khai lên môi trường dùng chung:** [TDD-PROJ-005](TDD-PROJ-005.md) bổ sung thứ tự giữa xóa và tiếp nhận AI: cùng khóa account rồi Estimate, kiểm DeletedAtUtc trước replay/reserve. Bản Pending chặn xóa; bản đã xóa chặn mọi generation mới. Finalizer tiếp tục đọc lịch sử nội bộ, không hồi sinh bản hoặc sửa lượt vì xóa.
+
 Tái sử dụng `UsageOperation` làm một lần sử dụng AI và nguồn trạng thái cuối. Module Estimate sở hữu đầu vào/kết quả; Subscription sở hữu kỳ, quyền, Used/Reserved và quyết định chốt lượt. Cả hai cùng PostgreSQL/DbContext, gọi service nội bộ cùng transaction thay vì gọi API HTTP giữa hai module.
 
 | Thành phần dự kiến | Trách nhiệm |

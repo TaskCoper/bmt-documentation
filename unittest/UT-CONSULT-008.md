@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-CONSULT-008 | Tư vấn kiến trúc sư | Handler tạo hồ sơ: lưu trực tiếp (unit dự kiến theo TDD) | Happy | REGRESSION | P1 | Đặc tả chưa thực thi. Dữ liệu minh họa; mock/fake trong bộ nhớ, không chứng minh PostgreSQL/broker. Repository xác nhận C1,C2 tồn tại; đồng hồ cố định T. | DTO hợp lệ; chạy riêng isVisible=true và false. | Entity đủ bảy nhóm thông tin; đúng isVisible; Id/Version khác empty; CreatedOnUtc=T; links đúng C1,C2; không tạo User hoặc yêu cầu phê duyệt. | BR-CONSULT-001/Then<br>TDD-CONSULT-001/Architecture | Kiểm nhánh và kết quả quan sát được theo hợp đồng đã chốt. | Tân Trần | Draft |
+| UT-CONSULT-008 | Tư vấn kiến trúc sư | Handler tạo hồ sơ: lưu trực tiếp (unit dự kiến theo TDD) | Happy | REGRESSION | P1 | Đặc tả chưa thực thi. Dữ liệu minh họa; mock/fake trong bộ nhớ, không chứng minh PostgreSQL/broker. Repository xác nhận C1,C2 tồn tại; đồng hồ cố định T. | DTO hợp lệ; CompanyName="  Công ty An  ", Rating=4.8m, ReviewCount=120; chạy riêng isVisible=true và false. | Entity đủ mười nhóm thông tin; CompanyName=Công ty An sau trim, Rating=4.8m, ReviewCount=120; đúng isVisible; Id/Version khác empty; CreatedOnUtc=T; links đúng C1,C2; không tạo User hoặc yêu cầu phê duyệt. | BR-CONSULT-001/Then<br>TDD-CONSULT-001/Architecture | Kiểm nhánh và kết quả quan sát được theo hợp đồng đã chốt. | Tân Trần | Draft |
 
 ## TEST_LINKS
 

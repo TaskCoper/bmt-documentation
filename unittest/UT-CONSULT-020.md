@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-CONSULT-020 | Tư vấn kiến trúc sư | Handler gửi đơn: số tài khoản (unit dự kiến theo TDD) | Happy | REGRESSION | P1 | Đặc tả chưa thực thi. Dữ liệu minh họa; mock/fake trong bộ nhớ, không chứng minh PostgreSQL/broker. Khách có số 0900000001; KTS hiện; chưa có receipt; thời gian tương lai. | contactPhone=null; message=null. | Đơn dùng 0900000001, Message=null, Pending và InternalNote=null; CustomerId từ phiên; không thay User; không kiểm/trừ gói. | BR-CONSULT-002/Then<br>TDD-CONSULT-001/Architecture | Kiểm nhánh và kết quả quan sát được theo hợp đồng đã chốt. | Tân Trần | Draft |
+| UT-CONSULT-020 | Tư vấn kiến trúc sư | Handler gửi đơn: số tài khoản (unit dự kiến theo TDD) | Happy | REGRESSION | P1 | Đặc tả chưa thực thi. Dữ liệu minh họa; mock/fake trong bộ nhớ, không chứng minh PostgreSQL/broker. Khách có số 0900000001; KTS hiện với Rating=4.8m và ReviewCount=120; chưa có receipt; thời gian tương lai. | contactPhone=null; message=null. | Đơn dùng 0900000001, Message=null, Pending và InternalNote=null; CustomerId từ phiên; không thay User; không kiểm/trừ gói; Rating/ReviewCount của KTS giữ nguyên 4.8m/120, không tự tăng theo đơn. | BR-CONSULT-002/Then<br>TDD-CONSULT-001/Architecture | Kiểm nhánh và kết quả quan sát được theo hợp đồng đã chốt. | Tân Trần | Draft |
 
 ## TEST_LINKS
 

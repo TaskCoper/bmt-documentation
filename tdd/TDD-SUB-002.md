@@ -212,7 +212,7 @@ Hàm nghiệp vụ nhận thời điểm từ TimeProvider hoặc giá trị Eff
 
 Trong unit test, cố định hoặc dịch chuyển đồng hồ để kiểm tra ngay trước, đúng và sau mốc kết thúc. Ví dụ kỳ kết thúc lúc 10:00:00 giờ Việt Nam: yêu cầu mới ở 09:59:59 vẫn nằm trong kỳ, đúng 10:00:00 thì không còn hiệu lực. Tác vụ AI Pending được kiểm tra đúng DeadlineUtc sẽ chuyển TimedOut; nếu đã lưu Succeeded trước đó thì giữ nguyên Succeeded.
 
-Cũng dùng đồng hồ cố định để kiểm tra kỳ bắt đầu ngày 31/01 kết thúc vào ngày cuối tháng 2 hoặc kỳ năm bắt đầu ngày 29/02. Unit test không phải chờ một tháng thật. Thời gian chờ AI tối đa và chu kỳ quét vẫn chưa chốt; TimeProvider giúp kiểm thử, không tự đặt các giá trị vận hành này.
+Cũng dùng đồng hồ cố định để kiểm tra kỳ bắt đầu ngày 31/01 kết thúc vào ngày cuối tháng 2 hoặc kỳ năm bắt đầu ngày 29/02. Unit test không phải chờ một tháng thật. Thời hạn một lần tạo thiết kế (15 phút) và chu kỳ quét tác vụ quá hạn (60 giây) đã được người dùng chốt ngày 26/09/2026 và đọc từ cấu hình (ghi chú "Thời hạn tạo thiết kế và chu kỳ quét" trong Notes bên dưới); TimeProvider chỉ giúp kiểm thử các mốc này, không quyết định giá trị vận hành.
 
 Đã có trong code ở commit `72e7327` trên nhánh `feature/tech-debt-subscription` của `bmt-be`: handler, job quét tác vụ quá hạn, nhật ký phân quyền, interceptor ghi mốc tạo/sửa và middleware nhận `TimeProvider` qua DI; khi chạy thật là `TimeProvider.System`. Test dùng đồng hồ cố định để kiểm mốc 09:59:59 và 10:00:00 ở bước giữ lượt. Thời hạn token, cookie và cache vẫn đọc giờ hệ thống: đó không phải mốc nghiệp vụ, và thư viện JWT tự đọc giờ hệ thống khi kiểm token.
 
@@ -227,7 +227,7 @@ Cũng dùng đồng hồ cố định để kiểm tra kỳ bắt đầu ngày 3
 | `OpenLibraryVersionRequest` / `CommitLibraryOpenCommand` | Chuẩn bị ngoài transaction; cấp LibraryAccess cùng Used/UsageOperation ở lần mở phiên bản đầu, mở lại miễn lượt theo TDD-LIB-002 |
 | `ISubscriptionStore`, `ITemplateContentReader`, `IDesignResultStore` | Các interface cần triển khai để đọc/ghi dữ liệu. Quyền sở hữu bản dự toán do module Estimate kiểm theo TDD-PROJ-001/002; kết nối AI chưa có hợp đồng |
 | `TimeProvider` | Cung cấp đồng hồ cho nghiệp vụ và kiểm thử; vận hành dùng giờ UTC của server, không lấy giờ từ client |
-| `UsageMaintenanceWorker` | Dịch vụ chạy nền mới; mỗi đợt xử lý tác vụ quá hạn/gửi AI dùng phạm vi truy cập dữ liệu và giao dịch riêng. Không khôi phục Quartz/RabbitMQ cũ |
+| `UsageMaintenanceWorker` | Phần chạy nền; mỗi đợt dùng phạm vi truy cập dữ liệu và giao dịch riêng. Trong code tách làm hai: rà tác vụ quá hạn là job Quartz `ExpireStaleUsageJob` (`src/bmt-be.infrastructure/backgroundJobs/`), mỗi tác vụ một phạm vi và một giao dịch, gửi cùng lệnh `SettleDesignUsage` mà luồng thành công và báo lỗi dùng; gửi AI là `EstimateGenerationWorker` của TDD-PROJ-002. Quartz được đưa lại vào backend ngày 23/09/2026 cho tác vụ nền; các job Quartz của dự án cũ không được khôi phục |
 
 ```mermaid
 flowchart LR
@@ -254,6 +254,10 @@ flowchart LR
 - Luôn xác thực tài khoản và quyền sở hữu trước khi tìm yêu cầu đã xử lý, kể cả khi gửi lại cùng key. `AccountId` lấy từ người dùng đã xác thực. Khi nhận kết quả từ dịch vụ ngoài, đối chiếu tác vụ, tài khoản, bản dự toán và lần gọi đã lưu; không tin accountId do bên ngoài gửi mà chưa kiểm tra.
 - Lấy `EffectiveNow` một lần sau khi đã lấy đủ khóa cần thiết, rồi truyền cùng giá trị vào các điều kiện nghiệp vụ. Database có thể dùng `clock_timestamp()` để lấy thời gian thực sau lúc chờ khóa. Unit test dùng `TimeProvider` với thời điểm cố định. Múi giờ cá nhân `User.TimeZone` không thay thế múi giờ nghiệp vụ Việt Nam.
 - Thứ tự khóa thống nhất: `AccountCommerceState` → `Estimate` (chỉ luồng có bản dự toán, theo TDD-PROJ-002) → DesignSubscription → DesignPeriod/PeriodQuota theo mã quyền → UsageOperation. Module Estimate phối hợp cùng thứ tự, không khóa ngược. `AccountCommerceState` được tạo bằng `INSERT ... ON CONFLICT DO NOTHING` rồi khóa (TDD-PAY-001), nên luôn có dòng để khóa trước kỳ đầu tiên và ngăn hai yêu cầu cùng tạo subscription cho một tài khoản. Không khóa dòng `User` cho quota; quyền của người gọi đọc từ claim nên cũng không khóa bản ghi quyền. Các thao tác ghi cùng tài khoản được xử lý lần lượt; chỉ tối ưu thêm sau khi đo thời gian chờ khóa.
+- **Thời hạn tạo thiết kế và chu kỳ quét** (người dùng chốt ngày 26/09/2026):
+  - Một lần tạo thiết kế có thời hạn 15 phút, tính từ `AcceptedAtUtc`: `DeadlineUtc = AcceptedAtUtc + EstimateAiOption__GenerationTimeoutMinutes`. Giá trị mặc định 15 có ở cả code (`EstimateAiOption.GenerationTimeoutMinutes = 15`, nhận 1–1440 phút) lẫn `.docker/compose.yaml`, `.docker/docker-compose.yml` và `.docker/.env.sample` (`ESTIMATE_AI_GENERATION_TIMEOUT_MINUTES=15`).
+  - Job `ExpireStaleUsageJob` quét mỗi `UsageMaintenanceOption__ScanIntervalSeconds` giây. Mặc định 60 chỉ đặt ở `.docker/compose.yaml`, `.docker/docker-compose.yml` và `.docker/.env.sample` (`USAGE_MAINTENANCE_SCAN_INTERVAL_SECONDS=60`); workflow triển khai truyền secret cùng tên, secret trống thì compose dùng 60. Code cố ý không tự đặt mặc định cho giá trị này: để trống hoặc 0 thì job không được lên lịch (nhận 0–86400 giây).
+  - Mỗi đợt quét lấy tối đa `UsageMaintenanceOption__BatchSize` tác vụ Pending có `DeadlineUtc <= now` (mặc định 50 trong code), xếp theo hạn sớm nhất. Vì vậy tác vụ quá hạn thường được trả lượt trong khoảng một chu kỳ quét sau `DeadlineUtc`; khi có nhiều tác vụ quá hạn hơn `BatchSize`, phần còn lại chờ các đợt sau.
 - Cơ chế thử lại của EF hiện chỉ bao quanh bước bắt đầu giao dịch. Không tự bật thử lại từng câu SQL hoặc handler có tác động bên ngoài. Nếu hai giao dịch chờ khóa lẫn nhau (deadlock) hoặc xung đột mức cô lập dữ liệu, phải thử lại toàn bộ giao dịch ngắn bằng DbContext mới và cùng key. Nếu chưa biết lần trước đã commit chưa, tra key trước khi làm lại. Không gọi lại dịch vụ ngoài trong vòng thử lại SQL.
 
 
@@ -368,7 +372,7 @@ stateDiagram-v2
       [*] --> Pending: Giữ lượt, commit tiếp nhận
       Pending --> Succeeded: Đủ kết quả, có thể mở, trước deadline
       Pending --> Failed: Lỗi được xác nhận
-      Pending --> TimedOut: now >= deadline
+      Pending --> TimedOut: now >= DeadlineUtc, tiếp nhận + 15 phút, job quét mỗi 60 giây
       Succeeded --> Succeeded: Kết quả gửi lặp hoặc xử lý quá hạn đến sau
       Failed --> Failed: Yêu cầu lặp hoặc kết quả muộn
       TimedOut --> TimedOut: Yêu cầu lặp hoặc kết quả muộn
@@ -382,7 +386,7 @@ stateDiagram-v2
 
 Mỗi yêu cầu mới đều kiểm tra thời gian hết hạn của kỳ, nên không cần chờ tiến trình chạy nền đổi trạng thái kỳ mới chặn quyền đúng giờ.
 
-Với tác vụ AI, thời gian chờ tối đa tính từ `AcceptedAtUtc` khi tiếp nhận Pending, bao gồm cả thời gian chờ gửi AI. Nếu lúc chốt có `now >= DeadlineUtc`, tác vụ bị tính là quá hạn dù kết quả vừa tới. Nếu đã lưu thành công trước hạn thì bước kiểm tra quá hạn chạy sau không làm gì thêm. Giá trị thời gian chờ và tần suất quét chưa chốt; phải cấu hình trước khi bật luồng AI, không tự đặt mặc định 15 phút.
+Với tác vụ AI, thời gian chờ tối đa tính từ `AcceptedAtUtc` khi tiếp nhận Pending, bao gồm cả thời gian chờ gửi AI. Nếu lúc chốt có `now >= DeadlineUtc`, tác vụ bị tính là quá hạn dù kết quả vừa tới. Nếu đã lưu thành công trước hạn thì bước kiểm tra quá hạn chạy sau không làm gì thêm. Người dùng chốt ngày 26/09/2026: thời hạn một lần tạo là 15 phút (`EstimateAiOption__GenerationTimeoutMinutes`), job `ExpireStaleUsageJob` quét mỗi 60 giây (`UsageMaintenanceOption__ScanIntervalSeconds`). Cả hai đọc từ cấu hình; nơi đặt mặc định ghi ở Architecture/Notes.
 
 ## Data Model
 
@@ -490,7 +494,7 @@ Cùng ba bản ghi trên, các cột thời gian và kết quả được tách 
 | OP2 | 2026-09-17T04:00:00Z | NULL | 2026-09-17T04:00:01Z | NULL | 1 | NULL | NULL |
 | OP3 | 2026-09-18T03:02:00Z | 2026-09-18T03:12:00Z | NULL | NULL | NULL | NULL | NULL |
 
-Khoảng timeout 10 phút chỉ dùng để minh họa thời gian, chưa phải giá trị vận hành đã chốt. OP2 có TemplateVersionId=V1 (bí danh UUID của phiên bản thuộc TPL1) và LibraryAccess(U1,V1,OP2); ContentVersion=1 là EditVersion lúc cấp. ResponseBody/ResponseContentType NULL theo TDD-LIB-002. Đường dẫn kết quả AI chỉ minh họa dữ liệu. `RequestHash`, `InputRef` và các trường điều phối nhà cung cấp được lược khỏi bảng này; không có nghĩa chúng được bỏ qua khi ghi tác vụ thật.
+Khoảng timeout 10 phút chỉ dùng để minh họa thời gian; giá trị vận hành đã chốt là 15 phút. OP2 có TemplateVersionId=V1 (bí danh UUID của phiên bản thuộc TPL1) và LibraryAccess(U1,V1,OP2); ContentVersion=1 là EditVersion lúc cấp. ResponseBody/ResponseContentType NULL theo TDD-LIB-002. Đường dẫn kết quả AI chỉ minh họa dữ liệu. `RequestHash`, `InputRef` và các trường điều phối nhà cung cấp được lược khỏi bảng này; không có nghĩa chúng được bỏ qua khi ghi tác vụ thật.
 
 Các thay đổi dữ liệu đáng chú ý:
 
@@ -541,7 +545,7 @@ Request điều phối OpenLibraryVersionRequest chạy ngoài transaction ghi; 
 1. Triển khai danh mục theo TDD-SUB-001, các hàm kiểm tra thời gian/hạn mức, ràng buộc lưu trữ và unit test trước.
 2. Triển khai kỳ mua và hàm nội bộ nhận yêu cầu cấp đã xác minh. Dùng dữ liệu cấp kỳ riêng trong kiểm thử, không mở API cấp gói thủ công để trình diễn.
 3. Triển khai giao dịch quản lý lượt và phối hợp lưu thông tin đầu vào bản dự toán. Unit test kiểm tra điều kiện; kiểm thử tích hợp dùng hai kết nối PostgreSQL thật cho tranh lượt cuối, quá hạn, công bố và đổi kỳ.
-4. Triển khai kết nối AI/bản dự toán/mẫu sau khi có hợp đồng dữ liệu. Tra cứu commit quyền xem cùng một lượt đã dùng, không giữ Reserved; mở lại theo Access. Chỉ bật worker khi cấu hình thời gian chờ và nhà cung cấp hợp lệ, không tự đặt số mặc định.
+4. Triển khai kết nối AI/bản dự toán/mẫu sau khi có hợp đồng dữ liệu. Tra cứu commit quyền xem cùng một lượt đã dùng, không giữ Reserved; mở lại theo Access. Chỉ bật worker khi thời hạn một lần tạo (mặc định 15 phút) và nhà cung cấp đã được cấu hình hợp lệ.
 5. Kiểm thử lại tài khoản/xác thực nếu đổi đăng ký UoW hoặc middleware. Lượt biên soạn tài liệu này không chạy restore, build hoặc test ứng dụng.
 
 ## Internal API
@@ -782,6 +786,7 @@ Không giữ giao dịch SQL trong lúc gọi dịch vụ ngoài. Lỗi trước
 
 ## Change Log
 
+- 2026-09-27 (thời hạn tạo thiết kế và chu kỳ quét): Theo quyết định người dùng ngày 26/09/2026, ghi thời hạn một lần tạo thiết kế là 15 phút (`EstimateAiOption__GenerationTimeoutMinutes`, mặc định 15 trong code và compose) và job `ExpireStaleUsageJob` quét mỗi 60 giây (`UsageMaintenanceOption__ScanIntervalSeconds`, mặc định 60 chỉ đặt ở compose và `.docker/.env.sample`, workflow truyền secret cùng tên; code không tự đặt, để trống thì job không chạy). Sửa Architecture (kỹ thuật 11, dòng `UsageMaintenanceWorker` theo code thật, thêm ghi chú "Thời hạn tạo thiết kế và chu kỳ quét"), State Diagram, ghi chú dữ liệu mẫu và kế hoạch triển khai; bỏ các câu "chưa chốt, không tự đặt mặc định 15 phút". Không đổi thiết kế quyết toán lượt.
 - 2026-09-26 (tên index, câu hỏi mở kết quả AI): Ghi đúng tên index `UX_UsageOperation_LiveDesignGeneration(ResourceId)` đã có trong code thay cho `UX_Usage_Estimate_Live(EstimateId)`. Thêm câu hỏi mở ở Architecture/Notes: phần `IDesignResultStore`/`CompleteDesignUsage` còn theo mô hình lưu kết quả riêng, chờ hợp đồng AI mới sửa theo quyết định lưu URL ngày 26/09/2026. Thiết kế không đổi.
 - 2026-09-26 (đồng bộ code develop `9c7b147`): Bỏ câu hiện trạng lỗi thời "chưa có module Estimate": module Estimate đã có tạo, lưu đầu vào, đọc và đổi tên bản dự toán, gọi policy lưu đầu vào qua `IEstimateInputWriteAccess`, hiện thực `EstimateInputWriteAccessPolicy`. Ghi tên `CommitDesignPeriodCommandHandler` và việc fulfillment thanh toán gọi thẳng handler này, không qua MediatR, vì đi qua MediatR sẽ khiến `TransactionPipelineBehavior` commit transaction của worker giữa chừng. Ghi commit `a53faeb` đã nằm trên `develop`. Thiết kế không đổi.
 - 2026-09-26 (CSRF): Chống CSRF dẫn tới [TDD-AUTH-001](TDD-AUTH-001.md).

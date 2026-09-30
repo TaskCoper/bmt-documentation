@@ -80,10 +80,13 @@ Khách yêu cầu tạo/lưu dự án, hoặc truy cập dự án, kết quả c
 
 ## Except
 
+Quyền xem, đổi tên và sử dụng hồ sơ cũ chỉ áp dụng cho bản dự toán chưa bị xóa. Theo [BR-PROJ-008](BR-PROJ-008.md), khách vẫn được xem danh sách dự toán còn lại khi hết hạn gói hoặc hết lượt. Theo [BR-PROJ-009](BR-PROJ-009.md), khách vẫn được xóa bản thuộc mình đủ điều kiện, nhưng chặn bản đang được AI xử lý; xóa không hoàn lượt, không thể khôi phục và không mở lại hồ sơ đã xóa. Đây không phải quyền sửa đầu vào hoặc bắt đầu tác vụ AI mới.
+
 Tác vụ đã bắt đầu hợp lệ trước khi hết hạn được tiếp tục đến khi hoàn thành dù chưa gia hạn. Với tạo thiết kế, thành công tính lượt vào kỳ đã giữ; lỗi giải phóng lượt giữ nhưng không cho dùng lại lượt đã hết hạn, theo [BR-SUB-003](BR-SUB-003.md). Xuất PDF từ kết quả cũ là thao tác được phép sau hết hạn. Quyết định này không mở quyền Gen AI tạo mới, không thay đổi kết quả nguồn. Sửa/lưu thông tin đầu vào của dự án cần subscription còn hiệu lực, có quyền tạo thiết kế và còn lượt sẵn dùng hoặc được cấp không giới hạn; đổi tên theo khoản 11 không cần các điều kiện này. Xuất Excel dự toán và quản lý chia sẻ hồ sơ cũ áp dụng khoản 10 theo xác nhận bổ sung của người dùng.
 
 ## Notes
 
+- Phần danh sách và xóa dự toán được bổ sung theo các quyết định mới trong hội thoại; người dùng đã chốt bộ STORY-PROJ-006/007 và BR-PROJ-008/009 cùng phần bổ sung này trong hội thoại ngày 30/09/2026. Đặc tả ST bổ sung ở [bảng độ phủ](../discovery/my-estimates-system-test-coverage.md); chưa triển khai hoặc thực thi; các khoản quyền/gói/lượt hiện có giữ nguyên với bản chưa bị xóa.
 - Nhóm STORY-PROJ-*** đã được người dùng đổi tên thành “Tạo dự toán”. Khi áp dụng quy tắc này cho nhóm đó, các thao tác tạo/lưu và truy cập kết quả trước đây gọi là “dự án” được hiểu là thao tác trên bản dự toán. Đây là đối chiếu thuật ngữ, không thay đổi quyền/gói/lượt và không quy định tính năng quản lý dự án trong tương lai. Gói giám sát không gắn với bản dự toán mà gắn với công trình, một thực thể riêng do khách tự tạo; hai thực thể này không liên kết trong đợt này (người dùng xác nhận ngày 25/09/2026).
 
 - Quyền xem/tải hồ sơ cũ không tự mở quyền xem dữ liệu của tài khoản khác. Chủ dự án có thể cấp quyền xem/tải hồ sơ qua link còn hiệu lực theo BR-PROJ-006; quyền chia sẻ này không cấp quyền sửa hoặc tạo thiết kế.

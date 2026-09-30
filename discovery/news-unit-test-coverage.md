@@ -8,6 +8,8 @@ Người dùng đã chốt TDD-NEWS-001 và TDD-NEWS-002, gồm giới hạn tê
 
 **Cập nhật 26/09/2026 (triển khai):** mã test của cả 43 đặc tả đã viết ở nhánh `feature/news` của `bmt-be` (commit `4714e68`, `bce2eb2`, `e390e2d`); bảng "Mã test" bên dưới ánh xạ từng đặc tả. Đặc tả vẫn ở trạng thái Draft; kết quả chạy không ghi vào đặc tả.
 
+**Cập nhật 29/09/2026:** bỏ mô tả ngắn và thêm số phút đọc nhập tay theo BR-NEWS-001 khoản 10. UT-NEWS-041 chỉ còn kiểm độ dài tiêu đề; UT-NEWS-044 kiểm số phút và bài cũ.
+
 ## Danh sách đặc tả
 
 | Đặc tả | Phạm vi |
@@ -52,9 +54,10 @@ Người dùng đã chốt TDD-NEWS-001 và TDD-NEWS-002, gồm giới hạn tê
 | [UT-NEWS-038](../unittest/UT-NEWS-038.md) | Handler đọc public — điều kiện trạng thái |
 | [UT-NEWS-039](../unittest/UT-NEWS-039.md) | Error mapping Tin tức — mã lỗi rõ ràng |
 | [UT-NEWS-040](../unittest/UT-NEWS-040.md) | Truy vấn danh sách công khai — categoryId không tồn tại trả rỗng |
-| [UT-NEWS-041](../unittest/UT-NEWS-041.md) | Validator lưu bài — độ dài tiêu đề và mô tả ngắn |
+| [UT-NEWS-041](../unittest/UT-NEWS-041.md) | Validator lưu bài — độ dài tiêu đề |
 | [UT-NEWS-042](../unittest/UT-NEWS-042.md) | Lưu bài — độ dài nội dung sau khi làm sạch |
 | [UT-NEWS-043](../unittest/UT-NEWS-043.md) | INewsHtmlSanitizer — liên kết mở tab mới |
+| [UT-NEWS-044](../unittest/UT-NEWS-044.md) | Số phút đọc nhập tay, API và bài cũ |
 
 ## Mã test
 
@@ -102,9 +105,10 @@ Tên test theo quy ước `Handle_{Condition}_{ExpectedOutcome}`. Đường dẫ
 | UT-NEWS-038 | `bmt-be.application.tests/usecases/news/NewsQueryHandlerTests.Handle_PublicDetailNotPublished_ReturnsNotFound`, `Handle_PublicDetailPublished_MapsPublicFieldsOnly`; SQL: `NewsReadTests.Handle_OnlyPublishedArticlesAreVisible` |
 | UT-NEWS-039 | `bmt-be.application.tests/behaviors/NewsConstraintMappingTests`, `bmt-be.api.tests/middlewares/NewsErrorResponseTests` |
 | UT-NEWS-040 | `NewsQueryHandlerTests.Handle_PublicListUnknownCategory_ReturnsEmptyPage`; SQL: `NewsReadTests.Handle_UnknownOrDeletedCategory_ReturnsEmptyList` |
-| UT-NEWS-041 | `NewsValidatorTests.Handle_TitleSummaryLength_EnforcedAfterTrim`; cột varchar: `NewsConstraintTests.Article_TextLength_LimitedByDatabase` |
+| UT-NEWS-041 | `NewsValidatorTests.Handle_TitleLength_EnforcedAfterTrim`; cột varchar: `NewsConstraintTests.Article_TextLength_LimitedByDatabase` |
 | UT-NEWS-042 | `NewsArticleImageUrlTests.Handle_SanitizedContentLength_Limited`; CHECK: `NewsConstraintTests.Article_TextLength_LimitedByDatabase` |
 | UT-NEWS-043 | `NewsHtmlSanitizerTests.Handle_LinkTarget_OnlyBlankWithSafeRel`, `Handle_LinkTargetBlank_StableWhenSanitizedAgain` |
+| UT-NEWS-044 | `NewsValidatorTests.Handle_ReadingTimeMinutes_RequiresPositiveValueWhenProvided`, các test số phút trong `NewsArticleCommandHandlerTests`, `NewsApiAuthorizationTests` và `NewsReadingTimeTests` |
 
 Integration test trên PostgreSQL 15 thật nằm ở `bmt-be.integration.tests/NewsConstraintTests.cs`, `NewsReadTests.cs` và `NewsConcurrencyTests.cs`; chúng phủ các dòng "ràng buộc", "khóa", "CTE" của bảng dưới.
 
@@ -122,7 +126,7 @@ Integration test trên PostgreSQL 15 thật nằm ở `bmt-be.integration.tests/
 
 ## Căn cứ và phần còn mở
 
-- [TDD bài viết](../tdd/TDD-NEWS-001.md), [TDD danh mục](../tdd/TDD-NEWS-002.md) và [30 System Test](news-system-test-coverage.md) là nguồn thiết kế/nghiệp vụ đã chốt.
+- [TDD bài viết](../tdd/TDD-NEWS-001.md), [TDD danh mục](../tdd/TDD-NEWS-002.md) và [31 System Test](news-system-test-coverage.md) là nguồn thiết kế/nghiệp vụ đã chốt.
 - Trace to và TEST_LINKS của từng UT dẫn cùng tập mã/section; phần không kiểm được bằng unit đã nêu rõ, không tính là kết quả Pass.
 - Ảnh do frontend tự upload qua dịch vụ presign ngoài backend; backend chỉ kiểm URL https thuộc tên miền kho (quyết định ngày 26/09/2026). Bộ làm sạch là thư viện HtmlSanitizer 9.2.1039 trên AngleSharp, đã kiểm allowlist bằng UT-NEWS-013, UT-NEWS-014, UT-NEWS-017.
 - Owner kiểm thử chưa phân công; Reviewer/Approver là Tân Trần theo hội thoại. Không tự cập nhật trạng thái phê duyệt hoặc tạo lịch sử phát hành.

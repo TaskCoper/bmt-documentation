@@ -57,23 +57,27 @@ Người quản lý tạo, lưu, sửa, công bố, ẩn hoặc xóa bài viết
 ## Then
 
 1. Dùng chung quyền quản lý tin tức theo STORY-RBAC-001 cho bài viết và danh mục. Người không có quyền không được thực hiện thao tác quản lý.
-2. Bài có các trạng thái Nháp, Công bố và Ẩn. Cho lưu nháp thiếu thông tin; chỉ cho công bố khi có tiêu đề, ảnh đại diện, mô tả ngắn, nội dung rich text và ít nhất một danh mục hợp lệ.
+2. Bài có các trạng thái Nháp, Công bố và Ẩn. Cho lưu nháp thiếu thông tin; chỉ cho công bố khi có tiêu đề, ảnh đại diện, số phút đọc, nội dung rich text và ít nhất một danh mục hợp lệ.
 3. Rich text hỗ trợ định dạng chữ, tiêu đề đoạn, danh sách, liên kết và chèn nhiều ảnh. FE tải ảnh lên cloud trước rồi chèn URL ảnh vào nội dung lưu. Đợt này không có video hoặc tệp đính kèm.
 4. Một bài được gắn nhiều danh mục, không có danh mục chính. Được chọn danh mục tại bất kỳ cấp nào; chọn con không bắt buộc gắn thêm cha.
 5. Sửa bài đã công bố cập nhật ngay bài đang hiển thị, không tạo phiên bản riêng hoặc lịch sử xem. Nội dung sau sửa vẫn phải đáp ứng điều kiện công bố.
 6. Ẩn bài làm bài không xuất hiện trong danh sách công khai và không đọc được qua đường dẫn trực tiếp. Bài đã ẩn có thể công bố lại khi đủ dữ liệu.
 7. Cho xóa bài ở mọi trạng thái. Sau xóa, bài không còn trong danh sách và đường dẫn cũ báo không tìm thấy. Không có thùng rác hoặc khôi phục trong phạm vi này.
 8. Ghi ngày công bố đầu tiên khi bài được công bố lần đầu. Sửa bài, ẩn bài hoặc công bố lại không thay đổi ngày này.
-9. Tiêu đề tối đa 200 ký tự và mô tả ngắn tối đa 500 ký tự, tính sau khi bỏ khoảng trắng đầu và cuối. Nội dung rich text tối đa 200.000 ký tự, tính trên nội dung đã được hệ thống làm sạch. Giới hạn áp dụng cho mọi lần lưu, kể cả bản nháp. Vượt giới hạn thì từ chối lưu và giữ nguyên bài hiện tại, không tự cắt ngắn.
+9. Tiêu đề tối đa 200 ký tự, tính sau khi bỏ khoảng trắng đầu và cuối. Nội dung rich text tối đa 200.000 ký tự, tính trên nội dung đã được hệ thống làm sạch. Giới hạn áp dụng cho mọi lần lưu, kể cả bản nháp. Vượt giới hạn thì từ chối lưu và giữ nguyên bài hiện tại, không tự cắt ngắn.
+
+10. Bỏ trường mô tả ngắn. Số phút đọc do người viết nhập, phải là số nguyên lớn hơn 0 nếu có giá trị; không tự tính từ nội dung. Được để trống khi lưu nháp hoặc sửa bài ẩn; bắt buộc khi công bố và khi lưu sửa bài đang công bố.
 
 ## Except
 
-Bản nháp được thiếu các trường bắt buộc khi công bố; không được cung cấp công khai.
+Bản nháp được thiếu các trường bắt buộc khi công bố; không được cung cấp công khai. Bài cũ có trước thay đổi ngày 29/09/2026 giữ số phút đọc trống, không gán mặc định. Bài cũ đang công bố vẫn đọc được; lần lưu sửa tiếp theo phải bổ sung số phút đọc.
 
 ## Notes
 
 Không áp dụng cơ chế phiên bản và lượt xem của thư viện mẫu. Xóa bài không đồng nghĩa đã chốt chính sách xóa object trên cloud; phần lưu trữ sẽ được làm rõ khi thiết kế kỹ thuật.
 
 Giới hạn độ dài ở khoản 9 do người dùng xác nhận ngày 26/09/2026. Ký tự được đếm như các module khác: mỗi ký tự Unicode tính là một, kể cả chữ có dấu hoặc ký tự đặc biệt.
+
+Quyết định ngày 29/09/2026: người dùng yêu cầu bỏ mô tả ngắn, thêm số phút đọc nhập tay và xác nhận quy tắc tại khoản 10 cùng cách xử lý bài cũ trong Except.
 
 Owner và ngày hiệu lực chưa xác định. Người dùng đã chốt bộ US/BR Tin tức trong hội thoại. Status Draft vẫn giữ theo quy trình tài liệu; xác nhận này không thay cho phê duyệt trên hệ thống hoặc kết quả kiểm thử.

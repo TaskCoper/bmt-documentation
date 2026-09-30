@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-CONSULT-001 | Tư vấn kiến trúc sư | Validator hồ sơ: đủ thông tin (unit dự kiến theo TDD) | Happy | REGRESSION | P1 | Đặc tả chưa thực thi. Dữ liệu minh họa; mock/fake trong bộ nhớ, không chứng minh PostgreSQL/broker. DTO hợp lệ; C1/C2 là UUID khác rỗng. | Tên Nguyễn An; title KTS; URL HTTPS; kinh nghiệm 0; công trình 0; giới thiệu Nhà phố; categories C1,C2; isVisible=false. | Validation thành công; 0 và false không bị coi là thiếu. | BR-CONSULT-001/Then<br>TDD-CONSULT-001/Architecture | Kiểm nhánh và kết quả quan sát được theo hợp đồng đã chốt. | Tân Trần | Draft |
+| UT-CONSULT-001 | Tư vấn kiến trúc sư | Validator hồ sơ: đủ thông tin (unit dự kiến theo TDD) | Happy | REGRESSION | P1 | Đặc tả chưa thực thi. Dữ liệu minh họa; mock/fake trong bộ nhớ, không chứng minh PostgreSQL/broker. DTO hợp lệ; C1/C2 là UUID khác rỗng. | Tên Nguyễn An; title KTS; URL HTTPS; kinh nghiệm 0; công trình 0; giới thiệu Nhà phố; categories C1,C2; isVisible=false; CompanyName=Công ty An; Rating=0m; ReviewCount=0. Chạy cả tạo và sửa, thêm ExpectedVersion hợp lệ cho sửa. | Validation thành công; 0 và false không bị coi là thiếu. | BR-CONSULT-001/Then<br>TDD-CONSULT-001/Architecture | Kiểm nhánh và kết quả quan sát được theo hợp đồng đã chốt. | Tân Trần | Draft |
 
 ## TEST_LINKS
 

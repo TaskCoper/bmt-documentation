@@ -93,6 +93,8 @@ Cách triển khai bốn quyết định này ghi ở Architecture/Notes, mục 
 
 ## Architecture
 
+**Bổ sung ngày 30/09/2026 — đã triển khai trên nhánh `feature/my-estimates`, chưa triển khai lên môi trường dùng chung:** [TDD-PROJ-005](TDD-PROJ-005.md) bổ sung guard DeletedAtUtc cho owner/public và mọi replay. Email kiểm lại grant trước SMTP; export kiểm trước I/O và hoàn tất dưới khóa Estimate sau I/O. Không giữ khóa suốt truyền tệp; yêu cầu truy cập mới sau commit xóa bị chặn. Lịch sử Ready/Accepted và dữ liệu đã tải giữ nguyên.
+
 Module Results chỉ đọc `EstimateGenerationResult` và `EstimateResultFile` khi UsageOperation đã Succeeded. Module Exports chọn tệp PDF/Excel của nguồn đó; tên hiện tại chỉ dùng để đặt tên tệp tải về; module Sharing kiểm token và thời hạn; module Email xếp yêu cầu gửi link. Tất cả dùng cùng EstimateId/OperationId để không lẫn bản và không phụ thuộc trạng thái quota hiện tại.
 
 | Thành phần dự kiến | Vai trò |

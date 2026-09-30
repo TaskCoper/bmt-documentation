@@ -53,7 +53,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ### Problem
 
-Bộ STORY-CONSULT-001, STORY-CONSULT-002, STORY-CONSULT-003 và BR-CONSULT-001 đến BR-CONSULT-005 đã được người dùng chốt trong hội thoại; 30 System Test hiện có là đặc tả, chưa thực thi. Người dùng bổ sung ảnh đại diện bằng đường dẫn ảnh có sẵn, không tải file từ máy lên. Hồ sơ và category do người có quyền quản lý trực tiếp; không có bước phê duyệt trong sản phẩm.
+Bộ STORY-CONSULT-001, STORY-CONSULT-002, STORY-CONSULT-003 và BR-CONSULT-001 đến BR-CONSULT-005 đã được người dùng chốt trong hội thoại; 41 System Test hiện có là đặc tả; chưa chạy trọn bộ từ giao diện đến database; phần bổ sung ba trường đã được chốt trong US/BR ngày 29/09/2026. Người dùng bổ sung ảnh đại diện bằng đường dẫn ảnh có sẵn, không tải file từ máy lên. Hồ sơ và category do người có quyền quản lý trực tiếp; không có bước phê duyệt trong sản phẩm.
 
 Thiết kế phải tiếp nhận yêu cầu miễn phí từ khách đã đăng nhập, lưu giờ mong muốn và số liên lạc trên đơn, rồi để admin liên hệ ngoài hệ thống. Hệ thống không giữ chỗ theo giờ, không thu phí, không kiểm quyền lợi gói và không tạo lịch hẹn chính thức.
 
@@ -61,9 +61,11 @@ Checkout khảo sát có .NET 8, Carter/MediatR/FluentValidation, EF Core/Npgsql
 
 **Hiện trạng triển khai (26/09/2026):** thiết kế này đã có trong code ở hai commit `4d6c386` (module) và `9e4f220` (kiểm tên miền ảnh đại diện) trên nhánh `feature/consultation` của `bmt-be`, dựng trên `develop` tại `c1d757a`, chưa merge. Migration `20260926091223_ConsultationArchitect` tạo bốn bảng, các index và seed `consultation.manage` cho vai trò admin; migration chưa chạy trên môi trường đã triển khai. Unit test theo UT-CONSULT-001 đến UT-CONSULT-048 và integration test trên PostgreSQL 15 đã chạy qua; các System Test ST-CONSULT vẫn chưa thực thi. Những lựa chọn phát sinh khi triển khai ghi ở Architecture/Notes, mục "Khi triển khai".
 
+**Bổ sung ngày 29/09/2026 — đã triển khai backend trong workspace sau khi người dùng chốt:** Công ty bắt buộc nhập tên khi tạo/sửa; Số sao và Số đánh giá nhập thủ công, hiển thị ở danh sách và chi tiết KTS. Hồ sơ cũ thiếu Công ty được giữ nguyên cùng trạng thái hiển thị, bổ sung ở lần sửa tiếp theo. Hai số mới mặc định 0, kể cả hồ sơ cũ. Đã bổ sung ba trường trong `Architect`, command, validator, response và cả bốn projection. Đã chạy qua 135 test nghiệp vụ, 34 test HTTP và 22 test tích hợp PostgreSQL, không bỏ qua test nào; chi tiết và giới hạn bằng chứng nằm trong [tài liệu độ phủ](../discovery/consult-system-test-coverage.md#bằng-chứng-backend-ngày-29092026). Migration `20260929122151_ArchitectProfileSummary` đã kiểm trên container PostgreSQL riêng, chưa áp dụng vào database phát triển đang chạy hoặc môi trường triển khai. Frontend chưa được cập nhật trong phần việc này. Các mô tả khảo sát trước đây bên dưới là bối cảnh lịch sử; thiết kế bổ sung trong bản này áp dụng trên module đã tồn tại.
+
 ### Goals
 
-- Lưu hồ sơ đủ bảy nhóm thông tin, có nhiều category, có trạng thái Ẩn/Hiện do người tạo chọn.
+- Lưu hồ sơ có mười nhóm thông tin, gồm Công ty, Số sao và Số đánh giá; bảo toàn hồ sơ cũ thiếu Công ty theo BR-CONSULT-001/Except. Có nhiều category và trạng thái Ẩn/Hiện do người tạo chọn.
 - Chặn xóa category đang được bất kỳ KTS nào sử dụng, kể cả khi có thao tác đồng thời.
 - Ghi yêu cầu và công việc gửi email trong cùng transaction; lỗi SMTP không làm mất yêu cầu đã tiếp nhận.
 - Cho nhiều khách chọn cùng KTS và cùng giờ; gửi lại cùng thao tác do lỗi mạng không tạo thêm đơn.
@@ -73,15 +75,31 @@ Checkout khảo sát có .NET 8, Carter/MediatR/FluentValidation, EF Core/Npgsql
 ### Non-goals
 
 - Upload hoặc proxy ảnh, thư viện media, tài khoản riêng của KTS, phê duyệt hồ sơ.
+- Danh mục công ty, chức năng khách gửi đánh giá, tự tổng hợp số sao/số đánh giá, lọc hoặc sắp xếp theo ba trường mới.
 - Lịch rảnh, giữ chỗ, thanh toán, quyền lợi gói, tư vấn trực tuyến trong ứng dụng.
 - Liên kết với cam kết tư vấn của gói. Yêu cầu tư vấn KTS miễn phí là kênh riêng, không thay cam kết tư vấn offline đã chốt cho gói theo BR-SUB-004 và BR-SUB-008 (BR-CONSULT-002/Notes, người dùng xác nhận ngày 25/09/2026). Module này không đọc, không trừ và không ghi dữ liệu gói.
 - Trang khách theo dõi/sửa/hủy đơn, email khi admin đổi trạng thái hoặc email thông báo admin.
 - Xóa hồ sơ KTS hoặc yêu cầu tư vấn; chính sách lưu trữ/xóa dữ liệu dài hạn chưa được giao.
-- Triển khai code, migration thực thi, triển khai dịch vụ hoặc đặc tả Unit Test trong lần bàn giao TDD này.
+- Tích hợp frontend và triển khai dịch vụ trong phần triển khai backend ngày 29/09/2026. Migration chỉ được kiểm trên database riêng của bộ test.
 
 ## Architecture
 
-**Hiện trạng đã đọc trong source** — đường dẫn dưới đây tính từ `bmt-be/`:
+**Phần bổ sung ba trường (29/09/2026):** tiếp tục dùng bảng `Architect`, các API hồ sơ và quyền `consultation.manage`. Công ty là tên nhập trên từng hồ sơ; số sao/số đánh giá là dữ liệu gốc do người có quyền nhập. Không thêm bảng Company, Review, dịch vụ hoặc tác vụ tổng hợp. Cập nhật cả ba trường cùng hồ sơ/category trong transaction hiện có; giữ khóa và `Version` để tránh ghi đè thay đổi của người khác.
+
+| Thành phần đã kiểm tra | Thay đổi backend và phần frontend còn lại |
+| --- | --- |
+| `bmt-be.domain/entities/Architect.cs` | Thêm `CompanyName` nullable để đọc hồ sơ cũ, `Rating` kiểu decimal và `ReviewCount` kiểu int. |
+| `bmt-be.contract/services/architect/Command.cs`, `ArchitectProfileInput.cs`, `Response.cs`; `bmt-be.contract/constants/ConsultationConstants.cs` | Thêm ba thuộc tính ở đầu vào/đầu ra và giới hạn tên công ty 200 ký tự sau trim. Đây là lựa chọn kỹ thuật, không phải danh mục công ty. |
+| `bmt-be.contract/services/architect/validators/ArchitectValidators.cs` | Bắt buộc tên công ty khi tạo/sửa; kiểm khoảng, phần thập phân và quan hệ hai số. POST có mặc định 0; PUT yêu cầu gửi đủ hai số để tránh xóa số liệu do client cũ thiếu field. |
+| `bmt-be.application/usecases/commands/architect/CreateArchitectCommandHandler.cs`, `UpdateArchitectCommandHandler.cs` | Lưu tên sau trim và đúng hai số đã kiểm; không tự làm tròn, không tự tính; lần sửa vẫn đổi Version. |
+| Bốn handler trong `bmt-be.application/usecases/queries/architect/` | Thêm ba trường vào projection public/admin, danh sách/chi tiết; giữ phân trang, thứ tự và quy tắc hồ sơ ẩn. |
+| `bmt-be.presentation/apis/architect/ArchitectApi.cs` | Thêm field ở ArchitectBody và mapping command; cập nhật mô tả API, giữ route/policy/envelope. |
+| `bmt-be.persistence/configurations/ConsultationConfigurations.cs` | Bổ sung mapping/check vào ArchitectConfiguration thực tế nằm trong file này; migration mới, không sửa migration đã có. |
+| Frontend quản trị và trang KTS | Thêm ô công ty bắt buộc, ô số có mặc định 0 khi tạo; khi sửa tải giá trị đã lưu và gửi đủ. Danh sách/chi tiết khách dùng cùng ba giá trị; công ty null của hồ sơ cũ không được thay bằng tên tự tạo. Chưa xác định file frontend trong lần khảo sát này. |
+
+Các đường dẫn trong bảng tính từ `bmt-be/src/`. Phạm vi kiểm chứng: validation và mapping theo đặc tả Unit Test đã đồng bộ sau khi chốt TDD; constraint/migration/transaction bằng PostgreSQL thật; hành vi giao diện–API–database theo ST-CONSULT-033 đến ST-CONSULT-040. Không có thay đổi quyền, email hoặc dữ liệu yêu cầu tư vấn.
+
+**Khảo sát ban đầu trước khi triển khai module (bối cảnh lịch sử)** — đường dẫn dưới đây tính từ `bmt-be/`:
 
 | Thành phần | Hiện trạng và tác động |
 | --- | --- |
@@ -157,12 +175,13 @@ API mới chỉ nhận JSON cho thao tác ghi. Chống CSRF dùng lớp chung �
 | Căn cứ | Nơi thực hiện trong thiết kế | System Test đã có |
 | --- | --- | --- |
 | BR-CONSULT-001/Then: hồ sơ, chuyên môn, ẩn/hiện, xóa category | Validator hồ sơ/category; transaction hồ sơ-links; FK RESTRICT và protocol khóa; public projection | ST-CONSULT-001 đến ST-CONSULT-010; ST-CONSULT-018; ST-CONSULT-029 |
+| BR-CONSULT-001 khoản 7, 10–13 và Except: ba trường nhập thủ công, hiển thị và hồ sơ cũ | Validator, mapping, CHECK số, projection và migration cộng thêm cột | ST-CONSULT-001, ST-CONSULT-008, ST-CONSULT-033 đến ST-CONSULT-040 |
 | BR-CONSULT-002/Then: đăng nhập, số liên lạc, không phụ thuộc gói | ConsultationCustomer; GetMeBasic.PhoneNumber; handler lựa chọn số; không gọi dịch vụ gói | ST-CONSULT-011 đến ST-CONSULT-015; ST-CONSULT-021 |
 | BR-CONSULT-003/Then: giờ mong muốn tương lai, trùng giờ, UTC+7 | Handler TimeProvider và DateTimeOffset; không unique theo KTS/giờ; FE/email format UTC+7 | ST-CONSULT-016, ST-CONSULT-017, ST-CONSULT-022 |
 | BR-CONSULT-004/Then và Except: hai trạng thái, mở lại, note nội bộ | CHECK status; command quản trị có version; DTO public không note | ST-CONSULT-023 đến ST-CONSULT-029 |
 | BR-CONSULT-005/Then và Except: email tiếp nhận và xử lý lỗi | Template allowlist; scoped Publish và Bus Outbox; consumer retry/error queue | ST-CONSULT-019, ST-CONSULT-020, ST-CONSULT-024, ST-CONSULT-030 |
 
-Các hợp đồng kỹ thuật mới cần được kiểm chứng thêm khi triển khai: replay cùng key/cùng payload và khác payload, response bị mất sau commit, hai transaction cùng key, stale version, category vừa được gán/xóa đồng thời, rollback sau khi tạo message nhưng trước commit, cookie request sai Origin và template có ký tự HTML. Đây là phạm vi kiểm chứng, chưa phải đặc tả Unit Test hoặc kết quả chạy.
+Các hợp đồng kỹ thuật mới cần được kiểm chứng thêm khi triển khai: replay cùng key/cùng payload và khác payload, response bị mất sau commit, hai transaction cùng key, stale version, category vừa được gán/xóa đồng thời, rollback sau khi tạo message nhưng trước commit, cookie request sai Origin và template có ký tự HTML. Đây là phạm vi kiểm chứng; đặc tả Unit Test được liên kết ở References, không phải kết quả chạy.
 
 **File dự kiến thêm/sửa** — đường dẫn tính từ backend:
 
@@ -182,7 +201,7 @@ Các hợp đồng kỹ thuật mới cần được kiểm chứng thêm khi tr
 - Khi xử lý admin, chỉ cập nhật Status/InternalNote/ModifiedOnUtc/Version; không sửa KTS, giờ khách chọn hoặc số liên lạc. Cả hai trạng thái cho phép sửa note; mở lại không gửi email.
 - Lý do khách không còn nhu cầu được ghi trong note theo quy trình đã chốt. Backend không thể suy ra nội dung cuộc gọi, nên không tự yêu cầu note ở mọi lần đánh dấu Đã xử lý và không thêm enum lý do.
 - API receipt gửi lại chỉ trả id, receivedAtUtc và message tiếp nhận cố định; không trả trạng thái xử lý hiện tại để tránh vô tình tạo API theo dõi cho khách.
-- Chiến lược kiểm thử: Unit kiểm tra validation, ánh xạ và quyết định handler sau khi TDD được chốt; PostgreSQL thật kiểm FK, lock, version, idempotency và rollback đơn/outbox; RabbitMQ/SMTP thử kiểm email. Không viết đặc tả Unit Test ở giai đoạn này.
+- Chiến lược kiểm thử: Unit kiểm tra validation, ánh xạ và quyết định handler; PostgreSQL thật kiểm FK, lock, version, idempotency và rollback đơn/outbox; RabbitMQ/SMTP thử kiểm email. Phần bổ sung ba trường có đặc tả UT-CONSULT-049 đến UT-CONSULT-059 cùng các UT hiện có được cập nhật sau khi người dùng chốt TDD ngày 29/09/2026; CHECK và kiểu numeric kiểm riêng tại ST-CONSULT-041.
 - Thứ tự triển khai dự kiến: thêm mã `consultation.manage` và policy → cấu hình schema/repository → quản trị hồ sơ/category → đọc public và bổ sung phoneNumber → gửi đơn/outbox → quản trị đơn → tích hợp FE và kiểm chứng. Xem Data Model/Notes về cửa sổ nâng cấp quyền.
 - Khi triển khai (26/09/2026), ảnh đại diện được kiểm cú pháp rồi kiểm tên miền kho presign như mục Bảo vệ request và dữ liệu. Người dùng xác nhận quyết định này ngày 26/09/2026.
 - Khi triển khai, policy `ConsultationCustomer` chỉ kiểm phiên: đã đăng nhập, không phải phiên quên mật khẩu, không bị bắt đổi mật khẩu. Token không mang loại tài khoản, nên handler đọc User để kiểm chưa xóa, `Status=Active` và `AccountKind=Customer`; sai một điều kiện thì trả 403 `AccessForbidden`. Tài khoản bị khóa hoặc phiên bị thu hồi đã bị chặn ở bước so dấu phiên.
@@ -191,6 +210,32 @@ Các hợp đồng kỹ thuật mới cần được kiểm chứng thêm khi tr
 - Người dùng đồng ý timeout SMTP 30 giây ngày 26/09/2026 và làm ở một thay đổi riêng vì ảnh hưởng mọi loại email (xác thực tài khoản, quên mật khẩu, tư vấn). Đã làm ở commit `e451773` trên nhánh `feature/smtp-timeout` của `bmt-be`, chưa merge vào `develop`. Tên `SmtpTimeoutSeconds` trong đề xuất trước được đổi thành `TimeoutSeconds` nằm trong `MailOption`: biến môi trường `MailOption__TimeoutSeconds`, trong compose và workflow deploy là `MAIL_TIMEOUT_SECONDS`, để trống thì dùng 30. Hạn này áp cho từng bước kết nối, xác thực, gửi thư và ngắt kết nối. Quá hạn thì adapter ném `TimeoutException`, `SendEmailConsumer` ném lại để MassTransit thử lại theo cấu hình retry hiện có. Giá trị 0 hoặc âm làm API từ chối khởi động. `SendEmailConsumer` ghi địa chỉ người nhận ở dạng che, ví dụ `c***@example.test`, cho mọi loại email.
 
 ## Sequence Diagram
+
+Luồng sửa hồ sơ với ba trường mới dùng transaction và kiểm phiên bản hiện có. Hồ sơ cũ chưa có Công ty vẫn đọc được; mọi lần lưu sửa phải bổ sung tên hợp lệ.
+
+```mermaid
+sequenceDiagram
+    actor A as Người có quyền
+    participant FE as Form hồ sơ
+    participant API as API và validator
+    participant H as Handler
+    participant DB as PostgreSQL
+    A->>FE: Sửa công ty, số sao, số đánh giá
+    FE->>API: PUT hồ sơ đủ field và expectedVersion
+    API->>API: Kiểm quyền, tên công ty và hai số
+    alt Dữ liệu không hợp lệ
+        API-->>FE: Lỗi theo field, không lưu
+    else Hợp lệ
+        API->>H: Command trong transaction hiện có
+        H->>DB: Khóa hồ sơ, kiểm version và category
+        H->>DB: Lưu ba trường cùng hồ sơ, links và version mới
+        DB-->>API: Commit thành công
+        API-->>FE: id và version mới
+        FE->>API: Đọc lại danh sách hoặc chi tiết
+        API->>DB: Projection gồm companyName, rating, reviewCount
+        API-->>FE: Giá trị vừa lưu
+    end
+```
 
 Luồng gửi mới và gửi lại dùng chung receipt. Email được tạo từ nội dung lúc tiếp nhận, không đọc lại ghi chú của admin khi consumer chạy.
 
@@ -242,7 +287,7 @@ flowchart TD
     A[Nhận thao tác] --> B{Hợp lệ và có quyền?}
     B -->|Không| X[Từ chối, không đổi dữ liệu]
     B -->|Có| C{Loại thao tác}
-    C -->|Lưu hồ sơ| D[Kiểm 7 nhóm, URL và category]
+    C -->|Lưu hồ sơ| D[Kiểm 10 nhóm, công ty bắt buộc, hai số, URL và category]
     D --> E[Khóa hồ sơ, kiểm version, thay links]
     E --> F[Commit hồ sơ và links]
     C -->|Xóa category| G[Khóa category]
@@ -268,8 +313,8 @@ stateDiagram-v2
     state HoSoKTS {
         [*] --> An: Tạo hợp lệ, chọn Ẩn
         [*] --> Hien: Tạo hợp lệ, chọn Hiện
-        An --> Hien: Có quyền, version khớp
-        Hien --> An: Có quyền, version khớp
+        An --> Hien: Có quyền, version khớp, hồ sơ sửa hợp lệ
+        Hien --> An: Có quyền, version khớp, hồ sơ sửa hợp lệ
     }
     state YeuCauTuVan {
         [*] --> Pending: Tiếp nhận hợp lệ và commit
@@ -282,15 +327,18 @@ stateDiagram-v2
 
 ## Data Model
 
-Bốn bảng mới trong schema `public`, tên PascalCase theo bảng `User` hiện có. UUID do ứng dụng sinh, không dùng tên KTS/category làm khóa. Một bảng chỉ sở hữu một nhóm dữ kiện: hồ sơ sở hữu thông tin KTS; category sở hữu tên chuyên môn; link sở hữu quan hệ; request sở hữu lần gửi và nội dung liên hệ. Không lưu category dạng CSV/JSON trong hồ sơ và không sao chép danh sách chuyên môn vào đơn.
+Module dùng bốn bảng trong schema `public`; phần bổ sung ngày 29/09 chỉ thêm ba cột vào Architect, tên PascalCase theo bảng `User` hiện có. UUID do ứng dụng sinh, không dùng tên KTS/category làm khóa. Một bảng chỉ sở hữu một nhóm dữ kiện: hồ sơ sở hữu thông tin KTS; category sở hữu tên chuyên môn; link sở hữu quan hệ; request sở hữu lần gửi và nội dung liên hệ. Không lưu category dạng CSV/JSON trong hồ sơ và không sao chép danh sách chuyên môn vào đơn.
 
-**Architect — một dòng là một hồ sơ KTS.** Người có quyền tạo/sửa; không liên kết với User của KTS. `IsVisible` chỉ điều khiển việc hiển thị/nhận yêu cầu mới. Số năm kinh nghiệm và số công trình do admin nhập, không tính từ các bảng dự án.
+**Architect — một dòng là một hồ sơ KTS.** Người có quyền tạo/sửa; không liên kết với User của KTS. `IsVisible` chỉ điều khiển việc hiển thị/nhận yêu cầu mới. Số năm kinh nghiệm và số công trình do admin nhập, không tính từ các bảng dự án. `CompanyName`, `Rating` và `ReviewCount` cũng do người có quyền nhập; không có bảng đánh giá làm nguồn tổng hợp. Công ty là thuộc tính văn bản của hồ sơ, không phải khóa liên kết tới tổ chức.
 
 | Cột | PostgreSQL / C# | NULL / mặc định | Ý nghĩa và ràng buộc |
 | --- | --- | --- | --- |
 | Id | uuid / Guid | Không; app sinh | PK |
 | FullName | varchar(200) / string | Không | Họ tên, trim, không rỗng |
 | Title | varchar(200) / string | Không | Chức danh, không rỗng |
+| CompanyName | varchar(200) / string? | Có; NULL cho hồ sơ cũ | Tên công ty, trim, tối đa 200 ký tự; ứng dụng bắt buộc có nội dung khi tạo/sửa. NULL chỉ phục vụ hồ sơ cũ chưa bổ sung. |
+| Rating | numeric / decimal | Không; mặc định 0 | Số sao nhập thủ công, 0–5; giá trị có tối đa một chữ số thập phân, không tự làm tròn đầu vào sai. |
+| ReviewCount | integer / int | Không; mặc định 0 | Số đánh giá nhập thủ công, số nguyên không âm; bằng 0 thì Rating phải bằng 0. |
 | AvatarUrl | varchar(2048) / string | Không | URL HTTPS tuyệt đối, không rỗng; app kiểm cú pháp và tên miền kho presign |
 | YearsExperience | integer / int | Không; không mặc định | Số năm, số nguyên >= 0 |
 | ProjectCount | integer / int | Không; không mặc định | Số công trình, số nguyên >= 0 |
@@ -339,7 +387,7 @@ Bắt buộc có ít nhất một link là bất biến xuyên bảng; CHECK đ�
 
 Giờ lưu UTC vì PostgreSQL timestamptz biểu diễn một thời điểm; không giữ offset gốc. API nhận ISO-8601 có offset bắt buộc, chuẩn hóa UTC; trả UTC, FE và email hiển thị UTC+7. Không so với User.TimeZone. `DesiredAtUtc > TimeProvider.GetUtcNow()` được kiểm sau khi giữ khóa KTS và ngay trước tạo đơn; không đặt CHECK dựa `now()` vì đơn hợp lệ hôm nay sẽ trở thành quá khứ về sau. [Nguồn Npgsql](https://www.npgsql.org/doc/types/datetime.html).
 
-Các giới hạn 200/2048/5000 và quy tắc số không âm là đề xuất validation kỹ thuật trong TDD, chưa phải giới hạn có sẵn của sản phẩm. Phone dài tối đa 20 theo User hiện có: chấp nhận dấu + đầu, chữ số ASCII, dấu cách, dấu chấm, gạch ngang và ngoặc; bắt buộc có ít nhất một chữ số, không tự ép đầu số Việt Nam hoặc chuẩn hóa sang E.164. Không thêm OTP. FE và BE cùng thực hiện giới hạn này; số năm/số công trình bằng 0 hợp lệ, thiếu/null khác 0. CategoryIds không rỗng, UUID khác empty, không lặp, tất cả phải tồn tại. Không đặt trần số category ngoài giới hạn request hạ tầng đã cấu hình.
+Các giới hạn độ dài 200/2048/5000 là lựa chọn validation kỹ thuật trong TDD. Riêng quy tắc Rating 0–5, tối đa một chữ số thập phân, ReviewCount không âm và ReviewCount=0 kéo theo Rating=0 đã được người dùng chốt ngày 29/09/2026. Phone dài tối đa 20 theo User hiện có: chấp nhận dấu + đầu, chữ số ASCII, dấu cách, dấu chấm, gạch ngang và ngoặc; bắt buộc có ít nhất một chữ số, không tự ép đầu số Việt Nam hoặc chuẩn hóa sang E.164. Không thêm OTP. FE và BE cùng thực hiện giới hạn này; số năm/số công trình bằng 0 hợp lệ, thiếu/null khác 0. CategoryIds không rỗng, UUID khác empty, không lặp, tất cả phải tồn tại. Không đặt trần số category ngoài giới hạn request hạ tầng đã cấu hình.
 
 ```mermaid
 erDiagram
@@ -355,6 +403,9 @@ erDiagram
     Architect {
         uuid Id PK
         string FullName
+        string CompanyName "nullable cho hồ sơ cũ"
+        decimal Rating "0..5, tối đa 1 số thập phân"
+        int ReviewCount "không âm"
         string AvatarUrl
         boolean IsVisible
         uuid Version
@@ -396,7 +447,7 @@ ERD thể hiện tối thiểu một chuyên môn theo nghiệp vụ; FK chỉ b
 | --- | --- |
 | User (dùng lại, không đổi schema) | Id=U1; Email=`customer@example.test`; PhoneNumber=`0900000001`. Schema thật: [UserConfiguration.cs](../../bmt-be/src/bmt-be.persistence/configurations/UserConfiguration.cs). |
 | ArchitectCategory | Id=C1, Name=Nhà phố, Version=V1, CreatedOnUtc=2026-09-23T01:00:00Z, ModifiedOnUtc=NULL; C2 tương tự với Name=Nội thất và UUID version riêng. |
-| Architect | Id=A1; FullName=Nguyễn An; Title=KTS; AvatarUrl=`https://images.example.test/kts/an.jpg`; YearsExperience=5; ProjectCount=12; Introduction=Tư vấn thiết kế nhà phố; IsVisible=true; Version=V2; CreatedOnUtc=2026-09-23T01:10:00Z; ModifiedOnUtc=NULL. |
+| Architect | Id=A1; FullName=Nguyễn An; Title=KTS; CompanyName=Công ty An; Rating=4.8; ReviewCount=120; AvatarUrl=`https://images.example.test/kts/an.jpg`; YearsExperience=5; ProjectCount=12; Introduction=Tư vấn thiết kế nhà phố; IsVisible=true; Version=V2; CreatedOnUtc=2026-09-23T01:10:00Z; ModifiedOnUtc=NULL. |
 | ArchitectCategoryLink | Hai dòng (A1,C1) và (A1,C2); không có thêm bản sao tên chuyên môn. |
 | ConsultationRequest | Id=R1; CustomerId=U1; ArchitectId=A1; DesiredAtUtc=2026-09-24T02:00:00Z; ContactPhone=0900000002; Message=NULL; Status=Pending; InternalNote=NULL; SubmissionKey=K1; PayloadHash=H1; Version=V3; CreatedOnUtc=2026-09-23T02:00:00Z; ModifiedOnUtc=NULL. H1 là bí danh chuỗi SHA-256 64 ký tự được tính từ input. |
 | Permission (dùng lại, thêm seed) | Code=`consultation.manage`; Label=Quản lý tư vấn KTS; RequiresAssignment=false; Description=NULL. Chỉ thêm đúng một dòng. Schema: [PermissionConfiguration.cs](../../bmt-be/src/bmt-be.persistence/configurations/PermissionConfiguration.cs). |
@@ -404,10 +455,13 @@ ERD thể hiện tối thiểu một chuyên môn theo nghiệp vụ; FK chỉ b
 | OutboxMessage/OutboxState (MassTransit dùng lại) | Sau commit có message M1 với envelope MessageId do MassTransit quản lý; Body chứa To=`customer@example.test`, Subject=Đã nhận yêu cầu tư vấn, Body=HTML đã encode giờ 09:00 ngày 24/09/2026 và số 0900000002, Purpose=`ConsultationRequestReceived`. OutboxState và số thứ tự do thư viện sinh, không tự insert thủ công. Schema dùng lại trong [migration hiện có](../../bmt-be/src/bmt-be.persistence/Migrations/20260923152830_InitialRbac.cs). |
 | InboxState (MassTransit dùng lại) | Khi consumer chạy, cặp MessageId=M1 và ConsumerId của SendEmailConsumer theo dõi xử lý. Cấu hình/schema do `AddInboxStateEntity` và migration hiện tại quản lý; không tạo bảng inbox thứ hai cho tư vấn. |
 
+Mẫu bổ sung: hồ sơ cũ B1 có `CompanyName=NULL`, `Rating=0`, `ReviewCount=0`; trạng thái và các trường cũ giữ nguyên. B1 vẫn được đọc theo trạng thái hiển thị. Lần sửa với `CompanyName=Công ty Bình`, `Rating=4.9`, `ReviewCount=121` hợp lệ thì lưu cả ba giá trị và đổi Version; thiếu tên công ty thì không ghi bất kỳ thay đổi nào. Đây là dữ liệu giả định, không phải dữ liệu đã chuyển đổi.
+
 User vẫn giữ số 0900000001. Ngày 24/09 lúc 09:00 Việt Nam chính là 02:00Z trên đơn. Admin ghi “Đã gọi, khách đồng ý trao đổi”, chuyển R1 sang Resolved: chỉ Status, InternalNote, ModifiedOnUtc và Version đổi; dữ liệu khách gửi giữ nguyên. Mở lại chuyển Pending, giữ hoặc sửa note theo payload, đổi Version lần nữa; không tạo M2. KTS A1 bị ẩn vẫn giữ R1 và cả hai link; muốn xóa C1 thì đổi tập chuyên môn A1 còn C2 trước. Gửi lại K1 và cùng input trả R1; không thêm dòng request hay email.
 
 **Notes**:
 
+- **Ba trường mới và chuẩn hóa:** `Architect.Id` xác định tên công ty và hai số nhập. Không có danh tính công ty hoặc thuộc tính công ty khác cần dùng chung nên không tách bảng công ty chỉ vì tên có thể lặp. Rating/ReviewCount là dữ liệu nhập, không phải bản sao tổng hợp từ Review. Ràng buộc khi ReviewCount=0 là điều kiện hợp lệ, không tạo quan hệ mới. Ba trường chỉ được đọc/hiển thị, không có truy vấn lọc/sắp xếp mới nên không thêm index.
 - **Chuẩn hóa:** Id xác định mọi thuộc tính của mỗi bảng chính; cặp (ArchitectId,CategoryId) xác định một quan hệ không có thuộc tính phụ. Không có phụ thuộc tên category trong hồ sơ hoặc request. ContactPhone thuộc lần gửi, không phải bản sao cần đồng bộ của User.PhoneNumber. Nội dung thư trong outbox là thông điệp lịch sử có chủ đích, không phải nguồn chỉnh sửa dữ liệu hồ sơ. Không có vấn đề chuẩn hóa cần thêm bảng ngoài bốn bảng này theo phạm vi hiện tại.
 - **Index theo truy vấn:** PK Architect dùng chi tiết/lock; `IX_Architect_IsVisible_CreatedOnUtc_Id` trên (IsVisible,CreatedOnUtc DESC,Id DESC) phục vụ list public và admin có lọc. Thêm `IX_Architect_CreatedOnUtc_Id` cho admin không lọc. Category dùng (Name,Id) để sắp xếp; PK link (ArchitectId,CategoryId), reverse index (CategoryId,ArchitectId) phục vụ kiểm category đang dùng. Request dùng (Status,CreatedOnUtc DESC,Id DESC), (CreatedOnUtc DESC,Id DESC), index ArchitectId cho FK và unique (CustomerId,SubmissionKey) cho replay/FK khách. Không có unique (ArchitectId,DesiredAtUtc).
 - **Đọc dữ liệu:** projection DTO trước materialize, không N+1 theo từng category/đơn. Hồ sơ trang hiện tại lấy theo page rồi gom category bằng một truy vấn theo tập Id; không lấy toàn bộ thư viện vào RAM. Admin request detail không lọc KTS ẩn hoặc soft-deleted User trong join lịch sử. List trả pageIndex/pageSize/totalCount, thứ tự CreatedOnUtc DESC, Id DESC; pageIndex <=0 về 1, pageSize <=0 về 10, tối đa 100 theo PagedResult. Count và page là hai truy vấn, có thể khác nhẹ khi dữ liệu được thêm đồng thời; không cam kết snapshot nhiều trang.
@@ -418,6 +472,10 @@ CREATE TABLE "Architect" (
   "Id" uuid PRIMARY KEY,
   "FullName" varchar(200) NOT NULL CHECK (length(btrim("FullName")) > 0),
   "Title" varchar(200) NOT NULL CHECK (length(btrim("Title")) > 0),
+  "CompanyName" varchar(200) NULL CONSTRAINT "CK_Architect_CompanyName" CHECK ("CompanyName" IS NULL OR length(btrim("CompanyName")) > 0),
+  "Rating" numeric NOT NULL DEFAULT 0 CONSTRAINT "CK_Architect_Rating" CHECK ("Rating" BETWEEN 0 AND 5 AND "Rating" = trunc("Rating", 1)),
+  "ReviewCount" integer NOT NULL DEFAULT 0 CONSTRAINT "CK_Architect_ReviewCount" CHECK ("ReviewCount" >= 0),
+  CONSTRAINT "CK_Architect_ReviewSummary" CHECK ("ReviewCount" > 0 OR "Rating" = 0),
   "AvatarUrl" varchar(2048) NOT NULL CHECK (length(btrim("AvatarUrl")) > 0),
   "YearsExperience" integer NOT NULL CHECK ("YearsExperience" >= 0),
   "ProjectCount" integer NOT NULL CHECK ("ProjectCount" >= 0),
@@ -467,16 +525,34 @@ CREATE INDEX "IX_ConsultationRequest_ArchitectId" ON "ConsultationRequest" ("Arc
 ```
 
 - **EF mapping:** ba entity chính ánh xạ `Version.IsConcurrencyToken()`, Guid ValueGeneratedNever, varchar/length/nullability/check/FK theo DDL; link có HasKey hai cột. Có DbSet riêng và configuration assembly scan hiện có. Repository lock dùng SQL có tham số, không ghép Id vào SQL. Khởi tạo Version/Id trong handler; khi cập nhật kiểm expectedVersion và đặt OriginalValue của token theo bản client đã đọc. Catch lỗi concurrency sau SaveChanges phải ở biên bao ngoài TransactionPipelineBehavior, vì CompleteAsync có thể là nơi ném. Chuyển thành 409 sau rollback; không chạy tiếp SELECT trong transaction PostgreSQL đã lỗi.
-- **Migration:** thêm bốn bảng và index, không backfill KTS/category từ dữ liệu minh họa website. User không đổi schema; chỉ đổi DTO me. Bảng Outbox/Inbox đã có trong migration hiện tại nên không tạo lại. Thêm một Permission `consultation.manage` và một RolePermission cho admin, cập nhật PermissionNames.All cùng phiên bản ứng dụng. Schema của RolePermission xem [RolePermissionConfiguration.cs](../../bmt-be/src/bmt-be.persistence/configurations/RolePermissionConfiguration.cs); seed dùng Id admin đã có, không tự gán quyền cho khách.
-- **Triển khai có kiểm soát:** kiểm migration history và catalog quyền hiện tại; xác định đúng phiên bản source/schema. Tạm dừng nhận ghi và drain app/worker cũ trước khi thêm mã quyền, vì bản cũ khởi động lại sẽ bị PermissionCatalogGuard chặn bởi mã mới. Chạy migration bằng bước riêng; triển khai bản mới có đúng catalog, policy, claims và kiểm phiên; khởi động, kiểm guard rồi mở traffic. Không mô tả đây là rolling deployment không gián đoạn. Muốn rolling cần một thiết kế tương thích catalog riêng, ngoài TDD này.
-- **Kiểm trước/sau:** thử migration trên PostgreSQL 15 riêng; đối chiếu bốn bảng, FK/check/index, số Permission tăng đúng một (mã `consultation.manage`) và có đúng một grant admin cho mã này; kiểm không có hồ sơ thiếu link, category mồ côi hoặc hai receipt cùng khách/key. Thử race ẩn/gửi, gán/xóa category, sửa phiên bản và rollback request/outbox. Chưa thực hiện các kiểm tra runtime này.
-- **Phục hồi:** nếu chưa mở traffic thì có thể revert riêng seed mới và schema rỗng theo migration được review. Nếu đã có đơn/outbox thì không chạy Down xóa bảng; ưu tiên sửa tiến hoặc giữ dữ liệu và quay lại code tương thích. Quay về binary cũ vẫn phải xử lý catalog mới một cách có kiểm soát; không tắt guard để lách. Bản sao lưu phải gồm DB và hạ tầng lưu message; chưa có RPO/RTO hoặc thời hạn giữ PII được người dùng đặt ra, không tự tạo job xóa.
+- **Migration của module ban đầu (không chạy lại cho phần bổ sung ba trường):** thêm bốn bảng và index, không backfill KTS/category từ dữ liệu minh họa website. User không đổi schema; chỉ đổi DTO me. Bảng Outbox/Inbox đã có trong migration hiện tại nên không tạo lại. Thêm một Permission `consultation.manage` và một RolePermission cho admin, cập nhật PermissionNames.All cùng phiên bản ứng dụng. Schema của RolePermission xem [RolePermissionConfiguration.cs](../../bmt-be/src/bmt-be.persistence/configurations/RolePermissionConfiguration.cs); seed dùng Id admin đã có, không tự gán quyền cho khách.
+- **Triển khai module ban đầu có kiểm soát:** kiểm migration history và catalog quyền hiện tại; xác định đúng phiên bản source/schema. Tạm dừng nhận ghi và drain app/worker cũ trước khi thêm mã quyền, vì bản cũ khởi động lại sẽ bị PermissionCatalogGuard chặn bởi mã mới. Chạy migration bằng bước riêng; triển khai bản mới có đúng catalog, policy, claims và kiểm phiên; khởi động, kiểm guard rồi mở traffic. Không mô tả đây là rolling deployment không gián đoạn. Muốn rolling cần một thiết kế tương thích catalog riêng, ngoài TDD này.
+- **Kiểm trước/sau của module ban đầu:** thử migration trên PostgreSQL 15 riêng; đối chiếu bốn bảng, FK/check/index, số Permission tăng đúng một (mã `consultation.manage`) và có đúng một grant admin cho mã này; kiểm không có hồ sơ thiếu link, category mồ côi hoặc hai receipt cùng khách/key. Thử race ẩn/gửi, gán/xóa category, sửa phiên bản và rollback request/outbox. Chưa thực hiện các kiểm tra runtime này.
+- **Phục hồi của module ban đầu:** nếu chưa mở traffic thì có thể revert riêng seed mới và schema rỗng theo migration được review. Nếu đã có đơn/outbox thì không chạy Down xóa bảng; ưu tiên sửa tiến hoặc giữ dữ liệu và quay lại code tương thích. Quay về binary cũ vẫn phải xử lý catalog mới một cách có kiểm soát; không tắt guard để lách. Bản sao lưu phải gồm DB và hạ tầng lưu message; chưa có RPO/RTO hoặc thời hạn giữ PII được người dùng đặt ra, không tự tạo job xóa.
+
+**Ràng buộc và ánh xạ bổ sung (29/09/2026):**
+
+- `CompanyName` ánh xạ nullable và `HasMaxLength(200)`. Validator dùng quy tắc văn bản bắt buộc hiện có, kiểm sau trim. CHECK chỉ chặn tên rỗng/dấu cách khi khác NULL; ứng dụng chặn đầy đủ chuỗi whitespace. DB không tự phân biệt NULL của hồ sơ cũ với NULL do writer khác tạo mới; mọi writer hồ sơ phải dùng validation mới. Không thêm trigger hoặc cờ hồ sơ cũ chỉ để thay kiểm tra này.
+- `Rating` dùng `HasColumnType("numeric")`, không dùng kiểu có scale cố định như numeric(2,1), vì PostgreSQL có thể làm tròn đầu vào trước khi kiểm constraint. CHECK so sánh với `trunc(Rating,1)` chặn 4.85; validator C# kiểm khoảng và `decimal.Truncate(rating * 10) == rating * 10` sau khi đã kiểm khoảng. 4.80 có cùng giá trị với 4.8; không đếm số chữ số 0 cuối chuỗi JSON. [PostgreSQL 15: numeric và quy tắc làm tròn](https://www.postgresql.org/docs/15/datatype-numeric.html).
+- `Rating` và `ReviewCount` có default lần lượt `0m` và `0`, đều không NULL trong entity. ReviewCount dùng Int32 theo quy ước các bộ đếm hiện có; giá trị vượt 2.147.483.647 hoặc JSON sai kiểu bị từ chối trước khi lưu. Đây là giới hạn biểu diễn kỹ thuật. Ràng buộc một chiều cho phép Rating=0, ReviewCount=1.
+- `CK_Architect_ReviewSummary` bảo vệ việc cập nhật hai số trên cùng một hàng. EF lưu toàn bộ thay đổi hồ sơ và category trong transaction hiện có; không ghi hai số bằng hai thao tác độc lập. Dữ liệu đầu vào sai trả validation error; không bắt mọi lỗi DB rồi đổi thành lỗi nhập liệu.
+
+**Migration cho ba trường mới — đã tạo và kiểm trên PostgreSQL riêng; chưa áp dụng vào môi trường triển khai:**
+
+File [20260929122151_ArchitectProfileSummary.cs](../../bmt-be/src/bmt-be.persistence/Migrations/20260929122151_ArchitectProfileSummary.cs) thêm đúng ba cột và bốn CHECK của Architect. Test migration tạo dữ liệu theo schema trước thay đổi, nâng cấp rồi đối chiếu hồ sơ hiện/ẩn, ID, version, mốc thời gian, links và yêu cầu cũ; chạy lại migration sau khi nhập số mới vẫn giữ số liệu. Quy trình dưới đây áp dụng khi đưa thay đổi vào môi trường dùng thật.
+
+1. Kiểm tra schema và migration history thực tế, số hồ sơ, kích thước bảng, writer đang chạy và bản sao lưu có thể phục hồi. Chưa có số liệu dung lượng hoặc thời gian khóa của môi trường triển khai; không cam kết thời gian gián đoạn.
+2. Tạm dừng ghi hồ sơ từ ứng dụng cũ. Áp dụng migration cộng thêm CompanyName nullable, Rating/ReviewCount NOT NULL DEFAULT 0 và bốn CHECK mới như DDL đích. Không tạo lại bảng Architect, không sửa migration ConsultationArchitect đã có; không đổi ID, category, yêu cầu, trạng thái, Version hoặc mốc thời gian cũ chỉ để bổ sung cột.
+3. PostgreSQL 15 hỗ trợ thêm cột với default hằng mà không phải cập nhật vật lý từng hàng; DDL vẫn cần khóa và kiểm constraint có thể phải đọc bảng. Cấu hình thời gian chờ theo môi trường, dừng và thử lại nếu không lấy được khóa; không mở vòng chờ vô hạn. Không dùng script UPDATE đặt hai số bằng 0 khi chạy lại vì có thể xóa số đã nhập. [PostgreSQL 15: thêm cột và ràng buộc](https://www.postgresql.org/docs/15/ddl-alter.html).
+4. Triển khai backend và frontend hiểu contract mới trước khi mở ghi. Response CompanyName nullable để đọc hồ sơ cũ; form bắt buộc bổ sung khi lưu. Không chạy đồng thời writer cũ vì nó có thể tạo thêm hồ sơ thiếu Công ty. GET cũ chịu được field thêm nếu client bỏ qua thuộc tính lạ; POST/PUT cũ thiếu companyName sẽ bị từ chối theo contract mới.
+5. Đối chiếu số hồ sơ và ID trước/sau, trạng thái, links và đơn cũ; hồ sơ cũ có CompanyName NULL và hai số 0; thử tạo/sửa/đọc đủ ba trường. Trên môi trường riêng, kiểm CHECK với giá trị sai và chạy ST-CONSULT-040. Không đặt NOT NULL cho CompanyName hoặc tự backfill bằng tên giả; chỉ xem xét siết schema sau một quyết định riêng khi hồ sơ cũ đã được bổ sung hết.
+6. Nếu migration lỗi trong transaction, rollback và giữ app cũ; nếu app mới lỗi sau khi có dữ liệu mới, giữ các cột và dữ liệu, tắt ghi hồ sơ và sửa tiến. Không chạy Down xóa ba cột hoặc mở writer cũ vì sẽ mất số liệu hoặc bỏ qua yêu cầu Công ty. Phục hồi backup chỉ là phương án vận hành được xét riêng, có đối chiếu các ghi phát sinh.
 
 ## Internal API
 
 ### Endpoints
 
-Tất cả đường dẫn dưới đây là hợp đồng đề xuất v1; Carter dùng `/api/v{version:apiVersion}`. Query list dùng pageIndex/pageSize; dữ liệu mới nhất đứng trước, category theo Name rồi Id. Không thêm filter category public trong bản này vì người dùng mới chốt phân loại, chưa yêu cầu rõ cách lọc nhiều category.
+Các đường dẫn dưới đây là hợp đồng v1 đã triển khai; Carter dùng `/api/v{version:apiVersion}`. Query list dùng pageIndex/pageSize; dữ liệu mới nhất đứng trước, category theo Name rồi Id. Không thêm filter category public trong bản này vì người dùng mới chốt phân loại, chưa yêu cầu rõ cách lọc nhiều category.
 
 | Nhóm | Quyền/policy |
 | --- | --- |
@@ -488,12 +564,12 @@ Tất cả đường dẫn dưới đây là hợp đồng đề xuất v1; Cart
 | Đọc đơn quản trị | consultation.manage |
 | Cập nhật đơn | consultation.manage |
 
-- **GET** `/api/v1/architects` — Trang hồ sơ đang hiển thị; trả id, fullName, title, avatarUrl, yearsExperience, projectCount, introduction, categories[{id,name}].
+- **GET** `/api/v1/architects` — Trang hồ sơ đang hiển thị; trả id, fullName, title, companyName, rating, reviewCount, avatarUrl, yearsExperience, projectCount, introduction, categories[{id,name}].
 - **GET** `/api/v1/architects/{id}` — Hồ sơ đang hiển thị; 404 nếu không tồn tại hoặc bị ẩn.
 - **GET** `/api/v1/admin/architects` — Danh sách mọi hồ sơ; query isVisible tùy chọn, kèm version và isVisible.
 - **GET** `/api/v1/admin/architects/{id}` — Chi tiết để sửa, gồm categoryIds và version.
-- **POST** `/api/v1/admin/architects` — Tạo hồ sơ; body bảy nhóm thông tin và isVisible bắt buộc; 201, trả id/version.
-- **PUT** `/api/v1/admin/architects/{id}` — Thay toàn bộ hồ sơ, tập category, isVisible; body expectedVersion bắt buộc; 200, trả id/version.
+- **POST** `/api/v1/admin/architects` — Tạo hồ sơ; bảy nhóm thông tin ban đầu, companyName và isVisible bắt buộc; rating/reviewCount mặc định 0 nếu thiếu hoặc null; 201, trả id/version.
+- **PUT** `/api/v1/admin/architects/{id}` — Thay toàn bộ hồ sơ, tập category, isVisible; body companyName, rating, reviewCount và expectedVersion bắt buộc, kể cả hồ sơ cũ thiếu Công ty; 200, trả id/version.
 - **GET** `/api/v1/admin/architect-categories` — Danh mục phân trang cho màn hình quản trị/chọn chuyên môn; không chỉ lấy trang đầu rồi coi là đầy đủ.
 - **POST** `/api/v1/admin/architect-categories` — Body name; 201, trả id/name/version.
 - **PUT** `/api/v1/admin/architect-categories/{id}` — Body name, expectedVersion; 200, trả id/name/version.
@@ -506,7 +582,13 @@ Tất cả đường dẫn dưới đây là hợp đồng đề xuất v1; Cart
 
 Không cung cấp GET receipt/đơn cho khách. desiredAt phải có offset, ví dụ `2026-09-24T09:00:00+07:00`; timestamp thiếu offset là 422, không phụ thuộc timezone server. Backend chỉ kiểm tương lai, không kiểm thuộc danh sách slot FE.
 
-DTO tạo hồ sơ dùng nullable cho các trường bắt buộc kiểu số/bool để phân biệt thiếu với 0/false; validator từ chối null trước mapping. Query/body sai enum, UUID rỗng hoặc format sai trả validation error. Nội dung template và API giữ chữ tiếng Việt, không tự bỏ dấu theo ngôn ngữ UI.
+**Hợp đồng ba trường mới:** tên JSON là `companyName`, `rating`, `reviewCount`; C# tương ứng `CompanyName`, `Rating`, `ReviewCount`. Cả bốn API GET hồ sơ public/admin, danh sách/chi tiết đều trả ba trường. `companyName` có thể null với hồ sơ cũ; frontend giữ hồ sơ theo IsVisible, không dựng tên công ty giả. Hai số luôn có giá trị, hiển thị 0 khi bằng 0. JSON dùng dấu chấm cho phần thập phân; frontend có thể hiển thị 4,8 theo tiếng Việt.
+
+DTO ghi dùng `string? CompanyName`, `decimal? Rating`, `int? ReviewCount`. POST coi thiếu/null của từng số mới là 0, rồi kiểm ràng buộc trên cặp giá trị hiệu lực; chỉ gửi rating=4.8 mà bỏ reviewCount thì bị từ chối vì cặp trở thành (4.8,0). PUT là thay toàn bộ nên yêu cầu cả hai số khác null và tên công ty hợp lệ; khi chỉ đổi giới thiệu hoặc Ẩn/Hiện, frontend gửi lại số đã đọc. Đây là lựa chọn contract để ngăn client cũ vô tình đặt số đã có về 0. Việc đổi Ẩn/Hiện hiện dùng cùng PUT, do đó hồ sơ cũ phải bổ sung Công ty khi lưu thao tác này.
+
+`companyName` trim, 1–200 ký tự theo .NET string.Length; không nhận chuỗi chỉ whitespace. Rating kiểm trên decimal trước mapping, không tự làm tròn; ReviewCount kiểm số nguyên không âm. Lỗi validator trả 422 `ConsultationInputInvalid` với field `CompanyName`, `Rating` hoặc `ReviewCount`; lỗi JSON sai kiểu/ngoài phạm vi kiểu có thể trả 400 trước validator như hiện có. Constraint DB là lớp chặn cuối, không thay validation.
+
+Các trường số/bool bắt buộc ban đầu vẫn dùng nullable ở DTO để phân biệt thiếu với 0/false; validator từ chối null trước mapping. Query/body sai enum, UUID rỗng hoặc format sai trả validation error. Nội dung template và API giữ chữ tiếng Việt, không tự bỏ dấu theo ngôn ngữ UI.
 
 ### Examples
 
@@ -516,7 +598,7 @@ Các UUID dưới đây chỉ minh họa. Khối response trình bày envelope R
 
 ```text
 Request:
-{"fullName":"Nguyễn An","title":"KTS","avatarUrl":"https://images.example.test/kts/an.jpg","yearsExperience":5,"projectCount":12,"introduction":"Tư vấn thiết kế nhà phố","categoryIds":["20000000-0000-4000-8000-000000000001"],"isVisible":true}
+{"fullName":"Nguyễn An","title":"KTS","avatarUrl":"https://images.example.test/kts/an.jpg","yearsExperience":5,"projectCount":12,"introduction":"Tư vấn thiết kế nhà phố","categoryIds":["20000000-0000-4000-8000-000000000001"],"isVisible":true,"companyName":"Công ty An","rating":4.8,"reviewCount":120}
 
 Response 201:
 {"isSuccess":true,"isFailure":false,"error":{"code":"","message":"","messageCode":""},"value":{"id":"10000000-0000-4000-8000-000000000001","version":"60000000-0000-4000-8000-000000000001"}}
@@ -529,7 +611,7 @@ Error Response:
 
 ```text
 Request:
-{"fullName":"Nguyễn An","title":"KTS trưởng","avatarUrl":"https://images.example.test/kts/an.jpg","yearsExperience":5,"projectCount":13,"introduction":"Tư vấn thiết kế nhà phố","categoryIds":["20000000-0000-4000-8000-000000000001"],"isVisible":false,"expectedVersion":"60000000-0000-4000-8000-000000000001"}
+{"fullName":"Nguyễn An","title":"KTS trưởng","avatarUrl":"https://images.example.test/kts/an.jpg","yearsExperience":5,"projectCount":13,"introduction":"Tư vấn thiết kế nhà phố","categoryIds":["20000000-0000-4000-8000-000000000001"],"isVisible":false,"expectedVersion":"60000000-0000-4000-8000-000000000001","companyName":"Công ty An","rating":4.8,"reviewCount":120}
 
 Response 200:
 {"isSuccess":true,"isFailure":false,"error":{"code":"","message":"","messageCode":""},"value":{"id":"10000000-0000-4000-8000-000000000001","version":"60000000-0000-4000-8000-000000000002"}}
@@ -545,7 +627,7 @@ Request:
 {"pageIndex":1,"pageSize":10}
 
 Response 200:
-{"isSuccess":true,"isFailure":false,"error":{"code":"","message":"","messageCode":""},"value":{"items":[{"id":"10000000-0000-4000-8000-000000000001","fullName":"Nguyễn An","title":"KTS","avatarUrl":"https://images.example.test/kts/an.jpg","yearsExperience":5,"projectCount":12,"introduction":"Tư vấn thiết kế nhà phố","categories":[{"id":"20000000-0000-4000-8000-000000000001","name":"Nhà phố"}]}],"pageIndex":1,"pageSize":10,"totalCount":1,"hasNextPage":false,"hasPreviousPage":false}}
+{"isSuccess":true,"isFailure":false,"error":{"code":"","message":"","messageCode":""},"value":{"items":[{"id":"10000000-0000-4000-8000-000000000001","fullName":"Nguyễn An","title":"KTS","avatarUrl":"https://images.example.test/kts/an.jpg","yearsExperience":5,"projectCount":12,"introduction":"Tư vấn thiết kế nhà phố","categories":[{"id":"20000000-0000-4000-8000-000000000001","name":"Nhà phố"}],"companyName":"Công ty An","rating":4.8,"reviewCount":120}],"pageIndex":1,"pageSize":10,"totalCount":1,"hasNextPage":false,"hasPreviousPage":false}}
 
 Error Response:
 {"title":"Validation Error","type":"Validation Error","status":422,"detail":"A validation error occured","errors":[]}
@@ -640,7 +722,7 @@ Các mã nghiệp vụ dưới đây dùng messageCode khi đi qua DomainExcepti
 - **ConsultationRequestNotFound** (404): Không có đơn tại API quản trị.
 - **ArchitectCategoriesRequired** (422): Chưa chọn category hoặc categoryIds trùng/rỗng không hợp lệ; chi tiết field trong errors.
 - **ArchitectCategoryNameRequired** (422): Tên chuyên môn rỗng.
-- **ConsultationInputInvalid** (422): Thiếu trường, URL/phone sai cú pháp, URL ảnh đại diện ngoài kho presign, thiếu offset, vượt độ dài hoặc enum/version/key không hợp lệ; trả lỗi theo field.
+- **ConsultationInputInvalid** (422): Thiếu trường (gồm companyName khi tạo/sửa và hai số khi PUT), công ty rỗng/vượt 200 ký tự, rating ngoài 0–5 hoặc sai độ chính xác, reviewCount âm, reviewCount=0 nhưng rating khác 0, URL/phone sai cú pháp, URL ảnh đại diện ngoài kho presign, thiếu offset, vượt độ dài hoặc enum/version/key không hợp lệ; trả lỗi theo field.
 - **DependencyUnavailable** (503): Chưa cấu hình tên miền kho presign nên chưa nhận URL ảnh đại diện mới; cùng mã với module dự toán.
 - **ConsultationTemporarilyUnavailable** (503): Timeout khóa hoặc dependency DB tạm thời không cho hoàn tất; client giữ key khi thử lại.
 
@@ -710,16 +792,23 @@ Mặc định source hiện là 3 lần retry, khoảng đầu 5 giây, mỗi l�
 
 ### Others
 
-- [Độ phủ System Test](../discovery/consult-system-test-coverage.md): 30 ca, 28 AC, chưa thực thi.
+- [Độ phủ System Test](../discovery/consult-system-test-coverage.md): 41 đặc tả, 35 AC; có bằng chứng backend ngày 29/09, chưa chạy trọn bộ E2E.
 - [ST-CONSULT-001](../systemtest/ST-CONSULT-001.md) đến [ST-CONSULT-010](../systemtest/ST-CONSULT-010.md): hồ sơ và category.
 - [ST-CONSULT-011](../systemtest/ST-CONSULT-011.md) đến [ST-CONSULT-022](../systemtest/ST-CONSULT-022.md): gửi yêu cầu, giờ, liên lạc và email.
 - [ST-CONSULT-023](../systemtest/ST-CONSULT-023.md) đến [ST-CONSULT-030](../systemtest/ST-CONSULT-030.md): quản trị và bảo vệ ghi chú.
+- [ST-CONSULT-033](../systemtest/ST-CONSULT-033.md) đến [ST-CONSULT-040](../systemtest/ST-CONSULT-040.md): công ty bắt buộc, hai số nhập thủ công, hiển thị và bảo toàn hồ sơ cũ.
+- [ST-CONSULT-041](../systemtest/ST-CONSULT-041.md): CHECK và ánh xạ kiểu numeric trên PostgreSQL thật.
+- [UT-CONSULT-049](../unittest/UT-CONSULT-049.md) đến [UT-CONSULT-059](../unittest/UT-CONSULT-059.md): validation, mặc định POST, dữ liệu bắt buộc PUT, handler và projection của ba trường mới; xem ma trận chi tiết trong [tài liệu độ phủ](../discovery/consult-system-test-coverage.md).
+- [PostgreSQL 15 — numeric](https://www.postgresql.org/docs/15/datatype-numeric.html): kiểu số chính xác và hành vi làm tròn.
+- [PostgreSQL 15 — sửa bảng](https://www.postgresql.org/docs/15/ddl-alter.html): thêm cột/default và ràng buộc.
 - [PostgreSQL 15 — row/advisory locking](https://www.postgresql.org/docs/15/explicit-locking.html).
 - [Npgsql — timestamp mapping](https://www.npgsql.org/doc/types/datetime.html).
 - [MassTransit — transactional outbox](https://masstransit.massient.com/concepts/outbox): tham khảo cơ chế, source dự án ghim 8.4.1; không nâng lên bản mới theo website.
-- Bằng chứng source và file dự kiến thay đổi nằm ở Architecture; DDL trong Data Model là đề xuất chưa thực thi.
+- Bằng chứng source nằm ở Architecture; migration ba trường mới đã kiểm trên PostgreSQL riêng. DDL đích dùng để giải thích schema, không phải script đã chạy trên môi trường triển khai.
 
 ## Change Log
+
+- 2026-09-29: Bổ sung CompanyName, Rating, ReviewCount theo US/BR đã chốt; mô tả giữ hồ sơ cũ, validation, CHECK, contract, projection, ví dụ và kế hoạch migration. Người dùng đã chốt bản cập nhật TDD trong hội thoại. Đã bổ sung UT-CONSULT-049 đến UT-CONSULT-059, cập nhật các UT chịu ảnh hưởng và thêm ST-CONSULT-041 cho CHECK/kiểu numeric. Đã triển khai backend, tạo migration `20260929122151_ArchitectProfileSummary` và chạy qua 191 test có phạm vi KTS/tư vấn (135 nghiệp vụ, 34 HTTP, 22 PostgreSQL). Migration chỉ chạy trên database của bộ test; chưa tích hợp frontend hoặc triển khai dịch vụ.
 
 - 2026-09-26 (timeout SMTP): Ghi nhận timeout SMTP 30 giây đã làm ở commit `e451773` (nhánh `feature/smtp-timeout` của `bmt-be`, chưa merge): option `MailOption__TimeoutSeconds`, biến `MAIL_TIMEOUT_SECONDS`, áp cho mọi email qua adapter chung. Sửa Architecture/Notes và External API/Error Handling cho khớp.
 - 2026-09-26 (quyết định): Người dùng xác nhận ảnh đại diện phải thuộc tên miền kho presign, dùng chung `UploadedFileOption__AllowedHosts` và `IUploadedFileUrlPolicy` với ảnh dự toán (BR-CONSULT-001 khoản 9, UT-CONSULT-048); thêm mã lỗi `DependencyUnavailable` (503). Xác nhận lưu `internalNote` chỉ có khoảng trắng thành NULL. Timeout SMTP 30 giây được đồng ý nhưng làm ở thay đổi riêng. Cập nhật hiện trạng code sau khi dựng lại nhánh trên `develop`: commit `4d6c386`, `9e4f220`, migration `20260926091223_ConsultationArchitect`.

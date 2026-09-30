@@ -40,7 +40,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 ## Metadata
 
 - **Story**: Là admin, tôi muốn quản lý hồ sơ KTS để khách chọn người phù hợp khi gửi yêu cầu tư vấn.
-- **Context**: Admin phụ trách thông tin KTS và việc hiển thị hồ sơ. Người dùng xác nhận ảnh đại diện là đường dẫn có sẵn, backend không có luồng upload; ngày 26/09/2026 người dùng chốt thêm đường dẫn phải thuộc kho ảnh của hệ thống (BR-CONSULT-001 khoản 9). Nghiệp vụ được xác nhận qua hội thoại ngày 2026-09-23; người dùng đã chốt bộ US/BR trong hội thoại. Metadata chưa đầy đủ. Hồ sơ bắt buộc đủ bảy nhóm thông tin và ít nhất một category. Giới hạn dữ liệu cụ thể sẽ xác định khi thiết kế. Người dùng đã chốt: người tạo chủ động chọn Ẩn/Hiện khi tạo hồ sơ.
+- **Context**: Admin phụ trách thông tin KTS và việc hiển thị hồ sơ. Người dùng xác nhận ảnh đại diện là đường dẫn có sẵn, backend không có luồng upload; ngày 26/09/2026 người dùng chốt thêm đường dẫn phải thuộc kho ảnh của hệ thống (BR-CONSULT-001 khoản 9). Bộ US/BR trước lần bổ sung này đã được chốt trong hội thoại. Ngày 29/09/2026, người dùng xác nhận thêm Công ty bắt buộc nhập tên, Số sao và Số đánh giá nhập thủ công; cả ba hiển thị ở danh sách và chi tiết KTS. Hồ sơ có mười nhóm thông tin; hai số mới mặc định bằng 0. Người dùng đã chốt bản cập nhật US/BR ngày 29/09/2026. Hồ sơ cũ chưa có Công ty được giữ nguyên cùng trạng thái hiển thị; phải bổ sung tên công ty ở lần sửa tiếp theo. Metadata chưa đầy đủ. Giới hạn kỹ thuật của tên công ty sẽ xác định khi thiết kế. Người tạo chủ động chọn Ẩn/Hiện khi tạo hồ sơ.
 - **Sprint**:
 - **Priority**: Must
 - **Status**: Todo
@@ -65,9 +65,9 @@ Admin mở chức năng quản lý hồ sơ KTS.
 
 ### Main Flow
 
-1. Người có quyền tạo thêm hồ sơ với ảnh đại diện, họ tên, chức danh, chuyên môn chọn từ danh mục category, số năm kinh nghiệm, số công trình và giới thiệu; một KTS có thể chọn nhiều category.
-2. Người tạo chọn Ẩn/Hiện. Hệ thống lưu hồ sơ trực tiếp, không qua phê duyệt. Người có quyền có thể đổi trạng thái này sau khi tạo.
-3. Khách chọn KTS từ các hồ sơ đang hiển thị để gửi yêu cầu.
+1. Người có quyền tạo thêm hồ sơ với ảnh đại diện, họ tên, chức danh, chuyên môn chọn từ danh mục category, số năm kinh nghiệm, số công trình, giới thiệu, công ty, số sao và số đánh giá; một KTS có thể chọn nhiều category. Công ty nhập tên trực tiếp và bắt buộc có nội dung. Số sao và số đánh giá nhập thủ công, mặc định bằng 0 khi tạo hồ sơ.
+2. Người tạo chọn Ẩn/Hiện. Hệ thống kiểm tra thông tin bắt buộc và các quy tắc tại BR-CONSULT-001: số sao từ 0 đến 5, tối đa một chữ số thập phân; số đánh giá là số nguyên không âm; khi số đánh giá bằng 0 thì số sao phải bằng 0. Hồ sơ hợp lệ được lưu trực tiếp, không qua phê duyệt. Người có quyền có thể đổi trạng thái sau khi tạo.
+3. Khách xem công ty, số sao và số đánh giá ở cả danh sách và trang chi tiết của các hồ sơ đang hiển thị, rồi chọn KTS để gửi yêu cầu.
 
 ### Alternative Flow
 
@@ -75,8 +75,8 @@ Admin mở chức năng quản lý hồ sơ KTS.
 
 Admin cập nhật hồ sơ đã có.
 
-1. Admin sửa thông tin và lưu.
-2. Hệ thống sử dụng thông tin đã cập nhật cho hồ sơ.
+1. Admin sửa thông tin, gồm công ty, số sao và số đánh giá khi cần, rồi lưu.
+2. Hệ thống kiểm tra dữ liệu theo các quy tắc khi tạo và sử dụng thông tin đã cập nhật cho hồ sơ. Công ty, số sao và số đánh giá mới được dùng thống nhất ở danh sách và chi tiết KTS.
 
 #### ALT-02
 
@@ -91,6 +91,14 @@ Người có quyền quản lý danh mục chuyên môn.
 
 1. Người có quyền tạo hoặc sửa category để dùng cho phần chuyên môn của KTS.
 2. Người có quyền được xóa category khi không còn KTS nào sử dụng, kể cả KTS đang bị ẩn.
+
+#### ALT-04
+
+Hồ sơ đã có trước khi bổ sung Công ty, Số sao và Số đánh giá.
+
+1. Hệ thống giữ nguyên hồ sơ và trạng thái Ẩn/Hiện; không tự điền tên công ty. Hai số mới được khởi tạo bằng 0.
+2. Hồ sơ đang Hiện vẫn xuất hiện cho khách khi chưa bổ sung Công ty. Hồ sơ đang Ẩn vẫn được giữ ở trạng thái Ẩn.
+3. Khi sửa hồ sơ lần tiếp theo, người có quyền phải nhập tên công ty hợp lệ mới lưu được.
 
 ### Exception Flow
 
@@ -114,13 +122,20 @@ Category cần xóa còn được gán cho KTS.
 1. Hệ thống từ chối xóa, giữ nguyên category và các liên kết hiện có.
 2. Người có quyền phải bỏ gán category khỏi tất cả hồ sơ trước khi xóa.
 
+#### EXC-04
+
+Số sao hoặc số đánh giá không hợp lệ.
+
+1. Hệ thống từ chối lưu nếu số sao ngoài khoảng 0–5 hoặc có hơn một chữ số thập phân; số đánh giá âm hoặc không phải số nguyên; hoặc số đánh giá bằng 0 nhưng số sao khác 0.
+2. Hệ thống chỉ rõ trường cần sửa, không lưu một phần thay đổi của hồ sơ.
+
 ## Acceptance Criteria
 
 #### AC-001
 
 - **Given**: Admin có quyền quản lý.
 - **When**: Admin thêm hoặc sửa hồ sơ.
-- **Then**: Lưu và đọc lại được đầy đủ bảy nhóm thông tin đã xác nhận.
+- **Then**: Lưu và đọc lại được đầy đủ mười nhóm thông tin đã xác nhận, gồm công ty, số sao và số đánh giá nhập thủ công.
 - **And**: Không tự thêm tài khoản đăng nhập cho KTS.
 
 #### AC-002
@@ -168,7 +183,7 @@ Category cần xóa còn được gán cho KTS.
 #### AC-008
 
 - **Given**: Người thao tác có quyền lưu hồ sơ KTS.
-- **When**: Thêm hoặc sửa hồ sơ thiếu một trong bảy nhóm thông tin hoặc chưa chọn category nào.
+- **When**: Thêm hoặc sửa hồ sơ thiếu một trong bảy nhóm thông tin ban đầu, thiếu tên công ty hoặc chưa chọn category nào.
 - **Then**: Hệ thống từ chối lưu và chỉ rõ phần còn thiếu.
 - **And**: Khi đủ thông tin hợp lệ, hồ sơ được lưu trực tiếp, không qua phê duyệt.
 
@@ -185,6 +200,48 @@ Category cần xóa còn được gán cho KTS.
 - **When**: Người thao tác xóa category.
 - **Then**: Category được xóa khỏi danh mục chuyên môn.
 - **And**: Không còn được chọn khi gán chuyên môn cho hồ sơ KTS.
+
+#### AC-011
+
+- **Given**: Người thao tác có quyền lưu hồ sơ KTS và các thông tin khác hợp lệ.
+- **When**: Thêm hoặc sửa hồ sơ với tên công ty bị thiếu, rỗng hoặc chỉ có khoảng trắng.
+- **Then**: Hệ thống từ chối lưu và thông báo phải nhập tên công ty.
+- **And**: Công ty được nhập bằng tên trực tiếp, không yêu cầu chọn từ danh mục công ty.
+
+#### AC-012
+
+- **Given**: Người thao tác có quyền lưu hồ sơ và các thông tin khác hợp lệ.
+- **When**: Nhập số sao trong khoảng 0–5, tối đa một chữ số thập phân, và số đánh giá là số nguyên không âm; nếu số đánh giá bằng 0 thì số sao cũng bằng 0.
+- **Then**: Hệ thống lưu và đọc lại đúng hai giá trị đã nhập, ví dụ 4,8 sao và 120 đánh giá.
+- **And**: Hệ thống không tự tính hai giá trị từ yêu cầu tư vấn hoặc đánh giá của khách.
+
+#### AC-013
+
+- **Given**: Người thao tác có quyền tạo hồ sơ và các thông tin bắt buộc hợp lệ.
+- **When**: Tạo hồ sơ và giữ giá trị mặc định của số sao và số đánh giá.
+- **Then**: Hồ sơ được lưu với số sao bằng 0 và số đánh giá bằng 0.
+- **And**: Hồ sơ đã có trước khi bổ sung hai trường cũng được khởi tạo hai số bằng 0.
+
+#### AC-014
+
+- **Given**: Người thao tác có quyền thêm hoặc sửa hồ sơ KTS.
+- **When**: Nhập số sao ngoài khoảng 0–5 hoặc hơn một chữ số thập phân; nhập số đánh giá âm hoặc không phải số nguyên; hoặc nhập số đánh giá bằng 0 và số sao khác 0.
+- **Then**: Hệ thống từ chối lưu và chỉ rõ trường không hợp lệ.
+- **And**: Không tạo hồ sơ mới hoặc lưu một phần thay đổi vào hồ sơ đã có.
+
+#### AC-015
+
+- **Given**: Hồ sơ KTS đang hiển thị và đã lưu công ty, số sao, số đánh giá hợp lệ.
+- **When**: Khách xem danh sách KTS hoặc trang chi tiết của KTS đó.
+- **Then**: Cả hai nơi đều hiển thị công ty, số sao và số đánh giá đúng theo hồ sơ hiện tại, kể cả hai số bằng 0.
+- **And**: Sau khi người có quyền cập nhật thành công, lần đọc tiếp theo ở cả hai nơi dùng các giá trị đã cập nhật.
+
+#### AC-016
+
+- **Given**: Hồ sơ KTS đã tồn tại trước khi thêm ba trường, chưa có tên công ty.
+- **When**: Áp dụng thay đổi rồi đọc lại hồ sơ.
+- **Then**: Giữ nguyên hồ sơ và trạng thái Ẩn/Hiện; không tự điền tên công ty; số sao và số đánh giá bằng 0.
+- **And**: Hồ sơ đang Hiện vẫn xem được ở danh sách và chi tiết; lần sửa tiếp theo phải bổ sung công ty hợp lệ mới lưu được.
 
 ## References
 
@@ -208,3 +265,4 @@ Category cần xóa còn được gán cho KTS.
 
 - Xóa hồ sơ; tài khoản và giao diện riêng cho KTS.
 - Quản lý lịch rảnh riêng của từng KTS.
+- Danh mục công ty; chức năng khách gửi đánh giá và tự tính số sao hoặc số đánh giá.

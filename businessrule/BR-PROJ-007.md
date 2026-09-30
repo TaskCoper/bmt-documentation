@@ -66,10 +66,13 @@ Hệ thống nhận kết quả AI hoặc khách yêu cầu xem dự toán, xem 
 
 ## Except
 
+Khi bản dự toán đã bị xóa theo [BR-PROJ-009](BR-PROJ-009.md), không cung cấp lại kết quả hoặc hồ sơ cho chủ sở hữu hay người nhận link. Việc còn dữ liệu kỹ thuật hoặc link chưa hết hạn không khôi phục quyền xem, xuất hay tải mới. Xóa không hoàn lượt đã dùng và không thu hồi tệp đã tải về trước đó.
+
 Nếu chưa có bộ kết quả hợp lệ hoặc chưa chuẩn bị được tệp, không báo đã có tệp để tải. Lỗi xuất hoặc tải tệp từ một kết quả đã thành công không biến thành một lần tạo thiết kế mới hoặc tự trừ lượt; giữ kết quả nguồn để xử lý lại thao tác bị lỗi.
 
 ## Notes
 
+- Ngoại lệ cho bản đã xóa bổ sung theo quyết định của người dùng trong hội thoại chuẩn bị danh sách và xóa dự toán; đã được người dùng chốt cùng STORY-PROJ-006/007 và BR-PROJ-008/009 trong hội thoại ngày 30/09/2026. Đặc tả ST bổ sung ở [bảng độ phủ](../discovery/my-estimates-system-test-coverage.md); chưa triển khai hoặc thực thi.
 - Khoản 7 do người dùng xác nhận ngày 25/09/2026. Ngày 26/09/2026 người dùng xác nhận sửa phần về tệp: bản cũ yêu cầu tệp xuất trước khi đổi tên không được dùng nữa và lần tải sau xuất lại với tên mới. Vì AI tạo PDF/Excel và backend không tự dựng tệp, tên mới nay chỉ áp vào tên tệp tải về (backend đặt khi chuyển tiếp tệp, TDD-PROJ-003); nội dung tệp giữ tên tại lúc AI tạo.
 - Khoản 4 cập nhật ngày 26/09/2026: AI trả URL cho mọi tệp kết quả, kể cả PDF và Excel; backend chỉ lưu URL, không tự dựng tệp. Người dùng xác nhận giữ bản sửa khoản 4 này ngày 26/09/2026.
 

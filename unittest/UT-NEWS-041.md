@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-NEWS-041 | Tin tức | Validator lưu bài — độ dài tiêu đề và mô tả ngắn | Boundary | REGRESSION | P1 | Validator thật của lệnh tạo và sửa bài; không DB. | Tiêu đề 200 và 201 ký tự, mô tả ngắn 500 và 501 ký tự, có thêm khoảng trắng đầu/cuối; một biến thể dùng chữ có dấu, một biến thể dùng ký tự ngoài BMP. | 200/500 hợp lệ; 201 hoặc 501 trả InvalidNewsContent ở title hoặc summary. Đếm sau khi bỏ khoảng trắng, theo ký tự Unicode (Rune): ký tự ngoài BMP tính một. Không tự cắt ngắn. | TDD-NEWS-001/Internal API<br>BR-NEWS-001/Then<br>STORY-NEWS-001/AC-009 | Quyết định người dùng xác nhận ngày 26/09/2026. Theo thiết kế đã chốt. Mã test ở bảng độ phủ kiểm thử đơn vị Tin tức; không ghi kết quả chạy vào đặc tả. | [Chưa xác định] | Draft |
+| UT-NEWS-041 | Tin tức | Validator lưu bài — độ dài tiêu đề | Boundary | REGRESSION | P1 | Validator thật của lệnh tạo và sửa bài; không DB. | Tiêu đề 200 và 201 ký tự, có thêm khoảng trắng đầu/cuối; một biến thể dùng chữ có dấu, một biến thể dùng ký tự ngoài BMP. | 200 hợp lệ; 201 trả InvalidNewsContent ở title. Đếm sau khi bỏ khoảng trắng, theo ký tự Unicode (Rune): ký tự ngoài BMP tính một. Không tự cắt ngắn. | TDD-NEWS-001/Internal API<br>BR-NEWS-001/Then<br>STORY-NEWS-001/AC-009 | Quyết định người dùng xác nhận ngày 26/09/2026. Theo thiết kế đã chốt. Mã test ở bảng độ phủ kiểm thử đơn vị Tin tức; không ghi kết quả chạy vào đặc tả. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

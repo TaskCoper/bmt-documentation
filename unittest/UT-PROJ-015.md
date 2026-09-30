@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PROJ-015 | Tạo dự toán | SaveEstimateInputHandler — Gửi lại không ghi đè dữ liệu mới | Determinism | FULL | P1 | Unit dự kiến trong TDD, chưa có implementation hoặc mã test. Dùng clock cố định và fake dependency có thể đọc lại đối số/trạng thái; không gọi dịch vụ thật. Owner đúng; receipt key S1/hash H đã lưu version 4; bản hiện version 6, kỳ đã hết hạn. | Gửi lại đúng key/hash; biến thể cùng key nhưng body khác. | Đúng key/hash trả savedInputVersion=4, không ghi lại đầu vào hoặc kiểm quyền dùng mới để replay. Hash khác trả IdempotencyConflict. Không đổi version 6. | TDD-PROJ-001/Architecture<br>TDD-PROJ-001/Internal API<br>BR-PROJ-003/Then<br>ST-PROJ-014/System Test | Gửi lại không ghi đè dữ liệu mới. Kiểm hành vi ở biên unit; không dùng mock để kết luận transaction, SQL hoặc tích hợp thật đúng. | [Chưa xác định] | Draft |
+| UT-PROJ-015 | Tạo dự toán | SaveEstimateInputHandler — Gửi lại không ghi đè dữ liệu mới | Determinism | FULL | P1 | Unit dự kiến trong TDD, chưa có implementation hoặc mã test. Dùng clock cố định và fake dependency có thể đọc lại đối số/trạng thái; không gọi dịch vụ thật. Owner đúng; receipt key S1/hash H đã lưu version 4; bản hiện version 6, kỳ đã hết hạn. Bản Estimate đích chưa xóa (DeletedAtUtc=NULL); nhánh đã xóa được đặc tả riêng theo TDD-PROJ-005. | Gửi lại đúng key/hash; biến thể cùng key nhưng body khác. | Đúng key/hash trả savedInputVersion=4, không ghi lại đầu vào hoặc kiểm quyền dùng mới để replay. Hash khác trả IdempotencyConflict. Không đổi version 6. | TDD-PROJ-001/Architecture<br>TDD-PROJ-001/Internal API<br>BR-PROJ-003/Then<br>ST-PROJ-014/System Test<br>TDD-PROJ-005/Architecture | Gửi lại không ghi đè dữ liệu mới. Kiểm hành vi ở biên unit; không dùng mock để kết luận transaction, SQL hoặc tích hợp thật đúng. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
@@ -50,3 +50,4 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - TDD-PROJ-001/Internal API
 - BR-PROJ-003/Then
 - ST-PROJ-014/System Test
+- TDD-PROJ-005/Architecture

@@ -44,7 +44,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Owner**: [Chưa xác định]
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
-- **Source**: Người dùng xác nhận trong hội thoại nghiên cứu tính năng tư vấn KTS ngày 2026-09-23. Người dùng đã chốt bộ US/BR trong hội thoại.
+- **Source**: Người dùng chốt bộ US/BR tư vấn KTS trong hội thoại trước lần sửa này; ngày 26/09/2026 chốt kho ảnh. Ngày 29/09/2026 xác nhận thêm Công ty bắt buộc nhập tên, Số sao và Số đánh giá nhập thủ công, giới hạn giá trị, mặc định 0 và hiển thị ở danh sách/chi tiết. Người dùng đã chốt bản cập nhật và cách giữ hồ sơ cũ thiếu Công ty trong cùng hội thoại.
 
 ## Statement
 
@@ -56,7 +56,7 @@ Admin thêm, sửa, ẩn/hiện hồ sơ hoặc khách gửi yêu cầu cho KTS.
 
 ## Then
 
-1. Hồ sơ gồm ảnh đại diện, họ tên, chức danh, chuyên môn, số năm kinh nghiệm, số công trình và giới thiệu.
+1. Hồ sơ gồm mười nhóm thông tin: ảnh đại diện, họ tên, chức danh, chuyên môn, số năm kinh nghiệm, số công trình, giới thiệu, công ty, số sao và số đánh giá.
 2. Người có quyền quản lý tư vấn KTS theo STORY-RBAC-001 được thêm, sửa, ẩn và hiện hồ sơ; không có bước phê duyệt hồ sơ.
 3. KTS bị ẩn không được nhận yêu cầu mới. Hệ thống kiểm tra khi tiếp nhận, kể cả khi khách đã mở trang trước lúc hồ sơ bị ẩn.
 4. Ẩn hồ sơ không xóa yêu cầu đã gửi; admin vẫn xem và xử lý các yêu cầu này.
@@ -64,15 +64,25 @@ Admin thêm, sửa, ẩn/hiện hồ sơ hoặc khách gửi yêu cầu cho KTS.
 5. Chuyên môn của KTS lấy từ danh mục category. Một KTS có thể thuộc nhiều category.
 6. Người có quyền quản lý tư vấn KTS được tạo, sửa và xóa category chuyên môn. Chỉ được xóa khi category không còn được gán cho bất kỳ KTS nào, kể cả KTS đang bị ẩn. Nếu còn được sử dụng, phải bỏ gán khỏi tất cả hồ sơ trước khi xóa.
 
-7. Hồ sơ KTS bắt buộc có đủ bảy nhóm thông tin: ảnh đại diện, họ tên, chức danh, chuyên môn, số năm kinh nghiệm, số công trình và giới thiệu. Chuyên môn phải chọn ít nhất một category. Thiếu thông tin bắt buộc thì không được lưu hồ sơ.
+7. Khi tạo hoặc sửa hồ sơ KTS, bắt buộc có ảnh đại diện, họ tên, chức danh, chuyên môn, số năm kinh nghiệm, số công trình, giới thiệu và tên công ty. Chuyên môn phải chọn ít nhất một category. Công ty nhập tên trực tiếp, không chọn từ danh mục; tên bị thiếu, rỗng hoặc chỉ có khoảng trắng không hợp lệ. Số sao và số đánh giá có giá trị mặc định theo khoản 12. Thiếu thông tin bắt buộc thì không được lưu hồ sơ.
 
 8. Người tạo chủ động chọn Ẩn/Hiện khi tạo hồ sơ KTS, không có bước phê duyệt.
 
 9. Ảnh đại diện phải là đường dẫn tới tệp trên kho ảnh của hệ thống, cùng kho với ảnh của dự toán. Đường dẫn ngoài kho bị từ chối khi tạo hồ sơ hoặc khi đổi sang ảnh mới; sửa hồ sơ mà giữ nguyên ảnh đang lưu thì không bị kiểm lại.
 
+10. Người có quyền quản lý tư vấn KTS nhập và sửa số sao, số đánh giá trực tiếp trên hồ sơ. Hai số này là dữ liệu nhập thủ công; hệ thống không tính từ yêu cầu tư vấn hoặc đánh giá của khách.
+
+11. Số sao nằm trong khoảng từ 0 đến 5, gồm cả hai đầu, và có tối đa một chữ số thập phân. Số đánh giá là số nguyên không âm. Khi số đánh giá bằng 0 thì số sao phải bằng 0. Dữ liệu vi phạm bị từ chối khi tạo hoặc sửa; không lưu một phần thay đổi của hồ sơ.
+
+12. Số sao và số đánh giá mặc định bằng 0 khi tạo hồ sơ. Hồ sơ đã có trước khi bổ sung hai trường được khởi tạo cả hai số bằng 0. Việc sửa hồ sơ sau đó phải giữ hoặc cập nhật số liệu theo nội dung người quản trị lưu, không tự đặt lại về 0 chỉ vì mở lại hồ sơ.
+
+13. Công ty, số sao và số đánh giá được hiển thị ở cả danh sách KTS và trang chi tiết KTS dành cho khách, theo giá trị hiện tại của hồ sơ; hai số bằng 0 vẫn được hiển thị. Chỉ công khai hồ sơ đang hiển thị. Sau khi cập nhật thành công, lần đọc tiếp theo ở cả hai nơi phải phản ánh dữ liệu mới.
+
 ## Except
 
 Các yêu cầu đã gửi trước khi ẩn vẫn được giữ để xử lý.
+
+Hồ sơ đã có trước khi bổ sung Công ty được giữ nguyên cùng trạng thái Ẩn/Hiện dù chưa có tên công ty; không tự điền tên thay thế. Hồ sơ đang Hiện vẫn xuất hiện ở danh sách và chi tiết cho khách. Lần sửa tiếp theo phải bổ sung tên công ty hợp lệ mới lưu được. Ngoại lệ này không áp dụng cho hồ sơ tạo mới; hai số mới của hồ sơ cũ được khởi tạo bằng 0 theo khoản 12.
 
 ## Notes
 
@@ -80,4 +90,10 @@ Người dùng xác nhận khi bắt đầu thiết kế kỹ thuật: người 
 
 STORY-CONSULT-001; STORY-CONSULT-002. Giới hạn dữ liệu cụ thể sẽ xác định khi thiết kế; người tạo chủ động chọn Ẩn/Hiện khi tạo hồ sơ; không tự thêm chức năng xóa hồ sơ.
 
-Nội dung nghiệp vụ của bộ US/BR đã được người dùng chốt trong hội thoại. Metadata người phụ trách tài liệu chưa xác định; không suy ra phê duyệt trên hệ thống quản lý tài liệu.
+Nội dung nghiệp vụ trước lần bổ sung ba trường đã được người dùng chốt trong hội thoại. Người dùng đã chốt bản cập nhật STORY-CONSULT-001, STORY-CONSULT-002 và BR-CONSULT-001 ngày 29/09/2026, đồng thời chọn giữ hồ sơ cũ thiếu Công ty và yêu cầu bổ sung ở lần sửa tiếp theo. System Test và TDD được cập nhật theo bộ nghiệp vụ này; người dùng đã chốt TDD trong hội thoại và đặc tả Unit Test cho phần bổ sung đã được cập nhật theo thiết kế đó. Chưa triển khai ba trường mới trong mã ứng dụng.
+
+Giới hạn độ dài tên công ty thuộc thiết kế kỹ thuật. Chưa bổ sung danh mục công ty hoặc chức năng khách gửi đánh giá.
+
+Ví dụ minh họa: 4,8 sao và 120 đánh giá là hợp lệ; 0 sao và 0 đánh giá là hợp lệ; 4,8 sao và 0 đánh giá bị từ chối. Không suy ra quy tắc ngược rằng số sao bằng 0 thì số đánh giá cũng phải bằng 0.
+
+Metadata người phụ trách tài liệu chưa xác định; không suy ra phê duyệt trên hệ thống quản lý tài liệu.

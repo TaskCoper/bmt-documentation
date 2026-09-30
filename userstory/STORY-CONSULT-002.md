@@ -40,7 +40,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 ## Metadata
 
 - **Story**: Là khách đã đăng nhập, tôi muốn gửi yêu cầu tư vấn với KTS và giờ mong muốn để admin gọi lại sắp xếp lịch.
-- **Context**: Tư vấn miễn phí, độc lập với gói dịch vụ. Khách không cần trang theo dõi yêu cầu. Nghiệp vụ được xác nhận qua hội thoại ngày 2026-09-23; người dùng đã chốt bộ US/BR trong hội thoại. Metadata chưa đầy đủ. Còn cần làm rõ: danh sách giờ cụ thể, định dạng số liên lạc và giới hạn độ dài nội dung.
+- **Context**: Tư vấn miễn phí, độc lập với gói dịch vụ. Khách không cần trang theo dõi yêu cầu. Nghiệp vụ trước lần bổ sung này đã được người dùng chốt trong hội thoại. Ngày 29/09/2026, người dùng xác nhận hiển thị công ty, số sao và số đánh giá ở cả danh sách và chi tiết KTS; các giá trị do người có quyền quản lý tư vấn KTS nhập thủ công theo BR-CONSULT-001. Người dùng đã chốt bản cập nhật US/BR ngày 29/09/2026. Hồ sơ cũ chưa có Công ty vẫn hiển thị theo trạng thái hiện có, theo ngoại lệ ở BR-CONSULT-001. Metadata chưa đầy đủ. Còn cần làm rõ: danh sách giờ cụ thể, định dạng số liên lạc và giới hạn độ dài nội dung.
 - **Sprint**:
 - **Priority**: Must
 - **Status**: Todo
@@ -66,7 +66,7 @@ Khách chọn KTS và bắt đầu gửi yêu cầu tư vấn.
 
 ### Main Flow
 
-1. Khách chọn KTS, ngày và khung giờ mong muốn từ danh sách dùng chung trên frontend, theo giờ Việt Nam (UTC+7).
+1. Khách xem các hồ sơ đang hiển thị; danh sách và trang chi tiết KTS đều có công ty, số sao và số đánh giá hiện tại. Khách chọn KTS, ngày và khung giờ mong muốn từ danh sách dùng chung trên frontend, theo giờ Việt Nam (UTC+7).
 2. Hệ thống điền số liên lạc từ tài khoản nếu có; khách kiểm tra hoặc đổi số riêng cho đơn.
 3. Khách có thể nhập nội dung cần tư vấn hoặc để trống rồi bấm gửi.
 4. Backend kiểm tra đăng nhập, KTS còn hiển thị, có số liên lạc và thời gian mong muốn còn ở tương lai.
@@ -196,6 +196,13 @@ Gửi email thất bại sau khi đã tiếp nhận.
 - **Then**: Các nơi này dùng thống nhất giờ Việt Nam (UTC+7).
 - **And**: Không làm thay đổi thời điểm khách đã chọn do múi giờ máy đang sử dụng.
 
+#### AC-013
+
+- **Given**: KTS đang hiển thị và đã lưu công ty, số sao, số đánh giá hợp lệ theo BR-CONSULT-001.
+- **When**: Khách xem danh sách hoặc mở chi tiết KTS để lựa chọn người tư vấn.
+- **Then**: Cả hai nơi hiển thị đúng công ty, số sao và số đánh giá hiện tại do người có quyền quản lý nhập; hai số bằng 0 vẫn được hiển thị.
+- **And**: Việc xem các số liệu này không yêu cầu khách gửi đánh giá và không thay đổi điều kiện gửi yêu cầu tư vấn.
+
 ## References
 
 ### TDDs
@@ -223,3 +230,4 @@ Gửi email thất bại sau khi đã tiếp nhận.
 - Trang khách theo dõi, sửa hoặc hủy yêu cầu.
 - Thanh toán, điều kiện mua gói, giữ chỗ, lịch rảnh riêng của KTS và tự xác nhận lịch.
 - Danh mục khung giờ hoặc màn hình quản trị khung giờ ở backend.
+- Chức năng khách gửi đánh giá KTS; tự tính số sao và số đánh giá.

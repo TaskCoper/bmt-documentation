@@ -576,7 +576,7 @@ Thứ tự Q01 → Q07 là kế hoạch lịch sử. Dùng bảng quyết địn
 - Chọn cơ chế xử lý khi thành công và hết thời gian chờ xảy ra sát nhau, bảo đảm chỉ một kết quả cuối cùng và không tính/hoàn hai lần theo BR-SUB-016.
 - Lưu bản quyền đã cấp, kiểm tra quyền ở backend, đồng bộ dữ liệu kiểm tra quyền và xử lý lỗi phụ thuộc. Nếu muốn cho dùng tạm khi không xác minh được quyền thì đó là ngoại lệ nghiệp vụ mới, không được tự thêm.
 - Ánh xạ Admin/nhân viên phụ trách vào phân quyền backend; dùng phân công hiện tại của dự án như đã chốt. Không cần hỏi lại ai được hoàn thành/mở lại.
-- Xác định và thử nghiệm thời gian chờ phù hợp với luồng tạo thiết kế. Con số chưa chốt; 15 phút không phải mặc định. Nếu ngưỡng này là cam kết với khách thì cần thống nhất trước vận hành.
+- Xác định và thử nghiệm thời gian chờ phù hợp với luồng tạo thiết kế. Đã chốt ngày 26/09/2026: 15 phút tính từ lúc tiếp nhận, job rà tác vụ quá hạn mỗi 60 giây, cả hai là cấu hình (TDD-SUB-002/Architecture). Nếu ngưỡng này là cam kết với khách thì cần thống nhất trước vận hành.
 - Chính sách lưu dữ liệu cũ, dữ liệu nội bộ đến muộn và lịch sử sử dụng cần đầu vào từ chính sách sản phẩm/vận hành. Quyền xem sau hết hạn không có nghĩa lưu vĩnh viễn; không tự quyết định xóa dữ liệu.
 
 **Khoảng trống về tài liệu và đặc tả test**

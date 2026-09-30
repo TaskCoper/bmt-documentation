@@ -45,7 +45,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Owner**: [Chưa xác định]
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
-- **Source**: Người dùng chọn tự đánh dấu tác vụ thất bại khi quá thời gian chờ, giải phóng lượt đang giữ và không tự trừ lại nếu kết quả đến muộn. Người dùng chọn không đưa kết quả muộn cho khách, giữ tác vụ thất bại. Thời gian chờ cấu hình riêng; 15 phút chỉ là ví dụ.
+- **Source**: Người dùng chọn tự đánh dấu tác vụ thất bại khi quá thời gian chờ, giải phóng lượt đang giữ và không tự trừ lại nếu kết quả đến muộn. Người dùng chọn không đưa kết quả muộn cho khách, giữ tác vụ thất bại. Thời gian chờ cấu hình riêng; lúc đầu 15 phút chỉ là ví dụ, ngày 26/09/2026 người dùng chốt dùng 15 phút.
 
 ## Statement
 
@@ -69,7 +69,7 @@ Không tự gửi lại tác vụ hoặc tạo tác vụ mới từ xử lý qu�
 
 ## Notes
 
-- Thời gian chờ là cấu hình riêng, chưa chốt con số. Không lấy ví dụ 15 phút làm mặc định sản phẩm.
+- Thời gian chờ là cấu hình riêng. Ngày 26/09/2026 người dùng chốt: thời gian chờ một lần tạo thiết kế là 15 phút, tính từ lúc hệ thống tiếp nhận tác vụ; hệ thống rà tác vụ quá hạn mỗi 60 giây. Đây là hai giá trị cấu hình (`EstimateAiOption__GenerationTimeoutMinutes`, `UsageMaintenanceOption__ScanIntervalSeconds`, xem TDD-SUB-002/Architecture), không làm đổi quy tắc: quy tắc áp dụng với thời gian chờ đang được cấu hình.
 - Mốc bắt đầu đo thời gian, cơ chế phát hiện, xử lý kết quả đến sát hạn và chống giải phóng/trừ lặp sẽ được làm rõ trong TDD; không cho một tác vụ vừa hoàn lượt do quá thời gian vừa tính lượt thành công đến muộn.
 - Việc không đưa kết quả muộn cho khách không đồng nghĩa với yêu cầu xóa ngay dữ liệu nội bộ. Cách lưu phục vụ đối soát, thời hạn lưu và dọn dữ liệu thuộc thiết kế kỹ thuật, chưa chốt ở đây.
 - Với không giới hạn lượt, vẫn xử lý kết quả quá thời gian; không có số dư hữu hạn để hoàn.

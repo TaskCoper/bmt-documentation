@@ -69,10 +69,13 @@ Chủ sở hữu bản dự toán chia sẻ hồ sơ, chọn ngày hết hạn h
 
 ## Except
 
+Nếu bản dự toán đã bị xóa theo [BR-PROJ-009](BR-PROJ-009.md), từ chối mọi yêu cầu xem hoặc tải mới qua link, QR và email đã chia sẻ, kể cả khi link chưa đến hạn. Không cho tạo lại quyền chia sẻ từ bản đã xóa.
+
 Thu hồi hoặc hết hạn chỉ ngăn truy cập tiếp qua link; không thu hồi được bản tệp mà người nhận đã tải về trước đó. Quyền của chủ sở hữu bản dự toán khi đăng nhập được kiểm tra riêng, không phụ thuộc vào việc link chia sẻ còn hiệu lực hay không.
 
 ## Notes
 
+- Ngoại lệ cho bản đã xóa được bổ sung theo quyết định của người dùng trong hội thoại chuẩn bị danh sách và xóa dự toán. Xóa bản chấm dứt cả quyền mở lại của chủ sở hữu; thu hồi link đơn thuần vẫn giữ bản dự toán và quyền của chủ sở hữu như quy tắc hiện có. Người dùng đã chốt phần bổ sung cùng STORY-PROJ-006/007 và BR-PROJ-008/009 trong hội thoại ngày 30/09/2026. Đặc tả ST bổ sung ở [bảng độ phủ](../discovery/my-estimates-system-test-coverage.md); chưa triển khai hoặc thực thi.
 - Phạm vi đã xác nhận gồm tải PDF hồ sơ và Excel dự toán. Người dùng xác nhận ngày 26/09/2026: AI trả URL cho mọi tệp kết quả, kể cả PDF và Excel; backend chỉ lưu URL, không có kho tệp riêng và không tự dựng PDF/Excel. Hợp đồng API của AI service vẫn chưa có.
 - Cách giữ hiệu lực của khoản 4 khi tệp nằm ở URL do AI trả (người dùng xác nhận ngày 26/09/2026): người nhận không bao giờ nhận URL gốc của tệp. Mỗi yêu cầu xem hoặc tải qua link đi qua route của backend; backend kiểm link còn hiệu lực và chưa bị thu hồi rồi mới chuyển tiếp nội dung tệp. Vì vậy sau khi thu hồi hoặc đến hạn, yêu cầu tải mới bị từ chối như khoản 4. Chi tiết ở TDD-PROJ-003/Architecture. Ghi chú này chỉ mô tả cách thực hiện, không đổi quy tắc.
 - Quyền thao tác trên hồ sơ cũ sau khi gói hết hạn đã được người dùng xác nhận riêng; BR-SUB-007 được bổ sung tương ứng. Đây không phải quyền tạo thiết kế AI mới.
