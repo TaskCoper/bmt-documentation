@@ -36,7 +36,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Rule Info
 
-- **Name**: Công trình có tên và địa chỉ bắt buộc; tên không trùng giữa các công trình của cùng một khách hàng.
+- **Name**: Công trình bắt buộc có tên, địa chỉ và tọa độ khi tạo; tên không trùng giữa các công trình của cùng một khách hàng.
 - **Category**: Công trình
 - **Status**: Draft
 - **Version**:
@@ -48,7 +48,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Statement
 
-Mỗi công trình có hai thông tin bắt buộc là tên và địa chỉ. Tên công trình không được trùng với công trình khác của cùng một khách hàng; khách hàng khác nhau được đặt trùng tên.
+Khi tạo công trình, bắt buộc có tên, địa chỉ, kinh độ và vĩ độ. Tên công trình không được trùng với công trình khác của cùng một khách hàng; khách hàng khác nhau được đặt trùng tên.
 
 ## When
 
@@ -58,16 +58,21 @@ Khách hàng tạo công trình, hoặc sửa tên hay địa chỉ của công 
 
 1. Bỏ khoảng trắng đầu và cuối của tên và địa chỉ trước khi kiểm tra và lưu.
 2. Sau bước 1, tên và địa chỉ đều phải có nội dung. Tên tối đa 200 ký tự, địa chỉ tối đa 500 ký tự. Giá trị vượt giới hạn bị từ chối, không tự cắt ngắn.
-3. Địa chỉ là một ô chữ tự do. Không tách tỉnh/thành, quận/huyện, phường/xã và không đối chiếu với danh mục địa giới hành chính.
+3. Khách nhập địa chỉ trong một ô. Không bắt buộc tách tỉnh/thành, quận/huyện, phường/xã. Frontend phải xác định tọa độ từ địa chỉ để gửi trong yêu cầu tạo công trình.
 4. Tên không được trùng với tên của công trình khác thuộc cùng khách hàng. So sánh sau bước 1 và không phân biệt chữ hoa, chữ thường. Khi sửa, chỉ so với các công trình khác, không so với chính công trình đang sửa.
 5. Không giới hạn số công trình của một khách hàng. Tạo công trình không thu phí và không cần gói thiết kế hay gói giám sát.
 6. Yêu cầu bị từ chối không tạo công trình và không thay đổi thông tin đã lưu.
+7. Frontend phải gửi cả kinh độ và vĩ độ khi tạo công trình. Backend phải kiểm tra và từ chối tạo nếu thiếu một trong hai trường, kể cả khi yêu cầu gửi trực tiếp tới API.
+8. Khi khách đổi địa chỉ công trình, frontend phải xác định lại kinh độ, vĩ độ và gửi cùng địa chỉ mới. Backend chỉ lưu khi có đủ cả hai tọa độ và công trình được phép sửa theo BR-SITE-002; địa chỉ và tọa độ được lưu cùng nhau. Nếu thiếu một trong hai tọa độ, từ chối toàn bộ yêu cầu sửa và giữ nguyên dữ liệu cũ.
 
 ## Except
 
 Không có ngoại lệ. Công trình đã bị xóa theo [BR-SITE-002](BR-SITE-002.md) không còn được tính khi kiểm tra trùng tên.
 
 ## Notes
+
+- Người dùng bổ sung trong phiên chuẩn bị tính năng nhà thầu: frontend xử lý địa chỉ và gửi kinh độ, vĩ độ ngay khi tạo; backend không cho tạo nếu thiếu một trong hai trường. Yêu cầu này thay thế mô tả cũ chỉ bắt buộc tên và địa chỉ.
+- Người dùng đã xác nhận đồng bộ địa chỉ và tọa độ khi sửa; quyền sửa công trình vẫn theo BR-SITE-002. Người dùng xác nhận chưa có dữ liệu thật cần giữ, hoặc chỉ có dữ liệu thử; phương án chuyển schema được đề xuất trong TDD-SITE-002.
 
 - Ví dụ: U1 có “Nhà Phố”. U1 tạo “ nhà phố ” bị từ chối. U2 tạo “Nhà phố” được. U1 đổi chính công trình “nhà phố” thành “Nhà Phố” được.
 - Chỉ bỏ khoảng trắng đầu và cuối; khoảng trắng ở giữa được giữ nguyên, nên “Nhà  phố” (hai dấu cách) và “Nhà phố” là hai tên khác nhau. Chữ có dấu và không dấu cũng là khác nhau, ví dụ “Nhà phố” và “Nha pho”.

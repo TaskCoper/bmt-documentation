@@ -40,7 +40,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 ## Metadata
 
 - **Story**: Là khách hàng, tôi muốn tạo và quản lý các công trình của mình để gắn gói giám sát đúng nơi cần giám sát.
-- **Context**: Công trình là nơi thi công thật mà khách muốn được giám sát. Đây là thực thể riêng, khác với bản dự toán. Khách tự tạo công trình miễn phí, không cần gói thiết kế và không giới hạn số lượng. Mỗi công trình chỉ có tên và địa chỉ, không có trạng thái riêng. Gói giám sát được gắn vào công trình theo STORY-SUB-004; nhân viên chỉ gỡ được gói khi khách gán nhầm, theo STORY-SUB-006. Nhân viên phụ trách theo từng gói. Người dùng xác nhận các quyết định này ngày 25/09/2026, gồm quyết định bổ sung: khi công trình có gói giữ chỗ (đã gán hoặc đã hoàn thành), khách không sửa và không xóa được công trình; gói đã gỡ hoặc đã hủy không khóa.
+- **Context**: Công trình là nơi thi công thật mà khách muốn được giám sát. Đây là thực thể riêng, khác với bản dự toán. Khách tự tạo công trình miễn phí, không cần gói thiết kế và không giới hạn số lượng. Khi tạo công trình, bắt buộc có tên, địa chỉ, kinh độ và vĩ độ; công trình không có trạng thái riêng. Gói giám sát được gắn vào công trình theo STORY-SUB-004; nhân viên chỉ gỡ được gói khi khách gán nhầm, theo STORY-SUB-006. Nhân viên phụ trách theo từng gói. Người dùng xác nhận các quyết định này ngày 25/09/2026, gồm quyết định bổ sung: khi công trình có gói giữ chỗ (đã gán hoặc đã hoàn thành), khách không sửa và không xóa được công trình; gói đã gỡ hoặc đã hủy không khóa.
 - **Sprint**:
 - **Priority**:
 - **Status**: Todo
@@ -66,9 +66,9 @@ Khách mở danh sách công trình của mình, hoặc yêu cầu tạo, sửa 
 
 ### Main Flow
 
-1. Khách chọn tạo công trình, nhập tên và địa chỉ.
+1. Khách chọn tạo công trình, nhập tên và địa chỉ. Frontend xác định kinh độ, vĩ độ từ địa chỉ và gửi cả hai giá trị trong yêu cầu tạo.
 2. Hệ thống bỏ khoảng trắng đầu và cuối của hai trường, rồi kiểm tra theo BR-SITE-001: cả hai có nội dung, tên tối đa 200 ký tự, địa chỉ tối đa 500 ký tự và tên chưa trùng với công trình khác của khách.
-3. Hệ thống lưu công trình thuộc tài khoản của khách. Không thu phí và không trừ lượt của gói nào.
+3. Backend kiểm tra có đủ kinh độ và vĩ độ; thiếu một trong hai thì từ chối tạo. Khi dữ liệu đạt yêu cầu, hệ thống lưu công trình cùng tọa độ, thuộc tài khoản của khách. Không thu phí và không trừ lượt của gói nào.
 4. Công trình mới hiện trong danh sách công trình của khách và có thể được gắn gói giám sát theo STORY-SUB-004.
 
 ### Alternative Flow
@@ -85,9 +85,9 @@ Khách xem danh sách và chi tiết công trình của mình.
 
 Khách sửa tên hoặc địa chỉ của công trình không có gói giữ chỗ.
 
-1. Khách sửa tên, địa chỉ hoặc cả hai của một công trình thuộc mình.
+1. Khách sửa tên, địa chỉ hoặc cả hai của một công trình thuộc mình. Nếu đổi địa chỉ, frontend xác định lại kinh độ, vĩ độ và gửi cả hai cùng địa chỉ mới.
 2. Hệ thống kiểm tra công trình không có gói đã gán hoặc đã hoàn thành theo BR-SITE-002, rồi kiểm tra lại theo BR-SITE-001. Tên mới không được trùng với công trình khác của khách.
-3. Hệ thống lưu thông tin mới. Lịch sử của các gói đã gỡ hoặc đã hủy khỏi công trình vẫn giữ tên và địa chỉ tại lúc gỡ hoặc hủy.
+3. Khi đổi địa chỉ, backend yêu cầu đủ cả kinh độ và vĩ độ; thiếu một trong hai thì từ chối toàn bộ yêu cầu sửa. Khi dữ liệu đạt yêu cầu, hệ thống lưu thông tin mới; nếu đổi địa chỉ thì lưu địa chỉ và tọa độ cùng nhau. Lịch sử của các gói đã gỡ hoặc đã hủy khỏi công trình vẫn giữ tên và địa chỉ tại lúc gỡ hoặc hủy.
 
 #### ALT-03
 
@@ -128,7 +128,16 @@ Khách xem, sửa hoặc xóa công trình của khách khác, kể cả gửi y
 1. Hệ thống từ chối và không tiết lộ tên, địa chỉ hay gói của công trình đó.
 2. Dữ liệu của công trình giữ nguyên.
 
+#### EXC-05
+
+Yêu cầu tạo công trình hoặc đổi địa chỉ thiếu kinh độ, vĩ độ hoặc cả hai.
+
+1. Backend từ chối yêu cầu, kể cả khi gọi trực tiếp API.
+2. Không tạo công trình mới hoặc lưu thay đổi; công trình đang sửa giữ nguyên dữ liệu cũ. Frontend cần xác định đủ tọa độ trước khi gửi lại.
+
 ## Acceptance Criteria
+
+Các yêu cầu tạo trong AC-001 đến AC-008 đều có đủ tọa độ, trừ khi tiêu chí nêu rõ trường bị thiếu.
 
 #### AC-001
 
@@ -241,13 +250,43 @@ Khách xem, sửa hoặc xóa công trình của khách khác, kể cả gửi y
 #### AC-017
 
 - **Given**: Công trình A của U1 từng có gói G1 nay đã hủy; công trình B của U1 từng có gói G2 nay đã bị nhân viên gỡ; A và B không có gói giữ chỗ.
-- **When**: U1 đổi địa chỉ của A và đổi tên của B.
+- **When**: U1 đổi địa chỉ của A, gửi kèm đủ tọa độ mới do frontend xác định, và đổi tên của B.
 - **Then**: Cả hai yêu cầu thành công.
 - **And**: Lịch sử của G1 và G2 vẫn giữ tên, địa chỉ công trình tại lúc hủy hoặc gỡ.
+
+#### AC-018
+
+- **Given**: Khách đã đăng nhập và nhập tên, địa chỉ hợp lệ.
+- **When**: Frontend xác định và gửi cả kinh độ, vĩ độ trong yêu cầu tạo.
+- **Then**: Backend lưu công trình cùng hai giá trị tọa độ nếu các điều kiện tạo khác đều đạt.
+- **And**: Không cần chờ đến lúc tìm nhà thầu mới bổ sung tọa độ.
+
+#### AC-019
+
+- **Given**: Các thông tin khác trong yêu cầu tạo đều hợp lệ.
+- **When**: Yêu cầu thiếu kinh độ, thiếu vĩ độ hoặc thiếu cả hai, kể cả khi gọi trực tiếp API.
+- **Then**: Backend từ chối tạo ở cả ba trường hợp.
+- **And**: Không lưu công trình thiếu tọa độ.
+
+#### AC-020
+
+- **Given**: Công trình thuộc khách và được phép sửa theo BR-SITE-002; các thông tin mới đều hợp lệ.
+- **When**: Khách đổi địa chỉ, frontend xác định lại và gửi đủ kinh độ, vĩ độ cùng địa chỉ mới.
+- **Then**: Backend lưu địa chỉ và hai tọa độ mới cùng nhau.
+- **And**: Tìm nhà thầu theo bán kính sau đó dùng tọa độ mới của công trình.
+
+#### AC-021
+
+- **Given**: Công trình thuộc khách, được phép sửa và đã có địa chỉ, tọa độ.
+- **When**: Khách gửi yêu cầu đổi địa chỉ nhưng thiếu kinh độ, thiếu vĩ độ hoặc thiếu cả hai, kể cả gọi trực tiếp API.
+- **Then**: Backend từ chối toàn bộ yêu cầu sửa ở cả ba trường hợp.
+- **And**: Địa chỉ, tọa độ và các thông tin khác của công trình giữ nguyên.
 
 ## References
 
 ### TDDs
+
+- [TDD-SITE-002](../tdd/TDD-SITE-002.md): Bổ sung tọa độ khi tạo và đồng bộ khi đổi địa chỉ; thiết kế mới chưa triển khai.
 
 - [TDD-SITE-001](../tdd/TDD-SITE-001.md): Bảng công trình, API tạo, xem, sửa, xóa của khách, kiểm trùng tên và điều kiện xóa.
 
@@ -270,6 +309,8 @@ Khách xem, sửa hoặc xóa công trình của khách khác, kể cả gửi y
 - STORY-SITE-002: Nhân viên xem công trình theo quyền.
 
 ## Non-Functional
+
+- Yêu cầu bắt buộc tọa độ khi tạo và xác định lại tọa độ khi đổi địa chỉ được bổ sung trong phiên chuẩn bị tính năng nhà thầu. Đã bổ sung đặc tả [ST-SITE-033](../systemtest/ST-SITE-033.md), [ST-SITE-034](../systemtest/ST-SITE-034.md), [ST-SITE-035](../systemtest/ST-SITE-035.md), [ST-SITE-036](../systemtest/ST-SITE-036.md), [ST-SITE-037](../systemtest/ST-SITE-037.md). Các ca mới chưa chạy; TDD, API, code và dữ liệu chuẩn bị của bộ kiểm thử SITE cũ còn cần cập nhật. Kết quả kiểm thử trước đây không xác nhận yêu cầu mới.
 
 - Kiểm tra trùng tên và điều kiện xóa phải đúng cả khi có yêu cầu đồng thời. Hai yêu cầu tạo công trình trùng tên của cùng khách gửi cùng lúc thì chỉ một yêu cầu thành công. Yêu cầu xóa công trình và yêu cầu gắn gói vào chính công trình đó gửi cùng lúc không được để lại gói gắn vào công trình đã xóa. Tương tự, yêu cầu sửa công trình và yêu cầu gắn gói gửi cùng lúc không được để công trình bị sửa sau khi đã có gói giữ chỗ. Cơ chế kỹ thuật thuộc TDD.
 - Mọi yêu cầu được kiểm quyền ở server, kể cả yêu cầu gửi trực tiếp tới API, theo BR-RBAC-011.
