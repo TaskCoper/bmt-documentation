@@ -1,5 +1,8 @@
 # Kế hoạch tính năng video hướng dẫn
 
+Đợt triển khai hiện tại chỉ làm backend, theo câu trả lời “chỉ backend” của người dùng. Đã có module, migration và kiểm thử trên nhánh `feature/video-guides`; xem [bàn giao backend](guide-backend-implementation.md). Các mục “hiện trạng” và “dự kiến” bên dưới ghi lại thời điểm lập kế hoạch ban đầu, không phải trạng thái triển khai mới nhất.
+
+
 ## Trạng thái
 
 Đã cập nhật hai User Story và ba Business Rule theo các câu trả lời trong hội thoại chuẩn bị tính năng ngày 30/09/2026. Người dùng đã xác nhận các quyết định nghiệp vụ bên dưới; Reviewer và Approver đều là Tân Trần. Người dùng đã xác nhận “chốt” bộ US/BR sau cập nhật; được chuyển sang viết System Test và thiết kế TDD. Creator, Assignee, Owner, Sprint và ngày hiệu lực chưa được cung cấp; không tự gán. Đã soạn 43 đặc tả System Test và 44 đặc tả Unit Test. Người dùng đã chốt TDD-GUIDE-001 tại commit f9d659d bằng câu “ok chốt”; xác nhận này là căn cứ viết Unit Test. Phần rà soát toàn bộ chuỗi phụ thuộc liên module chưa hoàn tất và không được coi là đã hoàn tất chỉ vì TDD được chốt. Chưa sửa mã ứng dụng, chạy migration hay triển khai.

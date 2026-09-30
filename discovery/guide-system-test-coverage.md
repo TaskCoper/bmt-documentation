@@ -41,7 +41,7 @@
 
 ## Phần thiết kế cần kiểm chứng thêm
 
-[TDD-GUIDE-001](../tdd/TDD-GUIDE-001.md) đã được người dùng chốt trong hội thoại. ST-GUIDE-035 đến ST-GUIDE-043 bổ sung kiểm cập nhật đồng thời, rollback, CHECK/FK, SQL tìm kiếm, Unicode, cache hết hạn và tích hợp policy/CSRF. Các ca này đòi môi trường thật ở tầng tương ứng, chưa có kết quả chạy. [44 đặc tả Unit Test](guide-unit-test-coverage.md) kiểm các nhánh thuần và điều phối bằng fake; không thay thế các ca tích hợp này.
+[TDD-GUIDE-001](../tdd/TDD-GUIDE-001.md) đã được người dùng chốt trong hội thoại. ST-GUIDE-035 đến ST-GUIDE-043 bổ sung kiểm cập nhật đồng thời, rollback, CHECK/FK, SQL tìm kiếm, Unicode, cache hết hạn và tích hợp policy/CSRF. Các ca này đòi môi trường thật ở tầng tương ứng. Đã chạy kiểm thử backend trên TestServer và PostgreSQL 15 tạm; phạm vi đã kiểm và các bước trình duyệt chưa chạy nằm trong [bàn giao backend](guide-backend-implementation.md). [44 đặc tả Unit Test](guide-unit-test-coverage.md) kiểm các nhánh thuần và điều phối bằng fake; không thay thế các ca tích hợp này.
 
 ## Giới hạn khảo sát nguồn
 

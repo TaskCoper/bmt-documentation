@@ -1,6 +1,6 @@
 # Phạm vi Unit Test cho video hướng dẫn
 
-Đã soạn 44 đặc tả Unit Test theo TDD-GUIDE-001 tại commit f9d659d, sau khi người dùng trả lời “ok chốt”. Tên unit là vai trò dự kiến, chưa phải lớp/hàm GUIDE đã tồn tại. Các đặc tả có Status Draft theo mẫu; chưa viết mã hoặc chạy test.
+Đã soạn 44 đặc tả Unit Test theo TDD-GUIDE-001 tại commit f9d659d, sau khi người dùng trả lời “ok chốt”. Tên unit trong bảng là vai trò ở lúc thiết kế. Backend đã có mã kiểm thử; [bàn giao backend](guide-backend-implementation.md) đối chiếu tên lớp thực tế và kết quả. Status Draft của đặc tả được giữ theo mẫu, không dùng thay kết quả chạy. UT-GUIDE-043/044 thuộc frontend nên chưa thực hiện.
 
 ## Bảng đối chiếu
 

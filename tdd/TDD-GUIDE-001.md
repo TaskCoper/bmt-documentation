@@ -53,9 +53,9 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ### Problem
 
-Trang `/vi/guide` đã có danh sách và cửa sổ xem hướng dẫn, nhưng mục đã kiểm tra còn báo video đang biên tập. Backend chưa có module hướng dẫn. Cần cho người có quyền Quản lý hướng dẫn nhập nội dung, gán video YouTube, xuất bản và chủ động sắp xếp; khách chưa đăng nhập cũng xem được nội dung đã xuất bản.
+Trang `/vi/guide` đã có danh sách và cửa sổ xem hướng dẫn, nhưng mục đã kiểm tra còn báo video đang biên tập. Ở thời điểm khảo sát ban đầu, backend chưa có module hướng dẫn. Cần cho người có quyền Quản lý hướng dẫn nhập nội dung, gán video YouTube, xuất bản và chủ động sắp xếp; khách chưa đăng nhập cũng xem được nội dung đã xuất bản.
 
-Nghiệp vụ căn cứ hai Story và ba BR của GUIDE đã được chốt trong hội thoại. Hai xác nhận bổ sung là giới hạn tiêu đề 200/mô tả 2.000 ký tự và chỉ nhận video đã đăng, gồm Shorts. Người dùng đã chốt toàn bộ TDD được bàn giao tại commit f9d659d bằng câu “ok chốt” trong hội thoại. Được chuyển sang soạn đặc tả Unit Test theo thiết kế này; chưa triển khai. Status vẫn Draft theo mẫu nhập tài liệu, không đại diện cho thao tác phê duyệt trong Document First. Chuỗi tài liệu phụ thuộc liên module chưa được đọc hết; giới hạn khảo sát ghi trong `discovery/guide-system-test-coverage.md`. Không dùng bản nháp này để tuyên bố đã hoàn tất rà soát toàn bộ RBAC.
+Nghiệp vụ căn cứ hai Story và ba BR của GUIDE đã được chốt trong hội thoại. Hai xác nhận bổ sung là giới hạn tiêu đề 200/mô tả 2.000 ký tự và chỉ nhận video đã đăng, gồm Shorts. Người dùng đã chốt toàn bộ TDD được bàn giao tại commit f9d659d bằng câu “ok chốt” trong hội thoại. Sau đó người dùng yêu cầu “Ok triển khai theo TDD” và xác nhận “chỉ backend”. Backend đã được triển khai trên nhánh `feature/video-guides`; giao diện vẫn ngoài phạm vi đợt này. Kết quả và giới hạn kiểm chứng ghi tại [bàn giao backend](../discovery/guide-backend-implementation.md). Status vẫn Draft theo mẫu nhập tài liệu, không đại diện cho thao tác phê duyệt trong Document First. Chuỗi tài liệu phụ thuộc liên module chưa được đọc hết; giới hạn khảo sát ghi trong `discovery/guide-system-test-coverage.md`. Không dùng bản nháp này để tuyên bố đã hoàn tất rà soát toàn bộ RBAC.
 
 ### Goals
 
@@ -72,7 +72,7 @@ Nghiệp vụ căn cứ hai Story và ba BR của GUIDE đã được chốt tro
 
 ## Architecture
 
-Dùng cấu trúc hiện có của backend .NET 8: Carter nhận request; contract và FluentValidation kiểm đầu vào; MediatR xử lý query/command; domain giữ điều kiện trạng thái; EF Core 8/Npgsql lưu PostgreSQL. Tên lớp, DTO và endpoint GUIDE dưới đây đều là dự kiến.
+Dùng cấu trúc hiện có của backend .NET 8: Carter nhận request; contract và FluentValidation kiểm đầu vào; MediatR xử lý query/command; handler kiểm điều kiện trạng thái, domain giữ thực thể và cổng dữ liệu; EF Core 8/Npgsql lưu PostgreSQL. Các endpoint backend dưới đây đã được triển khai; màn hình và player vẫn là thiết kế cho đợt frontend.
 
 | Thành phần | Trách nhiệm và phần thay đổi |
 |---|---|
@@ -81,7 +81,7 @@ Dùng cấu trúc hiện có của backend .NET 8: Carter nhận request; contra
 | `GuideApi`, contract GUIDE | Tách endpoint công khai và quản trị. API quản trị kiểm policy `guide.manage`; không kiểm tên vai trò và không yêu cầu Assignment. |
 | Handler GUIDE, `Guide` | Đọc dữ liệu, kiểm phiên bản, kiểm quy tắc, thay đổi trạng thái trong transaction; mọi lỗi sau khi bắt đầu ghi phải ném ngoại lệ để rollback. |
 | `YoutubeVideoClient` | Dùng HttpClient có cấu hình, gọi cố định Google API bằng video ID; lấy metadata và kiểm khả năng nhúng/loại video. |
-| `GuideVideoMetadataReader` | Dùng `ICacheService<ICacheInstance>` cho dữ liệu YouTube có hạn dùng; không dùng Redis lưu trạng thái đăng nhập. |
+| `GuideVideoService` | Dùng `ICacheService<ICacheInstance>` cho dữ liệu YouTube có hạn dùng; không dùng Redis lưu trạng thái đăng nhập. |
 | PostgreSQL | Nguồn chính thức cho nội dung, trạng thái, vị trí và phiên bản của hướng dẫn. |
 
 ```mermaid
@@ -101,7 +101,7 @@ flowchart LR
 ```
 
 **Notes**:
-- BR-GUIDE-001 được kiểm bằng policy, domain state guard và transaction; BR-GUIDE-002 bằng validator, YouTube client và xử lý lỗi player; BR-GUIDE-003 bằng truy vấn Published, bộ lọc tìm kiếm và lưu thứ tự.
+- BR-GUIDE-001 được kiểm bằng policy, kiểm trạng thái trong handler và transaction; BR-GUIDE-002 bằng validator, YouTube client và xử lý lỗi player; BR-GUIDE-003 bằng truy vấn Published, bộ lọc tìm kiếm và lưu thứ tự.
 - `Version` là số tăng mỗi lần thay đổi hướng dẫn. Form gửi phiên bản đã đọc; nếu admin khác đã sửa thì trả 409 và yêu cầu tải lại. Ví dụ hai người cùng mở bản 4: người thứ nhất lưu thành bản 5, người thứ hai không được ghi đè bản 5 bằng dữ liệu dựa trên bản 4.
 - `OrderVersion` bảo vệ toàn bộ thứ tự. Tạo, xóa hoặc di chuyển đều khóa dòng `GuideOrderState` trước rồi mới khóa các Guide theo Id tăng dần. Sửa nội dung chỉ khóa Guide, không xin khóa thứ tự sau đó. Cách này tuần tự hóa thao tác sắp xếp và tránh vòng chờ khóa.
 - Dùng `TransactionPipelineBehavior` hiện có. Nó mở transaction trước handler, nên lời gọi YouTube trong command vẫn nằm trong thời gian transaction đang mở. Gọi YouTube trước khi khóa dòng hoặc sửa entity và giới hạn tổng thời gian 5 giây cho mỗi yêu cầu; không mô tả đây là HTTP ngoài transaction. Khi giữ nhiều kết nối trở thành vấn đề thực tế mới tách bước điều phối; đợt này không đổi pipeline chung.
@@ -262,13 +262,13 @@ Dùng lại User, Permission, Role và RolePermission theo TDD-RBAC-001/Data Mod
 - Index `(SortOrder, Id)` phục vụ danh sách; thêm index từng FK audit theo quy ước EF. Truy vấn luôn sắp SortOrder rồi Id để ổn định. Chưa thêm trigram/index tìm kiếm: chưa có số liệu về lượng hướng dẫn hoặc tải để biện minh.
 - Tạo mới lấy max(SortOrder)+1 khi đã giữ khóa OrderState. Di chuyển đọc toàn bộ thứ tự dưới khóa rồi đánh số lại 1..N, chỉ tăng Version/ModifiedAt của Guide có vị trí đổi. Không đặt UNIQUE SortOrder vì việc cập nhật nhiều dòng trong một transaction có thể tạm trùng; invariant được bảo vệ bằng khóa chung và kiểm thử PostgreSQL thật. Cách này phù hợp danh sách hướng dẫn nhỏ, chi phí O(N); cần đánh giá lại khi số lượng thực tế lớn.
 - Xóa giữ khóa OrderState trước Guide; không cần đánh lại số các dòng còn lại. Publish/Hide giữ vị trí cũ. `beforeId=null` nghĩa là đưa xuống cuối, kể cả sau Nháp/Ẩn; public chỉ lọc Published trên thứ tự chung.
-- Migration dự kiến tạo hai bảng rỗng, seed OrderState và thêm quyền cùng grant của admin. Chưa xác minh cơ sở dữ liệu đang triển khai, kích thước hay cửa sổ bảo trì; không lấy xác nhận dev/test của module cũ làm hiện trạng GUIDE. Không chuyển sáu thẻ giao diện thành dữ liệu thật khi chưa biết nguồn/link.
+- Migration `20260930004917_AddVideoGuides` tạo hai bảng rỗng, seed OrderState và thêm quyền cùng grant của admin. Chưa xác minh cơ sở dữ liệu đang triển khai, kích thước hay cửa sổ bảo trì; không lấy xác nhận dev/test của module cũ làm hiện trạng GUIDE. Không chuyển sáu thẻ giao diện thành dữ liệu thật khi chưa biết nguồn/link.
 - Trước triển khai: sao lưu và kiểm khả năng phục hồi trên môi trường riêng; xác minh quyền/role seed, catalog và schema hiện tại. Thử migration trên PostgreSQL 15 với bản schema trước thay đổi, kiểm FK/CHECK và cấp quyền thực tế. `PermissionCatalogGuard` kiểm code và DB khớp nên cần phối hợp migration và bản code mới, tránh khởi động code cũ sau khi seed quyền mới. Chưa thể hứa triển khai không gián đoạn khi chưa kiểm topology.
-- Sau migration: kiểm hai bảng, singleton, danh mục quyền, token mới, admin có quyền và public không lộ Nháp/Ẩn. Nếu phải quay code cũ, phối hợp gỡ RolePermission rồi Permission mới sau khi sao lưu grants; giữ hai bảng GUIDE để bảo toàn nội dung. Không dùng Down xóa bảng để giả định phục hồi dữ liệu. Chưa tạo/chạy migration trong tác vụ này.
+- Sau migration: kiểm hai bảng, singleton, danh mục quyền, token mới, admin có quyền và public không lộ Nháp/Ẩn. Nếu phải quay code cũ, phối hợp gỡ RolePermission rồi Permission mới sau khi sao lưu grants; giữ hai bảng GUIDE để bảo toàn nội dung. Không dùng Down xóa bảng để giả định phục hồi dữ liệu. Đã tạo migration và chạy trên PostgreSQL 15 tạm cho test; chưa áp dụng vào môi trường phát triển dùng chung hoặc production.
 
 ## Internal API
 
-Tất cả endpoint dưới đây là contract phiên bản 1 trong TDD đã chốt; chưa có implementation GUIDE. Admin cần `guide.manage`; public AllowAnonymous. Body JSON; GUID sai định dạng trả 400 theo binding. Giữ envelope `Result<T>` hiện có cho thành công; lỗi dùng middleware hiện có. Các mã cụ thể của module đặt trong `messageCode`, không thay `code` chung của exception.
+Tất cả endpoint dưới đây là contract phiên bản 1 đã triển khai trong backend GUIDE. Admin cần `guide.manage`; public AllowAnonymous. Body JSON; GUID sai định dạng trả 400 theo binding. Giữ envelope `Result<T>` hiện có cho thành công; lỗi dùng middleware hiện có. Các mã cụ thể của module đặt trong `messageCode`, không thay `code` chung của exception.
 
 DTO đọc admin gồm id, title, description, youtubeUrl, youtubeVideoId, state, sortOrder, version, createdAtUtc, modifiedAtUtc, metadata và videoWarning. DTO public chỉ gồm id, title, description, youtubeVideoId, youtubeUrl và metadata; không trả tác giả, trạng thái nháp hay phiên bản sửa. `metadata` gồm thumbnailUrl, durationSeconds, fetchedAtUtc; null khi chưa lấy được. `videoWarning` là mã hoặc null, không coi đây là kết quả xuất bản đã xác thực.
 
@@ -359,7 +359,7 @@ ID và URL ảnh trong ví dụ là dữ liệu giả lập; chỉ trả thành 
 
 Timeout tổng 5 giây và truyền CancellationToken; không tự retry trong cùng request để tránh giữ transaction lâu và tiêu quota nhiều lần. Admin được bấm thử lại. Không tự theo redirect ra host tùy ý. Với thành công nhưng items rỗng, trả GuideVideoUnavailable; 403 quota/credentials, 429, 5xx hoặc lỗi mạng trả YoutubeUnavailable. Không log API key hoặc headers chứa credentials; log video ID, loại lỗi, thời gian và correlation ID đủ cho chẩn đoán.
 
-Cache miss khi đọc được gom theo batch, request đồng thời cùng ID có thể gộp trong một process; không tuyên bố chống gọi trùng trên nhiều instance. Redis lỗi thì thử provider trong cùng ngân sách timeout và cho public phản hồi thiếu metadata khi thất bại. Publish và preview luôn bỏ qua cache để kiểm mới; chỉ cache metadata hợp lệ, với TTL tuyệt đối. Metadata của video cũ không được dùng cho ID mới.
+Cache miss khi đọc được gom theo batch, request đồng thời cùng ID có thể gộp trong một process; không tuyên bố chống gọi trùng trên nhiều instance. Redis lỗi thì thử provider trong cùng ngân sách timeout và cho public phản hồi thiếu metadata khi thất bại. Mỗi lần chờ cache bị giới hạn 250 ms vì bộ Redis dùng chung chưa tự ngắt theo CancellationToken; ghi cache thất bại không hủy metadata vừa lấy thành công. Publish và preview luôn bỏ qua cache để kiểm mới; chỉ cache metadata hợp lệ, với TTL tuyệt đối. Metadata của video cũ không được dùng cho ID mới.
 
 Player báo video không phát được thì hiện thông báo và nút đóng/thử lại; không thay trạng thái Guide. Kiểm các lỗi 100, 101/150 và 153; lỗi 153 có thể do thiếu thông tin nhận diện nguồn nhúng. Khi dùng enablejsapi phải đặt origin đúng; cấu hình referrer policy phù hợp, không dùng no-referrer cho iframe. Không cưỡng ép autoplay; người xem chủ động bấm phát.
 
@@ -387,12 +387,12 @@ Player báo video không phát được thì hiện thông báo và nút đóng/
 
 ### Others
 
-- [Bảng phủ System Test](../discovery/guide-system-test-coverage.md): ST-GUIDE-001 đến ST-GUIDE-043; đây là đặc tả chưa chạy.
+- [Bảng phủ System Test](../discovery/guide-system-test-coverage.md): ST-GUIDE-001 đến ST-GUIDE-043; đây là đặc tả; bằng chứng kiểm thử backend và phần trình duyệt chưa chạy được tách trong báo cáo bàn giao.
 - [Bảng phủ Unit Test](../discovery/guide-unit-test-coverage.md): 44 đặc tả unit dự kiến, cùng ranh giới với integration/system test.
 - [Kế hoạch và xác nhận nghiệp vụ](../discovery/guide-planning.md).
 - [TDD-RBAC-001](TDD-RBAC-001.md): danh mục quyền, policy và dữ liệu phân quyền dùng lại.
 - [TDD-AUTH-001](TDD-AUTH-001.md): kiểm Origin cho request ghi dùng cookie.
 - Mã hiện có làm căn cứ: `src/bmt-be.presentation/apis/news/NewsArticleApi.cs`, `src/bmt-be.contract/constants/PermissionNames.cs`, `src/bmt-be.api/dependencyInjection/extensions/JwtExtensions.cs`, `src/bmt-be.api/startup/PermissionCatalogGuard.cs`, `src/bmt-be.persistence/ApplicationDbContext.cs`, `src/bmt-be.application/behaviors/TransactionPipelineBehavior.cs`, `src/bmt-be.application/abstractions/ICacheService.cs`, `src/bmt-be.contract/abstractions/shared/PagedResult.cs` trong repository bmt-be.
-- Kiểm chứng dự kiến: validator/domain bằng unit test theo TDD đã chốt; policy/HTTP bằng API integration; CHECK/FK/rollback và cập nhật đồng thời bằng PostgreSQL thật; player/Shorts bằng trình duyệt với video thật. Mock YouTube chỉ chứng minh nhánh xử lý API, không chứng minh video phát được. Đã soạn UT-GUIDE-001 đến UT-GUIDE-044 theo TDD đã chốt; chưa viết mã hoặc chạy test.
+- Kiểm chứng dự kiến: validator/domain bằng unit test theo TDD đã chốt; policy/HTTP bằng API integration; CHECK/FK/rollback và cập nhật đồng thời bằng PostgreSQL thật; player/Shorts bằng trình duyệt với video thật. Mock YouTube chỉ chứng minh nhánh xử lý API, không chứng minh video phát được. Đã soạn UT-GUIDE-001 đến UT-GUIDE-044 theo TDD đã chốt. Mã kiểm thử backend, kết quả và giới hạn nằm trong [báo cáo bàn giao](../discovery/guide-backend-implementation.md); UT-GUIDE-043/044 thuộc frontend, chưa triển khai hoặc chạy.
 
 ## Change Log
