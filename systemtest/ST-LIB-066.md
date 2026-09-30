@@ -35,7 +35,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# ST-LIB-011
+# ST-LIB-066
 
 ## System Test
 
@@ -44,11 +44,12 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-LIB-011 | STORY-LIB-001 | EXC | REGRESSION | P1 | Khách C và nhân viên B không có library.manage; nhân viên E thuộc vai trò tùy chỉnh (không phải Admin) được cấp library.manage; A thuộc vai trò Admin. E và A không có phân công tài nguyên. Môi trường thử có chức năng tương ứng; đọc lại được dữ liệu và lượt khi ca cần. | 1. C/B gửi trực tiếp thêm, sửa, công bố, ẩn, hiện, xóa nháp, đổi thứ tự section và xin upload theo section; lặp lại bằng phiên chưa đăng nhập.<br>2. E rồi A lần lượt thực hiện một thao tác hợp lệ.<br>3. A đọc lại mẫu và phiên bản. | V1 công khai, V2 nháp. Đây là dữ liệu thử, không phải mặc định sản phẩm. | Thao tác trái quyền bị từ chối (403 khi đã đăng nhập, 401 khi chưa đăng nhập), dữ liệu/hiển thị không đổi. E và A đều thực hiện được vì cùng có library.manage; hệ thống kiểm theo mã quyền, không theo tên vai trò Admin và không cần phân công. | STORY-LIB-001/AC-001<br>BR-LIB-002/Then<br>STORY-LIB-001/EXC-01<br>BR-RBAC-011/Then | Chặn quản trị trái quyền. Đặc tả chưa thực thi; API/fixture kỹ thuật bổ sung sau TDD. | [Chưa xác định] | Draft |
+| ST-LIB-066 | STORY-LIB-001 | EXC / Integration boundary | REGRESSION | P1 | Current V1 có section chuẩn bị S3 có tên nhưng chưa có file; A có quyền quản lý và C có quyền xem V1. PostgreSQL thật; có điểm gây lỗi trước commit complete. | 1. Lần lượt thử không PUT bytes, file không hợp lệ và lỗi lưu database sau khi đã chuẩn bị object final; mỗi biến thể dùng ticket riêng.<br>2. Sau mỗi lần, A và C đọc section; kiểm asset/link và trạng thái complete trong database.<br>3. Upload một file hợp lệ rồi complete thành công; gửi lại complete cùng ý định.<br>4. C đọc lại và kiểm số dư. | Ba biến thể thất bại độc lập; không giả định đóng màn hình sẽ thu hồi URL PUT đã ký. Ca database dùng điểm gây lỗi để bắt buộc rollback toàn bộ transaction. | Các biến thể thất bại không có link file được chấp nhận; C không thấy S3 hoặc tên của nó, A vẫn thấy section chuẩn bị. Lỗi transaction không để ticket Completed mà thiếu asset/link. Chỉ lần complete hợp lệ làm S3 xuất hiện; gửi lại trả cùng assetId, không tạo file thứ hai hoặc tăng EditVersion lần nữa. Không cộng lượt hoặc tạo thêm lịch sử xem. | STORY-LIB-001/AC-018<br>STORY-LIB-003/AC-008<br>BR-LIB-001/Then<br>TDD-LIB-001/Architecture<br>TDD-MEDIA-001/Architecture | Kiểm ranh giới lưu thành công; bytes có trong kho không đồng nghĩa section đã được công bố cho khách. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- STORY-LIB-001/AC-001
-- BR-LIB-002/Then
-- STORY-LIB-001/EXC-01
-- BR-RBAC-011/Then
+- STORY-LIB-001/AC-018
+- STORY-LIB-003/AC-008
+- BR-LIB-001/Then
+- TDD-LIB-001/Architecture
+- TDD-MEDIA-001/Architecture

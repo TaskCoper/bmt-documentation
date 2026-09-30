@@ -44,7 +44,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-LIB-007 | STORY-LIB-001 | Main / EXC | REGRESSION | P1 | V1 công khai, C đã mở V1. Môi trường thử có chức năng tương ứng; đọc lại được dữ liệu và lượt khi ca cần. | 1. Tạo nháp V2 rồi sửa ảnh/tệp.<br>2. C mở thư viện và lịch sử trước công bố.<br>3. Công bố V2; đọc thư viện/lịch sử.<br>4. Thử sửa V1 trực tiếp. | V1 có ảnh/tệp X; V2 có Y. Đây là dữ liệu thử, không phải mặc định sản phẩm. | Trước công bố khách vẫn xem V1; sau đó thư viện hiển thị V2, lịch sử C vẫn V1/X. Sửa V1 bị từ chối, nội dung cũ không đổi. | STORY-LIB-001/AC-003<br>BR-LIB-002/Then | Nháp riêng và khóa bản cũ. Đặc tả chưa thực thi; API/fixture kỹ thuật bổ sung sau TDD. | [Chưa xác định] | Draft |
+| ST-LIB-007 | STORY-LIB-001 | Main / EXC | REGRESSION | P1 | V1 công khai, C đã mở V1. Môi trường thử có chức năng tương ứng; đọc lại được dữ liệu và lượt khi ca cần. | 1. Tạo nháp V2, kiểm các section đã được sao sang nháp rồi sửa ảnh/tệp trong section của V2.<br>2. C mở thư viện và lịch sử trước công bố.<br>3. Công bố V2; đọc thư viện/lịch sử.<br>4. Thử sửa V1 trực tiếp. | V1 có ảnh/tệp X; V2 có Y. Đây là dữ liệu thử, không phải mặc định sản phẩm. | Trước công bố khách vẫn xem V1; sau đó thư viện hiển thị V2, lịch sử C vẫn V1/X. Sửa V1 bị từ chối, nội dung cũ không đổi. | STORY-LIB-001/AC-003<br>BR-LIB-002/Then | Nháp riêng và khóa bản cũ. Đặc tả chưa thực thi; API/fixture kỹ thuật bổ sung sau TDD. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

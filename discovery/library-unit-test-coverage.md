@@ -63,4 +63,62 @@ dotnet test test/bmt-be.api.tests --no-restore -m:1 -nr:false --filter FullyQual
 
 Kết quả: **206 unit test, 93 test PostgreSQL và 67 test HTTP đều đạt; tổng 366, không có ca bị bỏ qua**. Các số này gồm cả kiểm thử hồi quy LIB trước thay đổi, không phải số đặc tả mới. Test tích hợp dùng Testcontainers PostgreSQL 15, chạy toàn bộ migration trên database tạm rồi hủy container. Test HTTP dùng route/middleware/policy thật và MediatR giả; luồng handler/SQL được kiểm riêng trong test PostgreSQL. Vì vậy đây chưa phải kết quả end-to-end từ FE tới database.
 
-Migration mới: `20260930101013_AddLibraryVersionStyles`. Chưa chạy migration trên database dùng chung. Đợt bàn giao này commit và đẩy phần LIB lên `develop` theo yêu cầu người dùng; kết quả CI/CD cần theo dõi riêng. Migration đứng sau migration contractor đã có sẵn trong workspace; không tách hoặc hoàn tác thay đổi đó. Trước phát hành, kiểm read-only số mẫu 3D ở môi trường đích và dung lượng bảng theo TDD-LIB-001; không tự gán phong cách cho dữ liệu phát sinh ngoài giả định ban đầu.
+Migration mới: `20260930101013_AddLibraryVersionStyles`. Migration và code phân loại đã có trên `develop`; tài liệu đã có trên `main`. Chưa chạy migration trên database dùng chung hoặc triển khai dịch vụ trong phiên này. Migration đứng sau migration contractor đã có sẵn trong workspace; không tách hoặc hoàn tác thay đổi đó. Trước phát hành, kiểm read-only số mẫu 3D ở môi trường đích và dung lượng bảng theo TDD-LIB-001; không tự gán phong cách cho dữ liệu phát sinh ngoài giả định ban đầu.
+
+## Section content ngày 01/10/2026
+
+Người dùng đã đồng ý triển khai TDD section. Backend trong workspace đã lưu tên, thứ tự section và liên kết file riêng cho từng `VersionId`. Khi tạo nháp, hệ thống cấp `SectionId` mới và sao liên kết tới các file dùng chung. Sửa trực tiếp giữ phiên bản hiện tại; công bố phiên bản mới giữ nguyên nội dung và quyền xem của bản trước.
+
+Các đặc tả UT-LIB-079–090 giữ trạng thái Draft; đây không phải trạng thái phê duyệt trên Document First. Những điều kiện cần database thật được kiểm bằng integration test, không dùng mock để kết luận transaction hoặc khóa ngoại đã đúng.
+
+| Phạm vi | Bằng chứng thực thi, đường dẫn tính từ bmt-be |
+| --- | --- |
+| Tạo/đổi tên section, chuẩn bị trên current, đổi thứ tự, replay, vị trí sai/tràn, sao section, chặn công bố thiếu file và gỡ file cuối | `test/bmt-be.application.tests/usecases/library/LibrarySectionTests.cs` — UT-LIB-079–082, 089–090 |
+| Ticket bắt buộc đúng section; chặn generic MEDIA và API URL cũ; PDF/DWG/DXF; nhiều ticket trong một section hoàn tất lần lượt | `test/bmt-be.integration.tests/LibrarySectionFlowTests.cs` và `LibraryContentCommandHandlerTests.cs` — UT-LIB-083–085 |
+| Complete cùng commit với Ready/Completed/asset/link/reference; rollback lỗi lưu; replay không gắn lại file đã gỡ; xóa nháp trong lúc truyền file | `LibrarySectionFlowTests.cs` — UT-LIB-084–086 |
+| Khách giữ bản hai section sau khi công bố bản ba section; mở bản mới dùng thêm một lượt; section chuẩn bị ẩn trước count/paging, đọc trực tiếp trả 404 | `test/bmt-be.integration.tests/LibraryAccessFlowTests.cs` — UT-LIB-087–088 |
+| Đổi thứ tự section có file, FK chặn liên kết khác version, hai lần sửa cùng EditVersion chỉ một lần thành công | `LibrarySectionFlowTests.cs` |
+| Migration chặn file cũ chưa ánh xạ trước DDL; chặn Down làm mất section; Up/Down/Up khi không có section, giữ dữ liệu thư viện cũ và model khớp snapshot | `test/bmt-be.integration.tests/LibrarySectionMigrationTests.cs` |
+| Route section cần đăng nhập và library.manage; contract quản trị có version/section; khách không nhận URL gốc | `test/bmt-be.api.tests/library/LibraryApiAuthorizationTests.cs` và `LibrarySectionFlowTests.cs` |
+
+Kết quả: **213 unit test, 86 ca HTTP và 127 ca PostgreSQL đã đạt**, không có ca bị bỏ qua trong các bộ đã chọn. Đây là tổng số ca riêng biệt; không cộng trùng các lần chạy lại. Bộ PostgreSQL gồm LIB và MEDIA. Lượt cuối chạy lại 37 ca đọc/section/migration sau khi hoàn thiện contract; ca nhiều file cùng section được chạy riêng và đạt. HTTP chạy lại 10 ca section sau thay đổi contract và đạt. Các bộ còn lại đã đạt trước đó, không thay đổi phần xử lý sau lần kiểm chứng.
+
+Lệnh kiểm tra dùng `--no-restore`; PostgreSQL chạy trong container tạm. Log của phiên làm việc nằm ở `/private/tmp/bmt-sections-unit-final.log`, `/private/tmp/bmt-sections-api.log`, `/private/tmp/bmt-sections-api-final.log`, `/private/tmp/bmt-sections-integration-final.log`, `/private/tmp/bmt-sections-contract-tests.log` và `/private/tmp/bmt-sections-multiple-files.log`. Log integration toàn bộ có một lần fixture kiểm model hai lần bị lỗi; đã sửa fixture và chạy lại migration thành công trong bộ 37 ca. Build API và các project test thành công; các cảnh báo nullable sẵn có ở module khác vẫn còn.
+
+Bản đưa lên `develop` được tách trên nền code mới nhất của remote, chỉ gồm section thư viện và các thay đổi MEDIA cần thiết. Không đưa phần Google đang làm dở vào đợt này. Migration section đứng sau `20260930155958_UseContractorMediaUrls`; model snapshot giữ nguyên schema xác thực đang có trên `develop`. Các fixture LIB và MEDIA được bổ sung section; test hạ migration MEDIA vẫn kiểm việc Down/Up theo chuỗi migration đã phát hành. Test danh sách bảng bổ sung `LibrarySection` và `LibrarySectionUpload`.
+
+### Kiểm chứng bản đưa lên develop ngày 01/10/2026
+
+Bản code [a01796b](https://github.com/TaskCoper/bmt-be/commit/a01796be8a7469a8d9858cb832bf61c865007fb5) được ghép trên `origin/develop` tại `548020b`. Build toàn solution bằng `--no-restore` đạt, không có lỗi hay cảnh báo. Tổng **2.740 ca riêng biệt đạt**, không có ca bị bỏ qua:
+
+| Bộ test | Số ca đạt |
+| --- | ---: |
+| Domain | 1 |
+| Application | 1.521 |
+| Persistence | 17 |
+| Infrastructure | 245 |
+| HTTP API | 434 |
+| Integration PostgreSQL | 522 |
+
+Lượt Persistence đầu dùng binary chưa có danh sách hai bảng section mới; sau khi dựng lại, đủ 17 ca đạt. Lượt HTTP đầu được chủ động dừng vì log mặc định không hiển thị tiến độ; chạy lại với log chi tiết hoàn tất 434 ca, không có timeout. Kết quả tổng ở trên chỉ lấy lượt hoàn tất của từng bộ, không cộng trùng các lần chạy lại.
+
+Bằng chứng nằm tại `/private/tmp/bmt-library-push-results/`: `api-final.trx`, `persistence-final.trx` và các tệp `library-sections-push_net8.0_20261001022253.trx`, `...022257.trx`, `...022305.trx`, `...023012.trx` lần lượt cho Domain, Application, Infrastructure và Integration. Log build: `/private/tmp/bmt-library-push-build.log`; log HTTP: `/private/tmp/bmt-library-push-api.log`. Các tệp này là bằng chứng local của phiên kiểm tra, không được lưu trong repo.
+
+### Hợp đồng để nối giao diện
+
+Base quản trị: `/api/v1/admin/library/templates/{templateId}/versions/{versionId}`. Mọi thao tác cần `library.manage` và tuân theo cơ chế phiên/CSRF hiện có.
+
+1. `POST /sections` với `{expectedEditVersion,name}` để tạo section. Tên tự nhập; lấy `sectionId` và `editVersion` từ kết quả.
+2. `POST /sections/{sectionId}/uploads` với `{expectedEditVersion,fileName,contentType,sizeBytes}` và `Idempotency-Key` để nhận URL PUT. Ticket đã thuộc section; không gửi URL file về cấp mẫu.
+3. PUT bytes tới `uploadUrl` bằng `requiredHeaders`, rồi `POST /sections/{sectionId}/uploads/{uploadId}/complete` với `{expectedEditVersion,position,setAsCover}`. Dùng `editVersion` mới nhất cho từng file; 202 nghĩa là đang xác minh, đọc GET trạng thái upload. Complete thành công trả `assetId` và `editVersion` mới.
+4. `PUT /sections/{sectionId}` đổi tên; `POST /sections/reorder` gửi `items:[{sectionId,position}]` đổi thứ tự section. Các mutation này cần `Idempotency-Key` và `expectedEditVersion`.
+5. `GET /sections` đọc trang section; theo `assetsUrl` đọc trang file riêng. Quản trị thấy `isPreparing`; khách chưa thấy section chưa có file. API sắp file `/reorder` phải gửi thêm `sectionId`; `PUT /cover` chỉ chọn ảnh đã có trong phiên bản.
+
+Khách dùng `/api/v1/library-versions/{versionId}/sections` và `/sections/{sectionId}/assets` sau khi đã có quyền xem đúng version. GET không trừ lượt. File của khách dùng `contentUrl` có kiểm quyền. Khi `expectedEditVersion` cũ, tải lại từ trang đầu; không nối trang của hai lần sửa.
+
+### Điều kiện triển khai lên môi trường dùng chung
+
+- Migration mới: `20260930184601_AddLibraryVersionSections`. Kiểm file cũ trước triển khai. Nếu có liên kết chưa được ánh xạ section, migration dừng; chưa có quyết định tự gom vào “Nội dung”.
+- Cấu hình `LibraryFileOption__MaxUploadBytes` bằng số byte dương để nhận PDF/DWG/DXF. Chưa cấu hình thì trả 503 trước khi ký upload. Ảnh JPG/PNG/WebP giữ giới hạn 5 MiB.
+- Dùng `SourceSetVersion=3` cho đối soát MEDIA. Thứ tự khóa là nghiệp vụ LIB → StoreId → ticket → object, thống nhất với cleanup; không giữ transaction khi truyền bytes.
+- Chưa triển khai frontend, kiểm trên website Vercel, kiểm truyền file với BizFly thật, import tài liệu hoặc áp migration lên database dùng chung. Kết quả trên xác minh backend và protocol kho qua bộ lưu trữ giả trong test, không thay cho kiểm môi trường phát hành.

@@ -77,7 +77,57 @@ Tài liệu tiếp tục sở hữu nội dung và tìm kiếm; thêm bảng li�
 
 ## Architecture
 
-**Upload và dọn ảnh — áp dụng MEDIA:** [TDD-MEDIA-001](TDD-MEDIA-001.md) thay các mô tả trước đây trong tài liệu này về dịch vụ presign ngoài backend, chỉ frontend kiểm ảnh và backend không dọn file. Upload ảnh mới dùng ba route MEDIA của BMT, nhận JPG/PNG/WebP tối đa 5 MiB và chỉ có URL xem sau khi backend xác minh bytes. API nghiệp vụ tiếp tục nhận URL; khi bật MEDIA, SaveChangesAsync kiểm trạng thái ảnh và đồng bộ nơi sử dụng cùng transaction. Ảnh còn trong nháp, nội dung ẩn hoặc lịch sử được giữ. Sau khi mất nơi sử dụng cuối phải chờ ít nhất 24 giờ; ảnh cũ thiếu lịch sử chờ từ lần đối soát đầy đủ đầu tiên. Ảnh Deleting/Deleted không được gắn lại. Các đoạn mô tả giới hạn hoặc trách nhiệm upload cũ bên dưới chỉ ghi bối cảnh trước MEDIA, không là yêu cầu hiện hành cho ảnh mới. Tệp đính kèm không phải ảnh và luồng đọc nội dung riêng tư vẫn theo hợp đồng riêng của module.
+**Bổ sung section content ngày 01/10/2026 — đã chốt và triển khai backend trong workspace**
+
+Căn cứ: STORY-LIB-001/AC-012–AC-018, STORY-LIB-003/AC-008 và BR-LIB-001 khoản 17–20. Người dùng đã đồng ý tiếp tục từ bộ US/BR và giao triển khai. Phần dưới thay hợp đồng danh sách file chung và upload file rời của LIB; các ghi nhận triển khai trước ngày này không chứng minh section đã có trong code. Đặc tả System Test mới: ST-LIB-052–066, chưa thực thi. Chưa viết đặc tả Unit Test cho phần section vì bản TDD bổ sung chưa được chốt.
+
+Đã kiểm tra code trong workspace: `Library.cs` chỉ có liên kết Version–Asset với Position; `AddLibraryAssetCommandHandler` tạo asset chưa thuộc phiên bản; `CreateLibraryDraftCommandHandler` chỉ sao link file/phong cách; `LibraryAccessStore` phân trang file theo vị trí toàn phiên bản. MEDIA đã có `MediaUploadService`, staging, xác minh bytes và đồng bộ reference ở SaveChanges. `MediaConstants` hiện chỉ có Image/ContractorImage/ContractorScan, chưa nhận DWG/DXF hoặc target section. Nền tảng được xác minh: net8.0, Npgsql/EF Core 8.0.0, PostgreSQL 15 trong compose. Giữ các thay đổi LIB, MEDIA và module khác đang có trong working tree, không thay bằng phiên bản git cũ.
+
+**Quyền sở hữu và thứ tự thực hiện**
+
+1. LIB sở hữu tên, thứ tự section và file thuộc từng section theo VersionId. MEDIA tiếp tục sở hữu ticket, bytes, lease và tình trạng object; SUB sở hữu lượt, không sửa quota/Access để thêm section.
+2. Bổ sung schema section và binding upload; mở rộng read/write store. Tiếp theo là quản trị section, sao/xóa nháp và điều kiện công bố; sau đó là upload theo section, đọc nội dung có quyền và hồi quy đồng thời/lịch sử.
+3. Tất cả mutation nội dung dùng `library.manage`, không kiểm tên vai trò và không cần Assignment. Đổi thứ tự/tên section là sửa nội dung: tăng EditVersion, giữ VersionId/Number/PublishedAtUtc và Access. Phiên bản lịch sử chỉ đọc.
+4. Section có ID riêng nên đổi tên không đổi membership. Tạo nháp cấp ID section mới, sao tên/thứ tự, ánh xạ SectionId cũ sang mới khi sao LibraryVersionAsset; AssetId/URL được dùng lại như hiện tại. Không sao ticket đang upload hoặc kết quả chống gửi lặp sang nháp.
+5. Xóa nháp: khóa như hiện tại, bỏ cover, gỡ link, gỡ binding upload và section của nháp rồi xóa Version cùng transaction. Ticket MEDIA còn giữ purpose thư viện nhưng mất binding không được complete hoặc cấp lại URL; không tự đổi target. Không xóa bytes trong transaction hoặc trong catch. Các phiên bản khác tiếp tục giữ file qua MEDIA reference.
+
+**Section mới trên phiên bản hiện tại — nghiệp vụ đã xác nhận**
+
+Người dùng chọn phương án 1 theo BR-LIB-001 khoản 20: cho tạo section có tên trực tiếp trên current. Section chưa có file chỉ quản trị thấy; file đầu tiên được lưu thành công thì section tự xuất hiện cho khách có quyền xem. Không có thao tác công bố section riêng.
+
+Trạng thái chuẩn bị được suy ra từ việc chưa có LibraryVersionAsset thuộc section; không thêm cột State hoặc cờ IsVisible có thể lệch với dữ liệu file. DTO quản trị trả isPreparing và assetCount; section đã có file có isPreparing=false. Khi current nhận section mới, kiểm tên có nội dung, tăng EditVersion như mutation nội dung nhưng giữ VersionId, PublishedAtUtc và Access. Việc đổi tên/thứ tự section chuẩn bị được phép như các section khác, không làm section lộ cho khách.
+
+Complete file đầu tiên phải kiểm và commit cùng asset/link, kết quả MEDIA và EditVersion. Chỉ khi transaction commit thì query khách mới thấy section. Ticket, lease hoặc bytes ở staging không được tính là file. Upload lỗi, hủy phía client hoặc rollback giữ section ở trạng thái chuẩn bị; không tự thêm API hủy ticket ngoài phạm vi đã có.
+
+Policy sửa current kiểm đủ các section đang có file và cho phép section chuẩn bị có tên; policy công bố Draft vẫn yêu cầu mọi section có tên và ít nhất một file. Gỡ file cuối của section đang phục vụ khách tiếp tục bị từ chối. Khi sao nháp, sao cả section chuẩn bị thành section của nháp; nháp mới vẫn phải đủ dữ liệu trước công bố. Nếu current bị thay thế khi còn section chuẩn bị, section đó giữ nguyên trong bản lịch sử, chỉ quản trị thấy và không được nhận thêm file; không chuyển ticket sang phiên bản mới.
+
+**Mutation section và thứ tự**
+
+Dùng lại `LibraryWriteFlow` và receipt; các tên handler dưới đây là dự kiến: CreateLibrarySectionCommandHandler, RenameLibrarySectionCommandHandler, ReorderLibrarySectionsCommandHandler. Request có expectedEditVersion; cùng actor/operation/key và cùng hash trả lại kết quả đã commit; khác hash trả IdempotencyConflict. Hash có route/template/version/section và payload; reorder sắp mảng theo sectionId trước khi băm, không làm mất vị trí đích. Thêm operation SectionCreate/SectionRename/SectionReorder vào CHECK của LibraryMutationReceipt, không tái dùng hash cũ cho ý định khác.
+
+Khóa User của người thao tác → Template → Version; không lấy khóa catalog nếu chỉ đổi section. Kiểm Version thuộc Template, editable và expectedEditVersion trước khi ghi. Reorder nhận một tập con section: section không gửi giữ nguyên; từ chối ID trùng, ID ngoài version, vị trí không dương, vị trí đích trùng nhau hoặc trùng section không di chuyển. Dùng vị trí tạm lớn hơn mọi vị trí đang dùng/đích, SaveChanges rồi ghi vị trí đích trong cùng transaction. Kiểm tràn bigint trước khi cộng; mọi lỗi ném exception để rollback, không trả Result.Failure sau khi đã ghi. Một reorder tăng EditVersion một lần. Không sửa thứ tự file khi đổi thứ tự section.
+
+Điều kiện công bố bổ sung: có section, tên mỗi section có nội dung và mỗi section có ít nhất một link; mọi link thuộc section của đúng phiên bản. Draft được thiếu tên/file theo BR; Published không được mất cover, ảnh cuối cùng hoặc file cuối cùng của section đang phục vụ khách. Current cho phép thêm section chuẩn bị có tên theo quy tắc trên; điều kiện có file áp dụng cho section đang phục vụ khách. Đổi tên/thứ tự không tự đổi revision danh mục; các điều kiện phong cách hiện hành vẫn được kiểm ở đường ghi cần kiểm Published. Xóa nguyên section hoặc di chuyển file giữa các section chưa được yêu cầu; không tự thêm route cho các thao tác đó trong đợt này.
+
+**Upload phải gắn section từ lúc cấp quyền**
+
+Không giải quyết yêu cầu chỉ bằng thêm SectionId vào bước attach. Luồng đề xuất dùng route LIB theo TemplateId/VersionId/SectionId, phối hợp MEDIA bằng các port application dùng cùng UoW; không để LIB viết trực tiếp bảng MEDIA hoặc gọi command mở transaction lồng.
+
+- Tạo ticket: xác thực `library.manage`, khóa/kiểm section của phiên bản đang được sửa và expectedEditVersion. Tạo MediaUpload cùng LibrarySectionUpload trong một transaction ngắn. Purpose nội bộ là LibraryImage hoặc LibraryAttachment; hash ticket có target và metadata file. Chỉ sau commit mới ký URL PUT bằng IMediaObjectStore. Thiếu/sai section không được tạo ticket sử dụng được hoặc gọi signer. Kiểm lại target trước khi cấp lại URL cho ticket cũ; hết hạn không gia hạn cùng key.
+- Route MEDIA chung không nhận hai purpose thư viện từ body; generic complete/status không được hoàn tất ticket LIB theo luồng bỏ qua binding. Luồng ảnh chung vẫn phục vụ module khác; URL hoặc ticket chung không thể dùng làm file thư viện mới. Bỏ đường nhập URL tùy ý và create-asset/attach rời của LIB, kể cả gọi trực tiếp handler.
+- Complete: kiểm actor sở hữu ticket, quyền hiện tại, binding và trạng thái phiên bản trước khi nhận lease. Tiếp tục dùng staging private, lấy bytes ổn định vào file tạm, xác minh, tính SHA và PUT key final riêng ngoài transaction. Không giữ khóa DB khi gọi kho.
+- Transaction chốt: lấy đủ khóa LIB trước, rồi khóa StoreId, ticket và các object theo thứ tự của MEDIA; kiểm lại section/editVersion/lease. Qua port completion của MEDIA chuyển object Ready và ticket Completed, đồng thời tạo LibraryAsset + LibraryVersionAsset với SectionId, lưu kết quả vào binding, tăng EditVersion và đồng bộ reference. Nếu một bước lỗi thì rollback cả trạng thái complete và nội dung thư viện; bytes đã PUT được đối soát theo cơ chế MEDIA, không DELETE trong catch.
+- Hai complete cùng ticket chỉ tạo một asset/link. Khi đã thành công, gửi lại trả assetId/editVersion đã lưu; không gắn lại file đã được gỡ, không cộng vị trí hoặc tăng EditVersion lần nữa. Đổi position/setAsCover cho ticket đã hoàn tất bị IdempotencyConflict; thao tác mới phải dùng API sửa nội dung. Nếu section/nháp bị xóa hoặc phiên bản đã thành lịch sử trong lúc upload thì không gắn file và không chuyển sang current mới.
+- Quyền PUT đã cấp có thể còn dùng tới hết hạn dù target vừa đổi; backend không hứa thu hồi tức thì URL đã ký. Đây chỉ là bytes ở staging, không được coi là nội dung thư viện đã lưu. Điểm chấp nhận nội dung là transaction complete gắn file vào section thành công.
+
+Ảnh LibraryImage giữ quy tắc MEDIA cho JPG/PNG/WebP tối đa 5 MiB. LibraryAttachment nhận PDF/DWG/DXF, không mượn hạn mức scan nhà thầu 20 MiB. MIME/đuôi file chuẩn hóa cho PDF là application/pdf, DWG là [image/vnd.dwg](https://www.iana.org/assignments/media-types/image/vnd.dwg), DXF là [image/vnd.dxf](https://www.iana.org/assignments/media-types/image/vnd.dxf); ảnh tiếp tục dùng image/jpeg, image/png, image/webp. Không phân tích cấu trúc CAD hoặc tự cam kết quét mã độc. Kích thước khai báo dương và số byte thực phải khớp; trần truyền tải attachment lấy từ cấu hình hạ tầng `LibraryFileOption.MaxUploadBytes` bắt buộc được cung cấp trước khi mở upload attachment, không tự đặt mức sản phẩm. Thiếu cấu hình trả 503 LibraryStorageUnavailable trước signer. Cần xác minh ngưỡng và timeout với môi trường đích trước phát hành. Chi tiết thay đổi MEDIA ghi đồng bộ trong TDD-MEDIA-001; không thay upload của nhà thầu hay dự toán.
+
+**Bảo toàn dữ liệu và kiểm chứng**
+
+Không thêm JSON chứa toàn bộ section/file, bảng quota mới hoặc cache. Read dùng projection và phân trang ở database, không N+1 từng section. Unit test sau khi TDD được chốt sẽ kiểm policy/handler/validator; HTTP kiểm quyền và route cũ; PostgreSQL thật kiểm FK, thứ tự, rollback, replay và khóa đồng thời; kho thử kiểm cấp quyền upload theo section và complete. ST-LIB-052–066 là tiêu chí kiểm chứng, không phải kết quả chạy. Chuỗi phụ thuộc đã đối chiếu ở phần liên quan gồm LIB, MEDIA và cơ chế khóa/quyền hiện hữu; chưa rà lại toàn bộ tài liệu SUB/PAY/AUTH/PROJ ngoài các phần dùng chung được dẫn, không tuyên bố đã audit các module đó.
+
+
+**Quy ước MEDIA trước phần bổ sung section (luồng LIB mới dùng contract ở trên):** [TDD-MEDIA-001](TDD-MEDIA-001.md) thay các mô tả trước đây trong tài liệu này về dịch vụ presign ngoài backend, chỉ frontend kiểm ảnh và backend không dọn file. Upload ảnh mới dùng ba route MEDIA của BMT, nhận JPG/PNG/WebP tối đa 5 MiB và chỉ có URL xem sau khi backend xác minh bytes. API nghiệp vụ tiếp tục nhận URL; khi bật MEDIA, SaveChangesAsync kiểm trạng thái ảnh và đồng bộ nơi sử dụng cùng transaction. Ảnh còn trong nháp, nội dung ẩn hoặc lịch sử được giữ. Sau khi mất nơi sử dụng cuối phải chờ ít nhất 24 giờ; ảnh cũ thiếu lịch sử chờ từ lần đối soát đầy đủ đầu tiên. Ảnh Deleting/Deleted không được gắn lại. Các đoạn mô tả giới hạn hoặc trách nhiệm upload cũ bên dưới chỉ ghi bối cảnh trước MEDIA, không là yêu cầu hiện hành cho ảnh mới. Tệp đính kèm không phải ảnh và luồng đọc nội dung riêng tư vẫn theo hợp đồng riêng của module.
 
 **Hiện trạng đã xác minh**
 
@@ -113,7 +163,7 @@ Kiểm tra lại ngày 26/09/2026 trên `develop` tại `9c7b147`: chưa có cod
 - `LibraryContent` phân biệt null/không gửi với mảng rỗng, so sánh tập và giữ thuật toán hash cũ khi hai mảng đều không gửi. `LibraryStyles` kiểm nhóm/loại, số lựa chọn và thực hiện thay link trong transaction. Tạo, sửa, sao nháp, công bố, xóa nháp đều xử lý link; attach/detach/reorder kiểm phong cách của Published theo revision đã ghim.
 - `GetMatchingDesignTemplatesQueryHandler` đọc revision đầu vào rồi dùng chung truy vấn công khai trong `LibraryReadStore`; các điều kiện phong cách dùng EXISTS. Có `GET /api/v1/admin/library/classification-options`, có hai mảng lọc ở danh sách công khai và hai tập lựa chọn ở filters. `AdminVersionItem` và detail trả tên/ảnh theo revision mẫu, đọc cùng snapshot với metadata.
 - Phân trang tính offset bằng số 64 bit, chặn ở `int.MaxValue` trước khi truyền vào EF để không tràn số. Trang vượt tổng kết quả trả rỗng; không thay điều kiện tìm.
-- Kết quả và giới hạn kiểm chứng ở [bảng kiểm thử](../discovery/library-unit-test-coverage.md). Đợt bàn giao này commit và đẩy code lên `develop` theo yêu cầu người dùng; migration chưa áp dụng lên database dùng chung. Trước phát hành vẫn cần kiểm tra môi trường đích chưa có mẫu 3D và thực hiện các bước migration bên dưới; FE do bên tích hợp thực hiện theo phạm vi người dùng đã chốt.
+- Kết quả và giới hạn kiểm chứng ở [bảng kiểm thử](../discovery/library-unit-test-coverage.md). Code phân loại đã có trên `develop`; phần section và kết quả kiểm chứng được mô tả trong bảng kiểm thử. Chưa triển khai dịch vụ trong phiên này. Trước phát hành vẫn cần kiểm tra môi trường đích chưa có mẫu 3D và thực hiện các bước migration bên dưới; FE do bên tích hợp thực hiện theo phạm vi người dùng đã chốt.
 
 **Phong cách của mẫu — cách lưu và cập nhật**
 
@@ -286,32 +336,41 @@ Bổ sung integration PostgreSQL để kiểm FK ghép, rollback giữa các bư
 
 ## Sequence Diagram
 
+Luồng upload theo section đề xuất ngày 01/10/2026. Thay cho luồng tạo asset bằng URL rời trước đây; current được thêm section chuẩn bị theo BR-LIB-001 khoản 20, chỉ khách có quyền thấy sau khi complete file đầu tiên commit.
+
 ```mermaid
 sequenceDiagram
     actor A as Người quản lý
-    participant P as Dịch vụ presigned URL
-    participant API as AdminLibraryApi
+    participant LIB as Library API
+    participant MEDIA as Media upload
     participant DB as PostgreSQL
-    A->>A: Frontend kiểm định dạng và dung lượng tệp
-    A->>P: Xin URL upload và tự upload tệp
-    P-->>A: URL https cố định của tệp
-    A->>API: POST assets với url, kind, originalName, mediaType
-    API->>API: Chỉ kiểm URL https thuộc AllowedHosts
-    API->>DB: Lưu LibraryAsset bằng giao dịch ngắn
-    A->>API: Tạo và chỉnh sửa nháp riêng
-    API->>DB: Lưu nháp, link tài nguyên và receipt
-    Note over API,DB: Current vẫn phục vụ khách
-    A->>API: Publish với expected versions và key
-    API->>DB: Khóa actor, catalog, template và version
-    alt Dữ liệu thiếu hoặc version xung đột
-        API->>DB: Rollback
-        API-->>A: Lỗi, current không đổi
-    else Hợp lệ
-        API->>DB: Publish nháp, đổi current và ghi receipt
-        API->>DB: Commit
-        API-->>A: Phiên bản mới; bản trước khóa sửa
+    participant STORE as Kho tệp
+    A->>LIB: Chọn section, xin upload
+    LIB->>DB: Kiểm quyền, phiên bản và section
+    alt Target không hợp lệ
+        LIB-->>A: Từ chối trước khi ký URL
+    else Target hợp lệ
+        LIB->>MEDIA: Tạo ticket trong cùng transaction
+        LIB->>DB: Lưu binding ticket với section và commit
+        MEDIA->>STORE: Ký URL staging
+        LIB-->>A: UploadId và URL có hạn
+        A->>STORE: PUT bytes
+        A->>LIB: Complete upload của section
+        LIB->>DB: Kiểm lại target và nhận lease
+        LIB->>MEDIA: Xác minh và chuẩn bị object final
+        MEDIA->>STORE: Đọc staging, kiểm bytes, PUT final
+        Note over DB,STORE: Không giữ transaction DB trong lúc truyền tệp
+        LIB->>DB: Khóa LIB rồi MEDIA, kiểm lại target và lease
+        alt Target thay đổi hoặc phiên bản đã thành lịch sử
+            LIB-->>A: Báo lỗi, không gắn file
+        else Hợp lệ
+            LIB->>DB: Ready, Completed, asset, link section và reference
+            LIB->>DB: Lưu kết quả, tăng EditVersion và commit
+            LIB-->>A: AssetId và EditVersion đã lưu
+        end
     end
 ```
+
 
 Luồng tìm mẫu bổ sung, áp dụng khi dữ liệu phân loại đầu vào đã đủ:
 
@@ -333,6 +392,28 @@ sequenceDiagram
 
 
 ## Activity Diagram
+
+Luồng đổi thứ tự section; việc đổi thứ tự file bên trong section là thao tác riêng.
+
+```mermaid
+flowchart TD
+    S[Nhận danh sách section và vị trí đích] --> A{Có quyền quản lý?}
+    A -->|Không| X[Từ chối]
+    A -->|Có| B[Khóa actor, mẫu và phiên bản]
+    B --> C{Có kết quả cùng key?}
+    C -->|Cùng hash| R[Trả kết quả đã lưu]
+    C -->|Khác hash| X
+    C -->|Chưa| D{Editable và EditVersion đúng?}
+    D -->|Không| X
+    D -->|Có| E{Section và vị trí hợp lệ?}
+    E -->|Không| X
+    E -->|Có| F[Đổi qua vị trí tạm rồi vị trí đích]
+    F --> G[Tăng EditVersion, lưu receipt và commit]
+    F -->|Lỗi| H[Rollback toàn bộ]
+    G --> I[Trả thứ tự mới, giữ nguyên VersionId và lượt]
+```
+
+Luồng quản trị phiên bản hiện có, bổ sung kiểm section khi công bố:
 
 ```mermaid
 flowchart TD
@@ -360,10 +441,22 @@ flowchart TD
 
 ## State Diagram
 
+Trạng thái hiển thị section trên current được suy ra từ file đã lưu, không phải enum trong database:
+
+```mermaid
+stateDiagram-v2
+    [*] --> Preparing: Tạo section có tên trên current
+    Preparing --> Preparing: Upload chưa xong, lỗi hoặc rollback
+    Preparing --> Visible: Complete file đầu tiên commit thành công
+    Visible --> Visible: Thêm file, sửa tên hoặc thứ tự hợp lệ
+```
+
+Preparing chỉ quản trị thấy. Ở Visible, khách có quyền xem phiên bản được đọc section. Gỡ file cuối của section đang phục vụ bị từ chối; phiên bản lịch sử khóa mọi mutation kể cả section vẫn Preparing. Trạng thái vòng đời phiên bản tiếp tục theo sơ đồ dưới.
+
 ```mermaid
 stateDiagram-v2
     [*] --> Draft: Tạo mẫu hoặc nháp riêng
-    Draft --> Current: Đủ dữ liệu và phong cách áp dụng, đổi con trỏ
+    Draft --> Current: Đủ dữ liệu, section có tên và file; đổi con trỏ
     Draft --> [*]: Xóa nháp
     Current --> Current: Sửa tại chỗ tăng EditVersion
     Current --> Historical: Công bố phiên bản kế tiếp
@@ -373,6 +466,70 @@ stateDiagram-v2
 Current/Historical là trạng thái suy ra từ State=Published và con trỏ Template, không phải hai giá trị State được lưu. IsHidden thuộc Template, không phải trạng thái Version. Quyền Access không hết hạn theo kỳ và không bị gỡ bởi ẩn mẫu.
 
 ## Data Model
+
+**Schema section đã triển khai ngày 01/10/2026 — nguồn duy nhất của phần bổ sung**
+
+**Yêu cầu lưu theo từng phiên bản — người dùng đã xác nhận:** mỗi VersionId lưu riêng danh sách section, tên và thứ tự section, cùng các liên kết file và thứ tự file trong section. Một dòng LibrarySection chỉ thuộc một VersionId. Khi tạo nháp phiên bản mới, cấp SectionId mới và sao các liên kết file sang đúng section của nháp; không cho hai phiên bản cùng sửa một dòng section. File không thay đổi có thể dùng chung LibraryAsset, nhưng thay file phải tạo asset mới để giữ file mà bản cũ còn tham chiếu.
+
+Phân biệt hai thao tác theo BR-LIB-002: chỉnh sửa trực tiếp cập nhật section/file của cùng VersionId; tạo nháp rồi công bố phiên bản mới lưu một tập section riêng và giữ bản trước. Không tạo bản sao section theo từng khách hoặc từng lần mở; quyền xem vẫn gắn với AccountId/VersionId theo BR-LIB-003. Số lượng section và EditVersion không quyết định một lượt tra cứu mới.
+
+Bảng dưới bổ sung mô hình nội dung hiện có; phần mô tả VersionAsset chỉ có vị trí toàn phiên bản ở các mục lịch sử bên dưới được thay bằng SectionId và vị trí trong section. UUID/PascalCase/timestamptz/RESTRICT theo dự án; không thêm tenant.
+
+| Bảng | Một dòng đại diện cho gì; ai ghi |
+|---|---|
+| LibrarySection | Một nhóm nội dung của đúng một LibraryVersion; LIB tạo/sửa tên và thứ tự. ID khác nhau giữa bản gốc và bản nháp sao chép. |
+| LibraryVersionAsset | Một file thuộc đúng một section trong một phiên bản. Giữ PK VersionId/AssetId để một file không xuất hiện ở hai section của cùng phiên bản. |
+| LibrarySectionUpload | Một ticket MEDIA đã được cấp cho một section cụ thể; LIB tạo cùng ticket và ghi kết quả asset khi complete. Không là nơi sử dụng giữ bytes; link VersionAsset mới là nơi sử dụng. |
+
+| Bảng | Cột, khóa, NULL và ràng buộc bổ sung |
+|---|---|
+| LibrarySection | Id uuid PK; TemplateId uuid NN; VersionId uuid NN; Name text NULL cho nháp chưa đặt tên; Position bigint NN CHECK >0. FK (TemplateId,VersionId) → LibraryVersion(TemplateId,Id) RESTRICT; UNIQUE(TemplateId,VersionId,Id); UNIQUE(VersionId,Position). |
+| LibraryVersionAsset | Thêm SectionId uuid NN. FK (TemplateId,VersionId,SectionId) → LibrarySection(TemplateId,VersionId,Id) RESTRICT. Giữ PK(VersionId,AssetId) và hai FK hiện có để chặn file của mẫu khác. Thay UNIQUE(VersionId,Position) bằng UNIQUE(SectionId,Position); Position vẫn bigint dương, nay là thứ tự file trong section. |
+| LibrarySectionUpload | UploadId uuid PK/FK MediaUpload.Id RESTRICT; TemplateId/VersionId/SectionId uuid NN, FK ghép tới LibrarySection RESTRICT; ResultAssetId uuid NULL, UNIQUE khi có giá trị và FK(TemplateId,ResultAssetId) tới LibraryAsset(TemplateId,Id) RESTRICT; ResultEditVersion bigint NULL CHECK NULL hoặc >0; CompletionHash char(64) NULL. Ba cột kết quả cùng NULL trước thành công hoặc cùng khác NULL sau thành công. |
+| LibraryMutationReceipt | Giữ schema; mở rộng CHECK Operation cho SectionCreate/SectionRename/SectionReorder. Không lưu danh sách section làm nguồn nội dung trong receipt. |
+
+Index dự kiến: UX_LibrarySection_Version_Position để đọc/sắp thứ tự và kiểm trùng; AK_LibrarySection_Template_Version_Id làm đích FK; UX_LibraryVersionAsset_Section_Position phục vụ phân trang file trong section; IX_LibrarySectionUpload_SectionId để tra binding khi xóa nháp. PK UploadId tìm lại lần complete; index unique ResultAssetId chặn nhiều binding nhận cùng kết quả. Không đặt tên section là khóa vì tên được sửa; không thêm quy tắc cấm trùng tên chưa được người dùng yêu cầu.
+
+Giữ FK cover (Version.Id,CoverAssetId) tới VersionAsset(VersionId,AssetId), nên ảnh đại diện vẫn buộc là file đã gắn. FK ghép SectionId buộc file của đúng version/template; quy tắc có ít nhất một file ở từng section khi công bố là kiểm nhiều dòng dưới khóa Version, không dùng CHECK đọc bảng khác. Concurrency dùng Version.EditVersion, không tạo bộ đếm phiên bản riêng trên section.
+
+Chuẩn hóa: tên/thứ tự nhóm phụ thuộc SectionId và chỉ lưu tại LibrarySection; URL/tên file phụ thuộc AssetId và chỉ lưu LibraryAsset. Các cột TemplateId/VersionId lặp ở bảng con có chủ đích để FK ghép kiểm cùng chủ sở hữu, không phải các giá trị được sửa độc lập. Không lưu AssetCount hoặc danh sách ID dạng chuỗi; count/status hiển thị tính khi đọc. Binding lưu kết quả complete để chống tạo lại asset, không sao toàn bộ MediaUpload hoặc trạng thái MEDIA.
+
+```mermaid
+erDiagram
+    LibraryTemplate ||--o{ LibraryVersion : versions
+    LibraryVersion ||--o{ LibrarySection : contains
+    LibrarySection ||--o{ LibraryVersionAsset : groups
+    LibraryAsset ||--o{ LibraryVersionAsset : reused
+    LibrarySection ||--o{ LibrarySectionUpload : upload_target
+    MediaUpload ||--o| LibrarySectionUpload : scoped_to_library
+```
+
+Draft có thể có 0 section và section có 0 file. Khi công bố Draft, mọi section phải đủ tên/file; current được thêm section chuẩn bị có tên nhưng chưa có file như Architecture. FK đều RESTRICT. Khi xóa nháp phải xóa binding/link/section của riêng nháp theo đúng thứ tự; không cascade tới Asset, MediaUpload, MediaObject hay Access. Current được có section chuẩn bị không có link; isPreparing tính bằng NOT EXISTS link trong cùng snapshot đọc. Không lưu thêm trạng thái section; khi file đầu tiên được gắn trong transaction complete, trạng thái đọc tự đổi.
+
+**Dữ liệu minh họa, không phải seed hoặc dữ liệu môi trường thật**
+
+Dùng bí danh UUID, lược cột audit; cùng mẫu M1, current V1 và nháp V2. Các bảng Template/Version/Asset nền lấy schema ở tài liệu này; ticket/object nền lấy TDD-MEDIA-001/Data Model.
+
+| Bảng | Dữ liệu lưu minh họa |
+|---|---|
+| LibrarySection | S1/M1/V1/Name=Phòng khách/Position=1; S2/M1/V1/Name=Góc sofa/Position=2. |
+| LibraryAsset | F1/M1/Image/url ảnh 1; F2/M1/Image/url ảnh 2; F3/M1/Attachment/url PDF. Metadata bắt buộc theo bảng gốc. |
+| LibraryVersionAsset | M1/V1/F1/S1/Position=1; M1/V1/F2/S1/Position=2; M1/V1/F3/S2/Position=1. Hai file ở hai section có thể cùng Position=1. |
+| MediaUpload | U3/Purpose=LibraryAttachment/ActorId=A1/State=Completed/CompletedObjectId=O3; fields/key và thời gian UTC theo TDD-MEDIA-001. |
+| LibrarySectionUpload | UploadId=U3; M1/V1/S2; ResultAssetId=F3; ResultEditVersion=8; CompletionHash=SHA256 của ý định complete. Trước complete ba cột kết quả NULL. |
+
+Đảo section S2 lên trước chỉ đổi Position của S1/S2 và V1.EditVersion; các vị trí F1/F2/F3 giữ nguyên, không thay Access hoặc PublishedAtUtc. Sao V1 thành V2 tạo S3/S4 với VersionId=V2, sao link F1/F2 vào S3 và F3 vào S4; không sao U3/binding. Đổi tên hoặc thứ tự V2 không đổi V1. Xóa V2 gỡ các link và S3/S4 nhưng F1/F2/F3 còn được V1 giữ. Mất phản hồi complete U3 thì binding trả F3/editVersion=8, không chèn F4 hoặc gắn F3 thêm lần nữa.
+
+Ví dụ tiếp theo: khách U1 đã mở V1 gồm S1/S2 và các file F1/F2/F3. Admin tạo nháp V2 như trên, thêm S5 thuộc V2 và upload F4 vào S5 rồi công bố V2. Database giữ hai section S1/S2 của V1 và ba section S3/S4/S5 của V2. U1 xem lại V1 vẫn nhận hai section và file của V1; xác nhận mở V2 thành công mới nhận quyền xem ba section và dùng thêm một lượt với hạn mức hữu hạn. Riêng nếu admin chọn chỉnh sửa trực tiếp V1 để thêm section/file thì vẫn là V1, U1 đọc nội dung đã sửa và không dùng thêm lượt. Bấm Công bố không tự trừ lượt của U1.
+
+**Migration và tương thích**
+
+- Chưa chạy query trên database môi trường dùng chung, chưa biết số mẫu/file, nhịp ghi hay cửa sổ triển khai. Không suy ra không có dữ liệu từ working tree hoặc quyết định cũ chưa có mẫu 3D.
+- Phương án migration cho môi trường chưa có link file: kiểm trước `LibraryVersionAsset` rỗng trong transaction migration rồi thêm section/binding/SectionId NN, đổi index và CHECK. Nếu có link cũ thì dừng toàn bộ trước thay dữ liệu; không tạo section “Nội dung”, xóa file, đổi VersionId hoặc tự đoán từ tên file. Với môi trường có dữ liệu, cần bảng ánh xạ do nghiệp vụ cung cấp và kế hoạch expand/backfill/verify riêng trước cutover; chưa có ánh xạ nên chưa được áp migration này ở môi trường đó.
+- Không chỉnh các migration đã tồn tại. Migration mới cập nhật model snapshot và đồng thời mở rộng CHECK MEDIA cho purpose thư viện theo TDD-MEDIA-001; chạy trên PostgreSQL tạm trước phát hành. Không tự áp lên DB đang kết nối.
+- Đây là thay đổi contract ghi có chủ đích: frontend phải tạo/chọn section trước upload. Không chạy backend cũ và mới cùng ghi LIB; backend cũ không hiểu SectionId hoặc binding và có thể bỏ qua điều kiện. Cập nhật frontend đồng bộ khi phát hành; phạm vi hiện tại là backend và hợp đồng tích hợp.
+- Kiểm trước/sau: số Template/Version/Asset/Access/UsageOperation không đổi do migration; không có link thiếu section, sai version/template, section trùng Position hoặc asset trùng trong version; không có file/ảnh cover mất tham chiếu. Test Down không được drop dữ liệu section đã dùng: nếu bảng mới có dữ liệu thì từ chối Down, giữ schema và sửa tiếp hoặc khôi phục bản sao đã kiểm chứng. Không tự đặt RPO/RTO khi chưa có yêu cầu.
+
 
 **Quy ước và bảng dùng lại**
 
@@ -538,6 +695,22 @@ Không thay migration đã chạy; tạo migration EF mới ở bước triển 
 
 ### Endpoints
 
+**Contract section ngày 01/10/2026 — đã triển khai backend.** Các route quản trị dưới đây dùng `library.manage`, CSRF và envelope hiện tại. Tất cả route đọc trả no-store. Mutation section dùng Idempotency-Key 1–100 ký tự và expectedEditVersion; upload dùng key 1–128 ký tự theo MEDIA. Các route create-asset/attach URL rời ghi trong phần cũ bên dưới bị thay thế: khi triển khai giữ đường dẫn cũ để trả 422 InvalidLibraryContent yêu cầu chọn section, không nhận URL ở cấp mẫu hoặc cấp phiên bản.
+
+- **POST** `/api/v1/admin/library/templates/{templateId}/versions/{versionId}/sections` — `{expectedEditVersion,name}`; cấp SectionId và Position cuối danh sách, trả 201 `{sectionId,versionId,editVersion,name,position}`. Draft cho Name null; current bắt buộc Name có nội dung và section mới có isPreparing=true. Response bổ sung isPreparing; khách chưa thấy section này. Kiểm tràn Position trước ghi.
+- **PUT** `/api/v1/admin/library/templates/{templateId}/versions/{versionId}/sections/{sectionId}` — `{expectedEditVersion,name}`; chỉ đổi tên, trả 200 `{sectionId,versionId,editVersion,name,position,isPreparing}`. Không đổi membership/thứ tự.
+- **POST** `/api/v1/admin/library/templates/{templateId}/versions/{versionId}/sections/reorder` — `{expectedEditVersion,items:[{sectionId,position}]}`; đổi thứ tự tập con theo Architecture; trả 200 `{versionId,editVersion}`.
+- **GET** `/api/v1/admin/library/templates/{templateId}/versions/{versionId}/sections` — query pageIndex/pageSize/expectedEditVersion; trả `{templateId,versionId,editVersion,isCurrent,isReadOnly,sections}`. `sections` là PagedResult với mỗi item `{sectionId,name,position,isPreparing,assetCount,assetsUrl}`; sort Position rồi Id. Metadata và count cùng snapshot; quản trị thấy cả section chuẩn bị. Không tải mọi file lồng vào từng section.
+- **GET** `/api/v1/admin/library/templates/{templateId}/versions/{versionId}/sections/{sectionId}/assets` — query pageIndex/pageSize/expectedEditVersion; trả header version/section/cover và trang file `{assetId,sectionId,kind,url,originalName,mediaType,sizeBytes,position,isCover}`; sort vị trí trong section rồi assetId. Chỉ người quản lý nhận URL gốc.
+- **POST** `/api/v1/admin/library/templates/{templateId}/versions/{versionId}/sections/{sectionId}/uploads` — `{expectedEditVersion,fileName,contentType,sizeBytes}`; backend suy ra purpose từ định dạng, body không có ActorId/URL. Tạo ticket+binding rồi trả 201, hoặc 200 khi replay, payload `{uploadId,sectionId,state,method,uploadUrl,requiredHeaders,expiresAtUtc}`. Không tăng EditVersion khi mới cấp ticket vì chưa đổi nội dung.
+- **POST** `/api/v1/admin/library/templates/{templateId}/versions/{versionId}/sections/{sectionId}/uploads/{uploadId}/complete` — `{expectedEditVersion,position,setAsCover}`; 202 khi đang có lease xử lý, 200 khi đã lưu thành công `{uploadId,sectionId,assetId,versionId,editVersion}`. Thiếu section/binding hoặc ticket của actor khác trả 404; không nhận URL từ client. ExpectedEditVersion lấy từ lần đọc mới nhất, không bị cố định ở lúc cấp ticket, để nhiều file của cùng section có thể hoàn tất lần lượt. Kết quả complete chỉ được ghi một lần như Architecture.
+- **GET** `/api/v1/admin/library/templates/{templateId}/versions/{versionId}/sections/{sectionId}/uploads/{uploadId}` — trạng thái của ticket thuộc actor và target này; không cấp URL upload mới, trả kết quả đã lưu khi Completed. Target đã xóa trả 404; trạng thái thành công không tự gắn lại asset đã gỡ.
+
+Route `GET .../versions/{versionId}/assets` cũ giữ đọc được với sectionId/sectionName/sectionPosition bổ sung ở mỗi item, sort theo sectionPosition, vị trí file, assetId. FE mới dùng hai tầng section/assets để không phân trang làm mất nhóm. `POST .../versions/{versionId}/reorder` file cũ bổ sung sectionId bắt buộc; chỉ đổi file trong section này, không chuyển nhóm. `DELETE .../assets/{assetId}` giữ route/quyền, thêm kiểm không làm section đang phục vụ khách mất file cuối. PUT attach URL/file có sẵn không còn là đường thêm file mới; chọn cover dùng `PUT .../versions/{versionId}/cover` với `{expectedEditVersion,assetId}`, chỉ chọn Image đã có link trong section của đúng phiên bản, trả VersionEdited. Các route công bố/ẩn/metadata khác giữ hợp đồng, thêm policy section ở handler.
+
+- **PUT** `/api/v1/admin/library/templates/{templateId}/versions/{versionId}/cover` — đổi ảnh đại diện trong các file đã gắn; dùng key/expectedEditVersion và kết quả như mutation quản trị hiện có.
+
+
 Các route dưới đây đã có trong code ở commit `66e4671` (nhánh `feature/library-admin`, chưa merge). Mutation quản trị cần library.manage và Idempotency-Key, trừ `POST .../assets`; chống CSRF theo [TDD-AUTH-001](TDD-AUTH-001.md). Mọi phản hồi của hai nhóm route có `Cache-Control: no-store`. Chi tiết cài đặt đã chốt khi triển khai: tạo nháp không tăng `templateVersion` vì không đổi dòng mẫu; gửi ẩn/hiện đúng trạng thái đang có thì không đổi gì và giữ `templateVersion`; công bố một phiên bản không còn là nháp trả 409 `LibraryVersionConflict`; gỡ ảnh đại diện của nháp đưa cover về trống, còn với phiên bản hiện hành thì trả 422; gỡ tài nguyên chưa gắn trả 404 `LibraryNotFound`; gắn tài nguyên không thuộc mẫu trả 422 `InvalidLibraryContent`. RequestKey 1–100 ký tự; request hash chứa route, target, expected versions và body chuẩn hóa. Cùng actor/operation/key khác hash trả 409; cùng hash trả kết quả đã commit trước kiểm optimistic version, nhưng vẫn kiểm quyền hiện tại. API khách không nhận AccountId từ client.
 
 - **GET** `/api/v1/design-templates` — Công khai. query `drawingKind,buildingTypeId,floorCount,hasTum,name,pageIndex,pageSize`; thiếu hasTum nghĩa Tất cả. Trả summary: templateId,versionId,number,name,dimensions,type label,floorCount,hasTum,thumbnailUrl,publishedAtUtc. `thumbnailUrl` là URL gốc (`LibraryAsset.Url`) của ảnh cover thuộc phiên bản hiện hành không ẩn, để trình duyệt/CDN cache; mẫu bị ẩn hoặc chưa có bản hiện hành không xuất hiện trong danh sách. Không trả URL tệp chi tiết, tệp đính kèm hoặc manifest; các tệp đó là nội dung được bảo vệ, đi qua route có quyền của TDD-LIB-002.
@@ -590,6 +763,19 @@ Ví dụ: khách chọn kiến trúc [AR1,AR2] và nội thất [IN1,IN2]. Mẫu
 
 ### Examples
 
+#### POST /api/v1/admin/library/templates/{templateId}/versions/{versionId}/sections/reorder
+
+Ví dụ chỉ là payload minh họa; route thật dùng UUID hợp lệ, response bọc Result theo ApiEndpoint.
+
+```json
+{"expectedEditVersion":8,"items":[{"sectionId":"10000000-0000-0000-0000-000000000002","position":1},{"sectionId":"10000000-0000-0000-0000-000000000001","position":2}]}
+```
+
+Request: body JSON ở trên, Header Idempotency-Key: section-order-demo.
+Response 200: `{"versionId":"20000000-0000-0000-0000-000000000001","editVersion":9}`.
+Error Response: 409 `LibraryVersionConflict` khi expectedEditVersion cũ; 409 `LibraryPositionConflict` khi vị trí đích xung đột; 422 `InvalidLibraryContent` khi section không thuộc phiên bản.
+
+
 #### POST /api/v1/admin/library/templates/{templateId}/versions/{versionId}/publish
 
 ```
@@ -623,6 +809,8 @@ Ví dụ chỉ là payload; dùng wrapper/lỗi chung của ApiEndpoint khi tri�
 
 
 ### Error Codes
+
+Phần section dùng lại mã hiện hữu: LibraryNotFound cho target/ticket không thuộc đường dẫn; LibraryVersionReadOnly cho bản lịch sử; LibraryVersionConflict cho lần sửa cũ; LibraryPositionConflict cho vị trí trùng; InvalidLibraryContent cho thiếu section, tên hoặc file lúc công bố và các route nhập file rời đã ngừng nhận; IdempotencyConflict cho ý định complete/section thay đổi. Lỗi truyền tải/xác minh theo MEDIA được giữ ở route upload; không quy mọi lỗi thành hết lượt.
 
 - **Unauthorized** (401): Phiên thiếu/không hợp lệ; dùng mã xác thực hiện có khi tích hợp.
 - **AccessForbidden** (403): Thiếu library.manage hoặc không có Access cho đọc nội dung; không trả tài nguyên bảo vệ.
@@ -683,6 +871,9 @@ Upload lỗi thì frontend không gọi API, nội dung cũ giữ nguyên. Uploa
 
 ### Others
 
+- [TDD-MEDIA-001](TDD-MEDIA-001.md): ticket, staging, lease, đồng bộ reference và phần tích hợp LibrarySectionUpload bổ sung.
+- [ST-LIB-052](../systemtest/ST-LIB-052.md) đến [ST-LIB-066](../systemtest/ST-LIB-066.md): section, upload bắt buộc target, thứ tự, quyền và lịch sử; chưa thực thi.
+
 - [TDD-PROJ-002/Internal API](TDD-PROJ-002.md#internal-api): FE đợi lưu inputVersion rồi bắt đầu tác vụ; lấy mẫu tham khảo khi AI đang xử lý, độc lập với kết quả AI.
 
 - Phạm vi use case: Quản lý mẫu, sửa tại chỗ, công bố phiên bản mới, ẩn/hiện và xóa nháp. Tìm/lọc, mở lần đầu, xem lại và tải tài nguyên từ lịch sử.
@@ -723,3 +914,5 @@ Upload lỗi thì frontend không gọi API, nội dung cũ giữ nguyên. Uploa
 - 2026-09-26 (lưu URL tệp): Theo quyết định backend không có kho tệp riêng: frontend upload qua dịch vụ presigned URL, backend chỉ lưu URL https thuộc `UploadedFileOption__AllowedHosts`, kiểm bằng `IUploadedFileUrlPolicy` đã có trong code. Bỏ `ILibraryObjectStore`, `PutImmutable`, bộ kiểm bytes và tạo thumbnail; `LibraryAsset` thay `StorageKey`, `ThumbnailKey`, `Sha256` bằng cột `Url`, `SizeBytes` thành dữ liệu khai báo có thể NULL. `POST .../assets` nhận URL thay cho stream bytes; thumbnail dùng ảnh cover. Định dạng tệp kiểm ở frontend, backend kiểm định dạng khai báo; việc áp hệ quả này cho LIB và việc trả hay giấu URL gốc là câu hỏi mở. UT-LIB-009, UT-LIB-010, UT-LIB-032 cần viết lại sau khi chốt TDD. Nghiệp vụ BR-LIB-001–003 không đổi.
 - 2026-09-26 (CSRF): Chống CSRF dẫn tới [TDD-AUTH-001](TDD-AUTH-001.md), bỏ antiforgery token.
 - 2026-09-25: Ghi `library.manage` là tên quyền đã chốt theo STORY-RBAC-001 (RequiresAssignment=false, vai trò Admin có quyền), policy kiểm theo mã quyền chứ không theo tên vai trò. Bảng ý nghĩa dữ liệu đổi “Admin tạo/sửa” thành “người có `library.manage`”. Bổ sung tham chiếu STORY-RBAC-001 và BR-RBAC-001. Thiết kế nội dung, phiên bản và API không đổi.
+
+- 2026-10-01 (section): Đã triển khai backend section theo VersionId, upload gắn section, đọc có quyền và migration `20260930184601_AddLibraryVersionSections`. Migration dừng khi có file cũ chưa được ánh xạ; không tự backfill. Thứ tự khóa MEDIA dùng StoreId → ticket → object, thống nhất với cleanup để tránh chờ vòng. Chi tiết bằng chứng và phạm vi chưa chạy ở [bảng kiểm thử](../discovery/library-unit-test-coverage.md#section-content-ngày-01102026). Chưa áp migration lên môi trường dùng chung.

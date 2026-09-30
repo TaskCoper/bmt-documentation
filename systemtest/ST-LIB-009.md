@@ -44,7 +44,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-LIB-009 | STORY-LIB-001 | Main / EXC | REGRESSION | P1 | Có V1 đã công bố, V2 nháp; C đã mở V1. Môi trường thử có chức năng tương ứng; đọc lại được dữ liệu và lượt khi ca cần. | 1. Xóa V2.<br>2. Thử xóa V1 trực tiếp.<br>3. C mở V1 và tải tệp. | Ảnh/tệp riêng cho hai bản. Đây là dữ liệu thử, không phải mặc định sản phẩm. | V2 nháp được xóa; V1 không bị xóa, lịch sử và tệp V1 vẫn dùng được. | STORY-LIB-001/AC-005<br>BR-LIB-002/Then | Chỉ xóa bản nháp. Đặc tả chưa thực thi; API/fixture kỹ thuật bổ sung sau TDD. | [Chưa xác định] | Draft |
+| ST-LIB-009 | STORY-LIB-001 | Main / EXC | REGRESSION | P1 | Có V1 đã công bố, V2 nháp; C đã mở V1. Môi trường thử có chức năng tương ứng; đọc lại được dữ liệu và lượt khi ca cần. | 1. Xóa V2.<br>2. Thử xóa V1 trực tiếp.<br>3. C mở V1 và tải tệp. | Ảnh/tệp riêng cho hai bản. Đây là dữ liệu thử, không phải mặc định sản phẩm. | V2 nháp và section của V2 được xóa; V1 không bị xóa, lịch sử và tệp V1 vẫn dùng được. | STORY-LIB-001/AC-005<br>BR-LIB-002/Then | Chỉ xóa bản nháp. Đặc tả chưa thực thi; API/fixture kỹ thuật bổ sung sau TDD. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

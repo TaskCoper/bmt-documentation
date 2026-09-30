@@ -35,7 +35,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# ST-LIB-011
+# ST-LIB-060
 
 ## System Test
 
@@ -44,11 +44,13 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-LIB-011 | STORY-LIB-001 | EXC | REGRESSION | P1 | Khách C và nhân viên B không có library.manage; nhân viên E thuộc vai trò tùy chỉnh (không phải Admin) được cấp library.manage; A thuộc vai trò Admin. E và A không có phân công tài nguyên. Môi trường thử có chức năng tương ứng; đọc lại được dữ liệu và lượt khi ca cần. | 1. C/B gửi trực tiếp thêm, sửa, công bố, ẩn, hiện, xóa nháp, đổi thứ tự section và xin upload theo section; lặp lại bằng phiên chưa đăng nhập.<br>2. E rồi A lần lượt thực hiện một thao tác hợp lệ.<br>3. A đọc lại mẫu và phiên bản. | V1 công khai, V2 nháp. Đây là dữ liệu thử, không phải mặc định sản phẩm. | Thao tác trái quyền bị từ chối (403 khi đã đăng nhập, 401 khi chưa đăng nhập), dữ liệu/hiển thị không đổi. E và A đều thực hiện được vì cùng có library.manage; hệ thống kiểm theo mã quyền, không theo tên vai trò Admin và không cần phân công. | STORY-LIB-001/AC-001<br>BR-LIB-002/Then<br>STORY-LIB-001/EXC-01<br>BR-RBAC-011/Then | Chặn quản trị trái quyền. Đặc tả chưa thực thi; API/fixture kỹ thuật bổ sung sau TDD. | [Chưa xác định] | Draft |
+| ST-LIB-060 | STORY-LIB-003 | ALT | REGRESSION | P0 | Khách U đã mở V1; V1 có hai section nhiều file; gói của U có thể hết hạn trong ca kiểm. | 1. Tạo nháp V2 từ V1.<br>2. Đổi tên và thứ tự section ở V2; công bố khi hợp lệ.<br>3. U xem lại V1 sau hết hạn; thử mở V2 khi chưa có quyền. | V1: Phòng khách trước Góc sofa; V2 đảo thứ tự và sửa tên. | V1 giữ nguyên tên, thứ tự, file và xem lại miễn lượt dù hết gói. V2 có nội dung riêng; quyền V1 không tự cấp V2. Lịch sử vẫn trỏ đúng phiên bản. | STORY-LIB-001/AC-003<br>STORY-LIB-003/AC-002<br>STORY-LIB-003/AC-003<br>STORY-LIB-003/AC-008<br>BR-LIB-002/Then<br>BR-LIB-003/Then | Section phải thuộc nội dung từng phiên bản để lịch sử không đổi theo bản mới. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- STORY-LIB-001/AC-001
+- STORY-LIB-001/AC-003
+- STORY-LIB-003/AC-002
+- STORY-LIB-003/AC-003
+- STORY-LIB-003/AC-008
 - BR-LIB-002/Then
-- STORY-LIB-001/EXC-01
-- BR-RBAC-011/Then
+- BR-LIB-003/Then

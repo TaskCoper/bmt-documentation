@@ -44,7 +44,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-LIB-006 | STORY-LIB-001 | Main | REGRESSION | P1 | C đã mở V1; A có quyền. Môi trường thử có chức năng tương ứng; đọc lại được dữ liệu và lượt khi ca cần. | 1. Ghi nhận mã V1 và lượt C.<br>2. A sửa tên, kích thước, phân loại hợp lệ, ảnh và tệp bằng Sửa.<br>3. C mở lại từ lịch sử và tải tệp. | V1 có ảnh X/tệp X; thay bằng Y; C còn 19 lượt. Đây là dữ liệu thử, không phải mặc định sản phẩm. | Mã V1 giữ nguyên, C thấy nội dung Y, không xác nhận lượt và vẫn 19 lượt; không tạo dòng lịch sử phiên bản mới. | STORY-LIB-001/AC-002<br>BR-LIB-002/Then | Sửa cùng phiên bản. Đặc tả chưa thực thi; API/fixture kỹ thuật bổ sung sau TDD. | [Chưa xác định] | Draft |
+| ST-LIB-006 | STORY-LIB-001 | Main | REGRESSION | P1 | C đã mở V1; A có quyền. Môi trường thử có chức năng tương ứng; đọc lại được dữ liệu và lượt khi ca cần. | 1. Ghi nhận mã V1 và lượt C.<br>2. A sửa tên, kích thước, phân loại hợp lệ, ảnh và tệp bằng Sửa.<br>3. C mở lại từ lịch sử và tải tệp. | V1 có ảnh X/tệp X; upload Y vào cùng section trước khi gỡ X; C còn 19 lượt. Đây là dữ liệu thử, không phải mặc định sản phẩm. | Mã V1 giữ nguyên, C thấy nội dung Y, không xác nhận lượt và vẫn 19 lượt; không tạo dòng lịch sử phiên bản mới. | STORY-LIB-001/AC-002<br>BR-LIB-002/Then | Sửa cùng phiên bản. Đặc tả chưa thực thi; API/fixture kỹ thuật bổ sung sau TDD. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

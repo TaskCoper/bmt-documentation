@@ -57,9 +57,9 @@ Người quản lý cấu hình thư viện hoặc khách tìm kiếm, mở và 
 ## Then
 
 1. Người có quyền quản lý thư viện mẫu theo STORY-RBAC-001 được thêm, sửa, công bố, ẩn và hiện lại mẫu; không có bước người khác phê duyệt. Khách chỉ tham khảo.
-2. Người quản lý được sửa mọi nội dung của phiên bản hiện tại, kể cả phân loại, kích thước, ảnh và tệp. Thao tác Sửa không đổi phiên bản và không phát sinh lượt mới; người đã xem mở lại từ lịch sử sẽ thấy nội dung đã sửa.
+2. Người quản lý được sửa mọi nội dung của phiên bản hiện tại, kể cả phân loại, kích thước, tên và thứ tự section content, ảnh và tệp. Thao tác Sửa không đổi phiên bản và không phát sinh lượt mới; người đã xem mở lại từ lịch sử sẽ thấy nội dung đã sửa. Cấu trúc section và thao tác đổi thứ tự tuân theo BR-LIB-001 khoản 17–19.
 3. Để chuẩn bị phiên bản mới, tạo bản nháp riêng và chỉnh sửa trước khi Công bố phiên bản mới. Khách vẫn xem phiên bản đang công bố trong lúc chuẩn bị. Công bố chỉ thành công khi nội dung đáp ứng BR-LIB-001.
-4. Sau khi công bố phiên bản mới, thư viện hiển thị phiên bản mới nhất. Phiên bản đã được thay thế bị khóa sửa, giữ nguyên nội dung và tệp để người đã mở xem lại. Không cho sửa phiên bản cũ.
+4. Sau khi công bố phiên bản mới, thư viện hiển thị phiên bản mới nhất. Phiên bản đã được thay thế bị khóa sửa, giữ nguyên nội dung, tên và thứ tự section, các file thuộc từng section và tệp để người đã mở xem lại. Không cho sửa phiên bản cũ.
 5. Ẩn mẫu làm mẫu không xuất hiện trong danh sách/tìm kiếm và không tiếp nhận lượt xem mới. Người đã có quyền xem từng phiên bản vẫn mở lại từ lịch sử. Hiện lại không tạo phiên bản hay xóa quyền xem đã có.
 6. Chỉ cho xóa bản nháp chưa công bố. Không xóa mẫu/phiên bản đã công bố; dùng thao tác Ẩn. Không xóa tài nguyên còn cần để xem phiên bản đã trả lượt.
 
@@ -69,5 +69,6 @@ Bản nháp chưa công bố không được cung cấp cho khách. Cho phép l�
 
 ## Notes
 
+- Bổ sung ngày 01/10/2026: section content là một phần nội dung của phiên bản, áp dụng cùng quy tắc sửa tại chỗ và giữ lịch sử đang có. Người dùng đã giao tiếp tục triển khai; phần thiết kế section đang được bổ sung tại TDD-LIB-001/002, chưa có mã ứng dụng cho phần bổ sung.
 - Người dùng đã xác nhận “chốt US và BR” cho bộ LIB trong hội thoại. Trạng thái phê duyệt trên hệ thống chưa được cập nhật; tên Reviewer/Approver không thay cho thao tác phê duyệt.
 - Owner và ngày hiệu lực chưa xác định. Chưa triển khai hoặc chạy kiểm thử.

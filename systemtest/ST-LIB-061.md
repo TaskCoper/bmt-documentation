@@ -35,7 +35,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# ST-LIB-011
+# ST-LIB-061
 
 ## System Test
 
@@ -44,11 +44,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-LIB-011 | STORY-LIB-001 | EXC | REGRESSION | P1 | Khách C và nhân viên B không có library.manage; nhân viên E thuộc vai trò tùy chỉnh (không phải Admin) được cấp library.manage; A thuộc vai trò Admin. E và A không có phân công tài nguyên. Môi trường thử có chức năng tương ứng; đọc lại được dữ liệu và lượt khi ca cần. | 1. C/B gửi trực tiếp thêm, sửa, công bố, ẩn, hiện, xóa nháp, đổi thứ tự section và xin upload theo section; lặp lại bằng phiên chưa đăng nhập.<br>2. E rồi A lần lượt thực hiện một thao tác hợp lệ.<br>3. A đọc lại mẫu và phiên bản. | V1 công khai, V2 nháp. Đây là dữ liệu thử, không phải mặc định sản phẩm. | Thao tác trái quyền bị từ chối (403 khi đã đăng nhập, 401 khi chưa đăng nhập), dữ liệu/hiển thị không đổi. E và A đều thực hiện được vì cùng có library.manage; hệ thống kiểm theo mã quyền, không theo tên vai trò Admin và không cần phân công. | STORY-LIB-001/AC-001<br>BR-LIB-002/Then<br>STORY-LIB-001/EXC-01<br>BR-RBAC-011/Then | Chặn quản trị trái quyền. Đặc tả chưa thực thi; API/fixture kỹ thuật bổ sung sau TDD. | [Chưa xác định] | Draft |
+| ST-LIB-061 | STORY-LIB-003 | Main / EXC | REGRESSION | P0 | U đã mở V1; K chưa mở; V1 có hai section và nhiều ảnh/tệp. | 1. U đọc các section, chuyển section và tải các file.<br>2. K gọi thẳng cùng route đọc/tải.<br>3. Đối chiếu quota, Access và lịch sử của cả hai tài khoản. | S1 có ảnh và PDF; S2 có DWG/DXF; tài khoản lấy từ phiên xác thực. | U xem và tải mọi file hợp lệ của V1 không trừ thêm lượt. K bị chặn nội dung chi tiết và tệp. Không trả URL gốc của file bảo vệ cho khách, không tạo Access qua GET. | STORY-LIB-003/AC-006<br>STORY-LIB-003/AC-008<br>BR-LIB-003/Then | Nhóm nội dung không tạo đối tượng tính lượt hoặc đường đọc vượt quyền. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- STORY-LIB-001/AC-001
-- BR-LIB-002/Then
-- STORY-LIB-001/EXC-01
-- BR-RBAC-011/Then
+- STORY-LIB-003/AC-006
+- STORY-LIB-003/AC-008
+- BR-LIB-003/Then

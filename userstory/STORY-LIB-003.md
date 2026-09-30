@@ -68,7 +68,7 @@ Khách chọn mẫu từ thư viện hoặc một phiên bản trong lịch sử
 1. Xác định đúng phiên bản khách yêu cầu và quyền xem của tài khoản.
 2. Nếu chưa xem, kiểm tra gói, quyền và lượt; hiển thị xác nhận dùng một lượt. Khách hủy thì không mở có tính lượt.
 3. Sau xác nhận, xử lý mở thành công, tính đúng một lượt và ghi nhận quyền xem phiên bản; lỗi trước thành công không tính lượt.
-4. Cho xem mọi ảnh và tải tệp của phiên bản không tính thêm.
+4. Hiển thị nội dung xem theo đúng thứ tự section content đã lưu, gồm tên section và một hoặc nhiều file thuộc từng section. Cho xem mọi ảnh và tải tệp của phiên bản không tính thêm theo BR-LIB-003.
 5. Lưu mỗi phiên bản đã xem thành một dòng lịch sử; khi mở lại đúng phiên bản thì mở thẳng miễn lượt, kể cả gói đã hết hạn.
 
 ### Alternative Flow
@@ -131,6 +131,13 @@ Thiếu quyền mở lần đầu, mẫu bị ẩn, hoặc xử lý lỗi.
 - **When**: Mở phiên bản hợp lệ rồi gói hết hạn
 - **Then**: Vẫn có quyền xem lại phiên bản đã mở; không tự cấp quyền xem phiên bản khác.
 
+#### AC-008
+
+- **Given**: Khách có quyền xem một phiên bản mẫu 2D hoặc 3D có nội dung được chia thành section và lưu thứ tự theo BR-LIB-001 khoản 17–19.
+- **When**: Mở nội dung chi tiết của phiên bản đó.
+- **Then**: Hiển thị đúng tên và thứ tự các section cùng các file thuộc từng section đã lưu; không gộp mất nhóm hoặc đưa file sang section khác. Nếu người quản lý đổi thứ tự trên phiên bản hiện tại, lần đọc lại phản ánh thứ tự mới; phiên bản đã bị thay thế giữ nguyên thứ tự cũ.
+- **And**: Tiếp tục áp dụng quyền xem và lượt theo phiên bản tại BR-LIB-003. Section chuẩn bị chưa có file chỉ quản trị thấy; khách chỉ thấy sau khi file đầu tiên được lưu thành công theo BR-LIB-001 khoản 20.
+
 ## References
 
 ### TDDs
@@ -140,6 +147,7 @@ Thiếu quyền mở lần đầu, mẫu bị ẩn, hoặc xử lý lỗi.
 
 ### Rules
 
+- BR-LIB-001: Cấu trúc section content và file trong nội dung xem.
 - BR-LIB-002
 - BR-LIB-003
 - BR-SUB-017
@@ -149,10 +157,11 @@ Thiếu quyền mở lần đầu, mẫu bị ẩn, hoặc xử lý lỗi.
 
 ## Non-Functional
 
+- Bổ sung ngày 01/10/2026: AC-008 phản ánh yêu cầu xem nội dung theo section. Người dùng đã giao triển khai; TDD-LIB-002 và ST-LIB-052–066 đang bổ sung phần đọc/thứ tự/quyền. Chưa có code hoặc kết quả chạy cho section; các quyết định còn mở ghi tại BR-LIB-001/Notes.
 - Kiểm tra quyền tại backend, kể cả yêu cầu trực tiếp; không chỉ ẩn nút trên giao diện.
 - Chưa đặt ngưỡng hiệu năng hay giới hạn hạ tầng khi chưa có căn cứ. Chưa triển khai hoặc thực thi test.
 
 ## Out of Scope
 
-- Lưu mẫu yêu thích, mô hình 3D xoay trực tiếp, tìm kiếm kích thước, lựa chọn sắp xếp.
+- Lưu mẫu yêu thích, mô hình 3D xoay trực tiếp, tìm kiếm kích thước, lựa chọn sắp xếp danh sách mẫu.
 - Sửa phiên bản đã được thay thế; xóa phiên bản đã công bố.

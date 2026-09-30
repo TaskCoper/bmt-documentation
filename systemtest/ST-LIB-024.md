@@ -44,7 +44,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-LIB-024 | STORY-LIB-003 | Main | REGRESSION | P1 | C đã mở V1 với nhiều ảnh và PDF/DWG/DXF. Môi trường thử có chức năng tương ứng; đọc lại được dữ liệu và lượt khi ca cần. | 1. Lần lượt chuyển tất cả ảnh, tải từng tệp và tải lại.<br>2. Đóng rồi mở lại V1 và tải.<br>3. Đọc số dư. | Hai ảnh trở lên, các tệp có dấu nhận biết nội dung. Đây là dữ liệu thử, không phải mặc định sản phẩm. | Tải đúng tệp của V1, không dùng thêm lượt; số dư và số dòng lịch sử không đổi. | STORY-LIB-003/AC-006<br>BR-LIB-003/Then | Ảnh và tải tệp không tính thêm. Đặc tả chưa thực thi; API/fixture kỹ thuật bổ sung sau TDD. | [Chưa xác định] | Draft |
+| ST-LIB-024 | STORY-LIB-003 | Main | REGRESSION | P1 | C đã mở V1 có nhiều section với nhiều ảnh và PDF/DWG/DXF. Môi trường thử có chức năng tương ứng; đọc lại được dữ liệu và lượt khi ca cần. | 1. Lần lượt chuyển các section, xem tất cả ảnh, tải từng tệp và tải lại.<br>2. Đóng rồi mở lại V1 và tải.<br>3. Đọc số dư. | Hai ảnh trở lên, các tệp có dấu nhận biết nội dung. Đây là dữ liệu thử, không phải mặc định sản phẩm. | Tải đúng tệp của V1, không dùng thêm lượt; số dư và số dòng lịch sử không đổi. | STORY-LIB-003/AC-006<br>BR-LIB-003/Then | Ảnh và tải tệp không tính thêm. Đặc tả chưa thực thi; API/fixture kỹ thuật bổ sung sau TDD. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

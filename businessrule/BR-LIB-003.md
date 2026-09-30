@@ -58,7 +58,7 @@ Người quản lý cấu hình thư viện hoặc khách tìm kiếm, mở và 
 
 1. Tìm kiếm, lọc và xem danh sách công khai không yêu cầu đăng nhập hoặc gói và không dùng lượt.
 2. Mở phiên bản chưa từng xem phải đăng nhập, có gói còn hiệu lực, quyền tra cứu và lượt sẵn dùng, hoặc quyền không giới hạn theo BR-SUB-005. Hiển thị xác nhận dùng 1 lượt trước khi mở; hủy xác nhận không tính lượt.
-3. Lần mở thành công đầu tiên ghi nhận quyền xem của tài khoản đối với đúng phiên bản. Với hạn mức hữu hạn, tính đúng một lượt tra cứu; không dùng lượt tạo thiết kế thay thế. Chuyển ảnh và tải các tệp của phiên bản không tính thêm.
+3. Lần mở thành công đầu tiên ghi nhận quyền xem của tài khoản đối với đúng phiên bản. Với hạn mức hữu hạn, tính đúng một lượt tra cứu; không dùng lượt tạo thiết kế thay thế. Xem các section content, chuyển ảnh và tải các tệp của phiên bản không tính thêm. Cấu trúc section theo BR-LIB-001 khoản 17 không tạo thêm đối tượng tính lượt.
 4. Xem lại phiên bản đã mở thành công chỉ yêu cầu đăng nhập đúng tài khoản, không yêu cầu gói còn hiệu lực, còn lượt hoặc còn quyền tra cứu trong gói. Mở thẳng, không yêu cầu xác nhận dùng lượt. Quyền này áp dụng cả tài khoản đã mở hợp lệ với hạn mức không giới hạn.
 5. Công bố phiên bản mới không tự cấp quyền xem phiên bản đó cho người đã xem bản cũ. Khách mở phiên bản mới từ thư viện phải đáp ứng điều kiện mở lần đầu; lịch sử tiếp tục trỏ đúng phiên bản đã xem.
 6. Mỗi phiên bản đã xem là một dòng lịch sử riêng. Không có chức năng lưu mẫu yêu thích. Lịch sử không tự chuyển từ bản cũ sang bản mới.
@@ -71,5 +71,6 @@ Bản nháp chưa công bố không được cung cấp cho khách. Cho phép l�
 
 ## Notes
 
+- Bổ sung ngày 01/10/2026: làm rõ quyền xem của phiên bản bao gồm nội dung các section; tiếp tục tính lượt theo phiên bản, không tính theo section hay file. Người dùng đã giao tiếp tục triển khai; phần thiết kế section đang được bổ sung tại TDD-LIB-001/002, chưa có mã ứng dụng cho phần bổ sung.
 - Người dùng đã xác nhận “chốt US và BR” cho bộ LIB trong hội thoại. Trạng thái phê duyệt trên hệ thống chưa được cập nhật; tên Reviewer/Approver không thay cho thao tác phê duyệt.
 - Owner và ngày hiệu lực chưa xác định. Chưa triển khai hoặc chạy kiểm thử.

@@ -35,7 +35,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# ST-LIB-011
+# ST-LIB-058
 
 ## System Test
 
@@ -44,11 +44,12 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-LIB-011 | STORY-LIB-001 | EXC | REGRESSION | P1 | Khách C và nhân viên B không có library.manage; nhân viên E thuộc vai trò tùy chỉnh (không phải Admin) được cấp library.manage; A thuộc vai trò Admin. E và A không có phân công tài nguyên. Môi trường thử có chức năng tương ứng; đọc lại được dữ liệu và lượt khi ca cần. | 1. C/B gửi trực tiếp thêm, sửa, công bố, ẩn, hiện, xóa nháp, đổi thứ tự section và xin upload theo section; lặp lại bằng phiên chưa đăng nhập.<br>2. E rồi A lần lượt thực hiện một thao tác hợp lệ.<br>3. A đọc lại mẫu và phiên bản. | V1 công khai, V2 nháp. Đây là dữ liệu thử, không phải mặc định sản phẩm. | Thao tác trái quyền bị từ chối (403 khi đã đăng nhập, 401 khi chưa đăng nhập), dữ liệu/hiển thị không đổi. E và A đều thực hiện được vì cùng có library.manage; hệ thống kiểm theo mã quyền, không theo tên vai trò Admin và không cần phân công. | STORY-LIB-001/AC-001<br>BR-LIB-002/Then<br>STORY-LIB-001/EXC-01<br>BR-RBAC-011/Then | Chặn quản trị trái quyền. Đặc tả chưa thực thi; API/fixture kỹ thuật bổ sung sau TDD. | [Chưa xác định] | Draft |
+| ST-LIB-058 | STORY-LIB-001 | Main | REGRESSION | P1 | Mẫu có S1/S2/S3 theo thứ tự ban đầu; mỗi section có ít nhất một file; khách đã có quyền xem current. | 1. Đổi thứ tự thành S3/S1/S2 và lưu.<br>2. Tải lại quản trị và chi tiết khách.<br>3. Lặp với bản nháp khác và đối chiếu current. | Chạy cho cả 2D và 3D; file từng section có thứ tự xác định trước. | Hai màn hiển thị đúng S3/S1/S2; tên, membership và thứ tự file trong section giữ nguyên. Sửa nháp không đổi current. Sửa current giữ mã phiên bản, quyền xem và số lượt đã dùng. | STORY-LIB-001/AC-017<br>STORY-LIB-003/AC-008<br>BR-LIB-001/Then<br>BR-LIB-002/Then<br>BR-LIB-003/Then | Kiểm đổi thứ tự là dữ liệu lưu bền vững, không chỉ đổi giao diện. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- STORY-LIB-001/AC-001
+- STORY-LIB-001/AC-017
+- STORY-LIB-003/AC-008
+- BR-LIB-001/Then
 - BR-LIB-002/Then
-- STORY-LIB-001/EXC-01
-- BR-RBAC-011/Then
+- BR-LIB-003/Then

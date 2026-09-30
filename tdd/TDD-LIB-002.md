@@ -73,6 +73,23 @@ Tài liệu này sở hữu LibraryAccess, phần bổ sung UsageOperation và c
 
 ## Architecture
 
+**Bổ sung đọc section ngày 01/10/2026 — đã chốt và triển khai backend trong workspace**
+
+Căn cứ STORY-LIB-003/AC-008, STORY-LIB-001/AC-017, BR-LIB-001 khoản 17–20 và BR-LIB-003. Dùng LibrarySection và LibraryVersionAsset.SectionId do TDD-LIB-001/Data Model sở hữu; không tạo bản sao section ở Access, UsageOperation hoặc lịch sử. Đặc tả ST-LIB-058–066 kiểm phần đọc, quyền, thứ tự và giữ file; chưa có kết quả chạy hoặc đặc tả Unit Test cho phần bổ sung.
+
+- Khách có Access theo VersionId đọc tên, thứ tự section và file trong từng section của đúng phiên bản. Staff có library.manage được preview như hiện tại. Không nhận AccountId từ client; GET không mua quyền xem và không tăng lượt khi đổi section, ảnh hoặc tải file.
+- Lịch sử dùng VersionId của LibraryAccess để đọc section và liên kết file, không dùng CurrentVersionId thay thế. Ví dụ V1 đã mở có hai section, V2 công bố có ba section: xem lịch sử V1 trả hai section; muốn mở V2 phải xác nhận và đáp ứng điều kiện mở lần đầu. Nếu admin sửa trực tiếp V1 thì lịch sử vẫn trỏ V1 và phản ánh nội dung đã sửa, không phát sinh lượt mới. Đây là hai thao tác riêng theo BR-LIB-002, không suy ra phiên bản mới từ việc số section tăng.
+- Read store bổ sung projection trang section (Position, Id) và trang file trong section (Position, AssetId). Metadata/EditVersion, count và items nằm trong cùng snapshot ngắn; không gọi kho trong snapshot. Không query riêng từng section để đếm file; dùng projection/count ở SQL theo trang. Tên section không lấy từ current của mẫu khi đang xem phiên bản lịch sử.
+- expectedEditVersion tùy chọn ở trang đầu; các trang sau và trang file phải gửi editVersion đã nhận. Khi đổi thứ tự hoặc tên section giữa hai trang, trả 409 LibraryVersionChanged, client tải lại từ trang section đầu tiên; không ghép hai thứ tự. Một response phải là trạng thái trước hoặc sau sửa, không trộn tên, thứ tự và membership.
+- Route đọc file vẫn kiểm Access/preview và link VersionId+AssetId, bổ sung JOIN SectionId cùng VersionId. Link bị gỡ hoặc section không thuộc version trả 404 trước khi gọi kho. Nội dung bảo vệ tiếp tục dùng contentUrl của backend, không trả URL gốc qua API khách.
+- Chuẩn bị lần mở đầu thăm dò đúng tập asset thuộc các section phục vụ nội dung. EditVersion của lần chuẩn bị được kiểm lại dưới khóa trước commit; reorder chen vào cũng gây LibraryVersionChanged và không tính lượt khi chưa có Access. Người đã có Access xem lại miễn lượt và đọc nội dung mới của cùng VersionId.
+- Sao nháp/công bố tạo tập section của VersionId mới, không đổi section cũ hoặc tự cấp Access mới. PublishedAtUtc không đổi khi reorder nên mẫu không bị đẩy lên đầu danh sách; lịch sử vẫn một dòng mỗi phiên bản.
+
+Người dùng đã chọn section chuẩn bị chỉ quản trị thấy theo BR-LIB-001 khoản 20. Query khách lọc section bằng EXISTS LibraryVersionAsset đúng SectionId/VersionId trước khi đếm và phân trang; sectionCount chỉ tính section có file. Đọc trực tiếp trang file của section chuẩn bị bằng ID đã biết trả 404 LibraryNotFound, không trả tên hoặc vị trí section. Áp dụng cả khi xem bản lịch sử. Preview của người có library.manage được thấy section chuẩn bị; quyền xem của khách không tự đổi khi section có file đầu tiên.
+
+File đầu tiên và kết quả MEDIA được commit cùng transaction theo TDD-LIB-001. Trước commit khách không thấy section; sau commit khách đọc lại thấy section đúng Position đã lưu. Sửa tên/thứ tự lúc chuẩn bị không làm lộ section. Truy vấn không đánh lại Position để lấp khoảng trống do section bị lọc; chỉ giữ thứ tự tương đối của các section khách được thấy. EditVersion tăng khi tạo/sửa section chuẩn bị nên yêu cầu đọc dùng phiên bản cũ có thể nhận 409 để tải lại, nhưng không nhận metadata của section chuẩn bị và không bị tính thêm lượt.
+
+
 **Hiện trạng và nền tảng transaction**
 
 Dùng cùng hiện trạng .NET 8/EF Core/Npgsql/PostgreSQL 15 đã xác minh ở [TDD-LIB-001/Architecture](TDD-LIB-001.md#architecture). UoW phải scoped; command ghi phải được TransactionPipelineBehavior nhận diện; lỗi sau ghi phải rollback bằng exception. Không mở transaction lồng hoặc gọi HTTP tới URL tệp khi giữ transaction ghi.
@@ -203,6 +220,27 @@ Upload, kiểm URL và schema asset do TDD-LIB-001 định nghĩa. TDD này ch�
 
 ## Sequence Diagram
 
+Luồng đọc section bổ sung, dùng lại quyền của phiên bản:
+
+```mermaid
+sequenceDiagram
+    actor C as Khách đã mở phiên bản
+    participant API as Library query
+    participant DB as PostgreSQL
+    C->>API: GET sections(versionId)
+    API->>DB: Kiểm Access hoặc quyền preview
+    API->>DB: Đọc editVersion và trang section cùng snapshot
+    API-->>C: sectionId, name, position, assetCount, editVersion
+    C->>API: GET section assets với expectedEditVersion
+    API->>DB: Kiểm quyền và membership, đọc trang file cùng snapshot
+    alt Nội dung đã đổi
+        API-->>C: 409 LibraryVersionChanged
+    else Nội dung còn khớp
+        API-->>C: Trang file với contentUrl backend
+    end
+```
+
+
 ```mermaid
 sequenceDiagram
     actor C as Khách
@@ -271,6 +309,9 @@ Sơ đồ áp dụng riêng từng cặp AccountId/VersionId; không thêm cột
 
 ## Data Model
 
+**Bổ sung section ngày 01/10/2026:** không đổi schema LibraryAccess hoặc UsageOperation. Nguồn mới là LibrarySection và link SectionId theo [TDD-LIB-001/Data Model](TDD-LIB-001.md#data-model); dùng lại ví dụ V1/S1/S2/F1–F3. Khi thứ tự S1/S2 thành S2/S1, chỉ nội dung V1 và EditVersion đổi; Access U1/V1 và chứng từ lượt giữ nguyên. SectionCount/AssetCount/sectionsUrl là dữ liệu đọc, không thêm bảng hoặc cột lưu lặp. Migration thuộc TDD-LIB-001 và phần mở rộng MEDIA; tài liệu này không tạo migration thứ hai cho cùng schema.
+
+
 **Quy ước và bảng dùng lại**
 
 UUID, timestamptz/UTC, PascalCase, NN là NOT NULL; FK ON DELETE RESTRICT. Dùng lại LibraryTemplate/Version/Asset/VersionAsset theo [TDD-LIB-001/Data Model](TDD-LIB-001.md#data-model), gồm dữ liệu mẫu M1/V1/V2 và F1/F2/F3. Không định nghĩa lại các bảng nội dung. User từ RBAC; DesignPeriod/PeriodQuota/UsageOperation từ TDD-SUB-002 cùng LifecycleState TDD-SUB-005. AccountCommerceState theo [TDD-PAY-001/Data Model](TDD-PAY-001.md#data-model): luồng mở mẫu chỉ dùng dòng của khách làm khóa tuần tự hóa, không ghi cột nào. Tài khoản từ phiên là biên cách ly, không thêm tenant.
@@ -337,6 +378,14 @@ Tạo bảng Version của TDD-LIB-001 trước khi thêm TemplateVersionId/FK v
 
 ### Endpoints
 
+**Contract đọc section ngày 01/10/2026 — đã triển khai backend:** các route mới áp dụng cùng quyền đọc version, no-store và chuẩn Result/PagedResult hiện có.
+
+- **GET** `/api/v1/library-versions/{versionId}/sections` — query pageIndex/pageSize/expectedEditVersion; trả `{versionId,editVersion,sections}`. Mỗi item `{sectionId,name,position,assetCount,assetsUrl}`; sort Position rồi SectionId. Khách chỉ nhận section có file; quản trị preview thấy cả section chuẩn bị.
+- **GET** `/api/v1/library-versions/{versionId}/sections/{sectionId}/assets` — query pageIndex/pageSize/expectedEditVersion; trả `{versionId,editVersion,sectionId,sectionName,sectionPosition,coverAssetId,assets}`. Mỗi file `{assetId,sectionId,kind,name,mediaType,sizeBytes,position,isCover,contentUrl}`. Trang chỉ có file của section này; contentUrl dùng route tải hiện hữu. Khách gọi section chuẩn bị nhận 404 trước khi trả metadata hoặc gọi kho.
+
+Detail `GET /api/v1/library-versions/{versionId}` thêm sectionsUrl và sectionCount; không nhét toàn bộ section/file không giới hạn vào response. Route assets phẳng cũ vẫn đọc được, thêm sectionId/sectionName/sectionPosition vào item và sort sectionPosition → file position → assetId. Frontend mới dùng route section để hiển thị nhóm đúng cả khi phân trang. Content route theo VersionId/AssetId giữ đường dẫn; kiểm membership section trước đọc kho. Route/history/open/access-info còn lại giữ contract và cách tính lượt.
+
+
 Các route dưới đây đã có trong code ở commit `0263297` (nhánh `feature/library-access`, chưa merge); mọi phản hồi JSON có `Cache-Control: no-store`. AccountId lấy từ phiên. POST mở được kiểm Origin theo [TDD-AUTH-001](TDD-AUTH-001.md) nhưng không dựa Idempotency-Key của client để tính lượt. Định danh lượt là account/version. Danh sách công khai và mutation quản trị theo TDD-LIB-001/Internal API.
 
 - **GET** `/api/v1/design-templates/{templateId}/access-info` — Phiên khách; trả currentVersionId,editVersion,alreadyOpened,requiresConfirmation,canOpen,deniedCode; không trả nội dung bảo vệ. Chỉ là gợi ý, POST kiểm lại. Trong code trả thêm templateId và number; deniedCode là `LibraryHidden` hoặc mã SUB; mẫu không tồn tại hoặc chưa công bố trả 404 `LibraryNotFound`.
@@ -347,6 +396,22 @@ Các route dưới đây đã có trong code ở commit `0263297` (nhánh `featu
 - **GET** `/api/v1/library-versions/{versionId}/assets/{assetId}/content` — Kiểm quyền version và membership; backend đọc URL đã lưu và stream ảnh hoặc tệp đính kèm về (tên tải xuống lấy từ OriginalName), chuyển tiếp Range hợp lệ nếu kho hỗ trợ. Không tính lượt. AssetId không thuộc phiên bản, kể cả tài nguyên đã gỡ khi sửa tại chỗ, trả 404 LibraryNotFound trước khi gọi URL tệp.
 
 ### Examples
+
+#### GET /api/v1/library-versions/{versionId}/sections
+
+Ví dụ phần value của Result; ID minh họa là UUID, dữ liệu không phải môi trường thật.
+
+```
+Request:
+GET /api/v1/library-versions/20000000-0000-0000-0000-000000000001/sections?pageIndex=1&pageSize=10
+
+Response 200:
+{"versionId":"20000000-0000-0000-0000-000000000001","editVersion":9,"sections":{"items":[{"sectionId":"10000000-0000-0000-0000-000000000002","name":"Góc sofa","position":1,"assetCount":1,"assetsUrl":"/api/v1/library-versions/20000000-0000-0000-0000-000000000001/sections/10000000-0000-0000-0000-000000000002/assets"}],"pageIndex":1,"pageSize":10,"totalCount":1,"hasNextPage":false,"hasPreviousPage":false}}
+
+Error Response:
+409 LibraryVersionChanged khi expectedEditVersion khác lần sửa hiện tại; 403 AccessForbidden khi khách chưa có quyền xem.
+```
+
 
 #### POST /api/v1/design-templates/{templateId}/open
 
@@ -424,6 +489,10 @@ Chuẩn bị nội dung lỗi trước commit không tính lượt. Lỗi tải 
 ### Use Cases
 
 ### Others
+
+- [ST-LIB-065](../systemtest/ST-LIB-065.md), [ST-LIB-066](../systemtest/ST-LIB-066.md): section chuẩn bị chỉ hiện cho khách sau commit file đầu tiên; chưa thực thi.
+
+- [ST-LIB-058](../systemtest/ST-LIB-058.md) đến [ST-LIB-064](../systemtest/ST-LIB-064.md): thứ tự, quyền đọc, lịch sử và dữ liệu đồng thời; đặc tả chưa thực thi.
 
 - Phạm vi use case: Quản lý mẫu, sửa tại chỗ, công bố phiên bản mới, ẩn/hiện và xóa nháp. Tìm/lọc, mở lần đầu, xem lại và tải tài nguyên từ lịch sử.
 

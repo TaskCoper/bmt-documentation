@@ -1,8 +1,10 @@
 # Truy vết System Test thư viện mẫu
 
+**Bổ sung section content ngày 01/10/2026:** ST-LIB-052–066 là 15 đặc tả mới, chưa thực thi. Đã điều chỉnh dữ liệu/bước của ST-LIB-001, 002, 004, 006, 007, 009, 011, 024 và 031 để file nằm trong section. Các kết quả code/test trước đó không chứng minh phần section; chưa có đặc tả Unit Test hoặc code cho phần này. Người dùng đã chọn thêm section trực tiếp vào current: chỉ quản trị thấy tới khi file đầu tiên được lưu thành công. ST-LIB-065–066 kiểm hiển thị, thứ tự, lỗi upload và ranh giới commit theo quyết định này. TDD và kế hoạch migration đang là bản đề xuất để chốt.
+
 **Cập nhật triển khai BE ngày 30/09/2026:** đã có kiểm thử unit, HTTP và PostgreSQL cho phần nhiều phong cách/hai luồng tìm. Xem [kết quả và giới hạn kiểm chứng](library-unit-test-coverage.md#kết-quả-triển-khai-be-ngày-30092026). Các dòng “chưa thực thi” bên dưới ghi thời điểm soạn đặc tả; không dùng để thay kết quả thực chạy. FE ST-LIB-045–047 nằm ngoài phạm vi người dùng giao lần này.
 
-US và BR đã được người dùng chốt trong hội thoại. 51 ca dưới đây là đặc tả, chưa thực thi; không phải kết quả Pass. Reviewer/Approver: Tân Trần. Owner kiểm thử chưa xác định.
+US và BR đã được người dùng chốt trong hội thoại. 66 ca dưới đây là đặc tả, chưa thực thi; không phải kết quả Pass. Reviewer/Approver: Tân Trần. Owner kiểm thử chưa xác định.
 
 **Cập nhật 25/09/2026:** quyền quản lý thư viện mẫu theo STORY-RBAC-001 và BR-LIB-002 có mã kỹ thuật `library.manage` trong TDD-RBAC-001, không gắn phân công; ST-LIB-011 kiểm thêm nhân viên thuộc vai trò tùy chỉnh được cấp mã này. Đã thêm ST-LIB-028 kiểm việc mở mẫu lần đầu và thay đổi gói của cùng khách chạy đồng thời. Bổ sung sau đó: ST-LIB-029 kiểm sửa tại chỗ cùng phiên bản không tính lượt mới (STORY-LIB-003/ALT-01), ST-LIB-030 kiểm mẫu bị ẩn không nhận lượt mở mới nhưng người đã có quyền vẫn xem lại được (STORY-LIB-003/EXC-01); các ca đang phủ luồng ALT/EXC được ghi thêm mã luồng trong TEST_LINKS.
 
@@ -12,6 +14,15 @@ US và BR đã được người dùng chốt trong hội thoại. 51 ca dưới
 
 | Tiêu chí | System Test |
 | --- | --- |
+| STORY-LIB-001/AC-018 | [ST-LIB-065](../systemtest/ST-LIB-065.md), [ST-LIB-066](../systemtest/ST-LIB-066.md) |
+| STORY-LIB-001/AC-012 | [ST-LIB-052](../systemtest/ST-LIB-052.md) |
+| STORY-LIB-001/AC-013 | [ST-LIB-053](../systemtest/ST-LIB-053.md) |
+| STORY-LIB-001/AC-014 | [ST-LIB-053](../systemtest/ST-LIB-053.md), [ST-LIB-054](../systemtest/ST-LIB-054.md), [ST-LIB-056](../systemtest/ST-LIB-056.md) |
+| STORY-LIB-001/AC-015 | [ST-LIB-057](../systemtest/ST-LIB-057.md) |
+| STORY-LIB-001/AC-016 | [ST-LIB-055](../systemtest/ST-LIB-055.md), [ST-LIB-056](../systemtest/ST-LIB-056.md), [ST-LIB-057](../systemtest/ST-LIB-057.md), [ST-LIB-062](../systemtest/ST-LIB-062.md) |
+| STORY-LIB-001/AC-017 | [ST-LIB-058](../systemtest/ST-LIB-058.md), [ST-LIB-059](../systemtest/ST-LIB-059.md), [ST-LIB-063](../systemtest/ST-LIB-063.md), [ST-LIB-065](../systemtest/ST-LIB-065.md) |
+| STORY-LIB-003/AC-008 | [ST-LIB-052](../systemtest/ST-LIB-052.md), [ST-LIB-054](../systemtest/ST-LIB-054.md), [ST-LIB-058](../systemtest/ST-LIB-058.md), [ST-LIB-060](../systemtest/ST-LIB-060.md), [ST-LIB-061](../systemtest/ST-LIB-061.md), [ST-LIB-063](../systemtest/ST-LIB-063.md), [ST-LIB-065](../systemtest/ST-LIB-065.md), [ST-LIB-066](../systemtest/ST-LIB-066.md) |
+| BR-LIB-002/Then, BR-MEDIA-002/Then: giữ file và lịch sử | [ST-LIB-064](../systemtest/ST-LIB-064.md) |
 | STORY-LIB-002/AC-010 | [ST-LIB-042](../systemtest/ST-LIB-042.md), [ST-LIB-043](../systemtest/ST-LIB-043.md), [ST-LIB-044](../systemtest/ST-LIB-044.md) |
 | STORY-LIB-002/AC-011 | [ST-LIB-045](../systemtest/ST-LIB-045.md), [ST-LIB-046](../systemtest/ST-LIB-046.md), [ST-LIB-047](../systemtest/ST-LIB-047.md) |
 | TDD-LIB-001/Internal API: match công khai, dữ liệu áp dụng | [ST-LIB-048](../systemtest/ST-LIB-048.md) |
@@ -30,9 +41,9 @@ US và BR đã được người dùng chốt trong hội thoại. 51 ca dưới
 | STORY-LIB-001/AC-008 | [ST-LIB-032](../systemtest/ST-LIB-032.md), [ST-LIB-034](../systemtest/ST-LIB-034.md), [ST-LIB-049](../systemtest/ST-LIB-049.md), [ST-LIB-050](../systemtest/ST-LIB-050.md) |
 | STORY-LIB-001/AC-001 | [ST-LIB-001](../systemtest/ST-LIB-001.md), [ST-LIB-002](../systemtest/ST-LIB-002.md), [ST-LIB-011](../systemtest/ST-LIB-011.md) |
 | STORY-LIB-001/AC-002 | [ST-LIB-006](../systemtest/ST-LIB-006.md), [ST-LIB-010](../systemtest/ST-LIB-010.md) |
-| STORY-LIB-001/AC-003 | [ST-LIB-007](../systemtest/ST-LIB-007.md), [ST-LIB-051](../systemtest/ST-LIB-051.md) |
+| STORY-LIB-001/AC-003 | [ST-LIB-007](../systemtest/ST-LIB-007.md), [ST-LIB-051](../systemtest/ST-LIB-051.md), [ST-LIB-060](../systemtest/ST-LIB-060.md), [ST-LIB-064](../systemtest/ST-LIB-064.md) |
 | STORY-LIB-001/AC-004 | [ST-LIB-008](../systemtest/ST-LIB-008.md) |
-| STORY-LIB-001/AC-005 | [ST-LIB-009](../systemtest/ST-LIB-009.md) |
+| STORY-LIB-001/AC-005 | [ST-LIB-009](../systemtest/ST-LIB-009.md), [ST-LIB-062](../systemtest/ST-LIB-062.md), [ST-LIB-064](../systemtest/ST-LIB-064.md) |
 | STORY-LIB-001/AC-006 | [ST-LIB-005](../systemtest/ST-LIB-005.md) |
 | STORY-LIB-001/AC-007 | [ST-LIB-003](../systemtest/ST-LIB-003.md), [ST-LIB-004](../systemtest/ST-LIB-004.md) |
 | STORY-LIB-002/AC-001 | [ST-LIB-012](../systemtest/ST-LIB-012.md), [ST-LIB-016](../systemtest/ST-LIB-016.md), [ST-LIB-048](../systemtest/ST-LIB-048.md) |
@@ -40,11 +51,11 @@ US và BR đã được người dùng chốt trong hội thoại. 51 ca dưới
 | STORY-LIB-002/AC-003 | [ST-LIB-014](../systemtest/ST-LIB-014.md) |
 | STORY-LIB-002/AC-004 | [ST-LIB-015](../systemtest/ST-LIB-015.md) |
 | STORY-LIB-003/AC-001 | [ST-LIB-017](../systemtest/ST-LIB-017.md), [ST-LIB-027](../systemtest/ST-LIB-027.md) |
-| STORY-LIB-003/AC-002 | [ST-LIB-018](../systemtest/ST-LIB-018.md) |
-| STORY-LIB-003/AC-003 | [ST-LIB-019](../systemtest/ST-LIB-019.md), [ST-LIB-028](../systemtest/ST-LIB-028.md) |
+| STORY-LIB-003/AC-002 | [ST-LIB-018](../systemtest/ST-LIB-018.md), [ST-LIB-060](../systemtest/ST-LIB-060.md) |
+| STORY-LIB-003/AC-003 | [ST-LIB-019](../systemtest/ST-LIB-019.md), [ST-LIB-028](../systemtest/ST-LIB-028.md), [ST-LIB-060](../systemtest/ST-LIB-060.md) |
 | STORY-LIB-003/AC-004 | [ST-LIB-020](../systemtest/ST-LIB-020.md), [ST-LIB-021](../systemtest/ST-LIB-021.md) |
 | STORY-LIB-003/AC-005 | [ST-LIB-022](../systemtest/ST-LIB-022.md), [ST-LIB-023](../systemtest/ST-LIB-023.md), [ST-LIB-025](../systemtest/ST-LIB-025.md) |
-| STORY-LIB-003/AC-006 | [ST-LIB-024](../systemtest/ST-LIB-024.md) |
+| STORY-LIB-003/AC-006 | [ST-LIB-024](../systemtest/ST-LIB-024.md), [ST-LIB-061](../systemtest/ST-LIB-061.md) |
 | STORY-LIB-003/AC-007 | [ST-LIB-026](../systemtest/ST-LIB-026.md) |
 | STORY-LIB-001/ALT-01 | [ST-LIB-010](../systemtest/ST-LIB-010.md), [ST-LIB-035](../systemtest/ST-LIB-035.md) |
 | STORY-LIB-001/EXC-01 | [ST-LIB-011](../systemtest/ST-LIB-011.md), [ST-LIB-033](../systemtest/ST-LIB-033.md), [ST-LIB-034](../systemtest/ST-LIB-034.md) |
@@ -100,3 +111,7 @@ US và BR đã được người dùng chốt trong hội thoại. 51 ca dưới
 Các ca 004 và phần truyền tải chưa có ngưỡng hạ tầng để nghiệm thu tải lớn; không thể chứng minh “không giới hạn” bằng một bộ dữ liệu hữu hạn. API, fixture, điểm gây lỗi và cách điều phối đồng thời phải được cụ thể hóa trong TDD trước khi chạy. Trong bước thiết kế TDD, người dùng đã xác nhận cho lưu nháp thiếu dữ liệu và kiểm đủ khi công bố; cần bổ sung đặc tả riêng cho việc lưu nháp khi cập nhật bộ kiểm thử.
 
 Đã cập nhật ST-SUB-050–052 theo lượt từng phiên bản. TDD-SUB-002 đã được cập nhật phần tra cứu cùng TDD-LIB-002 để chốt; quản trị nội dung và danh sách theo TDD-LIB-001; các UT về tra cứu cần cập nhật sau khi chốt TDD; chưa dùng thiết kế cũ để triển khai quyền xem lại.
+
+## Bằng chứng backend cho section ngày 01/10/2026
+
+Đã triển khai backend và chạy kiểm thử tự động cho section theo phiên bản, upload có phạm vi, phân quyền đọc, tính lượt, transaction và migration. Xem [bảng kết quả và ranh giới kiểm chứng](library-unit-test-coverage.md#section-content-ngày-01102026). ST-LIB-052–066 vẫn là đặc tả Draft; chưa kết luận toàn bộ các bước giao diện đã chạy. Chưa triển khai hoặc kiểm trên Vercel/BizFly thật.

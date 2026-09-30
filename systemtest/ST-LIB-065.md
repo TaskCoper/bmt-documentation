@@ -35,7 +35,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# ST-LIB-011
+# ST-LIB-065
 
 ## System Test
 
@@ -44,11 +44,14 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-LIB-011 | STORY-LIB-001 | EXC | REGRESSION | P1 | Khách C và nhân viên B không có library.manage; nhân viên E thuộc vai trò tùy chỉnh (không phải Admin) được cấp library.manage; A thuộc vai trò Admin. E và A không có phân công tài nguyên. Môi trường thử có chức năng tương ứng; đọc lại được dữ liệu và lượt khi ca cần. | 1. C/B gửi trực tiếp thêm, sửa, công bố, ẩn, hiện, xóa nháp, đổi thứ tự section và xin upload theo section; lặp lại bằng phiên chưa đăng nhập.<br>2. E rồi A lần lượt thực hiện một thao tác hợp lệ.<br>3. A đọc lại mẫu và phiên bản. | V1 công khai, V2 nháp. Đây là dữ liệu thử, không phải mặc định sản phẩm. | Thao tác trái quyền bị từ chối (403 khi đã đăng nhập, 401 khi chưa đăng nhập), dữ liệu/hiển thị không đổi. E và A đều thực hiện được vì cùng có library.manage; hệ thống kiểm theo mã quyền, không theo tên vai trò Admin và không cần phân công. | STORY-LIB-001/AC-001<br>BR-LIB-002/Then<br>STORY-LIB-001/EXC-01<br>BR-RBAC-011/Then | Chặn quản trị trái quyền. Đặc tả chưa thực thi; API/fixture kỹ thuật bổ sung sau TDD. | [Chưa xác định] | Draft |
+| ST-LIB-065 | STORY-LIB-001 | Main / Integration boundary | REGRESSION | P1 | Quản trị A có library.manage; current V1 có hai section đủ file; khách C đã có quyền xem V1. Đọc được dữ liệu và số dư; kho thử hỗ trợ upload. | 1. A thêm section có tên Tầng 4 trực tiếp vào V1 rồi đặt thứ tự nằm giữa hai section cũ.<br>2. A và C đọc lại trang section, chi tiết và danh sách file; C gọi trực tiếp ID section mới.<br>3. A upload file đầu tiên nhưng tạm dừng trước commit complete; C đọc lại.<br>4. Hoàn tất commit, C đọc lại section và file; kiểm VersionId, PublishedAtUtc và số dư. | V1/S1 và V1/S2 đã có file; S3 mới có tên Tầng 4; F3 là file hợp lệ. Ghi nhận số dư, lịch sử và thời điểm công bố trước thao tác. | A thấy S3 đang chuẩn bị với 0 file; C chỉ thấy S1/S2, tổng section không tính S3 và đọc trực tiếp S3 nhận 404. Trước commit F3, S3 vẫn không lộ cho C. Sau commit, C thấy S3/F3 ở đúng vị trí giữa hai section cũ. VersionId, PublishedAtUtc, số dư và số dòng lịch sử không đổi; không cần công bố phiên bản mới. | STORY-LIB-001/AC-018<br>STORY-LIB-001/AC-017<br>STORY-LIB-003/AC-008<br>BR-LIB-001/Then<br>BR-LIB-003/Then<br>TDD-LIB-001/Architecture<br>TDD-LIB-002/Architecture | Chứng minh section chuẩn bị chỉ hiện sau khi file đầu tiên được lưu và giữ đúng thứ tự, quyền, lượt. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- STORY-LIB-001/AC-001
-- BR-LIB-002/Then
-- STORY-LIB-001/EXC-01
-- BR-RBAC-011/Then
+- STORY-LIB-001/AC-018
+- STORY-LIB-001/AC-017
+- STORY-LIB-003/AC-008
+- BR-LIB-001/Then
+- BR-LIB-003/Then
+- TDD-LIB-001/Architecture
+- TDD-LIB-002/Architecture

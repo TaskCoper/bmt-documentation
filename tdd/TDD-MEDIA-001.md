@@ -76,6 +76,23 @@ Code Taskcoper có `GET /api/v1/storages/presigned-url`, nhận key từ client,
 
 ## Architecture
 
+**Tích hợp upload thư viện theo section — đã chốt và triển khai backend ngày 01/10/2026**
+
+Yêu cầu BR-LIB-001 khoản 18 bắt buộc có section trước upload, nên thư viện là ngoại lệ của luồng generic “upload ảnh trước rồi gửi URL vào nghiệp vụ”. Tất cả file LIB mới phải được cấp ticket qua route theo section tại [TDD-LIB-001/Internal API](TDD-LIB-001.md#internal-api). Các purpose và route của module khác giữ hành vi đang có.
+
+- Bổ sung purpose nội bộ LibraryImage và LibraryAttachment. LibraryImage dùng JPG/PNG/WebP và trần 5 MiB hiện có. LibraryAttachment dùng PDF/DWG/DXF; số byte dương, giới hạn truyền tải do cấu hình `LibraryFileOption.MaxUploadBytes` quyết định và cần được cung cấp trước khi bật route, không dùng trần scan nhà thầu. MIME canonical: application/pdf, [image/vnd.dwg](https://www.iana.org/assignments/media-types/image/vnd.dwg), [image/vnd.dxf](https://www.iana.org/assignments/media-types/image/vnd.dxf). Chỉ route LIB được chọn purpose này; không chấp nhận hai giá trị qua MediaUploadInput của route chung.
+- LIB sở hữu bảng LibrarySectionUpload với FK UploadId → MediaUpload; tạo binding và ticket trong cùng transaction. MEDIA không sao tên/thứ tự section hoặc tự quyết quyền sửa mẫu. Port application cho phép LIB điều phối create/claim/finalize của MEDIA trong UoW hiện hữu; không gọi MediaUploadService đang tự mở scope bên trong một command transaction.
+- Tách phần nhận/ghi trạng thái ticket và phần I/O/xác minh để route LIB dùng lại; không sao chép một state machine upload thứ hai. Claim/finalize có hook kiểm target trong LIB, dùng cùng actor và library.manage hiện tại. Luồng generic phải từ chối complete/read theo đường vòng đối với purpose LIB; dùng route theo section để đọc kết quả.
+- Bytes staging vẫn private, key final riêng cho từng attempt, không thay bằng copy từ staging có thể bị ghi đè. Ảnh giải mã đúng MIME; PDF kiểm chữ ký như luồng PDF hiện có; DWG/DXF kiểm đuôi/MIME khai báo và số byte, chưa có parser CAD. Không tuyên bố đã kiểm cấu trúc CAD hoặc quét mã độc. SHA lấy từ đúng bytes đưa lên key final. Không render tệp đính kèm inline ở LIB.
+- Finalize LIB lấy đủ khóa nghiệp vụ trước: User/Template/Version → StoreId → ticket → object theo Id. Với ticket LIB, cả claim/complete/replay kiểm binding; worker MEDIA không lấy thêm khóa LIB sau khi đã giữ ticket/object. Complete cần đồng bộ reference thì lấy StoreId trước object, thay thứ tự khóa object trước StoreId của handler chung hiện tại cho nhánh này. Không giữ transaction trong khi gọi kho.
+- Transaction cuối chuyển object Ready, ticket Completed và ghi asset/link vào section cùng nhau; file đầu tiên chỉ làm section chuẩn bị xuất hiện cho khách sau commit theo BR-LIB-001 khoản 20. Không lưu một cờ hiển thị riêng trong MEDIA; đồng bộ MediaReference trước commit. Lỗi section/editVersion/lease hoặc lưu link rollback mọi ghi. Retry dùng UploadId + kết quả binding; không tạo asset rời hoặc chuyển file sang target khác. LIB không nhận URL từ ticket purpose Image chung làm file thư viện.
+- Xóa nháp gỡ binding sau khi khóa LIB rồi StoreId và ticket; ticket vẫn còn purpose LIB nên generic route tiếp tục từ chối, không có binding thì không được complete. Giữ dữ liệu MEDIA để worker xử lý staging/attempt theo cơ chế hiện có, không DELETE trong transaction.
+- Registry nguồn LibraryVersion vẫn đọc VersionAsset → Asset, có kiểm SectionId đúng version; section không sao file hoặc giữ ảnh bằng ticket/receipt. Tăng SourceSetVersion từ 2 lên 3 khi triển khai thay đổi nguồn; đóng gate dọn tới khi đối soát đúng phiên bản mới hoàn tất. Đổi thứ tự section không làm mất reference.
+- Purpose LibraryAttachment không thuộc chính sách tự dọn ảnh final. Không phân loại CAD thành ảnh cần dọn chỉ vì MIME bắt đầu bằng image/: candidate và bước kiểm cuối phải loại LibraryAttachment, PDF/DWG/DXF. Staging vẫn theo thời hạn tạm hiện hữu. Không thay thời hạn hoặc tự mở phạm vi xóa file đính kèm.
+
+Cấu hình kho/ACL vẫn theo hợp đồng đang áp dụng; không tự đổi bucket policy, mở listing hoặc deploy. Tệp final dùng adapter/key của MEDIA, route khách LIB tiếp tục chuyển tiếp bytes và không trả URL gốc như TDD-LIB-002. Cần kiểm trên bucket thử rằng signer/headers/đuôi CAD hoạt động trước phát hành; tài liệu này không phải bằng chứng đã upload thành công.
+
+
 **Thành phần triển khai**
 
 | Thành phần | Trách nhiệm |
@@ -328,6 +345,13 @@ stateDiagram-v2
 Orphan không phải trạng thái lưu riêng: Ready có UnreferencedSinceUtc khác NULL và không có reference là ảnh đang chờ dọn. Như vậy không cần đồng bộ thêm một cờ InUse có thể lệch với quan hệ thật.
 
 ## Data Model
+
+**Bổ sung phục vụ section LIB ngày 01/10/2026 — đã triển khai:** schema LibrarySectionUpload chỉ định nghĩa tại TDD-LIB-001. MediaUpload.Purpose mở rộng LibraryImage/LibraryAttachment; không thêm cột SectionId ở MEDIA để tránh hai nguồn binding. Ticket mới mang purpose LIB chỉ hợp lệ khi create command của LIB tạo binding cùng transaction; kiểm này nằm ở application, không giả lập CHECK đọc bảng khác. FK binding chặn ticket không tồn tại; generic create không thể tạo purpose LIB.
+
+Cập nhật CK_MediaUpload_Type/Size: LibraryImage cùng MIME/trần Image; LibraryAttachment nhận ba MIME PDF/DWG/DXF và DeclaredSizeBytes >0, giới hạn hạ tầng kiểm trước signer và trước complete. Giữ nguyên CHECK theo từng purpose Image/ContractorImage/ContractorScan. Mở rộng MediaConstants.Extension cho dwg/dxf. CK_MediaObject của object có SourceUploadId phải chấp nhận MIME mới, số byte dương, hash và UploadedAtUtc; bỏ trần cứng 20 MiB áp chung cho mọi purpose ở object vì LIB không có hạn mức này. Luồng finalize kiểm đúng trần ticket/purpose và cấu hình, không dùng giá trị Purpose từ client. Không thay dữ liệu ticket/object cũ hoặc hash replay của ba purpose cũ.
+
+Ví dụ dữ liệu giả định bổ sung cho ví dụ LIB: ticket U3 có Purpose=LibraryAttachment, OriginalName=mat-bang.pdf, DeclaredContentType=application/pdf, DeclaredSizeBytes=240000; object O3 có SourceUploadId=U3, State=Ready, MediaType=application/pdf, SizeBytes=240000, Sha256 của bytes thật và thời gian upload UTC. LibrarySectionUpload của LIB trỏ U3/S2 và ResultAssetId=F3; MediaReference ghi nguồn LibraryVersion/V1/Asset-F3 theo registry. Name/Position của S2 chỉ ở LibrarySection. Ticket không được tạo thêm một quyền truy cập nội dung cho khách.
+
 MediaUpload bổ sung Purpose varchar(32) NOT NULL DEFAULT Image. Ví dụ ticket ảnh thường lưu Purpose=Image, DeclaredContentType=image/png; ticket giấy phép lưu Purpose=ContractorScan, DeclaredContentType=application/pdf. Migration backfill ticket cũ bằng Image, không đổi hash request cũ. ContractorAsset.Url và cách gắn hồ sơ nằm tại TDD-CTR-001/Data Model.
 
 
@@ -585,6 +609,10 @@ Các object chưa được writer cũ bảo vệ phải qua bước cutover trư
 ### Use Cases
 
 ### Others
+
+- [ST-LIB-066](../systemtest/ST-LIB-066.md): lỗi upload/rollback không làm section chuẩn bị xuất hiện; chưa thực thi.
+
+- [TDD-LIB-001](TDD-LIB-001.md): binding upload theo section và transaction complete cùng nội dung; [ST-LIB-055](../systemtest/ST-LIB-055.md), [ST-LIB-056](../systemtest/ST-LIB-056.md), [ST-LIB-062](../systemtest/ST-LIB-062.md), [ST-LIB-064](../systemtest/ST-LIB-064.md) là đặc tả kiểm chứng, chưa thực thi.
 
 - Đợt đổi upload nhà thầu sang URL: 31/31 test PostgreSQL nhà thầu/Media, 54/54 test bộ kiểm tệp và adapter, 20/20 test HTTP nhà thầu/Media đã đạt, không có ca bỏ qua. Chạy trên bản sao tạm dùng phần đăng nhập ổn định vì module đăng nhập trong workspace đang được sửa đồng thời. TRX: `/private/tmp/bmt-ctr-presign-results/{integration,infra,api}.trx`. Chưa chạy FE hoặc kiểm PDF trên BizFly thật trong đợt này; chưa áp dụng migration lên môi trường chung. Kết quả các đợt trước ở bên dưới là bằng chứng lịch sử, không thay thế lượt kiểm này.
 
