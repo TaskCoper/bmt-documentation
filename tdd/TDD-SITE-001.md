@@ -53,6 +53,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ### Problem
 
+Phần tọa độ và contract tạo/sửa có thiết kế bổ sung tại [TDD-SITE-002](TDD-SITE-002.md). Khi triển khai thay đổi tọa độ, dùng contract mới ở đó; quyền sửa, gói giữ chỗ và các phần còn lại vẫn theo tài liệu này. Backend đã bổ sung tọa độ; chưa áp migration lên môi trường chung.
+
 Người dùng đã chốt nghiệp vụ Công trình ngày 25/09/2026 trong STORY-SITE-001, STORY-SITE-002 và BR-SITE-001 đến BR-SITE-003. Công trình là nơi thi công thật mà khách muốn được giám sát, là thực thể riêng, khác bản dự toán. Khách tự tạo công trình miễn phí và chỉ nhập tên, địa chỉ. Khách chỉ sửa hoặc xóa được công trình khi công trình không có gói giám sát giữ chỗ, tức gói đã gán hoặc đã hoàn thành; gói đã gỡ hoặc đã hủy không khóa (BR-SITE-002, bản cập nhật ngày 25/09/2026). Nhân viên không tạo, sửa hay xóa hộ; họ chỉ xem theo phạm vi quyền.
 
 Công trình là điểm neo của hai tính năng đã có code: gói giám sát gắn cố định vào một công trình (BR-SUB-009, BR-SUB-022) và nhân viên phụ trách theo từng gói (BR-RBAC-013). Trước đợt này chưa có bảng công trình nào, nên hai tính năng đó tham chiếu tới một định danh không kiểm được. Thiết kế dưới đây đã được triển khai ngày 25/09/2026 trên nhánh `feature/construction-site` của `bmt-be`.
