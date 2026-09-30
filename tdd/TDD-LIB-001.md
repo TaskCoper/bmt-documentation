@@ -77,6 +77,8 @@ Tài liệu tiếp tục sở hữu nội dung và tìm kiếm; thêm bảng li�
 
 ## Architecture
 
+**Upload và dọn ảnh — áp dụng MEDIA:** [TDD-MEDIA-001](TDD-MEDIA-001.md) thay các mô tả trước đây trong tài liệu này về dịch vụ presign ngoài backend, chỉ frontend kiểm ảnh và backend không dọn file. Upload ảnh mới dùng ba route MEDIA của BMT, nhận JPG/PNG/WebP tối đa 5 MiB và chỉ có URL xem sau khi backend xác minh bytes. API nghiệp vụ tiếp tục nhận URL; khi bật MEDIA, SaveChangesAsync kiểm trạng thái ảnh và đồng bộ nơi sử dụng cùng transaction. Ảnh còn trong nháp, nội dung ẩn hoặc lịch sử được giữ. Sau khi mất nơi sử dụng cuối phải chờ ít nhất 24 giờ; ảnh cũ thiếu lịch sử chờ từ lần đối soát đầy đủ đầu tiên. Ảnh Deleting/Deleted không được gắn lại. Các đoạn mô tả giới hạn hoặc trách nhiệm upload cũ bên dưới chỉ ghi bối cảnh trước MEDIA, không là yêu cầu hiện hành cho ảnh mới. Tệp đính kèm không phải ảnh và luồng đọc nội dung riêng tư vẫn theo hợp đồng riêng của module.
+
 **Hiện trạng đã xác minh**
 
 Backend là .NET 8, EF Core/Npgsql 8; compose dùng PostgreSQL 15. `ApplicationDbContext` có User và các bảng nền RBAC, chưa có bảng LIB, catalog PROJ hay subscription trong DbContext được đọc. Không có tenant filter. Các port/tên lớp mới trong tài liệu là đề xuất, không khẳng định đã tồn tại.

@@ -48,7 +48,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Statement
 
-Người liên hệ, số điện thoại và email của nhà thầu chỉ dành cho admin. Thông tin và bản scan pháp lý, hợp tác BuildX hiển thị theo trạng thái chung của hồ sơ nhà thầu.
+Người liên hệ, số điện thoại và email của nhà thầu chỉ dành cho admin. Thông tin pháp lý và hợp tác BuildX hiển thị theo trạng thái hồ sơ. Ảnh và bản scan mở trực tiếp cho người có URL, không yêu cầu đăng nhập; ẩn hồ sơ không thu hồi URL đã chia sẻ.
 
 ## When
 
@@ -59,7 +59,7 @@ Admin quản lý thông tin liên hệ, hồ sơ pháp lý hoặc hợp tác; kh
 1. Không trả người liên hệ, số điện thoại hoặc email của nhà thầu trong hồ sơ công khai cho khách.
 2. Admin được lưu và xem các thông tin liên hệ nội bộ của nhà thầu.
 3. Admin tải bản scan giấy phép hoặc thỏa thuận hợp tác lên hồ sơ; không có lựa chọn ẩn/hiện riêng cho từng tệp.
-4. Khi hồ sơ Hiển thị, khách được xem các bản scan đã tải lên mà không cần đăng nhập. Khi hồ sơ Ẩn, các bản scan cũng không được cung cấp công khai.
+4. Khi hồ sơ Hiển thị, API công khai cung cấp URL ảnh và bản scan đã gắn. Khi hồ sơ Ẩn, API không trả hồ sơ hoặc danh sách tệp của hồ sơ; người đã giữ URL vẫn mở được tệp. Kho không cho người chưa có URL liệt kê tệp để tra cứu.
 5. Hồ sơ pháp lý có các trường theo trang mẫu: tên pháp nhân, mã số thuế, ngày thành lập, người đại diện, địa chỉ đăng ký, ngành nghề và quy mô nhân sự. Thông tin giấy phép gồm loại giấy phép, số hiệu/mã số doanh nghiệp, cơ quan cấp, ngày cấp, thời hạn hiệu lực và bản scan. Các phần này có thể bổ sung sau theo BR-CTR-002.
 6. Hợp tác BuildX có thông tin thời gian hợp tác, mã hồ sơ, ngày ký, số trang và bản scan. Không dùng quy trình xác minh riêng cho tài liệu.
 7. Phần cam kết có thông tin bảo hành, việc dùng hợp đồng mẫu BuildX và bảo hiểm công trình theo trang mẫu. Admin nhập thông tin áp dụng cho nhà thầu; các con số và cam kết minh họa trên trang mẫu không tự trở thành chính sách bắt buộc cho mọi nhà thầu.
@@ -72,7 +72,7 @@ Thông tin liên hệ tại mục 1 vẫn chỉ dành cho admin, kể cả khi h
 ## Notes
 
 - Người dùng đã chốt làm phần pháp lý và hợp tác như trang mẫu, nhưng giản lược xác minh thành trạng thái tổng thể của hồ sơ.
-- Không dùng việc gửi lời mời báo giá để mở khóa tài liệu hoặc thông tin liên hệ trong phạm vi này. Quyền xem bản scan theo trạng thái chung của hồ sơ.
-- Loại/dung lượng tệp, API upload/download và kiểm quyền theo trạng thái hồ sơ đã chốt tại TDD-CTR-001/002. Hợp đồng adapter với nhà cung cấp kho riêng tư vẫn cần đối chiếu khi tích hợp.
-- Quyết định mới thay thế lựa chọn Công khai/Chỉ nội bộ của từng bản scan: chỉ dùng trạng thái chung của hồ sơ. Mã số thuế hiển thị đầy đủ khi hồ sơ công khai.
+- Không dùng việc gửi lời mời báo giá để mở khóa tài liệu hoặc thông tin liên hệ trong phạm vi này. Quyền xem tệp dựa trên việc có URL; trạng thái hồ sơ chỉ quyết định việc cung cấp thông tin qua API.
+- Frontend xin presign từ BMT, PUT trực tiếp vào BizFly, hoàn tất upload rồi gửi fileUrl vào API hồ sơ. Backend lưu URL cố định và metadata đã kiểm; không lưu uploadUrl có chữ ký. Chi tiết tại TDD-CTR-001/002 và TDD-MEDIA-001.
+- Quyết định mới thay thế yêu cầu chặn tệp khi hồ sơ ẩn: người có URL vẫn xem được ảnh và bản scan. Mã số thuế hiển thị đầy đủ khi hồ sơ công khai.
 - Người dùng đã chốt bộ US/BR trong hội thoại. Reviewer và Approver: Tân Trần. System Test được soạn theo phần nghiệp vụ đã chốt; chưa chạy kiểm thử hoặc triển khai code. Các điểm còn mở trong tài liệu không tự trở thành quy tắc đã xác nhận. Metadata người phụ trách và ngày hiệu lực còn thiếu; chưa thực hiện phê duyệt trên hệ thống quản lý tài liệu.

@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-CTR-028 | Nhà thầu | Register asset handler — hồ sơ thay đổi sau upload | Error | REGRESSION | P1 | Unit dự kiến theo TDD đã chốt; chưa viết hoặc chạy mã test. Object đã upload riêng tư; parent bị xóa hoặc Version từ 3 thành 4 trước command đăng ký. | Đăng ký key vừa upload với expectedVersion=3. | Parent mất trả ContractorNotFound; version cũ trả ContractorVersionConflict. Không thêm ContractorAsset, không sửa version hiện tại. Object không có public contentUrl; việc dọn orphan là đối soát riêng, không giả định rollback SQL xóa object. | BR-CTR-004/Then<br>TDD-CTR-001/Architecture<br>TDD-CTR-001/Internal API | Tách tác động của kho và database. | [Chưa xác định] | Draft |
+| UT-CTR-028 | Nhà thầu | Lưu URL — hồ sơ thay đổi sau upload | Error | REGRESSION | P1 | Unit dự kiến theo TDD đã chốt; chưa viết hoặc chạy mã test. Upload đã Completed và có fileUrl; parent bị xóa hoặc Version từ 3 thành 4 trước command lưu hồ sơ. | Lưu fileUrl vừa upload với expectedVersion=3. | Parent mất trả ContractorNotFound; version cũ trả ContractorVersionConflict. Không thêm ContractorAsset, không sửa version hiện tại. fileUrl vẫn đọc được; ảnh chưa dùng được dọn theo BR-MEDIA-002. Không giả định rollback SQL xóa object. | BR-CTR-004/Then<br>TDD-CTR-001/Architecture<br>TDD-CTR-001/Internal API | Tách tác động của kho và database. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

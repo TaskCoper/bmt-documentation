@@ -44,11 +44,11 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Owner**: [Chưa xác định]
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
-- **Source**: Người dùng xác nhận trong hội thoại: có ít nhất ảnh hoặc mô tả, không bắt buộc đồng thời cả hai; giữ một ảnh JPG/PNG/HEIC tối đa 10 MB và mô tả tối đa 500 ký tự như trang mẫu.
+- **Source**: Người dùng xác nhận trong hội thoại: có ít nhất ảnh hoặc mô tả, không bắt buộc đồng thời cả hai; một ảnh hoặc mô tả tối đa 500 ký tự; ảnh upload mới theo BR-MEDIA-001 đã chốt trong hội thoại.
 
 ## Statement
 
-Thông tin dùng để tạo thiết kế phải có ít nhất ảnh hoặc mô tả. Khách được cung cấp chỉ ảnh, chỉ mô tả hoặc cả hai. Mỗi bản dự toán nhận tối đa một ảnh thuộc định dạng JPG, PNG hoặc HEIC, dung lượng tối đa 10 MB; trường Mô tả chi tiết tối đa 500 ký tự, dùng làm đầu vào gửi AI. Không có trường ghi chú riêng trong phạm vi Tạo dự toán.
+Thông tin dùng để tạo thiết kế phải có ít nhất ảnh hoặc mô tả. Khách được cung cấp chỉ ảnh, chỉ mô tả hoặc cả hai. Mỗi bản dự toán nhận tối đa một ảnh thuộc định dạng JPG, PNG hoặc WebP, dung lượng tối đa 5 MiB (5.242.880 byte) cho upload mới theo BR-MEDIA-001; trường Mô tả chi tiết tối đa 500 ký tự, dùng làm đầu vào gửi AI. Không có trường ghi chú riêng trong phạm vi Tạo dự toán.
 
 ## When
 
@@ -61,7 +61,7 @@ Hệ thống kiểm tra tính đầy đủ của thông tin bản dự toán dù
 3. Có cả ảnh và mô tả thì đáp ứng điều kiện này; không bắt khách bỏ một trong hai.
 4. Không có cả ảnh lẫn mô tả thì thông tin chưa đủ để gửi AI; yêu cầu khách bổ sung ít nhất một trong hai.
 5. Đáp ứng điều kiện ảnh/mô tả không thay thế yêu cầu về diện tích hoặc các trường đầu vào khác được chốt riêng.
-6. Khi có ảnh, chỉ nhận tối đa một ảnh JPG, PNG hoặc HEIC, không vượt quá 10 MB. Ảnh ngoài định dạng hoặc vượt giới hạn không được coi là ảnh đầu vào hợp lệ.
+6. Khi có ảnh, chỉ nhận tối đa một ảnh JPG, PNG hoặc WebP, không vượt quá 5 MiB (5.242.880 byte) khi upload mới theo BR-MEDIA-001. Ảnh ngoài định dạng hoặc vượt giới hạn không được coi là ảnh đầu vào hợp lệ.
 7. Khi có Mô tả chi tiết, nội dung không vượt quá 500 ký tự. Nội dung vượt giới hạn không được coi là mô tả đầu vào hợp lệ.
 
 8. Khi thay ảnh đầu vào, giữ ảnh cũ đang gắn với bản dự toán cho đến khi ảnh mới hợp lệ, tải lên và lưu thay thế thành công. Nếu tải hoặc lưu ảnh mới thất bại, ảnh cũ vẫn là ảnh đầu vào đã lưu; không báo đã thay ảnh thành công.
@@ -77,5 +77,5 @@ Hệ thống kiểm tra tính đầy đủ của thông tin bản dự toán dù
 - Đã chốt số lượng ảnh, định dạng, dung lượng và giới hạn mô tả. Đã chốt giữ ảnh cũ đến khi ảnh mới tải và lưu thay thế thành công; trường hợp chưa có ảnh cũ mà tải ảnh mới lỗi thì bản dự toán vẫn chưa có ảnh hợp lệ. Dấu bắt buộc trên giao diện mẫu không thay thế quyết định cho phép chỉ có mô tả.
 - Mô tả chi tiết là trường mô tả thiết kế duy nhất, được gửi AI khi khách cung cấp. Người dùng đã chọn không thêm ghi chú riêng; đề xuất ghi chú riêng tùy chọn 500 ký tự trước đó không áp dụng. Giới hạn tên bản dự toán được quy định riêng tại BR-PROJ-003.
 - Quy tắc này chỉ xác định sự hiện diện của dữ liệu, không khẳng định mọi tệp hoặc nội dung mô tả đều hợp lệ.
-- Tầng thực thi (người dùng xác nhận ngày 26/09/2026): frontend kiểm định dạng JPG/PNG/HEIC và dung lượng tối đa 10 MB ở khoản 6 trước khi upload tệp qua dịch vụ presigned URL; backend chỉ lưu URL của tệp và kiểm URL là URL tuyệt đối dùng https. Bổ sung cùng ngày (lần 2): URL ảnh mới còn phải thuộc tên miền của kho presign, danh sách tên miền đọc từ cấu hình; URL do dịch vụ presign trả là cố định, không hết hạn. Backend không kiểm định dạng hay dung lượng, nên yêu cầu gửi thẳng API với URL https của tệp sai định dạng không bị backend chặn. "Lưu thay thế thành công" ở khoản 8 là lưu URL mới thành công; upload hoặc lưu lỗi thì URL cũ vẫn là ảnh đầu vào. Ảnh đầu vào nằm ở URL công khai theo xác nhận của người dùng. Nghĩa của các khoản không đổi. Thiết kế ở TDD-PROJ-001.
+- Tầng thực thi hiện tại: ảnh mới đi qua [BR-MEDIA-001](BR-MEDIA-001.md) và [TDD-MEDIA-001](../tdd/TDD-MEDIA-001.md). Frontend PUT lên kho; backend xác minh bytes, định dạng và dung lượng khi complete, rồi trả URL công khai cố định. API dự toán lưu URL và nơi sử dụng trong cùng transaction. Ảnh cũ đang dùng không bị loại theo giới hạn upload mới. Khi thay ảnh, URL cũ chỉ được gỡ sau khi lưu URL mới thành công; dọn sau ít nhất 24 giờ không còn bất kỳ nơi sử dụng nào theo [BR-MEDIA-002](BR-MEDIA-002.md). Quyết định này thay phần frontend tự kiểm và giới hạn HEIC/10 MB trước đây cho upload mới.
 - Reviewer và Approver là Tân Trần theo xác nhận trong hội thoại; việc ghi tên không có nghĩa tài liệu đã được phê duyệt. Owner và ngày hiệu lực chưa xác định; chưa có kết quả kiểm thử.
