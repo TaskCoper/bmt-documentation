@@ -103,7 +103,7 @@ Không dùng kết quả InMemory hoặc mock để kết luận về CHECK, sca
 
 ## Bằng chứng backend ngày 29/09/2026
 
-Đã triển khai Công ty, Số sao và Số đánh giá trong backend của workspace, trên nhánh `feature/architect-profile-summary`. Chưa commit thay đổi KTS. Ba trường có mặt ở POST/PUT và cả bốn API GET hồ sơ; các route và quyền `consultation.manage` được giữ nguyên.
+Đã triển khai Công ty, Số sao và Số đánh giá trong backend. Phần này được ghi trong commit [ae1bc8b](https://github.com/TaskCoper/bmt-be/commit/ae1bc8b32dab77d1218efa20122545f35d9f9706) trên `develop`. Ba trường có mặt ở POST/PUT và cả bốn API GET hồ sơ; các route và quyền `consultation.manage` được giữ nguyên.
 
 | Phạm vi đã chạy | Kết quả | Bằng chứng và giới hạn |
 | --- | --- | --- |
@@ -114,3 +114,12 @@ Không dùng kết quả InMemory hoặc mock để kết luận về CHECK, sca
 Các lệnh test dùng `--no-restore`; không tải lại dependency. Tổng cộng 191 test chạy qua. Migration [20260929122151_ArchitectProfileSummary](../../bmt-be/src/bmt-be.persistence/Migrations/20260929122151_ArchitectProfileSummary.cs) chỉ thêm ba cột và bốn CHECK của Architect. Test nâng cấp đối chiếu hồ sơ hiện/ẩn, ID, version, thời gian, links và yêu cầu cũ; test chạy lại giữ nguyên số sao/số đánh giá đã nhập.
 
 Đây là bằng chứng cho phần backend của ST-CONSULT-033 đến ST-CONSULT-041, cùng các nhánh hồi quy đã nêu; không đánh dấu toàn bộ 41 System Test đã đạt. Chưa tích hợp frontend, chưa chạy E2E qua trình duyệt hoặc gửi SMTP thật. Chưa áp dụng migration vào database phát triển đang chạy hay môi trường triển khai. Trước khi mở lại thao tác ghi hồ sơ trên môi trường dùng thật, cần triển khai frontend gửi Công ty và đủ hai số theo contract mới.
+
+
+## Kiểm chứng trước khi push ngày 30/09/2026
+
+Backend tại commit [ae1bc8b](https://github.com/TaskCoper/bmt-be/commit/ae1bc8b32dab77d1218efa20122545f35d9f9706) đã được kiểm trên checkout riêng, dựa trên `develop` có commit Tin tức `580bf16`. Snapshot và model đích của migration KTS đã đồng bộ với schema hiện tại; commit KTS chỉ thêm ba cột và bốn CHECK vào Architect. Test nâng cấp bắt đầu từ migration `20260929090000_NewsArticleReadingTime`.
+
+Lệnh `BMT_REQUIRE_DOCKER_TESTS=1 dotnet test bmt-be.sln -c Release --no-restore -m:1` chạy qua **2.335 test**, không lỗi, không bỏ qua: domain 1, application 1.379, persistence 17, infrastructure 163, API 338, integration 437. Lệnh EF `migrations has-pending-model-changes` xác nhận model khớp migration snapshot. Đây là kết quả trên bản commit cuối sau khi rebase, bổ sung cho bằng chứng kiểm thử theo phạm vi ngày 29/09 ở trên.
+
+Push lên `develop` tự kích hoạt workflow [Deploy Application](https://github.com/TaskCoper/bmt-be/actions/workflows/main.yaml), gồm bước áp dụng migration và triển khai Dev. Kết quả local không xác nhận workflow đã triển khai thành công; theo dõi trạng thái CI của đúng commit. Frontend vẫn chưa được cập nhật vì workspace chưa có mã nguồn giao diện.

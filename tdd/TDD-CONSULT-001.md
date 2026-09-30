@@ -808,6 +808,8 @@ Mặc định source hiện là 3 lần retry, khoảng đầu 5 giây, mỗi l�
 
 ## Change Log
 
+- 2026-09-30: Backend được ghi trong commit [ae1bc8b](https://github.com/TaskCoper/bmt-be/commit/ae1bc8b32dab77d1218efa20122545f35d9f9706) trên `develop`, dựa trên bản có thay đổi Tin tức `580bf16`. Đã kiểm lại toàn bộ solution Release: 2.335 test qua, không lỗi hoặc bỏ qua; model khớp migration snapshot. Push `develop` kích hoạt workflow triển khai Dev có bước áp dụng migration; kết quả local không thay bằng chứng triển khai CI. Chi tiết trong [bảng độ phủ](../discovery/consult-system-test-coverage.md#kiểm-chứng-trước-khi-push-ngày-30092026).
+
 - 2026-09-29: Bổ sung CompanyName, Rating, ReviewCount theo US/BR đã chốt; mô tả giữ hồ sơ cũ, validation, CHECK, contract, projection, ví dụ và kế hoạch migration. Người dùng đã chốt bản cập nhật TDD trong hội thoại. Đã bổ sung UT-CONSULT-049 đến UT-CONSULT-059, cập nhật các UT chịu ảnh hưởng và thêm ST-CONSULT-041 cho CHECK/kiểu numeric. Đã triển khai backend, tạo migration `20260929122151_ArchitectProfileSummary` và chạy qua 191 test có phạm vi KTS/tư vấn (135 nghiệp vụ, 34 HTTP, 22 PostgreSQL). Migration chỉ chạy trên database của bộ test; chưa tích hợp frontend hoặc triển khai dịch vụ.
 
 - 2026-09-26 (timeout SMTP): Ghi nhận timeout SMTP 30 giây đã làm ở commit `e451773` (nhánh `feature/smtp-timeout` của `bmt-be`, chưa merge): option `MailOption__TimeoutSeconds`, biến `MAIL_TIMEOUT_SECONDS`, áp cho mọi email qua adapter chung. Sửa Architecture/Notes và External API/Error Handling cho khớp.
