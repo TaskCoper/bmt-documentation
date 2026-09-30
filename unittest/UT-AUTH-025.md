@@ -42,9 +42,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-AUTH-025 | Auth session | AuthSessionIssuer.RefreshAsync | Branch | REGRESSION | P1 | `FakeTimeProvider` đặt lúc 2026-09-26T02:10:00Z. `JwtOption`: `RefreshTokenExpireMin = 1440`, `MobileRefreshTokenExpireMin = 43200`, `AccessTokenExpireMin = 15`. Store trả phiên Mobile có access token cũ mang claim `IsForgotPassword = true`. `TryRotateAsync` trả true. | `RefreshAsync(token, SessionClient.Mobile)`. | Gọi `IAccessClaimsBuilder.BuildAsync(UserId, forgotPasswordFlow: true)`. Payload mới có hạn 2026-09-27T02:10:00Z và TTL 1.445 phút, `clientKind: Mobile`. | STORY-AUTH-001/AC-008<br>BR-AUTH-002/Then | Phiên quên mật khẩu không được kéo dài 30 ngày khi làm mới. Mã test (nhánh feature/mobile-auth, chưa commit): bmt-be.application.tests/usecases/user/AuthSessionIssuerTests.cs:RefreshAsync_MobileForgotPasswordSession_KeepsWebLifetimeAndForgotFlag. | [Chưa xác định] | Draft |
+| UT-AUTH-025 | Auth session | AuthSessionIssuer.RefreshAsync | Branch | REGRESSION | P1 | TimeProvider=2026-09-26T02:10:00Z; JwtOption web=1440, mobile=43200, access=15 phút. Blob Mobile và JWT cùng PasswordReset/S1, claim IsForgotPassword=true; User Active/S1; proof email E1 còn khớp. TryRotateAsync trả true. | `RefreshAsync(token, SessionClient.Mobile)`. | Claims mới giữ PasswordReset/S1, IsForgotPassword=true cùng proof email E1; không tự chuyển Google dù User có link. Payload mới Mobile/PasswordReset/S1 có hạn 2026-09-27T02:10:00Z và TTL 1445 phút. | STORY-AUTH-001/AC-008<br>BR-AUTH-002/Then<br>TDD-AUTH-003/Architecture | Phiên quên mật khẩu không được kéo dài 30 ngày khi làm mới. Mã test (nhánh feature/mobile-auth, chưa commit): bmt-be.application.tests/usecases/user/AuthSessionIssuerTests.cs:RefreshAsync_MobileForgotPasswordSession_KeepsWebLifetimeAndForgotFlag. Phần mở rộng theo TDD-AUTH-003 là đặc tả chưa chạy; mã test được dẫn trước đó cần cập nhật khi triển khai. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-AUTH-001/AC-008
 - BR-AUTH-002/Then
+- TDD-AUTH-003/Architecture

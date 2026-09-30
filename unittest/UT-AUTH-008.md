@@ -42,8 +42,9 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-AUTH-008 | Auth session | UserCredentialChecker.CheckAsync | Happy | SMOKE | P1 | EF InMemory. User A: Id `1f0c7a52-3b9e-4d21-8c55-6a2e90b1d7f4`, `AccountKind = Customer`, đang hoạt động. `VerifyPassword` trả true. | Email `khach.a@example.test`, mật khẩu đúng. | Trả `Valid` với UserId của A và `AccountKind = Customer`. | TDD-AUTH-002/Architecture | Kết quả hợp lệ mang đủ thông tin cho bước chặn nhân viên. Mã test (nhánh feature/mobile-auth, chưa commit): bmt-be.application.tests/usecases/user/UserCredentialCheckerTests.cs:CheckAsync_ActiveCustomerWithRightPassword_ReturnsValidWithKind. | [Chưa xác định] | Draft |
+| UT-AUTH-008 | Auth session | UserCredentialChecker.CheckAsync | Happy | SMOKE | P1 | Repository giả trả User A: Id 1f0c7a52-3b9e-4d21-8c55-6a2e90b1d7f4, Customer/Active, SecurityStamp S1. VerifyPassword trả true. Chỉ kiểm kết quả proof, không kiểm SQL bằng EF InMemory. | Email `khach.a@example.test`, mật khẩu đúng. | Trả Valid với UserId A, AccountKind Customer và ExpectedSecurityStamp S1 từ cùng bản đọc đã kiểm mật khẩu. Không tra stamp mới để thay proof sau đó. | TDD-AUTH-002/Architecture<br>TDD-AUTH-003/Architecture | Kết quả hợp lệ mang đủ thông tin cho bước chặn nhân viên. Mã test (nhánh feature/mobile-auth, chưa commit): bmt-be.application.tests/usecases/user/UserCredentialCheckerTests.cs:CheckAsync_ActiveCustomerWithRightPassword_ReturnsValidWithKind. Phần mở rộng theo TDD-AUTH-003 là đặc tả chưa chạy; mã test được dẫn trước đó cần cập nhật khi triển khai. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - TDD-AUTH-002/Architecture
+- TDD-AUTH-003/Architecture

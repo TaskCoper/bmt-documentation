@@ -42,9 +42,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-AUTH-013 | Web auth | GetLoginQueryHandler.Handle | Quirk | REGRESSION | P1 | Ba lần chạy: checker trả `NotFound`; `WrongPassword`; `Valid(UserId A, Customer)`. | `GetLoginQuery` với email và mật khẩu tương ứng. | `NotFound`: ném `Exception` với message `UserNotExisted` như hiện nay. `WrongPassword`: ném `System.UnauthorizedAccessException`. `Valid`: gọi `IssueAsync(UserId A, SessionClient.Web, false)`. | STORY-AUTH-001/Out of Scope<br>TDD-AUTH-002/Architecture | Web giữ nguyên hành vi lỗi cho tới khi có việc riêng sửa cùng frontend; test này báo khi ai đó vô tình đổi web. Mã test (nhánh feature/mobile-auth, chưa commit): bmt-be.application.tests/usecases/user/GetLoginQueryHandlerTests.cs (cả lớp). | [Chưa xác định] | Draft |
+| UT-AUTH-013 | Web auth | GetLoginQueryHandler.Handle | Quirk | REGRESSION | P1 | Ba biến thể độc lập: checker NotFound; WrongPassword; Valid(A, Customer, ExpectedSecurityStamp S1). | `GetLoginQuery` với email và mật khẩu tương ứng. | NotFound: giữ Exception/message UserNotExisted. WrongPassword: giữ System.UnauthorizedAccessException theo phạm vi cũ. Valid: cấp phiên Web bằng AuthenticationMethod.Password và ExpectedSecurityStamp S1. Không tự lấy stamp mới thay proof. | STORY-AUTH-001/Out of Scope<br>TDD-AUTH-002/Architecture<br>TDD-AUTH-003/Architecture | Web giữ nguyên hành vi lỗi cho tới khi có việc riêng sửa cùng frontend; test này báo khi ai đó vô tình đổi web. Mã test (nhánh feature/mobile-auth, chưa commit): bmt-be.application.tests/usecases/user/GetLoginQueryHandlerTests.cs (cả lớp). Phần mở rộng theo TDD-AUTH-003 là đặc tả chưa chạy; mã test được dẫn trước đó cần cập nhật khi triển khai. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-AUTH-001/Out of Scope
 - TDD-AUTH-002/Architecture
+- TDD-AUTH-003/Architecture

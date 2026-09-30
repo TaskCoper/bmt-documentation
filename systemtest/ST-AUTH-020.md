@@ -44,9 +44,9 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-AUTH-020 | STORY-AUTH-001 | NFR | FULL | P1 | App bản test cài trên một máy Android và một máy iOS. | 1. Đăng nhập app bằng A<br>2. Kiểm tra nơi app lưu refresh token trên từng máy<br>3. Đóng hẳn app rồi mở lại<br>4. Đăng xuất, rồi kiểm tra lại kho lưu | Khách hàng A: `khach.a@example.test`, tài khoản khách hàng, đã xác minh email, đang hoạt động, mật khẩu `MatKhau@123`. | Bước 2: refresh token nằm trong Keychain (iOS) hoặc Keystore (Android), không nằm trong bộ nhớ thường của app; access token không được ghi xuống máy.<br>Bước 3: app vẫn đăng nhập nhờ làm mới phiên bằng refresh token đã lưu.<br>Bước 4: không còn token nào trong kho lưu. | STORY-AUTH-001/Non-Functional<br>STORY-AUTH-001/Main | Kiểm phía app giữ token đúng nơi an toàn và xóa token khi đăng xuất. | [Chưa phân công] | Draft |
+| ST-AUTH-020 | STORY-AUTH-001 | NFR | FULL | P1 | App bản test cài trên một máy Android và một máy iOS. | 1. Đăng nhập app bằng A<br>2. Kiểm tra nơi app lưu refresh token trên từng máy<br>3. Đóng hẳn app rồi mở lại<br>4. Đăng xuất, rồi kiểm tra lại kho lưu | Khách hàng A: `khach.a@example.test`, tài khoản khách hàng, đã xác minh email, đang hoạt động, mật khẩu `MatKhau@123`. | Bước 2: refresh token nằm trong Keychain (iOS) hoặc Keystore (Android), không nằm trong bộ nhớ thường của app; access token không được ghi xuống máy.<br>Bước 3: app vẫn đăng nhập nhờ làm mới phiên bằng refresh token đã lưu.<br>Bước 4: không còn token nào trong kho lưu. | STORY-AUTH-001/Non-Functional<br>STORY-AUTH-001/Main Flow | Kiểm phía app giữ token đúng nơi an toàn và xóa token khi đăng xuất. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 
 - STORY-AUTH-001/Non-Functional
-- STORY-AUTH-001/Main
+- STORY-AUTH-001/Main Flow

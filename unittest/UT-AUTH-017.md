@@ -42,9 +42,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-AUTH-017 | Mobile auth | MobileVerifyForgotPasswordCodeCommandHandler.Handle | Happy | SMOKE | P0 | EF InMemory. Khách hàng A có `VerifyForgotPasswordCode = 736120`. Issuer giả. | `MobileVerifyForgotPasswordCodeCommand("khach.a@example.test", 736120)`. | Gọi `IssueAsync(UserId A, SessionClient.Mobile, forgotPasswordFlow: true)` đúng một lần; kết quả chứa token. | STORY-AUTH-001/AC-008<br>BR-AUTH-002/Then | Phiên quên mật khẩu trên app được cấp với cờ quên mật khẩu để giữ hạn web và bị chặn ở chức năng thường. Mã test (nhánh feature/mobile-auth, chưa commit): bmt-be.application.tests/usecases/user/MobileAuthHandlerTests.cs:Handle_CustomerRightCode_IssuesMobileForgotPasswordSession. | [Chưa xác định] | Draft |
+| UT-AUTH-017 | Mobile auth | MobileVerifyForgotPasswordCodeCommandHandler.Handle và cấp phiên sau command (mở rộng dự kiến) | Happy | SMOKE | P0 | Fake repository trả Customer A, EmailKey E1, SecurityStamp S1, VerifyForgotPasswordCode=736120. Issuer chỉ có ở coordinator/endpoint sau command; sender điều khiển hoàn tất. | `MobileVerifyForgotPasswordCodeCommand("khach.a@example.test", 736120)`. | Handler tiêu thụ VerifyForgotPasswordCode=0, trả proof A/S1/E1; không cấp phiên bên trong transaction. Sau sender thành công, cấp Mobile/PasswordReset/S1 kèm email E1 đã chứng minh. Kết quả chứa token; phiên có IsForgotPassword=true, hạn reset như web và không có quyền nghiệp vụ. | STORY-AUTH-001/AC-008<br>BR-AUTH-002/Then<br>TDD-AUTH-003/Architecture | Phiên quên mật khẩu trên app được cấp với cờ quên mật khẩu để giữ hạn web và bị chặn ở chức năng thường. Mã test (nhánh feature/mobile-auth, chưa commit): bmt-be.application.tests/usecases/user/MobileAuthHandlerTests.cs:Handle_CustomerRightCode_IssuesMobileForgotPasswordSession. Phần mở rộng theo TDD-AUTH-003 là đặc tả chưa chạy; mã test được dẫn trước đó cần cập nhật khi triển khai. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-AUTH-001/AC-008
 - BR-AUTH-002/Then
+- TDD-AUTH-003/Architecture

@@ -42,10 +42,11 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-AUTH-009 | Mobile auth | GetMobileLoginQueryHandler.Handle | Happy | SMOKE | P0 | `IUserCredentialChecker` trả `Valid(UserId A, Customer)`. `IAuthSessionIssuer.IssueAsync` giả trả access token `T1`, refresh token `M1`, hạn 2026-10-26T09:10:00+07:00. | `GetMobileLoginQuery("khach.a@example.test", "MatKhau@123")`. | Gọi `IssueAsync(UserId A, SessionClient.Mobile, forgotPasswordFlow: false)` đúng một lần. Kết quả thành công có `AccessToken = T1`, `RefreshToken = M1` (không bị xóa khỏi kết quả). | STORY-AUTH-001/AC-001<br>BR-AUTH-001/Then<br>BR-AUTH-002/Then | Luồng chính: khách hàng đăng nhập app nhận token trong kết quả. Mã test (nhánh feature/mobile-auth, chưa commit): bmt-be.application.tests/usecases/user/MobileAuthHandlerTests.cs:Handle_Customer_IssuesMobileSessionAndKeepsTokens. | [Chưa xác định] | Draft |
+| UT-AUTH-009 | Mobile auth | GetMobileLoginQueryHandler.Handle | Happy | SMOKE | P0 | IUserCredentialChecker trả proof Valid(UserId A, Customer, ExpectedSecurityStamp S1). Issuer giả trả T1/M1 và hạn 2026-10-26T09:10:00+07:00. | `GetMobileLoginQuery("khach.a@example.test", "MatKhau@123")`. | Gọi issuer một lần với A, SessionClient.Mobile, AuthenticationMethod.Password và ExpectedSecurityStamp S1 từ checker. Kết quả thành công giữ AccessToken T1 và RefreshToken M1, không xóa khỏi body. | STORY-AUTH-001/AC-001<br>BR-AUTH-001/Then<br>BR-AUTH-002/Then<br>TDD-AUTH-003/Architecture | Luồng chính: khách hàng đăng nhập app nhận token trong kết quả. Mã test (nhánh feature/mobile-auth, chưa commit): bmt-be.application.tests/usecases/user/MobileAuthHandlerTests.cs:Handle_Customer_IssuesMobileSessionAndKeepsTokens. Phần mở rộng theo TDD-AUTH-003 là đặc tả chưa chạy; mã test được dẫn trước đó cần cập nhật khi triển khai. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-AUTH-001/AC-001
 - BR-AUTH-001/Then
 - BR-AUTH-002/Then
+- TDD-AUTH-003/Architecture

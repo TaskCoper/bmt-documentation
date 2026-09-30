@@ -44,9 +44,9 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-AUTH-002 | STORY-AUTH-001 | Main / Integration boundary | SMOKE | P0 | A đã đăng nhập mobile và có access token còn hạn. | 1. Gửi `PUT /api/v1/users/me` kèm header `Authorization: Bearer <access token>`, không gửi cookie, không gửi `Origin` và `Referer`<br>2. Gửi lại cùng yêu cầu nhưng thêm `Origin: https://evil.example.org`<br>3. Gọi `GET /api/v1/users/me` bằng cùng access token | Khách hàng A: `khach.a@example.test`, tài khoản khách hàng, đã xác minh email, đang hoạt động, mật khẩu `MatKhau@123`.<br>Dữ liệu cập nhật hồ sơ hợp lệ, ví dụ đổi họ tên thành `Khách A Mobile`. | Bước 1 và bước 2 không bị chặn 403 `CsrfInvalid`; yêu cầu được xử lý như yêu cầu của A trên web.<br>Bước 3 trả hồ sơ đã được cập nhật. | STORY-AUTH-001/AC-002<br>STORY-AUTH-001/Main | Xác nhận app gọi được API ghi dữ liệu bằng Bearer mà không cần cookie hay Origin, theo quy tắc bỏ qua kiểm Origin khi có header Authorization. | [Chưa phân công] | Draft |
+| ST-AUTH-002 | STORY-AUTH-001 | Main / Integration boundary | SMOKE | P0 | A đã đăng nhập mobile và có access token còn hạn. | 1. Gửi `PUT /api/v1/users/me` kèm header `Authorization: Bearer <access token>`, không gửi cookie, không gửi `Origin` và `Referer`<br>2. Gửi lại cùng yêu cầu nhưng thêm `Origin: https://evil.example.org`<br>3. Gọi `GET /api/v1/users/me` bằng cùng access token | Khách hàng A: `khach.a@example.test`, tài khoản khách hàng, đã xác minh email, đang hoạt động, mật khẩu `MatKhau@123`.<br>Dữ liệu cập nhật hồ sơ hợp lệ, ví dụ đổi họ tên thành `Khách A Mobile`. | Bước 1 và bước 2 không bị chặn 403 `CsrfInvalid`; yêu cầu được xử lý như yêu cầu của A trên web.<br>Bước 3 trả hồ sơ đã được cập nhật. | STORY-AUTH-001/AC-002<br>STORY-AUTH-001/Main Flow | Xác nhận app gọi được API ghi dữ liệu bằng Bearer mà không cần cookie hay Origin, theo quy tắc bỏ qua kiểm Origin khi có header Authorization. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 
 - STORY-AUTH-001/AC-002
-- STORY-AUTH-001/Main
+- STORY-AUTH-001/Main Flow
