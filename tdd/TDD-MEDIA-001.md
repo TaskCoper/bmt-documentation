@@ -53,7 +53,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ### Problem
 
-Người dùng đã chốt STORY-MEDIA-001, STORY-MEDIA-002, BR-MEDIA-001 và BR-MEDIA-002 trong hội thoại. Backend BMT sẽ cấp quyền upload JPG/PNG/WebP tối đa 5 MiB cho người dùng đã đăng nhập, trả URL xem công khai cố định, đồng thời dọn ảnh mới và cũ trong bucket riêng của BMT. Ảnh không còn được dùng phải chờ ít nhất 24 giờ; ảnh cũ thiếu lịch sử bắt đầu chờ từ lần đầu xác định không còn nơi sử dụng. Bản ghi đăng ký tài nguyên thư viện không tự giữ ảnh.
+Người dùng đã chốt STORY-MEDIA-001, STORY-MEDIA-002, BR-MEDIA-001 và BR-MEDIA-002 trong hội thoại. Backend BMT cấp quyền upload JPG/PNG/WebP tối đa 5 MiB mặc định; admin được tải ảnh nhà thầu ≤10 MiB và scan PDF/JPG/PNG ≤20 MiB. Hệ thống trả URL xem công khai cố định, đồng thời dọn ảnh mới và cũ trong bucket riêng của BMT. Ảnh không còn được dùng phải chờ ít nhất 24 giờ; ảnh cũ thiếu lịch sử bắt đầu chờ từ lần đầu xác định không còn nơi sử dụng. Bản ghi đăng ký tài nguyên thư viện không tự giữ ảnh.
 
 Người dùng đã chốt toàn bộ TDD trong hội thoại sau khi làm rõ phương án vùng tạm. Mã nguồn, migration và các test tự động đã được bổ sung trong workspace; chưa triển khai lên môi trường dùng thật. Status vẫn là Draft vì chưa thực hiện phê duyệt trên hệ thống tài liệu. Khảo sát workspace cho thấy .NET 8, EF Core/Npgsql 8.0.0, PostgreSQL 15, Carter/MediatR và Quartz 3.13.1. Trước thay đổi này, BMT có `UploadedFileUrlPolicy` kiểm host URL và nhiều module lưu URL trực tiếp, chưa có bộ theo dõi ảnh dùng chung. Mã nhà thầu đang có thay đổi chưa commit và bộ lưu file BizFly riêng; phải phối hợp khi triển khai, không ghi đè phần đang làm.
 
@@ -105,19 +105,21 @@ flowchart LR
 
 **Luồng upload và bảo vệ nội dung đã xác minh**
 
+Nhà thầu dùng cùng luồng Media theo BR-CTR-004. Final PDF vẫn nằm trong media/images/* để dùng policy GET hiện có; thư mục này là tên kỹ thuật lịch sử. Ẩn hồ sơ không đổi ACL hoặc fileUrl. SourceSetVersion=2 buộc đối soát lại nguồn ContractorAsset.Url trước khi mở gate cleanup. Candidate và bước khóa để xóa đều loại PDF; staging được dọn theo thời hạn tạm như trước. Không tự mở anonymous listing hoặc thay policy bucket.
+
 Người dùng đã đồng ý phương án vùng tạm sau khi được giải thích: `media/staging/` là nhóm đường dẫn riêng tư trên BizFly, nằm trong cùng bucket BMT với ảnh hoàn tất và tệp nhà thầu; ảnh hợp lệ được ghi sang `media/images/` để trả URL công khai. Người dùng xác nhận dùng chung một tài khoản/bucket, khác thư mục; code không còn cấu hình bucket staging riêng. Policy kho phải giữ `media/staging/*` và `ctr/*` riêng tư. Sau đó, người dùng đã xác nhận chốt toàn bộ bản TDD này để tiếp tục đặc tả Unit Test.
 
-1. `POST /media/uploads` nhận tên file, MIME và số byte; lấy ActorId từ `ICurrentUserService`, không nhận owner, bucket hoặc key từ client. Tạo `MediaUpload` và key `media/staging/{uploadId:N}`. Giá trị kỹ thuật trong thiết kế: URL PUT sống 5 phút; giới hạn ảnh theo BR cố định 5 MiB.
+1. `POST /media/uploads` nhận tên file, MIME, số byte và purpose (mặc định Image); lấy ActorId từ phiên. Image nhận JPG/PNG/WebP ≤5 MiB cho tài khoản hợp lệ. ContractorImage nhận JPG/PNG/WebP ≤10 MiB; ContractorScan nhận PDF/JPG/PNG ≤20 MiB, cả hai bắt buộc admin. Tạo MediaUpload với Purpose và key media/staging/{uploadId:N}; URL PUT mặc định sống 5 phút.
 2. Frontend PUT raw bytes trực tiếp lên BizFly với header được trả. Key tạm có ACL private; chính sách bucket/CDN không được ghi đè thành public. Không gửi cookie hoặc token BMT đến BizFly.
 3. Frontend gọi `POST /media/uploads/{uploadId}/complete`. Service nhận quyền xác minh bằng một transaction ngắn: đặt ticket Validating, cấp lease token và tạo một `MediaObject` Reserved với key mới `media/images/{objectId:N}.{ext}`. Mỗi lần nhận lại việc có objectId/key riêng; worker cũ không ghi đè file của worker mới.
-4. Ngoài transaction: đọc object tạm qua SDK; kiểm ContentLength, đọc tối đa 5 MiB cộng 1 byte vào file tạm tự xóa; số byte thật phải khớp số đã khai. Nhận dạng JPEG/PNG/WebP bằng nội dung, không chỉ MIME/đuôi; định dạng thật phải khớp MIME đã khai, nếu không trả 422. Bộ kiểm định dạng phải kiểm cấu trúc cần thiết của định dạng, từ chối file rỗng/hỏng/truncated; parser được chọn và ghim phiên bản khi triển khai, không dùng `System.Drawing` trên server. Không tự thêm giới hạn kích thước pixel hoặc đổi ảnh trong thiết kế này.
+4. Ngoài transaction: đọc staging qua SDK vào file tạm có trần theo purpose, kiểm số byte thực khớp khai báo. Ảnh JPEG/PNG/WebP được giải mã và phải đúng MIME; PDF chỉ dành cho ContractorScan, kiểm chữ ký %PDF- cùng dung lượng, không có parser PDF đầy đủ hoặc quét mã độc. Giữ một bản byte cố định cho lần complete để staging bị ghi đè không thay nội dung đã xác minh.
 5. Tính SHA-256 trên đúng bytes vừa kiểm, PUT chính file tạm đó lên key Reserved bằng quyền server và MIME đã xác minh. Không thực hiện GET để kiểm rồi Copy từ một key staging có thể đã bị ghi đè. Nhờ PUT từ buffer đã kiểm, nội dung công bố không phụ thuộc lần ghi tiếp theo vào staging.
 6. Một transaction ngắn kiểm ticket vẫn do đúng lease token quản lý, object vẫn Reserved, metadata và kết quả PUT đã đủ. Chuyển object Ready, gắn CompletedObjectId, ticket Completed; đặt UploadedAtUtc và UnreferencedSinceUtc bằng LastModified của đúng bytes staging đã đọc. Chưa có nơi sử dụng cho tới khi API nghiệp vụ lưu reference. Chỉ response này hoặc GET trạng thái Completed mới trả URL xem. URL công khai chỉ trỏ đến key final, không trỏ staging.
 7. API nghiệp vụ vẫn nhận URL. Resolver tìm object theo key; coordinator kiểm Ready và cập nhật nơi sử dụng cùng lần lưu nội dung. Metadata `LibraryAsset` đơn độc không được tạo reference giữ ảnh.
 
 Ticket Issued chỉ được complete khi staging còn tồn tại và chưa đủ 24 giờ từ LastModified của bytes đang đọc. Hết hạn URL PUT không tự cấm complete một file đã upload thành công. Khi chưa thấy file và URL hết hạn, worker có thể chốt Expired; file PUT đến muộn vẫn được quét và dọn sau 24 giờ nhưng ticket không được mở lại. Khi nhận lease phải giữ quyền xử lý staging tới khi complete kết thúc; cleanup khóa ticket và không xóa staging có lease còn hạn. Lỗi file thật chốt Rejected và xóa lease; lỗi hạ tầng giữ Validating để lần sau nhận lại sau khi lease hết. Complete và cleanup dùng DB clock để kiểm hạn.
 
-MIME client khai chỉ là điều kiện sớm để cấp URL. Với PUT, một client bất thường vẫn có thể gửi bytes thừa vào vùng tạm; giới hạn 5 MiB được thực thi bắt buộc trước khi BMT chấp nhận/công bố ảnh. Thiết kế không hứa kho chặn mọi bytes thừa ngay khi truyền. POST policy có điều kiện `content-length-range` là phương án khác nhưng chưa xác minh với BizFly; không âm thầm đổi contract sang multipart. Luồng xác minh thêm một lần GET và PUT của backend cho mỗi ảnh, đổi lại không phụ thuộc conditional copy của nhà cung cấp.
+MIME client khai chỉ là điều kiện sớm để cấp URL. Với PUT, một client bất thường vẫn có thể gửi bytes thừa vào vùng tạm; giới hạn tương ứng purpose được thực thi bắt buộc trước khi BMT chấp nhận/công bố ảnh. Thiết kế không hứa kho chặn mọi bytes thừa ngay khi truyền. POST policy có điều kiện `content-length-range` là phương án khác nhưng chưa xác minh với BizFly; không âm thầm đổi contract sang multipart. Luồng xác minh thêm một lần GET và PUT của backend cho mỗi ảnh, đổi lại không phụ thuộc conditional copy của nhà cung cấp.
 
 Presigned URL có thể được sử dụng nhiều lần trong thời hạn và PUT cùng key có thể thay nội dung; đây là lý do tách staging và final. [AWS: presigned URL](https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-presigned-url.html). Tài liệu BizFly có ví dụ cấp URL PUT với header ký và yêu cầu client gửi đúng header. [BizFly: client upload](https://support.bizflycloud.vn/api/simple-storage/).
 
@@ -156,7 +158,7 @@ Deleting là quyết định loại ảnh khỏi khả năng gắn mới, không
 | `EstimateExport` | Export.Id / Output | OutputUrl nếu ánh xạ về ảnh trong kho; PDF/XLSX bản thân không thuộc diện dọn ảnh. |
 | `LibraryVersion` | Version.Id / Asset-{AssetId} | JOIN LibraryVersionAsset → LibraryAsset.Url, kể cả current, old và Draft. Cover phải thuộc link của phiên bản; kiểm cả cover để phát hiện dữ liệu sai. LibraryAsset đứng riêng không giữ file. |
 | `PlanRevision` | Revision.Id / Cover | CoverImageUrl của mọi revision còn được lưu, không chỉ gói đang bán. |
-| `Contractor` và `ContractorProject` | Parent.Id / loại quan hệ + Id | Các link ảnh hồ sơ/công trình, giấy phép và hợp tác có AssetId, JOIN ContractorAsset.StorageKey. Resolver dùng `BizflyStorageOption` chung để ánh xạ StorageKey vào cùng StoreId của MEDIA. Không còn nhánh bỏ qua key vì cấu hình nhà thầu trỏ sang bucket khác; thiếu cấu hình chung khi có dữ liệu thì chặn đối soát. Chỉ dọn object được xác định là ảnh; giữ ACL private và route đọc hiện có. Không dùng presign công khai để thay luồng tài liệu riêng tư. |
+| `Contractor` và `ContractorProject` | Parent.Id / loại quan hệ + Id | JOIN liên kết profile/project/license/partnership với ContractorAsset; dùng Url nếu có, StorageKey cho tệp cũ. Bao gồm cả hồ sơ Hidden. Chỉ metadata ContractorAsset đơn độc không giữ tệp. Ảnh mới và scan dùng fileUrl công khai; PDF không bị job dọn ảnh xóa. |
 | `RetainedPayload` | Id dòng / mã bảng + đường dẫn trường đã đăng ký | Bản chụp/audit hoặc payload bền vững có thể còn dùng ảnh phải có extractor theo schema. Payload không biết schema hoặc đường ghi chưa được tích hợp chặn bật dọn cho store. |
 
 Registry là danh sách tường minh, có SourceSetVersion; không quét mọi chuỗi trong database rồi coi là quan hệ đúng. Với khóa nguồn ghép, SourceId là UUID aggregate, phần khóa còn lại đặt trong Slot chuẩn hóa tối đa 128 ký tự. Receipt chỉ lưu Id/kết quả điều khiển không được coi là nơi dùng ảnh; nếu payload lưu nội dung ảnh còn phục vụ người dùng thì phải khai extractor. Trước khi bật dọn, kiểm toàn bộ đường ghi thật và fixtures cho từng nguồn; không lấy một lần rg hoặc bảng này làm bằng chứng phủ hết.
@@ -326,6 +328,8 @@ stateDiagram-v2
 Orphan không phải trạng thái lưu riêng: Ready có UnreferencedSinceUtc khác NULL và không có reference là ảnh đang chờ dọn. Như vậy không cần đồng bộ thêm một cờ InUse có thể lệch với quan hệ thật.
 
 ## Data Model
+MediaUpload bổ sung Purpose varchar(32) NOT NULL DEFAULT Image. Ví dụ ticket ảnh thường lưu Purpose=Image, DeclaredContentType=image/png; ticket giấy phép lưu Purpose=ContractorScan, DeclaredContentType=application/pdf. Migration backfill ticket cũ bằng Image, không đổi hash request cũ. ContractorAsset.Url và cách gắn hồ sơ nằm tại TDD-CTR-001/Data Model.
+
 
 **Ý nghĩa và quyền sở hữu**
 
@@ -375,10 +379,10 @@ Ràng buộc cụ thể cho migration dự kiến:
 
 - `PK_MediaUpload`, `PK_MediaObject`, `PK_MediaReference`, `PK_MediaReconciliationRun` theo khóa ở bảng trên.
 - `UX_MediaUpload_Actor_RequestKey`; `UX_MediaUpload_Store_StagingKey`; `UX_MediaObject_Store_Key`. So key bằng collation `C`; kiểm `octet_length(ObjectKey)` và `octet_length(StagingKey)` từ 1 tới 1024. Không trim hoặc đổi chữ thường key sau khi sinh.
-- `CK_MediaUpload_Size`: 1 <= DeclaredSizeBytes <= 5242880; `CK_MediaUpload_ContentType`: image/jpeg, image/png hoặc image/webp; `CK_MediaUpload_Expires`: UploadExpiresAtUtc > IssuedAtUtc; tên gốc/key không rỗng.
+- `CK_MediaUpload_Size` và `CK_MediaUpload_Type`: kiểm đúng purpose, MIME và trần 5/10/20 MiB tương ứng. Purpose varchar(32) NOT NULL DEFAULT Image để ticket cũ giữ giới hạn cũ. RequestHash gồm purpose cho hai luồng contractor, giữ hash cũ với Image để replay ticket cũ không xung đột.
 - CHECK trạng thái thuộc danh sách của từng bảng. Ticket Completed khi và chỉ khi CompletedObjectId khác NULL; Validating khi và chỉ khi hai cột lease đều khác NULL.
 - `FK_MediaUpload_Actor` và `FK_MediaObject_SourceUpload` dùng RESTRICT. Thêm UNIQUE `(SourceUploadId, Id)` ở MediaObject rồi FK ghép `(MediaUpload.Id, CompletedObjectId)` tới `(SourceUploadId, Id)`; NULL CompletedObjectId bỏ kiểm ghép theo MATCH SIMPLE. Thêm FK đơn CompletedObjectId → MediaObject.Id để mô hình ORM có quan hệ rõ. Tạo bảng ticket trước với con trỏ NULL, bảng object sau, rồi thêm FK ngược; không cần constraint deferred để insert đúng thứ tự.
-- MediaObject Deleted khi và chỉ khi DeletedAtUtc khác NULL. DeleteAttempts >= 0, RowVersion >= 0, SizeBytes NULL hoặc > 0. Ready có MediaType và SizeBytes đã biết. Object Ready có SourceUploadId khác NULL phải có MIME thuộc danh sách, SizeBytes <= 5242880, UploadedAtUtc và Sha256 khác NULL; ảnh cũ không bị CHECK giới hạn mới.
+- MediaObject Deleted khi và chỉ khi DeletedAtUtc khác NULL. DeleteAttempts/RowVersion không âm; SizeBytes NULL hoặc dương. Ready phải có MIME và số byte. Object mới có SourceUploadId phải có MIME JPEG/PNG/WebP/PDF, ≤20 MiB, UploadedAtUtc và Sha256; handler complete còn kiểm đúng trần của Purpose trong upload. Ảnh cũ không áp trần này.
 - `FK_MediaReference_Object` dùng RESTRICT. Không cascade xóa ticket/object để làm mất dấu vết của file ngoài DB. Tombstone được giữ để chặn việc dùng lại URL cũ; chưa có yêu cầu thời hạn xóa lịch sử nên không tự đặt TTL cho tombstone/idempotency.
 - `SourceKind` dùng allowlist versioned của registry. Không thể có FK quan hệ tới nhiều bảng bằng một SourceId: đây là giới hạn được chấp nhận của projection, bù bằng ghi cùng transaction, kiểm nguồn trước xóa và rebuild. Không tuyên bố FK ObjectId chứng minh nguồn còn tồn tại.
 - Run Completed khi và chỉ khi CompletedAtUtc khác NULL; SourceSetVersion > 0, ScannedObjects >= 0. Mỗi store chỉ có một run Running, bảo vệ bằng partial UNIQUE. Heartbeat cập nhật mỗi 30 giây; sau 120 giây không cập nhật, lượt thay thế khóa dòng và chuyển run cũ Failed trước khi tạo run mới. Mọi checkpoint/kết quả phải cập nhật có điều kiện State=Running; worker cũ không được chốt run đã Failed.
@@ -440,12 +444,12 @@ Ví dụ giả định dùng bí danh UUID U1, UP1, O1, O2, NEWS1 và RUN1; khô
 | Bảng | Dòng mẫu ở 2026-10-01 08:02 UTC |
 |---|---|
 | User (dùng lại) | Id=U1; tài khoản có phiên hợp lệ. Nguồn cấu trúc: `bmt-be/src/bmt-be.domain/entities/User.cs`; không thêm hay sửa User trong migration media. |
-| MediaUpload | Id=UP1, ActorId=U1, RequestKey=req-001, DeclaredContentType=image/png, DeclaredSizeBytes=1048576, State=Completed, IssuedAtUtc=08:00, UploadExpiresAtUtc=08:05, LeaseToken=NULL, LeaseUntilUtc=NULL, CompletedObjectId=O1 |
+| MediaUpload | Id=UP1, ActorId=U1, RequestKey=req-001, Purpose=Image, DeclaredContentType=image/png, DeclaredSizeBytes=1048576, State=Completed, IssuedAtUtc=08:00, UploadExpiresAtUtc=08:05, LeaseToken=NULL, LeaseUntilUtc=NULL, CompletedObjectId=O1 |
 | MediaObject | Id=O1, SourceUploadId=UP1, StoreId=bmt-main, ObjectKey=media/images/{O1}.png, State=Ready, MediaType=image/png, SizeBytes=1048576, Sha256 là hash 64 ký tự của bytes, UploadedAtUtc=08:01, FirstObservedAtUtc=08:01:30, UnreferencedSinceUtc=NULL, DeletedAtUtc=NULL |
 | NewsArticle (dùng lại) | Id=NEWS1, CoverImageUrl=https://images.example.test/media/images/{O1}.png. Nguồn cấu trúc: `bmt-be/src/bmt-be.domain/entities/NewsArticle.cs`; URL vẫn nằm ở bảng nghiệp vụ. |
 | MediaReference | ObjectId=O1, SourceKind=NewsArticle, SourceId=NEWS1, Slot=Cover, LinkedAtUtc=08:02 |
 | MediaObject (ảnh cũ) | Id=O2, SourceUploadId=NULL, StoreId=bmt-main, ObjectKey=legacy/old-front.jpg, State=Ready, MediaType=image/jpeg, SizeBytes=7340032, UploadedAtUtc=NULL, Sha256=NULL, FirstObservedAtUtc=08:00, UnreferencedSinceUtc=08:10 sau lần đối soát đầy đủ; không có reference |
-| MediaReconciliationRun | Id=RUN1, StoreId=bmt-main, SourceSetVersion=1, ConfigurationHash là hash mapping không chứa secret, State=Completed, StartedAtUtc=08:00, HeartbeatAtUtc=08:10, CompletedAtUtc=08:10, Checkpoint={"phase":"done"}, ScannedObjects=2, LastErrorCode=NULL |
+| MediaReconciliationRun | Id=RUN1, StoreId=bmt-main, SourceSetVersion=2, ConfigurationHash là hash mapping không chứa secret, State=Completed, StartedAtUtc=08:00, HeartbeatAtUtc=08:10, CompletedAtUtc=08:10, Checkpoint={"phase":"done"}, ScannedObjects=2, LastErrorCode=NULL |
 
 Dòng O2 là trạng thái tại 08:10 sau khi run hoàn tất, muộn hơn bảng O1 tại 08:02. SizeBytes của O2 trên 5 MiB vẫn hợp lệ vì là ảnh cũ, không có SourceUploadId. Các dấu `{O1}` chỉ minh họa key được sinh từ UUID thật, không lưu ký tự ngoặc trong key mới.
 
@@ -466,11 +470,11 @@ Nếu đăng ký `LibraryAsset` cho O1 nhưng không có `LibraryVersionAsset`, 
 
 ### Endpoints
 
-- **POST** `/api/v1/media/uploads` — Tạo ticket/ký URL PUT; phiên thông thường; header Idempotency-Key. Body `{fileName, contentType, sizeBytes}`. Lần đầu trả 201, gửi lại cùng key trả 200; body dùng Result với value/isSuccess/isFailure/error theo dự án.
+- **POST** `/api/v1/media/uploads` — Header Idempotency-Key; body `{fileName,contentType,sizeBytes,purpose?}`. Purpose mặc định Image; ContractorImage/ContractorScan cần admin. Trả 201 lần đầu, 200 khi replay; maxSizeBytes phản ánh purpose. Envelope Result theo dự án.
 - **POST** `/api/v1/media/uploads/{uploadId}/complete` — Chỉ owner; body rỗng. Trả 200 khi Completed, 202 nếu một lần xác minh đang giữ lease, lỗi tương ứng khi chưa có file/sai file/quá hạn. Không nhận URL hoặc key tùy ý từ client.
 - **GET** `/api/v1/media/uploads/{uploadId}` — Chỉ owner; trả trạng thái, uploadExpiresAtUtc, fileUrl khi Completed và final object còn Ready, failureCode khi có. Không trả URL ký trong GET trạng thái.
 
-API nghiệp vụ hiện có vẫn dùng trường URL, nhưng trước khi thêm reference phải qua coordinator. URL managed ở Deleting/Deleted trả 410 `MediaImageGone`; URL staging/Reserved trả 409 `MediaImageNotReady`. URL ngoài kho tiếp tục theo policy riêng của chức năng, không biến endpoint thành cổng gọi URL tùy ý. Với URL legacy mới xuất hiện trong request, chỉ ghi nhận metadata/khóa tham chiếu khi mapping chắc chắn; nếu chưa đủ căn cứ thì không bật cleanup cho store và không giả tạo trạng thái Ready của file chưa kiểm.
+API nghiệp vụ hiện có vẫn dùng trường URL, nhưng trước khi thêm reference phải qua coordinator. Với API dùng coordinator chung, URL managed ở Deleting/Deleted trả 410 `MediaImageGone`; URL staging/Reserved trả 409 `MediaImageNotReady`. URL ngoài kho tiếp tục theo policy riêng của chức năng, không biến endpoint thành cổng gọi URL tùy ý. Với URL legacy mới xuất hiện trong request, chỉ ghi nhận metadata/khóa tham chiếu khi mapping chắc chắn; nếu chưa đủ căn cứ thì không bật cleanup cho store và không giả tạo trạng thái Ready của file chưa kiểm.
 
 ### Examples
 
@@ -521,7 +525,7 @@ Error Response:
 
 ### Error Codes
 
-- **InvalidMediaUpload** (422): tên file rỗng/quá 255 ký tự/chứa ký tự điều khiển, MIME ngoài danh sách, số byte ngoài 1..5242880 hoặc file thật không đạt định dạng/dung lượng. Frontend phải hiển thị lỗi upload, không lưu URL như thành công.
+- **InvalidMediaUpload** (422): Tên tệp không hợp lệ, purpose/MIME không được phép, số byte ngoài giới hạn tương ứng 5/10/20 MiB hoặc nội dung thực không đúng định dạng. Không lưu URL khi complete chưa thành công.
 - **MediaUploadNotFound** (404): không có ticket hoặc người gọi không phải owner.
 - **MediaUploadNotReady** (409): complete khi object tạm chưa tồn tại hoặc chưa đọc được một upload hoàn chỉnh; client có thể thử lại sau khi PUT thành công.
 - **MediaImageNotReady** (409): API nghiệp vụ nhận URL thuộc vùng staging hoặc object chưa Ready.
@@ -581,6 +585,8 @@ Các object chưa được writer cũ bảo vệ phải qua bước cutover trư
 ### Use Cases
 
 ### Others
+
+- Đợt đổi upload nhà thầu sang URL: 31/31 test PostgreSQL nhà thầu/Media, 54/54 test bộ kiểm tệp và adapter, 20/20 test HTTP nhà thầu/Media đã đạt, không có ca bỏ qua. Chạy trên bản sao tạm dùng phần đăng nhập ổn định vì module đăng nhập trong workspace đang được sửa đồng thời. TRX: `/private/tmp/bmt-ctr-presign-results/{integration,infra,api}.trx`. Chưa chạy FE hoặc kiểm PDF trên BizFly thật trong đợt này; chưa áp dụng migration lên môi trường chung. Kết quả các đợt trước ở bên dưới là bằng chứng lịch sử, không thay thế lượt kiểm này.
 
 - Bằng chứng kiểm thử ngày 2026-09-30: `MediaPolicyTests` và `MediaStorageProtocolTests` có 35 test đạt; `MediaApiPipelineTests` có 8 test đạt; `MediaFlowTests` có 16 test đạt trên PostgreSQL 15 tạm, gồm migration Up/Down, FK ownership, rollback, cạnh tranh attach/delete, staging có lease và file tái xuất hiện. Các test SDK dùng HTTP transport giả, không gọi BizFly thật. Hồi quy: API 422/422, infrastructure 227/227, integration PostgreSQL 504/504 đạt. Lượt PostgreSQL trước đó gặp hết dung lượng Docker; đã sửa vòng đời database tạm của test và chạy lại đạt, không thay kỳ vọng để bỏ qua lỗi.
 - Kiểm BizFly thật ngày 2026-09-30 bằng API Release và PostgreSQL tạm, dùng bộ `BIZFLY_*` trong `.docker/.env.dev` sau khi người dùng xác nhận đây là bucket BMT. Chỉ ánh xạ sang `MediaStoreOption` trong tiến trình thử; không sửa env đang dùng. Presigned PUT trả 200; complete trả 200; ảnh PNG công khai có byte và SHA-256 đúng với ảnh gửi lên; ghi đè staging không đổi ảnh hoàn tất. Kiểm chống gửi lặp, quyền chủ upload và đầu vào đạt. CORS preflight trả 204, cho phép PUT cùng `content-type` và `x-amz-acl` từ origin frontend đã cấu hình; chưa chạy trên trình duyệt thật.

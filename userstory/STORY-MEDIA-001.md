@@ -66,11 +66,11 @@ Người dùng chọn ảnh để sử dụng trong một chức năng của BMT
 
 ### Main Flow
 
-1. Người dùng chọn ảnh JPG, PNG hoặc WebP, dung lượng không quá 5 MiB.
+1. Người dùng chọn ảnh theo purpose Image mặc định: JPG/PNG/WebP ≤5 MiB. Admin quản lý nhà thầu dùng ContractorImage ≤10 MiB hoặc ContractorScan PDF/JPG/PNG ≤20 MiB.
 2. Frontend gửi yêu cầu xin URL upload đến backend BMT.
 3. Backend kiểm tra phiên đăng nhập và điều kiện cấp URL theo BR-MEDIA-001.
 4. Backend trả thông tin để frontend upload ảnh trực tiếp lên BizFly bằng presigned URL có thời hạn.
-5. Frontend upload ảnh lên BizFly. Khi upload thành công, frontend có URL https công khai, cố định để sử dụng ảnh.
+5. Frontend PUT vào URL đã cấp rồi gọi complete. Chỉ khi state=Completed, frontend lấy fileUrl HTTPS cố định để dùng trong hồ sơ.
 6. Frontend gửi URL ảnh vào API nghiệp vụ tương ứng.
 7. API nghiệp vụ kiểm tra quyền và điều kiện lưu của chức năng đó trước khi lưu URL. Có quyền upload không đồng nghĩa có quyền sửa nội dung.
 
@@ -127,7 +127,7 @@ Upload thành công nhưng API nghiệp vụ từ chối lưu nội dung hoặc 
 - **Given**: Quản trị viên hoặc khách hàng có phiên đăng nhập hợp lệ.
 - **When**: Người dùng xin URL upload với ảnh đáp ứng BR-MEDIA-001.
 - **Then**: Backend BMT cấp thông tin upload trực tiếp lên BizFly.
-- **And**: Không bắt buộc người dùng có vai trò quản trị để được xin URL.
+- **And**: Purpose Image không bắt buộc vai trò quản trị; ContractorImage và ContractorScan bắt buộc admin.
 
 #### AC-002
 
@@ -140,7 +140,7 @@ Upload thành công nhưng API nghiệp vụ từ chối lưu nội dung hoặc 
 
 - **Given**: Ảnh được gửi qua luồng upload mới.
 - **When**: Hệ thống kiểm tra định dạng và dung lượng.
-- **Then**: Chỉ chấp nhận JPG, PNG hoặc WebP có dung lượng không quá 5 MiB, tương đương 5.242.880 byte.
+- **Then**: Áp giới hạn tương ứng purpose theo BR-MEDIA-001; luồng mặc định vẫn chỉ JPG/PNG/WebP ≤5.242.880 byte.
 - **And**: Ảnh vượt giới hạn hoặc không thuộc định dạng cho phép bị từ chối.
 
 #### AC-004
@@ -186,6 +186,6 @@ Upload thành công nhưng API nghiệp vụ từ chối lưu nội dung hoặc 
 
 ## Out of Scope
 
-- Upload các loại file ngoài JPG, PNG và WebP qua luồng mới này.
+- Upload các định dạng ngoài danh sách của từng purpose tại BR-MEDIA-001.
 - Chuyển ảnh sang cơ chế xem riêng tư; người dùng đã chọn tạm thời dùng URL công khai.
 - Thay đổi quyền tạo hoặc sửa nội dung của các chức năng sử dụng ảnh.

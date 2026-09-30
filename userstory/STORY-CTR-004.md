@@ -149,7 +149,7 @@ Khách tạo công trình thiếu kinh độ hoặc vĩ độ.
 - **Given**: Hồ sơ nhà thầu đang hiển thị có dự án và bản scan pháp lý, hợp tác.
 - **When**: Khách chưa đăng nhập mở chi tiết.
 - **Then**: Khách xem các nhóm thông tin công khai, toàn bộ dự án và các bản scan đã tải lên.
-- **And**: Không trả người liên hệ, số điện thoại hoặc email. Khi hồ sơ chuyển sang Ẩn, hồ sơ và các bản scan không còn được cung cấp công khai.
+- **And**: Không trả người liên hệ, số điện thoại hoặc email. Khi hồ sơ chuyển sang Ẩn, API không trả hồ sơ và danh sách tệp; người có URL vẫn xem được ảnh và bản scan.
 
 #### AC-006
 
@@ -177,7 +177,7 @@ Khách tạo công trình thiếu kinh độ hoặc vĩ độ.
 - **Given**: Hồ sơ nhà thầu đang hiển thị có mã số thuế do admin nhập.
 - **When**: Khách chưa đăng nhập mở phần thông tin pháp nhân.
 - **Then**: Mã số thuế được hiển thị đầy đủ, không che một phần.
-- **And**: Người liên hệ, số điện thoại và email vẫn chỉ dành cho admin; bản scan hiển thị theo trạng thái chung của hồ sơ.
+- **And**: Người liên hệ, số điện thoại và email vẫn chỉ dành cho admin; URL bản scan chỉ được đưa vào hồ sơ công khai khi Hiển thị; URL đã chia sẻ vẫn dùng được khi Ẩn.
 
 ## References
 
@@ -207,7 +207,7 @@ Khách tạo công trình thiếu kinh độ hoặc vĩ độ.
 - Đặc tả kiểm thử liên quan: [ST-CTR-025](../systemtest/ST-CTR-025.md), [ST-CTR-026](../systemtest/ST-CTR-026.md), [ST-CTR-027](../systemtest/ST-CTR-027.md), [ST-CTR-028](../systemtest/ST-CTR-028.md), [ST-CTR-029](../systemtest/ST-CTR-029.md), [ST-CTR-030](../systemtest/ST-CTR-030.md), [ST-CTR-031](../systemtest/ST-CTR-031.md), [ST-CTR-032](../systemtest/ST-CTR-032.md). Các ca chưa chạy.
 
 - Kiểm tra quyền sử dụng công trình ở backend; không chỉ dựa vào công trình client gửi lên.
-- Không cung cấp dữ liệu liên hệ nội bộ hoặc tài liệu thuộc hồ sơ đang Ẩn qua phản hồi công khai.
+- Không trả dữ liệu liên hệ nội bộ hoặc danh sách tệp của hồ sơ Ẩn qua API. Người đã có URL vẫn xem được ảnh và bản scan.
 - STORY-SITE-001 và BR-SITE-001 đã bổ sung yêu cầu frontend xác định tọa độ từ địa chỉ và backend từ chối tạo nếu thiếu kinh độ hoặc vĩ độ. Đã bổ sung đặc tả ST-SITE-033 đến ST-SITE-037 cho tọa độ khi tạo và đổi địa chỉ. Đã có thiết kế TDD-SITE-002; API, code và fixture của bộ kiểm thử SITE cũ còn cần cập nhật. Người dùng xác nhận chưa có dữ liệu thật cần giữ, hoặc chỉ có dữ liệu thử. Chưa rà hết tham chiếu chéo ngoài phạm vi trực tiếp.
 - TDD-CTR-002 đã chốt get all không phân trang, thứ tự ổn định, xử lý query lỗi và bao gồm điểm đúng đường biên. Chưa có chỉ tiêu hiệu năng được đo hoặc SLA; metadata phân công chưa xác định.
 - Đã soạn đặc tả System Test theo nghiệp vụ được người dùng chốt; chưa chạy kiểm thử. Người dùng đã chốt TDD và đã soạn đặc tả Unit Test liên kết trong TDD; chưa triển khai mã ứng dụng hoặc chạy bộ test của tính năng.

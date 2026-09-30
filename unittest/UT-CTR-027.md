@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-CTR-027 | Nhà thầu | Upload orchestration — kho lỗi | Error | REGRESSION | P1 | Unit dự kiến theo TDD đã chốt; chưa viết hoặc chạy mã test. Admin hợp lệ; fake kho ném lỗi unavailable/timeout trước kết quả upload. | Upload file hợp lệ, expectedVersion=3. | ContractorFileUnavailable; không gửi command đăng ký metadata, không tăng version và không công khai URL nguồn. Không tự retry upload khi chưa rõ kết quả. | BR-CTR-004/Then<br>TDD-CTR-001/Architecture<br>TDD-CTR-001/Internal API | Lỗi dịch vụ ngoài không tạo metadata giả. | [Chưa xác định] | Draft |
+| UT-CTR-027 | Nhà thầu | Upload orchestration — kho lỗi | Error | REGRESSION | P1 | Unit dự kiến theo TDD đã chốt; chưa viết hoặc chạy mã test. Admin hợp lệ; fake kho ném lỗi unavailable/timeout trước kết quả upload. | Complete upload hợp lệ qua Media; hồ sơ đang version=3. | Không trả fileUrl Completed; không gắn URL vào hồ sơ và version vẫn là 3. Không tự retry lưu hồ sơ khi chưa rõ kết quả; kiểm trạng thái upload trước khi thử complete lại. | BR-CTR-004/Then<br>TDD-CTR-001/Architecture<br>TDD-CTR-001/Internal API | Lỗi dịch vụ ngoài không tạo metadata giả. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

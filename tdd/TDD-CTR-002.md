@@ -57,7 +57,7 @@ Người dùng đã chốt bản TDD sau lượt rà soát bằng phản hồi �
 
 STORY-CTR-004 cho phép khách xem hồ sơ không cần đăng nhập. Hai nhóm lọc là mảng GUID; OR trong từng nhóm và AND giữa các nhóm. Chỉ khi chọn công trình để tìm theo bán kính mới yêu cầu phiên khách. Nguồn lọc là năng lực admin chọn cho công ty, không phải lịch sử dự án.
 
-Dữ liệu nền theo TDD-CTR-001. Backend đã có module contractor theo thiết kế này; loại công trình dùng lại danh mục hiện có. Người dùng đã xác nhận kho upload hỗ trợ tệp riêng tư. Người dùng xác nhận provider Bizfly; adapter private được mô tả tại TDD-CTR-001. Chưa kiểm bucket thực tế và không mặc định các tệp cũ đã được chuyển sang private.
+Dữ liệu nền theo TDD-CTR-001. Upload mới dùng Media presign và URL cố định. Người dùng đã chốt quyền đọc bằng link: ẩn hồ sơ không thu hồi ảnh và bản scan đã chia sẻ; adapter private chỉ giữ cho tệp cũ.
 
 ### Goals
 
@@ -86,7 +86,8 @@ flowchart LR
     V --> File[File content endpoint]
     File --> Visible[Kiem Visible va asset dang gan]
     Visible --> Store[IContractorFileStore]
-    Store --> Private[(Kho private)]
+    Store --> Legacy[(Kho private cua tep cu)]
+    UI --> Public[(URL truc tiep cua tep moi)]
 ```
 
 `ContractorPublicApi` ở `presentation/apis/contractor/`; contract/query dùng cùng thư mục `contractor`. Store SQL đặt domain/persistence như TDD-CTR-001, không để application phụ thuộc Npgsql. Store trả read model đã giới hạn trường. Không dùng cache query cho các endpoint này; đặt Cache-Control: no-store cho danh sách, filter-options, detail, project detail và nội dung tệp, kể cả phản hồi lỗi. Cấu hình proxy/CDN không lưu các route này và frontend tải lại khi mở trang; tránh trả danh sách cũ sau khi admin ẩn hồ sơ hoặc đổi danh mục. Các byte đã tải về không thể bị backend thu hồi.
@@ -98,9 +99,9 @@ flowchart LR
 - **Bán kính:** radiusKm và constructionSiteId phải cùng có hoặc cùng không; thiếu một trả 422. radiusKm là số hữu hạn >0; không tự gán bán kính mặc định. Khi có radius, endpoint đánh giá default authorization policy qua dịch vụ authorization đầy đủ (không chỉ User.Identity.IsAuthenticated), rồi handler kiểm AccountKind=Customer và ownership từ database. Route anonymous không tự chạy policy nên phải gọi kiểm tra này rõ ràng trước khi đọc công trình. Không có phiên hợp lệ thì Challenge (401); phiên đã xác thực nhưng chưa đạt điều kiện policy thì Forbid (403), giữ mã hiện có. Không đọc tọa độ từ query do khách tự truyền. Công trình không có/khác chủ cùng trả 404 ConstructionSiteNotFound. Tài khoản staff không dùng công trình khách để tìm theo phạm vi này.
 - **Không có kết quả:** 200 với items=[] và totalCount=0; không nới bộ lọc. Scope ngừng dùng không xuất hiện trong danh mục chọn mới, nhưng khi gửi GUID đã gắn trước đây thì vẫn lọc được nhà thầu đang gắn scope đó.
 - **Danh mục loại công trình:** public read trả GUID và tên trong revision hiện hành; GET filter-options không trả cấu hình dự toán không cần thiết. Đọc catalog hiện hành bằng join trong một statement; không thay catalog ngoài module chủ quản.
-- **Ảnh và tệp:** URL công khai của response là route của backend theo assetId, không URL bucket hoặc signed URL đọc. Asset phải thuộc đúng contractor và đang gắn vào ảnh hồ sơ, project image, license hoặc partnership. Asset vừa upload chưa gắn không được đọc qua public endpoint. Admin endpoint được xem cả asset chưa gắn để soạn hồ sơ.
+- **Ảnh và tệp:** Public projection trả fileUrl cố định cho tệp mới. API hồ sơ chỉ trả thông tin khi Visible; người đã giữ URL vẫn GET tệp khi Hidden. Không có API anonymous liệt kê tệp hồ sơ ẩn hoặc bucket. Tệp cũ trả route backend theo assetId để tiếp tục đọc được.
 - **Trạng thái và đọc nhiều collection:** detail lấy snapshot nhất quán bằng một SQL projection/correlated aggregation hoặc transaction read-only repeatable read ngắn trong store. Không giữ transaction khi truyền stream. Tránh nhiều Include tạo tích Descartes; không N+1 theo từng contractor.
-- **Luồng tệp:** kiểm parent Visible và asset đang gắn, mở private object, kiểm lại quyền đọc trước khi gửi headers nếu có chờ I/O. Stream đã được cấp quyền trước lúc ẩn có thể hoàn tất; request mới sau khi ẩn commit bị 404. Không thể thu hồi tệp khách đã tải về. Không redirect sang nguồn, không log StorageKey/signed URL; Content-Disposition làm sạch tên tệp, X-Content-Type-Options=nosniff. Ảnh an toàn inline; PDF đề xuất attachment để tải xem.
+- **Luồng tệp:** Tệp mới được đọc trực tiếp tại fileUrl, không qua proxy BE và không kiểm trạng thái nhà thầu. Với route cũ, kiểm asset thuộc hồ sơ và đang gắn; không kiểm Visible. Việc chuyển sang Hidden trong lúc mở stream không chặn request. Route admin vẫn kiểm quyền. Link mới không tự bị vô hiệu khi gỡ khỏi hồ sơ; ảnh không còn được dùng sẽ được dọn theo BR-MEDIA-002.
 
 Truy vấn bán kính dùng công thức Haversine trên hình cầu, đơn vị km. Đây là xấp xỉ khoảng cách trên mặt đất từ hai tọa độ, không phải độ dài đường di chuyển; chọn R=6371.0088 km và cùng hằng ở SQL/test. Với độ chính xác yêu cầu hiện tại chưa có ngưỡng sai số được chốt; nếu cần độ chính xác ellipsoid thì xem lại lựa chọn này. Không dùng `sqrt(deltaLat²+deltaLon²)` trực tiếp trên độ.
 
@@ -208,7 +209,7 @@ GET không filter trả A,B. GET B1+S1 vẫn trả A,B dù A chưa có dự án.
 - **GET** `/api/v1/contractors/filter-options` — Anonymous; `{buildingTypes:[{id,name}],scopes:[{id,name,description,sortOrder}]}`. Scope chỉ Đang dùng; chưa có catalog loại thì buildingTypes=[]; không ngăn người dùng xem hồ sơ sẵn có.
 - **GET** `/api/v1/contractors/{contractorId}` — Anonymous; chỉ Visible. Trả profile công khai, nhóm ảnh, tọa độ, năng lực khai báo, legal/licenses/partnership và toàn bộ dự án, tên danh mục join hiện hành. Không có contact, actor, storage key hay version quản trị. Không có hồ sơ hoặc Hidden cùng 404.
 - **GET** `/api/v1/contractors/{contractorId}/projects/{projectId}` — Anonymous; cả parent phải Visible và project thuộc parent; trả PublicProjectDetail gồm tên, ảnh, đúng một loại/phạm vi và các thuộc tính đã nhập.
-- **GET** `/api/v1/contractors/{contractorId}/assets/{assetId}/content` — Anonymous; kiểm parent Visible và asset đang gắn theo Architecture. Stream 200; Range hợp lệ có thể 206, sai khoảng 416; không trả Result bọc byte.
+- **GET** `/api/v1/contractors/{contractorId}/assets/{assetId}/content` — Route tương thích tệp cũ; anonymous, kiểm đúng hồ sơ và đang gắn, không kiểm Visible. Stream 200/206, Range sai 416. Tệp mới dùng fileUrl trực tiếp.
 - **GET** `/api/v1/admin/contractors/{contractorId}/assets/{assetId}/content` — Verified admin theo TDD-CTR-001; xem được file thuộc parent kể cả chưa gắn hoặc Hidden; stream như public route.
 
 PublicContractorItem và PublicContractorDetail chỉ chứa trường theo allowlist. `rating/ratingCount` cùng NULL thì frontend không hiển thị đánh giá. Public detail trả latitude/longitude và URL backend cho ảnh; backend không gọi bản đồ hoặc geocoding cho luồng xem.
@@ -264,7 +265,7 @@ Error Response:
 
 ### Endpoints
 
-- **Kho upload private đã được người dùng xác nhận có hỗ trợ** — đọc qua IContractorFileStore của TDD-CTR-001; provider Bizfly, cấu hình và giới hạn thực tế ở TDD-CTR-001/External API.
+- **BizFly** — Upload mới theo TDD-MEDIA-001 và fileUrl công khai. IContractorFileStore chỉ đọc tệp cũ có StorageKey; xem TDD-CTR-001/External API.
 - **Bản đồ frontend** — chỉ nhận latitude/longitude hiển thị; không chọn vendor hoặc phát sinh API gọi ra từ backend.
 
 ### Fields
@@ -278,8 +279,8 @@ Lỗi bản đồ frontend không làm hồ sơ biến mất: vẫn hiển thị
 
 ### Quirks
 
-- Private bucket hoặc gateway phải chặn truy cập nguồn trực tiếp; chỉ không trả URL trong JSON là chưa đủ. Cần kiểm điều này tại môi trường tích hợp.
-- Không dùng presigned GET dài hạn trong public DTO vì đường dẫn có thể còn hiệu lực sau khi admin ẩn hồ sơ.
+- Bucket không cho anonymous listing; chỉ các fileUrl final được đọc công khai. Tệp cũ tại ctr/* tiếp tục qua adapter tương thích.
+- Dùng URL đọc cố định; thời hạn presigned PUT chỉ giới hạn upload. Trạng thái Hidden không thu hồi URL đã chia sẻ.
 
 ## References
 
@@ -304,6 +305,8 @@ Lỗi bản đồ frontend không làm hồ sơ biến mất: vẫn hiển thị
 - STORY-CTR-004/EXC-02
 
 ### Others
+
+- Đợt đổi upload nhà thầu sang URL: 31/31 test PostgreSQL nhà thầu/Media, 54/54 test bộ kiểm tệp và adapter, 20/20 test HTTP nhà thầu/Media đã đạt, không có ca bỏ qua. Chạy trên bản sao tạm dùng phần đăng nhập ổn định vì module đăng nhập trong workspace đang được sửa đồng thời. TRX: `/private/tmp/bmt-ctr-presign-results/{integration,infra,api}.trx`. Chưa chạy FE hoặc kiểm PDF trên BizFly thật trong đợt này; chưa áp dụng migration lên môi trường chung. Kết quả các đợt trước ở bên dưới là bằng chứng lịch sử, không thay thế lượt kiểm này.
 
 - Implementation đã kiểm trên PostgreSQL: `ContractorReadService`, `ContractorFileService`, `ContractorStore`. Test gồm get all 137 hồ sơ, OR trong từng nhóm/AND giữa nhóm, bán kính Haversine tại biên, quyền sở hữu công trình, ẩn hồ sơ trong lúc mở stream và không lộ thông tin liên hệ nội bộ.
 - `ContractorApiTests` kiểm route thật với TestServer, JWT/default policy, binder GUID và chống CSRF; ISender giả trong bộ HTTP. `ContractorFlowTests` chạy handler/pipeline thật trên PostgreSQL tạm. Chưa chạy giao diện khách hàng hoặc gọi bucket Bizfly thật.

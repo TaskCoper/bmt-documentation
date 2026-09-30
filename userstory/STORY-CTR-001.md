@@ -68,7 +68,7 @@ Admin mở danh sách quản trị nhà thầu để tạo, cập nhật, xóa h
 
 1. Admin nhập tên công ty. Admin có thể bổ sung ngay hoặc sau khi lưu: địa chỉ, kinh độ, vĩ độ, các loại công trình và phạm vi thi công nhà thầu nhận làm.
 2. Admin nhập các phần tùy chọn: giới thiệu, thông tin và ảnh doanh nghiệp, khu vực phục vụ, thời gian khảo sát, nhận dự án, bảo hành, điểm và số lượt đánh giá.
-3. Admin có thể bổ sung thông tin pháp nhân, giấy phép, cam kết/bảo hành, bảo hiểm công trình và hợp tác theo BR-CTR-004. Các bản scan hiển thị theo trạng thái chung của hồ sơ. Người liên hệ, số điện thoại và email dành cho admin.
+3. Admin có thể bổ sung thông tin pháp nhân, giấy phép, cam kết/bảo hành, bảo hiểm công trình và hợp tác theo BR-CTR-004. Ảnh và bản scan mở cho người có URL; khi ẩn hồ sơ, URL đã chia sẻ vẫn đọc được. Người liên hệ, số điện thoại và email dành cho admin.
 4. Hệ thống lưu hồ sơ mới với trạng thái mặc định Ẩn. Hồ sơ chưa được công khai sau bước tạo.
 5. Khi admin bật Hiển thị sau đó, hệ thống yêu cầu đủ các trường tại BR-CTR-002.
 6. Hồ sơ được đưa lên web thì coi là đã xác minh; không xác minh riêng hoặc tự yêu cầu xác minh lại khi sửa. Mã số thuế đã nhập hiển thị đầy đủ theo BR-CTR-004.

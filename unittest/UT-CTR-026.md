@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-CTR-026 | Nhà thầu | File content handler — hồ sơ bị ẩn trong lúc mở stream | Error | REGRESSION | P0 | Unit dự kiến theo TDD đã chốt; chưa viết hoặc chạy mã test. Lần kiểm đầu Visible; fake OpenRead trả stream theo dõi Dispose; lần kiểm lại thấy Hidden hoặc liên kết đã gỡ. | Gọi lấy nội dung, mô phỏng thay đổi sau khi bắt đầu I/O nhưng trước trả stream. | ContractorAssetNotFound, dispose stream đã mở; không trả stream nội dung cho endpoint. Không kỳ vọng thu hồi byte đã gửi ở request khác. | BR-CTR-004/Then<br>TDD-CTR-002/Architecture<br>TDD-CTR-002/Internal API | Chặn khoảng chờ I/O làm lọt tệp sau khi quyền đọc thay đổi. | [Chưa xác định] | Draft |
+| UT-CTR-026 | Nhà thầu | File content handler — hồ sơ bị ẩn trong lúc mở stream | Branch | REGRESSION | P0 | Unit dự kiến theo TDD đã chốt; chưa viết hoặc chạy mã test. Lần kiểm đầu Visible; fake OpenRead trả stream theo dõi Dispose; lần kiểm lại thấy Hidden hoặc liên kết đã gỡ. | Gọi lấy nội dung, mô phỏng thay đổi sau khi bắt đầu I/O nhưng trước trả stream. | Nếu chỉ chuyển Hidden, trả stream bình thường. Nếu liên kết cũ đã gỡ, trả ContractorAssetNotFound và dispose stream. URL final mới đọc trực tiếp, không qua handler này. | BR-CTR-004/Then<br>TDD-CTR-002/Architecture<br>TDD-CTR-002/Internal API | Ẩn hồ sơ không làm mất quyền đọc tệp đã có link. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

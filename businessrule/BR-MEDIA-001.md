@@ -48,7 +48,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Statement
 
-Backend BMT cấp presigned URL qua BizFly cho mọi tài khoản đã đăng nhập, gồm quản trị viên và khách hàng. Luồng upload mới nhận ảnh JPG, PNG hoặc WebP, tối đa 5 MiB mỗi ảnh. URL xem ảnh tạm thời là URL công khai, cố định; quyền upload độc lập với quyền sửa nội dung sử dụng ảnh.
+Backend BMT cấp presigned URL qua BizFly cho mọi tài khoản đã đăng nhập, gồm quản trị viên và khách hàng. Luồng ảnh mặc định nhận JPG, PNG hoặc WebP, tối đa 5 MiB mỗi ảnh. Riêng admin tải ảnh nhà thầu tối đa 10 MiB và bản scan PDF/JPG/PNG tối đa 20 MiB theo BR-CTR-004. URL xem ảnh tạm thời là URL công khai, cố định; quyền upload độc lập với quyền sửa nội dung sử dụng ảnh.
 
 ## When
 
@@ -58,8 +58,8 @@ Backend BMT cấp presigned URL qua BizFly cho mọi tài khoản đã đăng nh
 
 ## Then
 
-1. Chỉ cấp URL upload khi phiên đăng nhập hợp lệ; không yêu cầu riêng vai trò quản trị.
-2. Chỉ chấp nhận JPG, PNG hoặc WebP, dung lượng không quá 5 MiB (5.242.880 byte) mỗi ảnh qua luồng upload mới.
+1. Chỉ cấp URL upload khi phiên đăng nhập hợp lệ. Luồng ảnh mặc định không yêu cầu vai trò quản trị; purpose ContractorImage và ContractorScan chỉ dành cho admin.
+2. Purpose Image mặc định nhận JPG/PNG/WebP ≤5 MiB; ContractorImage nhận JPG/PNG/WebP ≤10 MiB; ContractorScan nhận PDF/JPG/PNG ≤20 MiB. Không nhận WebP làm bản scan.
 3. Frontend upload trực tiếp lên BizFly bằng presigned URL do backend BMT cấp.
 4. URL upload có thời hạn. URL xem ảnh là URL https cố định, không hết hạn theo thời hạn URL upload; người có URL xem ảnh không cần đăng nhập BMT.
 5. API nghiệp vụ vẫn kiểm tra quyền và các điều kiện lưu hiện có. Có quyền upload không cấp thêm quyền tạo hoặc sửa bài viết, dự toán hay nội dung khác.
