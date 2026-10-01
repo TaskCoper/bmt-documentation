@@ -40,7 +40,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 ## Metadata
 
 - **Story**: Là khách hàng, tôi muốn tạo và quản lý các công trình của mình để gắn gói giám sát đúng nơi cần giám sát.
-- **Context**: Công trình là nơi thi công thật mà khách muốn được giám sát. Đây là thực thể riêng, khác với bản dự toán. Khách tự tạo công trình miễn phí, không cần gói thiết kế và không giới hạn số lượng. Khi tạo công trình, bắt buộc có tên, địa chỉ, kinh độ và vĩ độ; công trình không có trạng thái riêng. Gói giám sát được gắn vào công trình theo STORY-SUB-004; nhân viên chỉ gỡ được gói khi khách gán nhầm, theo STORY-SUB-006. Nhân viên phụ trách theo từng gói. Người dùng xác nhận các quyết định này ngày 25/09/2026, gồm quyết định bổ sung: khi công trình có gói giữ chỗ (đã gán hoặc đã hoàn thành), khách không sửa và không xóa được công trình; gói đã gỡ hoặc đã hủy không khóa.
+- **Context**: Công trình là hồ sơ xây dựng thuộc khách, tạo miễn phí và không giới hạn số lượng. Ngày 01/10/2026 người dùng chốt mở rộng diện tích đất, hiện trạng, địa chỉ ba phần, ngân sách, khởi công và phân loại dùng chung với dự toán. Có thể tạo độc lập hoặc từ một dự toán hoàn tất; dữ liệu lấy từ nguồn bị khóa. Tệp tùy chọn được quản lý theo STORY-SITE-004. Công trình không có trạng thái tiến độ riêng; gói giữ chỗ khóa sửa/xóa. Người dùng xác nhận chưa có dữ liệu công trình cần chuyển đổi.
 - **Sprint**:
 - **Priority**:
 - **Status**: Todo
@@ -66,10 +66,12 @@ Khách mở danh sách công trình của mình, hoặc yêu cầu tạo, sửa 
 
 ### Main Flow
 
-1. Khách chọn tạo công trình, nhập tên và địa chỉ. Frontend xác định kinh độ, vĩ độ từ địa chỉ và gửi cả hai giá trị trong yêu cầu tạo.
-2. Hệ thống bỏ khoảng trắng đầu và cuối của hai trường, rồi kiểm tra theo BR-SITE-001: cả hai có nội dung, tên tối đa 200 ký tự, địa chỉ tối đa 500 ký tự và tên chưa trùng với công trình khác của khách.
-3. Backend kiểm tra có đủ kinh độ và vĩ độ; thiếu một trong hai thì từ chối tạo. Khi dữ liệu đạt yêu cầu, hệ thống lưu công trình cùng tọa độ, thuộc tài khoản của khách. Không thu phí và không trừ lượt của gói nào.
-4. Công trình mới hiện trong danh sách công trình của khách và có thể được gắn gói giám sát theo STORY-SUB-004.
+1. Khách chọn tạo công trình độc lập; hệ thống hiển thị form và danh mục hiện hành, cùng lựa chọn dự toán đủ điều kiện theo BR-SITE-004 nếu khách muốn dùng nguồn.
+2. Khách nhập tên, diện tích đất, hiện trạng, tỉnh/thành phố, phường/xã, số nhà–đường, ngân sách VND và dự kiến khởi công; chọn loại và các trường tầng/tum/phong cách áp dụng theo BR-SITE-005. Trường không áp dụng không cho chọn và không bắt nhập.
+3. Frontend xác định vĩ độ, kinh độ cho địa chỉ đầy đủ. Khách có thể thêm bản vẽ hoặc ảnh hiện trạng theo STORY-SITE-004; được để trống tệp và nguồn.
+4. Backend kiểm quyền khách hàng, dữ liệu theo BR-SITE-001, danh mục theo BR-SITE-005/006, trùng tên và tọa độ; nếu có tệp thì kiểm BR-SITE-007.
+5. Khi hợp lệ, lưu công trình thuộc khách cùng cấu hình danh mục áp dụng và liên kết tệp hợp lệ. Không thu phí, trừ lượt hoặc gọi AI.
+6. Công trình hiện trong danh sách của khách và có thể được gắn gói giám sát theo STORY-SUB-004.
 
 ### Alternative Flow
 
@@ -78,15 +80,15 @@ Khách mở danh sách công trình của mình, hoặc yêu cầu tạo, sửa 
 Khách xem danh sách và chi tiết công trình của mình.
 
 1. Khách mở danh sách hoặc chi tiết công trình.
-2. Hệ thống chỉ trả công trình thuộc tài khoản của khách. Mỗi công trình có tên, địa chỉ và các gói giám sát đã gắn, kèm trạng thái gói theo BR-SITE-003.
+2. Hệ thống chỉ trả công trình thuộc tài khoản của khách. Danh sách giữ thông tin nhận diện công trình và gói; chi tiết hiển thị đầy đủ hồ sơ, nguồn nếu có và tệp theo BR-SITE-003.
 3. Khách không thấy tên nhân viên phụ trách gói.
 
 #### ALT-02
 
-Khách sửa tên hoặc địa chỉ của công trình không có gói giữ chỗ.
+Khách sửa hồ sơ công trình không có gói giữ chỗ; các trường lấy từ dự toán vẫn bị khóa.
 
-1. Khách sửa tên, địa chỉ hoặc cả hai của một công trình thuộc mình. Nếu đổi địa chỉ, frontend xác định lại kinh độ, vĩ độ và gửi cả hai cùng địa chỉ mới.
-2. Hệ thống kiểm tra công trình không có gói đã gán hoặc đã hoàn thành theo BR-SITE-002, rồi kiểm tra lại theo BR-SITE-001. Tên mới không được trùng với công trình khác của khách.
+1. Khách sửa các trường không bị khóa bởi dự toán nguồn của công trình thuộc mình. Nếu đổi địa chỉ, frontend xác định lại kinh độ, vĩ độ và gửi cả hai cùng địa chỉ mới.
+2. Hệ thống kiểm tra công trình không có gói đã gán hoặc đã hoàn thành theo BR-SITE-002, rồi kiểm tra lại theo BR-SITE-001. Tên mới không trùng công trình khác của khách; giữ đủ thông tin bắt buộc và dùng danh mục của hồ sơ theo BR-SITE-005/006.
 3. Khi đổi địa chỉ, backend yêu cầu đủ cả kinh độ và vĩ độ; thiếu một trong hai thì từ chối toàn bộ yêu cầu sửa. Khi dữ liệu đạt yêu cầu, hệ thống lưu thông tin mới; nếu đổi địa chỉ thì lưu địa chỉ và tọa độ cùng nhau. Lịch sử của các gói đã gỡ hoặc đã hủy khỏi công trình vẫn giữ tên và địa chỉ tại lúc gỡ hoặc hủy.
 
 #### ALT-03
@@ -95,7 +97,24 @@ Khách xóa công trình không có gói giữ chỗ.
 
 1. Khách yêu cầu xóa công trình.
 2. Hệ thống kiểm tra công trình không có gói đã gán hoặc đã hoàn thành theo BR-SITE-002. Công trình chưa từng có gói, hoặc chỉ có gói đã gỡ hay đã hủy, đều xóa được.
-3. Hệ thống xóa công trình. Công trình không còn trong danh sách và không nhận gói giám sát được nữa. Lịch sử của các gói đã gỡ hoặc đã hủy vẫn giữ tên và địa chỉ công trình tại lúc gỡ hoặc hủy.
+3. Hệ thống xóa công trình. Công trình không còn trong danh sách và không nhận gói giám sát được nữa. Lịch sử của các gói đã gỡ hoặc đã hủy vẫn giữ tên và địa chỉ công trình tại lúc gỡ hoặc hủy. Nếu có dự toán nguồn, xóa công trình giải phóng liên kết; không xóa dự toán nguồn.
+
+#### ALT-04
+
+Khách tạo công trình từ dự toán đã hoàn tất.
+
+1. Chọn một dự toán của chính mình, trạng thái Succeeded, chưa xóa và chưa được công trình còn tồn tại sử dụng.
+2. Hệ thống điền và khóa diện tích đất, địa chỉ ba phần, loại, số tầng, tum, phong cách kiến trúc/nội thất theo nguồn. Trường không áp dụng giữ Không áp dụng. Cấu hình dùng theo nguồn, không theo danh mục mới nhất.
+3. Khách nhập riêng tên công trình, hiện trạng, ngân sách, khởi công; frontend xác định tọa độ địa chỉ nguồn. Tệp là tùy chọn và không sao từ kết quả dự toán.
+4. Trước khi tạo, khách được đổi hoặc bỏ nguồn. Sau khi tạo, không đổi/gỡ nguồn, không bổ sung nguồn cho công trình độc lập và không sửa các trường nguồn.
+5. Backend kiểm lại điều kiện nguồn, lưu liên kết cùng hồ sơ và bảo đảm một dự toán chỉ dùng cho một công trình còn tồn tại theo BR-SITE-004.
+
+#### ALT-05
+
+Admin đã đổi danh mục sau khi công trình hoặc dự toán nguồn được tạo.
+
+1. Hồ sơ công trình tiếp tục dùng cấu hình được giữ của mình; tạo từ dự toán dùng cấu hình của dự toán đó.
+2. Các tên/lựa chọn đã lưu không tự thay đổi. Hiện trạng đã ngừng cho chọn vẫn được giữ trên hồ sơ cũ khi sửa trường khác theo BR-SITE-006.
 
 ### Exception Flow
 
@@ -119,7 +138,7 @@ Khách sửa hoặc xóa công trình đang có gói giữ chỗ, tức gói đ�
 
 1. Hệ thống từ chối, kể cả khi yêu cầu gửi trực tiếp tới API.
 2. Công trình và gói giữ nguyên.
-3. Nếu khách gõ sai tên hoặc địa chỉ, khách liên hệ tổng đài để nhân viên gỡ gói theo STORY-SUB-006, rồi sửa và gán lại.
+3. Nếu khách gõ sai trường nhập riêng, khách liên hệ tổng đài để xử lý gói theo STORY-SUB-006 rồi sửa khi không còn gói giữ chỗ. Việc gỡ vẫn phải đáp ứng điều kiện của gói; không mở khóa trường lấy từ dự toán nguồn.
 
 #### EXC-04
 
@@ -135,22 +154,36 @@ Yêu cầu tạo công trình hoặc đổi địa chỉ thiếu kinh độ, vĩ
 1. Backend từ chối yêu cầu, kể cả khi gọi trực tiếp API.
 2. Không tạo công trình mới hoặc lưu thay đổi; công trình đang sửa giữ nguyên dữ liệu cũ. Frontend cần xác định đủ tọa độ trước khi gửi lại.
 
+#### EXC-06
+
+Thiếu thông tin bắt buộc, diện tích/ngân sách sai điều kiện hoặc phân loại không hợp lệ.
+
+1. Chỉ rõ trường không đạt theo BR-SITE-001/005/006, từ chối lưu và giữ nội dung khách đang nhập.
+2. Không tự làm tròn diện tích, gán phong cách mặc định hoặc dùng giá trị Không áp dụng cho trường cần chọn.
+
+#### EXC-07
+
+Dự toán không còn đủ điều kiện hoặc yêu cầu cố đổi nguồn/trường đã khóa, kể cả qua API.
+
+1. Kiểm lại chủ sở hữu, Succeeded, chưa xóa và chưa bị công trình khác sử dụng; từ chối khi không đạt mà không lộ dữ liệu người khác.
+2. Từ chối đổi/gỡ/bổ sung nguồn sau khi tạo hoặc giả mạo thông tin lấy từ nguồn; không ghi thay đổi một phần.
+
 ## Acceptance Criteria
 
-Các yêu cầu tạo trong AC-001 đến AC-008 đều có đủ tọa độ, trừ khi tiêu chí nêu rõ trường bị thiếu.
+Trong các AC dưới đây, dữ liệu không được nêu là thiếu/sai đều hợp lệ theo BR-SITE-001/005/006, có đủ tọa độ. Các AC-001 đến AC-021 về tên/địa chỉ dùng công trình độc lập; địa chỉ được nhập thành Tỉnh/Thành phố, Phường/Xã và Số nhà–đường.
 
 #### AC-001
 
 - **Given**: Khách U1 chưa có công trình và chưa mua gói nào.
-- **When**: U1 tạo công trình tên “Nhà phố Quận 7”, địa chỉ “12 Nguyễn Thị Thập, Quận 7, TP.HCM”.
+- **When**: U1 tạo công trình tên “Nhà phố”, chọn tỉnh/thành phố và phường/xã hợp lệ, nhập số nhà–đường “12 Nguyễn Thị Thập”.
 - **Then**: Tạo thành công; công trình thuộc U1 và hiện trong danh sách công trình của U1.
 - **And**: Không thu phí và không yêu cầu gói thiết kế hay gói giám sát.
 
 #### AC-002
 
 - **Given**: Khách U1 đã đăng nhập.
-- **When**: U1 tạo công trình với tên “  Nhà vườn  ” và địa chỉ “  Củ Chi, TP.HCM  ”.
-- **Then**: Hệ thống lưu tên “Nhà vườn” và địa chỉ “Củ Chi, TP.HCM”.
+- **When**: U1 tạo công trình với tên “  Nhà vườn  ” và số nhà–đường “  12 Đường A  ”, với tỉnh/xã hợp lệ đã chọn.
+- **Then**: Hệ thống lưu tên “Nhà vườn” và số nhà–đường “12 Đường A”.
 - **And**: Khoảng trắng ở giữa chuỗi được giữ nguyên.
 
 #### AC-003
@@ -163,14 +196,14 @@ Các yêu cầu tạo trong AC-001 đến AC-008 đều có đủ tọa độ, t
 #### AC-004
 
 - **Given**: Khách U1 đã đăng nhập.
-- **When**: U1 tạo công trình có tên đúng 200 ký tự và địa chỉ đúng 500 ký tự sau khi bỏ khoảng trắng đầu và cuối.
+- **When**: U1 tạo công trình có tên đúng 200 ký tự và số nhà–đường đúng 500 ký tự sau khi bỏ khoảng trắng đầu và cuối, đã chọn tỉnh/xã hợp lệ.
 - **Then**: Tạo thành công.
-- **And**: Tên và địa chỉ được lưu đủ, không bị cắt.
+- **And**: Tên và số nhà–đường được lưu đủ, không bị cắt.
 
 #### AC-005
 
 - **Given**: Khách U1 đã đăng nhập.
-- **When**: U1 lần lượt tạo công trình có tên 201 ký tự, rồi công trình có địa chỉ 501 ký tự, tính sau khi bỏ khoảng trắng đầu và cuối.
+- **When**: U1 lần lượt tạo công trình có tên 201 ký tự, rồi công trình có số nhà–đường 501 ký tự, tính sau khi bỏ khoảng trắng đầu và cuối.
 - **Then**: Cả hai yêu cầu bị từ chối.
 - **And**: Hệ thống không tự cắt ngắn để lưu.
 
@@ -282,11 +315,118 @@ Các yêu cầu tạo trong AC-001 đến AC-008 đều có đủ tọa độ, t
 - **Then**: Backend từ chối toàn bộ yêu cầu sửa ở cả ba trường hợp.
 - **And**: Địa chỉ, tọa độ và các thông tin khác của công trình giữ nguyên.
 
+#### AC-022
+
+- **Given**: Khách chưa có gói, đã nhập đủ hồ sơ bắt buộc.
+- **When**: Tạo công trình không chọn dự toán và không đính kèm tệp.
+- **Then**: Tạo thành công, nguồn trống và danh sách tệp rỗng; không thu phí hoặc trừ lượt.
+
+#### AC-023
+
+- **Given**: Các trường khác hợp lệ.
+- **When**: Lần lượt gửi AreaM2=100.25, 0, -1 và 100.251.
+- **Then**: Chấp nhận 100.25 m²; từ chối ba giá trị còn lại, không làm tròn 100.251.
+
+#### AC-024
+
+- **Given**: Các trường khác hợp lệ.
+- **When**: Gửi ngân sách 2000000000; sau đó thử bỏ trống, 0, số âm hoặc 2000000000.5.
+- **Then**: Giá trị đầu hợp lệ và hiển thị 2.000.000.000 ₫; các giá trị còn lại bị từ chối.
+
+#### AC-025
+
+- **Given**: Các trường khác hợp lệ.
+- **When**: Lần lượt bỏ hiện trạng, loại hoặc dự kiến khởi công; sau đó chọn Chưa xác định cho khởi công.
+- **Then**: Các trường bắt buộc bỏ trống bị từ chối; Chưa xác định là lựa chọn hợp lệ.
+
+#### AC-026
+
+- **Given**: Loại Nhà phố trong cấu hình áp dụng không cho chọn phong cách nội thất hoặc không có lựa chọn nội thất.
+- **When**: Khách chọn loại đó và hoàn tất các trường còn áp dụng.
+- **Then**: Phong cách nội thất không cho chọn, hiển thị Không áp dụng và không cản tạo; không tự gán phong cách.
+
+#### AC-027
+
+- **Given**: Loại cho chọn tầng, tum và cả hai nhóm phong cách với danh sách hợp lệ.
+- **When**: Khách tạo hồ sơ thiếu một trường áp dụng hoặc chọn sai loại/nhóm.
+- **Then**: Từ chối; khi chọn đủ hợp lệ thì tạo được. Không tum là câu trả lời hợp lệ, khác Không áp dụng.
+
+#### AC-028
+
+- **Given**: Khách có dự toán hoàn tất, chưa xóa, chưa liên kết và còn giữ cấu hình cũ.
+- **When**: Chọn nguồn rồi nhập đủ các trường riêng và tạo công trình.
+- **Then**: Điền/khóa đúng các trường nguồn theo cấu hình cũ; lưu liên kết với nguồn.
+- **And**: Tên công trình nhập riêng; không tự sao tệp dự toán hoặc trừ lượt AI.
+
+#### AC-029
+
+- **Given**: Có dự toán nháp, đang xử lý, thất bại, đã xóa, của khách khác hoặc đã được công trình sử dụng.
+- **When**: Khách tìm nguồn hoặc gửi trực tiếp yêu cầu tạo bằng các bản đó.
+- **Then**: Không cho dùng bất kỳ bản nào trong các trường hợp trên; không tiết lộ dữ liệu khách khác.
+
+#### AC-030
+
+- **Given**: Form đang chọn nguồn A, chưa lưu công trình.
+- **When**: Khách đổi sang B rồi bỏ nguồn.
+- **Then**: Trường nguồn đổi đúng theo B; khi bỏ nguồn được nhập trực tiếp theo danh mục công trình độc lập. Chỉ tạo khi toàn bộ hồ sơ hợp lệ.
+
+#### AC-031
+
+- **Given**: Công trình đã tạo từ nguồn và không có gói giữ chỗ.
+- **When**: Khách đổi/gỡ nguồn hoặc sửa một trường lấy từ nguồn qua API.
+- **Then**: Từ chối, hồ sơ giữ nguyên; chỉ các trường riêng được sửa nếu đáp ứng BR-SITE-002.
+
+#### AC-032
+
+- **Given**: Công trình được tạo độc lập.
+- **When**: Khách yêu cầu bổ sung dự toán nguồn sau khi tạo.
+- **Then**: Từ chối; công trình tiếp tục không có nguồn.
+
+#### AC-033
+
+- **Given**: Hai yêu cầu tạo dùng cùng dự toán đủ điều kiện được xử lý đồng thời.
+- **When**: Hệ thống lưu hồ sơ.
+- **Then**: Tối đa một công trình được liên kết; yêu cầu còn lại không để lại hồ sơ một phần.
+
+#### AC-034
+
+- **Given**: Dự toán là nguồn của công trình chưa có gói.
+- **When**: Khách xóa dự toán; sau đó xóa công trình hợp lệ và thử lại hoặc dùng nguồn tạo công trình mới.
+- **Then**: Lần xóa dự toán đầu bị chặn. Sau khi xóa công trình, nguồn được xóa hoặc dùng lại nếu vẫn đủ điều kiện.
+
+#### AC-035
+
+- **Given**: Hồ sơ hoặc dự toán nguồn đã có cấu hình; Admin đổi tên/cấu hình hoặc thêm loại mới.
+- **When**: Khách xem/sửa hồ sơ được phép, hoặc tạo công trình từ dự toán nguồn.
+- **Then**: Giữ cấu hình tương ứng, không tự đổi lựa chọn hoặc chuyển sang danh mục mới nhất.
+
+#### AC-036
+
+- **Given**: Công trình độc lập được sửa; hiện trạng cũ đã ngừng cho chọn.
+- **When**: Khách sửa ngân sách mà giữ hiện trạng, hoặc tạo công trình mới chọn hiện trạng đã ngừng.
+- **Then**: Cho lưu trường hợp giữ hiện trạng cũ; từ chối chọn mục đã ngừng cho công trình mới.
+
+#### AC-037
+
+- **Given**: Khách đang nhập địa chỉ và các trường khác hợp lệ.
+- **When**: Chọn xã không thuộc tỉnh, bỏ một phần địa chỉ hoặc đổi địa chỉ mà thiếu tọa độ mới.
+- **Then**: Từ chối lưu; không tạo hoặc cập nhật địa chỉ/tọa độ một phần.
+
+#### AC-038
+
+- **Given**: Các thông tin khác của hồ sơ hợp lệ.
+- **When**: Lần lượt chọn Càng sớm càng tốt, Trong 1–3 tháng tới, Trong 3–6 tháng tới và Chưa xác định rồi lưu.
+- **Then**: Cả bốn lựa chọn được chấp nhận; hồ sơ giữ đúng lựa chọn, không tự đổi thành một ngày khởi công hoặc tự chuyển lựa chọn khi thời gian trôi qua.
+
 ## References
 
 ### TDDs
 
-- [TDD-SITE-002](../tdd/TDD-SITE-002.md): Bổ sung tọa độ khi tạo và đồng bộ khi đổi địa chỉ; thiết kế mới chưa triển khai.
+- TDD-SITE-003
+- TDD-SITE-004
+- TDD-SITE-005
+
+- [TDD-SITE-002](../tdd/TDD-SITE-002.md): Thiết kế tọa độ hiện có; cần cập nhật theo hồ sơ mở rộng ngày 01/10/2026.
 
 - [TDD-SITE-001](../tdd/TDD-SITE-001.md): Bảng công trình, API tạo, xem, sửa, xóa của khách, kiểm trùng tên và điều kiện xóa.
 
@@ -302,22 +442,37 @@ Các yêu cầu tạo trong AC-001 đến AC-008 đều có đủ tọa độ, t
 - BR-SUB-024/Then: Gói đã hủy không khóa việc sửa hoặc xóa công trình.
 - BR-SUB-026/Then: Gói đã gỡ không còn giữ chỗ trên công trình cũ.
 
+- BR-SITE-004/Then
+- BR-SITE-005/Then
+- BR-SITE-006/Then
+- BR-SITE-007/Then
+- BR-PROJ-009/Then
+
 ### Dependencies
 
 - STORY-SUB-004: Khách gắn gói giám sát vào công trình của mình.
 - STORY-SUB-006: Nhân viên gỡ gói khi khách gán nhầm hoặc cần sửa công trình.
 - STORY-SITE-002: Nhân viên xem công trình theo quyền.
 
+- STORY-SITE-003: Admin quản lý hiện trạng.
+- STORY-SITE-004: Khách quản lý bản vẽ và ảnh hiện trạng.
+- STORY-PROJ-007: Chặn xóa dự toán đang là nguồn công trình.
+
 ## Non-Functional
 
-- Yêu cầu bắt buộc tọa độ khi tạo và xác định lại tọa độ khi đổi địa chỉ được bổ sung trong phiên chuẩn bị tính năng nhà thầu. Đã bổ sung đặc tả [ST-SITE-033](../systemtest/ST-SITE-033.md), [ST-SITE-034](../systemtest/ST-SITE-034.md), [ST-SITE-035](../systemtest/ST-SITE-035.md), [ST-SITE-036](../systemtest/ST-SITE-036.md), [ST-SITE-037](../systemtest/ST-SITE-037.md). Các ca mới chưa chạy; TDD, API, code và dữ liệu chuẩn bị của bộ kiểm thử SITE cũ còn cần cập nhật. Kết quả kiểm thử trước đây không xác nhận yêu cầu mới.
+- Người dùng đã chốt bản US/BR trong hội thoại ngày 01/10/2026. System Test đã được cập nhật; xem [bảng độ phủ](../discovery/construction-site-system-test-coverage.md). Chưa chạy các ca; xác nhận hội thoại không thay cho phê duyệt/import trên hệ thống tài liệu.
 
-- Kiểm tra trùng tên và điều kiện xóa phải đúng cả khi có yêu cầu đồng thời. Hai yêu cầu tạo công trình trùng tên của cùng khách gửi cùng lúc thì chỉ một yêu cầu thành công. Yêu cầu xóa công trình và yêu cầu gắn gói vào chính công trình đó gửi cùng lúc không được để lại gói gắn vào công trình đã xóa. Tương tự, yêu cầu sửa công trình và yêu cầu gắn gói gửi cùng lúc không được để công trình bị sửa sau khi đã có gói giữ chỗ. Cơ chế kỹ thuật thuộc TDD.
-- Mọi yêu cầu được kiểm quyền ở server, kể cả yêu cầu gửi trực tiếp tới API, theo BR-RBAC-011.
-- Chưa chốt chỉ tiêu hiệu năng, cách phân trang, thứ tự sắp xếp hay tìm kiếm trong danh sách công trình.
+- Kiểm quyền, khóa trường nguồn, tính duy nhất nguồn, giới hạn tệp và khóa do gói ở backend; không chỉ vô hiệu hóa giao diện.
+- Tạo công trình và xóa dự toán đồng thời không được để công trình dùng nguồn đã xóa. Hai yêu cầu dùng cùng nguồn không được cùng thành công. Các yêu cầu tạo/sửa/gán gói giữ các bảo đảm đồng thời hiện có theo BR-SITE-002.
+- Tọa độ phải ứng với địa chỉ hiện tại; không dùng kết quả xác định tọa độ đến muộn cho địa chỉ cũ.
+- Người dùng xác nhận không có dữ liệu công trình cần chuyển đổi. Không chạy migration hoặc xóa dữ liệu trong tác vụ tài liệu.
+- Phần mở rộng ngày 01/10/2026 đã chốt nghiệp vụ qua hội thoại; bản US/BR cụ thể đã được chốt và ST-SITE đã cập nhật. TDD-SITE-001/002 và UT-SITE cần cập nhật ở giai đoạn sau; các kết quả kiểm thử cũ không chứng minh phần mở rộng đạt.
+- Chưa chốt chỉ tiêu hiệu năng, cách phân trang, thứ tự sắp xếp hoặc tìm kiếm danh sách công trình.
 
 ## Out of Scope
 
-- Trạng thái công trình (đang thi công, đã xong); nhân viên tạo, sửa hoặc xóa hộ khách; hiện tên nhân viên phụ trách cho khách; địa chỉ tách tỉnh/thành, quận/huyện, phường/xã; gắn công trình với bản dự toán hoặc tạo công trình từ bản dự toán; giới hạn số công trình.
-- Gắn gói giám sát vào công trình thuộc STORY-SUB-004; phân công nhân viên cho gói thuộc STORY-RBAC-003.
-- Đã có TDD-SITE-001 và bộ System Test ST-SITE. Code đã triển khai ở commit `182e2a8` của `bmt-be`; unit test và integration test chạy đạt ngày 25/09/2026, System Test chưa chạy. Quy tắc khóa sửa và điều kiện xóa mới, chốt cùng ngày, đã có trong thiết kế TDD-SITE-001 nhưng chưa có trong code. Tài liệu chưa được phê duyệt. Sprint, Priority và người thực hiện chưa được phân công.
+- Trạng thái tiến độ thi công; chia công trình thành tầng/hạng mục/công việc; nhân viên tạo, sửa, xóa hồ sơ hoặc quản lý tệp thay khách; hiển thị tên nhân viên phụ trách cho khách.
+- Tìm kiếm/gợi ý nhà thầu, mẫu thiết kế hoặc thông tin liên quan từ các trường mới; đợt này chỉ lưu dữ liệu để phục vụ về sau.
+- Gắn gói theo STORY-SUB-004; phân công nhân viên theo STORY-RBAC-003. Không đổi quy tắc thanh toán hoặc cấp gói.
+- Đồng bộ tự động từ dự toán hoặc danh mục mới; thay nguồn sau khi tạo; sao tệp kết quả dự toán sang tệp công trình.
+- Thiết kế schema/API và triển khai code thuộc giai đoạn sau. Sprint, Priority và người thực hiện chưa được phân công.

@@ -53,6 +53,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ### Problem
 
+**Bổ sung ngày 01/10/2026:** US/BR và System Test đã chốt thêm điều kiện chặn xóa dự toán đang được công trình còn tồn tại tham chiếu. Phần bổ sung SITE của TDD này đã được người dùng chốt cùng bộ SITE-003/004/005 sau bàn giao, chưa triển khai; xác nhận bản TDD ngày 30/09 chỉ áp dụng thiết kế trước bổ sung SITE. Schema nguồn và khóa tạo công trình ở [TDD-SITE-003](TDD-SITE-003.md).
+
 **Triển khai ngày 30/09/2026:** người dùng đã giao triển khai sau khi chốt TDD và đặc tả test. Backend đã được bổ sung trên nhánh `feature/my-estimates`, trong worktree `bmt-be-my-estimates`. Migration chỉ được áp dụng trong database kiểm thử tạm. Xem [kết quả triển khai và kiểm chứng](../discovery/my-estimates-implementation.md) để biết phạm vi, mã test và điều kiện mở tính năng.
 
 STORY-PROJ-007 và BR-PROJ-009 đã được người dùng chốt ngày 30/09/2026: xóa các bản đủ điều kiện trong tập đã chọn, giữ bản đang xử lý AI, trả kết quả từng bản, không hoàn lượt, không khôi phục và không mở lại. Các ngoại lệ tương ứng đã bổ sung vào BR-PROJ-006, BR-PROJ-007 và BR-SUB-007. Chọn tất cả chỉ áp dụng trang đang xem theo STORY-PROJ-006.
@@ -61,7 +63,7 @@ Tại thời điểm thiết kế, code chưa có endpoint xóa hoặc trạng t
 
 **Đã xác nhận:** mọi quyết định nghiệp vụ nêu trên; gói hết hạn/hết lượt không chặn xóa; không hủy AI. Ngày 30/09/2026, người dùng đồng ý đánh dấu đã xóa, giữ dữ liệu kỹ thuật cùng lịch sử lượt để đối soát, không cho khách khôi phục, chưa tự động dọn tệp hoặc đặt thời hạn lưu trong đợt này. Người dùng đã chốt toàn bộ bản TDD này trong hội thoại ngày 30/09/2026; đây là căn cứ cho đặc tả Unit Test, không phải bằng chứng đã triển khai hoặc phê duyệt trên hệ thống tài liệu.
 
-**Đề xuất chưa chốt:** không còn đề xuất kỹ thuật trong phạm vi bản TDD này chờ người dùng quyết định. Cách bố trí giao diện và các chính sách vận hành ngoài phạm vi vẫn giữ trạng thái đã nêu.
+**Đã chốt bổ sung SITE:** status ConstructionSiteInUse, guard và phối hợp khóa nguồn đã được người dùng chốt cùng TDD-SITE-003. Cách bố trí giao diện và các chính sách vận hành ngoài phạm vi vẫn giữ trạng thái đã nêu.
 
 **Cần làm rõ:** không còn quyết định nghiệp vụ cản thiết kế API. Kiểm chứng môi trường, SQL và migration vẫn phải thực hiện khi triển khai; chưa đặt SLA, RPO/RTO hoặc chính sách dọn dữ liệu dài hạn.
 
@@ -107,6 +109,10 @@ flowchart LR
 ```
 
 **Notes**:
+
+- **Nguồn công trình:** dưới khóa Estimate FOR UPDATE, thứ tự phân loại là NotFound → AlreadyDeleted → ConstructionSiteInUse → Processing → Deleted. Liên kết SITE chặn xóa dù chưa có gói hoặc gói đã gỡ/hủy. Không dùng FK RESTRICT như bằng chứng đủ: xóa Estimate là UPDATE DeletedAtUtc, nên phải kiểm EXISTS SITE và lặp guard trong câu UPDATE. Luồng tạo SITE cũng khóa đúng Estimate FOR UPDATE trước kiểm trạng thái và INSERT. Tạo thắng thì xóa bị chặn; xóa thắng thì tạo thất bại. Không khóa site từ handler xóa nguồn, không cascade xóa/gỡ nguồn.
+- **Replay kết quả bị chặn:** receipt mới dùng ResponseVersion=2 và nhận thêm ConstructionSiteInUse; reader vẫn đọc receipt version 1 với bốn status cũ. Giữ nguyên request hash v1 vì nội dung yêu cầu không đổi. Gửi lại key đã có luôn trả nguyên results; kể cả site đã xóa sau đó, muốn đánh giá lại phải dùng key mới. Không nâng phiên bản hoặc sửa receipt cũ.
+- **Code bị ảnh hưởng:** thêm cờ HasConstructionSite vào ReadDeletionStateAsync, guard vào MarkDeletedAsync, status vào contract/validator receipt và frontend thông báo từng phần tử. Không thay quota hoặc HTTP 200 của lô; receipt chỉ nới CHECK phiên bản. Bộ test bổ sung ST-PROJ-110–114 và regression 093–109 chưa chạy theo contract mới.
 
 - **Một transaction, kết quả riêng từng bản:** bản đang xử lý, không tồn tại hoặc không thuộc người gọi là kết quả nghiệp vụ của từng phần tử, không ném exception làm hỏng cả lô. Với 10 bản có 8 hợp lệ, ghi 8 lần xóa và biên nhận có 10 kết quả cùng commit. Chỉ sau commit mới trả Deleted. SQL hoặc commit lỗi làm lần giao dịch chưa commit bị hủy; không gọi đó là hoàn tác những bản đã xóa thành công. Lỗi mạng sau commit không làm mất 8 kết quả đã lưu.
 - **Thứ tự khóa:** dùng `IDesignSubscriptionStore.LockAccountAsync(ownerId)` để cùng khóa AccountCommerceState với tiếp nhận AI; thao tác này chỉ điều phối, không kiểm/mua/cấp gói. Sau đó khóa các Estimate thuộc owner theo Id tăng dần. Không khóa bản của khách khác. Dưới khóa đọc lại tình trạng xóa và DesignGeneration Pending. Dùng câu truy vấn sau khi có khóa ở Read Committed, không dùng trạng thái client hoặc entity đã đọc trước lúc chờ. Không gọi HTTP, SMTP hoặc AI trong transaction. Khóa hàng giữ tới cuối transaction và ngăn writer khác cùng dòng; xem [PostgreSQL row locks](https://www.postgresql.org/docs/15/explicit-locking.html#LOCKING-ROWS).
@@ -155,10 +161,10 @@ sequenceDiagram
     else Yêu cầu mới
         H->>DB: Khóa Estimate của owner theo thứ tự Id
         loop Mỗi Id khác nhau
-            H->>DB: Kiểm hiện trạng quyền, xóa và AI
+            H->>DB: Kiểm owner, dấu xóa, liên kết SITE và AI
             alt Đủ điều kiện
-                H->>DB: UPDATE DeletedAtUtc khi còn NULL và không Pending
-            else Pending hoặc không thể thao tác
+                H->>DB: Kiểm SITE; UPDATE khi chưa xóa, không SITE, không Pending
+            else Có SITE, Pending hoặc không thể thao tác
                 Note over H,DB: Ghi kết quả phần tử, không ném lỗi nghiệp vụ cả lô
             end
         end
@@ -179,7 +185,10 @@ flowchart TD
     B -->|Không hoặc không tồn tại| N[NotFound, không tiết lộ dữ liệu]
     B -->|Có| C{Đã xóa?}
     C -->|Có| D[AlreadyDeleted, không thay đổi]
-    C -->|Chưa| E{Có DesignGeneration Pending?}
+    C -->|Chưa| S{Có công trình tham chiếu?}
+    S -->|Có| SI[ConstructionSiteInUse, giữ dự toán]
+    S -->|Không| E{Có DesignGeneration Pending?}
+    SI --> I
     E -->|Có| F[Processing, giữ tác vụ và lượt]
     E -->|Không| G[Ghi xóa]
     G --> H[Kết quả Deleted dự kiến]
@@ -196,8 +205,8 @@ flowchart TD
 ```mermaid
 stateDiagram-v2
     [*] --> Available
-    Available --> Available: Có AI Pending, chặn xóa
-    Available --> Deleted: Không Pending và xóa commit
+    Available --> Available: Có SITE hoặc AI Pending, chặn xóa
+    Available --> Deleted: Không SITE, không Pending và xóa commit
     Deleted --> Deleted: Gửi lại, không khôi phục
     Deleted --> [*]
 ```
@@ -212,11 +221,13 @@ Available tương ứng DeletedAtUtc=NULL; Deleted tương ứng DeletedAtUtc c�
 |---|---|
 | Estimate.DeletedAtUtc | timestamptz NULL, EF `DateTimeOffset?`; NULL là chưa xóa, khác NULL là thời điểm xử lý xóa do đồng hồ server ghi ở UTC. Không có default NOW; CHECK `DeletedAtUtc IS NULL OR isfinite(DeletedAtUtc)`. Giá trị cũ mặc định NULL. |
 
+**Mẫu bổ sung SITE (giả định, cùng U1/D1):** C1.SourceEstimateId=D1 và C1 còn tồn tại. Lần xóa key K2 tạo EstimateDeletionReceipt ResponseVersion=2, Results=[{estimateId:D1,status:ConstructionSiteInUse}], các cột ID/hash/time/owner giữ cùng cấu trúc mẫu bên dưới; D1.DeletedAtUtc vẫn NULL. Sau xóa hợp lệ C1, replay K2 vẫn trả kết quả cũ. Key K3 mới có thể xóa D1 nếu không Pending. Hai kết quả này không làm thay đổi Used/Reserved.
+
 Không thêm IsDeleted vì suy ra được từ DeletedAtUtc. Không cần DeletedById: tác nhân hợp lệ luôn là OwnerId bất biến và receipt đã lưu ActorId. Xóa không đổi ModifiedAtUtc, NameVersion hoặc InputVersion; không xóa Name, đầu vào, kết quả AI, URL, CurrentShareId, token/share history, export/email history và các receipt cũ. Không ghi RevokedAtUtc hàng loạt vì điều kiện DeletedAtUtc chặn mọi share của bản. Không có lệnh đưa DeletedAtUtc về NULL trong sản phẩm; giữ dữ liệu để đối soát không cấp quyền khôi phục.
 
 Không dùng EF global query filter trên Estimate: finalizer và tác vụ lịch sử cần đọc hàng đã xóa. Store phải có phương thức tên rõ phạm vi, ví dụ `LockOwnedActiveEstimateAsync` cho sản phẩm và phương thức khóa lịch sử dùng trong finalizer/xóa lặp. Mọi SQL ghi của sản phẩm phải kiểm bản chưa xóa dưới khóa hoặc lặp điều kiện `DeletedAtUtc IS NULL`, kể cả nhánh đọc lại sau UPDATE=0. Không attach và UPDATE toàn bộ entity cũ làm DeletedAtUtc bị ghi lại NULL.
 
-SQL đích sau khi đã khóa account rồi các hàng owner theo Id (tham số lấy từ server; store đã triển khai bằng ExecuteUpdateAsync tương đương):
+SQL đích sau khi đã khóa account rồi các hàng owner theo Id (tham số lấy từ server; phần guard SITE bổ sung ngày 01/10/2026 chưa triển khai trong store):
 
 ```sql
 UPDATE "Estimate" AS e
@@ -224,6 +235,10 @@ SET "DeletedAtUtc" = @processedAtUtc
 WHERE e."Id" = @estimateId
   AND e."OwnerId" = @ownerId
   AND e."DeletedAtUtc" IS NULL
+  AND NOT EXISTS (
+    SELECT 1 FROM "ConstructionSite" AS s
+    WHERE s."SourceEstimateId" = e."Id"
+  )
   AND NOT EXISTS (
     SELECT 1 FROM "UsageOperation" AS u
     WHERE u."AccountId" = @ownerId
@@ -233,7 +248,7 @@ WHERE e."Id" = @estimateId
   );
 ```
 
-Store phân loại NotFound/AlreadyDeleted/Processing từ lần đọc dưới khóa trước UPDATE; chỉ đưa Deleted vào receipt nếu UPDATE đúng một hàng. Nếu hàng được xác định đủ điều kiện nhưng UPDATE=0 bất ngờ, dừng bằng lỗi kỹ thuật và rollback lô chưa commit, không tạo biên nhận báo Deleted. Khóa chung của mọi writer tiếp nhận AI bảo vệ khoảng giữa kiểm Pending và ghi dấu; riêng NOT EXISTS không đủ bảo vệ nếu writer bỏ qua thứ tự khóa.
+Store phân loại NotFound/AlreadyDeleted/ConstructionSiteInUse/Processing từ lần đọc dưới khóa trước UPDATE; chỉ đưa Deleted vào receipt nếu UPDATE đúng một hàng. Nếu hàng được xác định đủ điều kiện nhưng UPDATE=0 bất ngờ, dừng bằng lỗi kỹ thuật và rollback lô chưa commit, không tạo biên nhận báo Deleted. Khóa chung của mọi writer tiếp nhận AI bảo vệ khoảng giữa kiểm Pending và ghi dấu; riêng NOT EXISTS không đủ bảo vệ nếu writer bỏ qua thứ tự khóa.
 
 Bảng độc lập được đề xuất để nhận diện lần xóa gửi lại là `EstimateDeletionReceipt`. Một dòng lưu **kết quả của một yêu cầu lô đã commit**, kể cả lô không có bản nào xóa được. Nó khác trạng thái hiện tại của từng Estimate: D2 từng bị chặn trong K1 vẫn có thể đã kết thúc AI sau đó. Không dùng EstimateMutationReceipt vì bảng cũ gắn một Estimate và ResultInputVersion, không phù hợp một lô có cả mã không tồn tại.
 
@@ -243,11 +258,11 @@ Bảng độc lập được đề xuất để nhận diện lần xóa gửi l
 | ActorId | uuid NOT NULL, FK User(Id) ON DELETE RESTRICT; lấy từ phiên Customer. |
 | RequestKey | varchar(100) NOT NULL, có nội dung, 1–100 ký tự theo quy ước key hiện có; UNIQUE(ActorId,RequestKey). |
 | RequestHash | char(64) NOT NULL; SHA-256 lowercase hex của operation version và tập GUID chuẩn hóa; CHECK chuỗi khớp `^[0-9a-f]{64}$`. |
-| ResponseVersion | int NOT NULL, CHECK=1 cho contract đợt này; giúp đọc receipt đã lưu khi API phát triển. |
+| ResponseVersion | int NOT NULL, CHECK IN (1,2); bản cũ version 1 giữ nguyên; writer mới ghi version 2 có status ConstructionSiteInUse. |
 | Results | jsonb NOT NULL, CHECK kiểu array, độ dài 1–100. Các phần tử `{estimateId,status}` theo contract. Không lưu tên, input, token, URL hoặc thông tin riêng của mã ngoài owner. |
 | ProcessedAtUtc | timestamptz NOT NULL, đồng hồ server sau khi đủ khóa và trước ghi receipt; không diễn giải đây là timestamp chính xác của commit. |
 
-Kết quả trong JSON là chứng từ bất biến, chỉ được đọc toàn khối để replay, không làm dữ liệu quan hệ để tìm kiếm từng dự toán. Vì tập có Id không tồn tại hoặc thuộc khách khác do người gọi gửi, các Id này không có FK sang Estimate; chúng không chứng minh quyền sở hữu. Các tham chiếu thật của AI/quota/hồ sơ vẫn giữ FK hiện có. Store kiểm mỗi GUID xuất hiện một lần, tập trả đúng tập chuẩn hóa và status nằm trong bốn giá trị hợp lệ trước lưu. DB bảo vệ loại JSON và số phần tử; không giả định CHECK JSON chứng minh quyền hoặc chống trùng phần tử.
+Kết quả trong JSON là chứng từ bất biến, chỉ được đọc toàn khối để replay, không làm dữ liệu quan hệ để tìm kiếm từng dự toán. Vì tập có Id không tồn tại hoặc thuộc khách khác do người gọi gửi, các Id này không có FK sang Estimate; chúng không chứng minh quyền sở hữu. Các tham chiếu thật của AI/quota/hồ sơ vẫn giữ FK hiện có. Store kiểm mỗi GUID xuất hiện một lần, tập trả đúng tập chuẩn hóa và status nằm trong bốn giá trị cũ đối với ResponseVersion=1 hoặc năm giá trị (thêm ConstructionSiteInUse) đối với ResponseVersion=2 trước lưu. DB bảo vệ loại JSON và số phần tử; không giả định CHECK JSON chứng minh quyền hoặc chống trùng phần tử.
 
 ```mermaid
 erDiagram
@@ -294,6 +309,7 @@ Mẫu giả định: U1 là bí danh UUID của Customer; D1=`11111111-1111-4111
 **Notes**:
 
 - Chuẩn hóa: `(ActorId,RequestKey)` xác định RequestHash, ResponseVersion, Results và ProcessedAtUtc. Receipt bất biến lưu kết quả tại một thời điểm, không phải bản sao trạng thái hiện hành cần đồng bộ. Không lưu thêm các bộ đếm deleted/blocked vì có thể tính từ Results. Không cần GIN cho JSON khi không truy vấn phần tử.
+- Migration bổ sung SITE phải đổi `CK_EstimateDeletionReceipt_Version` từ `ResponseVersion=1` sang `ResponseVersion IN (1,2)` trước khi chạy writer mới. Không sửa receipt cũ; reader hỗ trợ cả hai phiên bản. Sau khi có receipt version 2, không quay về code chỉ hiểu bốn status.
 - Index mới của receipt chỉ gồm PK và UNIQUE(ActorId,RequestKey); không thêm index đơn ActorId trùng tiền tố. Giữ `IX_Estimate_Owner_ModifiedAt` hiện có cho truy vấn owner/sắp xếp; DeletedAtUtc là bộ lọc thêm. Chưa có tỷ lệ xóa hoặc số liệu tải để thêm partial index trùng bộ cột; đánh giá EXPLAIN khi triển khai nếu nhiều hàng đã xóa làm truy vấn chậm.
 - Không đặt TTL cho receipt trong đợt thiết kế này: việc tự xóa key có thể khiến retry cũ trở thành hành động mới. Thời hạn lưu cùng kế hoạch dọn dữ liệu cần quyết định riêng, không suy ra cam kết giữ vĩnh viễn.
 - **Thứ tự migration và mở tính năng:** (1) Kiểm schema hiện có, giao dịch dài, encoding UTF8 và extension unaccent theo TDD-PROJ-004. (2) Migration chỉ thêm `DeletedAtUtc timestamptz NULL` không default và tạo bảng/constraint/unique receipt theo schema trên; cấu hình EF phải khớp. Không backfill trạng thái từ Failed/TimedOut: tất cả dữ liệu cũ vẫn chưa xóa. (3) Triển khai đủ API và worker có guard; giữ route bulk-delete chưa được công bố qua `EstimateOption__CustomerDeletionEnabled=false` mặc định, route trả 503 DependencyUnavailable trước xử lý khi chưa bật. (4) Kiểm tất cả instance/consumer cũ đã dừng, guard trên owner/public/replay/worker hoạt động, rồi bật cờ. Không dùng CustomerCreationEnabled thay cờ này vì quyền xóa không phụ thuộc tạo mới.
@@ -316,10 +332,11 @@ Khi xử lý hoàn tất, HTTP 200 dùng Result với value gồm deletionReques
 |---|---|
 | Deleted | Bản thuộc khách, đủ điều kiện và thay đổi xóa đã commit ở lần yêu cầu này. |
 | AlreadyDeleted | Bản thuộc khách đã xóa từ trước; không xóa lại, không tạo hoặc khôi phục. Nhận biết bằng OwnerId đúng và DeletedAtUtc khác NULL. |
+| ConstructionSiteInUse | Bản thuộc khách chưa xóa và có ConstructionSite còn tồn tại trỏ SourceEstimateId tới bản; giữ nguyên, không gỡ liên kết. |
 | Processing | Bản thuộc khách chưa xóa, có DesignGeneration Pending khi kiểm dưới khóa; không hủy AI. |
 | NotFound | Không có bản trong phạm vi owner hoặc Id của người khác. Cùng cấu trúc, không nêu tên/trạng thái thật hoặc phân biệt hai nguyên nhân. |
 
-Bốn status là hợp đồng của bản TDD này; AlreadyDeleted chỉ được công bố với hàng thuộc chính người gọi. Receipt chỉ trả những Id người gọi đã gửi cùng kết quả được phép công bố, không chứa dữ liệu hồ sơ. Nếu cùng key/tập khác thì 409 toàn yêu cầu trước ghi.
+Năm status là hợp đồng mở rộng ngày 01/10/2026; AlreadyDeleted chỉ được công bố với hàng thuộc chính người gọi. Receipt chỉ trả những Id người gọi đã gửi cùng kết quả được phép công bố, không chứa dữ liệu hồ sơ. Nếu cùng key/tập khác thì 409 toàn yêu cầu trước ghi.
 
 ### Examples
 
@@ -377,10 +394,14 @@ Không đưa SMTP hoặc HTTP tệp vào transaction xóa. Lỗi dịch vụ ngo
 
 ### User Stories
 
+- STORY-SITE-001
+
 - STORY-PROJ-007
 - STORY-PROJ-006/AC-008
 
 ### Business Rules
+
+- BR-SITE-004/Then
 
 - BR-PROJ-009/Then
 - BR-PROJ-009/Except
@@ -404,6 +425,9 @@ Không đưa SMTP hoặc HTTP tệp vào transaction xóa. Lỗi dịch vụ ngo
 - STORY-PROJ-007/EXC-04
 
 ### Others
+
+- [TDD-SITE-003](TDD-SITE-003.md): FK, nguồn hoàn tất và khóa chống tranh chấp xóa–tạo.
+- [Bộ System Test mở rộng đã chốt](../discovery/construction-site-system-test-coverage.md).
 
 - TDD-PROJ-001/Architecture
 - TDD-PROJ-001/Data Model

@@ -145,7 +145,7 @@ Upload thành công nhưng API nghiệp vụ từ chối lưu nội dung hoặc 
 
 #### AC-004
 
-- **Given**: Ảnh đã upload thành công và chưa bị dọn khỏi kho.
+- **Given**: Ảnh thuộc luồng công khai BR-MEDIA-001 đã upload thành công và chưa bị dọn khỏi kho; không phải tệp công trình BR-SITE-007.
 - **When**: Một người có URL xem ảnh mở URL đó.
 - **Then**: Người đó xem được ảnh mà không cần đăng nhập BMT.
 - **And**: URL xem ảnh cố định, không hết hạn theo thời hạn của URL upload.
@@ -168,6 +168,8 @@ Upload thành công nhưng API nghiệp vụ từ chối lưu nội dung hoặc 
 
 ### TDDs
 
+- TDD-SITE-005
+
 - TDD-MEDIA-001
 
 ### Rules
@@ -175,17 +177,25 @@ Upload thành công nhưng API nghiệp vụ từ chối lưu nội dung hoặc 
 - BR-MEDIA-001
 - BR-MEDIA-002
 
+- BR-SITE-007/Then: Ngoại lệ cho tệp công trình, không dùng URL xem công khai.
+
 ### Dependencies
 
 - STORY-MEDIA-002
 
+- STORY-SITE-004: Luồng tệp công trình cần quyền truy cập riêng và giới hạn riêng.
+
 ## Non-Functional
+
+- Người dùng đã chốt bản US/BR trong hội thoại ngày 01/10/2026. System Test đã được cập nhật; xem [bảng độ phủ](../discovery/construction-site-system-test-coverage.md). Chưa chạy các ca; xác nhận hội thoại không thay cho phê duyệt/import trên hệ thống tài liệu.
 
 - URL upload phải có thời hạn; thời lượng cụ thể sẽ được xác định khi thiết kế kỹ thuật, chưa lấy mốc 2 phút của Taskcoper làm yêu cầu đã chốt.
 - Thông tin cấp cho frontend để upload không được chứa khóa bí mật của tài khoản BizFly.
 
+- TDD-MEDIA-001 cần bổ sung luồng SITE riêng tư theo US/BR mở rộng đã được chốt; luồng công khai hiện tại không phải bằng chứng đã bảo vệ bản vẽ/ảnh hiện trạng.
+
 ## Out of Scope
 
 - Upload các định dạng ngoài danh sách của từng purpose tại BR-MEDIA-001.
-- Chuyển ảnh sang cơ chế xem riêng tư; người dùng đã chọn tạm thời dùng URL công khai.
+- Chuyển các luồng ảnh công khai hiện có sang riêng tư. Tệp công trình mới là phạm vi riêng tư riêng theo STORY-SITE-004 và BR-SITE-007; không áp dụng AC-004 của Story này cho tệp công trình.
 - Thay đổi quyền tạo hoặc sửa nội dung của các chức năng sử dụng ảnh.

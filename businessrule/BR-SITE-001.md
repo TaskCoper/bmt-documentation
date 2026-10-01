@@ -36,7 +36,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Rule Info
 
-- **Name**: Công trình bắt buộc có tên, địa chỉ và tọa độ khi tạo; tên không trùng giữa các công trình của cùng một khách hàng.
+- **Name**: Hồ sơ công trình đầy đủ thông tin đất, địa chỉ, ngân sách, khởi công và phân loại; tên không trùng trong cùng khách.
 - **Category**: Công trình
 - **Status**: Draft
 - **Version**:
@@ -44,38 +44,48 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Owner**: [Chưa xác định]
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
-- **Source**: Người dùng xác nhận trong hội thoại chuẩn bị nghiệp vụ Công trình ngày 25/09/2026: công trình có tên và địa chỉ, cả hai bắt buộc; tên tối đa 200, địa chỉ tối đa 500 ký tự; không cho trùng tên trong cùng khách; không giới hạn số công trình; tạo miễn phí.
+- **Source**: Quyết định ngày 25/09/2026 về tên, quyền sở hữu và tọa độ; hội thoại ngày 01/10/2026 chốt mở rộng hồ sơ, diện tích đất, địa chỉ ba phần, ngân sách VND, khởi công, danh mục dùng chung và các trường bắt buộc.
 
 ## Statement
 
-Khi tạo công trình, bắt buộc có tên, địa chỉ, kinh độ và vĩ độ. Tên công trình không được trùng với công trình khác của cùng một khách hàng; khách hàng khác nhau được đặt trùng tên.
+Công trình phải có đầy đủ thông tin tại Then khi được tạo hoặc lưu sửa. Diện tích là diện tích đất. Tệp đính kèm và dự toán nguồn không bắt buộc; các trường phân loại không áp dụng theo BR-SITE-005 được để trống. Tên công trình không trùng với công trình khác của cùng khách, không phân biệt chữ hoa/thường.
 
 ## When
 
-Khách hàng tạo công trình, hoặc sửa tên hay địa chỉ của công trình.
+Khách hàng tạo hoặc sửa hồ sơ công trình; hệ thống kiểm tra dữ liệu lấy từ dự toán nguồn trước khi tạo.
 
 ## Then
 
-1. Bỏ khoảng trắng đầu và cuối của tên và địa chỉ trước khi kiểm tra và lưu.
-2. Sau bước 1, tên và địa chỉ đều phải có nội dung. Tên tối đa 200 ký tự, địa chỉ tối đa 500 ký tự. Giá trị vượt giới hạn bị từ chối, không tự cắt ngắn.
-3. Khách nhập địa chỉ trong một ô. Không bắt buộc tách tỉnh/thành, quận/huyện, phường/xã. Frontend phải xác định tọa độ từ địa chỉ để gửi trong yêu cầu tạo công trình.
-4. Tên không được trùng với tên của công trình khác thuộc cùng khách hàng. So sánh sau bước 1 và không phân biệt chữ hoa, chữ thường. Khi sửa, chỉ so với các công trình khác, không so với chính công trình đang sửa.
-5. Không giới hạn số công trình của một khách hàng. Tạo công trình không thu phí và không cần gói thiết kế hay gói giám sát.
-6. Yêu cầu bị từ chối không tạo công trình và không thay đổi thông tin đã lưu.
-7. Frontend phải gửi cả kinh độ và vĩ độ khi tạo công trình. Backend phải kiểm tra và từ chối tạo nếu thiếu một trong hai trường, kể cả khi yêu cầu gửi trực tiếp tới API.
-8. Khi khách đổi địa chỉ công trình, frontend phải xác định lại kinh độ, vĩ độ và gửi cùng địa chỉ mới. Backend chỉ lưu khi có đủ cả hai tọa độ và công trình được phép sửa theo BR-SITE-002; địa chỉ và tọa độ được lưu cùng nhau. Nếu thiếu một trong hai tọa độ, từ chối toàn bộ yêu cầu sửa và giữ nguyên dữ liệu cũ.
+1. Bỏ khoảng trắng đầu/cuối của tên và số nhà–đường trước khi kiểm tra và lưu; giữ khoảng trắng ở giữa.
+2. Tên có nội dung, tối đa 200 ký tự. Số nhà–đường có nội dung, giữ giới hạn 500 ký tự của phần địa chỉ nhập tự do. Không tự cắt ngắn dữ liệu vượt giới hạn.
+3. Địa chỉ gồm Tỉnh/Thành phố, Phường/Xã và Số nhà–đường; cả ba bắt buộc. Chọn tỉnh/xã từ nguồn địa chỉ dùng chung với dự toán, xã phải thuộc tỉnh đã chọn. Không thêm cấp quận/huyện. Frontend xác định tọa độ của địa chỉ đầy đủ.
+4. Tên không trùng tên công trình khác của cùng khách sau khi bỏ khoảng trắng đầu/cuối và không phân biệt hoa/thường. Khi sửa không so với chính công trình đang sửa. Khách khác nhau được đặt trùng tên.
+5. Không giới hạn số công trình của khách. Tạo công trình miễn phí, không cần gói thiết kế hay gói giám sát; chọn dự toán nguồn không tạo tác vụ AI hoặc trừ lượt.
+6. Yêu cầu bị từ chối không tạo công trình, không chiếm dự toán nguồn và không thay đổi hồ sơ đã lưu.
+7. Khi tạo phải gửi đủ vĩ độ và kinh độ hợp lệ cho địa chỉ công trình. Backend từ chối khi thiếu hoặc không hợp lệ, kể cả gọi API trực tiếp. Dự toán nguồn không thay thế yêu cầu xác định tọa độ.
+8. Khi sửa địa chỉ được phép theo BR-SITE-002 và BR-SITE-004, phải xác định lại và gửi đủ tọa độ mới. Địa chỉ và tọa độ lưu cùng nhau; thiếu tọa độ thì từ chối toàn bộ thay đổi.
+9. AreaM2 là diện tích đất theo m², bắt buộc lớn hơn 0 và tối đa 2 chữ số thập phân. Không coi đây là tổng diện tích sàn; không nhân diện tích với số tầng. Từ chối số có quá 2 chữ số thập phân, không tự làm tròn để lưu.
+10. Khi tạo hoặc đổi hiện trạng, bắt buộc chọn đúng một mục đang cho chọn theo BR-SITE-006. Hồ sơ cũ được giữ mục đã ngừng khi sửa trường khác theo ngoại lệ của quy tắc đó. Các mục ban đầu là Đất trống, Có nhà cũ cần phá dỡ và Cải tạo; không dùng hiện trạng làm trạng thái tiến độ thi công.
+11. Ngân sách dự kiến là một số tiền nguyên VND lớn hơn 0, bắt buộc nhập. Hiển thị có phân cách hàng nghìn và đơn vị VND, ví dụ 2.000.000.000 ₫. Không nhận khoảng từ–đến hoặc số lẻ dưới một đồng.
+12. Dự kiến khởi công bắt buộc chọn một trong bốn giá trị: Càng sớm càng tốt; Trong 1–3 tháng tới; Trong 3–6 tháng tới; Chưa xác định. Chưa xác định là lựa chọn hợp lệ, khác với chưa chọn; không tự quy đổi thành ngày khởi công cụ thể.
+13. Loại công trình bắt buộc chọn đúng một loại. Số tầng, Có tum/Không tum, phong cách kiến trúc và phong cách nội thất tuân theo BR-SITE-005. Mỗi nhóm phong cách áp dụng phải chọn đúng một giá trị.
+14. Mọi thông tin nêu trên đều bắt buộc, trừ dự toán nguồn, tệp đính kèm và các trường không áp dụng theo BR-SITE-005. Không tạo hồ sơ thiếu thông tin bắt buộc bằng cách coi là bản nháp công trình.
+15. Tạo từ dự toán theo BR-SITE-004; tệp theo BR-SITE-007. Ngân sách là thông tin khách khai báo, không tự lấy tổng chi phí AI làm ngân sách; tên công trình, hiện trạng và dự kiến khởi công cũng do khách nhập riêng.
 
 ## Except
 
-Không có ngoại lệ. Công trình đã bị xóa theo [BR-SITE-002](BR-SITE-002.md) không còn được tính khi kiểm tra trùng tên.
+Trường phân loại bị tắt hoặc không có lựa chọn theo BR-SITE-005 hiển thị Không áp dụng và không bắt nhập. Dự toán nguồn và tệp đính kèm được bỏ trống. Công trình đã xóa theo BR-SITE-002 không tính khi kiểm trùng tên.
 
 ## Notes
 
-- Người dùng bổ sung trong phiên chuẩn bị tính năng nhà thầu: frontend xử lý địa chỉ và gửi kinh độ, vĩ độ ngay khi tạo; backend không cho tạo nếu thiếu một trong hai trường. Yêu cầu này thay thế mô tả cũ chỉ bắt buộc tên và địa chỉ.
-- Người dùng đã xác nhận đồng bộ địa chỉ và tọa độ khi sửa; quyền sửa công trình vẫn theo BR-SITE-002. Người dùng xác nhận chưa có dữ liệu thật cần giữ, hoặc chỉ có dữ liệu thử; phương án chuyển schema được đề xuất trong TDD-SITE-002.
+- Người dùng đã chốt bản US/BR trong hội thoại ngày 01/10/2026. System Test đã được cập nhật; xem [bảng độ phủ](../discovery/construction-site-system-test-coverage.md). Chưa chạy các ca; xác nhận hội thoại không thay cho phê duyệt/import trên hệ thống tài liệu.
 
-- Ví dụ: U1 có “Nhà Phố”. U1 tạo “ nhà phố ” bị từ chối. U2 tạo “Nhà phố” được. U1 đổi chính công trình “nhà phố” thành “Nhà Phố” được.
-- Chỉ bỏ khoảng trắng đầu và cuối; khoảng trắng ở giữa được giữ nguyên, nên “Nhà  phố” (hai dấu cách) và “Nhà phố” là hai tên khác nhau. Chữ có dấu và không dấu cũng là khác nhau, ví dụ “Nhà phố” và “Nha pho”.
-- Giới hạn 200 ký tự cho tên theo cách đang dùng cho tên trong BMT, ví dụ [BR-NEWS-002](BR-NEWS-002.md) khoản 1 và [BR-PROJ-004](BR-PROJ-004.md) khoản 17.
-- Công trình là thực thể riêng, khác với bản dự toán. Quyền tạo, sửa, xóa theo [BR-SITE-002](BR-SITE-002.md); quyền xem theo [BR-SITE-003](BR-SITE-003.md).
-- Bản nháp nghiệp vụ, chưa triển khai hoặc chạy kiểm thử. Reviewer và Approver lấy theo xác nhận đang dùng cho các bản nháp mới, không phải bằng chứng đã phê duyệt. Owner và ngày hiệu lực chưa xác định.
+- Người dùng xác nhận ngày 01/10/2026 không có dữ liệu công trình, kể cả dữ liệu thật; không có yêu cầu chuyển đổi hay tự điền hồ sơ cũ. Đây không phải chỉ thị xóa dữ liệu ở bất kỳ môi trường nào.
+- Thay mô tả cũ chỉ có tên và địa chỉ một ô bằng hồ sơ đầy đủ và địa chỉ ba phần. Giới hạn 500 ký tự áp dụng cho Số nhà–đường; cách ghép địa chỉ hiển thị thuộc TDD.
+- Ví dụ diện tích đất 100 m², xây 80 m² mỗi tầng và có 3 tầng: AreaM2 của công trình là 100, không phải 80 hoặc 240.
+- Giữ dấu và khoảng trắng giữa tên: Nhà phố khác Nha pho; Nhà  phố khác Nhà phố. Quyền quản lý theo [BR-SITE-002](BR-SITE-002.md), quyền xem theo [BR-SITE-003](BR-SITE-003.md).
+- Hồ sơ là thực thể riêng với dự toán; quan hệ nguồn có hoặc không theo [BR-SITE-004](BR-SITE-004.md), không đồng nhất hai hồ sơ.
+- Địa chỉ nguồn từ dự toán được giữ theo dữ liệu đã hoàn tất; không tự đổi xã/tỉnh hoặc mở khóa địa chỉ nguồn nếu danh mục địa chỉ về sau thay đổi. Cơ chế xác định tọa độ phải được đối chiếu trong TDD-SITE-002.
+- Phạm vi này chỉ lưu thông tin để truy vấn sau; chưa thêm tìm kiếm hoặc gợi ý nhà thầu, mẫu thiết kế hay thông tin liên quan.
+- Bản US/BR mở rộng đã được người dùng chốt ngày 01/10/2026; System Test đã cập nhật. TDD-SITE-001, TDD-SITE-002 và Unit Test còn cần bổ sung phần mở rộng. Chưa triển khai hoặc chạy kiểm thử cho yêu cầu mới.
+- Reviewer và Approver giữ như bản hiện có; không phải bằng chứng phê duyệt. Owner và ngày hiệu lực chưa xác định.

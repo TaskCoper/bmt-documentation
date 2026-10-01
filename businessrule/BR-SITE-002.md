@@ -60,10 +60,14 @@ Có yêu cầu tạo, sửa hoặc xóa công trình.
 
 1. Chỉ tài khoản khách hàng được tạo công trình. Công trình mới thuộc chính tài khoản gửi yêu cầu; không tạo công trình cho tài khoản khác.
 2. Chỉ khách hàng sở hữu được sửa hoặc xóa công trình. Từ chối yêu cầu của khách hàng khác và của mọi tài khoản nhân viên, kể cả Admin.
-3. Khách sửa được tên, địa chỉ hoặc cả hai khi công trình không có gói giám sát giữ chỗ theo [BR-SUB-006](BR-SUB-006.md). Công trình đang có gói đã gán hoặc đã hoàn thành thì mọi yêu cầu sửa bị từ chối. Gói đã bị gỡ theo [BR-SUB-026](BR-SUB-026.md) hoặc đã hủy theo [BR-SUB-024](BR-SUB-024.md) không khóa việc sửa.
+3. Khách sửa được các trường hồ sơ không bị khóa bởi dự toán nguồn theo BR-SITE-004 khi công trình không có gói giám sát giữ chỗ theo [BR-SUB-006](BR-SUB-006.md). Công trình đang có gói đã gán hoặc đã hoàn thành thì mọi yêu cầu sửa bị từ chối. Gói đã bị gỡ theo [BR-SUB-026](BR-SUB-026.md) hoặc đã hủy theo [BR-SUB-024](BR-SUB-024.md) không khóa việc sửa.
 4. Khách xóa được công trình khi công trình không có gói giám sát giữ chỗ, kể cả công trình từng có gói nay đã bị gỡ hoặc đã hủy. Công trình đang có gói đã gán hoặc đã hoàn thành thì không xóa được. Xóa công trình không xóa lịch sử của các gói đã gỡ hoặc đã hủy; lịch sử vẫn giữ tên và địa chỉ công trình tại lúc gỡ hoặc hủy.
 5. Công trình đã xóa không còn trong danh sách của khách và không nhận gói giám sát.
 6. Yêu cầu bị từ chối không thay đổi công trình hay gói.
+
+7. Các trường lấy từ dự toán nguồn vẫn bị khóa sau khi gói đã gỡ hoặc đã hủy; không dùng việc nhả chỗ của gói để đổi dữ liệu nguồn. Không có dự toán nguồn thì không được bổ sung sau khi tạo.
+8. Quy tắc khóa do gói áp dụng cả thêm, thay, xóa tệp theo BR-SITE-007. Nhân viên, kể cả Admin, không được quản lý tệp thay khách.
+9. Xóa công trình hợp lệ giải phóng dự toán nguồn cho lần tạo khác hoặc cho phép xóa dự toán theo BR-PROJ-009; không xóa dự toán cùng công trình. Không cấp quyền đọc tệp mới qua công trình đã xóa.
 
 ## Except
 
@@ -71,9 +75,12 @@ Không có ngoại lệ cho việc nhân viên tạo, sửa hoặc xóa công tr
 
 ## Notes
 
+- Người dùng đã chốt bản US/BR trong hội thoại ngày 01/10/2026. System Test đã được cập nhật; xem [bảng độ phủ](../discovery/construction-site-system-test-coverage.md). Chưa chạy các ca; xác nhận hội thoại không thay cho phê duyệt/import trên hệ thống tài liệu.
+
 - Không cần điều kiện riêng về nhân viên phụ trách khi sửa hoặc xóa: phân công theo từng gói giám sát và kết thúc khi gói bị gỡ hoặc bị hủy theo [BR-RBAC-013](BR-RBAC-013.md), nên công trình không có gói giữ chỗ thì cũng không còn người phụ trách.
-- Khóa sửa khi có gói giữ chỗ để khách không đổi địa chỉ công trình nhằm dùng gói cho một nơi khác. Khách gõ sai địa chỉ thì liên hệ tổng đài để nhân viên gỡ gói theo [BR-SUB-026](BR-SUB-026.md), sau đó khách sửa rồi gán lại.
+- Khóa sửa khi có gói giữ chỗ để khách không đổi địa chỉ công trình nhằm dùng gói cho một nơi khác. Khách gõ sai địa chỉ thì liên hệ tổng đài để nhân viên gỡ gói theo [BR-SUB-026](BR-SUB-026.md), sau đó khách sửa các trường được phép rồi gán lại. Các trường lấy từ dự toán vẫn bị khóa theo BR-SITE-004.
 - Gói đã gắn thì không đổi thẳng sang công trình khác, kể cả nhân viên; chỉ được gỡ theo BR-SUB-026. Gắn gói theo [BR-SUB-022](BR-SUB-022.md); giới hạn gói giữ chỗ trên một công trình theo [BR-SUB-006](BR-SUB-006.md). Khách không dùng thao tác xóa công trình để gỡ gói.
 - Tài khoản nhân viên bị từ chối theo cách tách nhóm tài khoản ở [BR-RBAC-005](BR-RBAC-005.md). Yêu cầu của khách khác bị từ chối mà không tiết lộ thông tin công trình, theo [BR-RBAC-011](BR-RBAC-011.md) khoản 5.
-- Dữ liệu tên và địa chỉ theo [BR-SITE-001](BR-SITE-001.md); quyền xem theo [BR-SITE-003](BR-SITE-003.md).
+- Dữ liệu hồ sơ theo [BR-SITE-001](BR-SITE-001.md); quyền xem theo [BR-SITE-003](BR-SITE-003.md).
 - Bản nháp nghiệp vụ, chưa triển khai hoặc chạy kiểm thử. Reviewer và Approver lấy theo xác nhận đang dùng cho các bản nháp mới, không phải bằng chứng đã phê duyệt. Owner và ngày hiệu lực chưa xác định.
+- Bổ sung ngày 01/10/2026: hồ sơ đầy đủ, khóa nguồn theo [BR-SITE-004](BR-SITE-004.md), tệp theo [BR-SITE-007](BR-SITE-007.md). Phần mở rộng chưa triển khai; US/BR đã được chốt và System Test đã cập nhật; TDD và Unit Test còn cần cập nhật.

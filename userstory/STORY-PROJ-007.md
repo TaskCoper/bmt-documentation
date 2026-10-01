@@ -70,7 +70,7 @@ Khách yêu cầu xóa các dự toán đã chọn trên trang đang xem.
 1. Khách chọn một hoặc nhiều dự toán trên trang đang xem; Chọn tất cả chỉ chọn các bản của trang đó theo BR-PROJ-009.
 2. Giao diện thể hiện các bản đang chọn và thông báo xóa xong không thể khôi phục, đồng thời hồ sơ đã chia sẻ sẽ không còn truy cập được.
 3. Khách yêu cầu xóa các bản đã chọn.
-4. Backend kiểm tra phiên khách hàng và kiểm tra lại từng bản: thuộc người gọi, chưa bị xóa và không đang được AI xử lý.
+4. Backend kiểm tra phiên khách hàng và kiểm tra lại từng bản: thuộc người gọi, chưa bị xóa, không đang được AI xử lý và không là nguồn của công trình còn tồn tại.
 5. Hệ thống xóa các bản đủ điều kiện; giữ nguyên các bản không đủ điều kiện và báo kết quả riêng cho từng bản. Không từ chối toàn bộ chỉ vì một bản đang xử lý AI.
 6. Với mỗi bản xóa thành công, hệ thống loại khỏi danh sách, ngăn chủ sở hữu mở lại và ngăn yêu cầu xem, tải mới qua link chia sẻ, QR hoặc link trong email.
 7. Hệ thống không hoàn lượt đã dùng, không giữ hoặc trừ lượt mới và không hủy tác vụ AI.
@@ -90,7 +90,7 @@ Danh sách chọn có cả bản đủ điều kiện và bản đang được A
 
 Khách đã hết hạn gói hoặc hết lượt.
 
-1. Vẫn kiểm tra và xử lý xóa từng bản theo quyền sở hữu, tình trạng chưa xóa và trạng thái AI.
+1. Vẫn kiểm tra và xử lý xóa từng bản theo quyền sở hữu, tình trạng chưa xóa, trạng thái AI và liên kết công trình.
 2. Không yêu cầu gia hạn hoặc mua thêm lượt để xóa; không thay đổi số lượt đã dùng.
 
 #### ALT-03
@@ -99,6 +99,13 @@ Khách chỉ chọn một bản hoặc toàn bộ bản đã chọn đều khôn
 
 1. Với một bản, áp dụng cùng quy tắc kiểm tra và trả kết quả cho bản đó.
 2. Khi không bản nào đủ điều kiện, không xóa bản nào và báo rõ kết quả; không ghi nhận thành công giả.
+
+#### ALT-04
+
+Danh sách chọn có dự toán đang là nguồn của công trình còn tồn tại.
+
+1. Giữ dự toán đó, báo bị chặn bởi liên kết công trình theo BR-SITE-004; vẫn xóa các bản khác đủ điều kiện.
+2. Không tự gỡ nguồn hoặc xóa công trình. Sau khi công trình được xóa hợp lệ, khách được thử xóa dự toán lại.
 
 ### Exception Flow
 
@@ -217,9 +224,29 @@ Lỗi mạng hoặc máy chủ khiến chưa xác định được đầy đủ 
 - **Then**: Thông báo chưa xác định được đầy đủ kết quả và cho tải lại danh sách.
 - **And**: Không tự kết luận tất cả đã xóa hoặc tất cả còn nguyên; các bản đã xóa thành công không được khôi phục hay hoàn lượt.
 
+#### AC-013
+
+- **Given**: Dự toán đã hoàn tất đang là nguồn của công trình còn tồn tại, dù công trình chưa có gói.
+- **When**: Khách xóa riêng bản đó hoặc chọn cùng các bản đủ điều kiện khác.
+- **Then**: Chặn bản có công trình và báo lý do riêng; bản khác đủ điều kiện vẫn được xóa. Không thay liên kết hoặc hồ sơ công trình.
+
+#### AC-014
+
+- **Given**: Công trình dùng nguồn vừa được xóa hợp lệ theo BR-SITE-002.
+- **When**: Khách xóa dự toán nguồn chưa bị xóa và không bị điều kiện khác chặn.
+- **Then**: Cho xóa; việc xóa công trình trước đó không tự xóa dự toán.
+
+#### AC-015
+
+- **Given**: Tạo công trình từ dự toán và xóa chính dự toán đó xảy ra đồng thời.
+- **When**: Backend xử lý hai yêu cầu.
+- **Then**: Không để công trình tạo thành công bằng nguồn đã xóa; nếu công trình đã giữ liên kết thì xóa nguồn bị chặn.
+
 ## References
 
 ### TDDs
+
+- TDD-SITE-003
 
 - TDD-PROJ-005: Thiết kế xóa bằng dấu thời gian, biên nhận từng lô và chặn mọi truy cập mới; đã được người dùng chốt trong hội thoại ngày 30/09/2026, chưa triển khai.
 
@@ -233,18 +260,27 @@ Lỗi mạng hoặc máy chủ khiến chưa xác định được đầy đủ 
 - BR-SUB-007
 - BR-RBAC-005
 
+- BR-SITE-004/Then
+- BR-SITE-002/Then
+
 ### Dependencies
 
 - STORY-PROJ-006: Chọn các dự toán trên trang danh sách đang xem.
 - STORY-PROJ-002: Trạng thái AI và kết quả của tác vụ đang chạy.
 - STORY-PROJ-004: Quyền truy cập qua link, QR và email.
 
+- STORY-SITE-001: Công trình có thể giữ tham chiếu dự toán nguồn.
+
 ## Non-Functional
+
+- Người dùng đã chốt bản US/BR trong hội thoại ngày 01/10/2026. System Test đã được cập nhật; xem [bảng độ phủ](../discovery/construction-site-system-test-coverage.md). Chưa chạy các ca; xác nhận hội thoại không thay cho phê duyệt/import trên hệ thống tài liệu.
 
 - Kiểm quyền sở hữu và trạng thái lúc xử lý từng bản ở backend, kể cả khi gửi yêu cầu trực tiếp hoặc thao tác từ nhiều phiên.
 - Kết quả từng bản phải phản ánh dữ liệu đã được xử lý thành công; không dùng một thông báo thành công chung che các bản bị chặn hoặc lỗi chưa xác định.
 - Quyền truy cập bản đã xóa phải được kiểm tra trên cả đường của chủ sở hữu và đường chia sẻ; không chỉ ẩn một dòng trên giao diện.
 - Hợp đồng kết quả từng bản, xử lý yêu cầu gửi lại và lỗi kỹ thuật sẽ được làm rõ trong TDD; chưa cam kết ngưỡng thời gian hoặc số bản mỗi yêu cầu.
+
+- Bổ sung ngày 01/10/2026: US/BR đã được chốt và System Test đã bổ sung chặn nguồn công trình; TDD-PROJ-005 và Unit Test còn cần cập nhật; chưa triển khai hoặc kiểm thử điều kiện mới.
 
 ## Out of Scope
 

@@ -60,7 +60,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ### Trigger
 
-Nhân viên mở danh sách hoặc chi tiết công trình.
+Nhân viên mở danh sách, chi tiết công trình hoặc xem/tải tệp đính kèm.
 
 ## Flow
 
@@ -77,7 +77,7 @@ Nhân viên mở danh sách hoặc chi tiết công trình.
 
 Nhân viên có quyền `supervision.complete` nhưng không có `assignment.manage`.
 
-1. Nhân viên mở danh sách hoặc chi tiết công trình.
+1. Nhân viên mở danh sách, chi tiết công trình hoặc xem/tải tệp đính kèm.
 2. Hệ thống chỉ trả công trình của các gói đang được phân công cho nhân viên đó tại thời điểm xem.
 3. Khi phân công kết thúc hoặc được chuyển giao cho người khác, công trình đó ra khỏi phạm vi xem của nhân viên.
 
@@ -97,6 +97,14 @@ Gói do nhân viên phụ trách bị hủy hoặc bị gỡ khỏi công trình
 1. Hủy theo STORY-SUB-005 hoặc gỡ theo STORY-SUB-006 kết thúc phân công của nhân viên trên gói đó.
 2. Từ yêu cầu xem tiếp theo, nhân viên chỉ có quyền `supervision.complete` không còn xem được công trình qua gói đó.
 3. Admin và nhân viên có quyền `assignment.manage` vẫn xem được công trình, kèm gói đã hủy nếu gói còn gắn với công trình.
+
+#### ALT-04
+
+Nhân viên xem chi tiết hồ sơ mở rộng và tệp đính kèm.
+
+1. Kiểm phạm vi công trình theo BR-SITE-003; chi tiết hiện thông tin mới, nguồn nếu có và danh sách tệp.
+2. Mỗi yêu cầu mở/tải tệp tiếp tục kiểm quyền hiện tại theo BR-SITE-007; không công khai URL gốc.
+3. Nhân viên không thêm/thay/xóa tệp. Quyền công trình không tự mở quyền đọc kết quả dự toán riêng của khách.
 
 ### Exception Flow
 
@@ -188,9 +196,30 @@ Tài khoản nhân viên, kể cả Admin, gửi yêu cầu tạo công trình h
 - **Then**: Cả hai yêu cầu của N bị từ chối vì phân công của N trên G1 và G2 đã kết thúc; M xem được A và thấy G1 với trạng thái đã hủy.
 - **And**: Không tiết lộ tên, địa chỉ hay gói của A và B cho N.
 
+#### AC-011
+
+- **Given**: Nhân viên có quyền xem công trình.
+- **When**: Mở chi tiết hồ sơ mở rộng.
+- **Then**: Thấy diện tích, hiện trạng, địa chỉ ba phần, ngân sách, khởi công, phân loại theo cấu hình hồ sơ, nguồn nếu có và tệp; không được sửa.
+
+#### AC-012
+
+- **Given**: Nhân viên có quyền xem công trình theo phân công đang hiệu lực.
+- **When**: Mở/tải tệp, sau đó thử lại sau khi mất phân công và không có quyền rộng hơn.
+- **Then**: Lần đầu được phép, yêu cầu mới sau mất quyền bị từ chối dù giữ đường dẫn.
+
+#### AC-013
+
+- **Given**: Admin hoặc nhân viên có quyền xem công trình.
+- **When**: Gửi yêu cầu thêm, thay, xóa tệp của khách.
+- **Then**: Từ chối; quyền xem không cấp quyền quản lý tệp.
+
 ## References
 
 ### TDDs
+
+- TDD-SITE-003
+- TDD-SITE-005
 
 - [TDD-SITE-001](../tdd/TDD-SITE-001.md): API chỉ đọc cho nhân viên và cách xác định phạm vi xem theo quyền và phân công gói.
 
@@ -205,16 +234,27 @@ Tài khoản nhân viên, kể cả Admin, gửi yêu cầu tạo công trình h
 - BR-SUB-024/Then: Hủy gói giám sát kết thúc phân công.
 - BR-SUB-026/Then: Gỡ gói kết thúc phân công.
 
+- BR-SITE-001/Then
+- BR-SITE-004/Then
+- BR-SITE-005/Then
+- BR-SITE-007/Then
+
 ### Dependencies
 
 - STORY-SITE-001: Khách tạo và quản lý công trình.
 - STORY-RBAC-003: Phân công nhân viên cho gói giám sát.
 - STORY-PAY-002: Tra cứu gói đã mua bằng quyền `commerce.read`.
 
+- STORY-SITE-004: Quy tắc bản vẽ và ảnh hiện trạng.
+
 ## Non-Functional
+
+- Người dùng đã chốt bản US/BR trong hội thoại ngày 01/10/2026. System Test đã được cập nhật; xem [bảng độ phủ](../discovery/construction-site-system-test-coverage.md). Chưa chạy các ca; xác nhận hội thoại không thay cho phê duyệt/import trên hệ thống tài liệu.
 
 - Phạm vi xem được kiểm ở server cho cả danh sách và chi tiết, kể cả yêu cầu gửi trực tiếp tới API, theo BR-RBAC-011. Phân công vừa kết thúc hoặc vừa chuyển giao có hiệu lực ngay từ yêu cầu xem tiếp theo.
 - Chưa chốt chỉ tiêu hiệu năng, cách phân trang, thứ tự sắp xếp, bộ lọc hay tìm kiếm trong danh sách công trình của nhân viên.
+
+- Phần mở rộng ngày 01/10/2026 đã được người dùng chốt US/BR; System Test đã cập nhật. TDD/UT còn cần cập nhật; chưa chạy để xác nhận các tiêu chí mới đạt.
 
 ## Out of Scope
 

@@ -52,7 +52,7 @@ Khách hàng chỉ xem công trình của chính mình. Admin và nhân viên c�
 
 ## When
 
-Có yêu cầu xem danh sách hoặc chi tiết công trình.
+Có yêu cầu xem danh sách, chi tiết công trình hoặc xem/tải tệp đính kèm công trình.
 
 ## Then
 
@@ -64,14 +64,22 @@ Có yêu cầu xem danh sách hoặc chi tiết công trình.
 6. Các quyền trong quy tắc này chỉ cho xem. Không quyền nào cho nhân viên tạo, sửa hoặc xóa công trình; xem [BR-SITE-002](BR-SITE-002.md).
 7. Yêu cầu ngoài phạm vi bị từ chối và không tiết lộ tên, địa chỉ hay gói của công trình, theo [BR-RBAC-011](BR-RBAC-011.md).
 
+8. Trong chi tiết, trả đầy đủ thông tin hồ sơ theo BR-SITE-001, lựa chọn/Không áp dụng theo BR-SITE-005, thông tin có hoặc không có dự toán nguồn và danh sách tệp. Không tự cấp thêm quyền đọc kết quả dự toán cho nhân viên chỉ vì công trình có nguồn; mở dự toán vẫn theo quyền hiện có của module dự toán.
+9. Quyền xem/tải tệp đi theo đúng phạm vi xem công trình tại thời điểm yêu cầu theo BR-SITE-007. Người có URL nhưng không có quyền vẫn bị từ chối. Quyền xem không cấp quyền thêm, thay hoặc xóa tệp.
+10. Mất phạm vi xem do kết thúc/chuyển giao phân công cũng làm mất quyền gửi yêu cầu xem/tải tệp mới. Không chỉ ẩn danh sách tệp trong giao diện mà để đường tải tiếp tục công khai.
+
 ## Except
 
 Nhân viên có quyền `commerce.read` thấy tên công trình gắn với gói khi tra cứu gói đã mua theo [BR-PAY-005](BR-PAY-005.md), nhưng không xem được danh sách hoặc chi tiết công trình của khách bằng quyền này.
 
 ## Notes
 
+- Người dùng đã chốt bản US/BR trong hội thoại ngày 01/10/2026. System Test đã được cập nhật; xem [bảng độ phủ](../discovery/construction-site-system-test-coverage.md). Chưa chạy các ca; xác nhận hội thoại không thay cho phê duyệt/import trên hệ thống tài liệu.
+
 - Không thêm mã quyền riêng để xem công trình. Danh mục quyền có 14 mã: ngày 25/09/2026 bỏ `supervision.reassign` và `package.restore`, thêm `supervision.unassign`; ngày 26/09/2026 thêm `payment.connection.manage` theo BR-PAY-006. Trên `develop` của `bmt-be` tại `79faf34`, code đã có 13 trong 14 mã (đã có `news.manage`); `library.manage` có ở nhánh `feature/library-admin` (commit `66e4671`), chưa merge.
 - Nhân viên được phân công theo từng gói giám sát, không theo công trình; xem [BR-RBAC-013](BR-RBAC-013.md). Người phụ trách gói xem được công trình đang gắn với gói đó; khi gói bị gỡ hoặc bị hủy, phân công kết thúc và quyền xem cũng hết.
 - Khoản 3 là phạm vi xem đi theo phân công. [BR-RBAC-010](BR-RBAC-010.md) khoản 1 cho quyền xem không đòi phân công; `supervision.complete` là quyền thao tác, không phải quyền xem, nên phạm vi đọc công trình của người giữ quyền này giới hạn theo gói được phân công.
 - Ví dụ: N phụ trách G1 gắn công trình A; G3 gắn B do N2 phụ trách. N thấy A, không thấy B. Nếu G1 được chuyển giao cho N2 lúc 10:00 thì từ 10:00 N không xem được A.
 - Bản nháp nghiệp vụ, chưa triển khai hoặc chạy kiểm thử. Reviewer và Approver lấy theo xác nhận đang dùng cho các bản nháp mới, không phải bằng chứng đã phê duyệt. Owner và ngày hiệu lực chưa xác định.
+
+- Bổ sung ngày 01/10/2026: hồ sơ mở rộng và tệp riêng tư theo [BR-SITE-007](BR-SITE-007.md); chưa triển khai phần mở rộng hoặc chạy kiểm thử.

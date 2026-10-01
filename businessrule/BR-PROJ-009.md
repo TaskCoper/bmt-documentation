@@ -48,7 +48,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Statement
 
-Khách được chọn một hoặc nhiều dự toán của mình để xóa. Hệ thống kiểm tra riêng từng bản và xóa các bản đủ điều kiện; bản đang được AI xử lý bị chặn. Bản đã xóa không còn trong danh sách, không mở lại hoặc khôi phục được và không còn truy cập hồ sơ qua link đã chia sẻ. Xóa không hoàn lượt đã dùng, không yêu cầu gói còn hiệu lực hoặc còn lượt.
+Khách được chọn một hoặc nhiều dự toán của mình để xóa. Hệ thống kiểm tra riêng từng bản và xóa các bản đủ điều kiện; bản đang được AI xử lý hoặc đang là nguồn của công trình còn tồn tại bị chặn. Bản đã xóa không còn trong danh sách, không mở lại hoặc khôi phục được và không còn truy cập hồ sơ qua link đã chia sẻ. Xóa không hoàn lượt đã dùng, không yêu cầu gói còn hiệu lực hoặc còn lượt.
 
 ## When
 
@@ -58,7 +58,7 @@ Khách yêu cầu xóa các dự toán đã chọn từ Dự toán của tôi, h
 
 1. Chỉ tài khoản khách hàng có phiên hợp lệ được xóa các bản thuộc chính mình. Backend kiểm tra quyền sở hữu của từng bản, không tin phạm vi lựa chọn do giao diện gửi lên.
 2. Khách có thể chọn một hoặc nhiều bản. Chọn tất cả chỉ chọn các bản trên trang đang xem, không chọn toàn bộ kết quả ở mọi trang. Không tự mở rộng tập xóa ngoài các bản khách đã chọn.
-3. Bản đủ điều kiện xóa phải thuộc người gọi, chưa bị xóa và không đang được AI xử lý tại thời điểm xử lý xóa bản đó. Bản nháp, thành công hoặc thất bại đều được xóa khi đáp ứng các điều kiện này.
+3. Bản đủ điều kiện xóa phải thuộc người gọi, chưa bị xóa, không đang được AI xử lý và không được công trình còn tồn tại tham chiếu làm nguồn tại thời điểm xử lý xóa bản đó. Bản nháp, thành công hoặc thất bại đều được xóa khi đáp ứng các điều kiện này.
 4. Kiểm lại trạng thái khi xử lý; trạng thái được tải hoặc được chọn trước đó không thay thế việc kiểm tra hiện tại. Nếu đã tiếp nhận AI trước khi xóa thì chặn xóa. Nếu đã xóa thành công thì không cho tiếp nhận AI mới trên bản đó.
 5. Trong một lần xóa nhiều, xóa các bản đủ điều kiện và giữ nguyên các bản không đủ điều kiện. Trả kết quả từng bản cùng lý do không xóa được khi có thể công bố; không từ chối cả lần chỉ vì một bản bị chặn và không hoàn tác các bản đã xóa thành công vì lý do đó.
 6. Bản không thuộc khách hoặc không tồn tại không được trả thông tin riêng để giải thích kết quả. Bản đã xóa không được tạo lại, khôi phục hoặc tính thêm lượt khi yêu cầu cũ được gửi lại.
@@ -70,11 +70,16 @@ Khách yêu cầu xóa các dự toán đã chọn từ Dự toán của tôi, h
 12. Giao diện phải thể hiện việc không thể khôi phục và mất quyền truy cập hồ sơ đã chia sẻ khi khách yêu cầu xóa, đồng thời phản ánh đúng kết quả từng bản sau xử lý.
 13. Nếu lỗi mạng hoặc máy chủ khiến chưa xác định đủ kết quả, không báo toàn bộ đã xóa hoặc toàn bộ còn nguyên. Cho khách tải lại danh sách để kiểm tra; không dùng lỗi phản hồi làm lý do khôi phục bản đã xóa hoặc hoàn lượt.
 
+14. Theo BR-SITE-004, từ chối xóa dự toán đang là nguồn của công trình còn tồn tại, kể cả công trình chưa có gói hoặc gói đã gỡ/hủy. Không tự gỡ liên kết hay xóa công trình. Trong lô xóa nhiều, bản bị chặn giữ nguyên và có lý do riêng; các bản khác đủ điều kiện vẫn được xóa.
+15. Sau khi công trình được xóa hợp lệ, dự toán được phép xóa nếu đáp ứng các điều kiện còn lại. Tạo công trình và xóa nguồn đồng thời phải giữ đúng điều kiện này; không để công trình tham chiếu dự toán đã xóa.
+
 ## Except
 
-Chặn xóa khi AI đang xử lý, kể cả khi bản đã được chọn trước lúc AI bắt đầu. Việc ngừng truy cập chỉ áp dụng cho yêu cầu mới; không thu hồi được bản tệp mà người nhận đã tải về trước đó. Không tự cam kết dừng một luồng tải đã được cấp quyền trước lúc xóa; chi tiết xử lý đồng thời cần được làm rõ trong thiết kế.
+Chặn xóa khi AI đang xử lý hoặc bản đang là nguồn công trình còn tồn tại, kể cả điều kiện phát sinh sau lúc khách chọn bản. Việc ngừng truy cập chỉ áp dụng cho yêu cầu mới; không thu hồi được bản tệp mà người nhận đã tải về trước đó. Không tự cam kết dừng một luồng tải đã được cấp quyền trước lúc xóa; chi tiết xử lý đồng thời cần được làm rõ trong thiết kế.
 
 ## Notes
+
+- Người dùng đã chốt bản US/BR trong hội thoại ngày 01/10/2026. System Test đã được cập nhật; xem [bảng độ phủ](../discovery/construction-site-system-test-coverage.md). Chưa chạy các ca; xác nhận hội thoại không thay cho phê duyệt/import trên hệ thống tài liệu.
 
 - Áp dụng cho STORY-PROJ-007; danh sách các bản còn lại theo STORY-PROJ-006 và BR-PROJ-008.
 - Ví dụ đã được người dùng chọn: 10 bản được yêu cầu xóa, 8 bản đủ điều kiện và 2 bản đang xử lý AI thì xóa 8, giữ 2 và báo kết quả riêng; không chuyển thành thao tác tất cả thành công hoặc không xóa gì.
@@ -82,3 +87,5 @@ Chặn xóa khi AI đang xử lý, kể cả khi bản đã được chọn trư
 - Ngày 30/09/2026, người dùng đồng ý đánh dấu đã xóa, giữ dữ liệu nội bộ và lịch sử lượt để đối soát; khách không thể khôi phục. Đợt này chưa tự động dọn tệp hoặc đặt thời hạn lưu; không xóa vật lý lịch sử tính lượt. Chi tiết schema ở TDD-PROJ-005.
 - Hợp đồng phản hồi từng bản, giới hạn số phần tử, xử lý mã lặp, yêu cầu gửi lại và lỗi giữa chừng được thiết kế trong TDD-PROJ-005. Ràng buộc nghiệp vụ là không làm mất kết quả xóa đã thành công, không làm lộ bản của người khác và không báo thành công khi chưa có căn cứ.
 - Reviewer và Approver đều là Tân Trần theo xác nhận trong hội thoại. Owner và ngày hiệu lực chưa được cung cấp. Người dùng đã chốt quy tắc cùng User Story trong hội thoại ngày 30/09/2026. Đặc tả ST xem [bảng độ phủ](../discovery/my-estimates-system-test-coverage.md); chưa thực thi. Việc chốt trong hội thoại không thay thế phê duyệt trên hệ thống quản lý tài liệu.
+
+- Bổ sung ngày 01/10/2026 theo [BR-SITE-004](BR-SITE-004.md) và [STORY-SITE-001](../userstory/STORY-SITE-001.md). US/BR đã được chốt và ST xóa dự toán đã cập nhật; TDD-PROJ-005 và UT còn cần cập nhật; chưa triển khai điều kiện chặn do công trình.

@@ -257,6 +257,8 @@ stateDiagram-v2
 
 ## Data Model
 
+**Tương thích hồ sơ SITE mở rộng ngày 01/10/2026, backend đã triển khai:** [TDD-SITE-003](TDD-SITE-003.md#data-model) đổi địa chỉ gộp ConstructionSite.Address sang text. Cột snapshot PackageLifecycleEvent.ConstructionSiteAddress cũng đổi từ varchar(500) sang text NULL, giữ CHECK/NULL và dữ liệu lịch sử; không cắt địa chỉ ba phần. Giới hạn 500 áp riêng số nhà–đường. Không đổi luồng hay quyền hủy/gỡ gói.
+
 **Ý nghĩa các bảng trong luồng gỡ**
 
 | Bảng | Một dòng đại diện cho gì? | Luồng gỡ làm gì với bảng này |
@@ -276,7 +278,7 @@ stateDiagram-v2
 | SupervisionGrant | `CK_SupervisionGrant_AssignedColumns` đổi thành: `(State = 'Unassigned' AND ConstructionSiteId IS NULL AND AssignedAtUtc IS NULL) OR (State IN ('Assigned','Completed') AND ConstructionSiteId IS NOT NULL AND FirstAssignedAtUtc IS NOT NULL AND AssignedAtUtc IS NOT NULL) OR State = 'CanceledByStaff'`. | Bản cũ đòi gói `Unassigned` có `FirstAssignedAtUtc IS NULL`, sẽ chặn thao tác gỡ. Điều kiện mới vẫn bảo đảm gói chưa gán không trỏ công trình nào. |
 | SupervisionGrant | Thêm `CK_SupervisionGrant_AssignedWindow`: `AssignedAtUtc IS NULL OR (FirstAssignedAtUtc IS NOT NULL AND AssignedAtUtc >= FirstAssignedAtUtc AND AssignedAtUtc < AssignmentDeadlineUtc)`. | Mọi lần gán, kể cả gán lại, đều phải trước hạn (BR-SUB-022). CHECK chặn một đường ghi lỗi ghi mốc gán sau hạn. |
 | PackageLifecycleEvent | `Action` thêm `Unassign`; `CK_PackageLifecycleEvent_SupervisionOnlyActions` thêm `Unassign`. `Restore` vẫn nằm trong CHECK để đọc dòng cũ, không còn đường ghi. | Lịch sử gỡ nằm cùng bảng với hủy, hoàn thành, mở lại, nên đọc lịch sử một gói theo `PackageVersion` trong một bảng. |
-| PackageLifecycleEvent | Thêm `ConstructionSiteId uuid NULL` (không khóa ngoại), `ConstructionSiteName varchar(200) NULL`, `ConstructionSiteAddress varchar(500) NULL`, và `CK_PackageLifecycleEvent_SiteSnapshot`: ba cột cùng NULL hoặc cùng có giá trị; có giá trị thì `PackageKind = 'Supervision'` và `Action IN ('Cancel','Unassign')`; `Action = 'Unassign'` bắt buộc có giá trị. | Giữ công trình tại lúc gỡ hoặc hủy, vì sau đó khách có thể sửa hoặc xóa công trình. Không đặt khóa ngoại cho `ConstructionSiteId`, vì khóa ngoại sẽ chặn chính việc xóa công trình mà BR-SITE-002 cho phép. Hủy dùng bản lưu này khi công trình đã bị xóa ([TDD-SUB-005](TDD-SUB-005.md), [TDD-SITE-001](TDD-SITE-001.md)). |
+| PackageLifecycleEvent | Thêm `ConstructionSiteId uuid NULL` (không khóa ngoại), `ConstructionSiteName varchar(200) NULL`, `ConstructionSiteAddress text NULL`, và `CK_PackageLifecycleEvent_SiteSnapshot`: ba cột cùng NULL hoặc cùng có giá trị; có giá trị thì `PackageKind = 'Supervision'` và `Action IN ('Cancel','Unassign')`; `Action = 'Unassign'` bắt buộc có giá trị. | Giữ công trình tại lúc gỡ hoặc hủy, vì sau đó khách có thể sửa hoặc xóa công trình. Không đặt khóa ngoại cho `ConstructionSiteId`, vì khóa ngoại sẽ chặn chính việc xóa công trình mà BR-SITE-002 cho phép. Hủy dùng bản lưu này khi công trình đã bị xóa ([TDD-SUB-005](TDD-SUB-005.md), [TDD-SITE-001](TDD-SITE-001.md)). |
 | Assignment | `CK_Assignment_EndReason` thêm `PackageCanceled`, `PackageUnassigned`. | Phân biệt phân công kết thúc vì người quản trị gỡ (`Removed`), chuyển giao (`Transferred`), hay vì gói bị hủy hoặc gỡ. |
 
 `PackageMutationReceipt.Operation` và `AccessAuditLog.Action` không có CHECK, nên giá trị mới `UnassignSupervision` không cần đổi schema.
@@ -340,7 +342,7 @@ erDiagram
 
 - Vì sao lưu bản sao tên và địa chỉ thay vì chỉ lưu `ConstructionSiteId`: sau khi gỡ, công trình cũ không còn gói giữ chỗ nên khách được sửa hoặc xóa (BR-SITE-002). Nếu chỉ lưu mã, lịch sử sẽ hiện tên mới sau khi khách sửa, hoặc không hiện được gì sau khi khách xóa. Đây là dư thừa có chủ đích: bản lưu là dữ kiện lịch sử tại một thời điểm, không phải bản sao phải đồng bộ với `ConstructionSite`.
 - Vì sao không ghi dòng lịch sử cho việc gán: lần gán do chủ gói thực hiện, đã có biên nhận `Assign` và mốc `AssignedAtUtc`. BR chỉ đòi lịch sử của việc gỡ; mỗi dòng gỡ đã chứa công trình cũ, nên chuỗi "gán CS1 → gỡ khỏi CS1 → gán CS2" đọc được từ các dòng gỡ và mốc gán hiện tại.
-- Độ dài `ConstructionSiteName` và `ConstructionSiteAddress` bằng giới hạn của `ConstructionSite` (200 và 500), nên bản lưu không bao giờ bị cắt.
+- `ConstructionSiteName` giữ giới hạn 200; `ConstructionSiteAddress` dùng text theo TDD-SITE-003 để lưu nguyên địa chỉ gộp. Không cắt 500 ký tự khi ghi lịch sử; số nhà–đường riêng vẫn giới hạn 500.
 
 **Migration gộp `20260925123300_SupervisionUnassignWithoutRestore` (đã tạo, chưa áp dụng lên database dùng chung)**
 

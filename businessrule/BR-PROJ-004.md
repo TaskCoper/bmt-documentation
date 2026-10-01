@@ -88,6 +88,8 @@ Bản nháp được phép chưa chọn đủ thông tin theo BR-PROJ-003, nhưn
 
 ## Notes
 
+- Người dùng đã chốt bản US/BR trong hội thoại ngày 01/10/2026. System Test đã được cập nhật; xem [bảng độ phủ](../discovery/construction-site-system-test-coverage.md). Chưa chạy các ca; xác nhận hội thoại không thay cho phê duyệt/import trên hệ thống tài liệu.
+
 - Phần tọa độ bổ sung ngày 01/10/2026 đã được người dùng chốt cùng STORY-PROJ-001 và BR-PROJ-003: frontend lấy đủ tọa độ từ bản đồ trước khi tạo dự toán; đổi địa chỉ phải gửi lại đủ cặp tọa độ; chưa có dữ liệu thật cần giữ. System Test và TDD đã được cập nhật; backend đã lên `develop` tại commit `5e396fc`. Phạm vi kiểm thử và phần chưa kiểm được ghi trong [bàn giao tọa độ](../discovery/estimate-coordinates-implementation.md). Xác nhận hội thoại không thay cho phê duyệt/import trên hệ thống tài liệu.
 
 - Hiện trạng trang mẫu: Nhà phố, Villa/Biệt thự, Nhà mái, Nhà vườn/Nhà cấp 4 có chọn tầng và tum; Căn hộ không có. Đây là cấu hình đang quan sát, không phải ngoại lệ phải viết cố định theo tên Căn hộ cho mọi phiên bản.
@@ -103,3 +105,5 @@ Bản nháp được phép chưa chọn đủ thông tin theo BR-PROJ-003, nhưn
 - Người dùng xác nhận ngày 26/09/2026 (lần 2) về nguồn địa chỉ của khoản 5 và 12: dùng dịch vụ bên thứ ba provinces.open-api.vn theo địa giới mới (34 tỉnh/thành, hai cấp tỉnh–xã). Khi dịch vụ lỗi, hệ thống dùng dữ liệu đã lưu trước đó; chỉ báo nguồn chưa sẵn sàng khi chưa có dữ liệu nào. Bản nháp đang giữ xã đã bị gộp hoặc ngừng dùng vẫn giữ và hiển thị xã đó, nhưng trước khi gửi AI khách phải chọn lại xã theo dữ liệu mới. Thiết kế ở TDD-PROJ-001.
 - Cách xử lý lựa chọn cũ khi đổi loại công trình hoặc tỉnh/thành đã được chốt tại khoản 11 và 12. Đã chốt bản dự toán cũ chỉ dùng danh mục tại thời điểm tạo; không được chọn loại mới thêm sau đó theo khoản 14.
 - Reviewer và Approver là Tân Trần; tên không có nghĩa tài liệu đã được phê duyệt. Owner và ngày hiệu lực chưa xác định; chưa có kiểm thử thực thi.
+
+- Bổ sung ngày 01/10/2026: công trình dùng lại danh mục này theo [BR-SITE-005](BR-SITE-005.md); tạo từ dự toán giữ cấu hình của nguồn, tạo độc lập giữ cấu hình lúc tạo. Không thay quy tắc nhập/gửi AI của PROJ hoặc cho phép Admin lưu nhóm bật rỗng ở khoản 13.

@@ -48,20 +48,20 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Statement
 
-Backend BMT cấp presigned URL qua BizFly cho mọi tài khoản đã đăng nhập, gồm quản trị viên và khách hàng. Luồng ảnh mặc định nhận JPG, PNG hoặc WebP, tối đa 5 MiB mỗi ảnh. Riêng admin tải ảnh nhà thầu tối đa 10 MiB và bản scan PDF/JPG/PNG tối đa 20 MiB theo BR-CTR-004. URL xem ảnh tạm thời là URL công khai, cố định; quyền upload độc lập với quyền sửa nội dung sử dụng ảnh.
+Backend BMT cấp presigned URL qua BizFly cho mọi tài khoản đã đăng nhập, gồm quản trị viên và khách hàng. Luồng ảnh mặc định nhận JPG, PNG hoặc WebP, tối đa 5 MiB mỗi ảnh. Riêng admin tải ảnh nhà thầu tối đa 10 MiB và bản scan PDF/JPG/PNG tối đa 20 MiB theo BR-CTR-004. URL xem ảnh của các luồng nêu trên tạm thời là URL công khai, cố định; quyền upload độc lập với quyền sửa nội dung sử dụng ảnh.
 
 ## When
 
 - Người dùng xin URL upload hoặc gửi ảnh qua luồng upload mới.
 - Người dùng gửi URL ảnh đã upload vào một API nghiệp vụ của BMT.
-- Một người mở URL công khai của ảnh còn tồn tại trong kho.
+- Một người mở URL công khai của ảnh thuộc các luồng công khai còn tồn tại trong kho.
 
 ## Then
 
 1. Chỉ cấp URL upload khi phiên đăng nhập hợp lệ. Luồng ảnh mặc định không yêu cầu vai trò quản trị; purpose ContractorImage và ContractorScan chỉ dành cho admin.
 2. Purpose Image mặc định nhận JPG/PNG/WebP ≤5 MiB; ContractorImage nhận JPG/PNG/WebP ≤10 MiB; ContractorScan nhận PDF/JPG/PNG ≤20 MiB. Không nhận WebP làm bản scan.
 3. Frontend upload trực tiếp lên BizFly bằng presigned URL do backend BMT cấp.
-4. URL upload có thời hạn. URL xem ảnh là URL https cố định, không hết hạn theo thời hạn URL upload; người có URL xem ảnh không cần đăng nhập BMT.
+4. URL upload có thời hạn. Với các luồng ảnh công khai của quy tắc này, URL xem là URL https cố định, không hết hạn theo thời hạn URL upload; người có URL không cần đăng nhập BMT. Không áp dụng khoản này cho tệp công trình theo BR-SITE-007.
 5. API nghiệp vụ vẫn kiểm tra quyền và các điều kiện lưu hiện có. Có quyền upload không cấp thêm quyền tạo hoặc sửa bài viết, dự toán hay nội dung khác.
 6. Khi thay ảnh, chỉ thay URL đã lưu sau khi API nghiệp vụ lưu thành công. Thao tác lưu thất bại không làm mất liên kết tới ảnh cũ.
 7. Ảnh upload không được dùng hoặc ảnh đã bị gỡ/thay được xét dọn theo BR-MEDIA-002.
@@ -71,9 +71,16 @@ Backend BMT cấp presigned URL qua BizFly cho mọi tài khoản đã đăng nh
 - Quy tắc định dạng và dung lượng ở đây áp dụng cho luồng upload ảnh mới; không tự biến thành điều kiện xóa các ảnh cũ đã tồn tại.
 - URL xem ảnh không còn bảo đảm đọc được sau khi ảnh đủ điều kiện dọn và đã bị xóa theo BR-MEDIA-002.
 
+- Tệp công trình là ngoại lệ riêng theo [BR-SITE-007](BR-SITE-007.md): tối đa 10 MB/tệp, tổng 9 tệp/công trình, định dạng theo nhóm, xem/tải theo quyền công trình. Không cấp URL công khai cho tệp gốc hoặc bản xem trước. Chưa định nghĩa purpose/API mới trong BR này.
+
 ## Notes
+
+
+- Người dùng đã chốt bản US/BR trong hội thoại ngày 01/10/2026. System Test đã được cập nhật; xem [bảng độ phủ](../discovery/construction-site-system-test-coverage.md). Chưa chạy các ca; xác nhận hội thoại không thay cho phê duyệt/import trên hệ thống tài liệu.
 
 - Đã xác nhận: dùng BizFly, cấp presign trong backend BMT, phục vụ cả quản trị viên và khách hàng, yêu cầu đăng nhập, JPG/PNG/WebP tối đa 5 MiB, URL xem công khai và cố định.
 - Thời hạn cụ thể của URL upload và cách kiểm tra file thực tế thuộc thiết kế tiếp theo; không xem giới hạn frontend hoặc tham số chưa được thực thi là bằng chứng file đã đạt điều kiện.
 - Đây là thay đổi so với cách một số tài liệu cũ mô tả dịch vụ presign nằm ngoài backend. Cần đối chiếu và cập nhật các tài liệu bị ảnh hưởng trước khi triển khai; bộ US/BR này đã được người dùng chốt.
 - Reviewer và Approver là Tân Trần theo thông tin người dùng cung cấp. Owner là Tân Trần theo xác nhận bổ sung của người dùng; ngày hiệu lực chưa xác định. Người dùng đã chốt nội dung bộ US/BR trong hội thoại ngày 30/09/2026. Status vẫn là Draft vì chưa thực hiện phê duyệt trên hệ thống tài liệu.
+
+- Bổ sung ngày 01/10/2026 theo [STORY-SITE-004](../userstory/STORY-SITE-004.md): thiết kế MEDIA phải bổ sung luồng tệp riêng tư trước khi triển khai công trình mở rộng; không coi luồng ảnh công khai hiện có đã đáp ứng.

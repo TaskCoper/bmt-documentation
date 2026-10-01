@@ -125,6 +125,8 @@ Các yêu cầu khó của thiết kế:
 
 ## Architecture
 
+**Mở rộng hồ sơ ngày 01/10/2026 — thiết kế chưa triển khai:** [TDD-SITE-003](TDD-SITE-003.md) thay contract tạo/sửa/đọc hồ sơ và bổ sung schema nguồn/danh mục; [TDD-SITE-004](TDD-SITE-004.md) quản lý hiện trạng; [TDD-SITE-005](TDD-SITE-005.md) quản lý tệp riêng tư. Các mô tả chỉ nhập tên/địa chỉ, không liên kết dự toán hoặc không có tệp bên dưới là phạm vi lịch sử của bản đầu, không còn là giới hạn hiện hành. Phần tên duy nhất, Customer sở hữu, quyền staff, gói giữ chỗ và lịch sử gói tiếp tục áp dụng. Trường Address đích đổi thành text do server ghép địa chỉ; schema chi tiết và ảnh hưởng snapshot gói ở TDD-SITE-003. Phê duyệt/kiểm thử trước đây không chứng minh phần mở rộng đã được phê duyệt hoặc chạy.
+
 ```mermaid
 flowchart LR
     KH[Khach hang] --> MAPI[ConstructionSiteApi<br/>/me/construction-sites]

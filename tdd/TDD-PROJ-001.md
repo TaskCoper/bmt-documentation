@@ -82,11 +82,13 @@ Hiện trạng code kiểm lại ngày 26/09/2026: thiết kế này đã đư�
 ### Non-goals
 
 - Viết frontend, triển khai code/migration, tạo phong cách mẫu, chạy AI hoặc gửi email thật trong tác vụ thiết kế.
-- Liên kết bản dự toán với Công trình (`ConstructionSite`, thực thể riêng do khách tạo cho gói giám sát, đặc tả ở STORY-SITE-001 và [TDD-SITE-001](TDD-SITE-001.md); STORY-SITE-001/Out of Scope không gắn công trình với bản dự toán) hoặc với gói giám sát; xóa/ngừng dùng danh mục; chuyển bản cũ sang danh mục mới.
+- Liên kết trực tiếp bản dự toán với gói giám sát; xóa/ngừng dùng danh mục; chuyển bản cũ sang danh mục mới. Liên kết nguồn dự toán của Công trình đã được bổ sung tại [TDD-SITE-003](TDD-SITE-003.md), không thuộc phần tạo bản nháp của TDD này.
 - Nhật ký riêng cho thao tác đổi tên bản dự toán (chưa có yêu cầu).
 - Thêm ghi chú riêng, bảng đơn giá, công thức dự toán hoặc quyền AI theo cờ phong cách.
 
 ## Architecture
+
+**Dùng danh mục và đầu vào hoàn tất cho công trình, ngày 01/10/2026 — backend đã triển khai; xem [báo cáo](../discovery/construction-site-implementation.md):** [TDD-SITE-003](TDD-SITE-003.md) dùng cùng identity/revision catalog và FK tới Estimate/EstimateGenerationInput. SITE lấy snapshot của operation Succeeded, không lấy kết quả AI làm diện tích/ngân sách và không dùng lượt. SITE có policy bắt buộc riêng; BR-PROJ-004 vẫn từ chối nhóm bật nhưng danh sách rỗng khi Admin lưu catalog. Danh mục cũ được giữ vì site có thể tham chiếu ngay cả khi không còn Estimate dùng revision đó. Xóa nguồn bị chặn theo [TDD-PROJ-005](TDD-PROJ-005.md). Quyền xem công trình không cấp quyền đọc kết quả dự toán riêng của khách.
 
 **Bổ sung tọa độ ngày 01/10/2026 — đã triển khai backend trên nhánh `feature/estimate-coordinates`:** người dùng đã chốt STORY-PROJ-001/AC-021 đến AC-024, BR-PROJ-003 khoản 10–11 và BR-PROJ-004 khoản 18. Phần này thay điều kiện tạo chỉ bằng tên: frontend gọi bản đồ lấy đủ tọa độ trước POST; đổi địa chỉ phải lấy lại và gửi đủ cặp; chưa có dữ liệu thật cần giữ. Code đã nhận và lưu cặp tọa độ, bổ sung validation, hash, GET và snapshot v2. Migration `20261001093238_EstimateCoordinates` đã kiểm trên PostgreSQL tạm, chưa áp dụng DB dùng chung. FE/bản đồ chưa triển khai trong tác vụ này. Xem [bàn giao tọa độ](../discovery/estimate-coordinates-implementation.md) để biết payload và phạm vi kiểm thử.
 

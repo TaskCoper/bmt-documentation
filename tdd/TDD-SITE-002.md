@@ -76,6 +76,8 @@ Người dùng xác nhận chưa có công trình thật cần giữ, hoặc ch�
 
 ## Architecture
 
+**Mở rộng địa chỉ ngày 01/10/2026 — thiết kế chưa triển khai:** contract hồ sơ đầy đủ nằm ở [TDD-SITE-003](TDD-SITE-003.md). Tỉnh/thành phố, phường/xã và số nhà–đường là đầu vào; Address do server ghép. Khi tạo phải có tọa độ, khi địa chỉ độc lập đổi phải xác định lại cặp tọa độ. Frontend gắn mỗi lần geocoding với phiên bản ba phần địa chỉ: hủy/bỏ phản hồi của địa chỉ cũ, khóa lưu khi đang chờ hoặc lỗi. Với hồ sơ có nguồn, lấy địa chỉ từ snapshot hoàn tất và khóa địa chỉ/tọa độ sau tạo. Các ví dụ body name/address bên dưới là contract cũ, được thay bằng TDD-SITE-003; thuật toán tọa độ và chức năng bán kính hiện có vẫn giữ. Không thêm chức năng tìm kiếm liên quan mới trong đợt này.
+
 ```mermaid
 flowchart LR
     User[Khach nhap dia chi] --> FE[Frontend]

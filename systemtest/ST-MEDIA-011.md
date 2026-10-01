@@ -44,7 +44,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-MEDIA-011 | STORY-MEDIA-001 | Main / Integration boundary | FULL | P1 | Môi trường thử cô lập; dùng dữ liệu có dấu nhận diện test, không dùng bucket thật đang phục vụ khách. Ảnh hợp lệ đã hoàn tất upload và được lưu vào nội dung. | 1. Lưu URL xem<br>2. Đợi hoặc điều khiển thời gian thử tới sau hạn URL upload<br>3. Mở URL xem bằng client không có cookie | Ảnh có nội dung/hash đã biết; không đi qua cache khi kiểm tra origin. | URL xem không đổi và vẫn đọc được đúng ảnh khi URL upload đã hết hạn. | STORY-MEDIA-001/AC-004<br>BR-MEDIA-001/Then | URL xem không hết hạn theo URL upload | Tân Trần | Draft |
+| ST-MEDIA-011 | STORY-MEDIA-001 | Main / Integration boundary | FULL | P1 | Môi trường thử cô lập; dùng dữ liệu có dấu nhận diện test, không dùng bucket thật đang phục vụ khách. Ảnh hợp lệ đã hoàn tất upload và được lưu vào nội dung. Ảnh thuộc purpose công khai hiện có (Image), không phải bản vẽ/ảnh hiện trạng công trình theo BR-SITE-007. | 1. Lưu URL xem<br>2. Đợi hoặc điều khiển thời gian thử tới sau hạn URL upload<br>3. Mở URL xem bằng client không có cookie | Ảnh có nội dung/hash đã biết; không đi qua cache khi kiểm tra origin. | URL xem không đổi và vẫn đọc được đúng ảnh khi URL upload đã hết hạn. | STORY-MEDIA-001/AC-004<br>BR-MEDIA-001/Then | URL xem không hết hạn theo URL upload | Tân Trần | Draft |
 
 ## TEST_LINKS
 

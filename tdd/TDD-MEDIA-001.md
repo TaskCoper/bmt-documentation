@@ -76,6 +76,8 @@ Code Taskcoper có `GET /api/v1/storages/presigned-url`, nhận key từ client,
 
 ## Architecture
 
+**Ngoại lệ SITE ngày 01/10/2026 — backend đã triển khai; xem [báo cáo](../discovery/construction-site-implementation.md):** [TDD-SITE-005](TDD-SITE-005.md) thêm SiteConditionPhoto/SiteDrawing, tối đa 10.000.000 byte, private staging và private final `media/site-private/`. Dùng lại MediaUpload/MediaObject/lease qua route SITE có binding; generic MEDIA không nhận hoặc complete/read ticket SITE. Các mô tả public final/URL cố định trong tài liệu này chỉ tiếp tục áp dụng cho purpose công khai. Private SITE không có publicUrl; tải qua API kiểm quyền SITE mỗi request. URL resolver phải loại prefix riêng tư ở mọi module. Bổ sung source ConstructionSiteAttachment vào registry/reconciliation và FK attachment qua UNIQUE MediaObject(SourceUploadId,Id) đã có theo TDD-SITE-005. Cleanup tự động hiện tại giữ mọi final thuộc purpose/prefix SITE, kể cả ảnh; không mở rộng quy tắc 24 giờ sang bản vẽ. Stage dùng vòng đời MEDIA hiện có. Phải nâng registry source version và đối soát trước khi mở cleanup trở lại; chưa kiểm cấu hình private prefix trên bucket thật trong tác vụ tài liệu này.
+
 **Tích hợp upload thư viện theo section — đã chốt và triển khai backend ngày 01/10/2026**
 
 Yêu cầu BR-LIB-001 khoản 18 bắt buộc có section trước upload, nên thư viện là ngoại lệ của luồng generic “upload ảnh trước rồi gửi URL vào nghiệp vụ”. Tất cả file LIB mới phải được cấp ticket qua route theo section tại [TDD-LIB-001/Internal API](TDD-LIB-001.md#internal-api). Các purpose và route của module khác giữ hành vi đang có.

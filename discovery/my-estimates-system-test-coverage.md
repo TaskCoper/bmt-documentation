@@ -1,5 +1,8 @@
 # System Test cho danh sách và xóa dự toán của tôi
 
+> Cập nhật 01/10/2026: điều kiện xóa dự toán có bổ sung trường hợp đang là nguồn của công trình. Xem [độ phủ hồ sơ công trình](construction-site-system-test-coverage.md) cho ST-PROJ-110–114 và điều chỉnh dữ liệu nền của ST-PROJ-093–109. Các hash và nhận định tại mốc soạn ban đầu bên dưới được giữ làm lịch sử.
+
+
 Người dùng xác nhận **“chốt”** trong hội thoại ngày 30/09/2026 cho STORY-PROJ-006, STORY-PROJ-007, BR-PROJ-008, BR-PROJ-009 và phần bổ sung về bản đã xóa trong BR-PROJ-006, BR-PROJ-007, BR-SUB-007. Đây là xác nhận nghiệp vụ trong hội thoại, không có approvalId hoặc bằng chứng import/publish/phê duyệt trên Document First.
 
 Đã soạn **32 đặc tả ST-PROJ-078–109**: 15 ca cho danh sách và 17 ca cho xóa nhiều. Mỗi file có một ca, đúng 13 cột, Trace to khớp TEST_LINKS. Các ca có liên kết tới **22 AC, 2 Main Flow, 6 Alternative Flow và 7 Exception Flow** của hai Story. Hai nhóm Non-Functional được đối chiếu ở phần dưới. Đây là độ phủ đặc tả và liên kết, không phải độ phủ mã hoặc kết quả Pass.
