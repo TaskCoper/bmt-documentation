@@ -446,7 +446,7 @@ Không còn mã InvalidAsset (422) và UploadTooLarge (413): backend không nh�
 - **imageUrl / inputImageUrl** — URL https cố định, không hết hạn, của tệp do dịch vụ presigned URL trả sau khi frontend upload xong. Backend lưu nguyên chuỗi; kiểm URL tuyệt đối dùng https, có host, không khoảng trắng, tối đa 2048 ký tự, và URL mới phải có tên máy chủ khớp chính xác một phần tử của `UploadedFileOption__AllowedHosts` (không phân biệt hoa thường, không nhận tên miền con).
 - **code (tỉnh) / code (xã)** — Số nguyên dương của nguồn, ví dụ Hà Nội là 1, Phường Ba Đình là 4. Backend lưu dạng chuỗi số thập phân (`"1"`, `"4"`) vào `ProvinceCode`/`WardCode`.
 - **name** — Tên đầy đủ kèm cấp, ví dụ "Thành phố Hà Nội", "Phường Ba Đình". Backend lưu vào `ProvinceName`/`WardName` lúc xác minh.
-- **wards[].province_code** — Mã tỉnh chứa xã. Backend kiểm trường này bằng mã của tỉnh bao ngoài; lệch thì bỏ cả lần tải.
+- **wards[].province_code** — Trường tùy chọn. Quan hệ tỉnh–xã lấy từ tỉnh bao ngoài chứa mảng `wards`; phản hồi `?depth=2` kiểm tra ngày 01/10/2026 không có trường này. Khi trường thiếu hoặc NULL, vẫn nhận xã thuộc tỉnh bao ngoài. Nếu có giá trị thì phải bằng mã tỉnh bao ngoài; lệch, kể cả 0 hoặc số âm, thì bỏ cả lần tải.
 - **datasetVersion** — Không có trong API. Backend tính từ nội dung: `pov2-` cộng 16 ký tự hex đầu của SHA-256 danh sách mã và tên tỉnh/xã đã sắp theo mã. Dùng để biết lựa chọn đã lưu thuộc bộ dữ liệu nào và phát hiện dữ liệu nguồn đã đổi.
 
 ### Error Handling
@@ -457,6 +457,7 @@ Nguồn địa chỉ: HTTP khác 2xx, quá thời gian chờ, lỗi mạng, JSON
 
 ### Quirks
 
+- Gọi `/api/v2/` không có `depth=2` có thể chỉ trả danh sách tỉnh với `wards: []`. Adapter cần cả tỉnh và xã để xác minh địa chỉ nên luôn gọi `?depth=2`; không dùng phản hồi chỉ có tỉnh làm bộ dữ liệu đầy đủ. Không cần thêm API key cho lần gọi công khai đã kiểm tra ngày 01/10/2026.
 - Ảnh minh họa (JPG/PNG/WebP, tối đa 5 MB) và ảnh đầu vào (JPG/PNG/HEIC, tối đa 10 MB) có quy tắc định dạng/dung lượng khác nhau; frontend áp đúng quy tắc cho từng loại. Backend dùng chung một phép kiểm URL https cho cả hai.
 - Backend không kiểm nội dung tệp ở URL, nên không chứng minh được tệp thực sự là ảnh hợp lệ; đây là hệ quả đã chấp nhận của quyết định ngày 26/09/2026.
 - provinces.open-api.vn không công bố số phiên bản bộ dữ liệu, thời điểm cập nhật hay điều khoản SLA trên trang tài liệu (kiểm ngày 26/09/2026); vì vậy phiên bản do backend tự tính. Phản hồi có `cache-control: s-maxage=30`, không dùng để quyết định thời gian lưu. Trọn bộ `?depth=2` khoảng 600 KB, 34 tỉnh và 3.321 xã tại thời điểm kiểm.
