@@ -73,6 +73,7 @@ Người dùng chọn ảnh để sử dụng trong một chức năng của BMT
 5. Frontend PUT vào URL đã cấp rồi gọi complete. Chỉ khi state=Completed, frontend lấy fileUrl HTTPS cố định để dùng trong hồ sơ.
 6. Frontend gửi URL ảnh vào API nghiệp vụ tương ứng.
 7. API nghiệp vụ kiểm tra quyền và điều kiện lưu của chức năng đó trước khi lưu URL. Có quyền upload không đồng nghĩa có quyền sửa nội dung.
+8. Khi CDN đã được cấu hình và bật, hệ thống lưu URL CDN vào cột URL hiện có; API đọc nguyên giá trị đã lưu để frontend hiển thị. URL ảnh cũ được chuyển một lần bằng migration khi triển khai; src của ảnh trong bài cũng được lưu lại. URL gốc và CDN vẫn chỉ cùng một ảnh.
 
 ### Alternative Flow
 
@@ -148,7 +149,7 @@ Upload thành công nhưng API nghiệp vụ từ chối lưu nội dung hoặc 
 - **Given**: Ảnh thuộc luồng công khai BR-MEDIA-001 đã upload thành công và chưa bị dọn khỏi kho; không phải tệp công trình BR-SITE-007.
 - **When**: Một người có URL xem ảnh mở URL đó.
 - **Then**: Người đó xem được ảnh mà không cần đăng nhập BMT.
-- **And**: URL xem ảnh cố định, không hết hạn theo thời hạn của URL upload.
+- **And**: URL xem ảnh cố định, không hết hạn theo thời hạn của URL upload. Khi có cấu hình và bật CDN, ảnh công khai được trả qua CDN với đường dẫn giữ nguyên, ảnh mới lưu trực tiếp và ảnh cũ chuyển bằng migration khi triển khai, không đổi URL lúc xuất JSON; không chuyển URL upload có chữ ký hoặc tệp riêng tư.
 
 #### AC-005
 

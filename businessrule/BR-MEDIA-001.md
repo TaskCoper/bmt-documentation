@@ -65,6 +65,7 @@ Backend BMT cấp presigned URL qua BizFly cho mọi tài khoản đã đăng nh
 5. API nghiệp vụ vẫn kiểm tra quyền và các điều kiện lưu hiện có. Có quyền upload không cấp thêm quyền tạo hoặc sửa bài viết, dự toán hay nội dung khác.
 6. Khi thay ảnh, chỉ thay URL đã lưu sau khi API nghiệp vụ lưu thành công. Thao tác lưu thất bại không làm mất liên kết tới ảnh cũ.
 7. Ảnh upload không được dùng hoặc ảnh đã bị gỡ/thay được xét dọn theo BR-MEDIA-002.
+8. Khi đã cấu hình và bật CDN Bizfly, URL ảnh công khai được lưu bằng domain CDN ngay trong cột URL hiện có, giữ nguyên đường dẫn tới ảnh. Ảnh cũ trong các cột trình bày và img[src] của bài viết được chuyển bằng migration khi triển khai; API trả nguyên giá trị đã lưu. Không thêm cột URL thứ hai hoặc đổi domain khi xuất JSON. URL gốc và URL CDN của cùng ảnh vẫn được nhận khi lưu nội dung. Không chuyển URL upload có chữ ký, file riêng tư hoặc route tải có kiểm quyền sang URL CDN công khai.
 
 ## Except
 
@@ -75,6 +76,7 @@ Backend BMT cấp presigned URL qua BizFly cho mọi tài khoản đã đăng nh
 
 ## Notes
 
+- Người dùng cung cấp domain CDN `bmt-cdn-vnzdna.cdn.vccloud.vn` và yêu cầu bắt đầu triển khai phương án cho ảnh cũ lẫn ảnh mới trong hội thoại ngày 01/10/2026. Người dùng sau đó chốt thay URL trong cột hiện có và chuyển dữ liệu cũ bằng migration khi triển khai. Không thay chính sách phân quyền hoặc thời gian dọn ảnh.
 
 - Người dùng đã chốt bản US/BR trong hội thoại ngày 01/10/2026. System Test đã được cập nhật; xem [bảng độ phủ](../discovery/construction-site-system-test-coverage.md). Chưa chạy các ca; xác nhận hội thoại không thay cho phê duyệt/import trên hệ thống tài liệu.
 
