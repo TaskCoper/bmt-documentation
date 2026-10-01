@@ -4,7 +4,31 @@ Ngày kiểm tra: 01/10/2026. Mã nguồn đã được commit tại `5e396fc` v
 
 Backend đã nhận, kiểm tra và lưu `latitude` (vĩ độ), `longitude` (kinh độ) theo [TDD-PROJ-001](../tdd/TDD-PROJ-001.md) và [TDD-PROJ-002](../tdd/TDD-PROJ-002.md). Người dùng đã xác nhận hai trường bắt buộc; FE lấy từ bản đồ trước khi tạo và lấy lại khi đổi địa chỉ. Chưa có dữ liệu thật cần giữ.
 
-## Contract dành cho FE
+## Điều chỉnh tạo nhanh — 01/10/2026
+
+Theo yêu cầu mới, `POST /api/v1/estimates` chỉ cần body `{"name":"Nhà của tôi"}`; giữ xác thực và `Idempotency-Key`. Bỏ cả tọa độ hoặc gửi cả hai null đều được; nếu gửi số thì cần đủ cặp hợp lệ. `additionalProp1/2/3` trong ví dụ Swagger là trường lạ, cần bỏ khỏi request.
+
+Backend lưu tọa độ chưa có là NULL, GET trả null và báo thiếu hai trường trong `missingFields`. Bản này vẫn tự lưu mô tả, diện tích hoặc các trường khác khi không đổi địa chỉ. Khi nhập/đổi địa chỉ vẫn phải gửi đủ cặp và khai báo trong `changedFields`; trước AI phải có đủ tọa độ. Không tự điền (0,0), không xóa tọa độ của bản cũ.
+
+Migration mới `20261001105408_OptionalEstimateCoordinates` bỏ NOT NULL, giữ CHECK miền và thêm `CK_Estimate_CoordinatePair`. Up giữ nguyên dữ liệu; Down dừng nếu còn bản chưa có tọa độ. Chỉ chạy migration trong PostgreSQL tạm, chưa triển khai API hoặc áp migration lên môi trường dùng chung. Khi triển khai, dừng writer cũ, áp migration rồi chạy toàn bộ API/worker mới trước khi mở tạo nhanh; code cũ không đọc được các dòng NULL.
+
+Kiểm chứng bản sửa bằng `dotnet test --no-restore`, bộ lọc dự toán: application 367 đạt; API 69 đạt; PostgreSQL/migration 27 đạt; không lỗi, không bỏ qua. Log local lần lượt là `/private/tmp/bmt-quick-create-app.log`, `/private/tmp/bmt-quick-create-api.log`, `/private/tmp/bmt-quick-create-postgres.log`. API test dùng HTTP binding và validator thật với spy ở bước ghi; PostgreSQL test gọi handler thật với store/transaction thật, giả lập quyền ghi. Chưa chạy browser hoặc HTTP tới API đang triển khai. Không coi các ca này là E2E toàn hệ thống.
+
+## Mô tả dùng chung khi tạo nhanh — 01/10/2026
+
+Theo xác nhận của người dùng, tạo nhanh nhận `description` tùy chọn, dùng chung Mô tả chi tiết hiện có. Ví dụ body:
+
+```json
+{"name":"Nhà của tôi","description":"Nhà hai tầng, có sân"}
+```
+
+Không gửi `description` hoặc gửi null đều được. Mô tả tối đa 500 Unicode scalar; backend giữ nguyên nội dung và lưu vào `Estimate.Description`. GET trả qua `input.description`; PUT /input sửa cùng trường. Không thêm cột hay migration cho mô tả. Nội dung quá dài trả 422 `InvalidEstimateInput` tại `description`; sai kiểu JSON trả 400.
+
+Mô tả tham gia kiểm tra `Idempotency-Key`: cùng key nhưng đổi mô tả trả 409; gửi lại yêu cầu tạo ban đầu không ghi đè mô tả đã sửa. Yêu cầu không có mô tả giữ cách tính hash cũ để replay được receipt trước thay đổi.
+
+Đã chạy `dotnet test --no-restore`: application 370 đạt (`~estimate`), API 75 đạt (`~Estimate`), PostgreSQL/migration 28 đạt (`~EstimateCoordinate|~IdempotentMigrationScriptTests`); tổng 473, không lỗi hoặc bỏ qua. Log: `/private/tmp/bmt-description-app.log`, `/private/tmp/bmt-description-api.log`, `/private/tmp/bmt-description-postgres.log`. Các ca mới kiểm Unicode, HTTP binding/validation, tạo–đọc–sửa cùng trường, replay sau khi sửa và receipt cũ. Phạm vi HTTP dùng spy ở bước ghi; PostgreSQL gọi handler/store/transaction thật với quyền ghi giả lập. Chưa chạy browser hoặc API đang triển khai. Backend tạo nhanh và mô tả đã đẩy lên `develop` tại commit `fe85d5c`, sau khi ghép với `689e36e`. Đã chạy lại trên bản ghép: application 370, API 75 và PostgreSQL/migration 28 test đạt; không lỗi hoặc bỏ qua. Log tương ứng: `/private/tmp/bmt-quick-push-app.log`, `/private/tmp/bmt-quick-push-api.log`, `/private/tmp/bmt-quick-push-integration.log`. Model đích của migration đã giữ đầy đủ schema công trình mới nhất. Push không xác nhận deploy hoặc migration trên Dev đã hoàn tất.
+
+## Contract dành cho FE — lịch sử trước điều chỉnh tạo nhanh
 
 Tạo bằng `POST /api/v1/estimates`, kèm xác thực và header `Idempotency-Key` như hiện tại:
 

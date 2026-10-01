@@ -62,14 +62,14 @@ Hệ thống kiểm tra tính đầy đủ của thông tin bản dự toán dù
 4. Không có cả ảnh lẫn mô tả thì thông tin chưa đủ để gửi AI; yêu cầu khách bổ sung ít nhất một trong hai.
 5. Đáp ứng điều kiện ảnh/mô tả không thay thế yêu cầu về diện tích hoặc các trường đầu vào khác được chốt riêng.
 6. Khi có ảnh, chỉ nhận tối đa một ảnh JPG, PNG hoặc WebP, không vượt quá 5 MiB (5.242.880 byte) khi upload mới theo BR-MEDIA-001. Ảnh ngoài định dạng hoặc vượt giới hạn không được coi là ảnh đầu vào hợp lệ.
-7. Khi có Mô tả chi tiết, nội dung không vượt quá 500 ký tự. Nội dung vượt giới hạn không được coi là mô tả đầu vào hợp lệ.
+7. Khi có Mô tả chi tiết, nội dung không vượt quá 500 ký tự. Tạo nhanh có thể nhận mô tả tùy chọn, dùng chung trường này với biểu mẫu đầu vào và AI. Giữ nguyên nội dung đã nhập; mô tả vượt giới hạn bị từ chối cả khi tạo và tự lưu.
 
 8. Khi thay ảnh đầu vào, giữ ảnh cũ đang gắn với bản dự toán cho đến khi ảnh mới hợp lệ, tải lên và lưu thay thế thành công. Nếu tải hoặc lưu ảnh mới thất bại, ảnh cũ vẫn là ảnh đầu vào đã lưu; không báo đã thay ảnh thành công.
 9. Sau khi thay thành công, bản dự toán chỉ có một ảnh đầu vào là ảnh mới. Việc xử lý tệp tải tạm không có nghĩa cho phép nhiều ảnh đầu vào.
 
 ## Except
 
-Được tạo dự toán với tên và đủ kinh độ, vĩ độ, đồng thời tự lưu tiến độ khi chưa có ảnh hoặc mô tả theo BR-PROJ-003. Điều kiện có ít nhất một trong hai áp dụng trước khi gửi AI, không chặn lưu thông tin chưa đầy đủ.
+Được tạo nhanh dự toán chỉ với tên và tự lưu tiến độ khi chưa có tọa độ, ảnh hoặc mô tả theo BR-PROJ-003. Điều kiện có ít nhất một trong hai áp dụng trước khi gửi AI, không chặn lưu thông tin chưa đầy đủ.
 
 ## Notes
 

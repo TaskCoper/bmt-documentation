@@ -60,7 +60,7 @@ Admin quản lý loại công trình và cấu hình của loại đó; khách n
 2. Admin bật/tắt riêng việc cho chọn số tầng và việc cho chọn Có tum/Không tum theo loại công trình. Khi bật chọn tầng, Admin cấu hình các số tầng được chọn cho loại đó; khách chọn trong danh sách áp dụng. Phân biệt cấu hình cho phép chọn tum với giá trị có/không tum mà khách chọn cho bản dự toán.
 3. Tách thông tin phong cách kiến trúc và phong cách nội thất. Admin được thêm/sửa cả hai danh mục, gồm tên, ảnh minh họa và gán các phong cách được chọn cho từng loại công trình. Khách chọn trong danh mục đúng nhóm và đúng loại. Không tự sao chép một giá trị phong cách chung thành cả hai lựa chọn.
 4. Admin cấu hình theo từng loại công trình việc cho chọn phong cách kiến trúc và phong cách nội thất. Khi một nhóm lựa chọn không được bật, khách không phải chọn phong cách cho nhóm đó; AI vẫn trả đầy đủ kết quả, không loại phần kiến trúc hoặc nội thất vì nhóm lựa chọn bị tắt.
-5. Địa chỉ vẫn gồm tỉnh/thành phố, xã/phường và địa chỉ chi tiết. Xã/phường phải thuộc tỉnh/thành đã chọn. Bản dự toán lưu thêm kinh độ và vĩ độ do frontend lấy từ dịch vụ bản đồ; cả hai bắt buộc ngay khi tạo theo BR-PROJ-003 khoản 10.
+5. Địa chỉ vẫn gồm tỉnh/thành phố, xã/phường và địa chỉ chi tiết. Xã/phường phải thuộc tỉnh/thành đã chọn. Bản dự toán lưu thêm kinh độ và vĩ độ do frontend lấy từ dịch vụ bản đồ; tạo nhanh được để trống cả cặp theo BR-PROJ-003 khoản 10, nhưng trước khi gửi AI phải có đủ tọa độ hợp lệ.
 6. Gói hoàn thiện và nội thất vẫn gồm Cơ bản, Tiêu chuẩn và VIP. Đây là đầu vào thiết kế, không phải gói đăng ký cấp quyền hoặc lượt sử dụng.
 7. Trước khi gửi AI, yêu cầu đủ địa chỉ, loại công trình và gói hoàn thiện/nội thất; lựa chọn phong cách, số tầng và tum cần khớp cấu hình áp dụng. Mỗi nhóm phong cách được bật phải có đúng một lựa chọn hợp lệ trước khi gửi AI; bật cả hai nhóm thì chọn một phong cách kiến trúc và một phong cách nội thất. Nhóm bị tắt không yêu cầu khách nhập phong cách.
 8. Cấu hình danh mục không thay thế quyền sở hữu bản dự toán, điều kiện gói/lượt hoặc quy tắc khóa đầu vào khi AI đang chạy.
@@ -84,13 +84,13 @@ Admin quản lý loại công trình và cấu hình của loại đó; khách n
 
 ## Except
 
-Bản nháp được phép chưa chọn đủ thông tin theo BR-PROJ-003, nhưng không được thiếu kinh độ hoặc vĩ độ khi tạo hay khi đổi địa chỉ. Việc giữ cấu hình cũ không cho phép sửa đầu vào khi AI đang chạy hoặc thay thế kết quả thành công; BR-PROJ-005 vẫn áp dụng.
+Bản nháp được phép chưa chọn đủ thông tin theo BR-PROJ-003, kể cả chưa có tọa độ ở bước tạo nhanh; khi đổi địa chỉ vẫn phải gửi đủ kinh độ và vĩ độ. Việc giữ cấu hình cũ không cho phép sửa đầu vào khi AI đang chạy hoặc thay thế kết quả thành công; BR-PROJ-005 vẫn áp dụng.
 
 ## Notes
 
 - Người dùng đã chốt bản US/BR trong hội thoại ngày 01/10/2026. System Test đã được cập nhật; xem [bảng độ phủ](../discovery/construction-site-system-test-coverage.md). Chưa chạy các ca; xác nhận hội thoại không thay cho phê duyệt/import trên hệ thống tài liệu.
 
-- Phần tọa độ bổ sung ngày 01/10/2026 đã được người dùng chốt cùng STORY-PROJ-001 và BR-PROJ-003: frontend lấy đủ tọa độ từ bản đồ trước khi tạo dự toán; đổi địa chỉ phải gửi lại đủ cặp tọa độ; chưa có dữ liệu thật cần giữ. System Test và TDD đã được cập nhật; backend đã lên `develop` tại commit `5e396fc`. Phạm vi kiểm thử và phần chưa kiểm được ghi trong [bàn giao tọa độ](../discovery/estimate-coordinates-implementation.md). Xác nhận hội thoại không thay cho phê duyệt/import trên hệ thống tài liệu.
+- Phần tọa độ bổ sung ngày 01/10/2026 đã được người dùng chốt cùng STORY-PROJ-001 và BR-PROJ-003: yêu cầu lấy tọa độ trước khi tạo đã được thay bằng tạo nhanh chỉ cần tên ở BR-PROJ-003; đổi địa chỉ phải gửi lại đủ cặp tọa độ; chưa có dữ liệu thật cần giữ. System Test và TDD đã được cập nhật; backend đã lên `develop` tại commit `5e396fc`. Phạm vi kiểm thử và phần chưa kiểm được ghi trong [bàn giao tọa độ](../discovery/estimate-coordinates-implementation.md). Xác nhận hội thoại không thay cho phê duyệt/import trên hệ thống tài liệu.
 
 - Hiện trạng trang mẫu: Nhà phố, Villa/Biệt thự, Nhà mái, Nhà vườn/Nhà cấp 4 có chọn tầng và tum; Căn hộ không có. Đây là cấu hình đang quan sát, không phải ngoại lệ phải viết cố định theo tên Căn hộ cho mọi phiên bản.
 - Danh sách tầng trên trang mẫu là Trệt đến Trệt + 4 lầu. Người dùng đã chốt Admin được cấu hình các số tầng theo loại; danh sách mẫu không còn là giới hạn cố định. Chưa tự đặt số tầng tối đa nghiệp vụ mới.
