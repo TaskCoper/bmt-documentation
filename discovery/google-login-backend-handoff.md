@@ -1,8 +1,8 @@
 # Bàn giao backend đăng nhập Google
 
-Backend đã có luồng Google cho khách hàng và API riêng cho web, Android/iOS. Tính năng mặc định tắt. Phạm vi lần này là mã nguồn backend, migration và kiểm thử cục bộ; chưa cấu hình Google Cloud, tích hợp giao diện hay triển khai dịch vụ.
+Backend đã có luồng Google cho khách hàng và API riêng cho web, Android/iOS. Tính năng mặc định tắt. Phạm vi lần này là mã nguồn backend, migration và kiểm thử cục bộ; chưa kiểm chứng đăng nhập Google thật qua giao diện và dịch vụ đã triển khai.
 
-Hiện đang chờ khách hàng cung cấp các biến cấu hình Google. Theo yêu cầu ngày 01/10/2026, mã nguồn được đẩy lên backend `develop` và tài liệu lên `main` trước; giữ `GOOGLE_AUTH_ENABLED=false` cho đến khi có cấu hình và hoàn tất kiểm tra môi trường.
+Người dùng đã tạo OAuth Web Client BMT Dev trong project `create-510207` và điền cấu hình vào env cục bộ; chọn triển khai web trước, bỏ hai return URI mobile khỏi env cục bộ. Android sẽ dùng Google Sign-In native; API nhận bằng chứng native chưa được triển khai và không thuộc lần đẩy mã này. Chưa xác nhận đăng nhập Google thành công trên môi trường dev. Theo yêu cầu ngày 01/10/2026, mã nguồn được đẩy lên backend `develop` và tài liệu lên `main` trước; giữ `GOOGLE_AUTH_ENABLED=false` cho đến khi có cấu hình và hoàn tất kiểm tra môi trường.
 
 Ngày cập nhật: 01/10/2026. Nghiệp vụ và TDD đã được người dùng chốt trong hội thoại; Reviewer/Approver: Tân Trần. Căn cứ: [STORY-AUTH-002](../userstory/STORY-AUTH-002.md), [TDD-AUTH-003](../tdd/TDD-AUTH-003.md), BR-AUTH-003–007 và các phần phiên đăng nhập trong TDD-AUTH-001/002.
 
@@ -43,7 +43,8 @@ Khi chạy trực tiếp, dùng biến môi trường dạng `GoogleAuthOptions_
 | `Enabled` | Mặc định false; route Google trả 503 khi tắt. |
 | `ClientId`, `ClientSecret` | OAuth Web Client của Google; backend đổi authorization code. |
 | `CallbackUri` | URI HTTPS callback API, khớp chính xác trong Google Cloud. |
-| `WebReturnUri`, `AndroidReturnUri`, `IosReturnUri` | URI HTTPS cố định, không userinfo/query/fragment. |
+| `WebReturnUri` | Bắt buộc khi bật Google. URI HTTPS cố định, không userinfo/query/fragment. |
+| `AndroidReturnUri`, `IosReturnUri` | Có thể để trống độc lập khi chưa bật nền tảng đó. Nếu điền, phải là URI HTTPS cố định, không userinfo/query/fragment. Start từ nền tảng chưa cấu hình trả 503 `GoogleSignInUnavailable` trước quota và tạo attempt. |
 | `EmailCodeKeyId`, `EmailCodeKeys__<id>` | HMAC key hiện dùng và tập khóa base64, mỗi khóa ít nhất 32 byte ngẫu nhiên, tách khỏi khóa JWT. |
 | `KeyRingPath` | Thư mục lưu Data Protection keyring bền vững; compose dùng `/app/data-protection-keys`. |
 | `CertificatePath`, `CertificatePassword` | Certificate có private key; compose mount `/run/secrets/bmt-auth/keyring.pfx` từ `AUTH_SECRETS_DIRECTORY`. |
