@@ -60,7 +60,7 @@ Admin quản lý loại công trình và cấu hình của loại đó; khách n
 2. Admin bật/tắt riêng việc cho chọn số tầng và việc cho chọn Có tum/Không tum theo loại công trình. Khi bật chọn tầng, Admin cấu hình các số tầng được chọn cho loại đó; khách chọn trong danh sách áp dụng. Phân biệt cấu hình cho phép chọn tum với giá trị có/không tum mà khách chọn cho bản dự toán.
 3. Tách thông tin phong cách kiến trúc và phong cách nội thất. Admin được thêm/sửa cả hai danh mục, gồm tên, ảnh minh họa và gán các phong cách được chọn cho từng loại công trình. Khách chọn trong danh mục đúng nhóm và đúng loại. Không tự sao chép một giá trị phong cách chung thành cả hai lựa chọn.
 4. Admin cấu hình theo từng loại công trình việc cho chọn phong cách kiến trúc và phong cách nội thất. Khi một nhóm lựa chọn không được bật, khách không phải chọn phong cách cho nhóm đó; AI vẫn trả đầy đủ kết quả, không loại phần kiến trúc hoặc nội thất vì nhóm lựa chọn bị tắt.
-5. Địa chỉ vẫn gồm tỉnh/thành phố, xã/phường và địa chỉ chi tiết. Xã/phường phải thuộc tỉnh/thành đã chọn.
+5. Địa chỉ vẫn gồm tỉnh/thành phố, xã/phường và địa chỉ chi tiết. Xã/phường phải thuộc tỉnh/thành đã chọn. Bản dự toán lưu thêm kinh độ và vĩ độ do frontend lấy từ dịch vụ bản đồ; cả hai bắt buộc ngay khi tạo theo BR-PROJ-003 khoản 10.
 6. Gói hoàn thiện và nội thất vẫn gồm Cơ bản, Tiêu chuẩn và VIP. Đây là đầu vào thiết kế, không phải gói đăng ký cấp quyền hoặc lượt sử dụng.
 7. Trước khi gửi AI, yêu cầu đủ địa chỉ, loại công trình và gói hoàn thiện/nội thất; lựa chọn phong cách, số tầng và tum cần khớp cấu hình áp dụng. Mỗi nhóm phong cách được bật phải có đúng một lựa chọn hợp lệ trước khi gửi AI; bật cả hai nhóm thì chọn một phong cách kiến trúc và một phong cách nội thất. Nhóm bị tắt không yêu cầu khách nhập phong cách.
 8. Cấu hình danh mục không thay thế quyền sở hữu bản dự toán, điều kiện gói/lượt hoặc quy tắc khóa đầu vào khi AI đang chạy.
@@ -68,7 +68,7 @@ Admin quản lý loại công trình và cấu hình của loại đó; khách n
 10. Khi mở lại, lưu tiếp hoặc gửi/thử lại AI trên bản dự toán cũ, kiểm tra các lựa chọn theo cấu hình của bản dự toán đó. Các điều kiện quyền, gói/lượt và khóa sửa vẫn được kiểm tra theo quy tắc hiện hành; giữ cấu hình danh mục không có nghĩa giữ quyền hoặc lượt cũ.
 
 11. Khi khách đổi loại công trình trong bản nháp, giữ các lựa chọn phong cách kiến trúc, phong cách nội thất, số tầng và tum còn hợp lệ với loại mới theo cấu hình áp dụng cho bản dự toán. Xóa lựa chọn không còn phù hợp, gồm giá trị của trường không áp dụng cho loại mới; yêu cầu chọn lại phần bắt buộc trước khi gửi AI. Không tự chuyển phong cách giữa hai nhóm. Giữ nguyên diện tích, địa chỉ, ảnh và mô tả.
-12. Khi khách đổi tỉnh/thành, xóa xã/phường đã chọn và yêu cầu chọn lại xã/phường thuộc tỉnh/thành mới trước khi gửi AI. Giữ địa chỉ chi tiết để khách tự sửa; không tự xóa hoặc viết lại địa chỉ chi tiết.
+12. Khi khách đổi tỉnh/thành, xóa xã/phường đã chọn và yêu cầu chọn lại xã/phường thuộc tỉnh/thành mới trước khi gửi AI. Giữ địa chỉ chi tiết để khách tự sửa; không tự xóa hoặc viết lại địa chỉ chi tiết. Lần lưu thay đổi địa chỉ phải gửi đủ cặp tọa độ do frontend lấy lại từ bản đồ theo khoản 18, kể cả khi bản nháp chưa chọn lại xã/phường.
 
 13. Khi Admin bật chọn tầng, danh sách số tầng phải có ít nhất một lựa chọn. Khi bật nhóm phong cách kiến trúc hoặc nội thất, nhóm đó phải được gán ít nhất một phong cách thuộc đúng nhóm cho loại công trình. Nếu bất kỳ danh sách được bật nào trống, từ chối lưu cấu hình và chỉ rõ danh sách cần bổ sung; không lưu cấu hình không hợp lệ hoặc thay cấu hình đã lưu trước đó. Điều kiện này áp dụng cả khi tạo cấu hình và khi sửa/xóa lựa chọn cuối cùng trong danh sách đang bật.
 
@@ -80,11 +80,15 @@ Admin quản lý loại công trình và cấu hình của loại đó; khách n
 
 17. Tên loại công trình và tên phong cách kiến trúc/nội thất bắt buộc có nội dung sau khi bỏ khoảng trắng đầu/cuối, tối đa 200 ký tự. Không tự cắt ngắn tên vượt giới hạn. Cho phép trùng tên; tên không thay thế mã định danh của từng mục.
 
+18. Khi khách thay đổi tỉnh/thành, xã/phường hoặc địa chỉ chi tiết của bản dự toán, frontend gọi dịch vụ bản đồ lấy lại kinh độ và vĩ độ cho địa chỉ đang sửa, rồi gửi cả hai trong cùng yêu cầu lưu. Backend chỉ lưu khi có đủ cặp tọa độ; lưu địa chỉ và tọa độ cùng nhau. Nếu chưa lấy được đủ tọa độ thì frontend chưa gửi lần lưu thay đổi địa chỉ; yêu cầu trực tiếp thiếu tọa độ bị từ chối và giữ nguyên toàn bộ dữ liệu đã lưu. Giá trị tọa độ bản đồ trả về có thể trùng với giá trị cũ; yêu cầu là lấy lại và gửi đủ cặp, không bắt buộc hai con số phải thay đổi.
+
 ## Except
 
-Bản nháp được phép chưa chọn đủ thông tin theo BR-PROJ-003. Việc giữ cấu hình cũ không cho phép sửa đầu vào khi AI đang chạy hoặc thay thế kết quả thành công; BR-PROJ-005 vẫn áp dụng.
+Bản nháp được phép chưa chọn đủ thông tin theo BR-PROJ-003, nhưng không được thiếu kinh độ hoặc vĩ độ khi tạo hay khi đổi địa chỉ. Việc giữ cấu hình cũ không cho phép sửa đầu vào khi AI đang chạy hoặc thay thế kết quả thành công; BR-PROJ-005 vẫn áp dụng.
 
 ## Notes
+
+- Phần tọa độ bổ sung ngày 01/10/2026 đã được người dùng chốt cùng STORY-PROJ-001 và BR-PROJ-003: frontend lấy đủ tọa độ từ bản đồ trước khi tạo dự toán; đổi địa chỉ phải gửi lại đủ cặp tọa độ; chưa có dữ liệu thật cần giữ. System Test và TDD đã được cập nhật; backend đã lên `develop` tại commit `5e396fc`. Phạm vi kiểm thử và phần chưa kiểm được ghi trong [bàn giao tọa độ](../discovery/estimate-coordinates-implementation.md). Xác nhận hội thoại không thay cho phê duyệt/import trên hệ thống tài liệu.
 
 - Hiện trạng trang mẫu: Nhà phố, Villa/Biệt thự, Nhà mái, Nhà vườn/Nhà cấp 4 có chọn tầng và tum; Căn hộ không có. Đây là cấu hình đang quan sát, không phải ngoại lệ phải viết cố định theo tên Căn hộ cho mọi phiên bản.
 - Danh sách tầng trên trang mẫu là Trệt đến Trệt + 4 lầu. Người dùng đã chốt Admin được cấu hình các số tầng theo loại; danh sách mẫu không còn là giới hạn cố định. Chưa tự đặt số tầng tối đa nghiệp vụ mới.

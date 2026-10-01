@@ -66,7 +66,7 @@ Hệ thống kiểm tra tính đầy đủ của thông tin bản dự toán dù
 
 ## Except
 
-Được tạo dự toán bằng tên và tự lưu tiến độ khi chưa nhập diện tích theo BR-PROJ-003. Điều kiện bắt buộc có diện tích áp dụng trước khi gửi AI, không chặn lưu thông tin chưa đầy đủ.
+Được tạo dự toán với tên và đủ kinh độ, vĩ độ, đồng thời tự lưu tiến độ khi chưa nhập diện tích theo BR-PROJ-003. Điều kiện bắt buộc có diện tích áp dụng trước khi gửi AI, không chặn lưu thông tin chưa đầy đủ.
 
 ## Notes
 

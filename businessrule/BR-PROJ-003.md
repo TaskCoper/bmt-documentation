@@ -36,7 +36,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Rule Info
 
-- **Name**: Tạo dự toán khi nhập tên và tự lưu thông tin đang nhập.
+- **Name**: Tạo dự toán với tên, kinh độ, vĩ độ và tự lưu thông tin đang nhập.
 - **Category**: Tạo dự toán — lưu tiến độ
 - **Status**: Draft
 - **Version**:
@@ -44,19 +44,19 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Owner**: [Chưa xác định]
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
-- **Source**: Người dùng chọn trong hội thoại: tạo dự toán khi nhập tên, tự lưu thông tin đang nhập để khách có thể quay lại làm tiếp.
+- **Source**: Người dùng chọn trong hội thoại: tạo dự toán khi nhập tên, tự lưu để quay lại làm tiếp. Ngày 01/10/2026, xác nhận kinh độ, vĩ độ bắt buộc khi tạo; frontend gọi bản đồ lấy đủ tọa độ trước khi gọi API tạo. Đổi địa chỉ phải gửi lại cả hai tọa độ; chưa có dữ liệu thật cần giữ.
 
 ## Statement
 
-Khách nhập tên và thực hiện thao tác tạo dự toán để bắt đầu. Hệ thống tạo dự toán trước khi khách hoàn tất biểu mẫu chi tiết, sau đó tự lưu thông tin đang nhập. Khách có thể mở lại bản dự toán và tiếp tục từ thông tin đã lưu thành công.
+Khách nhập tên để bắt đầu tạo dự toán. Frontend gọi dịch vụ bản đồ để lấy kinh độ và vĩ độ trước khi gọi API tạo, rồi gửi cả hai cùng tên bản dự toán. Backend chỉ tạo khi có đủ hai tọa độ và đáp ứng các điều kiện tạo hiện hành. Hệ thống vẫn cho phép tạo trước khi khách hoàn tất các thông tin thiết kế còn lại, sau đó tự lưu thông tin đang nhập. Khách có thể mở lại bản dự toán và tiếp tục từ thông tin đã lưu thành công.
 
 ## When
 
-Khách tạo dự toán bằng tên hoặc nhập, sửa thông tin đầu vào của bản dự toán đang chuẩn bị gửi AI.
+Khách tạo dự toán với tên và tọa độ do frontend lấy từ dịch vụ bản đồ, hoặc nhập, sửa thông tin đầu vào của bản dự toán đang chuẩn bị gửi AI.
 
 ## Then
 
-1. Tạo dự toán sau thao tác tạo với tên, không đợi đến khi khách bấm Nhận dự toán. Không thêm trường ghi chú riêng; Mô tả chi tiết thuộc biểu mẫu đầu vào theo BR-PROJ-002.
+1. Tạo dự toán sau thao tác tạo với tên và đủ kinh độ, vĩ độ, không đợi đến khi khách bấm Nhận dự toán. Không thêm trường ghi chú riêng; Mô tả chi tiết thuộc biểu mẫu đầu vào theo BR-PROJ-002.
 2. Cho phép tạo dự toán khi chưa có diện tích, ảnh hoặc mô tả thiết kế. Đây là thông tin chưa hoàn tất, chưa đủ điều kiện gửi AI.
 3. Tự lưu các thay đổi đầu vào trong bản dự toán đang chuẩn bị; không yêu cầu khách bấm Lưu nháp cho từng lần lưu.
 4. Khi mở lại bản dự toán, trả thông tin đã lưu thành công để khách nhập tiếp.
@@ -68,12 +68,19 @@ Khách tạo dự toán bằng tên hoặc nhập, sửa thông tin đầu vào 
 
 9. Tên bản dự toán bắt buộc có nội dung, tối đa 200 ký tự sau khi bỏ khoảng trắng đầu/cuối. Lưu tên sau khi bỏ khoảng trắng đầu/cuối; tên rỗng, chỉ có khoảng trắng hoặc vượt 200 ký tự sau bước này không hợp lệ. Từ chối tạo hoặc lưu tên không hợp lệ; không tự cắt ngắn tên để chấp nhận, giữ dữ liệu đã lưu khi yêu cầu sửa bị từ chối. Đổi tên bản dự toán đã có chỉ cần quyền sở hữu và tên hợp lệ; không phụ thuộc gói, lượt hay khóa đầu vào, theo BR-SUB-007 khoản 11.
 
+10. Kinh độ và vĩ độ là hai trường bắt buộc trong yêu cầu tạo dự toán. Frontend gọi dịch vụ bản đồ lấy đủ cả hai trước khi gọi API tạo. Backend lưu cả hai cùng bản dự toán; nếu thiếu một hoặc cả hai, kể cả gửi giá trị rỗng, từ chối yêu cầu và không tạo bản dự toán. Nếu frontend chưa lấy được đủ tọa độ thì chưa gọi API tạo; không có ngoại lệ tạo trước rồi bổ sung sau.
+
+11. Khi khách đổi địa chỉ, frontend lấy lại kinh độ và vĩ độ từ dịch vụ bản đồ, gửi đủ cả hai cùng yêu cầu lưu địa chỉ theo BR-PROJ-004 khoản 18. Backend lưu địa chỉ và tọa độ cùng nhau; thiếu một hoặc cả hai tọa độ thì từ chối yêu cầu, giữ nguyên dữ liệu đã lưu. Việc sửa vẫn phải đáp ứng điều kiện quyền/gói/lượt và khóa đầu vào hiện hành.
+
 ## Except
 
 Không hỗ trợ khôi phục phần chưa lưu sau khi đóng hoặc tải lại trang; khi mở lại chỉ trả dữ liệu backend đã lưu thành công. Không tự thử lại yêu cầu bị từ chối do không đủ quyền/gói/lượt theo BR-SUB-007, hoặc dùng thử lại để vượt qua khóa đầu vào theo BR-PROJ-005. Lỗi dữ liệu cần được sửa trước khi yêu cầu lưu lại.
 
 ## Notes
 
+- **Đã xác nhận ngày 01/10/2026**: bắt buộc đủ kinh độ, vĩ độ ngay khi tạo; frontend lấy tọa độ từ dịch vụ bản đồ trước khi gọi API tạo. Đổi địa chỉ phải gửi lại đủ cặp tọa độ từ bản đồ. Hiện chưa có dữ liệu thật cần giữ; xác nhận này không có nghĩa đã xóa dữ liệu thử hoặc chạy migration.
+- **Đề xuất chưa chốt**: chưa có đề xuất nghiệp vụ bổ sung trong phạm vi thay đổi tọa độ này.
+- **Đã chốt US/BR trong hội thoại ngày 01/10/2026**: người dùng đã chốt phần bổ sung tọa độ của STORY-PROJ-001, BR-PROJ-003 và BR-PROJ-004. System Test và TDD đã được cập nhật; backend đã lên `develop` tại commit `5e396fc`. Phạm vi kiểm thử và phần chưa kiểm được ghi trong [bàn giao tọa độ](../discovery/estimate-coordinates-implementation.md). Xác nhận hội thoại không thay cho phê duyệt/import trên hệ thống tài liệu.
 - Quy tắc nói về thời điểm tạo và lưu, không có nghĩa tạo một bản dự toán mới sau mỗi ký tự trong ô tên.
 - Lưu thông tin chưa đầy đủ không đồng nghĩa chấp nhận mọi giá trị không hợp lệ. Ràng buộc cho dữ liệu đã nhập sẽ được chốt theo từng trường.
 - BR-PROJ-001 và BR-PROJ-002 quy định điều kiện đầy đủ trước khi gửi AI; thiếu dữ liệu theo hai quy tắc đó không tự chặn lưu tiến độ.

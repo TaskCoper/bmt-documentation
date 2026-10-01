@@ -35,7 +35,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# ST-PROJ-015
+# ST-PROJ-121
 
 ## System Test
 
@@ -44,10 +44,11 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-PROJ-015 | STORY-PROJ-001 | EXC | REGRESSION | P0 | Môi trường thử đã có chức năng tương ứng; C1 là khách đã đăng nhập, sở hữu bản dự toán; gói còn hiệu lực, quyền tạo thiết kế, quota hữu hạn 3, đã dùng 0, đang giữ 0, trừ khi ca nêu khác. Có thể đọc lại dữ liệu đã lưu, trạng thái tác vụ và sổ lượt. Fixture tọa độ: mọi POST tạo gửi latitude=21.033, longitude=105.814; mọi PUT gửi đủ cặp đã lưu, trừ khi ca chủ động đổi địa chỉ thì FE lấy lại đủ cặp và khai báo cả hai trong changedFields. Không dùng thiếu tọa độ để thay lỗi đang kiểm. | 1. Chuẩn bị từng trạng thái tài khoản trong dữ liệu; bản nháp cũ đã tồn tại từ lúc đủ quyền.<br>2. Thử tạo bằng tên và đủ tọa độ và tự lưu thông tin đầu vào (diện tích, mô tả) của bản nháp cũ qua giao diện lẫn yêu cầu trực tiếp.<br>3. Với biến thể hết hạn/hết lượt, mở biểu mẫu trước khi mất điều kiện rồi mới gửi.<br>4. Đọc lại số bản ghi, dữ liệu và sổ lượt. | Không có gói; gói hết hạn nhưng còn lượt cũ; gói chỉ tra cứu; tạo thiết kế có quota 1 đã dùng 1; tất cả vẫn chọn gói hoàn thiện VIP. | Mọi yêu cầu tạo bản mới hoặc lưu thông tin đầu vào bị từ chối, không tạo bản ghi hoặc ghi thay đổi; không giữ/trừ thêm hoặc tự cấp gói/lượt. VIP đầu vào không thay quyền tạo thiết kế, lượt tra cứu không bù lượt tạo. Ca này không kiểm đổi tên: đổi tên bản nháp cũ vẫn được phép theo BR-SUB-007 khoản 11, xem ST-PROJ-061 và ST-PROJ-062. | STORY-PROJ-001/AC-006<br>STORY-PROJ-001/EXC-01<br>BR-SUB-007/Then | Chặn tạo và lưu đầu vào khi không có quyền lợi hoặc hết quota; tách khỏi thao tác đổi tên. Đặc tả chưa thực thi; dữ liệu trong ca là fixture kiểm thử, không phải mặc định sản phẩm. | [Chưa xác định] | Draft |
+| ST-PROJ-121 | STORY-PROJ-001 | EXC / Integration boundary | REGRESSION | P0 | Môi trường thử có FE/API và PostgreSQL riêng; C1 là khách đã xác minh, có gói/quyền tạo thiết kế và 3 lượt sẵn dùng. Đọc được Estimate, receipt, InputVersion và sổ lượt. Các mã, địa chỉ, tọa độ là fixture; ca chưa chạy. Có thể chặn phản hồi sau commit và gửi đồng thời hai request; dùng key riêng cho Create và Save. | 1. POST tên/cặp A với key K, chặn phản hồi sau commit rồi gửi lại cùng nội dung; lặp gửi đồng thời trên fixture khác.<br>2. Dùng K nhưng đổi một tọa độ hợp lệ.<br>3. PUT địa chỉ/cặp B với key S và version hiện tại, mất phản hồi rồi gửi lại; sau đó lưu cặp C bằng key mới.<br>4. Replay S lần nữa, rồi dùng S với một tọa độ khác.<br>5. Lặp với cách viết số 10, 10.0 và 1e1; -0 và 0. | A=(10,106), B=(11,107), C=(12,108); các địa chỉ fixture riêng. Đủ dữ liệu hợp lệ ở mọi lần, chỉ biến đổi trường nêu trong bước. | K cùng nội dung chỉ tạo một Estimate/receipt và trả cùng ID. Đổi tọa độ với K trả 409 IdempotencyConflict. S chỉ tăng InputVersion một lần; replay S muộn trả savedInputVersion cũ nhưng DB giữ địa chỉ/cặp C. Đổi tọa độ với S trả 409. Các cách viết cùng giá trị số có cùng hash, không xung đột giả; không giữ/trừ lượt. | STORY-PROJ-001/AC-001<br>STORY-PROJ-001/AC-023<br>BR-PROJ-003/Then<br>TDD-PROJ-001/Architecture | Tọa độ phải tham gia hash; replay không hồi sinh đầu vào cũ. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- STORY-PROJ-001/AC-006
-- STORY-PROJ-001/EXC-01
-- BR-SUB-007/Then
+- STORY-PROJ-001/AC-001
+- STORY-PROJ-001/AC-023
+- BR-PROJ-003/Then
+- TDD-PROJ-001/Architecture

@@ -67,8 +67,8 @@ Khách chọn Tạo dự toán mới hoặc mở lại bản dự toán đang ch
 
 ### Main Flow
 
-1. Khách nhập tên bắt buộc, tối đa 200 ký tự sau khi bỏ khoảng trắng đầu/cuối, rồi thực hiện thao tác tạo dự toán theo BR-PROJ-003.
-2. Backend kiểm tra điều kiện tạo theo BR-RBAC-005 và BR-SUB-007, sau đó tạo dự toán để khách nhập tiếp. Chưa yêu cầu đủ thông tin dùng để gửi AI.
+1. Khách nhập tên bắt buộc, tối đa 200 ký tự sau khi bỏ khoảng trắng đầu/cuối. Frontend gọi dịch vụ bản đồ để lấy đủ kinh độ và vĩ độ trước khi gọi API tạo, rồi gửi tên cùng hai tọa độ theo BR-PROJ-003.
+2. Backend kiểm tra tên và sự hiện diện của cả hai tọa độ theo BR-PROJ-003, cùng điều kiện tạo theo BR-RBAC-005 và BR-SUB-007. Khi hợp lệ, tạo bản dự toán và lưu cả hai tọa độ để khách nhập tiếp. Chưa yêu cầu đủ các thông tin còn lại dùng để gửi AI.
 3. Khách chọn loại công trình từ danh mục do Admin quản lý và nhập trường Diện tích chung, đơn vị m², theo BR-PROJ-001.
 4. Khách cung cấp tối đa một ảnh JPG/PNG/HEIC không vượt 10 MB, hoặc Mô tả chi tiết không vượt 500 ký tự, hoặc cả hai, theo BR-PROJ-002. Mô tả chi tiết dùng để gửi AI khi khách cung cấp; không có trường ghi chú riêng.
 5. Khách nhập địa chỉ và chọn gói hoàn thiện/nội thất. Thông tin phong cách kiến trúc và phong cách nội thất được tách riêng; số tầng và tum áp dụng theo cấu hình loại công trình tại BR-PROJ-004. Chỉ cho chọn những nhóm phong cách được bật theo loại; AI vẫn trả đủ kết quả dù một nhóm lựa chọn bị tắt. Trước khi gửi AI, mỗi nhóm được bật phải có đúng một phong cách hợp lệ; bản nháp vẫn được phép chưa chọn đủ.
@@ -112,8 +112,16 @@ Khách đổi loại công trình trong bản nháp khi còn đủ điều kiệ
 Khách đổi tỉnh/thành trong bản nháp khi còn đủ điều kiện lưu.
 
 1. Xóa xã/phường đã chọn và cung cấp lựa chọn thuộc tỉnh/thành mới.
-2. Giữ địa chỉ chi tiết để khách tự sửa; tự lưu theo điều kiện hiện hành.
-3. Yêu cầu chọn lại xã/phường hợp lệ trước khi gửi AI; chưa chọn lại vẫn được lưu như bản nháp chưa đầy đủ.
+2. Giữ địa chỉ chi tiết để khách tự sửa. Frontend lấy lại kinh độ và vĩ độ từ bản đồ cho địa chỉ đang sửa; gửi đủ cả hai cùng lần tự lưu theo BR-PROJ-004 khoản 18.
+3. Yêu cầu chọn lại xã/phường hợp lệ trước khi gửi AI; chưa chọn lại vẫn được lưu như bản nháp chưa đầy đủ nếu có đủ tọa độ và đáp ứng các điều kiện lưu khác.
+
+#### ALT-06
+
+Khách đổi địa chỉ khi bản dự toán còn được phép sửa.
+
+1. Khi tỉnh/thành, xã/phường hoặc địa chỉ chi tiết thay đổi, frontend gọi bản đồ lấy lại kinh độ và vĩ độ cho địa chỉ đang sửa.
+2. Frontend gửi địa chỉ cùng đủ cặp tọa độ trong một yêu cầu lưu. Backend kiểm tra điều kiện lưu và lưu địa chỉ, tọa độ cùng nhau theo BR-PROJ-003 khoản 11 và BR-PROJ-004 khoản 18.
+3. Khi mở lại bản dự toán, trả địa chỉ và tọa độ của lần lưu thành công đó.
 
 ### Exception Flow
 
@@ -149,13 +157,29 @@ Khách thay ảnh nhưng tải lên hoặc lưu ảnh mới thất bại.
 2. Chỉ thay ảnh cũ sau khi ảnh mới hợp lệ, tải lên và lưu thay thế thành công; bản dự toán vẫn chỉ có một ảnh đầu vào.
 3. Nếu chưa có ảnh cũ, bản dự toán vẫn chưa có ảnh hợp lệ; điều kiện có ít nhất ảnh hoặc mô tả vẫn áp dụng trước khi gửi AI.
 
+#### EXC-05
+
+Frontend chưa lấy được đủ kinh độ, vĩ độ từ dịch vụ bản đồ hoặc yêu cầu tạo gửi lên thiếu tọa độ.
+
+1. Frontend chưa gọi API tạo khi chưa lấy được đủ cả hai tọa độ.
+2. Nếu yêu cầu tạo vẫn được gửi trực tiếp mà thiếu kinh độ, vĩ độ hoặc cả hai, backend từ chối và không tạo bản dự toán theo BR-PROJ-003 khoản 10.
+3. Không khởi chạy AI và không giữ/trừ lượt; khách cần có đủ hai tọa độ trước khi gửi yêu cầu tạo hợp lệ.
+
+#### EXC-06
+
+Khách đổi địa chỉ nhưng frontend chưa lấy được đủ tọa độ từ bản đồ, hoặc yêu cầu lưu gửi lên thiếu tọa độ.
+
+1. Frontend chưa gửi lần lưu thay đổi địa chỉ khi chưa có đủ kinh độ và vĩ độ từ bản đồ.
+2. Nếu yêu cầu lưu đổi địa chỉ vẫn được gửi trực tiếp mà thiếu một hoặc cả hai tọa độ, backend từ chối yêu cầu và giữ nguyên dữ liệu đã lưu, gồm địa chỉ và tọa độ cũ.
+3. Không báo đã lưu cho thay đổi bị từ chối. Khách cần có đủ cặp tọa độ trước khi gửi lại; quyền/gói/lượt và khóa đầu vào vẫn được kiểm tra ở lần gửi lại.
+
 ## Acceptance Criteria
 
 #### AC-001
 
-- **Given**: Khách đáp ứng điều kiện tạo dự toán và đã nhập tên.
+- **Given**: Khách đáp ứng điều kiện tạo dự toán, đã nhập tên và frontend đã lấy đủ kinh độ, vĩ độ từ dịch vụ bản đồ.
 - **When**: Khách thực hiện thao tác tạo.
-- **Then**: Bản dự toán được tạo để nhập thông tin chi tiết dù chưa có diện tích, ảnh hoặc mô tả thiết kế.
+- **Then**: Bản dự toán được tạo và lưu cả hai tọa độ để nhập thông tin chi tiết dù chưa có diện tích, ảnh hoặc mô tả thiết kế.
 - **And**: Chưa khởi chạy AI và không giữ/trừ lượt vì tạo dự toán.
 
 #### AC-002
@@ -254,7 +278,7 @@ Khách thay ảnh nhưng tải lên hoặc lưu ảnh mới thất bại.
 - **Given**: Bản nháp có tỉnh/thành, xã/phường và địa chỉ chi tiết, khách đáp ứng điều kiện lưu.
 - **When**: Khách đổi tỉnh/thành.
 - **Then**: Xóa xã/phường đã chọn, yêu cầu chọn lại xã/phường thuộc tỉnh/thành mới trước khi gửi AI.
-- **And**: Giữ địa chỉ chi tiết để khách tự sửa; cho lưu bản nháp khi chưa chọn lại xã/phường.
+- **And**: Giữ địa chỉ chi tiết để khách tự sửa; cho lưu bản nháp khi chưa chọn lại xã/phường nếu frontend đã lấy lại và gửi đủ cặp tọa độ từ bản đồ theo BR-PROJ-004 khoản 18.
 
 #### AC-016
 
@@ -290,6 +314,34 @@ Khách thay ảnh nhưng tải lên hoặc lưu ảnh mới thất bại.
 - **When**: Cung cấp nội dung mô tả để gửi AI.
 - **Then**: Chỉ có một trường Mô tả chi tiết tối đa 500 ký tự; nội dung được dùng làm đầu vào AI khi khách cung cấp, không thêm trường ghi chú riêng.
 - **And**: Trước khi gửi AI vẫn chỉ yêu cầu có ít nhất ảnh hoặc mô tả hợp lệ; chỉ có ảnh thì không bắt buộc nhập mô tả. Bản nháp được phép chưa có cả hai.
+
+#### AC-021
+
+- **Given**: Yêu cầu tạo dự toán có tên hợp lệ và đáp ứng điều kiện quyền/gói/lượt.
+- **When**: Yêu cầu thiếu kinh độ, vĩ độ hoặc cả hai, kể cả gửi giá trị rỗng.
+- **Then**: Backend từ chối yêu cầu và không tạo bản dự toán theo BR-PROJ-003 khoản 10.
+- **And**: Không khởi chạy AI và không giữ/trừ lượt; không cho tạo trước rồi bổ sung tọa độ sau.
+
+#### AC-022
+
+- **Given**: Khách đang tạo dự toán và frontend chưa lấy được đủ kinh độ, vĩ độ từ dịch vụ bản đồ.
+- **When**: Khách thực hiện thao tác tạo.
+- **Then**: Frontend chưa gọi API tạo dự toán; chỉ gửi yêu cầu khi đã lấy được đủ cả hai tọa độ.
+- **And**: Yêu cầu tạo gửi tên cùng kinh độ và vĩ độ; khi mở lại bản đã tạo thành công, hệ thống trả cả hai tọa độ đã lưu.
+
+#### AC-023
+
+- **Given**: Bản dự toán đã có địa chỉ, kinh độ, vĩ độ và khách đáp ứng điều kiện sửa đầu vào.
+- **When**: Khách đổi tỉnh/thành, xã/phường hoặc địa chỉ chi tiết.
+- **Then**: Frontend lấy lại kinh độ, vĩ độ từ bản đồ và gửi đủ cả hai cùng yêu cầu lưu địa chỉ; backend lưu địa chỉ và tọa độ cùng nhau.
+- **And**: Khi mở lại, trả địa chỉ và cặp tọa độ vừa lưu. Tọa độ bản đồ trả về trùng với cặp cũ vẫn được chấp nhận nếu các điều kiện lưu khác hợp lệ.
+
+#### AC-024
+
+- **Given**: Khách đổi địa chỉ của bản dự toán đang được phép sửa.
+- **When**: Frontend chưa lấy được đủ cặp tọa độ từ bản đồ, hoặc có yêu cầu lưu trực tiếp thiếu kinh độ, vĩ độ hay cả hai.
+- **Then**: Frontend chưa gửi lần lưu thay đổi địa chỉ; backend từ chối yêu cầu trực tiếp thiếu tọa độ và giữ nguyên dữ liệu đã lưu.
+- **And**: Không chỉ lưu địa chỉ mới rồi giữ tọa độ cũ hoặc bổ sung tọa độ bằng một lần lưu riêng.
 
 ## References
 

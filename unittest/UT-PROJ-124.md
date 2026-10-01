@@ -11,13 +11,11 @@
 -->
 
 <!-- Mỗi file chứa một test, đúng một dòng dữ liệu và 13 cột theo thứ tự bên dưới.
-Thay ST-001 ở heading và Test ID, STORY-001 bằng mã Story cần kiểm thử.
-Trong ô bảng: xuống dòng bằng <br>, dấu | viết thành \|. Steps gồm các bước đánh số.
-Loại: Main / ALT / EXC / NFR / Integration boundary; ghép nhiều loại bằng dấu /.
-Suite: SMOKE / REGRESSION / FULL. Priority: P0 / P1 / P2 / P3.
+Thay UT-001 ở heading và Test ID. Trong ô bảng: xuống dòng bằng <br>, dấu | viết thành \|.
+Loại: Happy / Branch / Boundary / Error / Quirk / Determinism. Suite: SMOKE / REGRESSION / FULL. Priority: P0 / P1 / P2 / P3.
 TEST_LINKS là nguồn liên kết khi import; cột Trace to chỉ để đọc. Giữ hai nơi nhất quán.
-Owner là tên hiển thị; phê duyệt thực hiện sau import.
-Steps và Expected result phải bám Flow, AC và Business Rule của Story có thật. Test data là dữ liệu kiểm thử minh hoạ; không tự thêm hành vi nghiệp vụ hoặc ghi Pass/đã chạy nếu chưa có bằng chứng thực thi.
+Mỗi liên kết dùng DOC-KEY/section: ghi chú. Owner là tên hiển thị; phê duyệt thực hiện sau import.
+Expected output và assertion phải suy ra từ Business Rule/contract đã xác nhận. Dữ liệu mock chỉ là dữ liệu kiểm thử minh hoạ, không phải dữ liệu production; không ghi Pass/đã chạy nếu chưa có bằng chứng thực thi.
 BẮT BUỘC KHI HOÀN THIỆN MẪU: phải có cả Reviewer và Approver, mỗi tên 1–200 ký tự sau khi bỏ khoảng trắng đầu/cuối. Không xoá hai dòng metadata, để trống, dùng tên bịa hoặc giữ placeholder rồi coi là hoàn tất.
 Nếu chưa biết người review hoặc người phê duyệt, phải hỏi người dùng và báo tài liệu chưa đủ thông tin; không tự lấy Author/Owner làm người thay thế. Tên trong file không tự gán tài khoản hoặc xác nhận đã duyệt; gán thành viên trên giao diện sau import.
 Đây là yêu cầu hoàn thiện mẫu; backend hiện vẫn nhận file cũ thiếu hai trường để tương thích.
@@ -29,25 +27,27 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Không dùng Status trong Markdown hoặc tên Approver để tự xác nhận phê duyệt; import không cấp quyền hay gán tài khoản từ tên. Chạy Kiểm tra file và xử lý lỗi/cảnh báo trước khi nhập.
 - Giới hạn độ dài bên dưới tính theo string.Length của .NET (đơn vị UTF-16); không tự cắt ngắn dữ kiện quan trọng để vượt validation, hãy viết lại có căn cứ hoặc hỏi người dùng.
 - Bảng phải có header, dòng phân cách và đúng một dòng dữ liệu, đủ 13 cột theo thứ tự mẫu. Reviewer/Approver là hai bullet trước bảng, không thêm thành cột. Test ID trong bảng phải nhất quán với heading; mã tài liệu import lấy từ heading.
-- Story tối đa 100 ký tự và được dùng làm tiêu đề tài liệu; Owner tối đa 200. Trạng thái parser nhận: Draft / Approved; đây không phải kết quả chạy test hoặc quyền phê duyệt.
-- Giữ Loại: Main / ALT / EXC / NFR / Integration boundary, có thể ghép bằng dấu /; Suite: SMOKE / REGRESSION / FULL; Priority: P0 / P1 / P2 / P3. Không dùng số ngoài dải Priority 0–3.
-- Steps là các bước đánh số trong một ô, tách bằng <br>; không xuống dòng vật lý trong ô, dấu | trong nội dung phải viết \|. TEST_LINKS mới là nguồn liên kết import; cột Trace to chỉ hiển thị, hai nơi phải nhất quán.
+- Module tối đa 200 ký tự; Unit under test tối đa 500 (được dùng làm tiêu đề tài liệu); Owner tối đa 200. Trạng thái parser nhận: Draft / Approved; đây không phải kết quả chạy test hoặc quyền phê duyệt.
+- Giữ Loại: Happy / Branch / Boundary / Error / Quirk / Determinism; Suite: SMOKE / REGRESSION / FULL; Priority: P0 / P1 / P2 / P3. Không dùng số ngoài dải Priority 0–3.
+- Không xuống dòng vật lý trong ô: dùng <br>; dấu phân cột trong nội dung phải viết \|. TEST_LINKS mới là nguồn liên kết import; cột Trace to chỉ hiển thị, hai nơi phải nhất quán.
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# ST-PROJ-015
+# UT-PROJ-124
 
-## System Test
+## Unit Test
 
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
 
-| Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
+| Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-PROJ-015 | STORY-PROJ-001 | EXC | REGRESSION | P0 | Môi trường thử đã có chức năng tương ứng; C1 là khách đã đăng nhập, sở hữu bản dự toán; gói còn hiệu lực, quyền tạo thiết kế, quota hữu hạn 3, đã dùng 0, đang giữ 0, trừ khi ca nêu khác. Có thể đọc lại dữ liệu đã lưu, trạng thái tác vụ và sổ lượt. Fixture tọa độ: mọi POST tạo gửi latitude=21.033, longitude=105.814; mọi PUT gửi đủ cặp đã lưu, trừ khi ca chủ động đổi địa chỉ thì FE lấy lại đủ cặp và khai báo cả hai trong changedFields. Không dùng thiếu tọa độ để thay lỗi đang kiểm. | 1. Chuẩn bị từng trạng thái tài khoản trong dữ liệu; bản nháp cũ đã tồn tại từ lúc đủ quyền.<br>2. Thử tạo bằng tên và đủ tọa độ và tự lưu thông tin đầu vào (diện tích, mô tả) của bản nháp cũ qua giao diện lẫn yêu cầu trực tiếp.<br>3. Với biến thể hết hạn/hết lượt, mở biểu mẫu trước khi mất điều kiện rồi mới gửi.<br>4. Đọc lại số bản ghi, dữ liệu và sổ lượt. | Không có gói; gói hết hạn nhưng còn lượt cũ; gói chỉ tra cứu; tạo thiết kế có quota 1 đã dùng 1; tất cả vẫn chọn gói hoàn thiện VIP. | Mọi yêu cầu tạo bản mới hoặc lưu thông tin đầu vào bị từ chối, không tạo bản ghi hoặc ghi thay đổi; không giữ/trừ thêm hoặc tự cấp gói/lượt. VIP đầu vào không thay quyền tạo thiết kế, lượt tra cứu không bù lượt tạo. Ca này không kiểm đổi tên: đổi tên bản nháp cũ vẫn được phép theo BR-SUB-007 khoản 11, xem ST-PROJ-061 và ST-PROJ-062. | STORY-PROJ-001/AC-006<br>STORY-PROJ-001/EXC-01<br>BR-SUB-007/Then | Chặn tạo và lưu đầu vào khi không có quyền lợi hoặc hết quota; tách khỏi thao tác đổi tên. Đặc tả chưa thực thi; dữ liệu trong ca là fixture kiểm thử, không phải mặc định sản phẩm. | [Chưa xác định] | Draft |
+| UT-PROJ-124 | Tạo dự toán | EstimateInputState.From/ApplyTo và GetEstimateQueryHandler — ánh xạ đủ tọa độ | Happy | REGRESSION | P1 | Phần tọa độ theo TDD đã chốt ngày 01/10/2026; đã có mã test backend và kết quả chạy, phạm vi kiểm tại [bàn giao tọa độ](../discovery/estimate-coordinates-implementation.md). Không coi ghi chú này là Pass toàn bộ đặc tả. Các ID và dữ liệu dưới đây là fixture. Dùng entity và state thật; query dùng fake store trả Estimate của đúng owner, catalog hợp lệ. Hai số fixture khác nhau để phát hiện đảo kinh độ/vĩ độ. Policy quyền ghi lần lượt cho phép và trả SubscriptionInactive. | Entity A có latitude=21.033123456, longitude=105.814123456; gọi From rồi ApplyTo một entity đích đang có cặp khác. Query bản A; thêm biến thể (0,0). Serialize response với JSON options ứng dụng. | From và ApplyTo giữ đúng hai số; không đảo trường, mất số, làm tròn hoặc dùng giá trị của entity đích. Đối tượng response Input và phần JSON input có latitude/longitude đúng số; lớp bọc HTTP value.input kiểm riêng ở System Test. Chủ sở hữu hết gói vẫn nhận đủ cặp, canEdit=false; không có thao tác ghi. Cặp (0,0) vẫn xuất hiện, không biến thành null. | STORY-PROJ-001/AC-022<br>BR-PROJ-003/Then<br>TDD-PROJ-001/Internal API<br>ST-PROJ-001/System Test<br>ST-PROJ-123/System Test | Phát hiện thiếu ánh xạ ở bất kỳ chiều lưu/đọc; không dùng fake để kết luận SQL projection đúng. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- STORY-PROJ-001/AC-006
-- STORY-PROJ-001/EXC-01
-- BR-SUB-007/Then
+- STORY-PROJ-001/AC-022
+- BR-PROJ-003/Then
+- TDD-PROJ-001/Internal API
+- ST-PROJ-001/System Test
+- ST-PROJ-123/System Test

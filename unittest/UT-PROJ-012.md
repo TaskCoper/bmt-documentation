@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PROJ-012 | Tạo dự toán | CreateEstimateHandler — Tạo bản nháp không giữ lượt | Happy | FULL | P1 | Unit dự kiến trong TDD, chưa có implementation hoặc mã test. Dùng clock cố định và fake dependency có thể đọc lại đối số/trạng thái; không gọi dịch vụ thật. Customer hợp lệ; policy quyền/lượt cho phép; current catalog V1; store giả ghi nhận đối số; không có receipt. | Tên Nhà A và key C1. | Ghi một Estimate ghim V1, InputVersion=1, NameVersion=1 và receipt cùng ID; trả estimateId, inputVersion=1 và nameVersion=1. Không gọi Reserve/Complete hoặc AI. Input chưa đầy đủ không chặn tạo. | TDD-PROJ-001/Architecture<br>TDD-PROJ-001/Internal API<br>BR-PROJ-003/Then<br>ST-PROJ-001/System Test | Tạo bản nháp không giữ lượt. Kiểm hành vi ở biên unit; không dùng mock để kết luận transaction, SQL hoặc tích hợp thật đúng. | [Chưa xác định] | Draft |
+| UT-PROJ-012 | Tạo dự toán | CreateEstimateHandler — Tạo bản nháp không giữ lượt | Happy | FULL | P1 | Đặc tả theo TDD; đối chiếu mã test và phần đã kiểm trong [bàn giao tọa độ](../discovery/estimate-coordinates-implementation.md). Dùng clock cố định và fake dependency có thể đọc lại đối số/trạng thái; không gọi dịch vụ thật. Customer hợp lệ; policy quyền/lượt cho phép; current catalog V1; store giả ghi nhận đối số; không có receipt. Bổ sung tọa độ theo TDD chốt ngày 01/10/2026; phạm vi mã test và kết quả chạy backend tại [bàn giao tọa độ](../discovery/estimate-coordinates-implementation.md), chưa chuyển trạng thái toàn bộ đặc tả. | Tên Nhà A, latitude=21.033, longitude=105.814 và key C1; diện tích, ảnh, mô tả và địa chỉ hành chính chưa nhập. | Ghi một Estimate ghim V1, InputVersion=1, NameVersion=1 và receipt cùng ID; trả estimateId, inputVersion=1 và nameVersion=1. Không gọi Reserve/Complete hoặc AI. Các trường thiết kế còn thiếu không chặn tạo khi đã đủ tên và tọa độ. Estimate gửi store có đúng Latitude=21.033, Longitude=105.814; không gọi dịch vụ bản đồ. | TDD-PROJ-001/Architecture<br>TDD-PROJ-001/Internal API<br>BR-PROJ-003/Then<br>ST-PROJ-001/System Test<br>STORY-PROJ-001/AC-022 | Tạo bản nháp không giữ lượt. Kiểm hành vi ở biên unit; không dùng mock để kết luận transaction, SQL hoặc tích hợp thật đúng. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
@@ -50,3 +50,4 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - TDD-PROJ-001/Internal API
 - BR-PROJ-003/Then
 - ST-PROJ-001/System Test
+- STORY-PROJ-001/AC-022
