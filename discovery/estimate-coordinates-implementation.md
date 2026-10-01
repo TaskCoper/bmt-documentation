@@ -59,7 +59,17 @@ FE chịu trách nhiệm chờ bản đồ và bỏ kết quả cũ đến muộ
 
 Migration: `bmt-be/src/bmt-be.persistence/Migrations/20261001093238_EstimateCoordinates.cs`. Đã chạy trên PostgreSQL 15 trong container kiểm thử riêng. Chưa áp dụng vào database dùng chung.
 
-Migration dừng nếu bảng còn dòng thiếu tọa độ, không tự điền (0,0). Down từ chối khi bảng có dữ liệu để tránh xóa cặp đã lưu. Trước khi triển khai phải chuẩn bị FE/BE cùng contract, dừng writer cũ và kiểm dữ liệu đích theo kế hoạch trong TDD-PROJ-001/Data Model.
+Migration mặc định dừng nếu bảng còn dòng thiếu tọa độ, không tự điền (0,0). Bản sửa phục hồi Dev bên dưới bổ sung ngoại lệ có cờ bật riêng cho dữ liệu thử. Down từ chối khi bảng có dữ liệu để tránh xóa cặp đã lưu. Trước khi triển khai phải chuẩn bị FE/BE cùng contract, dừng writer cũ và kiểm dữ liệu đích theo kế hoạch trong TDD-PROJ-001/Data Model.
+
+## Phục hồi migration trên Dev — 01/10/2026
+
+[Job 110316252815](https://github.com/TaskCoper/bmt-be/actions/runs/36845593860/job/110316252815) dừng khi thêm `Latitude NOT NULL` vì bảng `Estimate` đã có dữ liệu. Người dùng xác nhận đây là dữ liệu thử và yêu cầu điền tọa độ ngẫu nhiên.
+
+Bản sửa giữ nguyên mã migration `20261001093238_EstimateCoordinates`: thêm hai cột nullable, điền giá trị thử khi phiên PostgreSQL có `bmt.seed_estimate_test_coordinates=on`, rồi áp NOT NULL và CHECK. Workflow chỉ truyền cờ `on` qua `PGOPTIONS` vào phiên psql khi profile và environment đều là `dev`; các môi trường khác dùng `off`. Không thêm default vào schema, không xóa dự toán hay các bảng liên quan. Tọa độ ngẫu nhiên nằm trong miền hợp lệ nhưng không khớp địa chỉ thực tế. Database đã áp migration thành công sẽ bỏ qua bản sửa và giữ nguyên tọa độ.
+
+Cần build lại từ bản sửa để có artifact SQL mới; chạy lại job cũ vẫn dùng SQL bị lỗi. Không thêm cột thủ công hoặc tự ghi migration vào `__EFMigrationsHistory`. Bản sửa backend ở commit `815e7ee` trên nhánh `develop`; việc push kích hoạt pipeline Dev nhưng chưa chứng minh migration hoặc deploy đã thành công.
+
+Kiểm chứng bản sửa: chạy project `bmt-be.integration.tests` với bộ lọc `EstimateCoordinateMigrationTests|IdempotentMigrationScriptTests|EstimateCoordinateFlowTests` bằng `dotnet test --no-restore`, đạt 25 test, 0 lỗi, 0 bỏ qua trên PostgreSQL 15 tạm. Hai ca mới kiểm cả `MigrateAsync` và SQL idempotent với cờ Dev: giữ bản đang dùng, bản xóa mềm, version và receipt; tọa độ nằm trong miền; chạy lại giữ nguyên cặp đã lưu; schema vẫn NOT NULL, CHECK và không có default. Ca mặc định tiếp tục kiểm thiếu tọa độ thì rollback và có dữ liệu thì chặn Down. Log: `/private/tmp/bmt-coordinate-migration-fix-tests.log`.
 
 ## Bằng chứng kiểm thử
 
