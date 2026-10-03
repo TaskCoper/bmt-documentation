@@ -62,12 +62,15 @@ Khách lấy danh sách nhà thầu có hoặc không có query loại công tr�
 4. Nếu truyền cả hai mảng, nhà thầu phải khớp ít nhất một loại công trình và ít nhất một phạm vi thi công được yêu cầu.
 5. Áp dụng bộ lọc trên các danh mục admin chọn trực tiếp trong hồ sơ nhà thầu; không lọc theo các dự án đã thực hiện.
 6. Nếu có query bán kính, kết hợp điều kiện bán kính theo BR-CTR-006 với các query danh mục được truyền.
+7. Nếu chọn miền Bắc, Trung hoặc Nam, kết hợp thêm điều kiện tỉnh của nhà thầu thuộc miền đó theo BR-CTR-008. Không chọn miền thì không loại nhà thầu vì thiếu tỉnh.
 
 ## Except
 
 [Chưa xác định: mảng rỗng, GUID không tồn tại hoặc không hợp lệ; cách phân trang và thứ tự trả danh sách.]
 
 ## Notes
+
+- [BR-CTR-008](BR-CTR-008.md): bảng ánh xạ 34 mã tỉnh và quy tắc lọc miền; phần bổ sung đã được người dùng chốt trong hội thoại.
 
 - Ví dụ: loại [Nhà phố, Biệt thự] và phạm vi [Phần thô, Trọn gói]. Nhà thầu có Nhà phố và Phần thô trong năng lực được khai báo sẽ khớp, kể cả chưa có dự án đã thực hiện phù hợp.
 - Get all trả toàn bộ tập nhà thầu công khai trong một phản hồi không phân trang theo TDD-CTR-002 đã chốt; có query thì áp các bộ lọc tương ứng.

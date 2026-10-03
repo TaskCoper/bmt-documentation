@@ -39,7 +39,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Metadata
 
-- **Story**: Là khách, tôi muốn xem danh sách và hồ sơ nhà thầu công khai, lọc theo loại công trình, phạm vi thi công hoặc bán kính để tìm đơn vị phù hợp.
+- **Story**: Là khách, tôi muốn xem danh sách và hồ sơ nhà thầu công khai, lọc theo loại công trình, phạm vi thi công, miền hoặc bán kính để tìm đơn vị phù hợp.
 - **Context**: Danh sách hoạt động theo query tùy chọn, không có query thì lấy tất cả nhà thầu đang hiển thị. Hai query danh mục là mảng GUID, lọc theo năng lực admin chọn trong hồ sơ. Query bán kính dùng vị trí công trình của khách và cần đăng nhập. Công trình phải có tọa độ ngay khi tạo. Nghiệp vụ đã được người dùng chốt trong hội thoại; chưa triển khai.
 - **Sprint**: [Chưa xác định]
 - **Priority**:
@@ -70,7 +70,8 @@ Khách mở danh sách nhà thầu, gửi query lọc hoặc mở một hồ sơ
 2. Hệ thống lấy toàn bộ tập nhà thầu đang hiển thị theo BR-CTR-005; API công khai không phân trang theo TDD-CTR-002 đã chốt.
 3. Khách có thể truyền mảng GUID loại công trình, mảng GUID phạm vi thi công hoặc cả hai.
 4. Hệ thống lọc theo năng lực admin khai báo: khớp ít nhất một giá trị mỗi mảng, và khớp cả hai nhóm khi có cả hai mảng.
-5. Khách mở chi tiết nhà thầu để xem Tổng quan, vị trí công ty trên bản đồ, toàn bộ dự án đã thực hiện, Năng lực pháp lý và Hợp tác BuildX, gồm các bản scan đã tải lên. Không cung cấp thông tin liên hệ nội bộ.
+5. Khách có thể chọn miền Bắc, Trung hoặc Nam. Hệ thống xác định miền theo tỉnh nhà thầu và kết hợp với các bộ lọc đang dùng theo BR-CTR-008; không chọn miền thì vẫn xét nhà thầu chưa có tỉnh.
+6. Khách mở chi tiết nhà thầu để xem Tổng quan, vị trí công ty trên bản đồ, toàn bộ dự án đã thực hiện, Năng lực pháp lý và Hợp tác BuildX, gồm các bản scan đã tải lên. Không cung cấp thông tin liên hệ nội bộ.
 
 ### Alternative Flow
 
@@ -179,6 +180,27 @@ Khách tạo công trình thiếu kinh độ hoặc vĩ độ.
 - **Then**: Mã số thuế được hiển thị đầy đủ, không che một phần.
 - **And**: Người liên hệ, số điện thoại và email vẫn chỉ dành cho admin; URL bản scan chỉ được đưa vào hồ sơ công khai khi Hiển thị; URL đã chia sẻ vẫn dùng được khi Ẩn.
 
+#### AC-010
+
+- **Given**: Có nhà thầu đang hiển thị tại các tỉnh thuộc ba miền và có nhà thầu chưa được bổ sung tỉnh.
+- **When**: Khách chưa đăng nhập chọn miền Bắc, Trung hoặc Nam.
+- **Then**: Chỉ trả nhà thầu có tỉnh thuộc miền đã chọn theo BR-CTR-008; Tây Nguyên nằm trong miền Trung.
+- **And**: Khi bỏ chọn miền, nhà thầu chưa có tỉnh được xét lại theo các bộ lọc còn lại; không có kết quả thì hiển thị danh sách rỗng.
+
+#### AC-011
+
+- **Given**: Khách chọn miền cùng loại công trình, phạm vi thi công hoặc bán kính hợp lệ.
+- **When**: Hệ thống tìm nhà thầu.
+- **Then**: Nhà thầu phải thỏa điều kiện miền và tất cả nhóm lọc đang dùng.
+- **And**: Giữ điều kiện đăng nhập và sở hữu công trình khi dùng bán kính; riêng bộ lọc miền không yêu cầu đăng nhập.
+
+#### AC-012
+
+- **Given**: Khách gửi một giá trị miền ngoài ba miền hỗ trợ.
+- **When**: Hệ thống nhận yêu cầu lọc.
+- **Then**: Từ chối giá trị không hợp lệ.
+- **And**: Không bỏ qua giá trị sai hoặc thay bằng miền khác.
+
 ## References
 
 ### TDDs
@@ -187,6 +209,8 @@ Khách tạo công trình thiếu kinh độ hoặc vĩ độ.
 - [TDD-SITE-002](../tdd/TDD-SITE-002.md)
 
 ### Rules
+
+- [BR-CTR-008](../businessrule/BR-CTR-008.md)
 
 - BR-CTR-001
 - BR-CTR-002
@@ -203,6 +227,10 @@ Khách tạo công trình thiếu kinh độ hoặc vĩ độ.
 - STORY-CTR-003: Danh mục phạm vi thi công.
 
 ## Non-Functional
+
+- Kiểm thử bổ sung cho tỉnh/miền: [ST-CTR-033](../systemtest/ST-CTR-033.md), [ST-CTR-034](../systemtest/ST-CTR-034.md), [ST-CTR-037](../systemtest/ST-CTR-037.md), [ST-CTR-038](../systemtest/ST-CTR-038.md), [ST-CTR-039](../systemtest/ST-CTR-039.md), [ST-CTR-040](../systemtest/ST-CTR-040.md). Đặc tả chưa chạy.
+
+- Bổ sung lọc miền và AC-010 đến AC-012 đã được người dùng chốt trong hội thoại; System Test được bổ sung tại ST-CTR-033 đến ST-CTR-040. Chưa triển khai mã ứng dụng.
 
 - Đặc tả kiểm thử liên quan: [ST-CTR-025](../systemtest/ST-CTR-025.md), [ST-CTR-026](../systemtest/ST-CTR-026.md), [ST-CTR-027](../systemtest/ST-CTR-027.md), [ST-CTR-028](../systemtest/ST-CTR-028.md), [ST-CTR-029](../systemtest/ST-CTR-029.md), [ST-CTR-030](../systemtest/ST-CTR-030.md), [ST-CTR-031](../systemtest/ST-CTR-031.md), [ST-CTR-032](../systemtest/ST-CTR-032.md). Các ca chưa chạy.
 

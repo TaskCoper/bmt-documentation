@@ -53,6 +53,9 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ### Problem
 
+Bổ sung ngày 2026-10-03: người dùng đã chốt US/BR về bảng mã tỉnh và bộ lọc ba miền. Phần thiết kế mới ở đây đã được người dùng đồng ý bổ sung trong hội thoại và đã triển khai trong workspace; chưa phát hành lên môi trường chung. Xác nhận TDD lịch sử bên dưới chỉ áp dụng phần cũ.
+
+
 Người dùng đã chốt bản TDD sau lượt rà soát bằng phản hồi “Ok chốt”. Đây là xác nhận thiết kế trong hội thoại; Status vẫn Draft vì chưa phê duyệt trên hệ thống quản lý tài liệu. Hợp đồng cụ thể với kho tệp và kiểm chứng trên môi trường thật vẫn là việc cần làm khi tích hợp.
 
 STORY-CTR-004 cho phép khách xem hồ sơ không cần đăng nhập. Hai nhóm lọc là mảng GUID; OR trong từng nhóm và AND giữa các nhóm. Chỉ khi chọn công trình để tìm theo bán kính mới yêu cầu phiên khách. Nguồn lọc là năng lực admin chọn cho công ty, không phải lịch sử dự án.
@@ -119,6 +122,18 @@ Dùng SQL tham số hóa trong `ContractorReadStore`, tính distanceKm một l�
 
 Không thêm spatial index giả cho Haversine: BTREE latitude/longitude không tự tăng tốc hàm lượng giác. Giai đoạn đầu giảm tập bằng Status và EXISTS danh mục, sau đó tính trên các ứng viên. Đo EXPLAIN trên dữ liệu đại diện trước khi quyết định bounding box hoặc PostGIS; chưa có số liệu để cam kết SLA hay thêm hạ tầng.
 
+**Bổ sung bộ lọc miền:**
+
+- `GET /api/v1/contractors` thêm `region` tùy chọn, một giá trị trong `north`, `central`, `south`. Binder bỏ khoảng trắng ngoài và chuyển chữ thường invariant; có tham số nhưng rỗng, giá trị lạ hoặc lặp tham số (kể cả cùng giá trị) trả 422 `InvalidContractorFilter`, field `region`. Không truyền tham số là không lọc; không có giá trị `all` trên API. Query qua handler cũng được kiểm hợp lệ, không chỉ dựa vào binder.
+- `ContractorReadService` đổi miền thành tập mã tỉnh từ `ProvinceRegionCatalog` theo BR-CTR-008. `IContractorStore.Search` nhận thêm mảng mã tỉnh đã chuẩn hóa; SQL có điều kiện tham số hóa `cardinality(@provinceCodes::text[]) = 0 OR c."ProvinceCode" = ANY(@provinceCodes::text[])`, đặt cùng Status và hai nhóm EXISTS trước bước trả kết quả khoảng cách. Không nối chuỗi input thành SQL, không materialize toàn bộ Contractor để lọc trong bộ nhớ. Region hợp lệ luôn ánh xạ ra tập khác rỗng; lỗi danh mục nội bộ không được coi là không lọc.
+- Query có miền vẫn AND với loại/phạm vi/bán kính; miền riêng cho anonymous. Radius vẫn chạy policy và kiểm quyền sở hữu như cũ. Không thêm Matrix hoặc geocoding; khoảng cách vẫn là Haversine. Không tự chọn miền theo công trình hoặc phần lớn nhà thầu.
+- `PublicItem` thêm `provinceCode` và `regionCode`, đều nullable. `PublicDetail`/`AdminDetail` thêm `regionCode` ở cấp ngoài; profile có `provinceCode` theo TDD-CTR-001. Giá trị regionCode dùng cùng ba mã chữ thường; nhà thầu thiếu tỉnh trả null. Response không thêm dữ liệu liên hệ nội bộ.
+- `FilterOptions` giữ nguyên buildingTypes/scopes, thêm `regions:[{code,name}]`, `provinces:[{code,name,regionCode}]` và `provinceRegionVersion:"vn-34-regions-v1"`. Trả đủ ba miền theo thứ tự Bắc, Trung, Nam và 34 tỉnh theo thứ tự mã số. Các mã tỉnh trong response là string không có số 0 đầu. Bảng nguồn đầy đủ tại [BR-CTR-008/Notes](../businessrule/BR-CTR-008.md#notes); không duy trì một bảng copy khác trong frontend.
+- Phía frontend dùng các lựa chọn này cho form admin; lưu mã tỉnh thay vì chỉ lưu tên địa chỉ. Có lựa chọn bỏ lọc miền để dữ liệu chưa có tỉnh vẫn xem được. Miền hiển thị suy ra từ response; bỏ gán mặc định `south`. Khi đổi miền, gửi query tới backend và đưa miền vào query key để cache không lẫn kết quả; bảo đảm phản hồi request cũ không ghi đè lựa chọn mới.
+- Với luồng danh sách thật, API trả rỗng thì hiển thị rỗng; lỗi thì hiển thị lỗi/thử lại, không fallback sang mock. Không dùng distanceKm=null như khoảng cách 0 để tự lọc bán kính ở frontend. Khi dùng bán kính, gửi cặp radiusKm/constructionSiteId thật tới backend; giữ quyền của luồng hiện có. Không sửa các luồng mock ngoài danh sách chịu ảnh hưởng.
+
+Các vị trí frontend đã phát hiện cần đối chiếu khi triển khai: `contractors.bmt.ts` đang gán region=south và fallback mock; `contractor-list.service.ts` lọc trên dữ liệu local; `contractor-matches.tsx` đang chọn miền mặc định. Cần lần theo hook/api adapter đang dùng để nối tham số mới, tránh sửa riêng DTO mà giao diện vẫn lọc dữ liệu cũ. Màn admin đang có cả form CMS và form API; sửa đúng form gọi API thật, không coi ô tỉnh trên CMS là bằng chứng backend đã lưu tỉnh.
+
 ## Sequence Diagram
 
 ```mermaid
@@ -134,7 +149,7 @@ sequenceDiagram
     alt Khong tim thay trong pham vi
         H-->>C: 404 ConstructionSiteNotFound
     else Hop le
-        H->>DB: Status Visible AND EXISTS filters AND distance <= radius
+        H->>DB: Status Visible AND province filter AND EXISTS filters AND distance <= radius
         DB-->>H: Projection the danh sach
         H-->>C: 200 items, totalCount
     end
@@ -150,7 +165,7 @@ flowchart TD
     C -->|Co| D[Kiem phien khach va ownership]
     D --> F{Du toa do?}
     F -->|Khong| G[409 ConstructionSiteCoordinatesUnavailable]
-    F -->|Co| H[Loc Visible va hai nhom danh muc]
+    F -->|Co| H[Loc Visible, mien va hai nhom danh muc]
     C -->|Khong| H
     H --> I[Ap radius neu co]
     I --> J[Projection va thu tu on dinh]
@@ -201,12 +216,16 @@ GET không filter trả A,B. GET B1+S1 vẫn trả A,B dù A chưa có dự án.
 - Index theo bảng ở TDD-CTR-001; index ngược danh mục và Status hỗ trợ thu hẹp ứng viên. Get all không có trần số lượng ẩn; nếu tải chưa đạt cần thảo luận contract thay vì thêm LIMIT làm sai nghiệp vụ.
 - Kho tệp chỉ nhận key từ ContractorAsset đã được kiểm quyền, không nhận URL hoặc path trực tiếp từ query. Khi file không còn đọc được, 503 không thay trạng thái hồ sơ và không làm giả nội dung rỗng.
 
+Ví dụ bổ sung, dữ liệu giả định: A Visible có ProvinceCode="1", B Visible có ProvinceCode="66", C Visible có ProvinceCode=NULL; các cột khác hợp lệ. Không truyền region trả A,B,C; region=north trả A; region=central trả B; region=south trả tập rỗng. Nếu có thêm loại/phạm vi/bán kính, A hoặc B vẫn phải thỏa các điều kiện đó. Không lưu kết quả suy ra regionCode hoặc khoảng cách vào Contractor.
+
+Không tạo quan hệ mới giữa Contractor và ConstructionSite để suy ra miền: chỉ tỉnh công ty quyết định miền nhà thầu. Schema ProvinceCode, CHECK, index và kế hoạch migration xem TDD-CTR-001/Data Model. Danh mục tĩnh có thể kiểm đủ 34 mã ở build/test; khi nguồn tỉnh ngoài thay đổi, phải rà lại và phát hành phiên bản danh mục, không âm thầm phân miền cho mã mới.
+
 ## Internal API
 
 ### Endpoints
 
-- **GET** `/api/v1/contractors` — Query `buildingTypeIds[]?`, `scopeIds[]?`, `radiusKm?`, `constructionSiteId?`. Binding thực dùng tên tham số lặp không dấu `[]`. Không có radius thì anonymous; có radius thì verified Customer. Trả Result<ListResult<PublicContractorItem>>.
-- **GET** `/api/v1/contractors/filter-options` — Anonymous; `{buildingTypes:[{id,name}],scopes:[{id,name,description,sortOrder}]}`. Scope chỉ Đang dùng; chưa có catalog loại thì buildingTypes=[]; không ngăn người dùng xem hồ sơ sẵn có.
+- **GET** `/api/v1/contractors` — Query `buildingTypeIds[]?`, `scopeIds[]?`, `radiusKm?`, `constructionSiteId?`, `region?`. Binding thực dùng tên tham số lặp không dấu `[]`. Không có radius thì anonymous; có radius thì verified Customer. Trả Result<ListResult<PublicContractorItem>>.
+- **GET** `/api/v1/contractors/filter-options` — Anonymous; `{buildingTypes:[{id,name}],scopes:[{id,name,description,sortOrder}],regions:[{code,name}],provinces:[{code,name,regionCode}],provinceRegionVersion}`. Scope chỉ Đang dùng; chưa có catalog loại thì buildingTypes=[]; không ngăn người dùng xem hồ sơ sẵn có.
 - **GET** `/api/v1/contractors/{contractorId}` — Anonymous; chỉ Visible. Trả profile công khai, nhóm ảnh, tọa độ, năng lực khai báo, legal/licenses/partnership và toàn bộ dự án, tên danh mục join hiện hành. Không có contact, actor, storage key hay version quản trị. Không có hồ sơ hoặc Hidden cùng 404.
 - **GET** `/api/v1/contractors/{contractorId}/projects/{projectId}` — Anonymous; cả parent phải Visible và project thuộc parent; trả PublicProjectDetail gồm tên, ảnh, đúng một loại/phạm vi và các thuộc tính đã nhập.
 - **GET** `/api/v1/contractors/{contractorId}/assets/{assetId}/content` — Route tương thích tệp cũ; anonymous, kiểm đúng hồ sơ và đang gắn, không kiểm Visible. Stream 200/206, Range sai 416. Tệp mới dùng fileUrl trực tiếp.
@@ -247,12 +266,16 @@ Error Response:
 {"title":"NotFound","code":"NotFound","status":404,"detail":"Không tìm thấy tài liệu công khai.","messageCode":"ContractorAssetNotFound","errors":null}
 ```
 
+Ví dụ query mới: `GET /api/v1/contractors?region=central`; kết hợp danh mục bằng `&buildingTypeIds=<GUID>&scopeIds=<GUID>`, kết hợp bán kính bằng `&radiusKm=5&constructionSiteId=<GUID>` với phiên khách hợp lệ. Các ký hiệu `<GUID>` cần thay bằng ID thật.
+
+Phản hồi rỗng vẫn dùng envelope hiện có: `{"value":{"items":[],"totalCount":0},"isSuccess":true,"isFailure":false,"error":{"code":"","message":"","messageCode":""}}`. Lựa chọn miền trả từ filter-options là `[{"code":"north","name":"Miền Bắc"},{"code":"central","name":"Miền Trung"},{"code":"south","name":"Miền Nam"}]`. Ví dụ một mục tỉnh trong mảng đủ 34 mục: `{"code":"66","name":"Đắk Lắk","regionCode":"central"}`.
+
 ### Error Codes
 
 - **Unauthorized** (401): Có radius nhưng không có phiên xác thực hợp lệ; đây là code chung, messageCode dùng InvalidAccessToken/MissingAccessToken/ExpiredAccessToken theo Challenge hiện có.
 - **AccessForbidden** (403): Phiên đã xác thực nhưng không thỏa default policy; tài khoản không phải Customer dùng tìm theo công trình; hoặc người không phải admin dùng route tệp quản trị.
 - **MustChangePassword** (403): Phiên đang bị yêu cầu đổi mật khẩu; giữ mã từ Forbid hiện có.
-- **InvalidContractorFilter** (422): Sai dạng GUID, cap tham số, radius không hữu hạn/không dương hoặc thiếu một trong cặp radius/site.
+- **InvalidContractorFilter** (422): Miền sai/rỗng/lặp, sai dạng GUID, cap tham số, radius không hữu hạn/không dương hoặc thiếu một trong cặp radius/site.
 - **ContractorNotFound** (404): Hồ sơ không tồn tại hoặc không Visible.
 - **ContractorProjectNotFound** (404): Project không tồn tại/khác parent hoặc parent không Visible.
 - **ContractorAssetNotFound** (404): Không được xem asset qua route hiện tại; phản hồi không lộ trạng thái nội bộ.
@@ -291,6 +314,8 @@ Lỗi bản đồ frontend không làm hồ sơ biến mất: vẫn hiển thị
 
 ### Business Rules
 
+- [BR-CTR-008](../businessrule/BR-CTR-008.md)
+
 - BR-CTR-001
 - BR-CTR-004
 - BR-CTR-005
@@ -306,6 +331,12 @@ Lỗi bản đồ frontend không làm hồ sơ biến mất: vẫn hiển thị
 
 ### Others
 
+- Unit Test tỉnh/miền: [UT-CTR-033](../unittest/UT-CTR-033.md), [UT-CTR-036](../unittest/UT-CTR-036.md), [UT-CTR-038](../unittest/UT-CTR-038.md).
+
+- Phần bổ sung chưa triển khai: [ST-CTR-033](../systemtest/ST-CTR-033.md), [ST-CTR-034](../systemtest/ST-CTR-034.md), [ST-CTR-037](../systemtest/ST-CTR-037.md), [ST-CTR-038](../systemtest/ST-CTR-038.md), [ST-CTR-039](../systemtest/ST-CTR-039.md), [ST-CTR-040](../systemtest/ST-CTR-040.md); đều là đặc tả chưa chạy. Đặc tả Unit Test đã được bổ sung.
+- Chiến lược kiểm chứng: bộ 34 mã không thiếu/trùng và đúng 15/11/8; HTTP binder/query/auth/envelope; PostgreSQL thật cho lọc kết hợp, NULL, migration và giữ thứ tự; frontend cho lựa chọn miền, bỏ lọc, tỉnh admin, phản hồi rỗng/lỗi và request thay đổi nhanh. Không coi test mock là chứng minh SQL hoặc luồng UI.
+- Thứ tự triển khai dự kiến: danh mục và ProvinceCode → API admin/response/options → SQL/query miền → frontend → kiểm thử phạm vi thay đổi. Đọc đủ TDD-CTR-001 và TDD-CTR-002 trước viết code; phần dùng chung là catalog mã tỉnh, nullable provinceCode và regionCode suy ra, giữ nguyên quyền và version aggregate. Chưa đo tải hoặc áp migration lên môi trường chung.
+
 - Đợt đổi upload nhà thầu sang URL: 31/31 test PostgreSQL nhà thầu/Media, 54/54 test bộ kiểm tệp và adapter, 20/20 test HTTP nhà thầu/Media đã đạt, không có ca bỏ qua. Chạy trên bản sao tạm dùng phần đăng nhập ổn định vì module đăng nhập trong workspace đang được sửa đồng thời. TRX: `/private/tmp/bmt-ctr-presign-results/{integration,infra,api}.trx`. Chưa chạy FE hoặc kiểm PDF trên BizFly thật trong đợt này; chưa áp dụng migration lên môi trường chung. Kết quả các đợt trước ở bên dưới là bằng chứng lịch sử, không thay thế lượt kiểm này.
 
 - Implementation đã kiểm trên PostgreSQL: `ContractorReadService`, `ContractorFileService`, `ContractorStore`. Test gồm get all 137 hồ sơ, OR trong từng nhóm/AND giữa nhóm, bán kính Haversine tại biên, quyền sở hữu công trình, ẩn hồ sơ trong lúc mở stream và không lộ thông tin liên hệ nội bộ.
@@ -319,3 +350,5 @@ Lỗi bản đồ frontend không làm hồ sơ biến mất: vẫn hiển thị
 - Giới hạn đã biết: chưa đo dung lượng dữ liệu hoặc latency; chưa xác minh contract kho private; chưa rà hết tham chiếu đệ quy ngoài phạm vi CTR/SITE trực tiếp.
 
 ## Change Log
+
+Kết quả kiểm chứng phần tỉnh/miền (2026-10-03): 47 test ứng dụng, 15 test HTTP và 13 test tích hợp PostgreSQL đều đạt, không bỏ qua test. Bao gồm chuẩn hóa mã tỉnh, lọc miền kết hợp loại/phạm vi/bán kính, dữ liệu cũ chưa có tỉnh, phân biệt bỏ trường với gửi null, migration giữ dữ liệu và chặn rollback khi còn mã tỉnh. Frontend đạt TypeScript, ESLint và Prettier. Chưa kiểm E2E trên trình duyệt: công cụ Chrome không mở được do profile đang được một phiên khác sử dụng. Chưa chạy migration hoặc triển khai lên môi trường chung.

@@ -53,6 +53,9 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ### Problem
 
+Bổ sung ngày 2026-10-03: người dùng đã chốt US/BR về tỉnh và ba miền; thiết kế bổ sung dưới đây đã được người dùng đồng ý bổ sung trong hội thoại. Xác nhận TDD lịch sử trong tài liệu này không áp dụng tự động cho phần mới. Phần mới đã được triển khai trong workspace; chưa phát hành lên môi trường chung.
+
+
 Người dùng đã chốt bản TDD sau lượt rà soát bằng phản hồi “Ok chốt”. Đây là xác nhận thiết kế trong hội thoại; Status vẫn Draft vì chưa phê duyệt trên hệ thống quản lý tài liệu. Hợp đồng cụ thể với kho tệp và kiểm chứng trên môi trường thật vẫn là việc cần làm khi tích hợp.
 
 Người dùng đã chốt STORY-CTR-001 đến STORY-CTR-004 và BR-CTR-001 đến BR-CTR-007 trong hội thoại. Giai đoạn này chỉ admin quản trị; hồ sơ mới Ẩn, có thể lưu chỉ với tên. Hiển thị là trạng thái công khai và đồng thời được coi là đã xác minh. Không có trạng thái kiểm duyệt riêng cho từng thành phần.
@@ -127,6 +130,15 @@ Nơi thực hiện và kiểm chứng các quy tắc đã chốt:
 
 Chiến lược kiểm thử: unit cho chuẩn hóa/validator/policy thuần; integration PostgreSQL thật cho khóa cạnh tranh, FK ghép deferred, unique tên scope, query danh mục và khoảng cách; system test cho HTTP/UI và private file. Không coi mock hoặc EF InMemory là bằng chứng khóa và CHECK hoạt động. Các ca đã có là đặc tả chưa chạy; dữ liệu biên theo contract kỹ thuật nằm trong bộ Unit Test được liên kết ở References.
 
+**Bổ sung tỉnh/thành — thiết kế đề xuất theo BR-CTR-008:**
+
+- Dùng danh mục tĩnh `ProvinceRegionCatalog` tại domain làm nguồn duy nhất của 34 mã tỉnh và miền theo BR-CTR-008/Notes. Mỗi mục gồm `Code`, `Name`, `RegionCode`; tên hiển thị dùng địa danh không kèm tiền tố loại đơn vị. Không tạo bảng quản trị danh mục hoặc thêm cột Region vào Contractor. Danh mục có mã phiên bản `vn-34-regions-v1`; thay đổi danh mục phải qua cập nhật code và kiểm chứng, không tự lấy giá trị miền từ API ngoài.
+- `CreateContractorCommand` nhận thêm `provinceCode` tùy chọn; thiếu hoặc null vẫn tạo nhanh như hiện tại. `ProfileInput`/`PublicProfile` thêm `provinceCode`. Admin GET và public GET trả mã đã chuẩn hóa; `AdminDetail` và `PublicDetail` thêm `regionCode` ở cấp cùng với `contractorId`, tính từ tỉnh.
+- Chuẩn hóa mã: JSON string, bỏ khoảng trắng ngoài; chỉ nhận một hoặc hai chữ số ASCII và mã phải nằm trong bảng 34 tỉnh. `"01"` và `"1"` đều lưu `"1"`; tương tự `04`→`4`, `08`→`8`. Từ chối chuỗi rỗng, dấu âm/dương, số thập phân, hơn hai chữ số hoặc mã cũ ngoài bảng. Không nhận JSON number thay cho string. Null có nghĩa chưa có tỉnh.
+- Riêng trường mới trong PUT: không gửi `profile.provinceCode` thì giữ tỉnh đang lưu, gửi null thì xóa tỉnh, gửi mã hợp lệ thì thay tỉnh. DTO cần phân biệt trường bị bỏ qua và null bằng cờ hiện diện nội bộ `[JsonIgnore]` được đặt khi setter nhận dữ liệu; không nhận cờ này từ client. Đây là ngoại lệ tương thích cho trường mới, không đổi nghĩa các section khác của PUT. Tránh làm frontend cũ vô tình xóa tỉnh vừa được bổ sung.
+- `ContractorRules` kiểm mã bằng danh mục trước khi áp dụng; `ContractorMapping` chỉ cập nhật tỉnh khi trường có mặt. Tạo/sửa tỉnh dùng cùng quyền, khóa dòng, expectedVersion và transaction của Contractor; không tạo transaction riêng hoặc gọi HTTP trong khóa. Tỉnh không phải điều kiện mới để bật Visible.
+- Dùng cùng danh mục cho validation, API lựa chọn và suy ra miền. DB lưu mã tỉnh; response chỉ suy ra miền khi đọc. Không suy ra tỉnh từ `Address` hoặc `ServiceAreaText`.
+
 ## Sequence Diagram
 
 ```mermaid
@@ -190,7 +202,7 @@ Một hồ sơ có các thông tin riêng dạng 0..1 và các bộ dữ liệu 
 
 | Bảng | Một dòng đại diện cho; ai ghi | Cột và nullability |
 |---|---|---|
-| Contractor | Một công ty nhà thầu do admin tạo | Id uuid PK; Name varchar(200) NOT NULL; Status varchar(16) NOT NULL DEFAULT Hidden; Address varchar(500) NULL; Latitude, Longitude double precision NULL; ShortDescription varchar(500) NULL; Introduction text NULL; ContractorType varchar(100) NULL; FoundedYear int NULL; ArchitectCount, EngineerCount int NULL; ServiceAreaText text NULL; SurveyHours, WarrantyMonths int NULL; AcceptingProjects boolean NULL; Rating numeric NULL; RatingCount int NULL; ContactPerson varchar(200), ContactPhone varchar(50), ContactEmail varchar(254) NULL; CreatedAtUtc, UpdatedAtUtc timestamptz NOT NULL; CreatedBy, UpdatedBy uuid NOT NULL; Version bigint NOT NULL DEFAULT 1 |
+| Contractor | Một công ty nhà thầu do admin tạo | Id uuid PK; Name varchar(200) NOT NULL; Status varchar(16) NOT NULL DEFAULT Hidden; Address varchar(500) NULL; ProvinceCode varchar(2) NULL; Latitude, Longitude double precision NULL; ShortDescription varchar(500) NULL; Introduction text NULL; ContractorType varchar(100) NULL; FoundedYear int NULL; ArchitectCount, EngineerCount int NULL; ServiceAreaText text NULL; SurveyHours, WarrantyMonths int NULL; AcceptingProjects boolean NULL; Rating numeric NULL; RatingCount int NULL; ContactPerson varchar(200), ContactPhone varchar(50), ContactEmail varchar(254) NULL; CreatedAtUtc, UpdatedAtUtc timestamptz NOT NULL; CreatedBy, UpdatedBy uuid NOT NULL; Version bigint NOT NULL DEFAULT 1 |
 | ConstructionScope | Một phạm vi dùng chung, admin cấu hình | Id uuid PK; Name varchar(200) NOT NULL; NormalizedName varchar(200) NOT NULL; Description text NULL; SortOrder int NOT NULL DEFAULT 0; IsActive boolean NOT NULL DEFAULT true; Version bigint NOT NULL DEFAULT 1; CreatedAtUtc, UpdatedAtUtc timestamptz NOT NULL |
 | ContractorBuildingType | Một năng lực loại công trình của một nhà thầu | ContractorId uuid NOT NULL; BuildingTypeId uuid NOT NULL; PK cả hai |
 | ContractorScope | Một năng lực phạm vi của một nhà thầu | ContractorId uuid NOT NULL; ScopeId uuid NOT NULL; PK cả hai |
@@ -253,6 +265,13 @@ Upload mới khai purpose: ContractorImage cho ảnh JPG/PNG/WebP ≤10 MiB; Con
 
 **Notes**:
 
+- Bổ sung `Contractor.ProvinceCode varchar(2) NULL`: một dòng Contractor vẫn đại diện một nhà thầu; admin chọn tỉnh của địa chỉ công ty. Không lưu ProvinceName hoặc RegionCode lặp trong bảng. Không có FK mới vì nguồn 34 mã là danh mục tĩnh trong code; application kiểm thuộc danh mục, DB CHECK kiểm hình thức chuẩn `ProvinceCode IS NULL OR ProvinceCode ~ '^[1-9][0-9]?$'`. CHECK không thay cho kiểm mã thuộc danh mục. Nếu dữ liệu được ghi ngoài ứng dụng chứa mã chưa hỗ trợ, trả regionCode=null và không khớp bộ lọc miền; không gán mặc định.
+- Thêm index `IX_Contractor_Province_Status` trên `(ProvinceCode,Status)` cho truy vấn danh sách có miền; giữ index Status/CreatedAtUtc/Id hiện có cho danh sách chung. Index hỗ trợ thu hẹp theo các mã tỉnh, không bảo đảm hết chi phí sort hoặc tính khoảng cách; cần EXPLAIN trên dữ liệu đại diện trước khi kết luận hiệu năng.
+- Mẫu dữ liệu giả định, chỉ trích cột: A có `(Id=A,ProvinceCode=NULL,Status=Visible,Version=4)` thì còn trong danh sách chung. Admin chọn Hà Nội thành `(Id=A,ProvinceCode="1",Status=Visible,Version=5)`; miền đọc ra là north. Lần sửa chọn Đắk Lắk thành `ProvinceCode="66",Version=6`, miền là central. RegionCode không được ghi vào DB. Những cột bắt buộc và quan hệ khác của A giữ như schema/mẫu gốc bên dưới.
+- Migration đề xuất chỉ thêm cột nullable, CHECK hình thức và index, không backfill tỉnh từ địa chỉ và không sửa Status. Triển khai schema mở rộng trước backend mới, rồi frontend. Code cũ có thể tiếp tục chạy trên schema mới, nhưng chỉ code mới bảo đảm giữ tỉnh khi PUT thiếu trường. Tránh chạy đồng thời hai backend lâu dài sau khi admin bắt đầu nhập tỉnh.
+- Kiểm migration trên PostgreSQL tạm từ schema trước thay đổi: bảo toàn số dòng, mọi tỉnh cũ NULL, trạng thái/địa chỉ/tọa độ không đổi; kiểm constraint và truy vấn miền thực. Chưa có số liệu kích thước bảng để cam kết thời gian khóa. Tạo index thường cần đánh giá cửa sổ triển khai; bảng lớn thì cân nhắc tạo concurrently qua migration tách riêng. Đã tạo migration `20261003162149_AddContractorProvinceCode` và kiểm trên PostgreSQL tạm; chưa áp dụng lên môi trường chung.
+- Rollback ứng dụng giữ schema mới để không mất tỉnh đã nhập. Down xóa cột sẽ mất dữ liệu; chỉ cho phép khi chưa có tỉnh khác NULL hoặc đã có phương án bảo toàn dữ liệu được duyệt. Không tự chạy Down trên môi trường đang dùng.
+
 - CHECK tại asset: SizeBytes > 0; key, tên và MIME không rỗng. CHECK tại ảnh: Position >= 0, Kind thuộc tập đã nêu. Các CHECK này không thay bước xác minh nội dung tệp ở backend.
 - CHECK tại Contractor: Name có nội dung; Status hợp lệ; cặp tọa độ; khi Visible thì Address có nội dung và tọa độ không NULL; Rating/RatingCount cùng NULL hoặc cùng có giá trị hợp lệ; Version ≥1, UpdatedAtUtc ≥CreatedAtUtc. CHECK không truy vấn bảng khác: điều kiện ít nhất một loại, một phạm vi và project ít nhất một ảnh phải kiểm sau khi dựng trạng thái mới trong handler dưới khóa Contractor. Không dùng CHECK giả để diễn đạt đếm dòng con.
 - Chuẩn hóa: khóa ghép ở bảng liên kết không có thuộc tính phụ thuộc một nửa khóa; tên scope/type không lặp ở hồ sơ; thông tin legal/partnership phụ thuộc ContractorId. NormalizedName là dữ liệu suy ra duy nhất được lưu thêm để unique ổn định; tính ở một helper dùng chung. `FoundedYear` là năm hoạt động công ty, `EstablishedDate` là ngày đăng ký pháp nhân, không ép suy ra từ nhau. Rating và số lượt là dữ liệu admin nhập, không tổng hợp từ một bảng review không tồn tại. Không lưu projectCount hoặc distanceKm vào Contractor.
@@ -290,7 +309,7 @@ Giữ cơ chế chống CSRF của `CsrfOriginProtectionMiddleware` cho mọi ro
 Hai đường lỗi hiện có cần được mô tả đúng: FluentValidation qua `ValidationPipelineBehavior` trả ProblemDetails có `type="Validation Error"`, `errors[].code/message/messageCode`, không có messageCode cấp ngoài. Quy tắc mới đặt mã bằng `WithErrorCode`. Lỗi kiểm tra trong handler dùng `application.exceptions.ValidationException(errors, messageCode)`: middleware trả `title="Validation Failure"`, `code="ValidationFailure"`, messageCode cấp ngoài và `errors[].PropertyName/ErrorMessage` theo serializer hiện tại. Không trộn hai dạng trong cùng một ví dụ và không sửa hợp đồng lỗi toàn hệ thống chỉ cho CTR. Các mã validation ở Error Codes được tìm trong errors[].messageCode hoặc messageCode cấp ngoài tương ứng đường lỗi.
 
 - **GET** `/api/v1/admin/contractors` — Query `status?`, `pageIndex=1`, `pageSize=20` (1..100); sort CreatedAtUtc DESC, Id DESC; trả PagedResult<AdminContractorItem> gồm id,name,status,address,version,updatedAtUtc. Phân trang quản trị là đề xuất kỹ thuật.
-- **POST** `/api/v1/admin/contractors` — Body `{name}`; tạo Hidden, Version=1; trả 201 `{contractorId,version,status}`.
+- **POST** `/api/v1/admin/contractors` — Body `{name,provinceCode?}`; tạo Hidden, Version=1; trả 201 `{contractorId,version,status}`.
 - **GET** `/api/v1/admin/contractors/{contractorId}` — Trả profile, capability GUIDs, legal, licenses, partnership, ảnh, version và missingFields. Thông tin liên hệ chỉ ở DTO này.
 - **PUT** `/api/v1/admin/contractors/{contractorId}` — Body `{expectedVersion,profile,buildingTypeIds,scopeIds,legal,licenses,partnership,images}`; thay các phần hồ sơ, không đổi projects/status. Kiểm đủ điều kiện nếu Visible; trả `{contractorId,version,status}`. Quy ước thay dữ liệu giải thích dưới danh sách route.
 - **PATCH** `/api/v1/admin/contractors/{contractorId}/visibility` — `{expectedVersion,isVisible}`; Hidden→Visible kiểm đủ trường; Visible→Hidden chỉ kiểm version/quyền; không tăng version nếu trạng thái đã đúng và expectedVersion đúng.
@@ -306,7 +325,7 @@ Hai đường lỗi hiện có cần được mô tả đúng: FluentValidation 
 - **PUT** `/api/v1/admin/construction-scopes/{scopeId}` — `{expectedVersion,name,description,sortOrder,isActive}`; khóa row và kiểm unique/version, trả ScopeDto.
 - **DELETE** `/api/v1/admin/construction-scopes/{scopeId}` — Query expectedVersion; từ chối nếu được tham chiếu, kể cả liên kết trên hồ sơ Hidden.
 
-PUT hồ sơ thay toàn bộ section của DTO; legal/partnership=null xóa section, danh sách rỗng gỡ liên kết. ImageInput dùng url,kind,position; LicenseInput thêm scanUrl và licenseId nullable khi tạo mới. Dữ liệu cũ vẫn nhận assetId để tương thích, nhưng không gửi cả URL lẫn assetId cho cùng một tệp. Admin GET trả URL cho tệp mới, assetId cho tệp cũ. Không nhận licenseId của hồ sơ khác.
+PUT hồ sơ thay toàn bộ section của DTO; riêng trường bổ sung `profile.provinceCode` giữ giá trị hiện có khi bị bỏ qua như Notes ở Architecture; legal/partnership=null xóa section, danh sách rỗng gỡ liên kết. ImageInput dùng url,kind,position; LicenseInput thêm scanUrl và licenseId nullable khi tạo mới. Dữ liệu cũ vẫn nhận assetId để tương thích, nhưng không gửi cả URL lẫn assetId cho cùng một tệp. Admin GET trả URL cho tệp mới, assetId cho tệp cũ. Không nhận licenseId của hồ sơ khác.
 
 Upload mới dùng các API Media trong TDD-MEDIA-001; không tăng version nhà thầu. POST /admin/contractors/{id}/assets multipart là API cũ còn giữ tương thích, không dùng trong luồng FE mới. Lưu URL mới diễn ra trong cùng transaction với liên kết hồ sơ, version và MediaReference.
 
@@ -333,7 +352,7 @@ Request:
   "expectedVersion": 1,
   "profile": {
     "name": "Cát Trắng", "address": "Địa chỉ công ty mẫu, TP.HCM",
-    "latitude": 10.78, "longitude": 106.70,
+    "provinceCode": "79", "latitude": 10.78, "longitude": 106.70,
     "shortDescription": "Thiết kế và thi công nhà ở", "introduction": "Thông tin giới thiệu do admin nhập.",
     "contractorType": "Doanh nghiệp", "foundedYear": 2013, "architectCount": 5, "engineerCount": 10,
     "serviceAreaText": "TP.HCM", "surveyHours": 48, "warrantyMonths": 24, "acceptingProjects": true,
@@ -474,6 +493,8 @@ Upload lỗi thì frontend chưa lưu URL vào hồ sơ. Complete đang xử lý
 
 ### Business Rules
 
+- [BR-CTR-008](../businessrule/BR-CTR-008.md)
+
 - BR-CTR-001
 - BR-CTR-002
 - BR-CTR-003
@@ -488,6 +509,11 @@ Upload lỗi thì frontend chưa lưu URL vào hồ sơ. Complete đang xử lý
 - STORY-CTR-003/ALT-01
 
 ### Others
+
+- Unit Test tỉnh/miền: [UT-CTR-033](../unittest/UT-CTR-033.md), [UT-CTR-034](../unittest/UT-CTR-034.md), [UT-CTR-035](../unittest/UT-CTR-035.md), [UT-CTR-037](../unittest/UT-CTR-037.md).
+
+- Bổ sung tỉnh: [ST-CTR-035](../systemtest/ST-CTR-035.md), [ST-CTR-036](../systemtest/ST-CTR-036.md). Chưa chạy. Chiến lược kiểm chứng thêm: validation/chuẩn hóa mã; serialization phân biệt thiếu và null; PostgreSQL cho lưu/đọc/cập nhật/version/migration. Đặc tả Unit Test đã bổ sung theo thiết kế được chốt.
+- Phần code dự kiến sửa: `Contractor`, `ContractorConfiguration`, `Command`, `ContractorInputs`, `Response`, `ContractorRules`, `ContractorMapping`, `ContractorWriteService`, `ContractorAdminReadService`; thêm `domain/referenceData/ProvinceRegionCatalog.cs` và migration tương ứng sau khi thiết kế được chốt.
 
 - Đợt đổi upload nhà thầu sang URL: 31/31 test PostgreSQL nhà thầu/Media, 54/54 test bộ kiểm tệp và adapter, 20/20 test HTTP nhà thầu/Media đã đạt, không có ca bỏ qua. Chạy trên bản sao tạm dùng phần đăng nhập ổn định vì module đăng nhập trong workspace đang được sửa đồng thời. TRX: `/private/tmp/bmt-ctr-presign-results/{integration,infra,api}.trx`. Chưa chạy FE hoặc kiểm PDF trên BizFly thật trong đợt này; chưa áp dụng migration lên môi trường chung. Kết quả các đợt trước ở bên dưới là bằng chứng lịch sử, không thay thế lượt kiểm này.
 
@@ -505,3 +531,5 @@ Upload lỗi thì frontend chưa lưu URL vào hồ sơ. Complete đang xử lý
 - Phạm vi rà soát: đã đối chiếu trực tiếp CTR US/BR/ST và các phần code được liệt kê. Chưa hoàn tất duyệt đệ quy toàn bộ graph tài liệu RBAC/SUB/PAY mà SITE/PROJ tham chiếu; không coi các mô tả lịch sử trong TDD cũ là hiện trạng đã kiểm chứng. Cần rà tiếp khi triển khai phần phụ thuộc, không mở rộng chức năng sang các module đó.
 
 ## Change Log
+
+Kết quả kiểm chứng phần tỉnh/miền (2026-10-03): 47 test ứng dụng, 15 test HTTP và 13 test tích hợp PostgreSQL đều đạt, không bỏ qua test. Bao gồm chuẩn hóa mã tỉnh, lọc miền kết hợp loại/phạm vi/bán kính, dữ liệu cũ chưa có tỉnh, phân biệt bỏ trường với gửi null, migration giữ dữ liệu và chặn rollback khi còn mã tỉnh. Frontend đạt TypeScript, ESLint và Prettier. Chưa kiểm E2E trên trình duyệt: công cụ Chrome không mở được do profile đang được một phiên khác sử dụng. Chưa chạy migration hoặc triển khai lên môi trường chung.

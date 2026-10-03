@@ -66,7 +66,7 @@ Admin mở danh sách quản trị nhà thầu để tạo, cập nhật, xóa h
 
 ### Main Flow
 
-1. Admin nhập tên công ty. Admin có thể bổ sung ngay hoặc sau khi lưu: địa chỉ, kinh độ, vĩ độ, các loại công trình và phạm vi thi công nhà thầu nhận làm.
+1. Admin nhập tên công ty. Admin có thể bổ sung ngay hoặc sau khi lưu: địa chỉ, tỉnh/thành, kinh độ, vĩ độ, các loại công trình và phạm vi thi công nhà thầu nhận làm.
 2. Admin nhập các phần tùy chọn: giới thiệu, thông tin và ảnh doanh nghiệp, khu vực phục vụ, thời gian khảo sát, nhận dự án, bảo hành, điểm và số lượt đánh giá.
 3. Admin có thể bổ sung thông tin pháp nhân, giấy phép, cam kết/bảo hành, bảo hiểm công trình và hợp tác theo BR-CTR-004. Ảnh và bản scan mở cho người có URL; khi ẩn hồ sơ, URL đã chia sẻ vẫn đọc được. Người liên hệ, số điện thoại và email dành cho admin.
 4. Hệ thống lưu hồ sơ mới với trạng thái mặc định Ẩn. Hồ sơ chưa được công khai sau bước tạo.
@@ -176,6 +176,20 @@ Hồ sơ thiếu trường bắt buộc khi đưa lên web.
 - **Then**: Từ chối lưu và chỉ rõ giá trị không hợp lệ.
 - **And**: Giữ nguyên đánh giá đã lưu trước đó.
 
+#### AC-010
+
+- **Given**: Admin tạo hoặc sửa nhà thầu.
+- **When**: Admin chọn tỉnh/thành hợp lệ và lưu hồ sơ.
+- **Then**: Hệ thống lưu mã tỉnh và xác định miền theo BR-CTR-008.
+- **And**: Có thể bổ sung tỉnh sau; nhà thầu cũ chưa có tỉnh vẫn giữ thông tin và trạng thái hiển thị. Không nhập miền độc lập với tỉnh.
+
+#### AC-011
+
+- **Given**: Nhà thầu đã có tỉnh hợp lệ.
+- **When**: Admin gửi mã tỉnh ngoài danh mục hỗ trợ.
+- **Then**: Hệ thống từ chối và giữ dữ liệu đã lưu.
+- **And**: Không suy đoán tỉnh từ địa chỉ hoặc tự gán miền mặc định.
+
 ## References
 
 ### TDDs
@@ -183,6 +197,8 @@ Hồ sơ thiếu trường bắt buộc khi đưa lên web.
 - [TDD-CTR-001](../tdd/TDD-CTR-001.md)
 
 ### Rules
+
+- [BR-CTR-008](../businessrule/BR-CTR-008.md)
 
 - BR-CTR-001
 - BR-CTR-002
@@ -195,6 +211,10 @@ Hồ sơ thiếu trường bắt buộc khi đưa lên web.
 - STORY-CTR-003: Cấu hình danh mục phạm vi thi công.
 
 ## Non-Functional
+
+- Kiểm thử bổ sung cho tỉnh/miền: [ST-CTR-035](../systemtest/ST-CTR-035.md), [ST-CTR-036](../systemtest/ST-CTR-036.md). Đặc tả chưa chạy.
+
+- Bổ sung tỉnh/thành và AC-010, AC-011 đã được người dùng chốt trong hội thoại; System Test được bổ sung tại ST-CTR-033 đến ST-CTR-040. Chưa triển khai mã ứng dụng.
 
 - Đặc tả kiểm thử liên quan: [ST-CTR-001](../systemtest/ST-CTR-001.md), [ST-CTR-002](../systemtest/ST-CTR-002.md), [ST-CTR-003](../systemtest/ST-CTR-003.md), [ST-CTR-004](../systemtest/ST-CTR-004.md), [ST-CTR-005](../systemtest/ST-CTR-005.md), [ST-CTR-006](../systemtest/ST-CTR-006.md), [ST-CTR-007](../systemtest/ST-CTR-007.md), [ST-CTR-008](../systemtest/ST-CTR-008.md), [ST-CTR-009](../systemtest/ST-CTR-009.md), [ST-CTR-010](../systemtest/ST-CTR-010.md). Các ca chưa chạy.
 
