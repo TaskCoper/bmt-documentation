@@ -94,7 +94,7 @@ Admin ngừng công khai hồ sơ.
 Admin xóa nhà thầu.
 
 1. Admin yêu cầu xóa một nhà thầu.
-2. Hệ thống kiểm tra quyền và xóa hồ sơ; nhà thầu không còn xuất hiện trong danh sách hoặc trang chi tiết công khai.
+2. Hệ thống kiểm tra quyền và điều kiện chưa có lời mời báo giá theo BR-RFQ-006. Nếu đã có lời mời thì từ chối xóa và admin có thể ẩn hồ sơ. Nếu đủ điều kiện, hệ thống xóa hồ sơ; nhà thầu không còn xuất hiện trong danh sách hoặc trang chi tiết công khai.
 3. Các dự án, thông tin pháp lý và hợp tác thuộc nhà thầu cũng được xóa khỏi hồ sơ quản trị và trang công khai. Danh mục dùng chung vẫn giữ nguyên.
 
 ### Exception Flow
@@ -157,7 +157,7 @@ Hồ sơ thiếu trường bắt buộc khi đưa lên web.
 
 #### AC-007
 
-- **Given**: Admin có quyền quản lý một nhà thầu.
+- **Given**: Admin có quyền quản lý một nhà thầu chưa có lời mời báo giá.
 - **When**: Admin xóa nhà thầu thành công.
 - **Then**: Nhà thầu không còn xuất hiện trong danh sách và trang chi tiết công khai.
 - **And**: Các dự án, thông tin pháp lý và hợp tác thuộc hồ sơ cũng bị xóa; danh mục dùng chung vẫn giữ nguyên. Quyền xóa được kiểm tra ở backend.
@@ -201,6 +201,7 @@ Hồ sơ thiếu trường bắt buộc khi đưa lên web.
 - [BR-CTR-008](../businessrule/BR-CTR-008.md)
 
 - BR-CTR-001
+- BR-RFQ-006/Then: Chặn xóa nhà thầu đã có lời mời; vẫn được ẩn.
 - BR-CTR-002
 - BR-CTR-004
 - BR-CTR-007

@@ -32,41 +32,46 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Form còn kiểm tra Version và Effective Date không rỗng; với file nhập mới, vẫn để Version trống theo hợp đồng import vì hệ thống quản lý phiên bản. Thiếu ngày hiệu lực thì hỏi lại, không bịa để thoả form.
 -->
 
-# BR-CTR-001
+# BR-RFQ-005
 
 ## Rule Info
 
-- **Name**: Admin quản lý nhà thầu; khách xem hồ sơ công khai.
-- **Category**: Nhà thầu
+- **Name**: Gửi email tiếp nhận và thông báo thay đổi lịch hoặc trạng thái cho khách.
+- **Category**: Mời báo giá
 - **Status**: Draft
 - **Version**:
 - **Effective Date**:
 - **Owner**: [Chưa xác định]
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
-- **Source**: Các quyết định người dùng xác nhận trong phiên bàn luận tính năng nhà thầu; trang tham khảo https://vnz-bmt-savico-abcxyz.vercel.app/vi/contractors/preview/firm/ctr-cattrang. Quyết định trong hội thoại được ưu tiên khi khác trang mẫu.
+- **Source**: Các quyết định người dùng xác nhận trong hội thoại chuẩn bị tính năng Mời báo giá ngày 03/10/2026. Người dùng đã chốt bộ US/BR và giao triển khai; chưa phê duyệt hoặc import trên hệ thống quản lý tài liệu.
 
 ## Statement
 
-Giai đoạn hiện tại chỉ admin tạo, cập nhật và xóa nhà thầu hoặc từng dự án đã thực hiện. Khách được xem danh sách và hồ sơ công khai mà không cần đăng nhập; tìm theo bán kính quanh công trình cần đăng nhập và chọn công trình của mình.
+Khách nhận email khi gửi lời mời thành công và khi người quản lý đổi lịch hoặc trạng thái. Email không chứa ghi chú nội bộ.
 
 ## When
 
-Người dùng quản lý hồ sơ, dự án, danh mục phạm vi thi công hoặc xem và tìm nhà thầu.
+Lời mời được tiếp nhận thành công hoặc lịch/trạng thái đã được cập nhật thành công.
 
 ## Then
 
-1. Chỉ admin được tạo và cập nhật hồ sơ nhà thầu, các dự án đã thực hiện, thông tin pháp lý, tài liệu hợp tác và danh mục phạm vi thi công.
-2. Khách chưa đăng nhập được xem danh sách và chi tiết nhà thầu đang hiển thị, gồm lọc theo loại công trình và phạm vi thi công.
-3. Khách tìm theo bán kính phải đăng nhập và chọn công trình thuộc tài khoản của mình.
-4. Admin được xóa nhà thầu khi nhà thầu chưa có lời mời báo giá ở bất kỳ trạng thái nào theo [BR-RFQ-006](BR-RFQ-006.md). Nhà thầu đã có lời mời chỉ được ẩn; lời mời vẫn được giữ. Admin vẫn được xóa từng dự án đã thực hiện. Người dùng khác không có quyền thực hiện các thao tác này trong giai đoạn hiện tại.
+1. Gửi email cho khách sau khi lời mời được tiếp nhận. Email giúp khách nhận biết hồ sơ, nhà thầu, ngày giờ đã đề nghị và trạng thái Đã gửi.
+2. Gửi email cho khách khi ngày hoặc giờ gặp thay đổi, thể hiện lịch hẹn mới nhất đã lưu.
+3. Gửi email cho khách khi trạng thái thay đổi, thể hiện trạng thái mới đã lưu.
+4. Ghi chú nội bộ không xuất hiện trong email. Chỉ sửa ghi chú nội bộ không phải sự kiện gửi email cho khách.
+5. Yêu cầu gửi hoặc cập nhật bị từ chối không được tạo email thông báo thành công. Bấm lưu khi lịch và trạng thái không đổi không được coi là một lần thay đổi.
+6. Người nhận là email trong tài khoản khách đã gửi lời mời. Không tự gửi email cho nhà thầu hoặc dùng địa chỉ liên hệ nhà thầu làm người nhận.
+7. Nếu gửi email lỗi sau khi đã tiếp nhận hoặc cập nhật thành công, giữ nguyên lời mời và thay đổi đã lưu. Hệ thống tự thử gửi lại; không yêu cầu khách gửi lại lời mời hoặc người quản lý lưu lại thay đổi để nhận email.
+8. Một lần lưu thay đổi cả lịch và trạng thái thì gửi một email tổng hợp chứa cả hai thay đổi, không tạo hai email riêng cho cùng lần lưu đó.
 
 ## Except
 
-Nhà thầu có tài khoản tự cập nhật hồ sơ là phạm vi mở rộng sau này; chưa cấp quyền hoặc xây luồng này trong giai đoạn hiện tại.
+Email gửi lỗi không đổi kết quả tiếp nhận hoặc cập nhật thành thất bại. Admin chủ động liên hệ nhà thầu bên ngoài hệ thống.
 
 ## Notes
 
-- Giữ yêu cầu mở rộng quyền cho tài khoản nhà thầu khi thiết kế kỹ thuật. Chưa chốt quan hệ tài khoản–nhà thầu hoặc cơ chế xét duyệt cho giai đoạn sau.
-- Mời báo giá, thêm vào so sánh và luồng xử lý đánh giá của khách nằm ngoài phạm vi. Mã quyền cụ thể sẽ được xác định trong TDD.
-- Người dùng đã chốt bộ US/BR trong hội thoại. Reviewer và Approver: Tân Trần. System Test được soạn theo phần nghiệp vụ đã chốt; chưa chạy kiểm thử hoặc triển khai code. Các điểm còn mở trong tài liệu không tự trở thành quy tắc đã xác nhận. Metadata người phụ trách và ngày hiệu lực còn thiếu; chưa thực hiện phê duyệt trên hệ thống quản lý tài liệu.
+- Phục vụ STORY-RFQ-001 và STORY-RFQ-002.
+- Người dùng đã xác nhận gửi đến email tài khoản khách, giữ yêu cầu hoặc thay đổi đã lưu khi gửi thư lỗi, tự thử lại và gộp email khi cùng một lần lưu đổi cả lịch lẫn trạng thái. Các quyết định này đã chuyển vào Then, không còn là đề xuất.
+- Không hứa email đến hộp thư ngay lập tức. Số lần thử, thời gian chờ và cách xử lý khi hết lượt thử thuộc thiết kế kỹ thuật; chưa tự đặt trong quy tắc nghiệp vụ.
+- Reviewer và Approver là Tân Trần theo xác nhận trong hội thoại. Owner và ngày hiệu lực chưa xác định. Người dùng đã chốt bộ US/BR này và giao triển khai. Đã soạn đặc tả System Test; chưa triển khai mã ứng dụng hoặc chạy kiểm thử. Status Draft không thay thế xác nhận hội thoại.

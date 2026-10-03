@@ -32,41 +32,44 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Form còn kiểm tra Version và Effective Date không rỗng; với file nhập mới, vẫn để Version trống theo hợp đồng import vì hệ thống quản lý phiên bản. Thiếu ngày hiệu lực thì hỏi lại, không bịa để thoả form.
 -->
 
-# BR-CTR-001
+# BR-RFQ-006
 
 ## Rule Info
 
-- **Name**: Admin quản lý nhà thầu; khách xem hồ sơ công khai.
-- **Category**: Nhà thầu
+- **Name**: Nhà thầu đã có lời mời chỉ được ẩn, không được xóa.
+- **Category**: Mời báo giá
 - **Status**: Draft
 - **Version**:
 - **Effective Date**:
 - **Owner**: [Chưa xác định]
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
-- **Source**: Các quyết định người dùng xác nhận trong phiên bàn luận tính năng nhà thầu; trang tham khảo https://vnz-bmt-savico-abcxyz.vercel.app/vi/contractors/preview/firm/ctr-cattrang. Quyết định trong hội thoại được ưu tiên khi khác trang mẫu.
+- **Source**: Các quyết định người dùng xác nhận trong hội thoại chuẩn bị tính năng Mời báo giá ngày 03/10/2026. Người dùng đã chốt bộ US/BR và giao triển khai; chưa phê duyệt hoặc import trên hệ thống quản lý tài liệu.
 
 ## Statement
 
-Giai đoạn hiện tại chỉ admin tạo, cập nhật và xóa nhà thầu hoặc từng dự án đã thực hiện. Khách được xem danh sách và hồ sơ công khai mà không cần đăng nhập; tìm theo bán kính quanh công trình cần đăng nhập và chọn công trình của mình.
+Nhà thầu có ít nhất một lời mời thì không được xóa. Admin được ẩn nhà thầu để ngừng công khai và ngừng nhận lời mời mới; lời mời cũ tiếp tục được giữ và xử lý.
 
 ## When
 
-Người dùng quản lý hồ sơ, dự án, danh mục phạm vi thi công hoặc xem và tìm nhà thầu.
+Admin ẩn, hiện lại hoặc xóa nhà thầu; khách gửi hoặc xem lời mời liên quan.
 
 ## Then
 
-1. Chỉ admin được tạo và cập nhật hồ sơ nhà thầu, các dự án đã thực hiện, thông tin pháp lý, tài liệu hợp tác và danh mục phạm vi thi công.
-2. Khách chưa đăng nhập được xem danh sách và chi tiết nhà thầu đang hiển thị, gồm lọc theo loại công trình và phạm vi thi công.
-3. Khách tìm theo bán kính phải đăng nhập và chọn công trình thuộc tài khoản của mình.
-4. Admin được xóa nhà thầu khi nhà thầu chưa có lời mời báo giá ở bất kỳ trạng thái nào theo [BR-RFQ-006](BR-RFQ-006.md). Nhà thầu đã có lời mời chỉ được ẩn; lời mời vẫn được giữ. Admin vẫn được xóa từng dự án đã thực hiện. Người dùng khác không có quyền thực hiện các thao tác này trong giai đoạn hiện tại.
+1. Khi nhà thầu đã có ít nhất một lời mời, từ chối xóa nhà thầu, kể cả khi tất cả lời mời đã Hoàn tất.
+2. Admin vẫn được ẩn nhà thầu. Nhà thầu ẩn không xuất hiện trong danh sách hoặc trang chi tiết công khai và không nhận lời mời mới.
+3. Ẩn nhà thầu không xóa lời mời, bản hồ sơ đã gửi hoặc lịch hẹn. Khách tiếp tục xem tiến độ; người có quyền tiếp tục xử lý yêu cầu.
+4. Các lời mời tới nhà thầu đã ẩn vẫn tính vào giới hạn của hồ sơ theo BR-RFQ-002.
+5. Cho phép hiện lại nhà thầu theo điều kiện hiển thị hiện có. Việc hiện lại không cho hồ sơ từng mời nhà thầu đó gửi thêm lần nữa.
+6. Nhà thầu chưa có lời mời vẫn được xóa theo quyền và điều kiện hiện có. Không dùng việc xóa lời mời làm cách vượt qua điều kiện giữ lịch sử.
 
 ## Except
 
-Nhà thầu có tài khoản tự cập nhật hồ sơ là phạm vi mở rộng sau này; chưa cấp quyền hoặc xây luồng này trong giai đoạn hiện tại.
+Điều kiện chặn xóa áp dụng khi đã có lời mời; không cấm xóa nhà thầu chưa có lời mời.
 
 ## Notes
 
-- Giữ yêu cầu mở rộng quyền cho tài khoản nhà thầu khi thiết kế kỹ thuật. Chưa chốt quan hệ tài khoản–nhà thầu hoặc cơ chế xét duyệt cho giai đoạn sau.
-- Mời báo giá, thêm vào so sánh và luồng xử lý đánh giá của khách nằm ngoài phạm vi. Mã quyền cụ thể sẽ được xác định trong TDD.
-- Người dùng đã chốt bộ US/BR trong hội thoại. Reviewer và Approver: Tân Trần. System Test được soạn theo phần nghiệp vụ đã chốt; chưa chạy kiểm thử hoặc triển khai code. Các điểm còn mở trong tài liệu không tự trở thành quy tắc đã xác nhận. Metadata người phụ trách và ngày hiệu lực còn thiếu; chưa thực hiện phê duyệt trên hệ thống quản lý tài liệu.
+- Phục vụ STORY-RFQ-001 và STORY-RFQ-002.
+- Thay đổi này bổ sung điều kiện cho thao tác xóa nhà thầu hiện có; không cấp quyền xóa nhà thầu cho mọi người có quyền quản lý lời mời.
+- Cần đồng bộ tài liệu quản lý nhà thầu, thao tác xóa trong ứng dụng và các test liên quan trước khi bàn giao triển khai. Thiết kế RFQ nằm trong [TDD-RFQ-001](../tdd/TDD-RFQ-001.md); các đặc tả ST-RFQ đã được soạn, chưa chạy kiểm thử.
+- Reviewer và Approver là Tân Trần theo xác nhận trong hội thoại. Owner và ngày hiệu lực chưa xác định. Người dùng đã chốt bộ US/BR này và giao triển khai. Đã soạn đặc tả System Test; chưa triển khai mã ứng dụng hoặc chạy kiểm thử. Status Draft không thay thế xác nhận hội thoại.

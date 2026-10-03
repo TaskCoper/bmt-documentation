@@ -36,7 +36,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Rule Info
 
-- **Name**: Chỉ khách hàng sở hữu được tạo, sửa và xóa công trình; chỉ sửa hoặc xóa được công trình không có gói giám sát giữ chỗ.
+- **Name**: Chỉ khách hàng sở hữu được tạo, sửa và xóa công trình; chỉ sửa hoặc xóa khi không có gói giữ chỗ; xóa còn cần chưa có lời mời báo giá.
 - **Category**: Công trình
 - **Status**: Draft
 - **Version**:
@@ -50,7 +50,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 **Cập nhật 25/09/2026:** Người dùng xác nhận khách không sửa hoặc xóa được công trình khi công trình có gói giám sát giữ chỗ, tức gói đã gán hoặc đã hoàn thành. Thay cho quy định cũ “sửa bất cứ lúc nào, chỉ xóa công trình chưa từng có gói”.
 
-Công trình thuộc tài khoản khách hàng đã tạo ra nó. Chỉ khách hàng đó được sửa hoặc xóa công trình, và chỉ khi công trình không có gói giám sát giữ chỗ.
+Công trình thuộc tài khoản khách hàng đã tạo ra nó. Chỉ khách hàng đó được sửa hoặc xóa công trình, và chỉ khi công trình không có gói giám sát giữ chỗ. Nếu đã có lời mời báo giá ở bất kỳ trạng thái nào, công trình không được xóa theo [BR-RFQ-003](BR-RFQ-003.md); điều kiện này không khóa sửa hồ sơ.
 
 ## When
 
@@ -61,7 +61,7 @@ Có yêu cầu tạo, sửa hoặc xóa công trình.
 1. Chỉ tài khoản khách hàng được tạo công trình. Công trình mới thuộc chính tài khoản gửi yêu cầu; không tạo công trình cho tài khoản khác.
 2. Chỉ khách hàng sở hữu được sửa hoặc xóa công trình. Từ chối yêu cầu của khách hàng khác và của mọi tài khoản nhân viên, kể cả Admin.
 3. Khách sửa được các trường hồ sơ không bị khóa bởi dự toán nguồn theo BR-SITE-004 khi công trình không có gói giám sát giữ chỗ theo [BR-SUB-006](BR-SUB-006.md). Công trình đang có gói đã gán hoặc đã hoàn thành thì mọi yêu cầu sửa bị từ chối. Gói đã bị gỡ theo [BR-SUB-026](BR-SUB-026.md) hoặc đã hủy theo [BR-SUB-024](BR-SUB-024.md) không khóa việc sửa.
-4. Khách xóa được công trình khi công trình không có gói giám sát giữ chỗ, kể cả công trình từng có gói nay đã bị gỡ hoặc đã hủy. Công trình đang có gói đã gán hoặc đã hoàn thành thì không xóa được. Xóa công trình không xóa lịch sử của các gói đã gỡ hoặc đã hủy; lịch sử vẫn giữ tên và địa chỉ công trình tại lúc gỡ hoặc hủy.
+4. Khách xóa được công trình khi chưa có lời mời báo giá và không có gói giám sát giữ chỗ, kể cả công trình từng có gói nay đã bị gỡ hoặc đã hủy. Công trình đang có gói đã gán hoặc đã hoàn thành thì không xóa được. Xóa công trình không xóa lịch sử của các gói đã gỡ hoặc đã hủy; lịch sử vẫn giữ tên và địa chỉ công trình tại lúc gỡ hoặc hủy.
 5. Công trình đã xóa không còn trong danh sách của khách và không nhận gói giám sát.
 6. Yêu cầu bị từ chối không thay đổi công trình hay gói.
 

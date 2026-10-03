@@ -32,41 +32,47 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Form còn kiểm tra Version và Effective Date không rỗng; với file nhập mới, vẫn để Version trống theo hợp đồng import vì hệ thống quản lý phiên bản. Thiếu ngày hiệu lực thì hỏi lại, không bịa để thoả form.
 -->
 
-# BR-CTR-001
+# BR-RFQ-002
 
 ## Rule Info
 
-- **Name**: Admin quản lý nhà thầu; khách xem hồ sơ công khai.
-- **Category**: Nhà thầu
+- **Name**: Giới hạn nhà thầu theo từng hồ sơ và áp dụng cấu hình hiện tại.
+- **Category**: Mời báo giá
 - **Status**: Draft
 - **Version**:
 - **Effective Date**:
 - **Owner**: [Chưa xác định]
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
-- **Source**: Các quyết định người dùng xác nhận trong phiên bàn luận tính năng nhà thầu; trang tham khảo https://vnz-bmt-savico-abcxyz.vercel.app/vi/contractors/preview/firm/ctr-cattrang. Quyết định trong hội thoại được ưu tiên khi khác trang mẫu.
+- **Source**: Các quyết định người dùng xác nhận trong hội thoại chuẩn bị tính năng Mời báo giá ngày 03/10/2026. Người dùng đã chốt bộ US/BR và giao triển khai; chưa phê duyệt hoặc import trên hệ thống quản lý tài liệu.
 
 ## Statement
 
-Giai đoạn hiện tại chỉ admin tạo, cập nhật và xóa nhà thầu hoặc từng dự án đã thực hiện. Khách được xem danh sách và hồ sơ công khai mà không cần đăng nhập; tìm theo bán kính quanh công trình cần đăng nhập và chọn công trình của mình.
+Mỗi hồ sơ mặc định được gửi lời mời đến tối đa 3 nhà thầu khác nhau. Mỗi cặp hồ sơ–nhà thầu chỉ có một lời mời. Giới hạn được lưu bằng cấu hình và áp dụng chung cho mọi hồ sơ ngay khi thay đổi.
 
 ## When
 
-Người dùng quản lý hồ sơ, dự án, danh mục phạm vi thi công hoặc xem và tìm nhà thầu.
+Khách gửi lời mời hoặc người có quyền thay đổi giới hạn.
 
 ## Then
 
-1. Chỉ admin được tạo và cập nhật hồ sơ nhà thầu, các dự án đã thực hiện, thông tin pháp lý, tài liệu hợp tác và danh mục phạm vi thi công.
-2. Khách chưa đăng nhập được xem danh sách và chi tiết nhà thầu đang hiển thị, gồm lọc theo loại công trình và phạm vi thi công.
-3. Khách tìm theo bán kính phải đăng nhập và chọn công trình thuộc tài khoản của mình.
-4. Admin được xóa nhà thầu khi nhà thầu chưa có lời mời báo giá ở bất kỳ trạng thái nào theo [BR-RFQ-006](BR-RFQ-006.md). Nhà thầu đã có lời mời chỉ được ẩn; lời mời vẫn được giữ. Admin vẫn được xóa từng dự án đã thực hiện. Người dùng khác không có quyền thực hiện các thao tác này trong giai đoạn hiện tại.
+1. Đếm số nhà thầu đã được mời theo từng hồ sơ, không cộng chung các hồ sơ của một khách. Giới hạn ban đầu là 3.
+2. Một hồ sơ đã gửi cho nhà thầu A thì không được tạo lời mời thứ hai cho A, kể cả yêu cầu trước đã Hoàn tất hoặc nhà thầu đã bị ẩn rồi hiện lại.
+3. Chỉ nhận lời mời tới nhà thầu chưa từng được mời khi số nhà thầu đã mời của hồ sơ còn nhỏ hơn giới hạn hiện hành.
+4. Mọi lời mời đã tiếp nhận đều tính vào giới hạn, không phụ thuộc trạng thái. Đổi trạng thái, đổi lịch hoặc ẩn nhà thầu không hoàn lại lượt.
+5. Giới hạn là cấu hình dùng chung có thể thay đổi, không phải giá trị cố định chỉ được sửa trong mã ứng dụng và không cố định theo ngày tạo hồ sơ.
+6. Tăng từ 3 lên 5 cho phép hồ sơ đã mời 3 nhà thầu mời thêm tối đa 2 nhà thầu khác. Vẫn không được gửi lại cho nhà thầu cũ.
+7. Giảm từ 3 xuống 2 giữ nguyên các lời mời đã có. Hồ sơ đã mời 2 hoặc nhiều hơn bị chặn gửi thêm; không tự xóa lời mời để đưa số đã gửi về giới hạn mới.
+8. Quy tắc không trùng và không vượt giới hạn phải đúng cả khi có nhiều yêu cầu gửi đồng thời. Yêu cầu bị từ chối không tạo lời mời hoặc tiêu tốn thêm lượt.
+9. Giới hạn phải là số nguyên từ 1 trở lên. Từ chối 0, số âm và số không nguyên; không tự làm tròn hoặc dùng 0 để tạm ngừng gửi hay biểu thị không giới hạn. Thay đổi bị từ chối giữ nguyên cấu hình đang dùng.
+10. Admin và người được cấp quyền cấu hình riêng được sửa giới hạn. Quyền quản lý lời mời không tự bao gồm quyền cấu hình; người không có quyền cấu hình bị từ chối thay đổi.
 
 ## Except
 
-Nhà thầu có tài khoản tự cập nhật hồ sơ là phạm vi mở rộng sau này; chưa cấp quyền hoặc xây luồng này trong giai đoạn hiện tại.
+Số lời mời cũ được phép lớn hơn giới hạn mới sau khi giảm cấu hình; đây không phải quyền gửi thêm.
 
 ## Notes
 
-- Giữ yêu cầu mở rộng quyền cho tài khoản nhà thầu khi thiết kế kỹ thuật. Chưa chốt quan hệ tài khoản–nhà thầu hoặc cơ chế xét duyệt cho giai đoạn sau.
-- Mời báo giá, thêm vào so sánh và luồng xử lý đánh giá của khách nằm ngoài phạm vi. Mã quyền cụ thể sẽ được xác định trong TDD.
-- Người dùng đã chốt bộ US/BR trong hội thoại. Reviewer và Approver: Tân Trần. System Test được soạn theo phần nghiệp vụ đã chốt; chưa chạy kiểm thử hoặc triển khai code. Các điểm còn mở trong tài liệu không tự trở thành quy tắc đã xác nhận. Metadata người phụ trách và ngày hiệu lực còn thiếu; chưa thực hiện phê duyệt trên hệ thống quản lý tài liệu.
+- Phục vụ STORY-RFQ-001 và STORY-RFQ-003.
+- Người dùng đã xác nhận giới hạn là số nguyên từ 1 trở lên và quyền sửa cấu hình ở khoản 9–10. Giới hạn biểu diễn kỹ thuật và mã quyền cụ thể sẽ được xác định trong TDD; không tự đặt trần nghiệp vụ. Giá trị mặc định 3 và cách áp dụng khi tăng/giảm cũng đã được xác nhận.
+- Reviewer và Approver là Tân Trần theo xác nhận trong hội thoại. Owner và ngày hiệu lực chưa xác định. Người dùng đã chốt bộ US/BR này và giao triển khai. Đã soạn đặc tả System Test; chưa triển khai mã ứng dụng hoặc chạy kiểm thử. Status Draft không thay thế xác nhận hội thoại.

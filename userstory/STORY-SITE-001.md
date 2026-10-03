@@ -93,10 +93,10 @@ Khách sửa hồ sơ công trình không có gói giữ chỗ; các trường l
 
 #### ALT-03
 
-Khách xóa công trình không có gói giữ chỗ.
+Khách xóa công trình chưa có lời mời báo giá và không có gói giữ chỗ.
 
 1. Khách yêu cầu xóa công trình.
-2. Hệ thống kiểm tra công trình không có gói đã gán hoặc đã hoàn thành theo BR-SITE-002. Công trình chưa từng có gói, hoặc chỉ có gói đã gỡ hay đã hủy, đều xóa được.
+2. Hệ thống kiểm tra công trình chưa có lời mời báo giá theo BR-RFQ-003 và không có gói đã gán hoặc đã hoàn thành theo BR-SITE-002. Khi chưa có lời mời, công trình chưa từng có gói hoặc chỉ có gói đã gỡ hay đã hủy đều xóa được.
 3. Hệ thống xóa công trình. Công trình không còn trong danh sách và không nhận gói giám sát được nữa. Lịch sử của các gói đã gỡ hoặc đã hủy vẫn giữ tên và địa chỉ công trình tại lúc gỡ hoặc hủy. Nếu có dự toán nguồn, xóa công trình giải phóng liên kết; không xóa dự toán nguồn.
 
 #### ALT-04
@@ -261,14 +261,14 @@ Trong các AC dưới đây, dữ liệu không được nêu là thiếu/sai đ
 
 #### AC-014
 
-- **Given**: Công trình B của U1 chưa từng có gói giám sát gắn vào.
+- **Given**: Công trình B của U1 chưa từng có gói giám sát gắn vào và chưa có lời mời báo giá.
 - **When**: U1 xóa B.
 - **Then**: Xóa thành công; B không còn trong danh sách của U1.
 - **And**: Yêu cầu gắn gói giám sát vào B sau đó bị từ chối.
 
 #### AC-015
 
-- **Given**: Công trình A của U1 có gói G1 đã hoàn thành; công trình B từng có gói G2 gắn vào, nay G2 đã hủy và B không có gói giữ chỗ.
+- **Given**: Công trình A của U1 có gói G1 đã hoàn thành; công trình B từng có gói G2 gắn vào, nay G2 đã hủy, B không có gói giữ chỗ và chưa có lời mời báo giá.
 - **When**: U1 lần lượt yêu cầu xóa A và B.
 - **Then**: Xóa A bị từ chối vì G1 đã hoàn thành vẫn giữ chỗ; xóa B thành công.
 - **And**: A và G1 giữ nguyên; G2 vẫn ở trạng thái đã hủy và lịch sử của G2 giữ tên, địa chỉ của B tại lúc hủy.
@@ -434,6 +434,7 @@ Trong các AC dưới đây, dữ liệu không được nêu là thiếu/sai đ
 
 - BR-SITE-001/Then
 - BR-SITE-002/Then
+- BR-RFQ-003/Then: Giữ hồ sơ gốc khi đã có lời mời báo giá.
 - BR-SITE-003/Then
 - BR-RBAC-005/Then
 - BR-RBAC-011/Then

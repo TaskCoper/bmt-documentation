@@ -35,7 +35,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# ST-SITE-014
+# ST-RFQ-019
 
 ## System Test
 
@@ -44,11 +44,9 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-SITE-014 | STORY-SITE-001 | ALT | REGRESSION | P1 | Công trình B của khách U1 chưa từng có gói giám sát gắn vào và chưa có lời mời báo giá. U1 có gói giám sát G4 chưa gán, còn hạn gán. Hồ sơ thử được chuẩn bị đủ trường mới theo dữ liệu nền; giữ các quyền/gói của riêng ca. | 1. U1 xóa công trình B.<br>2. U1 mở lại danh sách công trình.<br>3. U1 gửi thẳng yêu cầu gắn G4 vào B tới API. | B “Nhà vườn Củ Chi”; G4 là gói giám sát thử.<br>Dữ liệu nền (nguồn, tệp, gói và trường thay đổi lấy theo Precondition/Steps của từng ca): tên riêng không trùng; diện tích đất 100.25 m²; hiện trạng Đất trống đang cho chọn; ngân sách 2000000000 VND; khởi công Trong 1–3 tháng tới; Nhà phố, 3 tầng, Không tum, một phong cách kiến trúc và một nội thất hợp lệ theo cấu hình R1; địa chỉ P1/X1/12 Đường A; tọa độ (10,106); không tệp. P1/X1 là bí danh cho mã tỉnh/xã hợp lệ, X1 thuộc P1; chuẩn bị danh mục và nguồn địa chỉ thử, không gửi bí danh làm mã API. Các trường không được nêu là thiếu/sai luôn đầy đủ; riêng ca thiếu tọa độ bỏ đúng trường đang kiểm. Các chuỗi địa chỉ minh họa cũ là phần Số nhà–đường; chọn riêng tỉnh/xã hợp lệ. Khi đổi địa chỉ, gửi đủ tọa độ mới, trừ ca cố ý kiểm thiếu tọa độ. | Bước 1 thành công. B không còn trong danh sách của U1. Yêu cầu ở bước 3 bị từ chối; G4 vẫn chưa gán và giữ nguyên hạn gán ban đầu. | STORY-SITE-001/AC-014<br>STORY-SITE-001/ALT-03<br>BR-SITE-002/Then<br>BR-SUB-022/Then | Công trình không có gói giữ chỗ thì xóa được, ở đây là công trình chưa từng có gói; công trình đã xóa không nhận gói. Đặc tả chưa chạy. Đã cập nhật fixture hồ sơ mở rộng sau khi người dùng chốt US/BR ngày 01/10/2026; chưa chạy. | [Chưa xác định] | Draft |
+| ST-RFQ-019 | STORY-RFQ-002 | ALT | FULL | P1 | Môi trường riêng có API, PostgreSQL và SMTP thử; dữ liệu minh họa. Lời mời đã Hoàn tất. | 1. M sửa lịch khi R1 Hoàn tất rồi sửa ghi chú nội bộ.<br>2. Đọc lại R1 và so dữ liệu bất biến với trước thao tác.<br>3. Kiểm trạng thái Hoàn tất không chặn sửa và không đổi số điện thoại/ghi chú khảo sát. | R1 Hoàn tất; dữ liệu khách gửi đã ghi lại để so sánh. | Vẫn được sửa theo BR-RFQ-004. Không thay đổi hồ sơ, nhà thầu, số điện thoại và ghi chú khảo sát do khách đã gửi. | STORY-RFQ-002/AC-007<br>BR-RFQ-004/Then | Kiểm hành vi đầu cuối và dữ liệu đọc lại theo tiêu chí đã chốt; không chỉ kiểm mã thành công. | [Chưa phân công] | Draft |
 
 ## TEST_LINKS
 
-- STORY-SITE-001/AC-014
-- STORY-SITE-001/ALT-03
-- BR-SITE-002/Then
-- BR-SUB-022/Then
+- STORY-RFQ-002/AC-007
+- BR-RFQ-004/Then
