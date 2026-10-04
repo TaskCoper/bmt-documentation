@@ -66,7 +66,7 @@ Admin mở danh sách quản trị nhà thầu để tạo, cập nhật, xóa h
 
 ### Main Flow
 
-1. Admin nhập tên công ty. Admin có thể bổ sung ngay hoặc sau khi lưu: địa chỉ, tỉnh/thành, kinh độ, vĩ độ, các loại công trình và phạm vi thi công nhà thầu nhận làm.
+1. Admin nhập tên công ty. Admin có thể bổ sung ngay hoặc sau khi lưu: địa chỉ tách tỉnh/thành, phường/xã, số nhà–đường, kinh độ, vĩ độ, các loại công trình và phạm vi thi công nhà thầu nhận làm.
 2. Admin nhập các phần tùy chọn: giới thiệu, thông tin và ảnh doanh nghiệp, khu vực phục vụ, thời gian khảo sát, nhận dự án, bảo hành, điểm và số lượt đánh giá.
 3. Admin có thể bổ sung thông tin pháp nhân, giấy phép, cam kết/bảo hành, bảo hiểm công trình và hợp tác theo BR-CTR-004. Ảnh và bản scan mở cho người có URL; khi ẩn hồ sơ, URL đã chia sẻ vẫn đọc được. Người liên hệ, số điện thoại và email dành cho admin.
 4. Hệ thống lưu hồ sơ mới với trạng thái mặc định Ẩn. Hồ sơ chưa được công khai sau bước tạo.
@@ -190,13 +190,38 @@ Hồ sơ thiếu trường bắt buộc khi đưa lên web.
 - **Then**: Hệ thống từ chối và giữ dữ liệu đã lưu.
 - **And**: Không suy đoán tỉnh từ địa chỉ hoặc tự gán miền mặc định.
 
+#### AC-012
+
+- **Given**: Admin bổ sung địa chỉ công ty cho nhà thầu.
+- **When**: Admin chọn tỉnh/thành, chọn phường/xã thuộc tỉnh và nhập số nhà–đường.
+- **Then**: Hệ thống lưu riêng các phần địa chỉ, mã và tên tỉnh/phường đã xác minh cùng phiên bản danh mục.
+- **And**: Địa chỉ đầy đủ để hiển thị được ghép từ ba phần; miền vẫn xác định từ mã tỉnh.
+
+#### AC-013
+
+- **Given**: Admin gửi phường/xã không thuộc tỉnh đã chọn.
+- **When**: Hệ thống xử lý lần lưu.
+- **Then**: Từ chối và chỉ rõ lựa chọn không hợp lệ; không ghi một phần thay đổi.
+- **And**: Form đổi tỉnh phải bỏ lựa chọn phường cũ và dùng nguồn địa chỉ chung với dự toán/công trình.
+
+#### AC-014
+
+- **Given**: Có hồ sơ nhà thầu cũ chỉ lưu địa chỉ dạng chữ.
+- **When**: Triển khai phần địa chỉ tách riêng và đọc hồ sơ cũ.
+- **Then**: Giữ nguyên địa chỉ, tọa độ và trạng thái đã lưu; không tự suy đoán phường hoặc số nhà–đường.
+- **And**: Khi sửa trường khác, giữ địa chỉ đã lưu; chuyển sang ba phần bằng bộ địa chỉ đầy đủ. Chỉ hồ sơ Hidden được xóa toàn bộ địa chỉ theo TDD-CTR-003.
+
 ## References
 
 ### TDDs
 
+- [TDD-CTR-003](../tdd/TDD-CTR-003.md): bổ sung địa chỉ ba phần đã được người dùng chốt.
+
 - [TDD-CTR-001](../tdd/TDD-CTR-001.md)
 
 ### Rules
+
+- [BR-CTR-009](../businessrule/BR-CTR-009.md): địa chỉ ba phần; giữ riêng các đề xuất chưa chốt.
 
 - [BR-CTR-008](../businessrule/BR-CTR-008.md)
 
@@ -212,6 +237,8 @@ Hồ sơ thiếu trường bắt buộc khi đưa lên web.
 - STORY-CTR-003: Cấu hình danh mục phạm vi thi công.
 
 ## Non-Functional
+
+- Địa chỉ ba phần được người dùng yêu cầu ngày 2026-10-04. Các chi tiết tương thích và điều kiện lưu ở TDD-CTR-003/BR-CTR-009 đã được người dùng chốt và triển khai trong workspace. Kết quả kiểm backend nằm ở TDD-CTR-003/References; ST-CTR-041 đến ST-CTR-046 chưa được chạy đầy đủ qua giao diện.
 
 - Kiểm thử bổ sung cho tỉnh/miền: [ST-CTR-035](../systemtest/ST-CTR-035.md), [ST-CTR-036](../systemtest/ST-CTR-036.md). Đặc tả chưa chạy.
 

@@ -53,6 +53,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ### Problem
 
+Bổ sung ngày 2026-10-04: [TDD-CTR-003](TDD-CTR-003.md) mô tả địa chỉ nhà thầu tách tỉnh/phường/số nhà–đường đã được người dùng chốt và triển khai trong workspace. Bản bổ sung quy định phần lưu tên tỉnh/phường và nguồn danh mục thay cho cách chỉ chọn tỉnh bên dưới. Kết quả kiểm chứng mới nằm ở TDD-CTR-003/References; kết quả ngày 03/10 là bằng chứng của đợt trước.
+
 Bổ sung ngày 2026-10-03: người dùng đã chốt US/BR về bảng mã tỉnh và bộ lọc ba miền. Phần thiết kế mới ở đây đã được người dùng đồng ý bổ sung trong hội thoại và đã triển khai trong workspace; chưa phát hành lên môi trường chung. Xác nhận TDD lịch sử bên dưới chỉ áp dụng phần cũ.
 
 
