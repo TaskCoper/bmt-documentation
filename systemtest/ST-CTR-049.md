@@ -35,7 +35,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# ST-CTR-013
+# ST-CTR-049
 
 ## System Test
 
@@ -44,11 +44,9 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-CTR-013 | STORY-CTR-002 | ALT | REGRESSION | P1 | Môi trường thử có frontend, API và database thật; dữ liệu riêng cho từng ca. A công khai có P và Q; admin đăng nhập. | 1. Sửa P; kiểm loại công trình và số tầng/tum theo catalog dùng chung, phạm vi theo danh mục admin.<br>2. Đổi loại: giữ tầng còn hợp lệ, xoá tầng ngoài cấu hình; loại không áp dụng tầng/tum khoá trường. Chọn lại B1, 2 tầng, Không tum, S1; thay ảnh và bổ sung vai trò, năm hoàn thành; lưu rồi mở lại.<br>3. Khách chưa đăng nhập mở danh sách dự án và chi tiết P, Q; lọc theo loại công trình.<br>4. Đối chiếu request, database và nội dung công khai; kiểm chỉ mở lại form không tự xoá giá trị lịch sử. | B1: floorsEnabled/tumEnabled=true, floorCounts=[1,2,3]; B2: floorCounts=[1,3]; B3: không áp dụng tầng/tum. S1 đang dùng, S2 ngừng dùng đã gắn trên Q. P: B1, S1, hai ảnh, 40 m², 2 tầng, Không tum, năm 2023, tổng thầu; một dự án cũ có tầng ngoài cấu hình mới. | Cả P và Q được xem; P thể hiện nội dung mới và ảnh đúng. Loại/số tầng/tum dùng cấu hình catalog; đổi loại giữ hoặc xoá lựa chọn đúng điều kiện. Không tum lưu hasAttic=false và đọc lại đúng; để trống gửi null. Tên loại/phạm vi hiển thị theo DTO, bộ lọc loại dùng GUID. Phạm vi ngừng dùng đã gắn vẫn hiển thị, không được chọn mới. Giá trị lịch sử không bị xoá chỉ vì mở lại. Mỗi dự án đúng một loại và một phạm vi; không cần bật hiển thị hay xác minh từng dự án. | STORY-CTR-002/AC-003<br>STORY-CTR-002/AC-004<br>STORY-CTR-002/ALT-01<br>BR-CTR-003/Then | Sửa và xem toàn bộ dự án. Đặc tả chưa chạy. Có thể tự động hóa sau khi chốt TDD/contract; kiểm tra bản đồ bằng UI. Mã HTTP/lỗi cụ thể theo TDD, chưa tự đặt ở đây. Dọn dữ liệu fixture sau ca. | [Chưa xác định] | Draft |
+| ST-CTR-049 | STORY-CTR-004 | Main | REGRESSION | P1 | Landing chế độ API thật; backend hỗ trợ query mới, có dữ liệu phù hợp | 1. Chọn Trệt + 2 lầu<br>2. Chọn 5–15 dự án tương tự<br>3. Bấm lại để bỏ<br>4. Chọn Không yêu cầu | Query floorCount=3,min=5,max=15; có/không chọn loại | Nút bật được; API nhận đúng query; bỏ lựa chọn bỏ query tương ứng; Không yêu cầu không gửi min/max; cache không lẫn lựa chọn; không tự lấy loại/tầng từ hồ sơ khách | STORY-CTR-004/AC-016; STORY-CTR-004/AC-014 | Kiểm nối UI và hành vi bật/tắt | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- STORY-CTR-002/AC-003
-- STORY-CTR-002/AC-004
-- STORY-CTR-002/ALT-01
-- BR-CTR-003/Then
+- STORY-CTR-004/AC-016
+- STORY-CTR-004/AC-014

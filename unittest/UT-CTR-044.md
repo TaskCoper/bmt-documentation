@@ -11,13 +11,11 @@
 -->
 
 <!-- Mỗi file chứa một test, đúng một dòng dữ liệu và 13 cột theo thứ tự bên dưới.
-Thay ST-001 ở heading và Test ID, STORY-001 bằng mã Story cần kiểm thử.
-Trong ô bảng: xuống dòng bằng <br>, dấu | viết thành \|. Steps gồm các bước đánh số.
-Loại: Main / ALT / EXC / NFR / Integration boundary; ghép nhiều loại bằng dấu /.
-Suite: SMOKE / REGRESSION / FULL. Priority: P0 / P1 / P2 / P3.
+Thay UT-001 ở heading và Test ID. Trong ô bảng: xuống dòng bằng <br>, dấu | viết thành \|.
+Loại: Happy / Branch / Boundary / Error / Quirk / Determinism. Suite: SMOKE / REGRESSION / FULL. Priority: P0 / P1 / P2 / P3.
 TEST_LINKS là nguồn liên kết khi import; cột Trace to chỉ để đọc. Giữ hai nơi nhất quán.
-Owner là tên hiển thị; phê duyệt thực hiện sau import.
-Steps và Expected result phải bám Flow, AC và Business Rule của Story có thật. Test data là dữ liệu kiểm thử minh hoạ; không tự thêm hành vi nghiệp vụ hoặc ghi Pass/đã chạy nếu chưa có bằng chứng thực thi.
+Mỗi liên kết dùng DOC-KEY/section: ghi chú. Owner là tên hiển thị; phê duyệt thực hiện sau import.
+Expected output và assertion phải suy ra từ Business Rule/contract đã xác nhận. Dữ liệu mock chỉ là dữ liệu kiểm thử minh hoạ, không phải dữ liệu production; không ghi Pass/đã chạy nếu chưa có bằng chứng thực thi.
 BẮT BUỘC KHI HOÀN THIỆN MẪU: phải có cả Reviewer và Approver, mỗi tên 1–200 ký tự sau khi bỏ khoảng trắng đầu/cuối. Không xoá hai dòng metadata, để trống, dùng tên bịa hoặc giữ placeholder rồi coi là hoàn tất.
 Nếu chưa biết người review hoặc người phê duyệt, phải hỏi người dùng và báo tài liệu chưa đủ thông tin; không tự lấy Author/Owner làm người thay thế. Tên trong file không tự gán tài khoản hoặc xác nhận đã duyệt; gán thành viên trên giao diện sau import.
 Đây là yêu cầu hoàn thiện mẫu; backend hiện vẫn nhận file cũ thiếu hai trường để tương thích.
@@ -29,26 +27,24 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Không dùng Status trong Markdown hoặc tên Approver để tự xác nhận phê duyệt; import không cấp quyền hay gán tài khoản từ tên. Chạy Kiểm tra file và xử lý lỗi/cảnh báo trước khi nhập.
 - Giới hạn độ dài bên dưới tính theo string.Length của .NET (đơn vị UTF-16); không tự cắt ngắn dữ kiện quan trọng để vượt validation, hãy viết lại có căn cứ hoặc hỏi người dùng.
 - Bảng phải có header, dòng phân cách và đúng một dòng dữ liệu, đủ 13 cột theo thứ tự mẫu. Reviewer/Approver là hai bullet trước bảng, không thêm thành cột. Test ID trong bảng phải nhất quán với heading; mã tài liệu import lấy từ heading.
-- Story tối đa 100 ký tự và được dùng làm tiêu đề tài liệu; Owner tối đa 200. Trạng thái parser nhận: Draft / Approved; đây không phải kết quả chạy test hoặc quyền phê duyệt.
-- Giữ Loại: Main / ALT / EXC / NFR / Integration boundary, có thể ghép bằng dấu /; Suite: SMOKE / REGRESSION / FULL; Priority: P0 / P1 / P2 / P3. Không dùng số ngoài dải Priority 0–3.
-- Steps là các bước đánh số trong một ô, tách bằng <br>; không xuống dòng vật lý trong ô, dấu | trong nội dung phải viết \|. TEST_LINKS mới là nguồn liên kết import; cột Trace to chỉ hiển thị, hai nơi phải nhất quán.
+- Module tối đa 200 ký tự; Unit under test tối đa 500 (được dùng làm tiêu đề tài liệu); Owner tối đa 200. Trạng thái parser nhận: Draft / Approved; đây không phải kết quả chạy test hoặc quyền phê duyệt.
+- Giữ Loại: Happy / Branch / Boundary / Error / Quirk / Determinism; Suite: SMOKE / REGRESSION / FULL; Priority: P0 / P1 / P2 / P3. Không dùng số ngoài dải Priority 0–3.
+- Không xuống dòng vật lý trong ô: dùng <br>; dấu phân cột trong nội dung phải viết \|. TEST_LINKS mới là nguồn liên kết import; cột Trace to chỉ hiển thị, hai nơi phải nhất quán.
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# ST-CTR-013
+# UT-CTR-044
 
-## System Test
+## Unit Test
 
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
 
-| Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
+| Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-CTR-013 | STORY-CTR-002 | ALT | REGRESSION | P1 | Môi trường thử có frontend, API và database thật; dữ liệu riêng cho từng ca. A công khai có P và Q; admin đăng nhập. | 1. Sửa P; kiểm loại công trình và số tầng/tum theo catalog dùng chung, phạm vi theo danh mục admin.<br>2. Đổi loại: giữ tầng còn hợp lệ, xoá tầng ngoài cấu hình; loại không áp dụng tầng/tum khoá trường. Chọn lại B1, 2 tầng, Không tum, S1; thay ảnh và bổ sung vai trò, năm hoàn thành; lưu rồi mở lại.<br>3. Khách chưa đăng nhập mở danh sách dự án và chi tiết P, Q; lọc theo loại công trình.<br>4. Đối chiếu request, database và nội dung công khai; kiểm chỉ mở lại form không tự xoá giá trị lịch sử. | B1: floorsEnabled/tumEnabled=true, floorCounts=[1,2,3]; B2: floorCounts=[1,3]; B3: không áp dụng tầng/tum. S1 đang dùng, S2 ngừng dùng đã gắn trên Q. P: B1, S1, hai ảnh, 40 m², 2 tầng, Không tum, năm 2023, tổng thầu; một dự án cũ có tầng ngoài cấu hình mới. | Cả P và Q được xem; P thể hiện nội dung mới và ảnh đúng. Loại/số tầng/tum dùng cấu hình catalog; đổi loại giữ hoặc xoá lựa chọn đúng điều kiện. Không tum lưu hasAttic=false và đọc lại đúng; để trống gửi null. Tên loại/phạm vi hiển thị theo DTO, bộ lọc loại dùng GUID. Phạm vi ngừng dùng đã gắn vẫn hiển thị, không được chọn mới. Giá trị lịch sử không bị xoá chỉ vì mở lại. Mỗi dự án đúng một loại và một phạm vi; không cần bật hiển thị hay xác minh từng dự án. | STORY-CTR-002/AC-003<br>STORY-CTR-002/AC-004<br>STORY-CTR-002/ALT-01<br>BR-CTR-003/Then | Sửa và xem toàn bộ dự án. Đặc tả chưa chạy. Có thể tự động hóa sau khi chốt TDD/contract; kiểm tra bản đồ bằng UI. Mã HTTP/lỗi cụ thể theo TDD, chưa tự đặt ở đây. Dọn dữ liệu fixture sau ca. | [Chưa xác định] | Draft |
+| UT-CTR-044 | Contractor | ContractorFilterRules.Validate | Boundary | REGRESSION | P1 | Không cần DB | floorCount 1/3; min/max 0–4,5–15,16–null; sai 0 tầng, âm, min>max | Biên hợp lệ được chấp nhận; sai trả ValidationException, InvalidContractorFilter | BR-CTR-005/Then; TDD-CTR-002/Architecture | Bảo vệ cả caller không qua HTTP | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- STORY-CTR-002/AC-003
-- STORY-CTR-002/AC-004
-- STORY-CTR-002/ALT-01
-- BR-CTR-003/Then
+- BR-CTR-005/Then
+- TDD-CTR-002/Architecture

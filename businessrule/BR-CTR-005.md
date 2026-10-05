@@ -36,7 +36,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Rule Info
 
-- **Name**: Lọc danh sách theo các mảng GUID của năng lực nhà thầu.
+- **Name**: Lọc danh sách theo năng lực nhà thầu, số tầng và kinh nghiệm dự án tương tự.
 - **Category**: Nhà thầu
 - **Status**: Draft
 - **Version**:
@@ -48,11 +48,11 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Statement
 
-Không có query lọc thì lấy toàn bộ nhà thầu đang hiển thị. Query loại công trình và query phạm vi thi công đều nhận mảng GUID; khớp ít nhất một giá trị trong mỗi mảng và đáp ứng cả hai nhóm khi truyền cả hai.
+Không có query lọc thì lấy toàn bộ nhà thầu đang hiển thị. Query loại công trình và phạm vi thi công nhận mảng GUID, OR trong mỗi nhóm và AND giữa các nhóm. Bộ lọc số tầng và kinh nghiệm tương tự bổ sung điều kiện từ các dự án đã thực hiện theo loại công trình và số tầng đang chọn.
 
 ## When
 
-Khách lấy danh sách nhà thầu có hoặc không có query loại công trình và phạm vi thi công.
+Khách lấy danh sách nhà thầu có hoặc không có query năng lực, số tầng và mức kinh nghiệm dự án tương tự.
 
 ## Then
 
@@ -60,15 +60,22 @@ Khách lấy danh sách nhà thầu có hoặc không có query loại công tr�
 2. Loại công trình và phạm vi thi công là hai query độc lập, mỗi query nhận mảng GUID của danh mục tương ứng.
 3. Với mỗi mảng được truyền, nhà thầu phải nhận ít nhất một giá trị trong mảng đó.
 4. Nếu truyền cả hai mảng, nhà thầu phải khớp ít nhất một loại công trình và ít nhất một phạm vi thi công được yêu cầu.
-5. Áp dụng bộ lọc trên các danh mục admin chọn trực tiếp trong hồ sơ nhà thầu; không lọc theo các dự án đã thực hiện.
+5. Riêng bộ lọc loại công trình và phạm vi thi công áp dụng trên các danh mục admin chọn trực tiếp trong hồ sơ nhà thầu. Khi chỉ chọn các bộ lọc này, không yêu cầu có dự án đã thực hiện khớp.
 6. Nếu có query bán kính, kết hợp điều kiện bán kính theo BR-CTR-006 với các query danh mục được truyền.
 7. Nếu chọn miền Bắc, Trung hoặc Nam, kết hợp thêm điều kiện tỉnh của nhà thầu thuộc miền đó theo BR-CTR-008. Không chọn miền thì không loại nhà thầu vì thiếu tỉnh.
+
+8. Bộ lọc quy mô (số tầng) tìm trong dự án đã thực hiện của nhà thầu; phải có ít nhất một dự án khớp số tầng đang chọn. Tính cả tầng trệt: Trệt là 1 tầng, Trệt + 2 lầu là 3 tầng. Dự án chưa có số tầng không khớp bộ lọc số tầng.
+9. Khi chọn cả loại công trình và số tầng, dự án tương tự phải khớp cả hai trên cùng một dự án; với nhiều loại, chỉ cần khớp một loại. Chỉ chọn một tiêu chí thì đếm các dự án khớp tiêu chí đó. Chưa chọn cả hai thì đếm toàn bộ dự án nhà thầu.
+10. Kinh nghiệm dự án tương tự lọc theo số dự án của mục 9: Không yêu cầu không áp giới hạn; Dưới 5 là 0–4; 5–15 bao gồm hai mốc 5 và 15; Trên 15 là từ 16. Đã chọn số tầng vẫn phải thỏa yêu cầu ít nhất một dự án khớp ở mục 8, dù khoảng kinh nghiệm có chứa 0.
+11. Hai bộ lọc dự án là tùy chọn, không tự lấy loại/số tầng từ hồ sơ khách đang chọn và không yêu cầu đăng nhập khi không dùng bán kính. Kết hợp AND với các bộ lọc đang dùng. Đếm trực tiếp dự án còn tồn tại; không đếm ảnh hoặc dự án nhà thầu khác. Bấm lại lựa chọn đang bật để bỏ bộ lọc đó.
 
 ## Except
 
 [Chưa xác định: mảng rỗng, GUID không tồn tại hoặc không hợp lệ; cách phân trang và thứ tự trả danh sách.]
 
 ## Notes
+
+- Bổ sung mục 8–11 theo yêu cầu và câu trả lời người dùng ngày 2026-10-05: khớp loại công trình và số tầng đang chọn; chưa chọn tiêu chí nào thì đếm tất cả dự án. Đếm dự án không suy ra từ năng lực khai báo hoặc số tầng tối đa công ty có thể thi công.
 
 - [BR-CTR-008](BR-CTR-008.md): bảng ánh xạ 34 mã tỉnh và quy tắc lọc miền; phần bổ sung đã được người dùng chốt trong hội thoại.
 

@@ -60,7 +60,7 @@ Bổ sung ngày 2026-10-03: người dùng đã chốt US/BR về bảng mã t�
 
 Người dùng đã chốt bản TDD sau lượt rà soát bằng phản hồi “Ok chốt”. Đây là xác nhận thiết kế trong hội thoại; Status vẫn Draft vì chưa phê duyệt trên hệ thống quản lý tài liệu. Hợp đồng cụ thể với kho tệp và kiểm chứng trên môi trường thật vẫn là việc cần làm khi tích hợp.
 
-STORY-CTR-004 cho phép khách xem hồ sơ không cần đăng nhập. Hai nhóm lọc là mảng GUID; OR trong từng nhóm và AND giữa các nhóm. Chỉ khi chọn công trình để tìm theo bán kính mới yêu cầu phiên khách. Nguồn lọc là năng lực admin chọn cho công ty, không phải lịch sử dự án.
+STORY-CTR-004 cho phép khách xem hồ sơ không cần đăng nhập. Hai nhóm lọc là mảng GUID; OR trong từng nhóm và AND giữa các nhóm. Chỉ khi chọn công trình để tìm theo bán kính mới yêu cầu phiên khách. Nguồn lọc loại công trình/phạm vi là năng lực admin chọn cho công ty. Bộ lọc số tầng và kinh nghiệm tương tự bổ sung ngày 2026-10-05 đọc lịch sử dự án theo BR-CTR-005/Then mục 8–11.
 
 Dữ liệu nền theo TDD-CTR-001. Upload mới dùng Media presign và URL cố định. Người dùng đã chốt quyền đọc bằng link: ẩn hồ sơ không thu hồi ảnh và bản scan đã chia sẻ; adapter private chỉ giữ cho tệp cũ.
 
@@ -99,10 +99,13 @@ flowchart LR
 
 **Notes**:
 
-- **Get all:** dùng Result<ListResult<PublicContractorItem>>, không pageIndex/pageSize ở API công khai đợt đầu. Sắp xếp kỹ thuật CreatedAtUtc DESC, Id DESC, kể cả có radius; không mặc định gần nhất. Trả items và totalCount=items.Count để tránh count/read lệch do hai snapshot. Chỉ projection thẻ danh sách: contractorId,name,shortDescription,address,latitude,longitude,logoUrl,buildingTypes,scopes,rating,ratingCount,projectCount,distanceKm,provinceCode,regionCode,serviceAreaText,surveyHours,acceptingProjects. Ba trường cuối lấy trực tiếp từ hồ sơ, giữ NULL khi chưa khai báo; không gọi thêm API chi tiết cho mỗi thẻ. Không kèm toàn bộ ảnh, dự án hoặc scan. Nếu dữ liệu lớn đến mức cần phân trang, phải đổi contract có kế hoạch, không âm thầm cắt tập kết quả.
+- **Landing S09 (frontend, 05/10/2026):** khối danh sách xếp hạng trên `/contractors` dùng GET danh sách công khai và filter-options ở trên. Chế độ API thật không lấy nhà thầu từ CMS và không áp quy tắc đề xuất local mặc định; ban đầu bỏ bán kính. Giữ ba thẻ cùng dải logo. Theo yêu cầu mới, bỏ ba nút miền khỏi mục Khu vực & bán kính trên landing và không gửi tham số region; chỉ giữ các mức 5/10/20/50 km. Loại công trình gửi query backend; bán kính gửi cùng ID công trình đã lưu của khách. Theo yêu cầu giao diện tiếp theo, mục Khu vực & bán kính chỉ còn các lựa chọn km; bỏ dòng tên công trình và nút chọn công trình trong mục này. Tâm bán kính vẫn dùng công trình đã chọn của tài khoản. Tab đánh giá/khảo sát cùng tiêu chí điểm/lịch nhận việc dùng dữ liệu trả về để sắp xếp hoặc lọc trên frontend. Gần nhất cần bán kính và distanceKm từ backend; không coi NULL là 0 km. Thẻ dùng projectCount cho số dự án đã thực hiện, không dùng số dự án tương tự giả; rating/ratingCount/surveyHours NULL hiện nhãn chưa cập nhật. Quy mô và kinh nghiệm tương tự gửi query `floorCount`, `minSimilarProjects`, `maxSimilarProjects` tới backend; mở khóa lựa chọn và bỏ thông báo chưa hỗ trợ. Bấm lại lựa chọn để bỏ query tương ứng; Không yêu cầu không gửi min/max. Backend phải được phát hành cùng contract mới trước khi dùng bộ lọc trên môi trường chung. Loading, lỗi/thử lại và rỗng có trạng thái riêng. Đã kiểm danh sách cùng query loại/miền qua API thật; browser fixture kiểm lỗi/thử lại, rỗng, sắp xếp, bàn phím và cặp bán kính/SITE, không ghi dữ liệu thật. Kiểm bố cục 390/1440 px không tràn; chưa kiểm bán kính với phiên khách thật, `/en` hiện chuyển về `/vi`.
+- **Get all:** dùng Result<ListResult<PublicContractorItem>>, không pageIndex/pageSize ở API công khai đợt đầu. Sắp xếp kỹ thuật CreatedAtUtc DESC, Id DESC, kể cả có radius; không mặc định gần nhất. Trả items và totalCount=items.Count để tránh count/read lệch do hai snapshot. Chỉ projection thẻ danh sách: contractorId,name,shortDescription,address,latitude,longitude,logoUrl,buildingTypes,scopes,rating,ratingCount,projectCount,similarProjectCount,distanceKm,provinceCode,regionCode,serviceAreaText,surveyHours,acceptingProjects. Ba trường cuối lấy trực tiếp từ hồ sơ, giữ NULL khi chưa khai báo; không gọi thêm API chi tiết cho mỗi thẻ. Không kèm toàn bộ ảnh, dự án hoặc scan. Nếu dữ liệu lớn đến mức cần phân trang, phải đổi contract có kế hoạch, không âm thầm cắt tập kết quả.
 - **Bộ lọc:** query lặp tham số `buildingTypeIds=B1&buildingTypeIds=B2`; tương tự scopeIds. Không truyền hoặc mảng không có phần tử là không lọc. Phần tử rỗng, GUID sai dạng hoặc Guid.Empty trả 422 từ binder tùy chỉnh; trùng GUID được loại trùng. GUID đúng dạng nhưng không tồn tại cho kết quả không khớp, không tự bỏ GUID đó. Tối đa đề xuất 100 GUID phân biệt mỗi nhóm để giới hạn kích thước request. Đây là contract kỹ thuật được đề xuất, không sửa cách AND/OR đã chốt.
+- **Bộ lọc dự án (05/10/2026):** `floorCount` là số nguyên >=1, tính cả trệt; `minSimilarProjects` và `maxSimilarProjects` là số nguyên >=0, tùy chọn độc lập, biên bao gồm và min<=max khi có cả hai. Rỗng, lặp tham số, sai dạng/ngoài Int32 hoặc ngoài miền hợp lệ trả 422 InvalidContractorFilter, kể cả gọi handler không qua HTTP. Không tự áp giới hạn nếu không truyền. Count khớp loại đang chọn (OR trong mảng) AND số tầng trên cùng một ContractorProject; không có cả hai thì count toàn bộ dự án. Khi có floorCount yêu cầu count>0. LATERAL aggregate trả `projectCount` toàn bộ và `similarProjectCount` theo tiêu chí; min/max, floor, Visible, năng lực, miền và radius đều lọc trong PostgreSQL trước ToListAsync. Aggregate không join ảnh nên không nhân số đếm; truy vấn chạy trong snapshot đọc RepeatableRead hiện có, không thêm HTTP/DB call theo từng công ty.
 - **Bán kính:** radiusKm và constructionSiteId phải cùng có hoặc cùng không; thiếu một trả 422. radiusKm là số hữu hạn >0; không tự gán bán kính mặc định. Khi có radius, endpoint đánh giá default authorization policy qua dịch vụ authorization đầy đủ (không chỉ User.Identity.IsAuthenticated), rồi handler kiểm AccountKind=Customer và ownership từ database. Route anonymous không tự chạy policy nên phải gọi kiểm tra này rõ ràng trước khi đọc công trình. Không có phiên hợp lệ thì Challenge (401); phiên đã xác thực nhưng chưa đạt điều kiện policy thì Forbid (403), giữ mã hiện có. Không đọc tọa độ từ query do khách tự truyền. Công trình không có/khác chủ cùng trả 404 ConstructionSiteNotFound. Tài khoản staff không dùng công trình khách để tìm theo phạm vi này.
 - **Không có kết quả:** 200 với items=[] và totalCount=0; không nới bộ lọc. Scope ngừng dùng không xuất hiện trong danh mục chọn mới, nhưng khi gửi GUID đã gắn trước đây thì vẫn lọc được nhà thầu đang gắn scope đó.
+- **Phạm vi thi công trên hồ sơ khách (frontend, 05/10/2026):** form nhập hồ sơ lấy `scopes[{id,name}]` từ `GET /api/v1/contractors/filter-options`, cùng danh mục ConstructionScope do admin quản lý và dùng cho hồ sơ/dự án nhà thầu. Chế độ API thật không giới hạn ở bốn mã lịch sử `turnkey/shell/finishing/interior`; hồ sơ mới yêu cầu chọn phạm vi thay vì tự gán mã `turnkey`. Bản nhập liệu lưu ID cùng tên danh mục; trang kiểm tra hồ sơ ưu tiên tên hiện hành. Mục đã lưu nhưng không còn trong danh mục chọn mới vẫn hiển thị bằng tên đã lưu hoặc nhãn lịch sử, không mất lựa chọn. Khi tải danh mục lỗi, giữ dữ liệu đang nhập, báo lỗi và cho thử lại trước khi tiếp tục. Đây là dữ liệu nhu cầu nhà thầu lưu trên trình duyệt theo tài khoản: contract ConstructionSite hiện chưa có trường scope/description, nên frontend không gửi các trường này trong body SITE hoặc tuyên bố đã lưu chúng trên backend. Kiểm chứng: endpoint danh mục thật trả HTTP 200; browser fixture kiểm tra chọn ID ngoài bốn mã cũ bằng chuột/bàn phím, lưu và mở lại, đổi tên cùng ID, giữ dữ liệu khi API lỗi và thử lại, không tràn ở chiều rộng 390 px. Request lưu trong các ca này được chặn bằng fixture, không ghi vào API thật.
 - **Danh mục loại công trình:** public read trả GUID và tên trong revision hiện hành; GET filter-options không trả cấu hình dự toán không cần thiết. Đọc catalog hiện hành bằng join trong một statement; không thay catalog ngoài module chủ quản.
 - **Ảnh và tệp:** Public projection trả fileUrl cố định cho tệp mới. API hồ sơ chỉ trả thông tin khi Visible; người đã giữ URL vẫn GET tệp khi Hidden. Không có API anonymous liệt kê tệp hồ sơ ẩn hoặc bucket. Tệp cũ trả route backend theo assetId để tiếp tục đọc được.
 - **Trạng thái và đọc nhiều collection:** detail lấy snapshot nhất quán bằng một SQL projection/correlated aggregation hoặc transaction read-only repeatable read ngắn trong store. Không giữ transaction khi truyền stream. Tránh nhiều Include tạo tích Descartes; không N+1 theo từng contractor.
@@ -189,7 +192,7 @@ stateDiagram-v2
 
 ## Data Model
 
-Không tạo bảng kết quả tìm kiếm. Dùng các bảng của TDD-CTR-001 và ConstructionSite của TDD-SITE-002. `distanceKm`, `projectCount`, `isVerified`, public contentUrl là dữ liệu tính khi đọc.
+Không tạo bảng kết quả tìm kiếm. Dùng các bảng của TDD-CTR-001 và ConstructionSite của TDD-SITE-002. `distanceKm`, `projectCount`, `similarProjectCount`, `isVerified`, public contentUrl là dữ liệu tính khi đọc.
 
 ```mermaid
 erDiagram
@@ -203,12 +206,12 @@ Không có FK giữa Contractor và ConstructionSite: tìm gần là phép tính
 
 Ví dụ giả định, các ký hiệu là bí danh GUID. Tọa độ ghi theo (Latitude,Longitude):
 
-| Nguồn lưu | Dữ liệu |
-|---|---|
-| ConstructionSite | C thuộc U, tọa độ (10,106), Version=2 |
-| Contractor | A Visible tại (10.01,106); B Visible tại (10.2,106); H Hidden tại (10.02,106) |
-| ContractorBuildingType / ContractorScope | A và B cùng có B1, S1 |
-| ContractorProject | A chưa có dự án, B có P1 |
+| Nguồn lưu                                | Dữ liệu                                                                       |
+| ---------------------------------------- | ----------------------------------------------------------------------------- |
+| ConstructionSite                         | C thuộc U, tọa độ (10,106), Version=2                                         |
+| Contractor                               | A Visible tại (10.01,106); B Visible tại (10.2,106); H Hidden tại (10.02,106) |
+| ContractorBuildingType / ContractorScope | A và B cùng có B1, S1                                                         |
+| ContractorProject                        | A chưa có dự án, B có P1                                                      |
 
 GET không filter trả A,B. GET B1+S1 vẫn trả A,B dù A chưa có dự án. U chọn C với bán kính 5 km chỉ trả A, distanceKm khoảng 1.112; H không bao giờ xuất hiện. Không ghi distanceKm hay kết quả đó vào database. Nếu request sau thấy C đã đổi sang (11,106), tính lại từ vị trí mới.
 
@@ -222,11 +225,15 @@ Ví dụ bổ sung, dữ liệu giả định: A Visible có ProvinceCode="1", B
 
 Không tạo quan hệ mới giữa Contractor và ConstructionSite để suy ra miền: chỉ tỉnh công ty quyết định miền nhà thầu. Schema ProvinceCode, CHECK, index và kế hoạch migration xem TDD-CTR-001/Data Model. Danh mục tĩnh có thể kiểm đủ 34 mã ở build/test; khi nguồn tỉnh ngoài thay đổi, phải rà lại và phát hành phiên bản danh mục, không âm thầm phân miền cho mã mới.
 
+Dữ liệu giả định bổ sung cho bộ lọc dự án: A có 5 dự án loại B1, FloorCount=3; 1 dự án B1, FloorCount=2 và 1 dự án B2, FloorCount=3. Query B1 + floorCount=3 trả A với projectCount=7, similarProjectCount=5; khoảng 5–15 khớp. Nhà thầu C chỉ có B1/2 tầng và B2/3 tầng không khớp query này vì không có cùng dự án B1/3 tầng. Khi bỏ cả loại và tầng, similarProjectCount của A là 7. Thêm/sửa/xóa dự án làm thay đổi count của request kế tiếp; không lưu count vào bảng.
+
+Index hiện có `(ContractorId, CreatedAtUtc, Id)` của ContractorProject hỗ trợ lấy toàn bộ dự án một công ty cho aggregate; không thêm bảng/cột/migration trong đợt này. Không có giới hạn ngầm số tầng hoặc số dự án; hiệu năng tập dữ liệu lớn chưa được đo. Tum/phạm vi của dự án không tự trở thành điều kiện tương tự khi người dùng chỉ chọn loại/tầng.
+
 ## Internal API
 
 ### Endpoints
 
-- **GET** `/api/v1/contractors` — Query `buildingTypeIds[]?`, `scopeIds[]?`, `radiusKm?`, `constructionSiteId?`, `region?`. Binding thực dùng tên tham số lặp không dấu `[]`. Không có radius thì anonymous; có radius thì verified Customer. Trả Result<ListResult<PublicContractorItem>>.
+- **GET** `/api/v1/contractors` — Query `buildingTypeIds[]?`, `scopeIds[]?`, `radiusKm?`, `constructionSiteId?`, `region?`, `floorCount?`, `minSimilarProjects?`, `maxSimilarProjects?`. Binding thực dùng tên tham số lặp không dấu `[]`. Không có radius thì anonymous; có radius thì verified Customer. Trả Result<ListResult<PublicContractorItem>>.
 - **GET** `/api/v1/contractors/filter-options` — Anonymous; `{buildingTypes:[{id,name}],scopes:[{id,name,description,sortOrder}],regions:[{code,name}],provinces:[{code,name,regionCode}],provinceRegionVersion}`. Scope chỉ Đang dùng; chưa có catalog loại thì buildingTypes=[]; không ngăn người dùng xem hồ sơ sẵn có.
 - **GET** `/api/v1/contractors/{contractorId}` — Anonymous; chỉ Visible. Trả profile công khai, nhóm ảnh, tọa độ, năng lực khai báo, legal/licenses/partnership và toàn bộ dự án, tên danh mục join hiện hành. Không có contact, actor, storage key hay version quản trị. Không có hồ sơ hoặc Hidden cùng 404.
 - **GET** `/api/v1/contractors/{contractorId}/projects/{projectId}` — Anonymous; cả parent phải Visible và project thuộc parent; trả PublicProjectDetail gồm tên, ảnh, đúng một loại/phạm vi và các thuộc tính đã nhập.
@@ -234,6 +241,8 @@ Không tạo quan hệ mới giữa Contractor và ConstructionSite để suy ra
 - **GET** `/api/v1/admin/contractors/{contractorId}/assets/{assetId}/content` — Verified admin theo TDD-CTR-001; xem được file thuộc parent kể cả chưa gắn hoặc Hidden; stream như public route.
 
 PublicContractorItem và PublicContractorDetail chỉ chứa trường theo allowlist. `rating/ratingCount` cùng NULL thì frontend không hiển thị điểm đánh giá giả. `serviceAreaText` (string?), `surveyHours` (int?, đơn vị giờ) và `acceptingProjects` (bool?) có mặt trong item danh sách; NULL nghĩa là chưa khai báo, khác với false (tạm ngưng nhận dự án). Frontend hiển thị thông tin chưa cập nhật, dùng `projectCount` cho số dự án đã thực hiện và xếp thời gian khảo sát chưa có xuống cuối khi chọn khảo sát sớm. Public detail trả latitude/longitude và URL backend cho ảnh; backend không gọi bản đồ hoặc geocoding cho luồng xem.
+
+`similarProjectCount` (int, >=0) là số dự án khớp tiêu chí loại/tầng của request; không có hai tiêu chí thì bằng projectCount. Ví dụ query `?floorCount=3&minSimilarProjects=5&maxSimilarProjects=15` tìm nhà thầu có 5–15 dự án 3 tầng, không yêu cầu công trình khách hoặc đăng nhập.
 
 Binder tùy chỉnh ném `application.exceptions.ValidationException` với messageCode InvalidContractorFilter khi query sai. Ví dụ dưới dùng đúng định dạng middleware hiện có; các lỗi khác theo hai đường lỗi được giải thích tại [TDD-CTR-001/Internal API](TDD-CTR-001.md#internal-api).
 
@@ -277,7 +286,7 @@ Phản hồi rỗng vẫn dùng envelope hiện có: `{"value":{"items":[],"tota
 - **Unauthorized** (401): Có radius nhưng không có phiên xác thực hợp lệ; đây là code chung, messageCode dùng InvalidAccessToken/MissingAccessToken/ExpiredAccessToken theo Challenge hiện có.
 - **AccessForbidden** (403): Phiên đã xác thực nhưng không thỏa default policy; tài khoản không phải Customer dùng tìm theo công trình; hoặc người không phải admin dùng route tệp quản trị.
 - **MustChangePassword** (403): Phiên đang bị yêu cầu đổi mật khẩu; giữ mã từ Forbid hiện có.
-- **InvalidContractorFilter** (422): Miền sai/rỗng/lặp, sai dạng GUID, cap tham số, radius không hữu hạn/không dương hoặc thiếu một trong cặp radius/site.
+- **InvalidContractorFilter** (422): Miền sai/rỗng/lặp, sai dạng GUID, cap tham số, radius không hữu hạn/không dương hoặc thiếu một trong cặp radius/site; số tầng/số dự án sai dạng, rỗng/lặp, âm, floorCount=0 hoặc minSimilarProjects>maxSimilarProjects.
 - **ContractorNotFound** (404): Hồ sơ không tồn tại hoặc không Visible.
 - **ContractorProjectNotFound** (404): Project không tồn tại/khác parent hoặc parent không Visible.
 - **ContractorAssetNotFound** (404): Không được xem asset qua route hiện tại; phản hồi không lộ trạng thái nội bộ.
@@ -304,7 +313,7 @@ Lỗi bản đồ frontend không làm hồ sơ biến mất: vẫn hiển thị
 
 ### Quirks
 
-- Bucket không cho anonymous listing; chỉ các fileUrl final được đọc công khai. Tệp cũ tại ctr/* tiếp tục qua adapter tương thích.
+- Bucket không cho anonymous listing; chỉ các fileUrl final được đọc công khai. Tệp cũ tại ctr/\* tiếp tục qua adapter tương thích.
 - Dùng URL đọc cố định; thời hạn presigned PUT chỉ giới hạn upload. Trạng thái Hidden không thu hồi URL đã chia sẻ.
 
 ## References
@@ -350,6 +359,10 @@ Lỗi bản đồ frontend không làm hồ sơ biến mất: vẫn hiển thị
 - ST-CTR-025 đến ST-CTR-032; ST-CTR-009 cho ẩn hồ sơ; ST-SITE-033 đến ST-SITE-037 cho tọa độ. Đây là đặc tả, chưa chạy.
 - Chiến lược kiểm chứng: integration PostgreSQL thật cho AND/OR, khoảng cách, biên, snapshot và FK; system test qua HTTP để kiểm public projection, ownership, tệp sau khi ẩn. Unit Test đã được đặc tả sau khi người dùng chốt TDD; xem liên kết ở References.
 - Giới hạn đã biết: chưa đo dung lượng dữ liệu hoặc latency; chưa xác minh contract kho private; chưa rà hết tham chiếu đệ quy ngoài phạm vi CTR/SITE trực tiếp.
+
+Bổ sung kiểm chứng bộ lọc dự án ngày 2026-10-05: 33 test ContractorApiTests và 36 test ContractorRulesTests đạt. Bộ ContractorFlowTests biên dịch được nhưng không chạy phần truy vấn PostgreSQL vì Docker engine không phản hồi; không ghi nhận ca SQL đạt. Browser fixture trên bản xem thử riêng kiểm query floorCount=1/3, các khoảng 0–4/5–15/>15, chọn loại, bỏ tầng, Không yêu cầu, bàn phím và trạng thái rỗng. Bố cục 390/1440 px không tràn. Fixture chỉ chứng minh luồng frontend; chưa kiểm bộ lọc mới với API được triển khai và database thật. `/en` vẫn bị proxy chuyển về `/vi`, nên chưa kiểm giao diện tiếng Anh độc lập.
+
+Đặc tả bổ sung: [UT-CTR-044](../unittest/UT-CTR-044.md), [UT-CTR-045](../unittest/UT-CTR-045.md), [ST-CTR-047](../systemtest/ST-CTR-047.md), [ST-CTR-048](../systemtest/ST-CTR-048.md), [ST-CTR-049](../systemtest/ST-CTR-049.md). Các file vẫn Draft; kiểm fixture không phải nghiệm thu System Test với backend thật.
 
 ## Change Log
 

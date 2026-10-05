@@ -58,8 +58,8 @@ Admin thêm, sửa hoặc xóa dự án đã thực hiện; khách xem hồ sơ 
 
 1. Quản lý dự án đã thực hiện trong hồ sơ nhà thầu; dữ liệu này tách riêng khỏi công trình của khách.
 2. Yêu cầu tên dự án, đúng một loại công trình, đúng một phạm vi thi công và ít nhất một ảnh.
-3. Loại công trình dùng chung danh mục loại công trình admin đã cấu hình trên hệ thống. Phạm vi thi công dùng danh mục admin cấu hình cho tính năng này.
-4. Các thông tin diện tích, kích thước, số tầng, tum, địa điểm, thời gian hoặc năm hoàn thành, vai trò nhà thầu và hạng mục chính có thể bổ sung sau.
+3. Loại công trình dùng chung danh mục loại công trình admin đã cấu hình cho hồ sơ công trình và dự toán. Lựa chọn số tầng và điều kiện áp dụng tum trên form lấy từ cấu hình của loại công trình trong catalog hiện hành. Phạm vi thi công của dự án dùng danh mục admin cấu hình cho tính năng này; không tạo danh mục riêng cho từng nhà thầu.
+4. Các thông tin diện tích, kích thước, số tầng, tum, địa điểm, thời gian hoặc năm hoàn thành, vai trò nhà thầu và hạng mục chính có thể bổ sung sau. Không tum là giá trị đã khai báo, khác với chưa khai báo. Khi admin đổi loại công trình, form giữ số tầng/tum còn phù hợp và xoá lựa chọn không áp dụng; chỉ mở lại dự án để sửa không tự xoá giá trị cũ đã lưu.
 5. Khi hồ sơ nhà thầu được công khai, hiển thị toàn bộ các dự án đã thực hiện của nhà thầu. Không có trạng thái Hiển thị/Ẩn hoặc Nổi bật riêng cho từng dự án.
 6. Không có quy trình xác minh riêng từng dự án hoặc tự hủy xác minh khi thay ảnh, thông tin hay bằng chứng.
 7. Admin được xóa từng dự án đã thực hiện. Dự án đã xóa không còn xuất hiện trong hồ sơ nhà thầu.
@@ -72,6 +72,6 @@ Chưa có ngoại lệ riêng cho quyền xóa dự án được xác nhận.
 
 - Trang mẫu hiển thị bộ ảnh, loại công trình, quy mô, phạm vi, vai trò, thời gian, địa điểm và hạng mục. Giới hạn số ảnh và dung lượng theo TDD-CTR-001 đã được người dùng chốt.
 - Cách lưu dấu vết xóa và xử lý tệp ảnh thuộc thiết kế kỹ thuật; chưa mặc định thao tác xóa dự án sẽ xóa ngay tệp vật lý trong kho lưu trữ.
-- Năng lực để lọc nhà thầu lấy từ hồ sơ theo BR-CTR-005; không yêu cầu có dự án mẫu khớp bộ lọc.
+- Bộ lọc năng lực loại công trình/phạm vi lấy từ hồ sơ theo BR-CTR-005; riêng bộ lọc số tầng và kinh nghiệm tương tự đọc các dự án đã thực hiện theo BR-CTR-005/Then mục 8–11.
 - Quy tắc hiển thị toàn bộ thay thế các thao tác ẩn hoặc chọn nổi bật riêng từng dự án trên giao diện tham khảo.
 - Người dùng đã chốt bộ US/BR trong hội thoại. Reviewer và Approver: Tân Trần. System Test được soạn theo phần nghiệp vụ đã chốt; chưa chạy kiểm thử hoặc triển khai code. Các điểm còn mở trong tài liệu không tự trở thành quy tắc đã xác nhận. Metadata người phụ trách và ngày hiệu lực còn thiếu; chưa thực hiện phê duyệt trên hệ thống quản lý tài liệu.

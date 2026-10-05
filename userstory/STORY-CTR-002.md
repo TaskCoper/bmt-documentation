@@ -67,7 +67,7 @@ Admin mở phần dự án đã thực hiện trong hồ sơ nhà thầu để t
 ### Main Flow
 
 1. Admin nhập tên dự án, chọn đúng một loại công trình và một phạm vi thi công, thêm ít nhất một ảnh.
-2. Admin có thể bổ sung kích thước, diện tích, số tầng, tum, địa điểm, thời gian/năm hoàn thành, vai trò và hạng mục chính.
+2. Admin có thể bổ sung kích thước, diện tích, số tầng, tum, địa điểm, thời gian/năm hoàn thành, vai trò và hạng mục chính. Loại công trình và cấu hình tầng/tum dùng chung catalog với hồ sơ công trình và dự toán; số tầng chọn trong danh sách của loại đã chọn. Tum có lựa chọn Có tum hoặc Không tum, có thể để trống khi chưa khai báo. Phạm vi thi công chọn từ danh mục admin quản lý.
 3. Hệ thống kiểm tra các trường bắt buộc và lưu dự án thuộc hồ sơ nhà thầu, riêng với công trình của khách.
 4. Khi khách xem hồ sơ nhà thầu đang hiển thị, hệ thống cung cấp toàn bộ dự án của nhà thầu; không có ẩn hoặc nổi bật riêng.
 

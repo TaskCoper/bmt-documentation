@@ -73,6 +73,8 @@ Khách mở danh sách nhà thầu, gửi query lọc hoặc mở một hồ sơ
 5. Khách có thể chọn miền Bắc, Trung hoặc Nam. Hệ thống xác định miền theo tỉnh nhà thầu và kết hợp với các bộ lọc đang dùng theo BR-CTR-008; không chọn miền thì vẫn xét nhà thầu chưa có tỉnh.
 6. Khách mở chi tiết nhà thầu để xem Tổng quan, vị trí công ty trên bản đồ, toàn bộ dự án đã thực hiện, Năng lực pháp lý và Hợp tác BuildX, gồm các bản scan đã tải lên. Không cung cấp thông tin liên hệ nội bộ.
 
+7. Khách có thể chọn số tầng và mức kinh nghiệm tương tự. Hệ thống tìm và đếm dự án khớp loại công trình/số tầng đang chọn theo BR-CTR-005; chưa chọn hai tiêu chí này thì đếm tất cả dự án. Bấm lại lựa chọn để bỏ bộ lọc.
+
 ### Alternative Flow
 
 #### ALT-01
@@ -200,6 +202,34 @@ Khách tạo công trình thiếu kinh độ hoặc vĩ độ.
 - **When**: Hệ thống nhận yêu cầu lọc.
 - **Then**: Từ chối giá trị không hợp lệ.
 - **And**: Không bỏ qua giá trị sai hoặc thay bằng miền khác.
+
+#### AC-013
+
+- **Given**: Nhà thầu có dự án đã thực hiện với số tầng đã nhập.
+- **When**: Khách chọn quy mô Trệt + 2 lầu.
+- **Then**: Chỉ trả nhà thầu có ít nhất một dự án 3 tầng, tính cả trệt.
+- **And**: Dự án thiếu số tầng không khớp; khi chọn thêm loại công trình, cả loại và số tầng phải khớp trên cùng một dự án.
+
+#### AC-014
+
+- **Given**: Khách có hoặc chưa có lựa chọn loại công trình/số tầng.
+- **When**: Khách chọn mức kinh nghiệm dự án tương tự.
+- **Then**: Đếm dự án khớp các tiêu chí đang chọn; chưa chọn cả hai thì đếm toàn bộ dự án.
+- **And**: Dưới 5 là 0–4; 5–15 gồm hai biên; trên 15 là từ 16; Không yêu cầu bỏ giới hạn đếm. Đã chọn số tầng vẫn yêu cầu ít nhất một dự án khớp.
+
+#### AC-015
+
+- **Given**: Một nhà thầu có nhiều dự án nhưng chỉ một phần khớp tiêu chí tương tự.
+- **When**: Backend trả danh sách.
+- **Then**: Trả riêng tổng số dự án đã thực hiện và số dự án tương tự theo lựa chọn hiện tại.
+- **And**: Không đếm ảnh, dự án bị xóa hoặc của nhà thầu khác; nhà thầu Hidden không xuất hiện.
+
+#### AC-016
+
+- **Given**: Khách đã bật quy mô hoặc mức kinh nghiệm trên landing.
+- **When**: Khách bấm lại lựa chọn đang bật.
+- **Then**: Bỏ bộ lọc đó và tải kết quả theo các lựa chọn còn lại.
+- **And**: Không tự lấy loại hoặc số tầng từ hồ sơ khách; hai bộ lọc không yêu cầu đăng nhập khi không dùng bán kính.
 
 ## References
 
