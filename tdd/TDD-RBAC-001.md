@@ -555,6 +555,7 @@ Các đường dẫn dưới đây đã có trong mã nguồn, ở `src/bmt-be.p
 
 ### Endpoints
 
+- **GET** `/api/v1/users/me` — Hồ sơ phiên, bổ sung `accountKind`, `roleCodes` và `permissions` để frontend chặn route và lọc section admin. Cần phiên hợp lệ theo policy `AuthenticatedOnly`; vẫn mở khi bắt buộc đổi mật khẩu.
 - **GET** `/api/v1/permissions` — Danh mục mã quyền kèm nhãn và cờ cần phân công. Cần quyền `role.manage`.
 - **GET** `/api/v1/roles` — Danh sách vai trò kèm loại, số người đang giữ và danh sách quyền. Cần quyền `role.manage`.
 - **GET** `/api/v1/roles/{roleId}` — Chi tiết một vai trò. Cần quyền `role.manage`.
@@ -565,6 +566,23 @@ Các đường dẫn dưới đây đã có trong mã nguồn, ở `src/bmt-be.p
 - **GET** `/api/v1/access-audit/{auditLogId}` — Xem một bản ghi đầy đủ: các trường của danh sách cộng `before` và `after` là nội dung trước và sau khi thay đổi (BR-RBAC-012 khoản 1 và 5, STORY-RBAC-004/EXC-04). Cần quyền `audit.read`. Không có bản ghi thì 404 `AuditLogNotFound`. Đã có trong code ở commit `2c8dd90` trên nhánh `feature/audit-log-detail` của `bmt-be`.
 
 ### Examples
+
+#### GET /api/v1/users/me
+
+`accountKind` lấy từ User, nhận `Customer` hoặc `Staff` (BR-RBAC-005). `roles` giữ nguyên tên tương thích từ `RoleCodes.ToClaimValue`; `roleCodes` trả mã ổn định của vai trò hệ thống đang giữ, tránh nhận nhầm vai trò tự tạo có tên "Admin". Không suy ra loại tài khoản từ tên vai trò hoặc mặc định nhân viên không có role thành khách hàng.
+
+`permissions` là các claim `perm` của access token đang dùng, bỏ trùng và sắp xếp theo mã. Endpoint không tính lại hợp quyền từ RolePermission: quyền thay đổi có hiệu lực sau khi cấp lại token theo BR-RBAC-009. Không có claim thì trả mảng rỗng; tên role Admin không tự bổ sung quyền. DTO không trả token hoặc security stamp. Hai trường danh sách mới không yêu cầu migration.
+
+Ví dụ minh họa chỉ hiển thị phần bổ sung của `value` trong Result envelope; các trường hồ sơ hiện có giữ nguyên:
+
+```
+Response 200:
+{"value": {"accountKind": "Staff", "roleCodes": [], "permissions": ["audit.read", "commerce.read"]}, "isSuccess": true}
+```
+
+Frontend đợi `/users/me` trước khi dựng màn riêng tư, tách khu khách hàng và nhân viên, dùng cùng chính sách permission cho menu và URL trực tiếp. Section thiếu quyền không dựng component hoặc gọi API dữ liệu của section. Vào `/admin` sẽ chọn mục đầu tiên được phép trong menu; không có mục nào thì hiển thị thông báo thiếu quyền. Các API quản trị nhà thầu còn yêu cầu role hệ thống Admin; các màn CMS cục bộ chưa có API giữ điều kiện Admin hiện tại. Backend tiếp tục kiểm quyền, phạm vi phân công và dấu phiên ở mỗi request.
+
+Sau refresh token, frontend đọc lại `/users/me` để cập nhật bộ quyền; lỗi 401 không khôi phục được sẽ xóa trạng thái và cache phiên. Thông tin frontend đã lưu không thay thế việc kiểm tra phiên với backend.
 
 #### POST /api/v1/roles
 
