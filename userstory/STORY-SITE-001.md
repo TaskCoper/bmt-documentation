@@ -82,6 +82,8 @@ Khách xem danh sách và chi tiết công trình của mình.
 1. Khách mở danh sách hoặc chi tiết công trình.
 2. Hệ thống chỉ trả công trình thuộc tài khoản của khách. Danh sách giữ thông tin nhận diện công trình và gói; chi tiết hiển thị đầy đủ hồ sơ, nguồn nếu có và tệp theo BR-SITE-003.
 3. Khách không thấy tên nhân viên phụ trách gói.
+4. Khi khách chọn công trình để tìm nhà thầu, lưu lựa chọn theo tài khoản trong database. Mở lại trang, xóa localStorage hoặc dùng thiết bị khác vẫn đọc lựa chọn này từ backend; không dùng localStorage để lưu dự án đang chọn.
+5. Chỉ lưu lựa chọn sau khi backend xác nhận quyền sở hữu. Nếu lưu lỗi, giữ lựa chọn trước đó và báo lỗi để khách thử lại. Khi công trình được xóa hợp lệ, bỏ lựa chọn đang trỏ đến công trình đó.
 
 #### ALT-02
 
@@ -417,6 +419,27 @@ Trong các AC dưới đây, dữ liệu không được nêu là thiếu/sai đ
 - **Given**: Các thông tin khác của hồ sơ hợp lệ.
 - **When**: Lần lượt chọn Càng sớm càng tốt, Trong 1–3 tháng tới, Trong 3–6 tháng tới và Chưa xác định rồi lưu.
 - **Then**: Cả bốn lựa chọn được chấp nhận; hồ sơ giữ đúng lựa chọn, không tự đổi thành một ngày khởi công hoặc tự chuyển lựa chọn khi thời gian trôi qua.
+
+#### AC-039
+
+- **Given**: Khách đã chọn một công trình của mình để tìm nhà thầu.
+- **When**: Khách tải lại trang, xóa localStorage hoặc đăng nhập bằng cùng tài khoản trên thiết bị khác.
+- **Then**: Lựa chọn được đọc từ database theo tài khoản, không phụ thuộc localStorage.
+- **And**: Tên, địa chỉ và dữ liệu hồ sơ được đọc từ công trình hiện tại.
+
+#### AC-040
+
+- **Given**: Khách có lựa chọn đã lưu.
+- **When**: Khách chọn công trình khác thuộc mình.
+- **Then**: Backend lưu lựa chọn mới và frontend chỉ chuyển trang sau khi lưu thành công.
+- **And**: Yêu cầu không tồn tại hoặc thuộc khách khác bị từ chối, không đổi lựa chọn; lỗi lưu giữ popup và cho thử lại.
+
+#### AC-041
+
+- **Given**: Công trình đang chọn đủ điều kiện xóa theo các quy tắc hiện có.
+- **When**: Khách xóa công trình thành công.
+- **Then**: Lựa chọn trỏ đến công trình đó được xóa cùng giao dịch.
+- **And**: Không thay đổi điều kiện cho phép xóa công trình hoặc dữ liệu các công trình khác.
 
 ## References
 

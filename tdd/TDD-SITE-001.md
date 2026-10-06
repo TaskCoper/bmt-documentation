@@ -359,6 +359,12 @@ Các thao tác gói hiện đòi header `Idempotency-Key` và lưu biên nhận 
 - Không thêm policy "có một trong hai quyền". Phạm vi xem phụ thuộc quyền nào người gọi có, nên phải quyết định trong handler; một policy chỉ cho biết đạt hay không.
 - Tên lớp, route và mã lỗi ở tài liệu này đã có trong code ngày 25/09/2026. Phần cập nhật lần 2 (mã `ConstructionSiteHasSupervision`, bước khóa và kiểm gói giữ chỗ của handler sửa, điều kiện xóa mới và bước gỡ liên kết gói đã hủy, trường `assignedAtUtc`) có ở nhánh `feature/supervision-unassign` của `bmt-be`, chưa merge vào `develop`.
 
+### Lựa chọn công trình theo tài khoản
+
+Theo STORY-SITE-001/AC-039–041 và BR-SITE-003 khoản 11–13, thêm query đọc và command lưu lựa chọn. Dùng lại ConstructionSiteAccess để kiểm tài khoản Customer và IConstructionSiteOwnershipReader để khóa FOR KEY SHARE rồi kiểm chủ công trình. Command dùng transaction của MediatR; query chỉ đọc. Store ghi INSERT ... ON CONFLICT (OwnerUserId) DO UPDATE để các lần chọn đầu tiên song song vẫn chỉ tạo một dòng.
+
+Frontend dùng TanStack Query với key chứa userId, bỏ Zustand persist cho lựa chọn. Popup chờ PUT thành công rồi chuyển trang; lỗi không ghi đè cache và giữ popup. GET lỗi hiển thị lỗi/thử lại, không giả thành chưa có lựa chọn. URL công trình cụ thể giữ ngữ cảnh và có thể ghi lựa chọn sau khi đọc thành công công trình thuộc khách. Chỉ tự đồng bộ một lần cho mỗi URL, không ghi lại khi GET refetch do thiết bị khác thay đổi lựa chọn. Danh sách mặc định có thể hiển thị hồ sơ mới nhất đủ điều kiện khi chưa có lựa chọn; đọc danh sách không tự PUT. Bản nhập liệu và nhu cầu đang soạn trên thiết bị không thuộc thay đổi này.
+
 ## Sequence Diagram
 
 Khách tạo công trình, rồi yêu cầu xóa công trình chạy cùng lúc với yêu cầu gắn gói vào chính công trình đó (nhánh gắn gói chạy trước).
@@ -614,9 +620,25 @@ CREATE INDEX "IX_ConstructionSite_CreatedAt"
 - Đây là bảng mới trong database chỉ có dữ liệu dev/test (xác nhận ngày 25/09/2026), nên không cần chia lô hay tạo index `CONCURRENTLY`.
 - **Cập nhật lần 2 — không có migration riêng cho bảng `ConstructionSite`.** Khóa sửa, điều kiện xóa mới và bước gỡ liên kết gói đã hủy chỉ đổi code handler, không đổi schema công trình. Các thay đổi schema liên quan (cột `AssignedAtUtc` của gói, ba cột bản lưu công trình của `PackageLifecycleEvent`, lý do kết thúc phân công) nằm trong migration gộp dự kiến `SupervisionUnassignWithoutRestore`, thứ tự các bước ở [TDD-SUB-007](TDD-SUB-007.md#data-model). CHECK `CK_SupervisionGrant_AssignedColumns` đã cho gói `CanceledByStaff` có `ConstructionSiteId` NULL, nên bước gỡ liên kết không cần đổi ràng buộc.
 
+### ConstructionSiteSelection
+
+Mỗi dòng là lựa chọn hiện tại của một khách. Không có dòng nghĩa là chưa chọn; không lưu bản sao tên, địa chỉ hay trạng thái hồ sơ. Lựa chọn không thay đổi Version hoặc UpdatedAtUtc của công trình.
+
+| Cột | Kiểu | Ràng buộc / ý nghĩa |
+|---|---|---|
+| OwnerUserId | uuid | PK, không phát sinh tự động; lấy từ phiên đăng nhập |
+| ConstructionSiteId | uuid | NOT NULL; FK ghép (ConstructionSiteId, OwnerUserId) → ConstructionSite(Id, OwnerUserId), ON DELETE CASCADE |
+
+Index trên (ConstructionSiteId, OwnerUserId) phục vụ xóa công trình. PK bảo đảm một lựa chọn mỗi khách; FK ghép chặn lựa chọn khác chủ ngay tại database. Migration AddConstructionSiteSelection tạo bảng rỗng, không đọc/chuyển lựa chọn cũ từ localStorage. Khi xóa công trình, PostgreSQL xóa dòng lựa chọn cùng giao dịch; các giới hạn xóa hiện tại vẫn giữ nguyên.
+
+Ví dụ giả định: U1 có CS1 và CS2 theo hồ sơ mẫu ở trên. Sau khi chọn CS1, dòng là (U1, CS1); chọn CS2 thì thay thành (U1, CS2), không tạo dòng thứ hai. Xóa CS2 hợp lệ làm mất dòng; GET trả constructionSiteId=null. U2 không thể lưu (U2, CS1). Không bổ sung trường thời gian hay dữ liệu cá nhân vào bảng mới.
+
 ## Internal API
 
 ### Endpoints
+
+- **GET** `/api/v1/me/construction-sites/selection` — đọc lựa chọn của Customer đang đăng nhập, không có thì constructionSiteId=null; trả Result<ConstructionSiteSelection>.
+- **PUT** `/api/v1/me/construction-sites/selection` — body có trường bắt buộc constructionSiteId là UUID hoặc null (bỏ lựa chọn). Chỉ nhận trường này; không nhận userId. UUID rỗng không hợp lệ. Lưu lựa chọn của chính khách, cùng công trình có thể PUT lặp. Trả Result<ConstructionSiteSelection> sau khi transaction commit. Thiếu phiên 401; Staff/Admin 403 AccessForbidden; công trình không có hoặc khác chủ cùng trả 404 ConstructionSiteNotFound; JSON thiếu/sai/field lạ trả 422 ConstructionSiteValidationFailed. PUT ghi lựa chọn không kiểm giới hạn lời mời; RFQ vẫn kiểm quota riêng.
 
 Tất cả route dùng `NewVersionedApi` và `HasApiVersion(1)`, policy mặc định (phiên đã xác minh, không phải phiên quên mật khẩu, không bị bắt đổi mật khẩu). Phản hồi thành công bọc trong `Result` như các API hiện có. Phân trang theo `pageIndex` (từ 1) và `pageSize` (1–100, ngoài khoảng thì dùng 20) là quyết định kỹ thuật; nghiệp vụ chưa chốt phân trang, sắp xếp hay tìm kiếm. Thứ tự mặc định là mới tạo trước (`CreatedAtUtc DESC, Id DESC`).
 
@@ -629,6 +651,29 @@ Tất cả route dùng `NewVersionedApi` và `HasApiVersion(1)`, policy mặc đ
 - **GET** `/api/v1/admin/construction-sites/{siteId}` — Chi tiết cho nhân viên, cùng dữ liệu như một mục của danh sách nhân viên.
 
 ### Examples
+
+#### GET /api/v1/me/construction-sites/selection
+
+```
+Request:
+GET (cookie phiên đã xác minh)
+
+Response 200:
+{"value":{"constructionSiteId":null},"isSuccess":true,"isFailure":false,"error":{"code":"","message":"","messageCode":""}}
+```
+
+#### PUT /api/v1/me/construction-sites/selection
+
+```
+Request:
+{"constructionSiteId":"b3680d77-123c-4cb4-8787-3fcb963f1caa"}
+
+Response 200:
+{"value":{"constructionSiteId":"b3680d77-123c-4cb4-8787-3fcb963f1caa"},"isSuccess":true,"isFailure":false,"error":{"code":"","message":"","messageCode":""}}
+```
+
+UUID trong ví dụ là dữ liệu minh họa, phải là công trình thuộc người gọi. Bỏ lựa chọn gửi {"constructionSiteId":null} và trả value tương tự GET chưa chọn.
+
 
 #### POST /api/v1/me/construction-sites
 

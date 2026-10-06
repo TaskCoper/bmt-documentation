@@ -68,11 +68,17 @@ Có yêu cầu xem danh sách, chi tiết công trình hoặc xem/tải tệp đ
 9. Quyền xem/tải tệp đi theo đúng phạm vi xem công trình tại thời điểm yêu cầu theo BR-SITE-007. Người có URL nhưng không có quyền vẫn bị từ chối. Quyền xem không cấp quyền thêm, thay hoặc xóa tệp.
 10. Mất phạm vi xem do kết thúc/chuyển giao phân công cũng làm mất quyền gửi yêu cầu xem/tải tệp mới. Không chỉ ẩn danh sách tệp trong giao diện mà để đường tải tiếp tục công khai.
 
+11. Lựa chọn công trình để tìm nhà thầu được lưu trong database theo tài khoản khách đang đăng nhập. Chỉ chọn công trình thuộc mình và đã được lưu hợp lệ; bản nhập liệu trên thiết bị chưa thành công trình không được lưu thành lựa chọn. Không lưu lựa chọn trong localStorage.
+12. Mỗi khách có tối đa một lựa chọn. Chọn lại cùng công trình không tạo bản ghi trùng. Khi nhiều thiết bị cùng đổi lựa chọn, dữ liệu từ giao dịch ghi thành công sau cùng là lựa chọn được đọc ở lần tiếp theo. Lỗi lưu giữ lựa chọn đã lưu trước đó; frontend báo lỗi và chưa chuyển trang từ popup.
+13. Xóa hợp lệ công trình đang chọn đồng thời xóa lựa chọn đó. Khi chưa có lựa chọn, API trả không có lựa chọn; mở danh sách để đọc không tự ghi lựa chọn mặc định.
+
 ## Except
 
 Nhân viên có quyền `commerce.read` thấy tên công trình gắn với gói khi tra cứu gói đã mua theo [BR-PAY-005](BR-PAY-005.md), nhưng không xem được danh sách hoặc chi tiết công trình của khách bằng quyền này.
 
 ## Notes
+
+- Bổ sung ngày 06/10/2026 theo yêu cầu người dùng trong hội thoại sửa popup chọn dự án: lưu trạng thái dự án đang chọn trong database, không dùng localStorage. Các khoản 11–13 mô tả yêu cầu này và cách thực thi quyền sở hữu hiện có, không đổi vòng đời công trình.
 
 - Người dùng đã chốt bản US/BR trong hội thoại ngày 01/10/2026. System Test đã được cập nhật; xem [bảng độ phủ](../discovery/construction-site-system-test-coverage.md). Chưa chạy các ca; xác nhận hội thoại không thay cho phê duyệt/import trên hệ thống tài liệu.
 
