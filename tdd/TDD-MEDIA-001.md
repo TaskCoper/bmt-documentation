@@ -77,6 +77,16 @@ Code Taskcoper có `GET /api/v1/storages/presigned-url`, nhận key từ client,
 ## Architecture
 
 
+**Bucket dùng chung với landing page — 06/10/2026**
+
+Ngày 06/10/2026, người dùng chốt cho backend landing page (`bmt-be-landing-page`) dùng chung bucket của BMT để lưu ảnh do admin tải lên. Vì vậy bucket không còn là "bucket riêng của BMT" như Problem và BR-MEDIA-002 đã ghi. Landing page tự cấp URL presign và lưu ảnh ở khóa `landing/images/<năm>/<tháng>/<mã>.<đuôi>`; MEDIA không tham gia luồng này.
+
+- MEDIA bỏ qua mọi khóa bắt đầu bằng `landing/` (`MediaConstants.ExternalKeyPrefix` và `IsExternalKey`). Đối soát không đăng ký các khóa này thành `MediaObject`. Dọn dẹp không chọn và không xóa chúng, kể cả khi đã có dòng `MediaObject` của khóa đó. Tiền tố là hằng số trong code; đổi tiền tố phải sửa code và deploy.
+- Nếu thiếu thay đổi này, đối soát sẽ đăng ký ảnh landing page. Ảnh không có tham chiếu trong database BMT nên bị đánh dấu không còn dùng và bị xóa sau 24 giờ.
+- Điều kiện triển khai: bản sửa phải chạy ở mọi môi trường backend BMT dùng chung bucket với landing page (dev và prod) trước khi landing page tải ảnh đầu tiên. Nếu đối soát đã đăng ký khóa `landing/` từ trước, dòng `MediaObject` đó vẫn còn và nằm ngoài dọn dẹp. Dòng `Review` chưa phân loại vẫn chặn gate, cần xử lý thủ công.
+- Chỉ khóa `landing/` được bỏ qua. Các khóa khác trong bucket vẫn đối soát và dọn như trước, kể cả ảnh cũ. Landing page chỉ được ghi dưới `landing/`; backend landing page từ chối cấu hình tiền tố nằm ngoài thư mục này.
+- Kiểm chứng: test đơn vị `MediaExternalKeyTests`; test tích hợp `Reconciliation_ExternalLandingPrefix_IsNotInventoried` và `Cleanup_ExternalLandingPrefix_IsNeverDeleted_EvenIfRegisteredAndUnreferenced`. Hai test tích hợp cần PostgreSQL thật và chưa chạy trên máy cục bộ vì Docker không dùng được; chạy trên CI.
+
 **CDN ảnh công khai ngày 01/10/2026 — lưu URL CDN trong cột hiện có**
 
 Người dùng đã chốt thay URL gốc bằng URL CDN ngay trong các cột URL hiện có. Domain gốc là `bmt.hcm.ss.bfcplatform.vn`, CDN là `bmt-cdn-vnzdna.cdn.vccloud.vn`; giữ nguyên đường dẫn `/media/images/...`. Không thêm cột URL thứ hai. Quyết định này thay phương án đổi getter khi xuất JSON trước đó và các mô tả bên dưới về việc luôn giữ URL gốc.
@@ -700,3 +710,5 @@ Các object chưa được writer cũ bảo vệ phải qua bước cutover trư
 - [PostgreSQL 15: khóa dòng và thứ tự khóa](https://www.postgresql.org/docs/15/explicit-locking.html).
 
 ## Change Log
+
+- 2026-10-06 (bucket dùng chung): Người dùng chốt landing page dùng chung bucket của BMT. MEDIA bỏ qua khóa `landing/` ở đối soát và dọn dẹp: thêm `MediaConstants.ExternalKeyPrefix`, sửa `MediaReconciliationService` và `MediaCleanupService`, thêm `MediaExternalKeyTests` và hai test tích hợp. Ghi tại Architecture, mục "Bucket dùng chung với landing page". Mã nguồn: `develop` `448899f`, `main` `6ac49bb` (PR #15).

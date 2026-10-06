@@ -73,6 +73,7 @@ Hệ thống tự dọn ảnh không còn được sử dụng trong bucket riê
 
 - Chưa đối soát đầy đủ, chưa xác định được ảnh thuộc phạm vi BMT hoặc chưa đủ thông tin tính thời gian chờ: giữ ảnh, không tự coi là ảnh được phép xóa.
 - File không phải ảnh nằm ngoài phạm vi dọn của tính năng này.
+- File có khóa bắt đầu bằng `landing/` thuộc landing page dùng chung bucket: không đối soát, không dọn.
 - Không xóa ảnh cũ chỉ vì ảnh không đáp ứng giới hạn định dạng hoặc dung lượng của luồng upload mới.
 
 ## Notes
@@ -80,6 +81,7 @@ Hệ thống tự dọn ảnh không còn được sử dụng trong bucket riê
 - **Đã xác nhận:** có dọn ảnh trong đợt này; chờ 24 giờ; bao gồm ảnh cũ; bucket riêng của BMT.
 - **Đã xác nhận — ảnh cũ thiếu lịch sử:** người dùng đồng ý chờ 24 giờ từ lần đầu xác định ảnh không còn được dùng; áp dụng khoản 9 của Then.
 - **Đã xác nhận — tài nguyên thư viện:** người dùng chọn dọn sau 24 giờ đối với ảnh không còn phiên bản hay nội dung nào sử dụng, dù bản ghi đăng ký ảnh cho mẫu thư viện vẫn còn; áp dụng khoản 10 của Then.
+- **Đã xác nhận — bucket dùng chung (06/10/2026):** người dùng chốt landing page dùng chung bucket với BMT và yêu cầu hệ thống bỏ qua thư mục `landing/`. Cụm "bucket riêng của BMT" ở trên được hiểu là các khóa ngoài `landing/`. Cách thực hiện nằm tại TDD-MEDIA-001, mục Architecture.
 - Tên bucket, endpoint và cách ánh xạ URL cũ về file trong kho cần được kiểm chứng khi thiết kế và cấu hình. Việc xác nhận bucket riêng chưa thay thế thông tin cấu hình thật.
 - Lịch chạy là cấu hình kỹ thuật tại TDD-MEDIA-001/Architecture; không làm thay đổi thời gian chờ tối thiểu 24 giờ.
 - Reviewer và Approver là Tân Trần theo thông tin người dùng cung cấp. Owner là Tân Trần theo xác nhận bổ sung của người dùng; ngày hiệu lực chưa xác định. Người dùng đã chốt nội dung bộ US/BR trong hội thoại ngày 30/09/2026. Status vẫn là Draft vì chưa thực hiện phê duyệt trên hệ thống tài liệu.
