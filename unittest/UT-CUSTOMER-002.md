@@ -33,7 +33,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# UT-PROJ-066
+
+# UT-CUSTOMER-002
 
 ## Unit Test
 
@@ -42,11 +43,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PROJ-066 | Tạo dự toán | MockEstimateAiGateway / MockEstimateResultContract — Adapter giả luôn thành công với bộ kết quả mẫu cố định | Happy | FULL | P1 | Đã có mã test trong bmt-be (commit `62a626d`), tên test ghi ở Rationale. Cấu hình mặc định của EstimateAiOption (URL tệp mẫu là URL giữ chỗ). Thêm biến thể đăng ký DI với môi trường Production, Mode=Mock và năm URL https trên files.example.test/prod-mock/. Không gọi mạng. | Gửi tác vụ J1; hỏi kết quả theo mã lần xử lý; hỏi theo mã tác vụ khi chưa biết mã lần xử lý. Biến thể sai: payload chỉ có phần thô, không có tệp. | Gửi trả Accepted với mã lần xử lý `mock-{J1}`. Hai lần hỏi trả cùng một bộ kết quả `mock-v1`: payload có isSample=true, đủ phần thô/hoàn thiện/nội thất, tổng và tư vấn; năm tệp cover-image, floor-plan-2d, perspective, dossier-pdf, estimate-xlsx với URL từ cấu hình; hợp đồng mock-v1 không báo vấn đề. Biến thể sai: hợp đồng báo thiếu phần hoàn thiện, thiếu tổng và thiếu tệp PDF. Thời hạn mặc định là 15 phút. Biến thể Production: gửi/hỏi qua gateway đã đăng ký trả Accepted/Completed, giữ đúng operation/attempt và năm URL đã cấu hình; hồ sơ công bố có isSample=true, notice, consultation, VND, ba phần 100.000.000/60.000.000/40.000.000 và tổng 200.000.000. | TDD-PROJ-002/External API<br>TDD-PROJ-002/Architecture<br>BR-PROJ-007/Then<br>ST-PROJ-072/System Test | Adapter giả là cách chạy trọn luồng của BMT trước khi có hợp đồng AI (quyết định ngày 26/09/2026); dữ liệu mẫu ghi rõ là mẫu, không lấy từ website mẫu. Test không chứng minh hợp đồng AI thật. Mã test: `EstimateAiAdapterTests.Handle_MockGateway_ReturnsSampleResultThatPassesMockContract`, `Handle_ProductionMock_ReturnsSampleDossierAndConfiguredFiles`, `Handle_MockContractMissingPartOrFile_ReportsProblems`, `Handle_FileProbe_MapsStatus`, `Handle_FileProbeNetworkError_ReturnsFalse`. | [Chưa xác định] | Draft |
+| UT-CUSTOMER-002 | Customer | GetCustomersQueryHandler.Handle | Happy | REGRESSION | P1 | Customer tên Nguyễn An, email an@example.test, SĐT 0900123456; EF InMemory nếu dùng handler | search=NGUYỄN AN; An Nguyễn; AN@EXAMPLE.TEST; 0900123 | Đúng một khách hàng; trim và không phân biệt hoa thường | STORY-CUSTOMER-001/AC-001 | Kiểm hành vi đã chốt; không chứng minh SQL PostgreSQL. Mã test: usecases/customer/CustomerQueryTests.cs. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- TDD-PROJ-002/External API
-- TDD-PROJ-002/Architecture
-- BR-PROJ-007/Then
-- ST-PROJ-072/System Test
+- STORY-CUSTOMER-001/AC-001
