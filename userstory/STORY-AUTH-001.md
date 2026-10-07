@@ -258,5 +258,5 @@ Thiết kế kỹ thuật của phiên mobile nằm ở TDD-AUTH-002 (bản nhá
 - Đăng nhập bằng Google, Apple hoặc sinh trắc học; màn hình quản lý thiết bị và phiên đăng nhập.
 - Đăng ký nhận push, thuộc STORY-PUSH-001.
 - Thay đổi luồng đăng nhập bằng cookie của web.
-- Sửa các hành vi đang có của đăng nhập web, như cách báo lỗi khi email không tồn tại.
+- Sửa các hành vi đang có của đăng nhập web trong tính năng này. Riêng lỗi sai email hoặc mật khẩu của web đã được sửa thành 401 `InvalidCredentials` ngày 07/10/2026 như một việc riêng (TDD-AUTH-002/Architecture).
 - Triển khai code, tạo hoặc chạy migration trong bước chuẩn bị tài liệu này.
