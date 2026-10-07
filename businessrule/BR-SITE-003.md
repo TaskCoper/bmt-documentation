@@ -44,7 +44,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Owner**: [Chưa xác định]
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
-- **Source**: Người dùng xác nhận trong hội thoại chuẩn bị nghiệp vụ Công trình ngày 25/09/2026: nhân viên xem theo quyền đang có, không thêm mã quyền; khách thấy gói kèm trạng thái, chưa thấy nhân viên phụ trách; nhân viên phụ trách theo từng gói.
+- **Source**: Người dùng xác nhận trong hội thoại chuẩn bị nghiệp vụ Công trình ngày 25/09/2026: nhân viên xem theo quyền đang có, không thêm mã quyền; khách thấy gói kèm trạng thái, chưa thấy nhân viên phụ trách; nhân viên phụ trách theo từng gói. Ngày 07/10/2026 người dùng bổ sung hiển thị và tìm theo mã hồ sơ (khoản 1, 2, 14).
 
 ## Statement
 
@@ -56,8 +56,8 @@ Có yêu cầu xem danh sách, chi tiết công trình hoặc xem/tải tệp đ
 
 ## Then
 
-1. Khách hàng chỉ thấy công trình thuộc tài khoản của mình. Mỗi công trình hiện tên, địa chỉ và các gói giám sát đã gắn, kèm trạng thái gói: đã gán, đã hoàn thành hoặc đã hủy. Gói đã bị gỡ khỏi công trình không còn hiện ở công trình đó. Khách không thấy tên nhân viên phụ trách gói.
-2. Admin và nhân viên có quyền `assignment.manage` xem mọi công trình của mọi khách hàng. Mỗi công trình hiện tên, địa chỉ, khách hàng sở hữu và các gói giám sát đã gắn, kèm trạng thái gói.
+1. Khách hàng chỉ thấy công trình thuộc tài khoản của mình. Mỗi công trình hiện mã hồ sơ theo BR-SITE-001 khoản 16, tên, địa chỉ và các gói giám sát đã gắn, kèm trạng thái gói: đã gán, đã hoàn thành hoặc đã hủy. Gói đã bị gỡ khỏi công trình không còn hiện ở công trình đó. Khách không thấy tên nhân viên phụ trách gói.
+2. Admin và nhân viên có quyền `assignment.manage` xem mọi công trình của mọi khách hàng. Mỗi công trình hiện mã hồ sơ, tên, địa chỉ, khách hàng sở hữu và các gói giám sát đã gắn, kèm trạng thái gói.
 3. Nhân viên có quyền `supervision.complete` mà không có `assignment.manage` chỉ xem công trình của những gói giám sát đang được phân công cho mình tại thời điểm xem, với cùng thông tin như khoản 2. Khi phân công kết thúc hoặc được chuyển giao, nhân viên mất quyền xem công trình đó ngay. Gỡ gói hoặc hủy gói đều kết thúc phân công theo [BR-RBAC-013](BR-RBAC-013.md).
 4. Nhân viên có nhiều quyền thì xem theo phạm vi rộng nhất trong các quyền đó.
 5. Tài khoản nhân viên không có quyền `assignment.manage` hay `supervision.complete` thì không xem được danh sách hoặc chi tiết công trình.
@@ -71,6 +71,8 @@ Có yêu cầu xem danh sách, chi tiết công trình hoặc xem/tải tệp đ
 11. Lựa chọn công trình để tìm nhà thầu được lưu trong database theo tài khoản khách đang đăng nhập. Chỉ chọn công trình thuộc mình và đã được lưu hợp lệ; bản nhập liệu trên thiết bị chưa thành công trình không được lưu thành lựa chọn. Không lưu lựa chọn trong localStorage.
 12. Mỗi khách có tối đa một lựa chọn. Chọn lại cùng công trình không tạo bản ghi trùng. Khi nhiều thiết bị cùng đổi lựa chọn, dữ liệu từ giao dịch ghi thành công sau cùng là lựa chọn được đọc ở lần tiếp theo. Lỗi lưu giữ lựa chọn đã lưu trước đó; frontend báo lỗi và chưa chuyển trang từ popup.
 13. Xóa hợp lệ công trình đang chọn đồng thời xóa lựa chọn đó. Khi chưa có lựa chọn, API trả không có lựa chọn; mở danh sách để đọc không tự ghi lựa chọn mặc định.
+
+14. Danh sách công trình của khách và danh sách công trình của nhân viên cho tìm theo một phần mã hồ sơ, không phân biệt hoa/thường và bỏ qua dấu gạch ngang; ví dụ “t4w8nc” hoặc “hs-20261005” tìm được `BUILDX-HS-20261005-T4W8NC`. Phần thương hiệu `BUILDX` không dùng để so vì mã nào cũng có; vì vậy từ khóa ngắn như “i” không khớp mọi mã. Kết quả tìm vẫn chỉ gồm công trình trong phạm vi xem của người gọi theo khoản 1–5. Biết mã không cấp quyền xem công trình ngoài phạm vi.
 
 ## Except
 

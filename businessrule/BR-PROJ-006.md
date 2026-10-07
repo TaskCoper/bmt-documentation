@@ -44,7 +44,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Owner**: [Chưa xác định]
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
-- **Source**: Người dùng xác nhận trong hội thoại: giữ đủ PDF, Excel, link, QR và email; ai có link/QR đều được xem và tải không cần đăng nhập; chủ sở hữu bản dự toán chọn ngày hết hạn, được thu hồi sớm; email gửi link dùng cùng thời hạn và quyền thu hồi.
+- **Source**: Người dùng xác nhận trong hội thoại: giữ đủ PDF, Excel, link, QR và email; ai có link/QR đều được xem và tải không cần đăng nhập; chủ sở hữu bản dự toán chọn ngày hết hạn, được thu hồi sớm; email gửi link dùng cùng thời hạn và quyền thu hồi. Ngày 07/10/2026 người dùng bổ sung hiển thị mã dự toán trên trang chia sẻ (khoản 10).
 
 ## Statement
 
@@ -66,6 +66,7 @@ Chủ sở hữu bản dự toán chia sẻ hồ sơ, chọn ngày hết hạn h
 
 8. Link dùng được hết ngày chủ sở hữu chọn theo giờ Việt Nam (Asia/Ho_Chi_Minh); từ 00:00 ngày kế tiếp thì hết hiệu lực. Cho phép chọn ngày hiện tại, không cho chọn ngày đã qua theo múi giờ này. Ví dụ chọn 25/09/2026 thì hết hiệu lực lúc 00:00 ngày 26/09/2026 giờ Việt Nam.
 9. Mỗi bản dự toán chỉ có một link đang hiệu lực, dùng chung cho sao chép, QR và email. Khi link còn hiệu lực thì dùng lại; chỉ tạo link khác sau khi link cũ hết hạn hoặc bị thu hồi. Các yêu cầu đồng thời không được tạo nhiều link đang hiệu lực cho cùng bản dự toán.
+10. Trang xem qua link hiển thị mã dự toán theo BR-PROJ-003 khoản 12 cùng tên hiện tại của bản dự toán. Biết mã dự toán không cấp quyền xem hồ sơ khi không có link còn hiệu lực.
 
 ## Except
 

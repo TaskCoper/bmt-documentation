@@ -33,7 +33,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# UT-PAY-023
+# UT-PROJ-131
 
 ## Unit Test
 
@@ -42,9 +42,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-023 | Payment | PaymentCodeMatcher (dự kiến) | Branch | REGRESSION | P1 | Có PaymentCode BUILDX261007Q7K2M9TK thuộc connection C1 (ví dụ đổi từ mã BMT ngày 07/10/2026 theo BR-PAY-001 khoản 6). Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | code null, lạ, khớp một phần (ví dụ BUILDX261007Q7K2M9) hoặc gửi qua C2. | Không gán nhầm đơn; Unmatched hoặc ConnectionMismatch, không cấp gói. | BR-PAY-005/Then<br>TDD-PAY-001/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
+| UT-PROJ-131 | Tạo dự toán | CreateEstimateCommandHandler — cấp mã dự toán và gửi lại cùng khóa | Branch | REGRESSION | P1 | Đặc tả viết ngày 07/10/2026 theo quyết định người dùng cùng ngày; chưa thực thi. Khách U1 đủ điều kiện tạo; clock cố định 2026-10-05T03:00:00Z; bộ sinh ngẫu nhiên giả trả lần lượt các phần được chỉ định; store giả báo mã nào đã tồn tại. | (a) Tạo với key K1, store báo `BUILDX-20261005-Q7K2M9` đã có, lần sinh thứ hai là `T4W8NC`. (b) Gửi lại đúng K1 và body. (c) Store báo trùng cả 5 lần sinh. | (a) Estimate mới có Code=`BUILDX-20261005-T4W8NC`; response 201 trả cùng `code`, InputVersion=1. (b) Trả receipt cũ với `code`=`BUILDX-20261005-T4W8NC`, không tạo bản và không sinh mã mới. (c) Ném 503 `DependencyUnavailable`, không thêm Estimate hay receipt. Đổi tên sau đó không làm đổi Code. | BR-PROJ-003/Then<br>STORY-PROJ-001/AC-025<br>TDD-PROJ-001/Architecture | Kiểm sinh lại khi trùng, giới hạn số lần thử và replay giữ đúng mã; unique index thật kiểm bằng integration test PostgreSQL. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- BR-PAY-005/Then
-- TDD-PAY-001/Architecture
+- BR-PROJ-003/Then
+- STORY-PROJ-001/AC-025
+- TDD-PROJ-001/Architecture

@@ -70,6 +70,7 @@ Người không có quyền bị từ chối, không nhận dữ liệu quản t
 ## Notes
 
 - Truy vết giao dịch của đơn và bản giá/quyền lợi đã lưu dùng lại BR-PAY-001, BR-PAY-002 và BR-PAY-004; không tạo luồng tính tiền khác cho quản trị.
+- Người dùng xác nhận ngày 07/10/2026: bộ lọc mã thanh toán ở danh sách đơn quản trị vẫn khớp đủ mã sau khi bỏ khoảng trắng đầu/cuối và đổi chữ hoa, áp dụng cho cả mã `BUILDX` mới và mã `BMT` của đơn cũ. Giao dịch theo mã `BMT` gửi sau khi áp dụng BR-PAY-002 khoản 7 hiện với nhãn “Chưa xác định đơn” như khoản 5.
 - Danh sách trường, tìm kiếm/bộ lọc, phân trang và bố trí màn hình sẽ cụ thể hóa ở bước thiết kế. Không tự bổ sung báo cáo doanh thu, xuất file hoặc quyền chỉnh sửa từ yêu cầu xem.
 - Hợp đồng SePay và cách lưu giao dịch chưa khớp còn cần thiết kế kỹ thuật; không khẳng định tên trường provider trong tài liệu nghiệp vụ.
 - Xem [STORY-PAY-002](../userstory/STORY-PAY-002.md) và [tổng hợp](../discovery/payment-packages.md). Bản nháp, chưa triển khai hoặc chạy test; Owner/ngày hiệu lực chưa xác định. Reviewer/Approver theo xác nhận đã có cho bản nháp mới, không phải bằng chứng đã duyệt.

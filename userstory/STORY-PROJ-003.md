@@ -151,6 +151,13 @@ Chuẩn bị hoặc tải tệp thất bại sau khi kết quả thiết kế đ
 - **Then**: Cả hai đều thấy tên "Phương án chốt" trên hồ sơ; tệp PDF tải về có tên tệp "Phương án chốt", còn nội dung tệp giữ nguyên như lúc AI tạo theo BR-PROJ-007 khoản 7 (người dùng xác nhận ngày 26/09/2026).
 - **And**: Việc tải lại không tính lượt, không gọi AI, không tự dựng lại tệp và không thay kết quả nguồn.
 
+#### AC-007
+
+- **Given**: Bản dự toán có mã `BUILDX-20261005-Q7K2M9` và đã có kết quả thành công.
+- **When**: Chủ sở hữu mở kết quả và hồ sơ, kể cả sau khi đổi tên bản dự toán.
+- **Then**: Màn hình kết quả hiển thị mã `BUILDX-20261005-Q7K2M9` cùng tên hiện tại theo BR-PROJ-003 khoản 12.
+- **And**: Đổi tên không đổi mã; mở kết quả không tính lượt và không gọi AI.
+
 ## References
 
 ### TDDs
@@ -161,6 +168,7 @@ Chuẩn bị hoặc tải tệp thất bại sau khi kết quả thiết kế đ
 
 ### Rules
 
+- BR-PROJ-003/Then: Khoản 12, mã dự toán hiển thị ở kết quả của chủ sở hữu.
 - BR-PROJ-007
 - BR-SUB-003
 - BR-SUB-007

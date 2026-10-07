@@ -44,7 +44,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Owner**: [Chưa xác định]
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
-- **Source**: Người dùng yêu cầu ngày 01/10/2026: tạo nhanh không bắt buộc kinh độ, vĩ độ. Thay yêu cầu trước đó bắt buộc tọa độ ngay khi tạo. Quy tắc gửi đủ cặp khi đổi địa chỉ và trước khi gửi AI giữ nguyên.
+- **Source**: Người dùng yêu cầu ngày 01/10/2026: tạo nhanh không bắt buộc kinh độ, vĩ độ. Thay yêu cầu trước đó bắt buộc tọa độ ngay khi tạo. Quy tắc gửi đủ cặp khi đổi địa chỉ và trước khi gửi AI giữ nguyên. Ngày 07/10/2026 người dùng chốt mã dự toán `BUILDX-YYYYMMDD-XXXXXX` (khoản 12).
 
 ## Statement
 
@@ -72,12 +72,17 @@ Khách tạo nhanh dự toán bằng tên, hoặc nhập, sửa thông tin đầ
 
 11. Khi khách đổi địa chỉ, frontend lấy lại kinh độ và vĩ độ từ dịch vụ bản đồ, gửi đủ cả hai cùng yêu cầu lưu địa chỉ theo BR-PROJ-004 khoản 18. Backend lưu địa chỉ và tọa độ cùng nhau; thiếu một hoặc cả hai tọa độ thì từ chối yêu cầu, giữ nguyên dữ liệu đã lưu. Việc sửa vẫn phải đáp ứng điều kiện quyền/gói/lượt và khóa đầu vào hiện hành.
 
+12. Khi tạo, hệ thống cấp cho bản dự toán một mã dạng `BUILDX-YYYYMMDD-XXXXXX`, ví dụ `BUILDX-20261005-Q7K2M9`. `BUILDX` là thương hiệu; `YYYYMMDD` là ngày tạo theo giờ Việt Nam (Asia/Ho_Chi_Minh); `XXXXXX` là 6 ký tự ngẫu nhiên lấy từ chữ hoa và số, bỏ 0, O, 1, I, L vì dễ đọc nhầm với nhau (còn 31 ký tự). Mã không trùng với mã của bản dự toán khác, kể cả bản đã xóa, và không được cấp lại cho bản khác. Mã đã cấp không bao giờ đổi, kể cả khi đổi tên hoặc sửa đầu vào; khách không tự nhập hay sửa mã. Mã hiển thị ở danh sách, chi tiết và kết quả của chủ sở hữu, và ở trang xem qua link chia sẻ theo BR-PROJ-006 khoản 10.
+
 ## Except
 
 Không hỗ trợ khôi phục phần chưa lưu sau khi đóng hoặc tải lại trang; khi mở lại chỉ trả dữ liệu backend đã lưu thành công. Không tự thử lại yêu cầu bị từ chối do không đủ quyền/gói/lượt theo BR-SUB-007, hoặc dùng thử lại để vượt qua khóa đầu vào theo BR-PROJ-005. Lỗi dữ liệu cần được sửa trước khi yêu cầu lưu lại.
 
+Bản dự toán tạo trước khi áp dụng khoản 12, kể cả bản đã xóa, được cấp mã một lần theo ngày tạo gốc (giờ Việt Nam); sau đó mã cũng không đổi.
+
 ## Notes
 
+- **Đã xác nhận ngày 07/10/2026 (mã dự toán)**: định dạng, bảng ký tự, ngày theo giờ Việt Nam, mã không đổi và không cấp lại mã của bản đã xóa, cấp mã cho bản đã có theo ngày tạo gốc, nơi hiển thị và tìm theo mã (BR-PROJ-008 khoản 5). Mã chỉ để nhận diện, không phải mã bí mật và không cấp quyền truy cập.
 - **Đã xác nhận ngày 01/10/2026 (điều chỉnh tạo nhanh)**: tên là dữ liệu bắt buộc để tạo; tọa độ có thể bổ sung sau. Đổi địa chỉ vẫn phải gửi đủ cặp tọa độ từ bản đồ. Không thay đổi tọa độ đã lưu của bản cũ.
 - **Đề xuất chưa chốt**: chưa có đề xuất nghiệp vụ bổ sung trong phạm vi thay đổi tọa độ này.
 - **Đã chốt US/BR trong hội thoại ngày 01/10/2026**: người dùng đã chốt phần bổ sung tọa độ của STORY-PROJ-001, BR-PROJ-003 và BR-PROJ-004. System Test và TDD đã được cập nhật; backend đã lên `develop` tại commit `5e396fc`. Phạm vi kiểm thử và phần chưa kiểm được ghi trong [bàn giao tọa độ](../discovery/estimate-coordinates-implementation.md). Xác nhận hội thoại không thay cho phê duyệt/import trên hệ thống tài liệu.

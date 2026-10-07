@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-024 | Payment | PaymentCodeMatcher (dự kiến) | Happy | REGRESSION | P1 | Code và connection khớp toàn bộ. Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | code chữ thường của đúng mã đơn. | Chuẩn hóa chữ hoa và khớp đúng một đơn; không dựa tên khách hoặc số tiền. | TDD-PAY-001/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
+| UT-PAY-024 | Payment | PaymentCodeMatcher (dự kiến) | Happy | REGRESSION | P1 | Code và connection khớp toàn bộ; mã đơn là BUILDX261007Q7K2M9TK (định dạng từ 07/10/2026). Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | code chữ thường của đúng mã đơn: buildx261007q7k2m9tk. | Chuẩn hóa chữ hoa và khớp đúng một đơn; không dựa tên khách hoặc số tiền. | TDD-PAY-001/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

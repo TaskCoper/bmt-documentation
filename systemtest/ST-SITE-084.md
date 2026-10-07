@@ -11,11 +11,13 @@
 -->
 
 <!-- Mỗi file chứa một test, đúng một dòng dữ liệu và 13 cột theo thứ tự bên dưới.
-Thay UT-001 ở heading và Test ID. Trong ô bảng: xuống dòng bằng <br>, dấu | viết thành \|.
-Loại: Happy / Branch / Boundary / Error / Quirk / Determinism. Suite: SMOKE / REGRESSION / FULL. Priority: P0 / P1 / P2 / P3.
+Thay ST-001 ở heading và Test ID, STORY-001 bằng mã Story cần kiểm thử.
+Trong ô bảng: xuống dòng bằng <br>, dấu | viết thành \|. Steps gồm các bước đánh số.
+Loại: Main / ALT / EXC / NFR / Integration boundary; ghép nhiều loại bằng dấu /.
+Suite: SMOKE / REGRESSION / FULL. Priority: P0 / P1 / P2 / P3.
 TEST_LINKS là nguồn liên kết khi import; cột Trace to chỉ để đọc. Giữ hai nơi nhất quán.
-Mỗi liên kết dùng DOC-KEY/section: ghi chú. Owner là tên hiển thị; phê duyệt thực hiện sau import.
-Expected output và assertion phải suy ra từ Business Rule/contract đã xác nhận. Dữ liệu mock chỉ là dữ liệu kiểm thử minh hoạ, không phải dữ liệu production; không ghi Pass/đã chạy nếu chưa có bằng chứng thực thi.
+Owner là tên hiển thị; phê duyệt thực hiện sau import.
+Steps và Expected result phải bám Flow, AC và Business Rule của Story có thật. Test data là dữ liệu kiểm thử minh hoạ; không tự thêm hành vi nghiệp vụ hoặc ghi Pass/đã chạy nếu chưa có bằng chứng thực thi.
 BẮT BUỘC KHI HOÀN THIỆN MẪU: phải có cả Reviewer và Approver, mỗi tên 1–200 ký tự sau khi bỏ khoảng trắng đầu/cuối. Không xoá hai dòng metadata, để trống, dùng tên bịa hoặc giữ placeholder rồi coi là hoàn tất.
 Nếu chưa biết người review hoặc người phê duyệt, phải hỏi người dùng và báo tài liệu chưa đủ thông tin; không tự lấy Author/Owner làm người thay thế. Tên trong file không tự gán tài khoản hoặc xác nhận đã duyệt; gán thành viên trên giao diện sau import.
 Đây là yêu cầu hoàn thiện mẫu; backend hiện vẫn nhận file cũ thiếu hai trường để tương thích.
@@ -27,24 +29,26 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Không dùng Status trong Markdown hoặc tên Approver để tự xác nhận phê duyệt; import không cấp quyền hay gán tài khoản từ tên. Chạy Kiểm tra file và xử lý lỗi/cảnh báo trước khi nhập.
 - Giới hạn độ dài bên dưới tính theo string.Length của .NET (đơn vị UTF-16); không tự cắt ngắn dữ kiện quan trọng để vượt validation, hãy viết lại có căn cứ hoặc hỏi người dùng.
 - Bảng phải có header, dòng phân cách và đúng một dòng dữ liệu, đủ 13 cột theo thứ tự mẫu. Reviewer/Approver là hai bullet trước bảng, không thêm thành cột. Test ID trong bảng phải nhất quán với heading; mã tài liệu import lấy từ heading.
-- Module tối đa 200 ký tự; Unit under test tối đa 500 (được dùng làm tiêu đề tài liệu); Owner tối đa 200. Trạng thái parser nhận: Draft / Approved; đây không phải kết quả chạy test hoặc quyền phê duyệt.
-- Giữ Loại: Happy / Branch / Boundary / Error / Quirk / Determinism; Suite: SMOKE / REGRESSION / FULL; Priority: P0 / P1 / P2 / P3. Không dùng số ngoài dải Priority 0–3.
-- Không xuống dòng vật lý trong ô: dùng <br>; dấu phân cột trong nội dung phải viết \|. TEST_LINKS mới là nguồn liên kết import; cột Trace to chỉ hiển thị, hai nơi phải nhất quán.
+- Story tối đa 100 ký tự và được dùng làm tiêu đề tài liệu; Owner tối đa 200. Trạng thái parser nhận: Draft / Approved; đây không phải kết quả chạy test hoặc quyền phê duyệt.
+- Giữ Loại: Main / ALT / EXC / NFR / Integration boundary, có thể ghép bằng dấu /; Suite: SMOKE / REGRESSION / FULL; Priority: P0 / P1 / P2 / P3. Không dùng số ngoài dải Priority 0–3.
+- Steps là các bước đánh số trong một ô, tách bằng <br>; không xuống dòng vật lý trong ô, dấu | trong nội dung phải viết \|. TEST_LINKS mới là nguồn liên kết import; cột Trace to chỉ hiển thị, hai nơi phải nhất quán.
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# UT-PAY-023
+# ST-SITE-084
 
-## Unit Test
+## System Test
 
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
 
-| Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
+| Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-023 | Payment | PaymentCodeMatcher (dự kiến) | Branch | REGRESSION | P1 | Có PaymentCode BUILDX261007Q7K2M9TK thuộc connection C1 (ví dụ đổi từ mã BMT ngày 07/10/2026 theo BR-PAY-001 khoản 6). Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | code null, lạ, khớp một phần (ví dụ BUILDX261007Q7K2M9) hoặc gửi qua C2. | Không gán nhầm đơn; Unmatched hoặc ConnectionMismatch, không cấp gói. | BR-PAY-005/Then<br>TDD-PAY-001/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
+| ST-SITE-084 | STORY-SITE-001 | Main / Integration boundary | REGRESSION | P1 | U1 có dự toán hoàn tất D1 mã `BUILDX-20261001-Q7K2M9`, chưa dùng làm nguồn; đủ dữ liệu tạo công trình độc lập. Ngày thử 05/10/2026 giờ Việt Nam. Đặc tả viết ngày 07/10/2026 theo quyết định người dùng cùng ngày; chưa thực thi. | 1. Tạo công trình độc lập C1.<br>2. Tạo công trình C2 từ D1.<br>3. Mở danh sách và chi tiết C1, C2; nhân viên có `assignment.manage` mở danh sách công trình.<br>4. Sửa tên C1 rồi mở lại chi tiết. | C1, C2, D1 là dữ liệu thử. | C1 và C2 có hai mã khác nhau dạng `BUILDX-HS-20261005-XXXXXX`; C2 không dùng mã của D1. Mã hiện giống nhau ở danh sách, chi tiết của khách và danh sách nhân viên. Sửa tên không đổi mã. | STORY-SITE-001/AC-042<br>STORY-SITE-002/AC-014<br>BR-SITE-001/Then<br>BR-SITE-003/Then | Mã hồ sơ riêng cho cả công trình độc lập và công trình tạo từ dự toán. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- BR-PAY-005/Then
-- TDD-PAY-001/Architecture
+- STORY-SITE-001/AC-042
+- STORY-SITE-002/AC-014
+- BR-SITE-001/Then
+- BR-SITE-003/Then

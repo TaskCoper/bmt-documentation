@@ -434,6 +434,20 @@ Tài khoản nhân viên gửi yêu cầu tạo hoặc hủy đơn mua gói, k�
 - **Then**: Hệ thống từ chối cả hai yêu cầu với mã 403.
 - **And**: Không tạo đơn hay QR cho N; đơn của K giữ nguyên trạng thái chờ.
 
+#### AC-029
+
+- **Given**: Khách đủ điều kiện mua; hôm nay là 07/10/2026 theo giờ Việt Nam.
+- **When**: Khách tạo một đơn gói thiết kế và một đơn gói giám sát.
+- **Then**: Đơn thiết kế có mã chuyển khoản dạng `BUILDX261007XXXXXXTK`, đơn giám sát dạng `BUILDX261007XXXXXXGS`, theo BR-PAY-001 khoản 6; `XXXXXX` là 6 ký tự ngẫu nhiên không có 0, O, 1, I, L. Nội dung chuyển khoản và QR dùng đúng mã của đơn.
+- **And**: Hai đơn có mã khác nhau; mã không đổi khi khách chuyển thiếu rồi chuyển thêm. Khách không phải chọn dự toán hay công trình để có mã.
+
+#### AC-030
+
+- **Given**: Đơn cũ O0 tạo trước ngày áp dụng có mã `BMT7K9D3P2Q8R`; đơn mới O1 có mã `BUILDX261007Q7K2M9TK`.
+- **When**: SePay báo hai giao dịch tiền vào, một theo mã `BMT7K9D3P2Q8R` và một theo mã `buildx261007q7k2m9tk`.
+- **Then**: Giao dịch theo mã `BUILDX…` khớp O1 dù viết chữ thường; giao dịch theo mã `BMT…` không khớp đơn nào và hiện là “Chưa xác định đơn” theo BR-PAY-002 khoản 7.
+- **And**: Không cấp gói từ giao dịch mã `BMT…`; nhân viên xử lý khoản tiền đó bên ngoài hệ thống.
+
 ## References
 
 ### TDDs
@@ -446,6 +460,7 @@ Tài khoản nhân viên gửi yêu cầu tạo hoặc hủy đơn mua gói, k�
 - BR-PAY-002/Then
 - BR-PAY-003/Then
 - BR-PAY-004/Then
+- BR-PAY-005/Then: Giao dịch chưa xác định đơn ở AC-030.
 - BR-SUB-021/Then
 - BR-RBAC-005/Then
 

@@ -33,7 +33,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# UT-PAY-023
+# UT-PAY-132
 
 ## Unit Test
 
@@ -42,9 +42,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-023 | Payment | PaymentCodeMatcher (dự kiến) | Branch | REGRESSION | P1 | Có PaymentCode BUILDX261007Q7K2M9TK thuộc connection C1 (ví dụ đổi từ mã BMT ngày 07/10/2026 theo BR-PAY-001 khoản 6). Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | code null, lạ, khớp một phần (ví dụ BUILDX261007Q7K2M9) hoặc gửi qua C2. | Không gán nhầm đơn; Unmatched hoặc ConnectionMismatch, không cấp gói. | BR-PAY-005/Then<br>TDD-PAY-001/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
+| UT-PAY-132 | Payment | ProcessBankTransactionCommandHandler và PaymentCodes.IsMatchable — chỉ khớp mã BUILDX | Branch | REGRESSION | P0 | Đặc tả viết ngày 07/10/2026 theo quyết định người dùng cùng ngày; chưa thực thi. Đơn cũ O0 có PaymentCode=`BMT7K9D3P2Q8R`, đơn O1 có `BUILDX261007Q7K2M9TK`, cùng connection C1, còn hạn. | Giao dịch tiền vào qua C1 với code lần lượt `BMT7K9D3P2Q8R`, ` buildx261007q7k2m9tk `, `BUILDX261007Q7K2M9`. | Code `BMT…` → MatchState=Unmatched, OrderId=NULL, O0 không cộng tiền, không cấp gói. Code BUILDX viết thường có khoảng trắng → chuẩn hóa rồi khớp O1. Code thiếu hậu tố → Unmatched vì không trùng toàn bộ mã. | BR-PAY-002/Then<br>STORY-PAY-001/AC-030<br>TDD-PAY-001/Architecture | Khóa quyết định chỉ nhận mã BUILDX và không khớp một phần. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- BR-PAY-005/Then
+- BR-PAY-002/Then
+- STORY-PAY-001/AC-030
 - TDD-PAY-001/Architecture

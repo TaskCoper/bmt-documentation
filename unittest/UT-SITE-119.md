@@ -33,7 +33,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# UT-PAY-023
+# UT-SITE-119
 
 ## Unit Test
 
@@ -42,9 +42,11 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-023 | Payment | PaymentCodeMatcher (dự kiến) | Branch | REGRESSION | P1 | Có PaymentCode BUILDX261007Q7K2M9TK thuộc connection C1 (ví dụ đổi từ mã BMT ngày 07/10/2026 theo BR-PAY-001 khoản 6). Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | code null, lạ, khớp một phần (ví dụ BUILDX261007Q7K2M9) hoặc gửi qua C2. | Không gán nhầm đơn; Unmatched hoặc ConnectionMismatch, không cấp gói. | BR-PAY-005/Then<br>TDD-PAY-001/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
+| UT-SITE-119 | Công trình | GetMyConstructionSitesQuery và GetConstructionSitesForStaffQuery — validator và lọc theo code | Branch | REGRESSION | P1 | Đặc tả viết ngày 07/10/2026 theo quyết định người dùng cùng ngày; chưa thực thi. U1 có C1 mã `BUILDX-HS-20261005-T4W8NC`, C2 mã `BUILDX-HS-20261006-Q7K2M9`; U2 có C3 mã `BUILDX-HS-20261005-T4W8NA`. Nhân viên N chỉ có `supervision.complete`, phụ trách gói đang gắn C1; QL có `assignment.manage`. | U1 gọi danh sách với code="t4w8nc", code="hs-20261005", code=33 ký tự; N và QL gọi danh sách nhân viên với code="T4W8N". | U1: hai lần đầu chỉ trả C1; code 33 ký tự trả 422 `ConstructionSiteCodeFilterInvalid`. QL nhận C1 và C3; N chỉ nhận C1. Mỗi item có `code`; totalCount khớp số item sau lọc. | BR-SITE-003/Then<br>STORY-SITE-001/AC-043<br>STORY-SITE-002/AC-014<br>TDD-SITE-003/Internal API | Lọc theo mã cộng thêm vào phạm vi xem, không thay phạm vi. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- BR-PAY-005/Then
-- TDD-PAY-001/Architecture
+- BR-SITE-003/Then
+- STORY-SITE-001/AC-043
+- STORY-SITE-002/AC-014
+- TDD-SITE-003/Internal API

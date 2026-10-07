@@ -33,7 +33,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# UT-PAY-023
+# UT-SITE-118
 
 ## Unit Test
 
@@ -42,9 +42,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-023 | Payment | PaymentCodeMatcher (dự kiến) | Branch | REGRESSION | P1 | Có PaymentCode BUILDX261007Q7K2M9TK thuộc connection C1 (ví dụ đổi từ mã BMT ngày 07/10/2026 theo BR-PAY-001 khoản 6). Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | code null, lạ, khớp một phần (ví dụ BUILDX261007Q7K2M9) hoặc gửi qua C2. | Không gán nhầm đơn; Unmatched hoặc ConnectionMismatch, không cấp gói. | BR-PAY-005/Then<br>TDD-PAY-001/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
+| UT-SITE-118 | Công trình | CreateConstructionSiteCommandHandler — cấp mã hồ sơ, kể cả khi tạo từ dự toán | Branch | REGRESSION | P1 | Đặc tả viết ngày 07/10/2026 theo quyết định người dùng cùng ngày; chưa thực thi. Fixture tạo độc lập và tạo từ dự toán D1 (Code=`BUILDX-20261001-Q7K2M9`) như các UT tạo công trình hiện có; clock cố định 2026-10-05T03:00:00Z; store giả báo mã đã tồn tại khi cần. | (a) Tạo độc lập C1. (b) Tạo C2 từ D1. (c) Sửa tên C1 bằng PUT hợp lệ. (d) Store báo trùng cả 5 lần sinh. | (a) C1 có Code dạng `BUILDX-HS-20261005-XXXXXX`; response trả `code`. (b) C2 có mã HS riêng, khác mã của D1 và của C1. (c) Code của C1 giữ nguyên, Version tăng như cũ. (d) 503 `DependencyUnavailable`, không tạo công trình, không gắn tệp, không chiếm nguồn. | BR-SITE-001/Then<br>STORY-SITE-001/AC-042<br>TDD-SITE-003/Data Model | Kiểm mã HS độc lập với mã dự toán và không đổi khi sửa. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- BR-PAY-005/Then
-- TDD-PAY-001/Architecture
+- BR-SITE-001/Then
+- STORY-SITE-001/AC-042
+- TDD-SITE-003/Data Model

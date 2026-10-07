@@ -33,7 +33,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# UT-PAY-023
+# UT-PROJ-132
 
 ## Unit Test
 
@@ -42,9 +42,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-023 | Payment | PaymentCodeMatcher (dự kiến) | Branch | REGRESSION | P1 | Có PaymentCode BUILDX261007Q7K2M9TK thuộc connection C1 (ví dụ đổi từ mã BMT ngày 07/10/2026 theo BR-PAY-001 khoản 6). Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | code null, lạ, khớp một phần (ví dụ BUILDX261007Q7K2M9) hoặc gửi qua C2. | Không gán nhầm đơn; Unmatched hoặc ConnectionMismatch, không cấp gói. | BR-PAY-005/Then<br>TDD-PAY-001/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
+| UT-PROJ-132 | Dự toán của tôi | EstimateStore.ReadMyEstimatesAsync — tìm theo tên hoặc một phần mã | Branch | REGRESSION | P1 | Đặc tả viết ngày 07/10/2026 theo quyết định người dùng cùng ngày; chưa thực thi. Chạy trên PostgreSQL thật có extension unaccent (SQL thô không chạy được với EF InMemory). U1 có D1 “Nhà An” mã `BUILDX-20261005-Q7K2M9` và D2 “Nhà Bình” mã `BUILDX-20261006-T4W8NC`; U2 có D3 mã `BUILDX-20261005-Q7K2MA`; D4 của U1 mã `BUILDX-20261005-Q7K2MB` đã xóa mềm. | U1 tìm lần lượt "q7k2m9", "20261005-Q7K", "Q7K2", "nhà", "-", kèm một lần lọc state=Draft khi D1 là Draft. | "q7k2m9" và "20261005-Q7K" chỉ trả D1; "Q7K2" chỉ trả D1 (không có D3 của U2, không có D4 đã xóa); "nhà" trả D1, D2 theo tên; "-" không thu hẹp theo mã nên dùng điều kiện tên như cũ. totalCount khớp số item. Mỗi item có `code` đúng mã đã lưu. | BR-PROJ-008/Then<br>STORY-PROJ-006/AC-011<br>TDD-PROJ-004/Data Model | Bảo đảm OR giữa tên và mã không làm rò dữ liệu khách khác hoặc bản đã xóa và tổng số khớp trang. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- BR-PAY-005/Then
-- TDD-PAY-001/Architecture
+- BR-PROJ-008/Then
+- STORY-PROJ-006/AC-011
+- TDD-PROJ-004/Data Model

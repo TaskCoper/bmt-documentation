@@ -33,7 +33,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# UT-PAY-023
+# UT-RFQ-015
 
 ## Unit Test
 
@@ -42,9 +42,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-023 | Payment | PaymentCodeMatcher (dự kiến) | Branch | REGRESSION | P1 | Có PaymentCode BUILDX261007Q7K2M9TK thuộc connection C1 (ví dụ đổi từ mã BMT ngày 07/10/2026 theo BR-PAY-001 khoản 6). Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | code null, lạ, khớp một phần (ví dụ BUILDX261007Q7K2M9) hoặc gửi qua C2. | Không gán nhầm đơn; Unmatched hoặc ConnectionMismatch, không cấp gói. | BR-PAY-005/Then<br>TDD-PAY-001/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
+| UT-RFQ-015 | RFQ | GetQuotationRequestsQueryHandler — siteCode trong item và filter siteCode | Branch | REGRESSION | P1 | Đặc tả viết ngày 07/10/2026 theo quyết định người dùng cùng ngày; chưa thực thi. R1 từ công trình mã `BUILDX-HS-20261005-T4W8NC` trạng thái Sent; R2 từ công trình mã `BUILDX-HS-20261006-Q7K2M9` trạng thái Sent; R3 từ cùng công trình của R1 trạng thái Completed. Người gọi có `quotation-request.manage`. | siteCode="t4w8nc"; siteCode="hs-20261005" với status=Sent; siteCode 33 ký tự. | Lần 1 trả R1 và R3; lần 2 chỉ trả R1. Mỗi item có `siteCode` đúng mã hồ sơ. siteCode quá 32 ký tự bị từ chối bằng lỗi validation của danh sách, không truy vấn. | BR-RFQ-004/Then<br>STORY-RFQ-002/AC-010<br>TDD-RFQ-001/Internal API | Filter mã kết hợp AND với filter hiện có và không chụp mã vào snapshot. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- BR-PAY-005/Then
-- TDD-PAY-001/Architecture
+- BR-RFQ-004/Then
+- STORY-RFQ-002/AC-010
+- TDD-RFQ-001/Internal API

@@ -214,6 +214,13 @@ Tài khoản nhân viên, kể cả Admin, gửi yêu cầu tạo công trình h
 - **When**: Gửi yêu cầu thêm, thay, xóa tệp của khách.
 - **Then**: Từ chối; quyền xem không cấp quyền quản lý tệp.
 
+#### AC-014
+
+- **Given**: Công trình A mã `BUILDX-HS-20261005-T4W8NC` của gói G1 do nhân viên N phụ trách; công trình B mã `BUILDX-HS-20261005-T4W8NA` không thuộc gói nào của N. Quản lý QL có `assignment.manage`; N chỉ có `supervision.complete`.
+- **When**: QL và N mở danh sách công trình của nhân viên rồi tìm bằng “T4W8N”.
+- **Then**: Mỗi công trình hiển thị mã hồ sơ. QL nhận cả A và B; N chỉ nhận A, vì tìm theo mã vẫn giới hạn trong phạm vi xem theo BR-SITE-003 khoản 14.
+- **And**: Biết mã của B không giúp N xem B; tìm không phân biệt hoa/thường và bỏ qua dấu gạch ngang.
+
 ## References
 
 ### TDDs

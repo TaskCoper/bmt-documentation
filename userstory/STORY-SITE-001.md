@@ -441,6 +441,20 @@ Trong các AC dưới đây, dữ liệu không được nêu là thiếu/sai đ
 - **Then**: Lựa chọn trỏ đến công trình đó được xóa cùng giao dịch.
 - **And**: Không thay đổi điều kiện cho phép xóa công trình hoặc dữ liệu các công trình khác.
 
+#### AC-042
+
+- **Given**: Khách có dự toán hoàn tất D1 mã `BUILDX-20261001-Q7K2M9`; hôm nay là 05/10/2026 theo giờ Việt Nam.
+- **When**: Khách tạo công trình độc lập C1, tạo công trình C2 từ D1, rồi sửa tên C1.
+- **Then**: C1 và C2 mỗi công trình có một mã hồ sơ riêng dạng `BUILDX-HS-20261005-XXXXXX` theo BR-SITE-001 khoản 16; C2 không dùng lại mã của D1. Mã hiển thị ở danh sách và chi tiết công trình.
+- **And**: Sửa hồ sơ không đổi mã; khách không nhập hay sửa được mã; yêu cầu tạo bị từ chối không cấp mã.
+
+#### AC-043
+
+- **Given**: Khách có công trình mã `BUILDX-HS-20261005-T4W8NC` và công trình mã `BUILDX-HS-20261006-Q7K2M9`; khách khác có công trình mã `BUILDX-HS-20261005-T4W8NA`.
+- **When**: Khách tìm trong danh sách công trình của mình lần lượt bằng “t4w8nc” và “hs-20261005”.
+- **Then**: Cả hai lần chỉ trả công trình `BUILDX-HS-20261005-T4W8NC` của chính khách; tìm theo một phần mã, không phân biệt hoa/thường và bỏ qua dấu gạch ngang theo BR-SITE-003 khoản 14.
+- **And**: Không trả công trình của khách khác dù mã gần giống; không có kết quả thì hiện danh sách rỗng, không báo lỗi.
+
 ## References
 
 ### TDDs
@@ -457,6 +471,7 @@ Trong các AC dưới đây, dữ liệu không được nêu là thiếu/sai đ
 
 - BR-SITE-001/Then
 - BR-SITE-002/Then
+- BR-SITE-003/Then: Khoản 14, tìm công trình theo mã hồ sơ.
 - BR-RFQ-003/Then: Giữ hồ sơ gốc khi đã có lời mời báo giá.
 - BR-SITE-003/Then
 - BR-RBAC-005/Then

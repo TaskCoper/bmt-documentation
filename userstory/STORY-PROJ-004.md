@@ -208,6 +208,13 @@ Chủ sở hữu chọn ngày hết hạn đã qua theo giờ Việt Nam.
 - **Then**: Chỉ có một link đang hiệu lực dùng chung; khi còn hiệu lực thì dùng lại, sau khi hết hạn hoặc thu hồi mới tạo link khác.
 - **And**: Tạo link mới không khôi phục hiệu lực link cũ hoặc đường truy cập qua QR/email cũ.
 
+#### AC-011
+
+- **Given**: Bản dự toán có mã `BUILDX-20261005-Q7K2M9` và đang có link chia sẻ còn hiệu lực.
+- **When**: Người nhận mở link, quét QR hoặc mở từ email.
+- **Then**: Trang xem qua link hiển thị mã `BUILDX-20261005-Q7K2M9` cùng tên hiện tại của bản dự toán theo BR-PROJ-006 khoản 10.
+- **And**: Không có thao tác nào cho xem hồ sơ chỉ bằng mã dự toán; link hết hạn hoặc bị thu hồi vẫn bị từ chối dù người mở biết mã.
+
 ## References
 
 ### TDDs
@@ -217,6 +224,7 @@ Chủ sở hữu chọn ngày hết hạn đã qua theo giờ Việt Nam.
 ### Rules
 
 - BR-PROJ-006
+- BR-PROJ-003/Then: Khoản 12, định dạng và tính bất biến của mã dự toán.
 - BR-PROJ-007
 - BR-SUB-007
 

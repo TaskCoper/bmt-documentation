@@ -56,6 +56,7 @@ erDiagram
         uuid Id PK
         uuid OwnerUserId FK "AK ghep voi Id"
         varchar Name
+        varchar Code UK "ma ho so BUILDX-HS, khong doi"
         varchar NormalizedName "UK theo chu cong trinh"
         varchar Address
         timestamptz CreatedAtUtc
@@ -214,7 +215,7 @@ erDiagram
         numeric PriceVnd
         char Currency
         uuid ConnectionId FK
-        varchar PaymentCode UK
+        varchar PaymentCode UK "BUILDX tu 07/10/2026, don cu giu BMT"
         timestamptz CreatedAtUtc
         timestamptz ExpiresAtUtc
         timestamptz PaidAtUtc "NULL"
@@ -464,7 +465,7 @@ Trong bảng dưới, “1 → 0..N” nghĩa mỗi dòng con bắt buộc có m
 | Bảng | Một dòng đại diện cho gì? | Khi tạo/cập nhật và cách dùng |
 | --- | --- | --- |
 | `SupervisionGrant` | Một quyền sử dụng gói giám sát đã cấp cho khách. | Mới cấp chưa có công trình. Lần gán đầu ghi `ConstructionSiteId`, `FirstAssignedAtUtc` và (thiết kế lần 3) `AssignedAtUtc`. Không ai đổi thẳng công trình của gói đã gán. Thiết kế lần 3: nhân viên có `supervision.unassign` gỡ gói đang gán về `Unassigned` (cột công trình và `AssignedAtUtc` về NULL, `FirstAssignedAtUtc` giữ nguyên), khách gán lại trước hạn gán ban đầu. Hủy, hoàn thành, mở lại cập nhật cùng grant, giữ revision, mốc cấp và công trình; không còn khôi phục. Hạn một năm là hạn gán; đã gán đúng hạn không tự hết hiệu lực chỉ vì qua mốc đó. |
-| `ConstructionSite` | Một công trình thật của khách, do khách tự tạo. | Hiện trạng code: khách sửa tên và địa chỉ bất cứ lúc nào; chỉ xóa được khi chưa từng có gói nào gắn vào. Thiết kế lần 3: khách không sửa, không xóa được khi công trình có gói giữ chỗ (`Assigned` hoặc `Completed`); gói đã gỡ hoặc đã hủy không khóa. Tên không trùng trong cùng một khách, so theo `NormalizedName` (chữ hoa, giữ dấu). `Version` chặn hai lần sửa cùng lúc ghi đè nhau. |
+| `ConstructionSite` | Một công trình thật của khách, do khách tự tạo. | Từ 07/10/2026 mỗi công trình có mã hồ sơ `Code` dạng `BUILDX-HS-YYYYMMDD-XXXXXX`, cấp lúc tạo và không đổi ([TDD-SITE-003](../tdd/TDD-SITE-003.md#data-model)). Hiện trạng code: khách sửa tên và địa chỉ bất cứ lúc nào; chỉ xóa được khi chưa từng có gói nào gắn vào. Thiết kế lần 3: khách không sửa, không xóa được khi công trình có gói giữ chỗ (`Assigned` hoặc `Completed`); gói đã gỡ hoặc đã hủy không khóa. Tên không trùng trong cùng một khách, so theo `NormalizedName` (chữ hoa, giữ dấu). `Version` chặn hai lần sửa cùng lúc ghi đè nhau. |
 | `SupervisionTransition` | Một lần hoàn tất/mở lại giám sát theo thiết kế cũ SUB-003. | Lưu FromState/ToState, actor, thời điểm, lý do và GrantVersion. Được giữ trong tổng hợp để truy lịch sử thiết kế. Không dùng cho luồng mới và không tạo dòng mới; cách chuyển dữ liệu cũ xem mục 8. |
 
 ### 5.4. Thanh toán và cấp gói — PAY-001
@@ -519,9 +520,9 @@ Trong bảng dưới, “1 → 0..N” nghĩa mỗi dòng con bắt buộc có m
 | Giám sát | AssignmentDeadlineUtc>GrantedAtUtc; nếu có first thì GrantedAtUtc<=first<deadline. Hiện trạng code: Unassigned cần ConstructionSiteId/FirstAssignedAtUtc NULL; Assigned hoặc Completed cần cả hai. Thiết kế lần 3 (`CK_SupervisionGrant_AssignedColumns` mới): Unassigned cần ConstructionSiteId và AssignedAtUtc NULL (FirstAssignedAtUtc có thể có sau khi gỡ); Assigned hoặc Completed cần ConstructionSiteId, FirstAssignedAtUtc và AssignedAtUtc; thêm `CK_SupervisionGrant_AssignedWindow`: nếu có AssignedAtUtc thì first<=AssignedAtUtc<deadline. | Không làm mới hạn, kể cả khi gỡ rồi gán lại; CanceledByStaff giữ liên kết và mốc gán nếu có, trừ khi khách xóa công trình. |
 | Bản lưu công trình trong lịch sử (thiết kế lần 3) | `CK_PackageLifecycleEvent_SiteSnapshot`: ba cột bản lưu cùng NULL hoặc cùng có; nếu có thì PackageKind=Supervision và Action IN ('Cancel','Unassign'); Action=Unassign bắt buộc có. `CK_PackageLifecycleEvent_Action` thêm `Unassign`, giữ `Restore` cho dòng cũ. | Lịch sử gỡ và hủy vẫn đọc được tên, địa chỉ công trình sau khi công trình bị sửa hoặc xóa. |
 | Một gói giám sát giữ chỗ/công trình | `UX_SupervisionGrant_ConstructionSiteHolder`: UNIQUE(ConstructionSiteId) WHERE State IN ('Assigned','Completed'). | Có thể có nhiều grant lịch sử nhưng chỉ một grant giữ chỗ. Hủy gói nhả chỗ ngay sau commit. |
-| Công trình | `UX_ConstructionSite_OwnerNormalizedName`: UNIQUE(OwnerUserId,NormalizedName); `AK_ConstructionSite_Id_OwnerUserId`; CHECK tên, tên chuẩn hóa và địa chỉ có ký tự khác khoảng trắng; Version>=1. | Một khách không có hai công trình trùng tên. Ràng buộc AK làm đích cho khóa ngoại ghép từ gói. |
+| Công trình | `UX_ConstructionSite_OwnerNormalizedName`: UNIQUE(OwnerUserId,NormalizedName); `UX_ConstructionSite_Code`: UNIQUE(Code); `AK_ConstructionSite_Id_OwnerUserId`; CHECK tên, tên chuẩn hóa và địa chỉ có ký tự khác khoảng trắng; Version>=1. | Một khách không có hai công trình trùng tên. Ràng buộc AK làm đích cho khóa ngoại ghép từ gói. |
 | Phân công | `UX_Assignment_ActiveResource`: UNIQUE(ResourceType,ResourceId) WHERE EffectiveToUtc IS NULL; CHECK ResourceType IN ('SupervisionGrant'); `CK_Assignment_EndReason` nhận Transferred/Removed, thiết kế lần 3 thêm PackageCanceled/PackageUnassigned. | Mỗi gói tối đa một người phụ trách; khi hai yêu cầu giao chạy song song, yêu cầu sau nhận 409 `ResourceAlreadyAssigned`. |
-| Đơn mua | UNIQUE(AccountId,AccountOrderSequence), UNIQUE(AccountId,CreateKey), UNIQUE PaymentCode. | Cấp số đơn và tạo đơn chống trùng theo khách. |
+| Đơn mua | UNIQUE(AccountId,AccountOrderSequence), UNIQUE(AccountId,CreateKey), UNIQUE PaymentCode. | Cấp số đơn và tạo đơn chống trùng theo khách. Từ 07/10/2026 PaymentCode dạng `BUILDXYYMMDDXXXXXXTK/GS` theo TDD-PAY-001; mã duy nhất giúp webhook khớp đúng một đơn. |
 | Đơn thiết kế chờ | UNIQUE(AccountId) WHERE Kind='Design' AND State IN ('Pending','PartiallyPaid'). | Tối đa một đơn thiết kế chờ mỗi khách. |
 | Tiền và hạn thanh toán | PriceVnd/AmountVnd numeric(20,0)>0; tổng tiền không âm; Eligible<=Received; ExpiresAtUtc=CreatedAtUtc+15 phút. | Lưu nguyên đồng VNĐ, không tự làm tròn hoặc vượt độ chính xác. |
 | Giao dịch ngân hàng | UNIQUE(ConnectionId,ProviderTransactionId). | Webhook gửi lại không tạo giao dịch thứ hai. |

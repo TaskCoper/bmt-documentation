@@ -44,7 +44,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Owner**: [Chưa xác định]
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
-- **Source**: Quyết định ngày 25/09/2026 về tên, quyền sở hữu và tọa độ; hội thoại ngày 01/10/2026 chốt mở rộng hồ sơ, diện tích đất, địa chỉ ba phần, ngân sách VND, khởi công, danh mục dùng chung và các trường bắt buộc.
+- **Source**: Quyết định ngày 25/09/2026 về tên, quyền sở hữu và tọa độ; hội thoại ngày 01/10/2026 chốt mở rộng hồ sơ, diện tích đất, địa chỉ ba phần, ngân sách VND, khởi công, danh mục dùng chung và các trường bắt buộc. Ngày 07/10/2026 người dùng chốt mã hồ sơ `BUILDX-HS-YYYYMMDD-XXXXXX` (khoản 16).
 
 ## Statement
 
@@ -71,13 +71,15 @@ Khách hàng tạo hoặc sửa hồ sơ công trình; hệ thống kiểm tra d
 13. Loại công trình bắt buộc chọn đúng một loại. Số tầng, Có tum/Không tum, phong cách kiến trúc và phong cách nội thất tuân theo BR-SITE-005. Mỗi nhóm phong cách áp dụng phải chọn đúng một giá trị.
 14. Mọi thông tin nêu trên đều bắt buộc, trừ dự toán nguồn, tệp đính kèm và các trường không áp dụng theo BR-SITE-005. Không tạo hồ sơ thiếu thông tin bắt buộc bằng cách coi là bản nháp công trình.
 15. Tạo từ dự toán theo BR-SITE-004; tệp theo BR-SITE-007. Ngân sách là thông tin khách khai báo, không tự lấy tổng chi phí AI làm ngân sách; tên công trình, hiện trạng và dự kiến khởi công cũng do khách nhập riêng.
+16. Khi tạo, hệ thống cấp cho công trình một mã hồ sơ dạng `BUILDX-HS-YYYYMMDD-XXXXXX`, ví dụ `BUILDX-HS-20261005-T4W8NC`. `YYYYMMDD` là ngày lập hồ sơ theo giờ Việt Nam (Asia/Ho_Chi_Minh); `XXXXXX` là 6 ký tự ngẫu nhiên riêng của hồ sơ, lấy từ cùng bảng 31 ký tự của mã dự toán (BR-PROJ-003 khoản 12). Mã không trùng với mã hồ sơ khác, cấp một lần và không đổi khi sửa hồ sơ; khách không tự nhập hay sửa mã. Công trình tạo từ dự toán vẫn có mã hồ sơ riêng, không dùng lại mã của dự toán nguồn. Mã hiển thị ở danh sách và chi tiết công trình theo BR-SITE-003.
 
 ## Except
 
-Trường phân loại bị tắt hoặc không có lựa chọn theo BR-SITE-005 hiển thị Không áp dụng và không bắt nhập. Dự toán nguồn và tệp đính kèm được bỏ trống. Công trình đã xóa theo BR-SITE-002 không tính khi kiểm trùng tên.
+Trường phân loại bị tắt hoặc không có lựa chọn theo BR-SITE-005 hiển thị Không áp dụng và không bắt nhập. Dự toán nguồn và tệp đính kèm được bỏ trống. Công trình đã xóa theo BR-SITE-002 không tính khi kiểm trùng tên. Công trình tạo trước khi áp dụng khoản 16 được cấp mã hồ sơ một lần theo ngày tạo gốc (giờ Việt Nam); sau đó mã cũng không đổi.
 
 ## Notes
 
+- **Đã xác nhận ngày 07/10/2026 (mã hồ sơ)**: định dạng, bảng ký tự, ngày theo giờ Việt Nam, mã không đổi, công trình tạo từ dự toán vẫn có mã riêng, cấp mã cho công trình đã có, nơi hiển thị và tìm theo mã (BR-SITE-003 khoản 14, BR-RFQ-004 khoản 10). Mã chỉ để nhận diện, không cấp quyền xem công trình.
 - Người dùng đã chốt bản US/BR trong hội thoại ngày 01/10/2026. System Test đã được cập nhật; xem [bảng độ phủ](../discovery/construction-site-system-test-coverage.md). Chưa chạy các ca; xác nhận hội thoại không thay cho phê duyệt/import trên hệ thống tài liệu.
 
 - Người dùng xác nhận ngày 01/10/2026 không có dữ liệu công trình, kể cả dữ liệu thật; không có yêu cầu chuyển đổi hay tự điền hồ sơ cũ. Đây không phải chỉ thị xóa dữ liệu ở bất kỳ môi trường nào.

@@ -44,7 +44,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Owner**: [Chưa xác định]
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
-- **Source**: Các quyết định người dùng xác nhận trong hội thoại thiết kế thanh toán ngày 19/09/2026; xem discovery/payment-packages.md. Quyết định mới nhất được ưu tiên khi thay thế phương án trước đó.
+- **Source**: Các quyết định người dùng xác nhận trong hội thoại thiết kế thanh toán ngày 19/09/2026; xem discovery/payment-packages.md. Quyết định mới nhất được ưu tiên khi thay thế phương án trước đó. Ngày 07/10/2026 người dùng chốt mã chuyển khoản `BUILDX` (khoản 6).
 
 ## Statement
 
@@ -61,10 +61,11 @@ Khách chọn gói và yêu cầu tạo đơn thanh toán.
 3. Mỗi khách chỉ có một đơn thiết kế đang chờ, gồm cả đơn đã nhận một phần tiền. Giám sát cho phép nhiều đơn chờ và mua nhiều gói cùng loại.
 4. Khách mua giám sát ngay theo giá niêm yết, không bắt buộc có công trình, không chờ nhân viên kiểm tra địa điểm, diện tích hoặc phạm vi phục vụ.
 5. Đơn mới tạo sau khi hủy hoặc hết hạn là lần mua mới, dùng giá và quyền lợi tại lúc tạo đơn mới; không kế thừa giá của đơn cũ.
+6. Mỗi đơn có một mã chuyển khoản riêng dạng `BUILDX` + `YYMMDD` + `XXXXXX` + `LL`, chỉ gồm chữ hoa và số, ví dụ `BUILDX261007Q7K2M9TK`. `YYMMDD` là ngày tạo đơn theo giờ Việt Nam, năm lấy hai số cuối; `XXXXXX` là 6 ký tự ngẫu nhiên lấy từ chữ hoa và số, bỏ 0, O, 1, I, L vì dễ đọc nhầm với nhau (còn 31 ký tự); `LL` là `TK` với gói thiết kế và `GS` với gói giám sát. Mã không trùng giữa các đơn và không đổi trong suốt vòng đời của đơn. Luồng mua không đổi: đơn không phải gắn với dự toán hay công trình để có mã.
 
 ## Except
 
-Đơn đã tạo trước khi gói ngừng bán vẫn được hoàn tất theo điều kiện đã lưu. Yêu cầu mua mới gói ngừng bán vẫn bị chặn theo BR-SUB-013.
+Đơn đã tạo trước khi gói ngừng bán vẫn được hoàn tất theo điều kiện đã lưu. Yêu cầu mua mới gói ngừng bán vẫn bị chặn theo BR-SUB-013. Đơn tạo trước khi áp dụng khoản 6 giữ nguyên mã `BMT…` đã cấp; không đổi mã của đơn đã tạo.
 
 ## Notes
 

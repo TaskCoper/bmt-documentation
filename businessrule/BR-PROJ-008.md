@@ -36,7 +36,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Rule Info
 
-- **Name**: Danh sách dự toán của tôi, tìm theo tên và lọc trạng thái.
+- **Name**: Danh sách dự toán của tôi, tìm theo tên hoặc mã và lọc trạng thái.
 - **Category**: Dự toán — danh sách cá nhân
 - **Status**: Draft
 - **Version**:
@@ -44,23 +44,23 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Owner**: [Chưa xác định]
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
-- **Source**: Người dùng xác nhận trong hội thoại: hiển thị đủ trạng thái; tên, loại công trình, trạng thái, ngày tạo, lần sửa gần nhất là đủ, không có ảnh đại diện; đồng ý phân trang, tìm theo tên, lọc trạng thái và bản sửa gần nhất đứng trước. Quyền xem dữ liệu cũ dùng lại BR-SUB-007.
+- **Source**: Người dùng xác nhận trong hội thoại: hiển thị đủ trạng thái; tên, loại công trình, trạng thái, ngày tạo, lần sửa gần nhất là đủ, không có ảnh đại diện; đồng ý phân trang, tìm theo tên, lọc trạng thái và bản sửa gần nhất đứng trước. Quyền xem dữ liệu cũ dùng lại BR-SUB-007. Ngày 07/10/2026 người dùng bổ sung: hiển thị mã dự toán và cho ô tìm kiếm tìm theo cả một phần mã.
 
 ## Statement
 
-Dự toán của tôi chỉ hiển thị các bản chưa bị xóa thuộc tài khoản khách hàng đang đăng nhập. Danh sách gồm bản nháp, đang xử lý, thành công và thất bại; có phân trang, tìm theo tên và lọc theo trạng thái. Khách không cần gói còn hiệu lực hoặc còn lượt chỉ để xem dữ liệu của mình.
+Dự toán của tôi chỉ hiển thị các bản chưa bị xóa thuộc tài khoản khách hàng đang đăng nhập. Danh sách gồm bản nháp, đang xử lý, thành công và thất bại; có phân trang, tìm theo tên hoặc mã dự toán và lọc theo trạng thái. Khách không cần gói còn hiệu lực hoặc còn lượt chỉ để xem dữ liệu của mình.
 
 ## When
 
-Khách mở Dự toán của tôi, đổi trang, tìm theo tên, lọc trạng thái hoặc chọn mở một bản từ danh sách.
+Khách mở Dự toán của tôi, đổi trang, tìm theo tên hoặc mã, lọc trạng thái hoặc chọn mở một bản từ danh sách.
 
 ## Then
 
 1. Xác định chủ sở hữu từ tài khoản đăng nhập. Không trả dự toán của khách khác, kể cả thông qua tìm kiếm, bộ lọc hoặc thông tin phân trang. Loại tài khoản áp dụng BR-RBAC-005.
 2. Khi không lọc trạng thái, tập kết quả gồm đủ nháp, đang xử lý, thành công và thất bại. Không yêu cầu đã chọn loại công trình hoặc có kết quả AI mới được xuất hiện.
-3. Mỗi bản hiển thị tên, loại công trình nếu đã chọn, trạng thái, ngày tạo và lần sửa gần nhất. Không hiển thị ảnh đại diện hoặc cột địa chỉ. Bản nháp chưa chọn loại phải thể hiện đúng tình trạng chưa chọn, không tự gán loại khác.
+3. Mỗi bản hiển thị mã dự toán theo BR-PROJ-003 khoản 12, tên, loại công trình nếu đã chọn, trạng thái, ngày tạo và lần sửa gần nhất. Không hiển thị ảnh đại diện hoặc cột địa chỉ. Bản nháp chưa chọn loại phải thể hiện đúng tình trạng chưa chọn, không tự gán loại khác.
 4. Mặc định sắp xếp theo lần sửa gần nhất, mới nhất trước. Áp dụng thứ tự trên tập kết quả đã lọc rồi mới chia trang.
-5. Hỗ trợ tìm một phần tên không phân biệt hoa/thường hoặc dấu, kết hợp đồng thời với lọc trạng thái; ví dụ “nha” tìm được “Nhà”. Mọi kết quả vẫn phải thuộc khách, chưa bị xóa và đáp ứng các điều kiện đang áp dụng.
+5. Hỗ trợ tìm một phần tên không phân biệt hoa/thường hoặc dấu, kết hợp đồng thời với lọc trạng thái; ví dụ “nha” tìm được “Nhà”. Mọi kết quả vẫn phải thuộc khách, chưa bị xóa và đáp ứng các điều kiện đang áp dụng. Cùng ô tìm kiếm còn tìm theo một phần mã dự toán, không phân biệt hoa/thường và bỏ qua dấu gạch ngang; ví dụ “q7k2m9” hoặc “20261005Q7K” tìm được `BUILDX-20261005-Q7K2M9`. Phần thương hiệu `BUILDX` không dùng để so vì mã nào cũng có; vì vậy từ khóa ngắn như “i” không khớp mọi mã. Một bản thuộc kết quả khi tên hoặc mã khớp từ khóa.
 6. Không có bản phù hợp thì trả danh sách rỗng; không bổ sung dữ liệu mẫu hoặc dữ liệu của tài khoản khác. Lỗi tải dữ liệu phải được thể hiện là lỗi, không coi là danh sách rỗng đã tải thành công.
 7. Cho phép xem danh sách khi gói hết hạn hoặc hết lượt theo quyền xem dữ liệu cũ tại BR-SUB-007. Xem danh sách không giữ, trừ, hoàn lượt hoặc gọi AI; quyền sửa và gửi AI được kiểm tra riêng.
 8. Chọn một bản để mở phải kiểm lại quyền và tình trạng đã xóa. Hiển thị dữ liệu đã lưu, không tự gửi hoặc thử lại AI.
@@ -72,6 +72,7 @@ Người chưa có phiên hợp lệ hoặc dùng tài khoản nhân viên khôn
 
 ## Notes
 
+- Bổ sung ngày 07/10/2026 theo quyết định của người dùng: hiển thị mã dự toán và tìm theo một phần mã trong cùng ô tìm kiếm (khoản 3, 5). Cách chuẩn hóa từ khóa cho phần mã thuộc TDD-PROJ-004.
 - Áp dụng cho STORY-PROJ-006; thao tác xóa từ danh sách theo STORY-PROJ-007 và BR-PROJ-009.
 - “Dự án” trong các câu trả lời về hai tính năng này được hiểu là bản dự toán thuộc nhóm PROJ, không phải thực thể Công trình của nhóm SITE.
 - Trạng thái danh sách phải thống nhất với trạng thái bản dự toán đang dùng. Code hiện tại gộp tác vụ thất bại hoặc quá thời gian vào trạng thái dự toán thất bại; không tạo một vòng đời riêng cho danh sách.

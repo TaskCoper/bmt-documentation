@@ -33,7 +33,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# UT-PAY-023
+# UT-PROJ-130
 
 ## Unit Test
 
@@ -42,9 +42,11 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-023 | Payment | PaymentCodeMatcher (dự kiến) | Branch | REGRESSION | P1 | Có PaymentCode BUILDX261007Q7K2M9TK thuộc connection C1 (ví dụ đổi từ mã BMT ngày 07/10/2026 theo BR-PAY-001 khoản 6). Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | code null, lạ, khớp một phần (ví dụ BUILDX261007Q7K2M9) hoặc gửi qua C2. | Không gán nhầm đơn; Unmatched hoặc ConnectionMismatch, không cấp gói. | BR-PAY-005/Then<br>TDD-PAY-001/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
+| UT-PROJ-130 | Mã BUILDX | BuildXCodes — sinh mã dự toán, mã hồ sơ và chuẩn hóa từ khóa tìm theo mã | Boundary | REGRESSION | P1 | Đặc tả viết ngày 07/10/2026 theo quyết định người dùng cùng ngày; chưa thực thi. Hàm thuần, không DB. Truyền thời điểm và phần ngẫu nhiên cố định khi cần so chuỗi; một biến thể gọi bộ sinh ngẫu nhiên thật nhiều lần. | Estimate(2026-10-04T16:59:59Z, "Q7K2M9"), Estimate(2026-10-04T17:00:00Z, "Q7K2M9"), ConstructionSite(2026-10-05T03:00:00Z, "T4W8NC"); 10.000 lần NewRandomPart(); NormalizeSearch với " q7k2-m9 ", "20261005-q7k", "-", null. | Lần lượt `BUILDX-20261004-Q7K2M9` (23:59:59 ngày 04/10 giờ Việt Nam), `BUILDX-20261005-Q7K2M9` (00:00 ngày 05/10), `BUILDX-HS-20261005-T4W8NC`; độ dài 22 và 25. Mọi phần ngẫu nhiên dài 6 và chỉ gồm ký tự của `ABCDEFGHJKMNPQRSTUVWXYZ23456789`, không có 0 O 1 I L. NormalizeSearch trả "Q7K2M9", "20261005Q7K", "" và "". | BR-PROJ-003/Then<br>BR-SITE-001/Then<br>TDD-PROJ-001/Architecture<br>TDD-PROJ-004/Architecture | Chặn lỗi lệch ngày ở biên nửa đêm giờ Việt Nam, sai bảng ký tự và sai chuẩn hóa từ khóa tìm theo mã. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- BR-PAY-005/Then
-- TDD-PAY-001/Architecture
+- BR-PROJ-003/Then
+- BR-SITE-001/Then
+- TDD-PROJ-001/Architecture
+- TDD-PROJ-004/Architecture

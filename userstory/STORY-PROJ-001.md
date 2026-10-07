@@ -343,6 +343,13 @@ Khách đổi địa chỉ nhưng frontend chưa lấy được đủ tọa đ�
 - **Then**: Frontend chưa gửi lần lưu thay đổi địa chỉ; backend từ chối yêu cầu trực tiếp thiếu tọa độ và giữ nguyên dữ liệu đã lưu.
 - **And**: Không chỉ lưu địa chỉ mới rồi giữ tọa độ cũ hoặc bổ sung tọa độ bằng một lần lưu riêng.
 
+#### AC-025
+
+- **Given**: Khách đáp ứng điều kiện tạo dự toán; hôm nay là 05/10/2026 theo giờ Việt Nam.
+- **When**: Khách tạo nhanh dự toán, sau đó đổi tên và lưu đầu vào.
+- **Then**: Bản dự toán có mã dạng `BUILDX-20261005-XXXXXX` theo BR-PROJ-003 khoản 12, trong đó `XXXXXX` là 6 ký tự ngẫu nhiên không có 0, O, 1, I, L. Mã hiển thị khi mở lại bản dự toán.
+- **And**: Đổi tên và lưu đầu vào không đổi mã; mã không trùng với bản dự toán khác của bất kỳ khách nào, kể cả bản đã xóa. Khách không nhập hay sửa được mã.
+
 ## References
 
 ### TDDs

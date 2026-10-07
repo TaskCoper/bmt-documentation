@@ -190,6 +190,13 @@ Gửi email thông báo thất bại sau khi đã cập nhật lịch hoặc tr�
 - **Then**: Giữ nguyên thay đổi đã lưu và khách vẫn xem được lịch, trạng thái mới nhất.
 - **And**: Hệ thống tự thử gửi lại email, không yêu cầu người quản lý thực hiện lại thao tác cập nhật.
 
+#### AC-010
+
+- **Given**: Có lời mời R1 từ hồ sơ mã `BUILDX-HS-20261005-T4W8NC` và lời mời R2 từ hồ sơ mã `BUILDX-HS-20261006-Q7K2M9`.
+- **When**: Người có quyền quản lý mở danh sách lời mời rồi tìm bằng “t4w8nc”, kết hợp với một bộ lọc trạng thái.
+- **Then**: Mỗi lời mời hiển thị mã hồ sơ; kết quả chỉ gồm R1 nếu R1 khớp bộ lọc trạng thái, theo BR-RFQ-004 khoản 10.
+- **And**: Tìm theo một phần mã, không phân biệt hoa/thường và bỏ qua dấu gạch ngang; người không có quyền quản lý vẫn bị từ chối.
+
 ## References
 
 ### TDDs
@@ -200,6 +207,7 @@ Gửi email thông báo thất bại sau khi đã cập nhật lịch hoặc tr�
 
 - BR-RFQ-003
 - BR-RFQ-004
+- BR-SITE-001/Then: Khoản 16, định dạng mã hồ sơ.
 - BR-RFQ-005
 - BR-RFQ-006
 

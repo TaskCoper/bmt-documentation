@@ -44,7 +44,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Owner**: [Chưa xác định]
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
-- **Source**: Các quyết định người dùng xác nhận trong hội thoại thiết kế thanh toán ngày 19/09/2026; xem discovery/payment-packages.md. Quyết định mới nhất được ưu tiên khi thay thế phương án trước đó.
+- **Source**: Các quyết định người dùng xác nhận trong hội thoại thiết kế thanh toán ngày 19/09/2026; xem discovery/payment-packages.md. Quyết định mới nhất được ưu tiên khi thay thế phương án trước đó. Ngày 07/10/2026 người dùng chốt chỉ nhận mã chuyển khoản `BUILDX` (khoản 7).
 
 ## Statement
 
@@ -64,10 +64,11 @@ SePay gửi thông báo giao dịch cho đơn thanh toán.
 4. Thời điểm đủ tiền là thời điểm giao dịch làm tổng các khoản hợp lệ đạt giá đơn, xét theo thứ tự phát sinh giao dịch. Webhook có thể đến khác thứ tự này.
 5. Chuyển dư hoặc nhiều khoản cộng lại vượt giá đơn vẫn đủ điều kiện. Phần dư do nhân viên xử lý bên ngoài nếu khách khiếu nại.
 6. Khoản phát sinh sau hạn không giúp đơn đủ điều kiện cấp gói, kể cả trước hạn đã chuyển một phần. Nhân viên xử lý tiền bên ngoài; không tự hoàn tiền, không ghi nhận đã hoàn tiền trong hệ thống.
+7. Chỉ khớp giao dịch với đơn khi mã chuyển khoản nhận được có dạng `BUILDX` theo BR-PAY-001 khoản 6 và trùng toàn bộ mã của đúng một đơn, không phân biệt hoa/thường. Tiền chuyển theo mã `BMT…` cũ không khớp đơn nào và được hiển thị như giao dịch chưa xác định đơn theo BR-PAY-005; nhân viên xử lý bên ngoài hệ thống.
 
 ## Except
 
-Đơn bị hủy còn phải xét BR-PAY-003. Giao dịch trong hạn có webhook đến muộn vẫn được tính; giao dịch thực tế sau hạn không được coi là đúng hạn.
+Đơn bị hủy còn phải xét BR-PAY-003. Giao dịch trong hạn có webhook đến muộn vẫn được tính; giao dịch thực tế sau hạn không được coi là đúng hạn. Giao dịch theo mã `BMT…` của đơn cũ không khớp đơn đó, kể cả khi phát sinh trong hạn của đơn.
 
 ## Notes
 

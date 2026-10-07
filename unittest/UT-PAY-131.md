@@ -33,7 +33,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# UT-PAY-023
+# UT-PAY-131
 
 ## Unit Test
 
@@ -42,9 +42,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PAY-023 | Payment | PaymentCodeMatcher (dự kiến) | Branch | REGRESSION | P1 | Có PaymentCode BUILDX261007Q7K2M9TK thuộc connection C1 (ví dụ đổi từ mã BMT ngày 07/10/2026 theo BR-PAY-001 khoản 6). Unit chưa triển khai; mock chỉ mô phỏng phụ thuộc. | code null, lạ, khớp một phần (ví dụ BUILDX261007Q7K2M9) hoặc gửi qua C2. | Không gán nhầm đơn; Unmatched hoặc ConnectionMismatch, không cấp gói. | BR-PAY-005/Then<br>TDD-PAY-001/Architecture | Kiểm nhánh/đầu ra nghiệp vụ hoặc hợp đồng; chưa thực thi. | [Chưa xác định] | Draft |
+| UT-PAY-131 | Payment | CreatePaymentOrderCommandHandler — mã chuyển khoản BUILDX theo loại gói | Branch | REGRESSION | P1 | Đặc tả viết ngày 07/10/2026 theo quyết định người dùng cùng ngày; chưa thực thi. Khách đủ điều kiện mua; clock cố định 2026-10-06T17:30:00Z (00:30 ngày 07/10 giờ Việt Nam); gói thiết kế và gói giám sát đang bán; bộ sinh ngẫu nhiên giả. | Tạo đơn Design với phần ngẫu nhiên Q7K2M9; tạo đơn Supervision với T4W8NC; một biến thể store báo mã đầu đã tồn tại. | Đơn Design có PaymentCode=`BUILDX261007Q7K2M9TK`, đơn Supervision có `BUILDX261007T4W8NCGS`; mã dài 20, chỉ chữ hoa và số, khớp `^BUILDX[0-9]{6}[ABCDEFGHJKMNPQRSTUVWXYZ2-9]{6}(TK\|GS)$`. `beneficiary.transferContent` và `des` của QR chứa đúng mã. Biến thể trùng sinh lại mã khác, không tạo hai đơn cùng mã. | BR-PAY-001/Then<br>STORY-PAY-001/AC-029<br>TDD-PAY-001/Architecture | Chặn sai hậu tố loại gói, lệch ngày giờ Việt Nam và mã có ký tự ngân hàng có thể cắt bỏ. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- BR-PAY-005/Then
+- BR-PAY-001/Then
+- STORY-PAY-001/AC-029
 - TDD-PAY-001/Architecture

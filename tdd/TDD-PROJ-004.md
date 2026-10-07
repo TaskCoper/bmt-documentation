@@ -89,7 +89,7 @@ Thêm query vào feature `estimate` hiện có, giữ Carter → MediatR → rep
 | GetMyEstimatesQueryValidator | Kiểm dữ liệu phân trang, chiều dài tìm kiếm, enum trạng thái; đặt trong validators của estimate. |
 | GetMyEstimatesQueryHandler | Lấy Customer từ EstimateAccess.RequireCustomerAsync, gọi store một lần cho trang và tổng; không gọi writeAccess hoặc coordinator lượt. |
 | IEstimateStore / EstimateStore | Thêm projection danh sách; owner và điều kiện chưa xóa luôn thuộc truy vấn gốc. |
-| Response.EstimateListItem | DTO chỉ đọc; không ánh xạ thành bảng. Trả estimateId, name, buildingType, state, createdAtUtc, modifiedAtUtc. |
+| Response.EstimateListItem | DTO chỉ đọc; không ánh xạ thành bảng. Trả estimateId, code, name, buildingType, state, createdAtUtc, modifiedAtUtc. |
 | PagedResult | Dùng dạng dữ liệu trả về hiện có; không dùng nguyên CreateAsync nếu nó tự sửa đầu vào hoặc đếm và lấy trang từ hai ảnh chụp dữ liệu khác nhau. |
 
 ```mermaid
@@ -111,6 +111,7 @@ flowchart LR
 - **Nhất quán một lần đọc:** store mở một transaction chỉ đọc, Repeatable Read, để phép đếm và lấy trang dùng cùng ảnh chụp dữ liệu; commit trước trả response. Query không hiện thực ICommand/ITransactionalRequest nên không bị pipeline ghi bao lại. Hai câu SQL có cùng bộ lọc, chạy tuần tự trên cùng DbContext, có cancellation. Khi database thay đổi giữa các lần chuyển trang, offset có thể dịch; không cam kết một ảnh chụp cố định cho cả phiên duyệt. PostgreSQL mô tả ảnh chụp Repeatable Read tại [Transaction Isolation](https://www.postgresql.org/docs/15/transaction-iso.html).
 - **Mốc sửa:** dùng đúng ModifiedAtUtc hiện có, được ghi khi tạo, lưu đầu vào hoặc đổi tên thật sự. Đọc, tiếp nhận AI và đổi trạng thái operation không tự tăng mốc sửa. Không lấy AcceptedAtUtc thay lần sửa của bản. Hai bản cùng mốc dùng Id ASC làm thứ tự ổn định.
 - **Tìm tên:** trim search; rỗng là bỏ điều kiện, tối đa 200 Unicode scalar sau trim. Tìm một phần tên, không phân biệt hoa/thường và dấu, gồm đ/Đ tương đương d/D. Chuẩn hóa cả tên và từ khóa bằng NFC, bỏ dấu bằng PostgreSQL `unaccent`, chuyển chữ thường rồi dùng `strpos` tìm chuỗi con. Tên lưu/hiển thị không đổi. Không chia từ, không tìm gần đúng; `%`, `_` và dấu gạch chéo ngược là ký tự thường vì không dùng mẫu LIKE. SQL nhận tham số, không ghép chuỗi người dùng thành SQL. Biểu thức cụ thể ở Data Model.
+- **Tìm mã (bổ sung 07/10/2026):** cùng tham số `search` còn khớp một phần mã dự toán. Từ khóa cho phần mã được chuẩn hóa bằng `BuildXCodes.NormalizeSearch`: bỏ mọi khoảng trắng và dấu gạch ngang, đổi chữ hoa. Mã lưu chữ hoa có dấu gạch nên so với `replace(substr(e."Code", 7), '-', '')` bằng `strpos`. Phần thương hiệu `BUILDX` không dùng để so: nếu từ khóa đã chuẩn hóa bắt đầu bằng `BUILDX` thì bỏ phần đó (`BuildXCodes.SearchKey`), còn phía mã lưu chỉ so phần sau thương hiệu đã bỏ dấu gạch, ví dụ `BUILDX-HS-20261005-T4W8NC` so như `HS20261005T4W8NC`. Lý do: mã nào cũng có `BUILDX`, nên một từ ngắn như “i” sẽ khớp mọi bản ghi. Gõ đúng “BUILDX” thì khớp mọi mã; chuỗi vắt qua thương hiệu như “DX2026” không khớp. Một bản thuộc kết quả khi điều kiện tên **hoặc** điều kiện mã đúng; điều kiện owner, chưa xóa và state vẫn áp cho cả hai. Từ khóa còn rỗng sau chuẩn hóa (ví dụ chỉ gồm “-”) thì bỏ điều kiện mã, không diễn giải thành mọi mã. Không bỏ dấu tiếng Việt cho phần mã vì mã chỉ có chữ hoa và số.
 - **Giao diện:** phân biệt đang tải, đã tải rỗng và lỗi tải. Giữ search/state khi tải lại. Đổi search/state đưa về trang 1; bỏ phản hồi cũ đến muộn bằng mã thứ tự request hoặc hủy request. Sau xóa tải lại cùng bộ lọc; nếu trang vượt trang cuối thì về trang cuối còn hợp lệ, tối thiểu trang 1. Mở bản dùng API chi tiết đang có và kiểm lại quyền/tình trạng xóa, không tự gửi AI.
 - **Hiệu năng:** dùng index `IX_Estimate_Owner_ModifiedAt` `(OwnerId ASC, ModifiedAtUtc DESC, Id ASC)` hiện có, unique index tác vụ sống và index lịch sử của PROJ-002. Không tải payload, URL ảnh, snapshot hoặc toàn bộ catalog. Chưa có số liệu tải nên chưa thêm GIN/trigram/search index hoặc SLA. Khi triển khai, xem SQL và kế hoạch truy vấn trên dữ liệu đại diện trước quyết định index bổ sung.
 - **Kiểm chứng tổng quát:** ST-PROJ-078–092 phủ đọc, phân trang, quyền và lỗi; PostgreSQL thật kiểm query/snapshot/thứ tự. Sau chốt TDD cần bổ sung kiểm biên trang, tên có dấu/ký tự đặc biệt và hai mốc sửa bằng nhau. Đặc tả Unit Test sau chốt nằm trong bảng độ phủ ở References; chưa có kết quả chạy.
@@ -221,7 +222,7 @@ Store dùng cùng biểu thức có tham số trong SQL đếm và SQL lấy tra
 | Nhà 100%_A | %_ | Có đúng chuỗi ký tự; không mở rộng thành ký tự đại diện. |
 | Nhà An | kho | Không. |
 
-Đây là ví dụ so khớp, không bỏ qua điều kiện owner, chưa xóa hoặc state. Không dùng generated column/index hàm giả `IMMUTABLE`: kết quả unaccent phụ thuộc từ điển. Tìm chuỗi con phải kiểm tên trong tập của owner; index sắp xếp hiện có không bảo đảm tăng tốc phần bỏ dấu. Khi triển khai, đo SQL trên dữ liệu đại diện trước cân nhắc index riêng. Nếu từ khóa không rỗng nhưng sau bỏ dấu thành chuỗi rỗng, trả tập rỗng; không diễn giải thành tìm mọi tên. Bộ lọc đầy đủ phải có thêm `length(lower(public.unaccent('public.unaccent'::regdictionary, normalize(@search, NFC)))) > 0`. Khi search rỗng ngay sau trim, bỏ cả hai điều kiện tìm kiếm. Kiểm môi trường phải chứng minh cả chữ I/i và Đ/đ hoạt động như bảng mẫu; không dùng locale khác giữa các môi trường làm thay đổi hợp đồng.
+Đây là ví dụ so khớp, không bỏ qua điều kiện owner, chưa xóa hoặc state. Điều kiện mã được nối bằng OR với điều kiện tên ở trên, với `@code` là từ khóa đã chuẩn hóa theo Architecture/Notes: `(@codeActive AND strpos(replace(substr(e."Code", 7), '-', ''), @code) > 0)`, trong đó `@codeActive` sai khi từ khóa rỗng sau chuẩn hóa. Ví dụ `@search`="20261005-q7k" thành `@code`="20261005Q7K" và khớp `BUILDX-20261005-Q7K2M9`. Không dùng generated column/index hàm giả `IMMUTABLE`: kết quả unaccent phụ thuộc từ điển. Tìm chuỗi con phải kiểm tên trong tập của owner; index sắp xếp hiện có không bảo đảm tăng tốc phần bỏ dấu. Khi triển khai, đo SQL trên dữ liệu đại diện trước cân nhắc index riêng. Nếu từ khóa không rỗng nhưng sau bỏ dấu thành chuỗi rỗng, trả tập rỗng; không diễn giải thành tìm mọi tên. Bộ lọc đầy đủ phải có thêm `length(lower(public.unaccent('public.unaccent'::regdictionary, normalize(@search, NFC)))) > 0`. Khi search rỗng ngay sau trim, bỏ cả hai điều kiện tìm kiếm. Kiểm môi trường phải chứng minh cả chữ I/i và Đ/đ hoạt động như bảng mẫu; không dùng locale khác giữa các môi trường làm thay đổi hợp đồng.
 
 **Notes**:
 
@@ -235,9 +236,9 @@ Store dùng cùng biểu thức có tham số trong SQL đếm và SQL lấy tra
 
 - **GET** `/api/v1/estimates` — Trả danh sách của phiên Customer. Query: pageIndex mặc định 1, pageSize mặc định 10, search tùy chọn, state tùy chọn. Không cần Idempotency-Key.
 
-Hợp đồng phân trang đề xuất: pageIndex là int từ 1; pageSize là int 1–100. Tính offset bằng số 64-bit và từ chối nếu vượt Int32.MaxValue trước gọi Skip. Không âm thầm cắt trang hoặc lấy kích thước khác yêu cầu. state chỉ nhận Draft, Processing, Succeeded, Failed; bỏ tham số là tất cả, chuỗi rỗng/sai trả 422. search bỏ trống hoặc chỉ có khoảng trắng thì không tìm; tìm một phần tên không phân biệt hoa/thường hoặc dấu như mô tả ở Architecture. Query lặp tham số, tham số lạ như ownerId hoặc sort không được âm thầm áp dụng; từ chối 422. Lỗi không đọc được kiểu số ở bước binding là 400 theo pipeline HTTP.
+Hợp đồng phân trang đề xuất: pageIndex là int từ 1; pageSize là int 1–100. Tính offset bằng số 64-bit và từ chối nếu vượt Int32.MaxValue trước gọi Skip. Không âm thầm cắt trang hoặc lấy kích thước khác yêu cầu. state chỉ nhận Draft, Processing, Succeeded, Failed; bỏ tham số là tất cả, chuỗi rỗng/sai trả 422. search bỏ trống hoặc chỉ có khoảng trắng thì không tìm; tìm một phần tên không phân biệt hoa/thường hoặc dấu, hoặc một phần mã dự toán bỏ qua dấu gạch ngang, như mô tả ở Architecture. Query lặp tham số, tham số lạ như ownerId hoặc sort không được âm thầm áp dụng; từ chối 422. Lỗi không đọc được kiểu số ở bước binding là 400 theo pipeline HTTP.
 
-Response: `Result<PagedResult<EstimateListItem>>`; value có items, pageIndex, pageSize, totalCount, hasNextPage, hasPreviousPage. Mỗi item có estimateId, name, buildingType (`{id,name}` hoặc null), state, createdAtUtc, modifiedAtUtc. Không trả canEdit để tránh mở rộng truy vấn gói; khi mở bản, API chi tiết cung cấp quyền hiện tại. `totalCount=0` khi tập rỗng; trang vượt cuối có items rỗng và giữ tổng thực. `hasPreviousPage` giữ quy ước PagedResult là pageIndex>1.
+Response: `Result<PagedResult<EstimateListItem>>`; value có items, pageIndex, pageSize, totalCount, hasNextPage, hasPreviousPage. Mỗi item có estimateId, code (mã dự toán theo TDD-PROJ-001), name, buildingType (`{id,name}` hoặc null), state, createdAtUtc, modifiedAtUtc. Không trả canEdit để tránh mở rộng truy vấn gói; khi mở bản, API chi tiết cung cấp quyền hiện tại. `totalCount=0` khi tập rỗng; trang vượt cuối có items rỗng và giữ tổng thực. `hasPreviousPage` giữ quy ước PagedResult là pageIndex>1.
 
 ### Examples
 
@@ -249,7 +250,7 @@ GET /api/v1/estimates?pageIndex=1&pageSize=10&state=Draft
 Cookie: <phiên Customer hợp lệ>
 
 Response 200:
-{"value":{"items":[{"estimateId":"11111111-1111-4111-8111-111111111111","name":"Bản nháp","buildingType":null,"state":"Draft","createdAtUtc":"2026-09-30T01:00:00Z","modifiedAtUtc":"2026-09-30T03:00:00Z"}],"pageIndex":1,"pageSize":10,"totalCount":1,"hasNextPage":false,"hasPreviousPage":false},"isSuccess":true,"isFailure":false,"error":{"code":"","message":""}}
+{"value":{"items":[{"estimateId":"11111111-1111-4111-8111-111111111111","code":"BUILDX-20260930-Q7K2M9","name":"Bản nháp","buildingType":null,"state":"Draft","createdAtUtc":"2026-09-30T01:00:00Z","modifiedAtUtc":"2026-09-30T03:00:00Z"}],"pageIndex":1,"pageSize":10,"totalCount":1,"hasNextPage":false,"hasPreviousPage":false},"isSuccess":true,"isFailure":false,"error":{"code":"","message":""}}
 
 Error Response:
 {"title":"Validation Error","code":"InvalidEstimateListQuery","status":422,"detail":"Thông tin tìm kiếm hoặc phân trang không hợp lệ.","messageCode":"InvalidEstimateListQuery","errors":null}
@@ -304,5 +305,9 @@ Lỗi binding 400 và lỗi hạ tầng 5xx giữ cơ chế chung. Không đổi
 - [PagedResult](../../bmt-be/src/bmt-be.contract/abstractions/shared/PagedResult.cs).
 
 - [Đặc tả Unit Test và phạm vi kiểm chứng](../discovery/my-estimates-unit-test-coverage.md).
+- UT-PROJ-132/Unit Test
+- ST-PROJ-127/System Test
 
 ## Change Log
+
+- 2026-10-07 (mã dự toán): Theo quyết định người dùng cùng ngày, mỗi item trả thêm `code`; tham số `search` hiện có tìm thêm theo một phần mã, bỏ khoảng trắng và dấu gạch ngang, không phân biệt hoa thường, nối OR với điều kiện tên. Không thêm tham số hay index. Căn cứ BR-PROJ-008 khoản 3 và 5, STORY-PROJ-006/AC-011; thêm UT-PROJ-132, ST-PROJ-127.

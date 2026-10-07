@@ -44,7 +44,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Owner**: [Chưa xác định]
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
-- **Source**: Các quyết định người dùng xác nhận trong hội thoại chuẩn bị tính năng Mời báo giá ngày 03/10/2026. Người dùng đã chốt bộ US/BR và giao triển khai; chưa phê duyệt hoặc import trên hệ thống quản lý tài liệu.
+- **Source**: Các quyết định người dùng xác nhận trong hội thoại chuẩn bị tính năng Mời báo giá ngày 03/10/2026. Người dùng đã chốt bộ US/BR và giao triển khai; chưa phê duyệt hoặc import trên hệ thống quản lý tài liệu. Ngày 07/10/2026 người dùng bổ sung hiển thị và tìm lời mời theo mã hồ sơ (khoản 10).
 
 ## Statement
 
@@ -65,6 +65,7 @@ Admin hoặc người có quyền xử lý yêu cầu; khách xem yêu cầu đ�
 7. Nhà thầu đã bị ẩn không làm mất quyền xem và xử lý lời mời cũ. Hoàn tất không khóa việc sửa lịch hoặc ghi chú của người có quyền.
 8. Khách chỉ được xem lời mời của hồ sơ mình. Người không có quyền quản lý không được gọi thao tác quản trị dù biết mã yêu cầu.
 9. Sau khi đổi lịch hoặc trạng thái thành công, gửi email cho khách theo BR-RFQ-005.
+10. Mỗi lời mời hiển thị mã hồ sơ công trình theo BR-SITE-001 khoản 16. Danh sách lời mời của người có quyền quản lý cho tìm theo một phần mã hồ sơ, không phân biệt hoa/thường và bỏ qua dấu gạch ngang, và kết hợp được với các bộ lọc hiện có. Mã hồ sơ không đổi nên khớp hồ sơ tại thời điểm gửi.
 
 ## Except
 
