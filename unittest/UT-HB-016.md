@@ -33,7 +33,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# UT-NEWS-002
+# UT-HB-016
 
 ## Unit Test
 
@@ -42,12 +42,11 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-NEWS-002 | Tin tức | NewsArticleService — kiểm đủ dữ liệu công bố | Boundary | REGRESSION | P1 | Bài Draft đầy đủ, Version=2; danh mục hợp lệ. | Lần lượt bỏ từng trường Title, ReadingTimeMinutes, CoverImageUrl, ContentHtml hoặc Slug; thêm biến thể trường chữ chỉ khoảng trắng; thêm biến thể đối chứng bỏ toàn bộ categoryIds nhưng giữ đủ năm trường trên. | Các biến thể thiếu trường trả InvalidNewsContent; không chuyển trạng thái, không gán ngày đầu hoặc tăng Version. Biến thể bỏ hết categoryIds công bố thành công. | TDD-NEWS-001/Architecture<br>BR-NEWS-001/Then<br>BR-NEWS-004/Then<br>STORY-NEWS-001/AC-002<br>STORY-NEWS-001/AC-011 | Danh mục không còn là điều kiện công bố; đường dẫn thay vào danh sách trường bắt buộc. Mã test ở bảng độ phủ kiểm thử đơn vị Tin tức; không ghi kết quả chạy vào đặc tả. | [Chưa xác định] | Draft |
+| UT-HB-016 | Cẩm nang | GetHandbookNewsletterQueryHandler — bỏ qua bài không công bố | Branch | REGRESSION | P1 | Khối chứa B1 đến B6 với Position 1 đến 6. B2 đang Hidden, B6 đang Draft; B1, B3, B4, B5 đang Published. | Không có tham số. | Trả đúng bốn bài theo thứ tự B1, B3, B4, B5. B2 và B6 không có trong kết quả nhưng dòng NewsSpotlight của chúng không bị xóa. | STORY-HB-003/AC-003<br>STORY-HB-003/ALT-01<br>STORY-HB-003/ALT-03<br>BR-HB-002/Then | BR-HB-002 khoản 3 và 5: bài không công bố bị bỏ qua khi hiển thị nhưng vẫn giữ vị trí. Handler là unit dự kiến của TDD-HB-002. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- TDD-NEWS-001/Architecture
-- BR-NEWS-001/Then
-- BR-NEWS-004/Then
-- STORY-NEWS-001/AC-002
-- STORY-NEWS-001/AC-011
+- STORY-HB-003/AC-003
+- STORY-HB-003/ALT-01
+- STORY-HB-003/ALT-03
+- BR-HB-002/Then

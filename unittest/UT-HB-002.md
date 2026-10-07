@@ -33,7 +33,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# UT-NEWS-002
+# UT-HB-002
 
 ## Unit Test
 
@@ -42,12 +42,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-NEWS-002 | Tin tức | NewsArticleService — kiểm đủ dữ liệu công bố | Boundary | REGRESSION | P1 | Bài Draft đầy đủ, Version=2; danh mục hợp lệ. | Lần lượt bỏ từng trường Title, ReadingTimeMinutes, CoverImageUrl, ContentHtml hoặc Slug; thêm biến thể trường chữ chỉ khoảng trắng; thêm biến thể đối chứng bỏ toàn bộ categoryIds nhưng giữ đủ năm trường trên. | Các biến thể thiếu trường trả InvalidNewsContent; không chuyển trạng thái, không gán ngày đầu hoặc tăng Version. Biến thể bỏ hết categoryIds công bố thành công. | TDD-NEWS-001/Architecture<br>BR-NEWS-001/Then<br>BR-NEWS-004/Then<br>STORY-NEWS-001/AC-002<br>STORY-NEWS-001/AC-011 | Danh mục không còn là điều kiện công bố; đường dẫn thay vào danh sách trường bắt buộc. Mã test ở bảng độ phủ kiểm thử đơn vị Tin tức; không ghi kết quả chạy vào đặc tả. | [Chưa xác định] | Draft |
+| UT-HB-002 | Cẩm nang | UpdateHandbookStageCommandHandler — thiếu trường bắt buộc | Boundary | REGRESSION | P1 | Bước S1 đang có đủ ba trường, Version=1. Mỗi biến thể chạy trên một bản sao độc lập. | Bốn biến thể: bỏ Title; bỏ Description; bỏ CoverImageUrl; Title chỉ gồm khoảng trắng và tab. | Từng biến thể trả InvalidHandbookStage kèm tên trường sai. Dòng S1 giữ nguyên cả ba trường và Version=1; không tự điền giá trị mặc định và không cắt ngắn. | STORY-HB-001/AC-003<br>STORY-HB-001/EXC-02<br>BR-HB-001/Then | Điều kiện đủ ba trường ở BR-HB-001 khoản 2, gồm cả chuỗi chỉ có khoảng trắng. Handler là unit dự kiến của TDD-HB-001. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- TDD-NEWS-001/Architecture
-- BR-NEWS-001/Then
-- BR-NEWS-004/Then
-- STORY-NEWS-001/AC-002
-- STORY-NEWS-001/AC-011
+- STORY-HB-001/AC-003
+- STORY-HB-001/EXC-02
+- BR-HB-001/Then

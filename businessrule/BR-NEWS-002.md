@@ -61,8 +61,11 @@ Người quản lý tạo, đổi tên, sắp xếp, chuyển cha, xóa danh m�
 3. Cho đổi tên, đổi thứ tự và chuyển danh mục sang cha khác. Việc chuyển cha phải tiếp tục đáp ứng quy tắc tên không trùng tại cha mới.
 4. Không cho đặt chính danh mục hoặc bất kỳ danh mục con nào của nó làm cha, để cây không tạo vòng lặp.
 5. Đổi tên hoặc chuyển cha không làm mất liên kết bài với danh mục đã chọn. Kết quả lọc tin sử dụng cây danh mục sau thay đổi.
-6. Chỉ cho xóa danh mục khi không còn danh mục con và không được bài nào sử dụng, kể cả bài nháp hoặc đã ẩn. Muốn xóa phải chuyển hoặc gỡ liên kết bài và chuyển hoặc xóa danh mục con trước; bài công bố vẫn phải còn ít nhất một danh mục.
+6. Chỉ cho xóa danh mục khi không còn danh mục con và không được bài nào sử dụng, kể cả bài nháp hoặc đã ẩn. Muốn xóa phải chuyển hoặc gỡ liên kết bài và chuyển hoặc xóa danh mục con trước.
 7. Gắn danh mục tại bất kỳ cấp nào; không tự buộc người quản lý gắn cả chuỗi cha. Không có danh mục chính cho bài.
+8. Danh mục gốc gắn được một bước của Cẩm nang, bật được cờ chủ đề hướng dẫn và chọn được một biểu tượng. Danh mục con không mang ba thuộc tính này mà theo danh mục gốc của nhánh mình.
+9. Danh mục bật cờ chủ đề hướng dẫn bắt buộc phải gắn một bước. Danh mục không bật cờ có thể gắn bước hoặc không.
+10. Chuyển một danh mục gốc sang làm con của danh mục khác thì xóa bước, cờ chủ đề hướng dẫn và biểu tượng của nó; nhánh đó theo danh mục gốc mới.
 
 ## Except
 
@@ -73,5 +76,7 @@ Người quản lý tạo, đổi tên, sắp xếp, chuyển cha, xóa danh m�
 Ví dụ: “Nhà phố → Thiết kế” và “Biệt thự → Thiết kế” được cùng tồn tại. Hai danh mục “ Sơn ” và “sơn” dưới cùng cha bị coi là trùng tên.
 
 Giới hạn 200 ký tự ở khoản 1 do người dùng xác nhận ngày 25/09/2026.
+
+Quyết định ngày 07/10/2026: người dùng yêu cầu danh mục gốc mang thêm bước, cờ chủ đề hướng dẫn và biểu tượng, ghi ở khoản 8 đến 10. Ý nghĩa của bước và cách suy ra bước của một bài nằm ở [BR-HB-001](BR-HB-001.md). Cùng ngày, điều kiện "bài công bố vẫn phải còn ít nhất một danh mục" ở khoản 6 được bỏ theo thay đổi tại [BR-NEWS-001](BR-NEWS-001.md) khoản 2.
 
 Owner và ngày hiệu lực chưa xác định. Người dùng đã chốt bộ US/BR Tin tức trong hội thoại. Status Draft vẫn giữ theo quy trình tài liệu; xác nhận này không thay cho phê duyệt trên hệ thống hoặc kết quả kiểm thử.

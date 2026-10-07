@@ -35,12 +35,12 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Sprint dùng số nguyên dương để đồng thời đáp ứng form yêu cầu số dương và parser đọc Int32 (tối đa 2.147.483.647). Không tự đặt Sprint hoặc số liệu khi chưa có nguồn.
 -->
 
-# STORY-NEWS-001
+# STORY-HB-002
 
 ## Metadata
 
-- **Story**: Là người có quyền quản lý Tin tức, tôi muốn quản lý bài viết để cung cấp tin công khai trong Cẩm nang.
-- **Context**: Tin tức dùng rich text và nhiều danh mục riêng; không dùng cơ chế phiên bản hoặc lượt của thư viện mẫu.
+- **Story**: Là người đọc Cẩm nang, tôi muốn xem nội dung theo ba bước xây nhà và mở từng chủ đề để tìm kiến thức đúng giai đoạn công trình của mình, không cần đăng nhập.
+- **Context**: Trang Cẩm nang hiện ba bước kèm ảnh và mô tả; mở một bước thì thấy các chủ đề hướng dẫn và bài viết thuộc chủ đề đó. Bản nháp soạn từ các quyết định người dùng xác nhận ngày 07/10/2026.
 - **Sprint**:
 - **Priority**: Must
 - **Status**: Todo
@@ -55,181 +55,113 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ### Preconditions
 
-- Người thao tác đăng nhập và có quyền quản lý tin tức theo STORY-RBAC-001; quyền này không gắn phân công.
+- Không yêu cầu đăng nhập hoặc sở hữu gói.
 
 ### Trigger
 
-Người quản lý tạo hoặc cập nhật bài.
+Người đọc mở trang Cẩm nang, mở một bước hoặc chọn một chủ đề.
 
 ## Flow
 
 ### Main Flow
 
-1. Tạo bài và nhập tiêu đề, ảnh đại diện, số phút đọc do người viết nhập, nội dung rich text; kiểm lại đường dẫn hệ thống sinh từ tiêu đề và sửa nếu cần. Chọn một hoặc nhiều danh mục nếu muốn; danh mục không bắt buộc.
-2. Khi chèn ảnh nội dung, FE tải ảnh lên cloud rồi chèn URL vào rich text.
-3. Lưu nháp để nhập dần hoặc chọn công bố; hệ thống kiểm đủ dữ liệu trước công bố.
-4. Công bố bài hợp lệ trực tiếp, không qua người duyệt; ghi ngày công bố đầu tiên.
-5. Khi sửa bài đã công bố, lưu nội dung hợp lệ để cập nhật ngay cùng bài.
+1. Mở trang Cẩm nang; thấy phần mở đầu và ba thẻ bước kèm tiêu đề, mô tả ngắn và ảnh đại diện, theo thứ tự Phần thô, Phần hoàn thiện, Trang trí nội thất.
+2. Mở một bước; hệ thống hiện các chủ đề hướng dẫn của bước đó theo thứ tự người quản lý đã sắp, kèm biểu tượng của từng chủ đề.
+3. Chọn một chủ đề; hệ thống hiện các bài đang công bố gắn chủ đề đó hoặc gắn danh mục con của nó ở mọi cấp, mới công bố trước, mỗi bài một lần.
+4. Chọn một bài để đọc theo STORY-NEWS-003.
 
 ### Alternative Flow
 
 #### ALT-01
 
-Chưa đủ dữ liệu công bố.
+Bước chưa có chủ đề hướng dẫn nào.
 
-1. Lưu nháp và tiếp tục nhập sau; bài chưa xuất hiện công khai.
+1. Hiện trạng thái trống cho bước đó; không lấy chủ đề của bước khác hoặc nhãn tin tức để lấp chỗ.
 
 #### ALT-02
 
-Cần ngừng hoặc khôi phục hiển thị.
+Chủ đề chưa có bài nào đang công bố.
 
-1. Ẩn bài; danh sách và đường dẫn trực tiếp không cung cấp bài.
-2. Công bố lại khi đủ thông tin, giữ ngày công bố đầu tiên.
-
-#### ALT-03
-
-Người quản lý xóa bài ở bất kỳ trạng thái nào.
-
-1. Xóa bài khỏi nội dung phục vụ; đường dẫn cũ báo không tìm thấy.
-2. Không có thùng rác hoặc chức năng khôi phục.
+1. Hiện danh sách rỗng; người đọc chọn chủ đề khác hoặc đóng bước.
 
 ### Exception Flow
 
 #### EXC-01
 
-Không có quyền quản lý.
+Bài trong một chủ đề bị ẩn hoặc xóa trước khi người đọc mở.
 
-1. Từ chối thao tác, giữ dữ liệu hiện tại.
-
-#### EXC-02
-
-Công bố hoặc lưu sửa bài công bố thiếu trường bắt buộc hay dùng danh mục không còn tồn tại.
-
-1. Thông báo phần không hợp lệ; không công bố hoặc thay bài hiện hành bằng dữ liệu lỗi.
-
-#### EXC-03
-
-Upload ảnh thất bại.
-
-1. Thông báo lỗi, không chèn URL của ảnh chưa upload thành công; cho người quản lý thử lại.
-
-#### EXC-04
-
-Tiêu đề hoặc nội dung vượt giới hạn độ dài.
-
-1. Từ chối lưu, chỉ rõ phần vượt giới hạn; giữ nguyên bài hiện tại và không tự cắt ngắn.
-
-#### EXC-05
-
-Số phút đọc không phải số nguyên lớn hơn 0.
-
-1. Từ chối lưu, chỉ rõ trường sai; giữ bài hiện tại.
+1. Không cung cấp nội dung bài; bài đã xóa báo không tìm thấy.
+2. Các bài còn lại trong chủ đề vẫn xem được bình thường.
 
 ## Acceptance Criteria
 
 #### AC-001
 
-- **Given**: Người có quyền đang tạo bài chưa đủ thông tin
-- **When**: Lưu nháp
-- **Then**: Lưu được để nhập tiếp, khách không đọc được bài.
+- **Given**: Người đọc chưa đăng nhập và không có gói
+- **When**: Mở trang Cẩm nang
+- **Then**: Xem được ba bước kèm tiêu đề, mô tả ngắn và ảnh, không bị hỏi đăng nhập hoặc trừ lượt.
 
 #### AC-002
 
-- **Given**: Bài thiếu một trong năm thành phần bắt buộc
-- **When**: Công bố
-- **Then**: Từ chối; chỉ công bố khi có tiêu đề, ảnh đại diện, số phút đọc do người viết nhập, nội dung và đường dẫn theo BR-NEWS-004.
-- **And**: Danh mục không nằm trong các thành phần bắt buộc; bài không gắn danh mục nào vẫn công bố được.
+- **Given**: Một bước có nhiều chủ đề hướng dẫn đã được sắp thứ tự
+- **When**: Mở bước đó
+- **Then**: Các chủ đề hiện đúng thứ tự người quản lý đã lưu, kèm biểu tượng của từng chủ đề.
+- **And**: Không hiện nhãn tin tức không thuộc bước nào.
 
 #### AC-003
 
-- **Given**: Bài chọn các danh mục cha hoặc con ở nhiều nhánh
-- **When**: Công bố bài đủ dữ liệu
-- **Then**: Giữ các danh mục đã chọn, không bắt chọn cha hoặc danh mục chính.
+- **Given**: Chủ đề "Móng" có danh mục con và bài gắn ở cả hai cấp
+- **When**: Chọn chủ đề "Móng"
+- **Then**: Danh sách gồm bài gắn trực tiếp và bài thuộc mọi cấp con, mỗi bài chỉ xuất hiện một lần.
 
 #### AC-004
 
-- **Given**: Ảnh được FE upload thành công
-- **When**: Chèn vào rich text rồi lưu bài
-- **Then**: Nội dung lưu tham chiếu URL ảnh; hỗ trợ nhiều ảnh, định dạng chữ, tiêu đề đoạn, danh sách và liên kết.
+- **Given**: Có bài đang nháp, đang ẩn và đang công bố trong một chủ đề
+- **When**: Người đọc mở chủ đề đó
+- **Then**: Chỉ bài đang công bố được trả về, mới công bố trước.
 
 #### AC-005
 
-- **Given**: Bài đang công bố
-- **When**: Lưu sửa hợp lệ
-- **Then**: Khách đọc nội dung mới ngay trên cùng bài; không tạo phiên bản hoặc đổi ngày công bố đầu tiên.
+- **Given**: Một bài gắn chủ đề của Phần thô và chủ đề của Trang trí nội thất
+- **When**: Người đọc mở lần lượt hai bước đó
+- **Then**: Bài xuất hiện ở cả hai bước.
 
 #### AC-006
 
-- **Given**: Bài đã công bố
-- **When**: Ẩn rồi công bố lại
-- **Then**: Khi ẩn không đọc công khai được; khi công bố lại giữ ngày công bố đầu tiên.
+- **Given**: Một bài không gắn danh mục nào
+- **When**: Người đọc mở các bước
+- **Then**: Bài không xuất hiện trong bước nào.
+- **And**: Bài vẫn xuất hiện ở danh sách bài viết chung theo BR-NEWS-003.
 
 #### AC-007
 
-- **Given**: Bài nháp, công bố hoặc ẩn
-- **When**: Người quản lý xóa bài
-- **Then**: Xóa được ở cả ba trạng thái; bài biến mất và đường dẫn cũ báo không tìm thấy, không khôi phục.
-
-#### AC-008
-
-- **Given**: Người không có quyền quản lý
-- **When**: Gọi trực tiếp thao tác quản trị
-- **Then**: Bị từ chối, không thay đổi dữ liệu.
-
-#### AC-009
-
-- **Given**: Người có quyền đang lưu nháp hoặc sửa một bài
-- **When**: Tiêu đề dài 200 ký tự sau khi bỏ khoảng trắng đầu/cuối và nội dung 200.000 ký tự, rồi thử lại với 201 hoặc 200.001 ký tự
-- **Then**: Lần đầu lưu được; mỗi lần vượt giới hạn bị từ chối, không tự cắt ngắn.
-- **And**: Yêu cầu bị từ chối không thay đổi bài hiện tại.
-
-#### AC-010
-
-- **Given**: Người có quyền tạo hoặc sửa bài
-- **When**: Nhập số phút đọc hoặc để trống
-- **Then**: Số nguyên lớn hơn 0 được lưu đúng giá trị đã nhập; 0, số âm hoặc số không nguyên bị từ chối. Nháp được để trống; công bố hoặc lưu sửa bài đang công bố phải có số phút đọc.
-- **And**: Không còn trường mô tả ngắn. Bài cũ giữ số phút đọc trống và vẫn đọc được nếu đang công bố; bổ sung khi lưu sửa bài đang công bố, không tự gán mặc định.
-
-#### AC-011
-
-- **Given**: Người có quyền đang soạn một bài đủ các trường bắt buộc nhưng chưa chọn danh mục nào
-- **When**: Công bố bài, rồi sửa một bài đang công bố để gỡ hết danh mục
-- **Then**: Cả hai lần đều thành công; bài hiển thị công khai và mang nhãn chưa phân loại trên thẻ bài.
-- **And**: Bài này không xuất hiện khi người đọc lọc bất kỳ danh mục nào.
-
-#### AC-012
-
-- **Given**: Người có quyền đang lưu một bài
-- **When**: Đặt đường dẫn trùng với đường dẫn hiện tại hoặc đường dẫn cũ của bài khác
-- **Then**: Từ chối lưu và giữ nguyên bài hiện tại.
-- **And**: Sửa tiêu đề không tự đổi đường dẫn; đổi đường dẫn thì đường dẫn cũ vẫn trỏ về bài đó.
+- **Given**: Một bước chưa có chủ đề hướng dẫn nào
+- **When**: Người đọc mở bước đó
+- **Then**: Hiện trạng thái trống, không hiện dữ liệu minh họa hoặc chủ đề của bước khác.
 
 ## References
 
 ### TDDs
 
-- TDD-NEWS-001
-- TDD-NEWS-002
-- TDD-NEWS-003
+- TDD-HB-001
 
 ### Rules
 
-- BR-NEWS-001
-- BR-NEWS-002
-- BR-NEWS-004
+- BR-HB-001
+- BR-NEWS-003
 
 ### Dependencies
 
-- STORY-NEWS-002
+- STORY-HB-001: người quản lý chuẩn bị nội dung bước và chủ đề hướng dẫn.
+- STORY-NEWS-003: đọc chi tiết một bài tin tức.
 
 ## Non-Functional
 
-- Kiểm tra quyền quản lý tại backend, kể cả yêu cầu trực tiếp; quyền đọc công khai không cấp quyền sửa dữ liệu.
-- Rich text phải hiển thị an toàn, không thực thi mã do người soạn chèn. Chi tiết kiểm soát thuộc bước thiết kế kỹ thuật.
-- Chưa chốt ngưỡng hiệu năng hoặc giới hạn truyền tải. Backend đã merge vào `develop` của `bmt-be`; phần đường dẫn và bỏ ràng buộc danh mục chưa triển khai và chưa chạy System Test.
+- Phần công khai không được làm lộ bài đang nháp hoặc đang ẩn qua yêu cầu đọc mới.
+- Chưa chốt ngưỡng hiệu năng cho việc lấy bài theo cả nhánh chủ đề.
 
 ## Out of Scope
 
-- Duyệt bài, phiên bản nội dung, lịch sử xem, video và tệp đính kèm.
-- Thùng rác, khôi phục bài và các tương tác người đọc.
-- Việc đưa bài lên khối Bản tin thuộc STORY-HB-003, không nằm trong Story này.
+- Tìm kiếm trong phạm vi một bước hoặc một chủ đề.
+- Lọc nhiều chủ đề cùng lúc và lưu lại chủ đề đang xem giữa các phiên.
+- Nhiều bản ngôn ngữ cho tiêu đề bước và tên chủ đề.

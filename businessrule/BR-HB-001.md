@@ -32,47 +32,47 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Form còn kiểm tra Version và Effective Date không rỗng; với file nhập mới, vẫn để Version trống theo hợp đồng import vì hệ thống quản lý phiên bản. Thiếu ngày hiệu lực thì hỏi lại, không bịa để thoả form.
 -->
 
-# BR-NEWS-003
+# BR-HB-001
 
 ## Rule Info
 
-- **Name**: Đọc, tìm kiếm và lọc tin công khai
-- **Category**: Tin tức
+- **Name**: Cấu trúc Cẩm nang theo ba bước xây nhà
+- **Category**: Cẩm nang
 - **Status**: Draft
 - **Version**:
 - **Effective Date**:
 - **Owner**: [Chưa xác định]
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
-- **Source**: Các quyết định người dùng xác nhận trong hội thoại chuẩn bị nghiệp vụ Tin tức của Cẩm nang BMT.
+- **Source**: Các quyết định người dùng xác nhận trong hội thoại thiết kế lưu trữ trang Cẩm nang ngày 07/10/2026.
 
 ## Statement
 
-Mọi người được đọc tin đã công bố miễn phí, không cần đăng nhập hoặc gói, không tính lượt.
+Cẩm nang có ba bước cố định. Danh mục tin tức quyết định nội dung hiển thị trong từng bước thông qua bước được gắn và cờ phân loại hiển thị.
 
 ## When
 
-Người đọc mở danh sách, tìm kiếm, lọc danh mục, chuyển trang hoặc mở chi tiết tin.
+Người quản lý sửa nội dung một bước, tạo hoặc sửa danh mục tin tức; người đọc mở trang Cẩm nang hoặc mở một bước.
 
 ## Then
 
-1. Chỉ cung cấp bài đang công bố trên danh sách và trang chi tiết công khai; không cung cấp bài nháp, đang ẩn hoặc đã xóa.
-2. Không kiểm điều kiện có gói và không trừ lượt khi đọc tin, kể cả lần đầu. Không áp dụng quota hoặc quyền xem theo phiên bản của LIB.
-3. Tìm kiếm theo tiêu đề; chọn một danh mục mỗi lần hoặc không lọc danh mục. Cho kết hợp từ khóa với danh mục và có phân trang.
-4. Lọc danh mục bao gồm bài gắn trực tiếp vào danh mục đó và bài thuộc toàn bộ danh mục con bên dưới. Một bài khớp nhiều danh mục trong nhánh chỉ xuất hiện một lần.
-5. Khi kết hợp tìm và lọc, bài phải đồng thời khớp tiêu đề và nhánh danh mục đã chọn. Không có kết quả thì hiển thị danh sách rỗng.
-6. Sắp xếp theo ngày công bố đầu tiên, mới nhất trước. Sửa bài hoặc ẩn rồi công bố lại không tự đưa bài lên đầu.
-7. Đợt này không có bình luận, thích, lưu yêu thích hoặc thống kê lượt đọc. Việc đưa bài lên khối Bản tin theo thứ tự do người quản lý sắp xếp áp dụng theo [BR-HB-002](BR-HB-002.md).
-8. Bài không gắn danh mục nào vẫn nằm trong danh sách khi người đọc không lọc danh mục, và hiển thị nhãn chưa phân loại trên thẻ bài. Bài này không xuất hiện khi người đọc lọc bất kỳ danh mục nào; cũng không có bộ lọc riêng cho nhóm chưa phân loại.
+1. Cẩm nang có đúng ba bước, theo thứ tự: Phần thô, Phần hoàn thiện, Trang trí nội thất. Người quản lý sửa được tiêu đề, mô tả ngắn và ảnh của từng bước. Không thêm bước mới, không xóa bước và không đổi thứ tự.
+2. Mỗi bước phải có đủ tiêu đề, mô tả ngắn và ảnh đại diện. Thiếu một trong ba thì từ chối lưu và giữ nguyên nội dung đang hiển thị.
+3. Danh mục tin tức có cờ phân loại hiển thị. Bật cờ thì danh mục là chủ đề hướng dẫn, hiện bên trong một bước. Tắt cờ thì danh mục là nhãn tin tức, hiện ở bộ lọc bài viết.
+4. Chỉ danh mục gốc mới được gắn bước, bật cờ chủ đề hướng dẫn và chọn biểu tượng. Danh mục con theo danh mục gốc của nhánh mình.
+5. Chủ đề hướng dẫn bắt buộc thuộc một bước. Nhãn tin tức có thể thuộc một bước hoặc không thuộc bước nào.
+6. Chủ đề hướng dẫn chọn được một biểu tượng trong bộ biểu tượng có sẵn. Nhãn tin tức không có biểu tượng.
+7. Bài viết thuộc bước nào được suy ra từ các danh mục đã gắn cho bài. Bài gắn danh mục của nhiều bước thì thuộc nhiều bước. Bài không gắn danh mục nào thì không thuộc bước nào.
+8. Đổi bước của một danh mục gốc làm toàn bộ nhánh con và các bài trong nhánh chuyển sang bước mới.
 
 ## Except
 
-
+Các danh mục đã có trước khi áp dụng quy tắc này giữ nguyên là nhãn tin tức và không thuộc bước nào, cho tới khi người quản lý chủ động gắn bước hoặc bật cờ chủ đề hướng dẫn. Hệ thống không tự xếp danh mục cũ vào bước.
 
 ## Notes
 
-Ví dụ: một bài gắn cả “Vật liệu” và “Vật liệu → Sơn” chỉ hiển thị một lần khi lọc “Vật liệu”.
+Bài không thuộc bước nào vẫn xuất hiện ở danh sách bài viết và khối Bản tin; chỉ không xuất hiện trong panel chủ đề của các bước. Xem [BR-NEWS-001](BR-NEWS-001.md) về điều kiện công bố bài và [BR-NEWS-002](BR-NEWS-002.md) về cây danh mục.
 
-Quyết định ngày 07/10/2026: người dùng yêu cầu cho công bố bài không có danh mục và bỏ điều "không có ghim tin" ở khoản 7, vì trang Cẩm nang có khối Bản tin do người quản lý sắp xếp. Nhãn hiển thị cho bài chưa phân loại là chữ trên giao diện, không phải một danh mục trong cây.
+Ví dụ: "Móng" là danh mục gốc, bật cờ chủ đề hướng dẫn, gắn bước Phần thô, chọn biểu tượng. Bài "Các loại móng nhà phố" gắn "Móng" nên hiện trong panel của Phần thô. Nếu bài đó gắn thêm "Nội thất" thuộc bước Trang trí nội thất thì bài hiện ở cả hai bước.
 
-Owner và ngày hiệu lực chưa xác định. Người dùng đã chốt bộ US/BR Tin tức trong hội thoại. Status Draft vẫn giữ theo quy trình tài liệu; xác nhận này không thay cho phê duyệt trên hệ thống hoặc kết quả kiểm thử.
+Owner và ngày hiệu lực chưa xác định. Reviewer và Approver lấy theo các tài liệu Tin tức hiện có; cần xác nhận lại nếu người phụ trách đã thay đổi. Status Draft giữ theo quy trình tài liệu; xác nhận trong hội thoại không thay cho phê duyệt trên hệ thống.

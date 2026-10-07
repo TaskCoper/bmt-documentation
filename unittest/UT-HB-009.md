@@ -33,7 +33,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# UT-NEWS-002
+# UT-HB-009
 
 ## Unit Test
 
@@ -42,12 +42,9 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-NEWS-002 | Tin tức | NewsArticleService — kiểm đủ dữ liệu công bố | Boundary | REGRESSION | P1 | Bài Draft đầy đủ, Version=2; danh mục hợp lệ. | Lần lượt bỏ từng trường Title, ReadingTimeMinutes, CoverImageUrl, ContentHtml hoặc Slug; thêm biến thể trường chữ chỉ khoảng trắng; thêm biến thể đối chứng bỏ toàn bộ categoryIds nhưng giữ đủ năm trường trên. | Các biến thể thiếu trường trả InvalidNewsContent; không chuyển trạng thái, không gán ngày đầu hoặc tăng Version. Biến thể bỏ hết categoryIds công bố thành công. | TDD-NEWS-001/Architecture<br>BR-NEWS-001/Then<br>BR-NEWS-004/Then<br>STORY-NEWS-001/AC-002<br>STORY-NEWS-001/AC-011 | Danh mục không còn là điều kiện công bố; đường dẫn thay vào danh sách trường bắt buộc. Mã test ở bảng độ phủ kiểm thử đơn vị Tin tức; không ghi kết quả chạy vào đặc tả. | [Chưa xác định] | Draft |
+| UT-HB-009 | Cẩm nang | SetCategoryHandbookCommandHandler — tắt cờ chủ đề hướng dẫn | Branch | REGRESSION | P1 | Danh mục gốc C4 đang có StageId=S1, IsInstruction=true, IconKey='foundation', Version=2. | isInstruction=false, stageId=S1, iconKey bỏ trống, expectedVersion=2. | IsInstruction=false và IconKey=NULL; StageId vẫn là S1; Version=3. Danh mục trở lại là nhãn tin tức nhưng vẫn thuộc bước. | STORY-HB-001/ALT-03<br>BR-HB-001/Then | BR-HB-001 khoản 5 cho nhãn tin tức thuộc một bước, khoản 6 nói nhãn tin tức không có biểu tượng. Handler là unit dự kiến của TDD-HB-001. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- TDD-NEWS-001/Architecture
-- BR-NEWS-001/Then
-- BR-NEWS-004/Then
-- STORY-NEWS-001/AC-002
-- STORY-NEWS-001/AC-011
+- STORY-HB-001/ALT-03
+- BR-HB-001/Then

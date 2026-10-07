@@ -35,12 +35,12 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Sprint dùng số nguyên dương để đồng thời đáp ứng form yêu cầu số dương và parser đọc Int32 (tối đa 2.147.483.647). Không tự đặt Sprint hoặc số liệu khi chưa có nguồn.
 -->
 
-# STORY-NEWS-001
+# STORY-HB-001
 
 ## Metadata
 
-- **Story**: Là người có quyền quản lý Tin tức, tôi muốn quản lý bài viết để cung cấp tin công khai trong Cẩm nang.
-- **Context**: Tin tức dùng rich text và nhiều danh mục riêng; không dùng cơ chế phiên bản hoặc lượt của thư viện mẫu.
+- **Story**: Là người có quyền quản lý Tin tức, tôi muốn sửa nội dung ba bước xây nhà và sắp xếp chủ đề hướng dẫn trong từng bước để người đọc tìm được kiến thức theo đúng giai đoạn công trình.
+- **Context**: Trang Cẩm nang có ba bước cố định: Phần thô, Phần hoàn thiện, Trang trí nội thất. Chủ đề hướng dẫn dùng chung cây danh mục của Tin tức, phân biệt với nhãn tin tức bằng một cờ hiển thị. Bản nháp soạn từ các quyết định người dùng xác nhận ngày 07/10/2026.
 - **Sprint**:
 - **Priority**: Must
 - **Status**: Todo
@@ -56,180 +56,158 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 ### Preconditions
 
 - Người thao tác đăng nhập và có quyền quản lý tin tức theo STORY-RBAC-001; quyền này không gắn phân công.
+- Ba bước đã có sẵn trong hệ thống; người quản lý không tạo bước.
 
 ### Trigger
 
-Người quản lý tạo hoặc cập nhật bài.
+Người quản lý mở phần quản lý Cẩm nang để sửa một bước hoặc sắp xếp chủ đề hướng dẫn.
 
 ## Flow
 
 ### Main Flow
 
-1. Tạo bài và nhập tiêu đề, ảnh đại diện, số phút đọc do người viết nhập, nội dung rich text; kiểm lại đường dẫn hệ thống sinh từ tiêu đề và sửa nếu cần. Chọn một hoặc nhiều danh mục nếu muốn; danh mục không bắt buộc.
-2. Khi chèn ảnh nội dung, FE tải ảnh lên cloud rồi chèn URL vào rich text.
-3. Lưu nháp để nhập dần hoặc chọn công bố; hệ thống kiểm đủ dữ liệu trước công bố.
-4. Công bố bài hợp lệ trực tiếp, không qua người duyệt; ghi ngày công bố đầu tiên.
-5. Khi sửa bài đã công bố, lưu nội dung hợp lệ để cập nhật ngay cùng bài.
+1. Mở danh sách ba bước theo thứ tự Phần thô, Phần hoàn thiện, Trang trí nội thất rồi chọn một bước.
+2. Sửa tiêu đề, mô tả ngắn và ảnh đại diện của bước. Ảnh do frontend tải lên kho trước, backend chỉ nhận đường dẫn.
+3. Lưu; hệ thống kiểm đủ ba trường rồi cập nhật ngay nội dung công khai.
+4. Tạo danh mục gốc làm chủ đề hướng dẫn: nhập tên, bật cờ chủ đề hướng dẫn, chọn bước và chọn một biểu tượng.
+5. Sắp xếp thứ tự các chủ đề trong bước; phần công khai hiển thị theo thứ tự đã lưu.
 
 ### Alternative Flow
 
 #### ALT-01
 
-Chưa đủ dữ liệu công bố.
+Chuyển một nhãn tin tức sẵn có thành chủ đề hướng dẫn.
 
-1. Lưu nháp và tiếp tục nhập sau; bài chưa xuất hiện công khai.
+1. Mở danh mục gốc đó, bật cờ chủ đề hướng dẫn, chọn bước và biểu tượng.
+2. Các bài đang gắn danh mục đó xuất hiện trong bước tương ứng; liên kết bài giữ nguyên.
 
 #### ALT-02
 
-Cần ngừng hoặc khôi phục hiển thị.
+Chuyển chủ đề hướng dẫn sang bước khác.
 
-1. Ẩn bài; danh sách và đường dẫn trực tiếp không cung cấp bài.
-2. Công bố lại khi đủ thông tin, giữ ngày công bố đầu tiên.
+1. Chọn bước mới cho danh mục gốc rồi lưu.
+2. Toàn bộ nhánh con và các bài trong nhánh chuyển sang bước mới; không phải sửa từng bài.
 
 #### ALT-03
 
-Người quản lý xóa bài ở bất kỳ trạng thái nào.
+Ngừng dùng một danh mục làm chủ đề hướng dẫn.
 
-1. Xóa bài khỏi nội dung phục vụ; đường dẫn cũ báo không tìm thấy.
-2. Không có thùng rác hoặc chức năng khôi phục.
+1. Tắt cờ chủ đề hướng dẫn; hệ thống bỏ biểu tượng của danh mục.
+2. Danh mục trở lại là nhãn tin tức và không còn hiện trong bước; bài vẫn giữ liên kết danh mục.
 
 ### Exception Flow
 
 #### EXC-01
 
-Không có quyền quản lý.
+Người thao tác không có quyền quản lý tin tức.
 
-1. Từ chối thao tác, giữ dữ liệu hiện tại.
+1. Từ chối thao tác quản trị và giữ nguyên dữ liệu, kể cả khi yêu cầu gửi thẳng tới API.
 
 #### EXC-02
 
-Công bố hoặc lưu sửa bài công bố thiếu trường bắt buộc hay dùng danh mục không còn tồn tại.
+Lưu bước nhưng thiếu tiêu đề, mô tả ngắn hoặc ảnh đại diện.
 
-1. Thông báo phần không hợp lệ; không công bố hoặc thay bài hiện hành bằng dữ liệu lỗi.
+1. Chỉ rõ trường còn thiếu, không lưu và giữ nguyên nội dung đang hiển thị.
 
 #### EXC-03
 
-Upload ảnh thất bại.
+Bật cờ chủ đề hướng dẫn nhưng không chọn bước.
 
-1. Thông báo lỗi, không chèn URL của ảnh chưa upload thành công; cho người quản lý thử lại.
+1. Từ chối lưu và yêu cầu chọn bước; danh mục giữ nguyên trạng thái cũ.
 
 #### EXC-04
 
-Tiêu đề hoặc nội dung vượt giới hạn độ dài.
+Gắn bước, bật cờ chủ đề hướng dẫn hoặc chọn biểu tượng cho một danh mục con.
 
-1. Từ chối lưu, chỉ rõ phần vượt giới hạn; giữ nguyên bài hiện tại và không tự cắt ngắn.
+1. Từ chối thay đổi và nêu rõ ba thuộc tính này chỉ đặt ở danh mục gốc.
 
 #### EXC-05
 
-Số phút đọc không phải số nguyên lớn hơn 0.
+Ảnh của bước không phải đường dẫn https thuộc tên miền kho ảnh đã cấu hình.
 
-1. Từ chối lưu, chỉ rõ trường sai; giữ bài hiện tại.
+1. Từ chối lưu và giữ nguyên ảnh hiện tại.
+
+#### EXC-06
+
+Yêu cầu thêm bước mới hoặc xóa một bước.
+
+1. Hệ thống không cung cấp thao tác này; số bước và thứ tự bước không đổi.
 
 ## Acceptance Criteria
 
 #### AC-001
 
-- **Given**: Người có quyền đang tạo bài chưa đủ thông tin
-- **When**: Lưu nháp
-- **Then**: Lưu được để nhập tiếp, khách không đọc được bài.
+- **Given**: Người thao tác không có quyền quản lý tin tức
+- **When**: Gọi trực tiếp thao tác sửa bước hoặc sửa danh mục
+- **Then**: Bị từ chối và dữ liệu không thay đổi.
 
 #### AC-002
 
-- **Given**: Bài thiếu một trong năm thành phần bắt buộc
-- **When**: Công bố
-- **Then**: Từ chối; chỉ công bố khi có tiêu đề, ảnh đại diện, số phút đọc do người viết nhập, nội dung và đường dẫn theo BR-NEWS-004.
-- **And**: Danh mục không nằm trong các thành phần bắt buộc; bài không gắn danh mục nào vẫn công bố được.
+- **Given**: Người quản lý đang sửa một bước
+- **When**: Lưu với đủ tiêu đề, mô tả ngắn và ảnh đại diện
+- **Then**: Nội dung mới hiển thị ngay trên trang Cẩm nang công khai.
 
 #### AC-003
 
-- **Given**: Bài chọn các danh mục cha hoặc con ở nhiều nhánh
-- **When**: Công bố bài đủ dữ liệu
-- **Then**: Giữ các danh mục đã chọn, không bắt chọn cha hoặc danh mục chính.
+- **Given**: Người quản lý đang sửa một bước
+- **When**: Lưu khi thiếu một trong ba trường bắt buộc
+- **Then**: Từ chối, chỉ rõ trường thiếu và giữ nguyên nội dung đang hiển thị.
+- **And**: Không tự điền giá trị mặc định cho trường thiếu.
 
 #### AC-004
 
-- **Given**: Ảnh được FE upload thành công
-- **When**: Chèn vào rich text rồi lưu bài
-- **Then**: Nội dung lưu tham chiếu URL ảnh; hỗ trợ nhiều ảnh, định dạng chữ, tiêu đề đoạn, danh sách và liên kết.
+- **Given**: Người quản lý đang tạo hoặc sửa một danh mục gốc
+- **When**: Bật cờ chủ đề hướng dẫn nhưng để trống bước
+- **Then**: Từ chối lưu và yêu cầu chọn bước.
 
 #### AC-005
 
-- **Given**: Bài đang công bố
-- **When**: Lưu sửa hợp lệ
-- **Then**: Khách đọc nội dung mới ngay trên cùng bài; không tạo phiên bản hoặc đổi ngày công bố đầu tiên.
+- **Given**: Một danh mục con trong cây
+- **When**: Gắn bước, bật cờ chủ đề hướng dẫn hoặc chọn biểu tượng cho nó
+- **Then**: Bị từ chối; ba thuộc tính này chỉ đặt được ở danh mục gốc.
 
 #### AC-006
 
-- **Given**: Bài đã công bố
-- **When**: Ẩn rồi công bố lại
-- **Then**: Khi ẩn không đọc công khai được; khi công bố lại giữ ngày công bố đầu tiên.
+- **Given**: Chủ đề hướng dẫn đang thuộc Phần thô và có danh mục con cùng các bài liên kết
+- **When**: Chuyển chủ đề đó sang Phần hoàn thiện
+- **Then**: Cả nhánh con và các bài trong nhánh hiện ở Phần hoàn thiện, không còn ở Phần thô.
+- **And**: Liên kết bài với danh mục giữ nguyên.
 
 #### AC-007
 
-- **Given**: Bài nháp, công bố hoặc ẩn
-- **When**: Người quản lý xóa bài
-- **Then**: Xóa được ở cả ba trạng thái; bài biến mất và đường dẫn cũ báo không tìm thấy, không khôi phục.
+- **Given**: Một danh mục gốc đang là chủ đề hướng dẫn, có bước và biểu tượng
+- **When**: Chuyển nó thành con của một danh mục khác
+- **Then**: Bước, cờ chủ đề hướng dẫn và biểu tượng của nó bị xóa; nhánh theo danh mục gốc mới.
 
 #### AC-008
 
-- **Given**: Người không có quyền quản lý
-- **When**: Gọi trực tiếp thao tác quản trị
-- **Then**: Bị từ chối, không thay đổi dữ liệu.
-
-#### AC-009
-
-- **Given**: Người có quyền đang lưu nháp hoặc sửa một bài
-- **When**: Tiêu đề dài 200 ký tự sau khi bỏ khoảng trắng đầu/cuối và nội dung 200.000 ký tự, rồi thử lại với 201 hoặc 200.001 ký tự
-- **Then**: Lần đầu lưu được; mỗi lần vượt giới hạn bị từ chối, không tự cắt ngắn.
-- **And**: Yêu cầu bị từ chối không thay đổi bài hiện tại.
-
-#### AC-010
-
-- **Given**: Người có quyền tạo hoặc sửa bài
-- **When**: Nhập số phút đọc hoặc để trống
-- **Then**: Số nguyên lớn hơn 0 được lưu đúng giá trị đã nhập; 0, số âm hoặc số không nguyên bị từ chối. Nháp được để trống; công bố hoặc lưu sửa bài đang công bố phải có số phút đọc.
-- **And**: Không còn trường mô tả ngắn. Bài cũ giữ số phút đọc trống và vẫn đọc được nếu đang công bố; bổ sung khi lưu sửa bài đang công bố, không tự gán mặc định.
-
-#### AC-011
-
-- **Given**: Người có quyền đang soạn một bài đủ các trường bắt buộc nhưng chưa chọn danh mục nào
-- **When**: Công bố bài, rồi sửa một bài đang công bố để gỡ hết danh mục
-- **Then**: Cả hai lần đều thành công; bài hiển thị công khai và mang nhãn chưa phân loại trên thẻ bài.
-- **And**: Bài này không xuất hiện khi người đọc lọc bất kỳ danh mục nào.
-
-#### AC-012
-
-- **Given**: Người có quyền đang lưu một bài
-- **When**: Đặt đường dẫn trùng với đường dẫn hiện tại hoặc đường dẫn cũ của bài khác
-- **Then**: Từ chối lưu và giữ nguyên bài hiện tại.
-- **And**: Sửa tiêu đề không tự đổi đường dẫn; đổi đường dẫn thì đường dẫn cũ vẫn trỏ về bài đó.
+- **Given**: Người quản lý mở phần quản lý Cẩm nang
+- **When**: Xem danh sách bước
+- **Then**: Luôn có đúng ba bước theo thứ tự cố định, không có thao tác thêm hoặc xóa bước.
 
 ## References
 
 ### TDDs
 
-- TDD-NEWS-001
-- TDD-NEWS-002
-- TDD-NEWS-003
+- TDD-HB-001
 
 ### Rules
 
-- BR-NEWS-001
+- BR-HB-001
 - BR-NEWS-002
-- BR-NEWS-004
 
 ### Dependencies
 
-- STORY-NEWS-002
+- STORY-NEWS-002: quản lý cây danh mục của Tin tức.
 
 ## Non-Functional
 
-- Kiểm tra quyền quản lý tại backend, kể cả yêu cầu trực tiếp; quyền đọc công khai không cấp quyền sửa dữ liệu.
-- Rich text phải hiển thị an toàn, không thực thi mã do người soạn chèn. Chi tiết kiểm soát thuộc bước thiết kế kỹ thuật.
-- Chưa chốt ngưỡng hiệu năng hoặc giới hạn truyền tải. Backend đã merge vào `develop` của `bmt-be`; phần đường dẫn và bỏ ràng buộc danh mục chưa triển khai và chưa chạy System Test.
+- Kiểm quyền tại backend cho mọi thao tác quản trị; ẩn nút trên giao diện không thay thế kiểm quyền.
+- Ảnh của bước theo cùng quy định đường dẫn đang áp dụng cho ảnh bài tin tức; backend không nhận dữ liệu ảnh.
+- Chưa chốt ngưỡng hiệu năng hoặc số lượng chủ đề tối đa trong một bước.
 
 ## Out of Scope
 
-- Duyệt bài, phiên bản nội dung, lịch sử xem, video và tệp đính kèm.
-- Thùng rác, khôi phục bài và các tương tác người đọc.
-- Việc đưa bài lên khối Bản tin thuộc STORY-HB-003, không nằm trong Story này.
+- Thêm, xóa hoặc đổi thứ tự ba bước.
+- Nhiều bản ngôn ngữ cho tiêu đề bước và tên chủ đề; phần này dùng bản dịch sẵn có trong giao diện.
+- Phân quyền riêng cho quản lý Cẩm nang tách khỏi quản lý tin tức.

@@ -33,7 +33,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# UT-NEWS-002
+# UT-HB-011
 
 ## Unit Test
 
@@ -42,12 +42,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-NEWS-002 | Tin tức | NewsArticleService — kiểm đủ dữ liệu công bố | Boundary | REGRESSION | P1 | Bài Draft đầy đủ, Version=2; danh mục hợp lệ. | Lần lượt bỏ từng trường Title, ReadingTimeMinutes, CoverImageUrl, ContentHtml hoặc Slug; thêm biến thể trường chữ chỉ khoảng trắng; thêm biến thể đối chứng bỏ toàn bộ categoryIds nhưng giữ đủ năm trường trên. | Các biến thể thiếu trường trả InvalidNewsContent; không chuyển trạng thái, không gán ngày đầu hoặc tăng Version. Biến thể bỏ hết categoryIds công bố thành công. | TDD-NEWS-001/Architecture<br>BR-NEWS-001/Then<br>BR-NEWS-004/Then<br>STORY-NEWS-001/AC-002<br>STORY-NEWS-001/AC-011 | Danh mục không còn là điều kiện công bố; đường dẫn thay vào danh sách trường bắt buộc. Mã test ở bảng độ phủ kiểm thử đơn vị Tin tức; không ghi kết quả chạy vào đặc tả. | [Chưa xác định] | Draft |
+| UT-HB-011 | Cẩm nang | HandbookStageValidator — giới hạn độ dài trường chữ | Boundary | REGRESSION | P2 | Validator FluentValidation của lệnh sửa bước; đếm theo ký tự Unicode sau khi bỏ khoảng trắng đầu và cuối, như cách đang dùng cho tiêu đề bài viết. | Lần lượt: Title 200 ký tự rồi 201; Description 500 ký tự rồi 501; Title gồm 200 chữ Hán ngoài mặt phẳng cơ bản. | Giá trị đúng giới hạn được chấp nhận; giá trị vượt bị từ chối và nêu tên trường. Chuỗi 200 chữ Hán vẫn đạt, chứng tỏ đếm theo ký tự Unicode chứ không theo byte hay đơn vị UTF-16. | STORY-HB-001/AC-003<br>BR-HB-001/Then<br>TDD-HB-001/Data Model | Khớp cách đếm đang áp dụng cho Tin tức. Validator là unit dự kiến của TDD-HB-001. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- TDD-NEWS-001/Architecture
-- BR-NEWS-001/Then
-- BR-NEWS-004/Then
-- STORY-NEWS-001/AC-002
-- STORY-NEWS-001/AC-011
+- STORY-HB-001/AC-003
+- BR-HB-001/Then
+- TDD-HB-001/Data Model

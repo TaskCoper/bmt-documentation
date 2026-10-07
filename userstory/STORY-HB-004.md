@@ -35,14 +35,14 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Sprint dùng số nguyên dương để đồng thời đáp ứng form yêu cầu số dương và parser đọc Int32 (tối đa 2.147.483.647). Không tự đặt Sprint hoặc số liệu khi chưa có nguồn.
 -->
 
-# STORY-NEWS-002
+# STORY-HB-004
 
 ## Metadata
 
-- **Story**: Là người có quyền quản lý Tin tức, tôi muốn quản lý cây danh mục riêng để tổ chức và phân loại bài viết.
-- **Context**: Danh mục đa cấp không giới hạn độ sâu; một bài gắn được nhiều danh mục.
+- **Story**: Là người có quyền quản lý Tin tức, tôi muốn sửa các khối chữ cố định của trang Cẩm nang để đổi lời giới thiệu mà không cần nhờ lập trình viên.
+- **Context**: Trang Cẩm nang có vài khối chữ cố định: phần mở đầu, tiêu đề nhóm ba bước, tiêu đề và mô tả khối bài viết, tiêu đề khối Bản tin. Hiện các chữ này nằm trong mã frontend. Bản nháp soạn từ các quyết định người dùng xác nhận ngày 07/10/2026.
 - **Sprint**:
-- **Priority**: Must
+- **Priority**: Should
 - **Status**: Todo
 - **Creator**: Tân Trần
 - **Reviewer**: Tân Trần
@@ -55,133 +55,108 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ### Preconditions
 
-- Người thao tác đăng nhập và có cùng quyền quản lý tin tức theo STORY-RBAC-001 dùng cho bài viết.
+- Người thao tác đăng nhập và có quyền quản lý tin tức theo STORY-RBAC-001.
 
 ### Trigger
 
-Người quản lý tạo, đổi tên, đổi thứ tự, chuyển cha hoặc xóa danh mục.
+Người quản lý mở phần quản lý nội dung trang để sửa một khối chữ.
 
 ## Flow
 
 ### Main Flow
 
-1. Nhập tên và chọn vị trí gốc hoặc cha cho danh mục.
-2. Kiểm tên bắt buộc, tối đa 200 ký tự và không trùng trong cùng cha sau khi bỏ khoảng trắng đầu/cuối, không phân biệt hoa/thường.
-3. Lưu danh mục trong cây riêng của Tin tức để người quản lý gắn bài và khách lọc tin.
+1. Mở danh sách các khối của trang Cẩm nang.
+2. Chọn một khối; hệ thống hiện các trường đúng theo loại khối đó.
+3. Nhập nội dung rồi lưu; hệ thống kiểm cấu trúc theo loại khối trước khi ghi.
+4. Nội dung mới hiển thị ngay trên trang công khai ở ngôn ngữ tương ứng.
 
 ### Alternative Flow
 
 #### ALT-01
 
-Cập nhật danh mục hiện có.
+Khối chưa từng được sửa.
 
-1. Cho đổi tên, thứ tự hoặc chuyển cha khi hợp lệ.
-2. Giữ liên kết với bài; kết quả lọc dùng cây sau thay đổi.
+1. Trang công khai dùng bản dịch sẵn có trong giao diện; không để trống chữ.
+2. Người quản lý sửa khối bất cứ lúc nào để thay bản mặc định đó.
 
 #### ALT-02
 
-Xóa danh mục không còn được sử dụng.
+Quay về nội dung mặc định.
 
-1. Kiểm không có danh mục con và không có bài liên kết.
-2. Xóa danh mục khi cả hai điều kiện thỏa mãn.
+1. Người quản lý xóa bản đã lưu của khối.
+2. Trang công khai quay lại dùng bản dịch sẵn có trong giao diện.
 
 ### Exception Flow
 
 #### EXC-01
 
-Tên trống, dài quá 200 ký tự, trùng tên cùng cha hoặc chuyển cha tạo vòng lặp.
+Người thao tác không có quyền quản lý tin tức.
 
-1. Từ chối thay đổi và giữ cây hiện tại.
+1. Từ chối thao tác và giữ nguyên nội dung hiện tại.
 
 #### EXC-02
 
-Xóa danh mục có con hoặc có bài nháp, công bố hay ẩn liên kết.
+Nội dung gửi lên không đúng cấu trúc của loại khối.
 
-1. Từ chối xóa; yêu cầu xử lý bài và danh mục con trước.
+1. Từ chối lưu, chỉ rõ phần sai và giữ nguyên nội dung đang hiển thị.
 
 #### EXC-03
 
-Người thao tác thiếu quyền quản lý.
+Ảnh trong khối không phải đường dẫn https thuộc tên miền kho ảnh đã cấu hình.
 
-1. Từ chối thay đổi.
+1. Từ chối lưu và giữ nguyên nội dung đang hiển thị.
 
 ## Acceptance Criteria
 
 #### AC-001
 
-- **Given**: Có cây nhiều cấp
-- **When**: Tạo danh mục con ở cấp tiếp theo
-- **Then**: Không bị chặn bởi giới hạn số cấp nghiệp vụ.
+- **Given**: Người thao tác không có quyền quản lý tin tức
+- **When**: Gọi trực tiếp thao tác sửa khối
+- **Then**: Bị từ chối và nội dung không thay đổi.
 
 #### AC-002
 
-- **Given**: Có danh mục tên “Sơn”
-- **When**: Tạo “ sơn ” dưới cùng cha
-- **Then**: Từ chối trùng tên; dưới cha khác được phép; các danh mục gốc cùng xét một cấp.
+- **Given**: Người quản lý đang sửa khối phần mở đầu của trang Cẩm nang
+- **When**: Lưu nội dung đúng cấu trúc
+- **Then**: Trang công khai hiện nội dung mới ngay ở ngôn ngữ tương ứng.
 
 #### AC-003
 
-- **Given**: Danh mục có nhánh con
-- **When**: Chuyển cha vào chính nó hoặc một hậu duệ
-- **Then**: Từ chối, không tạo vòng lặp.
+- **Given**: Một khối chưa từng được sửa
+- **When**: Người đọc mở trang Cẩm nang
+- **Then**: Trang hiện bản dịch sẵn có trong giao diện, không để trống chữ.
 
 #### AC-004
 
-- **Given**: Danh mục đang gắn bài
-- **When**: Đổi tên, thứ tự hoặc chuyển cha hợp lệ
-- **Then**: Liên kết bài giữ nguyên và bộ lọc phản ánh cây mới.
+- **Given**: Người quản lý đang sửa một khối
+- **When**: Gửi nội dung thiếu trường bắt buộc hoặc sai cấu trúc của loại khối
+- **Then**: Từ chối lưu, chỉ rõ phần sai và giữ nguyên nội dung đang hiển thị.
 
 #### AC-005
 
-- **Given**: Cha đích có danh mục cùng tên
-- **When**: Chuyển danh mục tới cha đó
-- **Then**: Từ chối trùng tên theo cùng quy tắc chuẩn hóa.
-
-#### AC-006
-
-- **Given**: Danh mục còn con hoặc bài ở bất kỳ trạng thái nào
-- **When**: Xóa danh mục
-- **Then**: Từ chối; chỉ xóa được khi không còn cả con lẫn bài liên kết.
-
-#### AC-007
-
-- **Given**: Người không có quyền quản lý Tin tức
-- **When**: Thay đổi danh mục
-- **Then**: Bị từ chối, không đổi dữ liệu.
-
-#### AC-008
-
-- **Given**: Người có quyền quản lý tin tức tạo hoặc đổi tên danh mục.
-- **When**: Tên sau khi bỏ khoảng trắng đầu/cuối dài 200 ký tự, rồi thử lại với 201 ký tự.
-- **Then**: Tên 200 ký tự được lưu; tên 201 ký tự bị từ chối và không tự cắt ngắn.
-- **And**: Yêu cầu bị từ chối không đổi tên hoặc vị trí của danh mục.
+- **Given**: Một khối đã có bản tiếng Việt
+- **When**: Người đọc mở trang ở ngôn ngữ chưa có bản riêng
+- **Then**: Trang dùng bản dịch sẵn có trong giao diện cho ngôn ngữ đó, không hiện nhầm bản tiếng Việt.
 
 ## References
 
 ### TDDs
 
-- TDD-NEWS-002
-- TDD-NEWS-001
-- TDD-HB-001
+- TDD-HB-003
 
 ### Rules
 
-- BR-NEWS-001
-- BR-NEWS-002
-- BR-HB-001
+- BR-HB-003
 
 ### Dependencies
 
-
-
 ## Non-Functional
 
-- Kiểm tra quyền quản lý tại backend, kể cả yêu cầu trực tiếp; quyền đọc công khai không cấp quyền sửa dữ liệu.
-- Rich text phải hiển thị an toàn, không thực thi mã do người soạn chèn. Chi tiết kiểm soát thuộc bước thiết kế kỹ thuật.
-- Chưa chốt ngưỡng hiệu năng hoặc giới hạn truyền tải. Backend đã merge vào `develop` của `bmt-be`; phần bước, cờ chủ đề hướng dẫn và biểu tượng chưa triển khai và chưa chạy System Test.
+- Kiểm quyền tại backend cho mọi thao tác quản trị.
+- Nội dung khối phải hiển thị an toàn, không thực thi mã do người soạn chèn.
 
 ## Out of Scope
 
-- Dùng chung danh mục loại công trình hoặc thư viện mẫu.
-- Giới hạn số cấp và phân quyền quản lý danh mục riêng với quản lý bài.
-- Việc gắn bước, bật cờ chủ đề hướng dẫn và chọn biểu tượng cho danh mục gốc thuộc STORY-HB-001; Story này chỉ giữ các quy tắc chung của cây danh mục.
+- Quản lý nội dung cho các trang khác ngoài Cẩm nang.
+- Lịch sử sửa, bản nháp và hẹn giờ xuất bản cho khối chữ.
+- Kéo thả để thêm, xóa hoặc đổi thứ tự khối trên trang.

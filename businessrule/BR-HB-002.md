@@ -32,47 +32,49 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Form còn kiểm tra Version và Effective Date không rỗng; với file nhập mới, vẫn để Version trống theo hợp đồng import vì hệ thống quản lý phiên bản. Thiếu ngày hiệu lực thì hỏi lại, không bịa để thoả form.
 -->
 
-# BR-NEWS-003
+# BR-HB-002
 
 ## Rule Info
 
-- **Name**: Đọc, tìm kiếm và lọc tin công khai
-- **Category**: Tin tức
+- **Name**: Khối Bản tin — bài nổi bật và bài liên quan
+- **Category**: Cẩm nang
 - **Status**: Draft
 - **Version**:
 - **Effective Date**:
 - **Owner**: [Chưa xác định]
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
-- **Source**: Các quyết định người dùng xác nhận trong hội thoại chuẩn bị nghiệp vụ Tin tức của Cẩm nang BMT.
+- **Source**: Các quyết định người dùng xác nhận trong hội thoại thiết kế lưu trữ trang Cẩm nang ngày 07/10/2026.
 
 ## Statement
 
-Mọi người được đọc tin đã công bố miễn phí, không cần đăng nhập hoặc gói, không tính lượt.
+Khối Bản tin hiển thị các bài nổi bật theo thứ tự người quản lý sắp xếp, kèm danh sách bài liên quan do hệ thống suy ra.
 
 ## When
 
-Người đọc mở danh sách, tìm kiếm, lọc danh mục, chuyển trang hoặc mở chi tiết tin.
+Người quản lý chọn hoặc sắp xếp bài nổi bật; người đọc mở trang Cẩm nang.
 
 ## Then
 
-1. Chỉ cung cấp bài đang công bố trên danh sách và trang chi tiết công khai; không cung cấp bài nháp, đang ẩn hoặc đã xóa.
-2. Không kiểm điều kiện có gói và không trừ lượt khi đọc tin, kể cả lần đầu. Không áp dụng quota hoặc quyền xem theo phiên bản của LIB.
-3. Tìm kiếm theo tiêu đề; chọn một danh mục mỗi lần hoặc không lọc danh mục. Cho kết hợp từ khóa với danh mục và có phân trang.
-4. Lọc danh mục bao gồm bài gắn trực tiếp vào danh mục đó và bài thuộc toàn bộ danh mục con bên dưới. Một bài khớp nhiều danh mục trong nhánh chỉ xuất hiện một lần.
-5. Khi kết hợp tìm và lọc, bài phải đồng thời khớp tiêu đề và nhánh danh mục đã chọn. Không có kết quả thì hiển thị danh sách rỗng.
-6. Sắp xếp theo ngày công bố đầu tiên, mới nhất trước. Sửa bài hoặc ẩn rồi công bố lại không tự đưa bài lên đầu.
-7. Đợt này không có bình luận, thích, lưu yêu thích hoặc thống kê lượt đọc. Việc đưa bài lên khối Bản tin theo thứ tự do người quản lý sắp xếp áp dụng theo [BR-HB-002](BR-HB-002.md).
-8. Bài không gắn danh mục nào vẫn nằm trong danh sách khi người đọc không lọc danh mục, và hiển thị nhãn chưa phân loại trên thẻ bài. Bài này không xuất hiện khi người đọc lọc bất kỳ danh mục nào; cũng không có bộ lọc riêng cho nhóm chưa phân loại.
+1. Người quản lý chọn các bài đưa vào khối nổi bật và tự quyết định thứ tự. Thứ tự này không phụ thuộc ngày công bố.
+2. Khối hiển thị bốn bài đầu tiên đang công bố, đánh số 01 đến 04 theo thứ tự hiển thị thực tế.
+3. Số bài được xếp vào khối không giới hạn. Bài không còn công bố thì bị bỏ qua và các bài sau dồn lên, nên khối vẫn đủ bốn bài nếu còn đủ bài công bố.
+4. Một bài chỉ nằm ở một vị trí trong khối và chỉ xuất hiện một lần.
+5. Ẩn bài hoặc chuyển bài về nháp không gỡ bài khỏi khối. Bài tạm không hiển thị và quay lại đúng vị trí cũ khi được công bố lại.
+6. Xóa bài sẽ gỡ bài khỏi khối nổi bật.
+7. Danh sách bài liên quan được suy ra từ các danh mục của bài đang đứng đầu khối, người quản lý không chọn tay. Bài liên quan phải đang công bố và không trùng với các bài đang hiển thị trong khối nổi bật.
+8. Danh sách bài liên quan không có liên kết xem tất cả. Người đọc muốn xem thêm thì dùng bộ lọc danh mục ở khối bài viết.
+9. Khi không có bài nổi bật nào đang công bố, trang công khai không hiển thị khối Bản tin. Các phần còn lại của trang vẫn hiển thị bình thường, và hệ thống không tự lấy bài khác để lấp vào khối.
+10. Khi khối không hiển thị được vì lý do ở khoản 9, màn quản trị phải báo cho người quản lý biết.
 
 ## Except
 
-
+Bài đang nằm trong khối nổi bật vẫn bị ẩn, sửa hoặc xóa bình thường theo [BR-NEWS-001](BR-NEWS-001.md); việc nằm trong khối không khóa bài lại.
 
 ## Notes
 
-Ví dụ: một bài gắn cả “Vật liệu” và “Vật liệu → Sơn” chỉ hiển thị một lần khi lọc “Vật liệu”.
+Ví dụ: người quản lý xếp sáu bài theo thứ tự 1 đến 6. Bài ở vị trí 2 bị ẩn thì khối hiển thị các bài 1, 3, 4, 5 và đánh số 01 đến 04. Công bố lại bài 2 thì nó trở về số 02 và bài 5 lui ra ngoài khối.
 
-Quyết định ngày 07/10/2026: người dùng yêu cầu cho công bố bài không có danh mục và bỏ điều "không có ghim tin" ở khoản 7, vì trang Cẩm nang có khối Bản tin do người quản lý sắp xếp. Nhãn hiển thị cho bài chưa phân loại là chữ trên giao diện, không phải một danh mục trong cây.
+Quyết định ngày 07/10/2026: bỏ liên kết "Xem tất cả bài liên quan" khỏi khối, ghi ở khoản 8. Cùng ngày, người dùng chốt ẩn cả khối khi không có bài nổi bật nào đang công bố, ghi ở khoản 9 và 10. Hệ thống không tự lấy bài mới nhất lấp vào, để thứ tự khối luôn là lựa chọn có chủ đích của người quản lý theo khoản 1.
 
-Owner và ngày hiệu lực chưa xác định. Người dùng đã chốt bộ US/BR Tin tức trong hội thoại. Status Draft vẫn giữ theo quy trình tài liệu; xác nhận này không thay cho phê duyệt trên hệ thống hoặc kết quả kiểm thử.
+Owner và ngày hiệu lực chưa xác định. Reviewer và Approver lấy theo các tài liệu Tin tức hiện có; cần xác nhận lại nếu người phụ trách đã thay đổi. Quy tắc này thay cho khoản 7 của [BR-NEWS-003](BR-NEWS-003.md) về việc chưa có ghim tin.

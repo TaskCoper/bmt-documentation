@@ -35,12 +35,12 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Sprint dùng số nguyên dương để đồng thời đáp ứng form yêu cầu số dương và parser đọc Int32 (tối đa 2.147.483.647). Không tự đặt Sprint hoặc số liệu khi chưa có nguồn.
 -->
 
-# STORY-NEWS-001
+# STORY-HB-003
 
 ## Metadata
 
-- **Story**: Là người có quyền quản lý Tin tức, tôi muốn quản lý bài viết để cung cấp tin công khai trong Cẩm nang.
-- **Context**: Tin tức dùng rich text và nhiều danh mục riêng; không dùng cơ chế phiên bản hoặc lượt của thư viện mẫu.
+- **Story**: Là người có quyền quản lý Tin tức, tôi muốn chọn và sắp xếp các bài nổi bật trong khối Bản tin để người đọc thấy ngay nội dung đáng chú ý nhất.
+- **Context**: Khối Bản tin trên trang Cẩm nang hiện bốn bài nổi bật đánh số 01 đến 04, kèm danh sách bài liên quan do hệ thống suy ra. Thứ tự do người quản lý quyết định, không theo ngày công bố. Bản nháp soạn từ các quyết định người dùng xác nhận ngày 07/10/2026.
 - **Sprint**:
 - **Priority**: Must
 - **Status**: Todo
@@ -55,181 +55,150 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ### Preconditions
 
-- Người thao tác đăng nhập và có quyền quản lý tin tức theo STORY-RBAC-001; quyền này không gắn phân công.
+- Người thao tác đăng nhập và có quyền quản lý tin tức theo STORY-RBAC-001.
+- Đã có bài tin tức để chọn.
 
 ### Trigger
 
-Người quản lý tạo hoặc cập nhật bài.
+Người quản lý mở phần quản lý khối Bản tin để thêm, gỡ hoặc đổi thứ tự bài nổi bật.
 
 ## Flow
 
 ### Main Flow
 
-1. Tạo bài và nhập tiêu đề, ảnh đại diện, số phút đọc do người viết nhập, nội dung rich text; kiểm lại đường dẫn hệ thống sinh từ tiêu đề và sửa nếu cần. Chọn một hoặc nhiều danh mục nếu muốn; danh mục không bắt buộc.
-2. Khi chèn ảnh nội dung, FE tải ảnh lên cloud rồi chèn URL vào rich text.
-3. Lưu nháp để nhập dần hoặc chọn công bố; hệ thống kiểm đủ dữ liệu trước công bố.
-4. Công bố bài hợp lệ trực tiếp, không qua người duyệt; ghi ngày công bố đầu tiên.
-5. Khi sửa bài đã công bố, lưu nội dung hợp lệ để cập nhật ngay cùng bài.
+1. Mở danh sách bài nổi bật đang có, theo thứ tự đã lưu.
+2. Chọn thêm bài vào khối; tìm bài theo tiêu đề rồi thêm vào cuối danh sách.
+3. Kéo đổi thứ tự các bài trong danh sách.
+4. Lưu; hệ thống ghi lại toàn bộ thứ tự mới trong một lần.
+5. Phần công khai hiện bốn bài đầu tiên đang công bố, đánh số 01 đến 04 theo thứ tự hiển thị thực tế.
 
 ### Alternative Flow
 
 #### ALT-01
 
-Chưa đủ dữ liệu công bố.
+Xếp dư bài để dự phòng.
 
-1. Lưu nháp và tiếp tục nhập sau; bài chưa xuất hiện công khai.
+1. Người quản lý thêm nhiều hơn bốn bài vào danh sách.
+2. Bài nào không còn công bố thì bị bỏ qua khi hiển thị và các bài sau dồn lên, nên khối vẫn đủ bốn bài.
 
 #### ALT-02
 
-Cần ngừng hoặc khôi phục hiển thị.
+Gỡ một bài khỏi khối.
 
-1. Ẩn bài; danh sách và đường dẫn trực tiếp không cung cấp bài.
-2. Công bố lại khi đủ thông tin, giữ ngày công bố đầu tiên.
+1. Người quản lý gỡ bài khỏi danh sách rồi lưu.
+2. Các bài còn lại giữ nguyên thứ tự tương đối; bài bị gỡ vẫn tồn tại và vẫn đọc được như bài thường.
 
 #### ALT-03
 
-Người quản lý xóa bài ở bất kỳ trạng thái nào.
+Bài trong khối tạm ngừng hiển thị.
 
-1. Xóa bài khỏi nội dung phục vụ; đường dẫn cũ báo không tìm thấy.
-2. Không có thùng rác hoặc chức năng khôi phục.
+1. Người quản lý ẩn bài hoặc chuyển bài về nháp theo STORY-NEWS-001.
+2. Bài không còn hiện trong khối nhưng vẫn giữ vị trí đã xếp; công bố lại thì bài trở về đúng vị trí cũ.
+
+#### ALT-04
+
+Khối chưa có bài nổi bật nào đang công bố.
+
+1. Trang công khai không hiển thị dải Bản tin; các phần còn lại của trang giữ nguyên.
+2. Màn quản trị báo khối đang không hiển thị để người quản lý thêm bài hoặc công bố lại bài đã xếp.
 
 ### Exception Flow
 
 #### EXC-01
 
-Không có quyền quản lý.
+Người thao tác không có quyền quản lý tin tức.
 
-1. Từ chối thao tác, giữ dữ liệu hiện tại.
+1. Từ chối thao tác và giữ nguyên danh sách hiện tại, kể cả khi yêu cầu gửi thẳng tới API.
 
 #### EXC-02
 
-Công bố hoặc lưu sửa bài công bố thiếu trường bắt buộc hay dùng danh mục không còn tồn tại.
+Thêm một bài đã có trong khối.
 
-1. Thông báo phần không hợp lệ; không công bố hoặc thay bài hiện hành bằng dữ liệu lỗi.
+1. Từ chối và giữ nguyên danh sách; một bài chỉ nằm ở một vị trí.
 
 #### EXC-03
 
-Upload ảnh thất bại.
+Lưu thứ tự có chứa bài đã bị xóa trong lúc người quản lý đang thao tác.
 
-1. Thông báo lỗi, không chèn URL của ảnh chưa upload thành công; cho người quản lý thử lại.
-
-#### EXC-04
-
-Tiêu đề hoặc nội dung vượt giới hạn độ dài.
-
-1. Từ chối lưu, chỉ rõ phần vượt giới hạn; giữ nguyên bài hiện tại và không tự cắt ngắn.
-
-#### EXC-05
-
-Số phút đọc không phải số nguyên lớn hơn 0.
-
-1. Từ chối lưu, chỉ rõ trường sai; giữ bài hiện tại.
+1. Từ chối lưu và chỉ rõ bài không còn tồn tại; người quản lý tải lại danh sách rồi xếp lại.
 
 ## Acceptance Criteria
 
 #### AC-001
 
-- **Given**: Người có quyền đang tạo bài chưa đủ thông tin
-- **When**: Lưu nháp
-- **Then**: Lưu được để nhập tiếp, khách không đọc được bài.
+- **Given**: Người thao tác không có quyền quản lý tin tức
+- **When**: Gọi trực tiếp thao tác thêm, gỡ hoặc đổi thứ tự bài nổi bật
+- **Then**: Bị từ chối và danh sách không thay đổi.
 
 #### AC-002
 
-- **Given**: Bài thiếu một trong năm thành phần bắt buộc
-- **When**: Công bố
-- **Then**: Từ chối; chỉ công bố khi có tiêu đề, ảnh đại diện, số phút đọc do người viết nhập, nội dung và đường dẫn theo BR-NEWS-004.
-- **And**: Danh mục không nằm trong các thành phần bắt buộc; bài không gắn danh mục nào vẫn công bố được.
+- **Given**: Người quản lý đã xếp bốn bài đang công bố theo thứ tự
+- **When**: Người đọc mở trang Cẩm nang
+- **Then**: Khối Bản tin hiện đúng bốn bài đó, đánh số 01 đến 04 theo thứ tự đã lưu.
+- **And**: Thứ tự không phụ thuộc ngày công bố của bài.
 
 #### AC-003
 
-- **Given**: Bài chọn các danh mục cha hoặc con ở nhiều nhánh
-- **When**: Công bố bài đủ dữ liệu
-- **Then**: Giữ các danh mục đã chọn, không bắt chọn cha hoặc danh mục chính.
+- **Given**: Người quản lý đã xếp sáu bài và bài ở vị trí 2 bị ẩn
+- **When**: Người đọc mở trang Cẩm nang
+- **Then**: Khối hiện các bài ở vị trí 1, 3, 4, 5 và đánh số 01 đến 04.
 
 #### AC-004
 
-- **Given**: Ảnh được FE upload thành công
-- **When**: Chèn vào rich text rồi lưu bài
-- **Then**: Nội dung lưu tham chiếu URL ảnh; hỗ trợ nhiều ảnh, định dạng chữ, tiêu đề đoạn, danh sách và liên kết.
+- **Given**: Bài ở vị trí 2 đang bị ẩn và khối đang hiện bài vị trí 5
+- **When**: Người quản lý công bố lại bài vị trí 2
+- **Then**: Bài đó trở lại số 02 và bài vị trí 5 lui ra ngoài khối.
+- **And**: Người quản lý không phải xếp lại thứ tự.
 
 #### AC-005
 
-- **Given**: Bài đang công bố
-- **When**: Lưu sửa hợp lệ
-- **Then**: Khách đọc nội dung mới ngay trên cùng bài; không tạo phiên bản hoặc đổi ngày công bố đầu tiên.
+- **Given**: Một bài đang nằm trong khối nổi bật
+- **When**: Người quản lý xóa bài đó
+- **Then**: Bài bị gỡ khỏi khối và các bài sau dồn lên.
 
 #### AC-006
 
-- **Given**: Bài đã công bố
-- **When**: Ẩn rồi công bố lại
-- **Then**: Khi ẩn không đọc công khai được; khi công bố lại giữ ngày công bố đầu tiên.
+- **Given**: Một bài đã có trong khối
+- **When**: Thêm lại chính bài đó
+- **Then**: Bị từ chối; bài vẫn chỉ nằm ở một vị trí.
 
 #### AC-007
 
-- **Given**: Bài nháp, công bố hoặc ẩn
-- **When**: Người quản lý xóa bài
-- **Then**: Xóa được ở cả ba trạng thái; bài biến mất và đường dẫn cũ báo không tìm thấy, không khôi phục.
+- **Given**: Bài đứng đầu khối gắn danh mục "Vật liệu"
+- **When**: Người đọc mở trang Cẩm nang
+- **Then**: Danh sách bài liên quan gồm các bài đang công bố cùng danh mục với bài đứng đầu.
+- **And**: Không chứa các bài đang hiển thị trong khối nổi bật và người quản lý không chọn tay danh sách này.
 
 #### AC-008
 
-- **Given**: Người không có quyền quản lý
-- **When**: Gọi trực tiếp thao tác quản trị
-- **Then**: Bị từ chối, không thay đổi dữ liệu.
-
-#### AC-009
-
-- **Given**: Người có quyền đang lưu nháp hoặc sửa một bài
-- **When**: Tiêu đề dài 200 ký tự sau khi bỏ khoảng trắng đầu/cuối và nội dung 200.000 ký tự, rồi thử lại với 201 hoặc 200.001 ký tự
-- **Then**: Lần đầu lưu được; mỗi lần vượt giới hạn bị từ chối, không tự cắt ngắn.
-- **And**: Yêu cầu bị từ chối không thay đổi bài hiện tại.
-
-#### AC-010
-
-- **Given**: Người có quyền tạo hoặc sửa bài
-- **When**: Nhập số phút đọc hoặc để trống
-- **Then**: Số nguyên lớn hơn 0 được lưu đúng giá trị đã nhập; 0, số âm hoặc số không nguyên bị từ chối. Nháp được để trống; công bố hoặc lưu sửa bài đang công bố phải có số phút đọc.
-- **And**: Không còn trường mô tả ngắn. Bài cũ giữ số phút đọc trống và vẫn đọc được nếu đang công bố; bổ sung khi lưu sửa bài đang công bố, không tự gán mặc định.
-
-#### AC-011
-
-- **Given**: Người có quyền đang soạn một bài đủ các trường bắt buộc nhưng chưa chọn danh mục nào
-- **When**: Công bố bài, rồi sửa một bài đang công bố để gỡ hết danh mục
-- **Then**: Cả hai lần đều thành công; bài hiển thị công khai và mang nhãn chưa phân loại trên thẻ bài.
-- **And**: Bài này không xuất hiện khi người đọc lọc bất kỳ danh mục nào.
-
-#### AC-012
-
-- **Given**: Người có quyền đang lưu một bài
-- **When**: Đặt đường dẫn trùng với đường dẫn hiện tại hoặc đường dẫn cũ của bài khác
-- **Then**: Từ chối lưu và giữ nguyên bài hiện tại.
-- **And**: Sửa tiêu đề không tự đổi đường dẫn; đổi đường dẫn thì đường dẫn cũ vẫn trỏ về bài đó.
+- **Given**: Khối chưa có bài nào, hoặc mọi bài đã xếp đều đang ẩn hoặc đang nháp
+- **When**: Người đọc mở trang Cẩm nang
+- **Then**: Trang không hiển thị dải Bản tin; phần mở đầu, ba bước và khối bài viết vẫn hiển thị bình thường.
+- **And**: Hệ thống không tự lấy bài khác lấp vào khối, và màn quản trị báo khối đang không hiển thị.
 
 ## References
 
 ### TDDs
 
-- TDD-NEWS-001
-- TDD-NEWS-002
-- TDD-NEWS-003
+- TDD-HB-002
 
 ### Rules
 
-- BR-NEWS-001
-- BR-NEWS-002
-- BR-NEWS-004
+- BR-HB-002
+- BR-NEWS-003
 
 ### Dependencies
 
-- STORY-NEWS-002
+- STORY-NEWS-001: tạo, công bố, ẩn và xóa bài tin tức.
 
 ## Non-Functional
 
-- Kiểm tra quyền quản lý tại backend, kể cả yêu cầu trực tiếp; quyền đọc công khai không cấp quyền sửa dữ liệu.
-- Rich text phải hiển thị an toàn, không thực thi mã do người soạn chèn. Chi tiết kiểm soát thuộc bước thiết kế kỹ thuật.
-- Chưa chốt ngưỡng hiệu năng hoặc giới hạn truyền tải. Backend đã merge vào `develop` của `bmt-be`; phần đường dẫn và bỏ ràng buộc danh mục chưa triển khai và chưa chạy System Test.
+- Kiểm quyền tại backend cho mọi thao tác quản trị.
+- Sắp xếp lại khối không được làm đổi ngày sửa của các bài, vì danh sách quản trị bài xếp theo lần sửa gần nhất.
 
 ## Out of Scope
 
-- Duyệt bài, phiên bản nội dung, lịch sử xem, video và tệp đính kèm.
-- Thùng rác, khôi phục bài và các tương tác người đọc.
-- Việc đưa bài lên khối Bản tin thuộc STORY-HB-003, không nằm trong Story này.
+- Nhiều khối nổi bật khác nhau trên cùng một trang hoặc trên các trang khác.
+- Chọn tay danh sách bài liên quan.
+- Liên kết xem tất cả bài liên quan; khối chỉ hiện danh sách suy ra, không dẫn sang trang khác.
+- Hẹn giờ đưa bài vào hoặc ra khỏi khối nổi bật.

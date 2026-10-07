@@ -33,7 +33,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# UT-NEWS-002
+# UT-NEWS-056
 
 ## Unit Test
 
@@ -42,12 +42,11 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-NEWS-002 | Tin tức | NewsArticleService — kiểm đủ dữ liệu công bố | Boundary | REGRESSION | P1 | Bài Draft đầy đủ, Version=2; danh mục hợp lệ. | Lần lượt bỏ từng trường Title, ReadingTimeMinutes, CoverImageUrl, ContentHtml hoặc Slug; thêm biến thể trường chữ chỉ khoảng trắng; thêm biến thể đối chứng bỏ toàn bộ categoryIds nhưng giữ đủ năm trường trên. | Các biến thể thiếu trường trả InvalidNewsContent; không chuyển trạng thái, không gán ngày đầu hoặc tăng Version. Biến thể bỏ hết categoryIds công bố thành công. | TDD-NEWS-001/Architecture<br>BR-NEWS-001/Then<br>BR-NEWS-004/Then<br>STORY-NEWS-001/AC-002<br>STORY-NEWS-001/AC-011 | Danh mục không còn là điều kiện công bố; đường dẫn thay vào danh sách trường bắt buộc. Mã test ở bảng độ phủ kiểm thử đơn vị Tin tức; không ghi kết quả chạy vào đặc tả. | [Chưa xác định] | Draft |
+| UT-NEWS-056 | Tin tức | GetPublicNewsArticleQueryHandler — đường dẫn không dùng được | Error | REGRESSION | P1 | Bài H đang Hidden với đường dẫn 'bai-an'. Bài X đã bị xóa, đường dẫn cũ 'bai-da-xoa' không còn dòng nào. | Ba biến thể: idOrSlug='khong-co-bai-nay'; idOrSlug='bai-an'; idOrSlug='bai-da-xoa'. | Cả ba trả NewsArticleNotFound. Không biến thể nào làm lộ tiêu đề hay nội dung của bài đang ẩn. | STORY-NEWS-003/AC-005<br>STORY-NEWS-003/AC-007<br>STORY-NEWS-003/EXC-01<br>BR-NEWS-003/Then | Đường dẫn không tồn tại và bài không công bố dùng chung một phản hồi để không tiết lộ bài nào đang tồn tại. Handler là unit dự kiến. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- TDD-NEWS-001/Architecture
-- BR-NEWS-001/Then
-- BR-NEWS-004/Then
-- STORY-NEWS-001/AC-002
-- STORY-NEWS-001/AC-011
+- STORY-NEWS-003/AC-005
+- STORY-NEWS-003/AC-007
+- STORY-NEWS-003/EXC-01
+- BR-NEWS-003/Then

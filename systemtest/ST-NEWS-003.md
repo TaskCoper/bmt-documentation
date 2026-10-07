@@ -44,10 +44,12 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-NEWS-003 | STORY-NEWS-001 | EXC | REGRESSION | P1 | Môi trường thử có chức năng Tin tức và cloud thử nghiệm khi cần; A có quyền quản lý trừ tác nhân nêu riêng; được kiểm dữ liệu lưu. Mỗi biến thể dùng dữ liệu độc lập. | 1. Với mỗi biến thể, tạo nháp còn đủ các trường khác.<br>2. Yêu cầu công bố.<br>3. Đọc lại trạng thái và danh sách khách. | Năm biến thể độc lập: thiếu tiêu đề, cover, số phút đọc, nội dung, toàn bộ danh mục. Dữ liệu minh họa, không phải mặc định sản phẩm. | Từng biến thể đều bị từ chối, chỉ rõ trường thiếu, nháp không trở thành bài công khai. | STORY-NEWS-001/AC-002<br>STORY-NEWS-001/EXC-02<br>BR-NEWS-001/Then | Thiếu từng trường khi công bố. Đặc tả chưa thực thi; API và fixture cụ thể bổ sung sau TDD. | [Chưa xác định] | Draft |
+| ST-NEWS-003 | STORY-NEWS-001 | EXC | REGRESSION | P1 | Môi trường thử có chức năng Tin tức và cloud thử nghiệm khi cần; A có quyền quản lý trừ tác nhân nêu riêng; được kiểm dữ liệu lưu. Mỗi biến thể dùng dữ liệu độc lập. | 1. Với mỗi biến thể, tạo nháp còn đủ các trường khác.<br>2. Yêu cầu công bố.<br>3. Đọc lại trạng thái và danh sách khách. | Năm biến thể độc lập: thiếu tiêu đề, cover, số phút đọc, nội dung, đường dẫn. Thêm một biến thể đối chứng không gắn danh mục nào nhưng đủ năm trường trên. Dữ liệu minh họa, không phải mặc định sản phẩm. | Năm biến thể thiếu trường đều bị từ chối, chỉ rõ trường thiếu, nháp không trở thành bài công khai. Biến thể đối chứng không có danh mục vẫn công bố được. | STORY-NEWS-001/AC-002<br>STORY-NEWS-001/AC-011<br>STORY-NEWS-001/EXC-02<br>BR-NEWS-001/Then<br>BR-NEWS-004/Then | Thiếu từng trường khi công bố, và danh mục không còn là điều kiện công bố. Đặc tả chưa thực thi; API và fixture cụ thể bổ sung sau TDD. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-NEWS-001/AC-002
+- STORY-NEWS-001/AC-011
 - STORY-NEWS-001/EXC-02
 - BR-NEWS-001/Then
+- BR-NEWS-004/Then

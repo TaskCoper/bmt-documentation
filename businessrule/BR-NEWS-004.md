@@ -32,11 +32,11 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Form còn kiểm tra Version và Effective Date không rỗng; với file nhập mới, vẫn để Version trống theo hợp đồng import vì hệ thống quản lý phiên bản. Thiếu ngày hiệu lực thì hỏi lại, không bịa để thoả form.
 -->
 
-# BR-NEWS-003
+# BR-NEWS-004
 
 ## Rule Info
 
-- **Name**: Đọc, tìm kiếm và lọc tin công khai
+- **Name**: Đường dẫn và ngôn ngữ của bài tin tức
 - **Category**: Tin tức
 - **Status**: Draft
 - **Version**:
@@ -44,35 +44,36 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Owner**: [Chưa xác định]
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
-- **Source**: Các quyết định người dùng xác nhận trong hội thoại chuẩn bị nghiệp vụ Tin tức của Cẩm nang BMT.
+- **Source**: Các quyết định người dùng xác nhận trong hội thoại thiết kế lưu trữ trang Cẩm nang ngày 07/10/2026.
 
 ## Statement
 
-Mọi người được đọc tin đã công bố miễn phí, không cần đăng nhập hoặc gói, không tính lượt.
+Mỗi bài tin tức có một đường dẫn hiện tại và giữ lại các đường dẫn cũ; đường dẫn cũ chuyển hướng về đường dẫn hiện tại. Mỗi bài thuộc đúng một ngôn ngữ.
 
 ## When
 
-Người đọc mở danh sách, tìm kiếm, lọc danh mục, chuyển trang hoặc mở chi tiết tin.
+Người quản lý lưu bài, đổi tiêu đề hoặc đổi đường dẫn; người đọc mở một đường dẫn bài.
 
 ## Then
 
-1. Chỉ cung cấp bài đang công bố trên danh sách và trang chi tiết công khai; không cung cấp bài nháp, đang ẩn hoặc đã xóa.
-2. Không kiểm điều kiện có gói và không trừ lượt khi đọc tin, kể cả lần đầu. Không áp dụng quota hoặc quyền xem theo phiên bản của LIB.
-3. Tìm kiếm theo tiêu đề; chọn một danh mục mỗi lần hoặc không lọc danh mục. Cho kết hợp từ khóa với danh mục và có phân trang.
-4. Lọc danh mục bao gồm bài gắn trực tiếp vào danh mục đó và bài thuộc toàn bộ danh mục con bên dưới. Một bài khớp nhiều danh mục trong nhánh chỉ xuất hiện một lần.
-5. Khi kết hợp tìm và lọc, bài phải đồng thời khớp tiêu đề và nhánh danh mục đã chọn. Không có kết quả thì hiển thị danh sách rỗng.
-6. Sắp xếp theo ngày công bố đầu tiên, mới nhất trước. Sửa bài hoặc ẩn rồi công bố lại không tự đưa bài lên đầu.
-7. Đợt này không có bình luận, thích, lưu yêu thích hoặc thống kê lượt đọc. Việc đưa bài lên khối Bản tin theo thứ tự do người quản lý sắp xếp áp dụng theo [BR-HB-002](BR-HB-002.md).
-8. Bài không gắn danh mục nào vẫn nằm trong danh sách khi người đọc không lọc danh mục, và hiển thị nhãn chưa phân loại trên thẻ bài. Bài này không xuất hiện khi người đọc lọc bất kỳ danh mục nào; cũng không có bộ lọc riêng cho nhóm chưa phân loại.
+1. Bài có một đường dẫn hiện tại dùng cho trang công khai. Hệ thống sinh đường dẫn từ tiêu đề; người quản lý sửa lại được.
+2. Đường dẫn là duy nhất trên toàn hệ thống, tính cả các đường dẫn cũ của mọi bài. Trùng thì từ chối lưu và giữ nguyên bài hiện tại.
+3. Sửa tiêu đề không tự đổi đường dẫn. Chỉ đổi khi người quản lý chủ động sửa.
+4. Đổi đường dẫn thì đường dẫn cũ được giữ lại và vẫn trỏ về đúng bài đó.
+5. Mở bằng đường dẫn hiện tại thì trả nội dung bài. Mở bằng đường dẫn cũ thì chuyển hướng vĩnh viễn sang đường dẫn hiện tại. Đường dẫn không tồn tại thì báo không tìm thấy.
+6. Xóa bài thì xóa toàn bộ đường dẫn của bài, gồm cả các đường dẫn cũ. Các đường dẫn đó được dùng lại cho bài khác.
+7. Bài công bố bắt buộc có đường dẫn. Bài nháp được để trống.
+8. Mỗi bài thuộc đúng một ngôn ngữ. Bản dịch của một bài là một bài riêng, có trạng thái, ngày công bố và đường dẫn riêng.
+9. Bản tiếng Anh tồn tại độc lập, không bắt buộc phải có bản tiếng Việt.
 
 ## Except
 
-
+Các bài đã có trước khi áp dụng quy tắc này được coi là tiếng Việt và chưa có đường dẫn. Bài đang công bố vẫn đọc được qua định danh cũ; người quản lý bổ sung đường dẫn ở lần lưu sửa tiếp theo. Hệ thống không tự sinh đường dẫn cho bài cũ.
 
 ## Notes
 
-Ví dụ: một bài gắn cả “Vật liệu” và “Vật liệu → Sơn” chỉ hiển thị một lần khi lọc “Vật liệu”.
+Chuyển hướng vĩnh viễn thay vì trả cùng nội dung ở hai đường dẫn, vì hai đường dẫn cùng nội dung bị công cụ tìm kiếm coi là trùng lặp và chia nhỏ thứ hạng của chính bài đó.
 
-Quyết định ngày 07/10/2026: người dùng yêu cầu cho công bố bài không có danh mục và bỏ điều "không có ghim tin" ở khoản 7, vì trang Cẩm nang có khối Bản tin do người quản lý sắp xếp. Nhãn hiển thị cho bài chưa phân loại là chữ trên giao diện, không phải một danh mục trong cây.
+Đường dẫn duy nhất trên toàn hệ thống nghĩa là bản tiếng Việt và bản tiếng Anh của cùng một bài không dùng chung một đường dẫn. Thực tế không vướng vì tiêu đề hai ngôn ngữ khác nhau.
 
-Owner và ngày hiệu lực chưa xác định. Người dùng đã chốt bộ US/BR Tin tức trong hội thoại. Status Draft vẫn giữ theo quy trình tài liệu; xác nhận này không thay cho phê duyệt trên hệ thống hoặc kết quả kiểm thử.
+Owner và ngày hiệu lực chưa xác định. Reviewer và Approver lấy theo các tài liệu Tin tức hiện có; cần xác nhận lại nếu người phụ trách đã thay đổi. Quy tắc này bổ sung cho [BR-NEWS-001](BR-NEWS-001.md), không thay thế các điều kiện công bố đã có ở đó.

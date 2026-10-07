@@ -57,9 +57,9 @@ Người quản lý tạo, lưu, sửa, công bố, ẩn hoặc xóa bài viết
 ## Then
 
 1. Dùng chung quyền quản lý tin tức theo STORY-RBAC-001 cho bài viết và danh mục. Người không có quyền không được thực hiện thao tác quản lý.
-2. Bài có các trạng thái Nháp, Công bố và Ẩn. Cho lưu nháp thiếu thông tin; chỉ cho công bố khi có tiêu đề, ảnh đại diện, số phút đọc, nội dung rich text và ít nhất một danh mục hợp lệ.
+2. Bài có các trạng thái Nháp, Công bố và Ẩn. Cho lưu nháp thiếu thông tin; chỉ cho công bố khi có tiêu đề, ảnh đại diện, số phút đọc, nội dung rich text và đường dẫn theo [BR-NEWS-004](BR-NEWS-004.md). Danh mục không còn là điều kiện công bố: bài không gắn danh mục nào vẫn công bố được.
 3. Rich text hỗ trợ định dạng chữ, tiêu đề đoạn, danh sách, liên kết và chèn nhiều ảnh. FE tải ảnh lên cloud trước rồi chèn URL ảnh vào nội dung lưu. Đợt này không có video hoặc tệp đính kèm.
-4. Một bài được gắn nhiều danh mục, không có danh mục chính. Được chọn danh mục tại bất kỳ cấp nào; chọn con không bắt buộc gắn thêm cha.
+4. Một bài được gắn nhiều danh mục, không có danh mục chính. Được chọn danh mục tại bất kỳ cấp nào; chọn con không bắt buộc gắn thêm cha. Bài không gắn danh mục nào được coi là chưa phân loại và vẫn hiển thị công khai.
 5. Sửa bài đã công bố cập nhật ngay bài đang hiển thị, không tạo phiên bản riêng hoặc lịch sử xem. Nội dung sau sửa vẫn phải đáp ứng điều kiện công bố.
 6. Ẩn bài làm bài không xuất hiện trong danh sách công khai và không đọc được qua đường dẫn trực tiếp. Bài đã ẩn có thể công bố lại khi đủ dữ liệu.
 7. Cho xóa bài ở mọi trạng thái. Sau xóa, bài không còn trong danh sách và đường dẫn cũ báo không tìm thấy. Không có thùng rác hoặc khôi phục trong phạm vi này.
@@ -79,5 +79,7 @@ Không áp dụng cơ chế phiên bản và lượt xem của thư viện mẫu
 Giới hạn độ dài ở khoản 9 do người dùng xác nhận ngày 26/09/2026. Ký tự được đếm như các module khác: mỗi ký tự Unicode tính là một, kể cả chữ có dấu hoặc ký tự đặc biệt.
 
 Quyết định ngày 29/09/2026: người dùng yêu cầu bỏ mô tả ngắn, thêm số phút đọc nhập tay và xác nhận quy tắc tại khoản 10 cùng cách xử lý bài cũ trong Except.
+
+Quyết định ngày 07/10/2026: người dùng yêu cầu bỏ điều kiện "ít nhất một danh mục" khi công bố. Bài không gắn danh mục được coi là chưa phân loại, hiển thị nhãn tương ứng trên thẻ bài và vẫn nằm trong danh sách khi người đọc không lọc danh mục. Thay đổi này sửa khoản 2 và khoản 4; các điều kiện công bố còn lại giữ nguyên.
 
 Owner và ngày hiệu lực chưa xác định. Người dùng đã chốt bộ US/BR Tin tức trong hội thoại. Status Draft vẫn giữ theo quy trình tài liệu; xác nhận này không thay cho phê duyệt trên hệ thống hoặc kết quả kiểm thử.

@@ -124,18 +124,34 @@ Mở bài nháp, ẩn hoặc đã xóa bằng đường dẫn trực tiếp.
 - **When**: Xem danh sách hoặc mở trực tiếp
 - **Then**: Không được đọc nội dung công khai; đường dẫn bài đã xóa báo không tìm thấy.
 
+#### AC-006
+
+- **Given**: Có bài đang công bố không gắn danh mục nào
+- **When**: Xem danh sách mà không lọc danh mục, rồi lọc một danh mục bất kỳ
+- **Then**: Lần đầu bài xuất hiện kèm nhãn chưa phân loại trên thẻ bài; lần sau bài không xuất hiện.
+- **And**: Bộ lọc không có lựa chọn riêng cho nhóm chưa phân loại.
+
+#### AC-007
+
+- **Given**: Một bài đang công bố đã từng đổi đường dẫn
+- **When**: Mở bài bằng đường dẫn cũ, rồi mở bằng đường dẫn hiện tại
+- **Then**: Đường dẫn cũ chuyển hướng vĩnh viễn sang đường dẫn hiện tại; đường dẫn hiện tại trả nội dung bài.
+- **And**: Đường dẫn không tồn tại báo không tìm thấy.
+
 ## References
 
 ### TDDs
 
 - TDD-NEWS-001
 - TDD-NEWS-002
+- TDD-NEWS-003
 
 ### Rules
 
 - BR-NEWS-001
 - BR-NEWS-002
 - BR-NEWS-003
+- BR-NEWS-004
 
 ### Dependencies
 
@@ -146,9 +162,11 @@ Mở bài nháp, ẩn hoặc đã xóa bằng đường dẫn trực tiếp.
 
 - Kiểm tra quyền quản lý tại backend, kể cả yêu cầu trực tiếp; quyền đọc công khai không cấp quyền sửa dữ liệu.
 - Rich text phải hiển thị an toàn, không thực thi mã do người soạn chèn. Chi tiết kiểm soát thuộc bước thiết kế kỹ thuật.
-- Chưa chốt ngưỡng hiệu năng hoặc giới hạn truyền tải. Backend đã triển khai ở nhánh `feature/news` của `bmt-be`, chưa merge; chưa chạy System Test.
+- Chưa chốt ngưỡng hiệu năng hoặc giới hạn truyền tải. Backend đã merge vào `develop` của `bmt-be`; phần đường dẫn và bài không danh mục chưa triển khai và chưa chạy System Test.
 
 ## Out of Scope
 
-- Bình luận, thích, lưu yêu thích, ghim tin và thống kê lượt đọc.
+- Bình luận, thích, lưu yêu thích và thống kê lượt đọc.
 - Lịch sử xem, quota, tìm trong toàn bộ nội dung hoặc lọc nhiều danh mục cùng lúc.
+- Bộ lọc riêng cho nhóm bài chưa phân loại.
+- Khối Bản tin và cách xem theo bước thuộc STORY-HB-002 và STORY-HB-003.
