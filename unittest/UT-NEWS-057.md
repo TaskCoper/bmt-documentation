@@ -33,7 +33,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# UT-NEWS-054
+# UT-NEWS-057
 
 ## Unit Test
 
@@ -42,9 +42,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-NEWS-054 | Tin tức | NewsArticleService — xóa bài xóa mọi đường dẫn | Branch | REGRESSION | P2 | Bài W đang Published với đường dẫn hiện tại 'gia-vat-lieu-thang-8' và đường dẫn cũ 'gia-vat-lieu'. Kho giả lập mô phỏng hành vi CASCADE của khóa ngoại. | Yêu cầu xóa bài W với expectedVersion khớp. | Bài W biến mất cùng cả hai dòng đường dẫn. Sau đó tạo bài mới với slug='gia-vat-lieu' thành công, chứng tỏ chuỗi đã được giải phóng. | BR-NEWS-004/Then<br>STORY-NEWS-003/AC-007 | BR-NEWS-004 khoản 7: xóa bài giải phóng cả đường dẫn cũ để dùng lại. Hành vi CASCADE thật phải được kiểm bằng integration test trên PostgreSQL; ca này chỉ kiểm phần handler. | [Chưa xác định] | Draft |
+| UT-NEWS-057 | Tin tức | NewsArticleService — đường dẫn tự sinh bị trùng | Branch | REGRESSION | P1 | Kho giả lập rỗng; bộ sinh đường dẫn và kho dùng chung một danh sách. | Tạo lần lượt ba bài cùng tiêu đề 'Chọn sơn', không bài nào gửi trường slug. | Ba bài nhận đường dẫn 'chon-son', 'chon-son-2' và 'chon-son-3'; không bài nào bị từ chối và các đường dẫn đôi một khác nhau. | BR-NEWS-004/Then<br>BR-NEWS-001/Notes<br>TDD-NEWS-003/Data Model | BR-NEWS-001 không cấm hai bài trùng tiêu đề, nên đường dẫn do hệ thống sinh phải tự né thay vì chặn việc tạo bài. Khác với đường dẫn người quản lý tự nhập ở UT-NEWS-049, trùng thì bị từ chối. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - BR-NEWS-004/Then
-- STORY-NEWS-003/AC-007
+- BR-NEWS-001/Notes
+- TDD-NEWS-003/Data Model

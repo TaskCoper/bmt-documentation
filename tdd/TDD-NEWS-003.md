@@ -78,7 +78,7 @@ Phần ngôn ngữ chuẩn bị trước cho bản tiếng Anh: locale `en` đã
 
 Thay đổi nằm ở ba chỗ:
 
-- **Bảng mới `NewsArticleSlug`** giữ mọi đường dẫn của mọi bài, đánh dấu đường dẫn nào đang là hiện tại.
+- **Bảng mới `NewsArticleSlug`** giữ mọi đường dẫn của mọi bài, đánh dấu đường dẫn nào đang là hiện tại. Hai index: unique có điều kiện `UX_NewsArticleSlug_Current` trên `(ArticleId)` WHERE `IsCurrent`, và `IX_NewsArticleSlug_Article` trên `(ArticleId, Slug)` cho khóa ngoại và việc liệt kê lịch sử.
 - **Hai cột mới trên `NewsArticle`**: `Locale` và `TranslationGroupId`.
 - **Luồng đọc công khai** nhận một chuỗi thay cho UUID, và trả về đường dẫn chính thức để frontend tự chuyển hướng.
 
@@ -214,7 +214,7 @@ Collation `"C"` so từng byte, không phụ thuộc locale của database — t
 - Unique index `UX_NewsArticle_TranslationGroup_Locale` trên `(TranslationGroupId, Locale)` — một nhóm dịch chỉ có một bài cho mỗi ngôn ngữ.
 - CHECK `CK_NewsArticle_Locale`: `"Locale" IN ('vi', 'en')`.
 
-`CK_NewsArticle_PublishedFields` được viết lại, thêm điều kiện bài `Published` phải có dòng đường dẫn hiện tại. Ràng buộc này trải trên hai bảng nên CHECK không diễn đạt được; handler kiểm trong cùng transaction, dưới khóa dòng bài đã có. Đây là cùng cách đang áp dụng cho ràng buộc "bài công bố phải có danh mục" trước đây — và chính ràng buộc đó nay bị bỏ theo BR-NEWS-001 khoản 2.
+Điều kiện "bài `Published` phải có dòng đường dẫn hiện tại" trải trên hai bảng nên CHECK không diễn đạt được. `CK_NewsArticle_PublishedFields` giữ nguyên ba trường chữ như cũ; handler kiểm đường dẫn trong cùng transaction, dưới khóa dòng bài đã có. Đây là cùng cách đang áp dụng cho ràng buộc "bài công bố phải có danh mục" trước đây — và chính ràng buộc đó nay bị bỏ theo BR-NEWS-001 khoản 2.
 
 ### Quan hệ
 
@@ -253,8 +253,9 @@ Mở `gia-vat-lieu` trả nội dung W kèm `slug: "gia-vat-lieu-thang-8"`, và 
 **Các nhánh bị từ chối:** tạo bài mới với đường dẫn `gia-vat-lieu` bị khóa chính chặn dù chuỗi đó chỉ còn là đường dẫn cũ. Công bố một bài chưa có dòng slug hiện tại bị handler từ chối 422. Sửa tiêu đề W không tạo thêm dòng slug nào.
 
 **Notes**:
-- Migration `NewsArticleSlugsAndLocale` tạo `NewsArticleSlug`, thêm hai cột vào `NewsArticle` rồi viết lại `CK_NewsArticle_PublishedFields`. Bảng `NewsArticle` trên production đã có dữ liệu, nên cần backfill: đặt `TranslationGroupId = Id` và `Locale = 'vi'` cho mọi dòng, rồi sinh một dòng `NewsArticleSlug` từ tiêu đề cho các bài đang `Published`.
-- Backfill đường dẫn có thể đụng trùng chuỗi nếu hai bài cùng tiêu đề. Cách xử lý: sinh chuỗi từ tiêu đề, gặp trùng thì nối thêm hậu tố số tăng dần. Trước khi chạy, đếm số bài `Published` và số tiêu đề trùng nhau để biết trước khối lượng; bài nháp không cần đường dẫn nên bỏ qua.
+- Migration `NewsArticleSlugsAndLocale` tạo `NewsArticleSlug` và thêm hai cột vào `NewsArticle`. Bảng `NewsArticle` có thể đã có dữ liệu, nên migration chạy `UPDATE "NewsArticle" SET "TranslationGroupId" = "Id"` **trước** khi tạo unique index `(TranslationGroupId, Locale)`: để nguyên giá trị mặc định thì mọi bài cùng mang nhóm rỗng và cùng `Locale` là `vi`, nên index sẽ không tạo được. `Locale` nhận giá trị `vi` từ DEFAULT của cột.
+- Migration **không** backfill đường dẫn. Theo Except của [BR-NEWS-004](../businessrule/BR-NEWS-004.md), bài cũ đang công bố vẫn đọc được qua định danh, và người quản lý bổ sung đường dẫn ở lần lưu sửa tiếp theo; handler tự sinh từ tiêu đề lúc đó. Sinh đường dẫn bằng SQL đòi bảng chuyển đổi dấu tiếng Việt dài và dễ sai, trong khi lợi ích chỉ là rút ngắn giai đoạn chuyển tiếp.
+- Đường dẫn do hệ thống sinh mà trùng thì nối hậu tố số tăng dần (BR-NEWS-004 khoản 3), tối đa 1000 lần thử rồi báo lỗi để một tiêu đề rất phổ biến không làm vòng lặp chạy mãi. Đường dẫn người quản lý tự nhập mà trùng thì từ chối ngay.
 - `Locale` dùng `varchar(10)` kèm CHECK thay vì kiểu enum của PostgreSQL. Enum đòi migration mỗi lần thêm ngôn ngữ và khóa chặt hơn mức cần thiết ở giai đoạn này.
 - Không đặt `Slug` làm cột trên `NewsArticle`. Giữ cùng lúc một cột trên bài và một bảng lịch sử tạo ra hai nguồn cho cùng một dữ kiện, và không ràng buộc nào bảo đảm chúng không giẫm lên nhau.
 

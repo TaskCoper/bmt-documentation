@@ -57,14 +57,15 @@ Người quản lý lưu bài, đổi tiêu đề hoặc đổi đường dẫn;
 ## Then
 
 1. Bài có một đường dẫn hiện tại dùng cho trang công khai. Hệ thống sinh đường dẫn từ tiêu đề; người quản lý sửa lại được.
-2. Đường dẫn là duy nhất trên toàn hệ thống, tính cả các đường dẫn cũ của mọi bài. Trùng thì từ chối lưu và giữ nguyên bài hiện tại.
-3. Sửa tiêu đề không tự đổi đường dẫn. Chỉ đổi khi người quản lý chủ động sửa.
-4. Đổi đường dẫn thì đường dẫn cũ được giữ lại và vẫn trỏ về đúng bài đó.
-5. Mở bằng đường dẫn hiện tại thì trả nội dung bài. Mở bằng đường dẫn cũ thì chuyển hướng vĩnh viễn sang đường dẫn hiện tại. Đường dẫn không tồn tại thì báo không tìm thấy.
-6. Xóa bài thì xóa toàn bộ đường dẫn của bài, gồm cả các đường dẫn cũ. Các đường dẫn đó được dùng lại cho bài khác.
-7. Bài công bố bắt buộc có đường dẫn. Bài nháp được để trống.
-8. Mỗi bài thuộc đúng một ngôn ngữ. Bản dịch của một bài là một bài riêng, có trạng thái, ngày công bố và đường dẫn riêng.
-9. Bản tiếng Anh tồn tại độc lập, không bắt buộc phải có bản tiếng Việt.
+2. Đường dẫn là duy nhất trên toàn hệ thống, tính cả các đường dẫn cũ của mọi bài.
+3. Người quản lý tự nhập đường dẫn mà trùng thì từ chối lưu và giữ nguyên bài hiện tại. Đường dẫn do hệ thống sinh từ tiêu đề mà trùng thì hệ thống tự nối thêm số thứ tự cho tới khi được, vì hai bài được phép trùng tiêu đề.
+4. Sửa tiêu đề không tự đổi đường dẫn. Chỉ đổi khi người quản lý chủ động sửa.
+5. Đổi đường dẫn thì đường dẫn cũ được giữ lại và vẫn trỏ về đúng bài đó.
+6. Mở bằng đường dẫn hiện tại thì trả nội dung bài. Mở bằng đường dẫn cũ thì chuyển hướng vĩnh viễn sang đường dẫn hiện tại. Đường dẫn không tồn tại thì báo không tìm thấy.
+7. Xóa bài thì xóa toàn bộ đường dẫn của bài, gồm cả các đường dẫn cũ. Các đường dẫn đó được dùng lại cho bài khác.
+8. Bài công bố bắt buộc có đường dẫn. Bài nháp được để trống.
+9. Mỗi bài thuộc đúng một ngôn ngữ. Bản dịch của một bài là một bài riêng, có trạng thái, ngày công bố và đường dẫn riêng.
+10. Bản tiếng Anh tồn tại độc lập, không bắt buộc phải có bản tiếng Việt.
 
 ## Except
 
@@ -73,6 +74,8 @@ Các bài đã có trước khi áp dụng quy tắc này được coi là tiế
 ## Notes
 
 Chuyển hướng vĩnh viễn thay vì trả cùng nội dung ở hai đường dẫn, vì hai đường dẫn cùng nội dung bị công cụ tìm kiếm coi là trùng lặp và chia nhỏ thứ hạng của chính bài đó.
+
+Ví dụ cho khoản 3: hai bài cùng tên "Chọn sơn" cho đường dẫn `chon-son` và `chon-son-2`. Nếu người quản lý tự nhập `chon-son` cho bài thứ hai thì bị từ chối, vì đó là lựa chọn có chủ đích của họ.
 
 Đường dẫn duy nhất trên toàn hệ thống nghĩa là bản tiếng Việt và bản tiếng Anh của cùng một bài không dùng chung một đường dẫn. Thực tế không vướng vì tiêu đề hai ngôn ngữ khác nhau.
 

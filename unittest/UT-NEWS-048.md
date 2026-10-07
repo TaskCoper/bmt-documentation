@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-NEWS-048 | Tin tức | NewsArticleService — tiêu đề không sinh được đường dẫn | Branch | REGRESSION | P1 | Kho giả lập không có đường dẫn nào. Hai biến thể độc lập. | Biến thể 1: lưu nháp với tiêu đề '+++' và không gửi slug. Biến thể 2: công bố chính bài đó khi vẫn không có đường dẫn. | Biến thể 1 lưu nháp thành công và không tạo dòng NewsArticleSlug nào. Biến thể 2 trả InvalidNewsSlug; bài giữ trạng thái Draft và Version không tăng. | BR-NEWS-004/Then<br>STORY-NEWS-001/AC-012<br>TDD-NEWS-003/Activity Diagram | BR-NEWS-004 khoản 7 cho nháp để trống đường dẫn nhưng bắt buộc khi công bố. Handler là unit dự kiến của TDD-NEWS-003. | [Chưa xác định] | Draft |
+| UT-NEWS-048 | Tin tức | NewsArticleService — tiêu đề không sinh được đường dẫn | Branch | REGRESSION | P1 | Kho giả lập không có đường dẫn nào. Hai biến thể độc lập. | Biến thể 1: lưu nháp với tiêu đề '+++' và không gửi slug. Biến thể 2: công bố chính bài đó khi vẫn không có đường dẫn. | Biến thể 1 lưu nháp thành công và không tạo dòng NewsArticleSlug nào. Biến thể 2 trả InvalidNewsSlug; bài giữ trạng thái Draft và Version không tăng. | BR-NEWS-004/Then<br>STORY-NEWS-001/AC-012<br>TDD-NEWS-003/Activity Diagram | BR-NEWS-004 khoản 8 cho nháp để trống đường dẫn nhưng bắt buộc khi công bố. Handler là unit dự kiến của TDD-NEWS-003. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
