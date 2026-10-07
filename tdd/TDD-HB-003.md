@@ -55,7 +55,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 STORY-HB-004 và BR-HB-003 đã được người dùng chốt ngày 07/10/2026. Các câu chữ cố định của trang Cẩm nang — phần mở đầu, tiêu đề nhóm ba bước, tiêu đề và mô tả khối bài viết, tiêu đề khối Bản tin — hiện nằm trong mã frontend, nên đổi một dòng chữ cũng phải triển khai lại.
 
-Mỗi khối có hình dạng khác nhau: phần mở đầu có dòng nhãn, tiêu đề, mô tả, chữ trên nút, liên kết của nút và ảnh nền; tiêu đề khối Bản tin chỉ có một dòng chữ. Nếu mỗi khối một bảng thì thêm khối nào cũng phải migration, quá nặng cho một trang tiếp thị.
+Mỗi khối có hình dạng khác nhau: phần mở đầu có dòng nhãn, tiêu đề, mô tả, chữ trên nút và ảnh nền (tùy chọn); tiêu đề khối Bản tin chỉ có một dòng chữ. Nếu mỗi khối một bảng thì thêm khối nào cũng phải migration, quá nặng cho một trang tiếp thị.
 
 ### Goals
 
@@ -90,6 +90,8 @@ flowchart LR
 `jsonb` là kiểu dữ liệu JSON đã phân tích sẵn của PostgreSQL. Dùng nó nghĩa là mỗi khối tự mang hình dạng riêng mà bảng không cần biết trước, nên thêm khối mới chỉ là thêm một dòng và một validator, không phải migration.
 
 Dự án đã dùng cách này ở tám chỗ, kèm đúng kiểu CHECK được dùng ở đây (`QuotationConfigurations.cs:46`, `EstimateGenerationConfigurations.cs:20`), nên không phải mô hình mới với đội.
+
+Hình dạng của từng khối được khai báo trong `PageSectionCatalog`: trường chữ bắt buộc, trường chữ tùy chọn và trường ảnh. Trường ảnh luôn tùy chọn: bỏ trống thì giao diện dùng ảnh mặc định, nên admin sửa chữ không phải tải ảnh lại. Nút của khối `hero` cuộn xuống ba bước chứ không phải liên kết, nên khối không có trường liên kết; trường lạ bị từ chối thay vì bỏ qua im lặng.
 
 Đánh đổi quan trọng: database chỉ kiểm được "đây là một đối tượng JSON", không kiểm được bên trong có đủ trường hay không. Vì vậy mỗi `SectionKey` có một validator riêng ở tầng ứng dụng, chạy trước khi ghi. Không có validator thì cột `jsonb` sẽ nhận bất cứ thứ gì và lỗi chỉ lộ ra khi người đọc mở trang.
 
@@ -217,7 +219,6 @@ Nội dung của P1:
  "title": "Hiểu rõ từng bước xây nhà",
  "description": "Từ phần thô đến hoàn thiện, khám phá kiến thức giúp bạn chủ động hơn với công trình của mình.",
  "ctaLabel": "Khám phá cẩm nang",
- "ctaHref": "/handbook",
  "backgroundImageUrl": "https://images.example.test/handbook/hero.webp"}
 ```
 
@@ -259,7 +260,6 @@ Response 200:
                "title": "Hiểu rõ từng bước xây nhà",
                "description": "Từ phần thô đến hoàn thiện, khám phá kiến thức giúp bạn chủ động hơn với công trình của mình.",
                "ctaLabel": "Khám phá cẩm nang",
-               "ctaHref": "/handbook",
                "backgroundImageUrl": "https://images.example.test/handbook/hero.webp"}},
   {"sectionKey": "stagesHeading", "schemaVersion": 1,
    "content": {"title": "3 nội dung quan trọng trong quá trình xây nhà"}}
@@ -278,7 +278,6 @@ Request:
              "title": "Hiểu rõ từng bước xây nhà",
              "description": "Từ phần thô đến hoàn thiện...",
              "ctaLabel": "Khám phá cẩm nang",
-             "ctaHref": "/handbook",
              "backgroundImageUrl": "https://images.example.test/handbook/hero.webp"},
  "expectedVersion": 1}
 

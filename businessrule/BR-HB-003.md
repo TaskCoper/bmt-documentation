@@ -59,7 +59,7 @@ Người quản lý sửa nội dung một khối; người đọc mở trang C�
 1. Mỗi khối được xác định bằng ba yếu tố: trang, mã khối và ngôn ngữ. Một trang có nhiều khối; mỗi khối có nhiều nhất một bản cho mỗi ngôn ngữ.
 2. Trang Cẩm nang có các khối: phần mở đầu, tiêu đề nhóm ba bước, tiêu đề và mô tả khối bài viết, tiêu đề khối Bản tin.
 3. Mỗi loại khối có cấu trúc nội dung riêng. Hệ thống kiểm cấu trúc trước khi lưu và từ chối nội dung không đúng cấu trúc của loại khối đó.
-4. Ảnh trong nội dung khối phải là đường dẫn https thuộc tên miền kho ảnh đã cấu hình, theo cùng quy định đang áp dụng cho ảnh của bài tin tức.
+4. Ảnh trong nội dung khối là tùy chọn: bỏ trống thì trang dùng ảnh mặc định, nên sửa chữ không buộc phải tải ảnh lại. Nếu có ảnh thì phải là đường dẫn https thuộc tên miền kho ảnh đã cấu hình, theo cùng quy định đang áp dụng cho ảnh của bài tin tức.
 5. Chỉ người có quyền quản lý tin tức mới sửa được nội dung khối.
 6. Khối chưa có bản cho ngôn ngữ đang xem thì trang dùng bản dịch sẵn có trong giao diện, không để trống chữ.
 

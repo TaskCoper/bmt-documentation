@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-HB-020 | Cẩm nang | HeroSectionValidator — nội dung hợp lệ | Happy | REGRESSION | P1 | Validator của SectionKey 'hero'; IUploadedFileUrlPolicy giả lập chấp nhận images.example.test. | Content đủ eyebrow, title, description, ctaLabel, ctaHref và backgroundImageUrl thuộc tên miền đã cấu hình. | Không có lỗi; nội dung được chấp nhận nguyên vẹn, validator không tự thêm hay bỏ trường nào. | STORY-HB-004/AC-002<br>BR-HB-003/Then | Hình dạng của khối hero theo TDD-HB-003. Validator là unit dự kiến, chưa có mã. | [Chưa xác định] | Draft |
+| UT-HB-020 | Cẩm nang | HeroSectionValidator — nội dung hợp lệ | Happy | REGRESSION | P1 | Validator của SectionKey 'hero'; IUploadedFileUrlPolicy giả lập chấp nhận images.example.test. | Content đủ eyebrow, title, description, ctaLabel và backgroundImageUrl thuộc tên miền đã cấu hình. | Không có lỗi; nội dung được chấp nhận nguyên vẹn, validator không tự thêm hay bỏ trường nào. | STORY-HB-004/AC-002<br>BR-HB-003/Then | Hình dạng của khối hero theo TDD-HB-003. Validator là unit dự kiến, chưa có mã. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
