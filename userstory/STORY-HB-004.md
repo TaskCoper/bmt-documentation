@@ -106,6 +106,12 @@ Nội dung gửi lên không đúng cấu trúc của loại khối.
 
 1. Từ chối lưu và giữ nguyên nội dung đang hiển thị.
 
+#### EXC-04
+
+Một trường chữ trong khối dài hơn 1.000 ký tự.
+
+1. Từ chối lưu, chỉ rõ trường vượt giới hạn và giữ nguyên nội dung đang hiển thị; không tự cắt bớt chữ.
+
 ## Acceptance Criteria
 
 #### AC-001
@@ -137,6 +143,13 @@ Nội dung gửi lên không đúng cấu trúc của loại khối.
 - **Given**: Một khối đã có bản tiếng Việt
 - **When**: Người đọc mở trang ở ngôn ngữ chưa có bản riêng
 - **Then**: Trang dùng bản dịch sẵn có trong giao diện cho ngôn ngữ đó, không hiện nhầm bản tiếng Việt.
+
+#### AC-006
+
+- **Given**: Người quản lý đang sửa một khối
+- **When**: Lưu một trường chữ dài đúng 1.000 ký tự, rồi lưu một trường chữ dài 1.001 ký tự
+- **Then**: Bản 1.000 ký tự được lưu và hiển thị đủ chữ; bản 1.001 ký tự bị từ chối, chỉ rõ trường vượt giới hạn.
+- **And**: Hệ thống không tự cắt bớt chữ và giữ nguyên nội dung đang hiển thị.
 
 ## References
 

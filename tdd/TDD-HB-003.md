@@ -235,7 +235,7 @@ Mở trang ở ngôn ngữ `en`: không dòng nào khớp `Locale='en'`, nên c�
 **Notes**:
 - Migration `PageSections` chỉ tạo một bảng mới, không đụng dữ liệu đang có và không seed dòng nào. Bảng rỗng là trạng thái hợp lệ, nên không cần backfill.
 - Không đặt index GIN trên cột `Content`. Hệ thống chỉ đọc khối theo khóa `(PageKey, SectionKey, Locale)`, không tìm kiếm bên trong JSON. Index GIN sẽ tốn ghi mà không phục vụ truy vấn nào.
-- Giới hạn độ dài do validator quy định, không đặt ở cột `jsonb`: mỗi trường chữ tối đa 1000 ký tự Unicode sau khi bỏ khoảng trắng đầu và cuối, vượt thì từ chối và không tự cắt (`PageSectionLimits.TextMaxLength`). Con số này do thiết kế chọn để một nội dung bất thường không làm phình dòng, chưa có yêu cầu nghiệp vụ riêng nên cần người dùng xác nhận. Trần cho cả khối chưa đặt: mỗi khối chỉ có vài trường nên tổng độ dài đã bị chặn bởi giới hạn từng trường.
+- Giới hạn độ dài do validator quy định, không đặt ở cột `jsonb`: mỗi trường chữ tối đa 1000 ký tự Unicode sau khi bỏ khoảng trắng đầu và cuối, vượt thì từ chối và không tự cắt (`PageSectionLimits.TextMaxLength`). Con số 1000 được chọn để một nội dung bất thường không làm phình dòng; người dùng đã xác nhận giữ giới hạn này ngày 08/10/2026 và nó là quy tắc nghiệp vụ (BR-HB-003 khoản 7). Trần cho cả khối chưa đặt: mỗi khối chỉ có vài trường nên tổng độ dài đã bị chặn bởi giới hạn từng trường.
 
 ## Internal API
 

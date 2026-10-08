@@ -64,6 +64,7 @@ Người quản lý sửa nội dung một bước, tạo hoặc sửa danh mụ
 6. Chủ đề hướng dẫn chọn được một biểu tượng trong bộ biểu tượng có sẵn. Nhãn tin tức không có biểu tượng.
 7. Bài viết thuộc bước nào được suy ra từ các danh mục đã gắn cho bài. Bài gắn danh mục của nhiều bước thì thuộc nhiều bước. Bài không gắn danh mục nào thì không thuộc bước nào.
 8. Đổi bước của một danh mục gốc làm toàn bộ nhánh con và các bài trong nhánh chuyển sang bước mới.
+9. Người quản lý sắp xếp chủ đề trong một bước bằng cách dời từng chủ đề lên hoặc xuống một vị trí; người đọc thấy chủ đề theo đúng thứ tự đã lưu. Chủ đề đầu bước không dời lên được, chủ đề cuối bước không dời xuống được. Thứ tự này chính là thứ tự danh mục gốc trong cây danh mục (xem [BR-NEWS-002](BR-NEWS-002.md)), nên không có bảng thứ tự riêng. Dời một chủ đề không đổi thứ tự của các danh mục gốc khác, kể cả khi nhãn tin tức hoặc chủ đề của bước khác nằm xen giữa.
 
 ## Except
 

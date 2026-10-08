@@ -10,11 +10,14 @@
 - Trước khi bàn giao, đối chiếu nội dung với nguồn, kiểm tra cấu trúc, giá trị cho phép, giới hạn độ dài và tính nhất quán của mã/tham chiếu. Báo rõ phần chưa đủ thông tin; không tuyên bố đã chạy test hoặc import khi chưa thực hiện.
 -->
 
-<!-- Thay mã BR-001 và nội dung ví dụ; giữ nguyên heading và nhãn in đậm.
-Effective Date dùng YYYY-MM-DD hoặc để trống. Status: Draft / Active / Deprecated.
-Statement, When, Then và Except phải phản ánh đúng chính sách nguồn; không tự đặt công thức, ngưỡng, thời hạn hay ngoại lệ. Chỉ để Except trống khi đã xác định không có ngoại lệ; thiếu thông tin thì hỏi lại.
-Version và phê duyệt do hệ thống quản lý. Owner là tên nghiệp vụ; gán tài khoản trên giao diện.
-Liên kết Story và các trường quản trị bổ sung trên giao diện sau import.
+<!-- Mỗi file chứa một test, đúng một dòng dữ liệu và 13 cột theo thứ tự bên dưới.
+Thay ST-001 ở heading và Test ID, STORY-001 bằng mã Story cần kiểm thử.
+Trong ô bảng: xuống dòng bằng <br>, dấu | viết thành \|. Steps gồm các bước đánh số.
+Loại: Main / ALT / EXC / NFR / Integration boundary; ghép nhiều loại bằng dấu /.
+Suite: SMOKE / REGRESSION / FULL. Priority: P0 / P1 / P2 / P3.
+TEST_LINKS là nguồn liên kết khi import; cột Trace to chỉ để đọc. Giữ hai nơi nhất quán.
+Owner là tên hiển thị; phê duyệt thực hiện sau import.
+Steps và Expected result phải bám Flow, AC và Business Rule của Story có thật. Test data là dữ liệu kiểm thử minh hoạ; không tự thêm hành vi nghiệp vụ hoặc ghi Pass/đã chạy nếu chưa có bằng chứng thực thi.
 BẮT BUỘC KHI HOÀN THIỆN MẪU: phải có cả Reviewer và Approver, mỗi tên 1–200 ký tự sau khi bỏ khoảng trắng đầu/cuối. Không xoá hai dòng metadata, để trống, dùng tên bịa hoặc giữ placeholder rồi coi là hoàn tất.
 Nếu chưa biết người review hoặc người phê duyệt, phải hỏi người dùng và báo tài liệu chưa đủ thông tin; không tự lấy Author/Owner làm người thay thế. Tên trong file không tự gán tài khoản hoặc xác nhận đã duyệt; gán thành viên trên giao diện sau import.
 Đây là yêu cầu hoàn thiện mẫu; backend hiện vẫn nhận file cũ thiếu hai trường để tương thích.
@@ -25,51 +28,26 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Chỉ nhập đè tài liệu cùng loại đang Draft, chưa có phiên bản và chưa lưu trữ. Import thay toàn bộ nội dung bản nháp, vì vậy phải giữ lại nội dung hợp lệ ngoài phần được yêu cầu sửa.
 - Không dùng Status trong Markdown hoặc tên Approver để tự xác nhận phê duyệt; import không cấp quyền hay gán tài khoản từ tên. Chạy Kiểm tra file và xử lý lỗi/cảnh báo trước khi nhập.
 - Giới hạn độ dài bên dưới tính theo string.Length của .NET (đơn vị UTF-16); không tự cắt ngắn dữ kiện quan trọng để vượt validation, hãy viết lại có căn cứ hoặc hỏi người dùng.
-- Name tối đa 300 ký tự (được dùng làm tiêu đề tài liệu); Category tối đa 200; Owner tối đa 200; Source tối đa 500.
-- Effective Date: dùng ngày hợp lệ YYYY-MM-DD hoặc để trống khi chưa xác định; ngày không đọc được sẽ bị để trống kèm cảnh báo. Không tự đặt ngày hiệu lực.
-ĐỐI CHIẾU FORM BUSINESS RULE (src/features/business-rules/validations.ts; form có thể chặt hơn import):
-- Form yêu cầu Name, Category, Statement, When, Then, Source và Owner có nội dung; Except và Notes được phép trống. Liên kết Story đã khai báo không được rỗng.
-- Form còn kiểm tra Version và Effective Date không rỗng; với file nhập mới, vẫn để Version trống theo hợp đồng import vì hệ thống quản lý phiên bản. Thiếu ngày hiệu lực thì hỏi lại, không bịa để thoả form.
+- Bảng phải có header, dòng phân cách và đúng một dòng dữ liệu, đủ 13 cột theo thứ tự mẫu. Reviewer/Approver là hai bullet trước bảng, không thêm thành cột. Test ID trong bảng phải nhất quán với heading; mã tài liệu import lấy từ heading.
+- Story tối đa 100 ký tự và được dùng làm tiêu đề tài liệu; Owner tối đa 200. Trạng thái parser nhận: Draft / Approved; đây không phải kết quả chạy test hoặc quyền phê duyệt.
+- Giữ Loại: Main / ALT / EXC / NFR / Integration boundary, có thể ghép bằng dấu /; Suite: SMOKE / REGRESSION / FULL; Priority: P0 / P1 / P2 / P3. Không dùng số ngoài dải Priority 0–3.
+- Steps là các bước đánh số trong một ô, tách bằng <br>; không xuống dòng vật lý trong ô, dấu | trong nội dung phải viết \|. TEST_LINKS mới là nguồn liên kết import; cột Trace to chỉ hiển thị, hai nơi phải nhất quán.
+- Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# BR-HB-003
+# ST-HB-021
 
-## Rule Info
+## System Test
 
-- **Name**: Nội dung chữ cố định của trang Cẩm nang
-- **Category**: Cẩm nang
-- **Status**: Draft
-- **Version**:
-- **Effective Date**:
-- **Owner**: [Chưa xác định]
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
-- **Source**: Các quyết định người dùng xác nhận trong hội thoại thiết kế lưu trữ trang Cẩm nang ngày 07/10/2026.
 
-## Statement
+| Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| ST-HB-021 | STORY-HB-001 | EXC | REGRESSION | P2 | Môi trường thử có trang Cẩm nang; A và B đều có quyền quản lý tin tức. Phần thô có ba chủ đề T1, T2, T3 theo thứ tự đó; cả A và B đã mở màn quản lý chủ đề và đang thấy cùng danh sách này. | 1. A dời T2 lên một vị trí và lưu thành công.<br>2. Không tải lại màn của B, B bấm dời T2 xuống.<br>3. Quan sát màn của B.<br>4. Mở trang Cẩm nang công khai và xem thứ tự chủ đề trong Phần thô. | Hai phiên quản lý độc lập của A và B. Dữ liệu minh họa, không phải mặc định sản phẩm. | Thao tác của B bị từ chối vì dữ liệu đã cũ và B nhận thông báo lỗi. Màn của B tải lại và hiện thứ tự T2, T1, T3. Trang công khai hiện thứ tự T2, T1, T3, đúng kết quả của A. | STORY-HB-001/AC-010<br>STORY-HB-001/EXC-07<br>BR-HB-001/Then | Hai người sắp xếp cùng lúc không được ghi đè lên nhau. Đặc tả chưa thực thi; API và fixture cụ thể bổ sung sau TDD. | [Chưa xác định] | Draft |
 
-Các khối chữ cố định của trang Cẩm nang do người quản lý sửa và được lưu riêng theo trang, theo khối và theo ngôn ngữ.
+## TEST_LINKS
 
-## When
-
-Người quản lý sửa nội dung một khối; người đọc mở trang Cẩm nang ở một ngôn ngữ.
-
-## Then
-
-1. Mỗi khối được xác định bằng ba yếu tố: trang, mã khối và ngôn ngữ. Một trang có nhiều khối; mỗi khối có nhiều nhất một bản cho mỗi ngôn ngữ.
-2. Trang Cẩm nang có các khối: phần mở đầu, tiêu đề nhóm ba bước, tiêu đề và mô tả khối bài viết, tiêu đề khối Bản tin.
-3. Mỗi loại khối có cấu trúc nội dung riêng. Hệ thống kiểm cấu trúc trước khi lưu và từ chối nội dung không đúng cấu trúc của loại khối đó.
-4. Ảnh trong nội dung khối là tùy chọn: bỏ trống thì trang dùng ảnh mặc định, nên sửa chữ không buộc phải tải ảnh lại. Nếu có ảnh thì phải là đường dẫn https thuộc tên miền kho ảnh đã cấu hình, theo cùng quy định đang áp dụng cho ảnh của bài tin tức.
-5. Chỉ người có quyền quản lý tin tức mới sửa được nội dung khối.
-6. Khối chưa có bản cho ngôn ngữ đang xem thì trang dùng bản dịch sẵn có trong giao diện, không để trống chữ.
-7. Mỗi trường chữ trong khối dài tối đa 1.000 ký tự Unicode, tính sau khi bỏ khoảng trắng đầu và cuối. Vượt giới hạn thì từ chối lưu và không tự cắt bớt.
-
-## Except
-
-Khối chưa từng được người quản lý sửa thì trang vẫn hiển thị bản dịch mặc định của giao diện. Thiếu bản ghi trong cơ sở dữ liệu không phải là lỗi.
-
-## Notes
-
-Nội dung khối được lưu dưới dạng có cấu trúc để thêm khối mới không phải đổi cơ sở dữ liệu. Cách kiểm cấu trúc theo từng loại khối thuộc bước thiết kế kỹ thuật.
-
-Owner và ngày hiệu lực chưa xác định. Reviewer và Approver lấy theo các tài liệu Tin tức hiện có; cần xác nhận lại nếu người phụ trách đã thay đổi.
+- STORY-HB-001/AC-010
+- STORY-HB-001/EXC-07
+- BR-HB-001/Then

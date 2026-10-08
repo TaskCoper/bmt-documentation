@@ -133,6 +133,13 @@ Yêu cầu thêm bước mới hoặc xóa một bước.
 
 1. Hệ thống không cung cấp thao tác này; số bước và thứ tự bước không đổi.
 
+#### EXC-07
+
+Người quản lý dời một chủ đề khi người khác vừa dời hoặc sửa chính chủ đề đó.
+
+1. Từ chối thao tác dời vì dữ liệu đã cũ và giữ nguyên thứ tự người kia vừa lưu.
+2. Màn quản lý tải lại danh sách để người quản lý thấy thứ tự mới nhất rồi tự quyết định có dời tiếp không.
+
 ## Acceptance Criteria
 
 #### AC-001
@@ -184,6 +191,21 @@ Yêu cầu thêm bước mới hoặc xóa một bước.
 - **Given**: Người quản lý mở phần quản lý Cẩm nang
 - **When**: Xem danh sách bước
 - **Then**: Luôn có đúng ba bước theo thứ tự cố định, không có thao tác thêm hoặc xóa bước.
+
+#### AC-009
+
+- **Given**: Bước Phần thô có ba chủ đề theo thứ tự A, B, C
+- **When**: Người quản lý dời B lên một vị trí
+- **Then**: Thứ tự trong bước là B, A, C và trang công khai hiện đúng thứ tự này.
+- **And**: A (đầu bước) không dời lên được và C (cuối bước) không dời xuống được.
+- **And**: Nhãn tin tức hoặc chủ đề của bước khác nằm xen giữa các chủ đề trên vẫn giữ nguyên thứ tự so với nhau.
+
+#### AC-010
+
+- **Given**: Hai người quản lý cùng mở danh sách chủ đề của Phần thô và cùng thấy B ở vị trí cũ
+- **When**: Người thứ nhất dời B lên, sau đó người thứ hai dời B xuống theo danh sách cũ
+- **Then**: Thao tác của người thứ hai bị từ chối vì dữ liệu đã cũ và thứ tự người thứ nhất vừa lưu giữ nguyên.
+- **And**: Màn của người thứ hai tải lại danh sách mới.
 
 ## References
 

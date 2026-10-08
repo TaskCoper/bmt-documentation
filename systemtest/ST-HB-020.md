@@ -10,11 +10,14 @@
 - Trước khi bàn giao, đối chiếu nội dung với nguồn, kiểm tra cấu trúc, giá trị cho phép, giới hạn độ dài và tính nhất quán của mã/tham chiếu. Báo rõ phần chưa đủ thông tin; không tuyên bố đã chạy test hoặc import khi chưa thực hiện.
 -->
 
-<!-- Thay mã BR-001 và nội dung ví dụ; giữ nguyên heading và nhãn in đậm.
-Effective Date dùng YYYY-MM-DD hoặc để trống. Status: Draft / Active / Deprecated.
-Statement, When, Then và Except phải phản ánh đúng chính sách nguồn; không tự đặt công thức, ngưỡng, thời hạn hay ngoại lệ. Chỉ để Except trống khi đã xác định không có ngoại lệ; thiếu thông tin thì hỏi lại.
-Version và phê duyệt do hệ thống quản lý. Owner là tên nghiệp vụ; gán tài khoản trên giao diện.
-Liên kết Story và các trường quản trị bổ sung trên giao diện sau import.
+<!-- Mỗi file chứa một test, đúng một dòng dữ liệu và 13 cột theo thứ tự bên dưới.
+Thay ST-001 ở heading và Test ID, STORY-001 bằng mã Story cần kiểm thử.
+Trong ô bảng: xuống dòng bằng <br>, dấu | viết thành \|. Steps gồm các bước đánh số.
+Loại: Main / ALT / EXC / NFR / Integration boundary; ghép nhiều loại bằng dấu /.
+Suite: SMOKE / REGRESSION / FULL. Priority: P0 / P1 / P2 / P3.
+TEST_LINKS là nguồn liên kết khi import; cột Trace to chỉ để đọc. Giữ hai nơi nhất quán.
+Owner là tên hiển thị; phê duyệt thực hiện sau import.
+Steps và Expected result phải bám Flow, AC và Business Rule của Story có thật. Test data là dữ liệu kiểm thử minh hoạ; không tự thêm hành vi nghiệp vụ hoặc ghi Pass/đã chạy nếu chưa có bằng chứng thực thi.
 BẮT BUỘC KHI HOÀN THIỆN MẪU: phải có cả Reviewer và Approver, mỗi tên 1–200 ký tự sau khi bỏ khoảng trắng đầu/cuối. Không xoá hai dòng metadata, để trống, dùng tên bịa hoặc giữ placeholder rồi coi là hoàn tất.
 Nếu chưa biết người review hoặc người phê duyệt, phải hỏi người dùng và báo tài liệu chưa đủ thông tin; không tự lấy Author/Owner làm người thay thế. Tên trong file không tự gán tài khoản hoặc xác nhận đã duyệt; gán thành viên trên giao diện sau import.
 Đây là yêu cầu hoàn thiện mẫu; backend hiện vẫn nhận file cũ thiếu hai trường để tương thích.
@@ -25,51 +28,26 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Chỉ nhập đè tài liệu cùng loại đang Draft, chưa có phiên bản và chưa lưu trữ. Import thay toàn bộ nội dung bản nháp, vì vậy phải giữ lại nội dung hợp lệ ngoài phần được yêu cầu sửa.
 - Không dùng Status trong Markdown hoặc tên Approver để tự xác nhận phê duyệt; import không cấp quyền hay gán tài khoản từ tên. Chạy Kiểm tra file và xử lý lỗi/cảnh báo trước khi nhập.
 - Giới hạn độ dài bên dưới tính theo string.Length của .NET (đơn vị UTF-16); không tự cắt ngắn dữ kiện quan trọng để vượt validation, hãy viết lại có căn cứ hoặc hỏi người dùng.
-- Name tối đa 300 ký tự (được dùng làm tiêu đề tài liệu); Category tối đa 200; Owner tối đa 200; Source tối đa 500.
-- Effective Date: dùng ngày hợp lệ YYYY-MM-DD hoặc để trống khi chưa xác định; ngày không đọc được sẽ bị để trống kèm cảnh báo. Không tự đặt ngày hiệu lực.
-ĐỐI CHIẾU FORM BUSINESS RULE (src/features/business-rules/validations.ts; form có thể chặt hơn import):
-- Form yêu cầu Name, Category, Statement, When, Then, Source và Owner có nội dung; Except và Notes được phép trống. Liên kết Story đã khai báo không được rỗng.
-- Form còn kiểm tra Version và Effective Date không rỗng; với file nhập mới, vẫn để Version trống theo hợp đồng import vì hệ thống quản lý phiên bản. Thiếu ngày hiệu lực thì hỏi lại, không bịa để thoả form.
+- Bảng phải có header, dòng phân cách và đúng một dòng dữ liệu, đủ 13 cột theo thứ tự mẫu. Reviewer/Approver là hai bullet trước bảng, không thêm thành cột. Test ID trong bảng phải nhất quán với heading; mã tài liệu import lấy từ heading.
+- Story tối đa 100 ký tự và được dùng làm tiêu đề tài liệu; Owner tối đa 200. Trạng thái parser nhận: Draft / Approved; đây không phải kết quả chạy test hoặc quyền phê duyệt.
+- Giữ Loại: Main / ALT / EXC / NFR / Integration boundary, có thể ghép bằng dấu /; Suite: SMOKE / REGRESSION / FULL; Priority: P0 / P1 / P2 / P3. Không dùng số ngoài dải Priority 0–3.
+- Steps là các bước đánh số trong một ô, tách bằng <br>; không xuống dòng vật lý trong ô, dấu | trong nội dung phải viết \|. TEST_LINKS mới là nguồn liên kết import; cột Trace to chỉ hiển thị, hai nơi phải nhất quán.
+- Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# BR-HB-003
+# ST-HB-020
 
-## Rule Info
+## System Test
 
-- **Name**: Nội dung chữ cố định của trang Cẩm nang
-- **Category**: Cẩm nang
-- **Status**: Draft
-- **Version**:
-- **Effective Date**:
-- **Owner**: [Chưa xác định]
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
-- **Source**: Các quyết định người dùng xác nhận trong hội thoại thiết kế lưu trữ trang Cẩm nang ngày 07/10/2026.
 
-## Statement
+| Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| ST-HB-020 | STORY-HB-001 | Main | REGRESSION | P1 | Môi trường thử có trang Cẩm nang; A có quyền quản lý tin tức. Phần thô có ba chủ đề T1, T2, T3 theo thứ tự đó. Trong dãy danh mục gốc, nhãn tin tức N nằm giữa T1 và T2, còn chủ đề X của Trang trí nội thất nằm giữa T2 và T3. | 1. Đăng nhập bằng A, mở màn quản lý chủ đề của Phần thô và xem trạng thái các nút Lên, Xuống.<br>2. Dời T2 lên một vị trí.<br>3. Mở trang Cẩm nang công khai và xem thứ tự chủ đề trong Phần thô.<br>4. Quay lại màn quản lý, dời T2 xuống một vị trí.<br>5. Đối chiếu vị trí của N và X so với nhau. | Dãy danh mục gốc ban đầu: T1, N, T2, X, T3. T1, T2, T3 thuộc Phần thô; N là nhãn tin tức; X thuộc Trang trí nội thất. Dữ liệu minh họa, không phải mặc định sản phẩm. | Bước 1: nút Lên của T1 và nút Xuống của T3 bị khóa, các nút còn lại dùng được. Bước 2 và 3: Phần thô có thứ tự T2, T1, T3 ở cả màn quản lý lẫn trang công khai. Bước 4 và 5: Phần thô trở lại T1, T2, T3; N vẫn đứng trước X và các chủ đề của Trang trí nội thất không đổi thứ tự. | STORY-HB-001/AC-009<br>BR-HB-001/Then<br>BR-NEWS-002/Then | Sắp xếp chủ đề dùng thứ tự danh mục gốc chung nên phải kiểm cả trường hợp có danh mục khác xen giữa. Đặc tả chưa thực thi; API và fixture cụ thể bổ sung sau TDD. | [Chưa xác định] | Draft |
 
-Các khối chữ cố định của trang Cẩm nang do người quản lý sửa và được lưu riêng theo trang, theo khối và theo ngôn ngữ.
+## TEST_LINKS
 
-## When
-
-Người quản lý sửa nội dung một khối; người đọc mở trang Cẩm nang ở một ngôn ngữ.
-
-## Then
-
-1. Mỗi khối được xác định bằng ba yếu tố: trang, mã khối và ngôn ngữ. Một trang có nhiều khối; mỗi khối có nhiều nhất một bản cho mỗi ngôn ngữ.
-2. Trang Cẩm nang có các khối: phần mở đầu, tiêu đề nhóm ba bước, tiêu đề và mô tả khối bài viết, tiêu đề khối Bản tin.
-3. Mỗi loại khối có cấu trúc nội dung riêng. Hệ thống kiểm cấu trúc trước khi lưu và từ chối nội dung không đúng cấu trúc của loại khối đó.
-4. Ảnh trong nội dung khối là tùy chọn: bỏ trống thì trang dùng ảnh mặc định, nên sửa chữ không buộc phải tải ảnh lại. Nếu có ảnh thì phải là đường dẫn https thuộc tên miền kho ảnh đã cấu hình, theo cùng quy định đang áp dụng cho ảnh của bài tin tức.
-5. Chỉ người có quyền quản lý tin tức mới sửa được nội dung khối.
-6. Khối chưa có bản cho ngôn ngữ đang xem thì trang dùng bản dịch sẵn có trong giao diện, không để trống chữ.
-7. Mỗi trường chữ trong khối dài tối đa 1.000 ký tự Unicode, tính sau khi bỏ khoảng trắng đầu và cuối. Vượt giới hạn thì từ chối lưu và không tự cắt bớt.
-
-## Except
-
-Khối chưa từng được người quản lý sửa thì trang vẫn hiển thị bản dịch mặc định của giao diện. Thiếu bản ghi trong cơ sở dữ liệu không phải là lỗi.
-
-## Notes
-
-Nội dung khối được lưu dưới dạng có cấu trúc để thêm khối mới không phải đổi cơ sở dữ liệu. Cách kiểm cấu trúc theo từng loại khối thuộc bước thiết kế kỹ thuật.
-
-Owner và ngày hiệu lực chưa xác định. Reviewer và Approver lấy theo các tài liệu Tin tức hiện có; cần xác nhận lại nếu người phụ trách đã thay đổi.
+- STORY-HB-001/AC-009
+- BR-HB-001/Then
+- BR-NEWS-002/Then
