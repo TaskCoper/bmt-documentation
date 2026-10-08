@@ -265,6 +265,8 @@ Mở `gia-vat-lieu` trả nội dung W kèm `slug: "gia-vat-lieu-thang-8"`, và 
 
 - **GET** `/api/v1/news/articles/{idOrSlug}` — công khai; bỏ ràng buộc `:guid` của route hiện tại. Trả thêm trường `slug`.
 - **GET** `/api/v1/news/articles` — công khai; mỗi phần tử trả thêm `slug`.
+
+`slug` có thể là `null` ở cả hai endpoint: bài cũ đang công bố chưa có dòng đường dẫn vì migration không backfill (BR-NEWS-004 Except). Giao diện dùng định danh của bài thay cho đường dẫn và không chuyển hướng với các bài đó.
 - **POST** `/api/v1/admin/news/articles` và **PUT** `/api/v1/admin/news/articles/{articleId}` — nhận thêm `slug` và `locale`.
 - **GET** `/api/v1/admin/news/articles/{articleId}` — trả thêm `slug`, `locale`, `translationGroupId` và danh sách đường dẫn cũ.
 

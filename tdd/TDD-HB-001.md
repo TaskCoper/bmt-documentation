@@ -285,6 +285,8 @@ Thử bật `IsInstruction=true` cho C1 mà không gửi `stageId`: handler tr�
 
 Bài của một chủ đề dùng `GET /api/v1/news/articles?categoryId={categoryId}` đã có; không thêm endpoint mới.
 
+**Các API danh mục hiện có trả thêm ba trường** `stageId`, `isInstruction` và `iconKey` (`GET /news/categories`, `GET /news/categories/{id}`, bản `admin` tương ứng, và kết quả tạo, sửa, chuyển danh mục). Giao diện cần cờ `isInstruction` để biết danh mục nào hiện trong một bước và danh mục nào hiện ở bộ lọc bài viết (BR-HB-001 khoản 3); thiếu nó thì chủ đề hướng dẫn lẫn vào chip lọc tin. Danh mục con luôn trả `stageId` NULL, `isInstruction` false và `iconKey` NULL. Chip lọc phải loại cả nhánh của chủ đề hướng dẫn chứ không chỉ nút gốc, vì giao diện lấy con của nút gốc làm chip.
+
 ### Examples
 
 #### GET /api/v1/handbook/stages
