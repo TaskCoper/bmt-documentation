@@ -33,7 +33,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# UT-HB-025
+# UT-HB-028
 
 ## Unit Test
 
@@ -42,11 +42,12 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-HB-025 | Cẩm nang | GetPageSectionsQueryHandler — khối chưa có bản lưu | Branch | REGRESSION | P1 | Bảng chỉ có hai dòng: hero và stagesHeading, cả hai locale='vi'. Bốn khối còn lại (articlesHeading, newsletterHeading, libraryBanner và tabs) chưa có dòng nào. | Hai biến thể: pageKey='handbook' với locale='vi'; cùng pageKey với locale='en'. | Biến thể 'vi' trả đúng hai khối đã lưu, không báo lỗi cho các khối còn thiếu. Biến thể 'en' trả danh sách rỗng và không trả nội dung tiếng Việt thay thế. | STORY-HB-004/AC-003<br>STORY-HB-004/AC-005<br>BR-HB-003/Then<br>BR-HB-003/Except | Thiếu dòng là trạng thái hợp lệ; phần dự phòng nằm ở giao diện chứ không ở backend. Handler là unit dự kiến của TDD-HB-003. | [Chưa xác định] | Draft |
+| UT-HB-028 | Cẩm nang | SavePageSectionCommandHandler — khối tabs | Branch | REGRESSION | P1 | Kho khối chữ rỗng; validator khối tabs thật. Mỗi biến thể chạy độc lập. | Bốn biến thể: đủ newsLabel và libraryLabel; thiếu libraryLabel; libraryLabel rỗng; thêm trường backgroundImageUrl. | Biến thể đầu được lưu với đúng hai nhãn. Ba biến thể sau trả InvalidPageSection và kho vẫn rỗng; khối tabs không nhận ảnh. | STORY-HB-004/AC-008<br>STORY-HB-004/AC-004<br>STORY-HB-004/EXC-02<br>BR-HB-003/Then<br>TDD-HB-003/Data Model | Hai nhãn tab đều bắt buộc để nút chuyển tab không bao giờ trống chữ. Validator là unit dự kiến. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- STORY-HB-004/AC-003
-- STORY-HB-004/AC-005
+- STORY-HB-004/AC-008
+- STORY-HB-004/AC-004
+- STORY-HB-004/EXC-02
 - BR-HB-003/Then
-- BR-HB-003/Except
+- TDD-HB-003/Data Model

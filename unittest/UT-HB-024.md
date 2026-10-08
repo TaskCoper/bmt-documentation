@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-HB-024 | Cẩm nang | SavePageSectionCommandHandler — khối chưa được khai báo | Error | REGRESSION | P2 | Danh sách khối hợp lệ của trang Cẩm nang gồm hero, stagesHeading, articlesHeading và newsletterHeading. | Hai biến thể: sectionKey='footerNote' trên pageKey='handbook'; pageKey='pricing' với sectionKey='hero'. | Cả hai trả PageSectionNotFound. Không dòng nào được tạo; hệ thống không tự nhận một khối hoặc một trang chưa khai báo. | STORY-HB-004/AC-004<br>BR-HB-003/Then | Chặn tạo dữ liệu rác cho khối không có trên giao diện. Handler là unit dự kiến của TDD-HB-003. | [Chưa xác định] | Draft |
+| UT-HB-024 | Cẩm nang | SavePageSectionCommandHandler — khối chưa được khai báo | Error | REGRESSION | P2 | Danh sách khối hợp lệ của trang Cẩm nang gồm hero, stagesHeading, articlesHeading, newsletterHeading, libraryBanner và tabs. | Hai biến thể: sectionKey='footerNote' trên pageKey='handbook'; pageKey='pricing' với sectionKey='hero'. | Cả hai trả PageSectionNotFound. Không dòng nào được tạo; hệ thống không tự nhận một khối hoặc một trang chưa khai báo. | STORY-HB-004/AC-004<br>BR-HB-003/Then | Chặn tạo dữ liệu rác cho khối không có trên giao diện. Handler là unit dự kiến của TDD-HB-003. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

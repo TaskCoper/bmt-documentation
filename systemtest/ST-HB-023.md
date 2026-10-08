@@ -11,11 +11,13 @@
 -->
 
 <!-- Mỗi file chứa một test, đúng một dòng dữ liệu và 13 cột theo thứ tự bên dưới.
-Thay UT-001 ở heading và Test ID. Trong ô bảng: xuống dòng bằng <br>, dấu | viết thành \|.
-Loại: Happy / Branch / Boundary / Error / Quirk / Determinism. Suite: SMOKE / REGRESSION / FULL. Priority: P0 / P1 / P2 / P3.
+Thay ST-001 ở heading và Test ID, STORY-001 bằng mã Story cần kiểm thử.
+Trong ô bảng: xuống dòng bằng <br>, dấu | viết thành \|. Steps gồm các bước đánh số.
+Loại: Main / ALT / EXC / NFR / Integration boundary; ghép nhiều loại bằng dấu /.
+Suite: SMOKE / REGRESSION / FULL. Priority: P0 / P1 / P2 / P3.
 TEST_LINKS là nguồn liên kết khi import; cột Trace to chỉ để đọc. Giữ hai nơi nhất quán.
-Mỗi liên kết dùng DOC-KEY/section: ghi chú. Owner là tên hiển thị; phê duyệt thực hiện sau import.
-Expected output và assertion phải suy ra từ Business Rule/contract đã xác nhận. Dữ liệu mock chỉ là dữ liệu kiểm thử minh hoạ, không phải dữ liệu production; không ghi Pass/đã chạy nếu chưa có bằng chứng thực thi.
+Owner là tên hiển thị; phê duyệt thực hiện sau import.
+Steps và Expected result phải bám Flow, AC và Business Rule của Story có thật. Test data là dữ liệu kiểm thử minh hoạ; không tự thêm hành vi nghiệp vụ hoặc ghi Pass/đã chạy nếu chưa có bằng chứng thực thi.
 BẮT BUỘC KHI HOÀN THIỆN MẪU: phải có cả Reviewer và Approver, mỗi tên 1–200 ký tự sau khi bỏ khoảng trắng đầu/cuối. Không xoá hai dòng metadata, để trống, dùng tên bịa hoặc giữ placeholder rồi coi là hoàn tất.
 Nếu chưa biết người review hoặc người phê duyệt, phải hỏi người dùng và báo tài liệu chưa đủ thông tin; không tự lấy Author/Owner làm người thay thế. Tên trong file không tự gán tài khoản hoặc xác nhận đã duyệt; gán thành viên trên giao diện sau import.
 Đây là yêu cầu hoàn thiện mẫu; backend hiện vẫn nhận file cũ thiếu hai trường để tương thích.
@@ -27,26 +29,26 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Không dùng Status trong Markdown hoặc tên Approver để tự xác nhận phê duyệt; import không cấp quyền hay gán tài khoản từ tên. Chạy Kiểm tra file và xử lý lỗi/cảnh báo trước khi nhập.
 - Giới hạn độ dài bên dưới tính theo string.Length của .NET (đơn vị UTF-16); không tự cắt ngắn dữ kiện quan trọng để vượt validation, hãy viết lại có căn cứ hoặc hỏi người dùng.
 - Bảng phải có header, dòng phân cách và đúng một dòng dữ liệu, đủ 13 cột theo thứ tự mẫu. Reviewer/Approver là hai bullet trước bảng, không thêm thành cột. Test ID trong bảng phải nhất quán với heading; mã tài liệu import lấy từ heading.
-- Module tối đa 200 ký tự; Unit under test tối đa 500 (được dùng làm tiêu đề tài liệu); Owner tối đa 200. Trạng thái parser nhận: Draft / Approved; đây không phải kết quả chạy test hoặc quyền phê duyệt.
-- Giữ Loại: Happy / Branch / Boundary / Error / Quirk / Determinism; Suite: SMOKE / REGRESSION / FULL; Priority: P0 / P1 / P2 / P3. Không dùng số ngoài dải Priority 0–3.
-- Không xuống dòng vật lý trong ô: dùng <br>; dấu phân cột trong nội dung phải viết \|. TEST_LINKS mới là nguồn liên kết import; cột Trace to chỉ hiển thị, hai nơi phải nhất quán.
+- Story tối đa 100 ký tự và được dùng làm tiêu đề tài liệu; Owner tối đa 200. Trạng thái parser nhận: Draft / Approved; đây không phải kết quả chạy test hoặc quyền phê duyệt.
+- Giữ Loại: Main / ALT / EXC / NFR / Integration boundary, có thể ghép bằng dấu /; Suite: SMOKE / REGRESSION / FULL; Priority: P0 / P1 / P2 / P3. Không dùng số ngoài dải Priority 0–3.
+- Steps là các bước đánh số trong một ô, tách bằng <br>; không xuống dòng vật lý trong ô, dấu | trong nội dung phải viết \|. TEST_LINKS mới là nguồn liên kết import; cột Trace to chỉ hiển thị, hai nơi phải nhất quán.
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# UT-HB-025
+# ST-HB-023
 
-## Unit Test
+## System Test
 
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
 
-| Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
+| Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-HB-025 | Cẩm nang | GetPageSectionsQueryHandler — khối chưa có bản lưu | Branch | REGRESSION | P1 | Bảng chỉ có hai dòng: hero và stagesHeading, cả hai locale='vi'. Bốn khối còn lại (articlesHeading, newsletterHeading, libraryBanner và tabs) chưa có dòng nào. | Hai biến thể: pageKey='handbook' với locale='vi'; cùng pageKey với locale='en'. | Biến thể 'vi' trả đúng hai khối đã lưu, không báo lỗi cho các khối còn thiếu. Biến thể 'en' trả danh sách rỗng và không trả nội dung tiếng Việt thay thế. | STORY-HB-004/AC-003<br>STORY-HB-004/AC-005<br>BR-HB-003/Then<br>BR-HB-003/Except | Thiếu dòng là trạng thái hợp lệ; phần dự phòng nằm ở giao diện chứ không ở backend. Handler là unit dự kiến của TDD-HB-003. | [Chưa xác định] | Draft |
+| ST-HB-023 | STORY-HB-004 | Main | REGRESSION | P1 | Môi trường thử có trang Cẩm nang; A có quyền quản lý tin tức; banner của tab Thư viện mẫu chưa có bản lưu ở cả hai ngôn ngữ. | 1. Mở tab Thư viện mẫu ở tiếng Việt và ghi lại tiêu đề, mô tả, ảnh của banner.<br>2. A lưu banner tiếng Việt với tiêu đề hai dòng, mô tả mới và không chọn ảnh.<br>3. Mở lại tab Thư viện mẫu ở tiếng Việt.<br>4. Mở tab Thư viện mẫu ở tiếng Anh.<br>5. A xóa bản đã lưu của banner tiếng Việt rồi mở lại tab ở tiếng Việt. | Tiêu đề: "Dòng một" xuống dòng "Dòng hai". Mô tả: "Mô tả do người quản lý nhập". Dữ liệu minh họa, không phải mặc định sản phẩm. | Bước 1 hiện chữ và ảnh mặc định. Bước 3 hiện tiêu đề đúng hai dòng và mô tả mới, ảnh vẫn là ảnh mặc định. Bước 4 hiện chữ mặc định tiếng Anh, không mượn bản tiếng Việt. Bước 5 quay lại chữ mặc định. | STORY-HB-004/AC-007<br>STORY-HB-004/AC-005<br>STORY-HB-004/ALT-02<br>BR-HB-003/Then | Luồng chính của banner Thư viện mẫu, gồm chỗ xuống dòng, ảnh tùy chọn và quay về mặc định. Đặc tả chưa thực thi; API và fixture cụ thể bổ sung sau TDD. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- STORY-HB-004/AC-003
+- STORY-HB-004/AC-007
 - STORY-HB-004/AC-005
+- STORY-HB-004/ALT-02
 - BR-HB-003/Then
-- BR-HB-003/Except

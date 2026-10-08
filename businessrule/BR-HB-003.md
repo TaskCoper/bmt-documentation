@@ -44,7 +44,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Owner**: [Chưa xác định]
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
-- **Source**: Các quyết định người dùng xác nhận trong hội thoại thiết kế lưu trữ trang Cẩm nang ngày 07/10/2026.
+- **Source**: Các quyết định người dùng xác nhận trong hội thoại thiết kế lưu trữ trang Cẩm nang ngày 07/10/2026 và 08/10/2026.
 
 ## Statement
 
@@ -57,12 +57,13 @@ Người quản lý sửa nội dung một khối; người đọc mở trang C�
 ## Then
 
 1. Mỗi khối được xác định bằng ba yếu tố: trang, mã khối và ngôn ngữ. Một trang có nhiều khối; mỗi khối có nhiều nhất một bản cho mỗi ngôn ngữ.
-2. Trang Cẩm nang có các khối: phần mở đầu, tiêu đề nhóm ba bước, tiêu đề và mô tả khối bài viết, tiêu đề khối Bản tin.
+2. Trang Cẩm nang có các khối: tên hai tab (Tin tức, Thư viện mẫu), phần mở đầu, tiêu đề nhóm ba bước, tiêu đề và mô tả khối bài viết, tiêu đề khối Bản tin, và banner của tab Thư viện mẫu gồm tiêu đề, mô tả và ảnh nền.
 3. Mỗi loại khối có cấu trúc nội dung riêng. Hệ thống kiểm cấu trúc trước khi lưu và từ chối nội dung không đúng cấu trúc của loại khối đó.
 4. Ảnh trong nội dung khối là tùy chọn: bỏ trống thì trang dùng ảnh mặc định, nên sửa chữ không buộc phải tải ảnh lại. Nếu có ảnh thì phải là đường dẫn https thuộc tên miền kho ảnh đã cấu hình, theo cùng quy định đang áp dụng cho ảnh của bài tin tức.
 5. Chỉ người có quyền quản lý tin tức mới sửa được nội dung khối.
 6. Khối chưa có bản cho ngôn ngữ đang xem thì trang dùng bản dịch sẵn có trong giao diện, không để trống chữ.
 7. Mỗi trường chữ trong khối dài tối đa 1.000 ký tự Unicode, tính sau khi bỏ khoảng trắng đầu và cuối. Vượt giới hạn thì từ chối lưu và không tự cắt bớt.
+8. Tiêu đề banner của tab Thư viện mẫu được phép xuống dòng; trang hiển thị đúng chỗ ngắt dòng đã nhập.
 
 ## Except
 
@@ -71,5 +72,7 @@ Khối chưa từng được người quản lý sửa thì trang vẫn hiển t
 ## Notes
 
 Nội dung khối được lưu dưới dạng có cấu trúc để thêm khối mới không phải đổi cơ sở dữ liệu. Cách kiểm cấu trúc theo từng loại khối thuộc bước thiết kế kỹ thuật.
+
+Chữ chức năng của tab Thư viện mẫu (nhãn bộ lọc, gợi ý ô tìm kiếm, thông báo không có mẫu) chưa cho sửa ở đây; người dùng xác nhận phạm vi này ngày 08/10/2026. Danh sách mẫu bản vẽ có màn quản lý riêng.
 
 Owner và ngày hiệu lực chưa xác định. Reviewer và Approver lấy theo các tài liệu Tin tức hiện có; cần xác nhận lại nếu người phụ trách đã thay đổi.

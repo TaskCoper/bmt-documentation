@@ -40,7 +40,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 ## Metadata
 
 - **Story**: Là người có quyền quản lý Tin tức, tôi muốn sửa các khối chữ cố định của trang Cẩm nang để đổi lời giới thiệu mà không cần nhờ lập trình viên.
-- **Context**: Trang Cẩm nang có vài khối chữ cố định: phần mở đầu, tiêu đề nhóm ba bước, tiêu đề và mô tả khối bài viết, tiêu đề khối Bản tin. Hiện các chữ này nằm trong mã frontend. Bản nháp soạn từ các quyết định người dùng xác nhận ngày 07/10/2026.
+- **Context**: Trang Cẩm nang có vài khối chữ cố định: tên hai tab, phần mở đầu, tiêu đề nhóm ba bước, tiêu đề và mô tả khối bài viết, tiêu đề khối Bản tin, banner của tab Thư viện mẫu. Hiện các chữ này nằm trong mã frontend. Bản nháp soạn từ các quyết định người dùng xác nhận ngày 07/10/2026 và 08/10/2026.
 - **Sprint**:
 - **Priority**: Should
 - **Status**: Todo
@@ -151,6 +151,19 @@ Một trường chữ trong khối dài hơn 1.000 ký tự.
 - **Then**: Bản 1.000 ký tự được lưu và hiển thị đủ chữ; bản 1.001 ký tự bị từ chối, chỉ rõ trường vượt giới hạn.
 - **And**: Hệ thống không tự cắt bớt chữ và giữ nguyên nội dung đang hiển thị.
 
+#### AC-007
+
+- **Given**: Người quản lý đang sửa banner của tab Thư viện mẫu
+- **When**: Lưu tiêu đề gồm hai dòng và một mô tả mới, không chọn ảnh
+- **Then**: Tab Thư viện mẫu hiện tiêu đề đúng chỗ xuống dòng và mô tả mới ở ngôn ngữ tương ứng.
+- **And**: Banner vẫn dùng ảnh mặc định vì không chọn ảnh.
+
+#### AC-008
+
+- **Given**: Người quản lý đang sửa tên hai tab của trang Cẩm nang
+- **When**: Đổi tên tab Tin tức và tab Thư viện mẫu rồi lưu
+- **Then**: Hai nút chuyển tab hiện tên mới ở ngôn ngữ tương ứng và việc chuyển tab vẫn hoạt động như trước.
+
 ## References
 
 ### TDDs
@@ -173,3 +186,4 @@ Một trường chữ trong khối dài hơn 1.000 ký tự.
 - Quản lý nội dung cho các trang khác ngoài Cẩm nang.
 - Lịch sử sửa, bản nháp và hẹn giờ xuất bản cho khối chữ.
 - Kéo thả để thêm, xóa hoặc đổi thứ tự khối trên trang.
+- Chữ chức năng của tab Thư viện mẫu (nhãn bộ lọc, gợi ý ô tìm kiếm, thông báo không có mẫu) và danh sách mẫu bản vẽ; danh sách mẫu có màn quản lý riêng.

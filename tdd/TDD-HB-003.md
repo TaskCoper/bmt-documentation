@@ -53,7 +53,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ### Problem
 
-STORY-HB-004 và BR-HB-003 đã được người dùng chốt ngày 07/10/2026. Các câu chữ cố định của trang Cẩm nang — phần mở đầu, tiêu đề nhóm ba bước, tiêu đề và mô tả khối bài viết, tiêu đề khối Bản tin — hiện nằm trong mã frontend, nên đổi một dòng chữ cũng phải triển khai lại.
+STORY-HB-004 và BR-HB-003 đã được người dùng chốt ngày 07/10/2026; ngày 08/10/2026 bổ sung banner của tab Thư viện mẫu và tên hai tab. Các câu chữ cố định của trang Cẩm nang — tên hai tab, phần mở đầu, tiêu đề nhóm ba bước, tiêu đề và mô tả khối bài viết, tiêu đề khối Bản tin, banner của tab Thư viện mẫu — hiện nằm trong mã frontend, nên đổi một dòng chữ cũng phải triển khai lại.
 
 Mỗi khối có hình dạng khác nhau: phần mở đầu có dòng nhãn, tiêu đề, mô tả, chữ trên nút và ảnh nền (tùy chọn); tiêu đề khối Bản tin chỉ có một dòng chữ. Nếu mỗi khối một bảng thì thêm khối nào cũng phải migration, quá nặng cho một trang tiếp thị.
 
@@ -192,7 +192,9 @@ Mỗi dòng là **nội dung của một khối trên một trang, ở một ng�
 
 Unique index `UX_PageSection_Page_Section_Locale` trên `(PageKey, SectionKey, Locale)` — mỗi khối có nhiều nhất một bản cho mỗi ngôn ngữ. Index này cũng phục vụ truy vấn đọc cả trang vì `PageKey` là cột trái nhất.
 
-`SectionKey` của trang Cẩm nang: `hero`, `stagesHeading`, `articlesHeading`, `newsletterHeading`. `PageKey` lần này chỉ có `handbook`.
+`SectionKey` của trang Cẩm nang: `hero`, `stagesHeading`, `articlesHeading`, `newsletterHeading`, `libraryBanner`, `tabs`. `PageKey` lần này chỉ có `handbook`.
+
+Hai khối thêm ngày 08/10/2026 chỉ là hai dòng khai báo trong `PageSectionCatalog` cùng bản dịch mặc định ở giao diện, không đổi bảng. `libraryBanner` có `title` và `description` bắt buộc, `backgroundImageUrl` tùy chọn; `title` được chứa ký tự xuống dòng. `tabs` có hai trường chữ bắt buộc `newsLabel` và `libraryLabel`, không có ảnh.
 
 ### Quan hệ
 
@@ -222,9 +224,9 @@ Nội dung của P1:
  "backgroundImageUrl": "https://images.example.test/handbook/hero.webp"}
 ```
 
-Hai khối còn lại của trang, `articlesHeading` và `newsletterHeading`, **chưa có dòng nào**. Người đọc mở trang vẫn thấy đủ chữ vì frontend dùng bản dịch trong `messages/vi.json` cho hai khối đó.
+Bốn khối còn lại của trang, `articlesHeading`, `newsletterHeading`, `libraryBanner` và `tabs`, **chưa có dòng nào**. Người đọc mở trang vẫn thấy đủ chữ vì frontend dùng bản dịch trong `messages/vi.json` cho bốn khối đó.
 
-Mở trang ở ngôn ngữ `en`: không dòng nào khớp `Locale='en'`, nên cả bốn khối dùng bản dịch trong `messages/en.json`. Hệ thống không lấy dòng tiếng Việt để thay.
+Mở trang ở ngôn ngữ `en`: không dòng nào khớp `Locale='en'`, nên cả sáu khối dùng bản dịch trong `messages/en.json`. Hệ thống không lấy dòng tiếng Việt để thay.
 
 **Sửa P1** đổi tiêu đề: cùng dòng được cập nhật `Content`, `Version=2`, `ModifiedAtUtc` mới. Không tạo dòng thứ hai và không có lịch sử.
 
