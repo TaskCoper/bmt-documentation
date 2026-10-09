@@ -84,6 +84,8 @@ Checkout khảo sát có .NET 8, Carter/MediatR/FluentValidation, EF Core/Npgsql
 
 ## Architecture
 
+**Mẫu email BuildX (09/10/2026):** `ConsultationEmailTemplate` dùng mẫu khách hàng `buildx-mail-templates/06-da-nhan-yeu-cau-tu-van.html`, đóng gói trong assembly contract tại `templates/buildx/`. Giữ tiêu đề “Đã nhận yêu cầu tư vấn”, các trường được phép và BR-CONSULT-005; bỏ cả dòng nội dung khi message trống, giữ xuống dòng khi có nội dung. HTML encode dữ liệu nhập, hiển thị UTC+7, giữ câu “Admin sẽ gọi lại để xác nhận lịch tư vấn.” và lời nhắc đây chưa phải lịch chính thức. SMTP nhúng logo khách hàng bằng MIME nội tuyến (`cid:buildx-logo`); không đưa ghi chú nội bộ vào thư hoặc đổi quy tắc gửi qua outbox.
+
 **Bổ sung mô tả ngắn và dự án thiết kế (08/10/2026) — thiết kế đã được Tân Trần chốt trong hội thoại ngày 08/10/2026:** người dùng đã chốt phần bổ sung trong STORY-CONSULT-001/AC-017 đến AC-020, STORY-CONSULT-002/AC-014 và BR-CONSULT-001 khoản 14–17. Frontend thực tế nằm ở `../buildx-fe-web/` tính từ backend. Thêm ô mô tả ngắn và danh sách dự án có tên, nhiều ảnh trong `/admin/consultants`; trên `/consult/{consultantId}` hiển thị mô tả ngắn, từng tên dự án và lưới ảnh có thể mở lớn. Giữ phần giới thiệu và luồng tư vấn hiện có.
 
 **Hiện trạng triển khai 08/10/2026:** backend và frontend `buildx-fe-web` đã bổ sung hai phần dữ liệu; migration `20261008061007_AddArchitectDesignPortfolio` chỉ thêm cột nullable và hai bảng con. Tân Trần được người dùng xác nhận là Reviewer/Approver và người duyệt thiết kế trong hội thoại. Đã xuất SQL migration để rà soát, chưa áp dụng vào database đang chạy. Bằng chứng và phần chưa kiểm được nằm trong [độ phủ kiểm thử](../discovery/consult-system-test-coverage.md#bằng-chứng-mô-tả-và-dự-án-thiết-kế-ngày-08102026).

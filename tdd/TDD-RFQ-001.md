@@ -76,6 +76,8 @@ Thông tin lịch sử trong một số tài liệu SITE/CTR vẫn ghi chưa tri
 
 ## Architecture
 
+**Mẫu email BuildX (09/10/2026):** `QuotationNotifier` dùng `QuotationEmailTemplate` và mẫu khách hàng `buildx-mail-templates/04-da-nhan-du-an.html`, được đóng gói ở `contract/templates/buildx/`. Email tiếp nhận có tiêu đề “Đã nhận dự án · BuildX”; email đổi lịch hoặc trạng thái dùng cùng bố cục với tiêu đề “Cập nhật lời mời dự án · BuildX” và lời dẫn cập nhật. Điền tên hồ sơ, nhà thầu, lịch hiện tại, nhãn trạng thái, UUID lời mời và mốc cập nhật; cả lịch và mốc cập nhật hiển thị UTC+7. Mọi dữ liệu nhập được encode HTML; không đưa SurveyNote hoặc InternalNote vào mẫu này. SMTP nhúng logo khách hàng bằng MIME nội tuyến. Giữ BR-RFQ-005 về người nhận, một email cho một lần lưu đổi lịch/trạng thái, no-op, replay và retry.
+
 Tên module mới dùng thống nhất `quotationRequest` ở contract, application, presentation và test. Cấu hình dùng module `systemConfiguration` với cột có kiểu rõ ràng; không dùng bảng key/value không kiểm được miền giá trị. Các tên và route mới bên dưới là đề xuất triển khai của TDD.
 
 | Thành phần | Trách nhiệm và phần dùng lại |
