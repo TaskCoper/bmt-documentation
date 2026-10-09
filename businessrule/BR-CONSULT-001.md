@@ -78,6 +78,14 @@ Admin thêm, sửa, ẩn/hiện hồ sơ hoặc khách gửi yêu cầu cho KTS.
 
 13. Công ty, số sao và số đánh giá được hiển thị ở cả danh sách KTS và trang chi tiết KTS dành cho khách, theo giá trị hiện tại của hồ sơ; hai số bằng 0 vẫn được hiển thị. Chỉ công khai hồ sơ đang hiển thị. Sau khi cập nhật thành công, lần đọc tiếp theo ở cả hai nơi phải phản ánh dữ liệu mới.
 
+14. Hồ sơ có thêm mô tả ngắn, là trường riêng với giới thiệu, và danh sách dự án thiết kế. Mỗi dự án chỉ gồm tên dự án và danh sách ảnh thiết kế; không bổ sung địa chỉ, tiến độ, ngân sách hoặc trạng thái dự án trong phạm vi này.
+
+15. Mô tả ngắn và danh sách dự án đều tùy chọn khi tạo hoặc sửa hồ sơ. Không có hai phần này vẫn được lưu nếu các thông tin bắt buộc hiện có hợp lệ.
+
+16. Hai phần mới được nhập trong quản trị, lưu ở backend và đọc lại trên hồ sơ công khai của KTS đang hiển thị. Ảnh phải được gắn với đúng dự án và tên dự án tương ứng.
+
+17. Khi thêm một dự án, bắt buộc nhập tên có nội dung và ít nhất một ảnh thiết kế. Thiếu tên, tên chỉ có khoảng trắng hoặc chưa có ảnh thì từ chối lưu; không lưu một phần thay đổi của hồ sơ hoặc dự án.
+
 ## Except
 
 Các yêu cầu đã gửi trước khi ẩn vẫn được giữ để xử lý.
@@ -85,6 +93,8 @@ Các yêu cầu đã gửi trước khi ẩn vẫn được giữ để xử lý
 Hồ sơ đã có trước khi bổ sung Công ty được giữ nguyên cùng trạng thái Ẩn/Hiện dù chưa có tên công ty; không tự điền tên thay thế. Hồ sơ đang Hiện vẫn xuất hiện ở danh sách và chi tiết cho khách. Lần sửa tiếp theo phải bổ sung tên công ty hợp lệ mới lưu được. Ngoại lệ này không áp dụng cho hồ sơ tạo mới; hai số mới của hồ sơ cũ được khởi tạo bằng 0 theo khoản 12.
 
 ## Notes
+
+Phần bổ sung ngày 08/10/2026 (khoản 14–17) đã được người dùng chốt cùng STORY-CONSULT-001 và STORY-CONSULT-002 trong hội thoại. Người dùng đã xác nhận phạm vi quản trị, hồ sơ công khai và backend; mô tả ngắn và danh sách dự án đều tùy chọn; một dự án đã thêm phải có tên và ít nhất một ảnh. Chưa đặt số ảnh tối đa hoặc giới hạn độ dài mới; các giới hạn kỹ thuật sẽ được ghi ở TDD. Các đặc tả ST-CONSULT-042 đến ST-CONSULT-045 được bổ sung theo phần nghiệp vụ đã chốt; chưa thực thi.
 
 Người dùng xác nhận khi bắt đầu thiết kế kỹ thuật: người quản trị nhập đường dẫn ảnh có sẵn cho ảnh đại diện; backend không nhận tệp ảnh. Ngày 26/09/2026 người dùng chốt thêm khoản 9: đường dẫn đó phải thuộc kho ảnh của hệ thống (kho presign dùng chung với ảnh dự toán), không nhận ảnh ở tên miền bất kỳ.
 

@@ -73,6 +73,8 @@ Vì vậy bản thiết kế trước có hai endpoint `POST /api/v1/admin/news/
 
 **Quyết định ngày 29/09/2026:** bỏ mô tả ngắn, thay bằng `readingTimeMinutes` do người viết nhập. Giá trị có nhập phải là số nguyên lớn hơn 0; nháp được để trống, công bố và lưu sửa bài Published phải có. Bài cũ giữ NULL, vẫn đọc được khi đang công bố và bổ sung số phút ở lần lưu sửa tiếp theo. Quyết định này thay yêu cầu về mô tả ngắn ngày 26/09/2026; xem BR-NEWS-001 khoản 10 và Except.
 
+**Yêu cầu ngày 08/10/2026:** thêm lại `summary` dưới dạng mô tả ngắn tùy chọn, giữ `readingTimeMinutes`. Dùng lại giới hạn 500 ký tự Unicode sau trim của ngày 26/09/2026. Mô tả không tham gia điều kiện công bố; xem BR-NEWS-001 khoản 11 và STORY-NEWS-001/AC-013. Thay đổi áp dụng cho backend `bmt-be` và frontend `buildx-fe-web`.
+
 ### Goals
 
 - Lưu nháp thiếu thông tin; công bố kiểm đủ; sửa, ẩn và xóa phản ánh ở lần đọc mới.
@@ -132,6 +134,8 @@ Quản trị phải có phiên hợp lệ, tài khoản không bị khóa/buộc
 **Rich text và URL ảnh**
 
 Chọn HTML đã làm sạch lưu trong ContentHtml text; không lưu song song JSON editor và HTML như hai nguồn nội dung. Đây là lựa chọn kỹ thuật; editor FE có thể xuất/nhập HTML theo contract, chưa chốt thư viện editor. Backend luôn làm sạch lại cả lưu nháp lẫn lưu bài công bố; FE chỉ preview bản đã làm sạch, không render HTML thô từ request lỗi.
+
+**Bảng rich text — yêu cầu ngày 08/10/2026:** frontend `buildx-fe-web` dùng Tiptap TableKit để chèn và chỉnh bảng. Backend lưu bảng ngay trong `ContentHtml`; không thêm cột, bảng dữ liệu hoặc JSON editor. Allowlist bổ sung `table`, `caption`, `colgroup`, `col`, `thead`, `tbody`, `tfoot`, `tr`, `th`, `td`. Thuộc tính `colspan`/`rowspan` chỉ nhận số nguyên dương trong phạm vi HTML (tối đa 1000/65534). `colwidth` của `td`/`th` là danh sách số nguyên theo số cột của ô; số dương là độ rộng pixel, 0 biểu thị cột chưa đặt độ rộng trong ô gộp của editor. `style` chỉ giữ `width`/`min-width` bằng số pixel dương trên `table`/`col`; `table` được có `width:100%`. Bỏ giá trị âm, biểu thức, biến CSS, URL và `!important`. Giới hạn số pixel không vượt Int32 để khớp cách biểu diễn kích thước. Mọi CSS khác, thuộc tính sự kiện và class người soạn gửi vẫn bị bỏ. Backend tự dựng một `div.tableWrapper` cố định quanh mỗi bảng để frontend cuộn ngang; làm sạch lại không thêm wrapper hoặc mất độ rộng. Bảng rỗng vẫn không có nội dung có nghĩa; chữ hoặc ảnh hợp lệ trong ô dùng quy tắc công bố và kiểm URL ảnh hiện có. Giới hạn 200.000 ký tự vẫn tính trên HTML sau khi làm sạch, kể cả cấu trúc bảng.
 
 Allowlist cơ bản: p, br, strong, b, em, i, u, s, h2–h6, ul, ol, li, blockquote, a, img. Thuộc tính: href/title/target của a; src/alt/title/width/height của img với kích thước dương hợp lệ. Không chấp nhận script, style, iframe, object, embed, form, SVG, thuộc tính on*, srcdoc, CSS tùy ý hoặc URL javascript/data/blob. Link chỉ URL tuyệt đối http/https. Thẻ a được có thêm `target`, nhưng chỉ nhận `_blank` (không phân biệt hoa thường); giá trị khác bị bỏ. Liên kết có `target="_blank"` luôn được backend đặt `rel="noopener noreferrer"` và bỏ rel người soạn gửi: `noopener` chặn trang được mở điều khiển trang Tin tức qua `window.opener`, `noreferrer` không gửi địa chỉ trang Tin tức cho trang kia. Ví dụ `<a href="https://e.org" target="_BLANK" rel="opener">` được lưu thành `<a href="https://e.org" target="_blank" rel="noopener noreferrer">`; `target="_self"` bị bỏ và không có rel. Không dùng regex làm bộ làm sạch HTML. Thiết kế theo [OWASP về HTML sanitization](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html).
 
@@ -273,7 +277,7 @@ UUID là định danh; thời điểm timestamptz theo UTC; bigint Version tăng
 
 | Bảng | Cột và ràng buộc |
 | --- | --- |
-| NewsArticle | Id uuid PK; State varchar(16) NN DEFAULT 'Draft' CHECK IN ('Draft','Published','Hidden'); Title varchar(200) NULL; ReadingTimeMinutes integer NULL CHECK (ReadingTimeMinutes IS NULL OR ReadingTimeMinutes > 0); ContentHtml text NULL CHECK char_length(ContentHtml) <= 200000; CoverImageUrl text NULL; FirstPublishedAtUtc timestamptz NULL; Version bigint NN DEFAULT 1 CHECK >0; CreatedBy uuid NN FK User RESTRICT; ModifiedBy uuid NN FK User RESTRICT; CreatedAtUtc, ModifiedAtUtc timestamptz NN. |
+| NewsArticle | Id uuid PK; State varchar(16) NN DEFAULT 'Draft' CHECK IN ('Draft','Published','Hidden'); Title varchar(200) NULL; Summary varchar(500) NULL; ReadingTimeMinutes integer NULL CHECK (ReadingTimeMinutes IS NULL OR ReadingTimeMinutes > 0); ContentHtml text NULL CHECK char_length(ContentHtml) <= 200000; CoverImageUrl text NULL; FirstPublishedAtUtc timestamptz NULL; Version bigint NN DEFAULT 1 CHECK >0; CreatedBy uuid NN FK User RESTRICT; ModifiedBy uuid NN FK User RESTRICT; CreatedAtUtc, ModifiedAtUtc timestamptz NN. |
 | NewsArticleCategory | ArticleId uuid NN FK NewsArticle ON DELETE CASCADE; CategoryId uuid NN FK NewsCategory ON DELETE RESTRICT; PK(ArticleId,CategoryId). Không có thứ tự, danh mục chính, tên danh mục hoặc các cha được sao chép. |
 
 NULL của các trường nội dung biểu diễn chưa nhập. Giới hạn 200/200.000 ký tự (BR-NEWS-001 khoản 9) được ứng dụng kiểm trước; varchar(n) và `char_length` của PostgreSQL cũng đếm ký tự Unicode nên cột và CHECK là lớp chặn cuối cùng cách đếm, ví dụ 200 chữ Hán ngoài BMP vẫn vừa Title. Normalize chuỗi rỗng thành NULL. Không đặt unique Title vì nghiệp vụ không cấm bài trùng tiêu đề. Version là concurrency token EF; không dùng làm bảng lịch sử. Audit fields được gán server, cùng transaction nội dung.
@@ -281,6 +285,8 @@ NULL của các trường nội dung biểu diễn chưa nhập. Giới hạn 20
 CHECK: (State='Draft') = (FirstPublishedAtUtc IS NULL), tức Draft thì chưa có ngày đầu, Published/Hidden thì đã có. Viết dạng so hai vế để một giá trị State lạ chỉ vi phạm CHECK trạng thái, không kéo thêm ràng buộc này. Với Published, từng Title/ContentHtml/CoverImageUrl phải IS NOT NULL và btrim không rỗng. SQL CHECK không thay kiểm HTML có nghĩa hoặc xác minh URL. Việc Published có ít nhất một Category là ràng buộc nhiều dòng: NewsArticleService kiểm tập liên kết cuối cùng trong cùng transaction và dùng khóa cây. Không dùng CHECK có subquery; không cho writer khác bỏ qua service/khóa. FK RESTRICT ở Category và việc gỡ links chỉ qua article service ngăn bài công bố bị mất danh mục ngoài quy trình.
 
 `ReadingTimeMinutes` lưu số phút do người viết ước lượng cho chính bài đó; đây là dữ liệu nhập tay, không phải giá trị dẫn xuất từ ContentHtml. NULL nghĩa là chưa nhập, áp dụng cho nháp/ẩn và bài cũ trước thay đổi. CHECK chỉ chặn 0/số âm; không đặt điều kiện Published phải NOT NULL ở DB vì phải giữ bài cũ đang công bố. Handler kiểm bắt buộc khi công bố hoặc lưu sửa Published. Không thêm bảng, quan hệ, index hay dữ liệu trùng; ArticleId xác định số phút đọc.
+
+`Summary` là mô tả do người viết nhập, không được suy ra từ rich text. NULL nghĩa là không có mô tả; trim và chuyển chuỗi rỗng thành NULL ở đường ghi. Validator và handler đều kiểm tối đa 500 Unicode scalar; PostgreSQL `varchar(500)` chặn dữ liệu vượt giới hạn khi ghi trực tiếp. Thêm, sửa hoặc xóa riêng mô tả tăng Version khi giá trị đã chuẩn hóa thực sự đổi, giữ ngày công bố đầu tiên. Cột phụ thuộc ArticleId, không tạo bảng, quan hệ hay index mới vì chưa có yêu cầu lọc/sắp xếp theo mô tả. Ví dụ bài Published có Summary=NULL vẫn công bố hợp lệ; lưu `"  Chọn sơn phù hợp  "` thành `"Chọn sơn phù hợp"`, lưu lại chỉ có khoảng trắng thì Summary=NULL.
 
 **Quan hệ và xóa**
 
@@ -324,6 +330,7 @@ Trước khi triển khai, sao lưu dữ liệu và kiểm bản sao lưu có th
 
 **Notes**:
 
+- Migration `20261008050835_NewsArticleOptionalSummary` chỉ thêm `NewsArticle.Summary varchar(500) NULL`, không có mặc định hoặc backfill. Bài cũ giữ nguyên nội dung, trạng thái, Version, ngày công bố, số phút đọc và liên kết. Áp dụng migration trước khi mở backend mới; backend trước thay đổi này có thể bỏ qua cột mới. Rollback ứng dụng giữ cột và dữ liệu; Down sẽ xóa mô tả đã nhập nên chỉ dùng khi chấp nhận mất dữ liệu đó. Migration chưa áp dụng lên database dùng chung.
 - Restore DB cần đối chiếu kho ảnh vì DB chỉ giữ URL. Chưa có chính sách dọn tệp/RPO/RTO; không tự xóa ảnh bằng cascade SQL hoặc hứa restore bài qua giao diện.
 - DB constraints và EF mapping được mô tả để viết migration; SQL trong truy vấn ở TDD-NEWS-002 là minh họa có tham số, chưa thực thi kiểm chứng.
 
@@ -334,7 +341,7 @@ Trước khi triển khai, sao lưu dữ liệu và kiểm bản sao lưu có th
 Các route dưới đây là contract v1. Backend không có endpoint upload hoặc presign ảnh. Carter dùng /api/v{version:apiVersion}. Quản trị yêu cầu news.manage; mutation dùng cookie được kiểm Origin theo [TDD-AUTH-001](TDD-AUTH-001.md). JSON field camelCase; UUID dạng chuỗi. Response dưới đây mô tả payload; endpoint giữ envelope Result của repo nếu đang dùng, không bọc PagedResult thêm một lần.
 
 - **GET** `/api/v1/news/articles` — Public; query keyword, categoryId, pageIndex, pageSize. Trả PagedResult<ArticleSummary> chỉ Published; không có contentHtml hoặc thông tin người quản trị. categoryId không tồn tại trả danh sách rỗng, không trả 404.
-- **GET** `/api/v1/news/articles/{id}` — Public; ArticleDetail gồm id,title,readingTimeMinutes,coverImageUrl,contentHtml,firstPublishedAtUtc,categories. Không Published hoặc không tồn tại trả 404.
+- **GET** `/api/v1/news/articles/{id}` — Public; ArticleDetail gồm id,title,summary,readingTimeMinutes,coverImageUrl,contentHtml,firstPublishedAtUtc,categories. Không Published hoặc không tồn tại trả 404.
 - **GET** `/api/v1/admin/news/articles` — Có quyền; query keyword,state,pageIndex,pageSize. Trả metadata và version theo ModifiedAtUtc DESC,Id DESC; không trả toàn bộ rich text trong danh sách.
 - **GET** `/api/v1/admin/news/articles/{id}` — Có quyền; trả toàn bộ nội dung, state,version,categoryIds và metadata thời điểm để soạn/đối chiếu.
 - **POST** `/api/v1/admin/news/articles` — Tạo Draft với ArticleWrite, được thiếu trường. Trả 201 với id,version,state và nội dung đã làm sạch; không tự công bố.
@@ -343,9 +350,9 @@ Các route dưới đây là contract v1. Backend không có endpoint upload ho�
 - **POST** `/api/v1/admin/news/articles/{id}/hide` — Body expectedVersion; Published sang Hidden, không đổi ngày đầu; trả id,state,version. Draft trả 409.
 - **DELETE** `/api/v1/admin/news/articles/{id}` — Query expectedVersion bắt buộc; xóa mọi trạng thái cùng links, thành công 204; không tồn tại 404, version cũ 409.
 
-API danh sách và chi tiết, cả quản trị lẫn công khai, trả `readingTimeMinutes` dạng number hoặc null; bỏ `summary`. Frontend phải bỏ ô mô tả và dùng ô số phút đọc. Với bài cũ NULL, không hiển thị như 0 phút. Gửi số thập phân hoặc giá trị không chuyển được sang Int32 trả 400 tại bước đọc JSON; số nguyên 0/âm trả 422 InvalidNewsContent.
+API danh sách và chi tiết, cả quản trị lẫn công khai, trả `readingTimeMinutes` dạng number hoặc null và `summary` dạng string hoặc null. Frontend có ô mô tả ngắn tùy chọn, bộ đếm 500 ký tự Unicode sau trim và giữ ô số phút đọc. Khi sửa, nạp mô tả từ API; khi lưu gửi đủ `summary`, dùng null để xóa. Phần đọc Cẩm nang ánh xạ summary sang excerpt của các khối đã có mô tả. Với bài cũ có số phút NULL, không hiển thị như 0 phút. Gửi số thập phân hoặc giá trị không chuyển được sang Int32 trả 400 tại bước đọc JSON; số nguyên 0/âm trả 422 InvalidNewsContent.
 
-ArticleWrite = {title?,readingTimeMinutes?,contentHtml?,coverImageUrl?,categoryIds:uuid[]}; title tối đa 200 ký tự sau trim, readingTimeMinutes là số nguyên dương do người viết nhập (JSON number, ánh xạ Int32), contentHtml tối đa 200.000 ký tự sau khi làm sạch; thiếu trường chuỗi là NULL, categoryIds thiếu khi tạo là []; PUT bắt buộc gửi categoryIds (thiếu thì 422); trường nội dung không gửi được hiểu là NULL, tức xóa giá trị, nên frontend gửi đủ các trường để rõ nghĩa thay thế. Không nhận state hoặc firstPublishedAtUtc. ID category trùng trong input được distinct. expectedVersion là số nguyên dương. coverImageUrl và `src` của mọi `img` phải là URL https thuộc tên miền kho presign theo Architecture (URL mới mới bị kiểm tên miền); `href` của liên kết chỉ bị giới hạn scheme http/https.
+ArticleWrite = {title?,summary?,readingTimeMinutes?,contentHtml?,coverImageUrl?,categoryIds:uuid[]}; title tối đa 200 ký tự sau trim, summary là văn bản thường tùy chọn tối đa 500 ký tự Unicode sau trim, readingTimeMinutes là số nguyên dương do người viết nhập (JSON number, ánh xạ Int32), contentHtml tối đa 200.000 ký tự sau khi làm sạch; thiếu trường chuỗi là NULL, categoryIds thiếu khi tạo là []; PUT bắt buộc gửi categoryIds (thiếu thì 422); trường nội dung không gửi được hiểu là NULL, tức xóa giá trị, nên frontend gửi đủ các trường để rõ nghĩa thay thế. Summary vượt giới hạn trả 422 InvalidNewsContent và không thay đổi bài. Không nhận state hoặc firstPublishedAtUtc. ID category trùng trong input được distinct. expectedVersion là số nguyên dương. coverImageUrl và `src` của mọi `img` phải là URL https thuộc tên miền kho presign theo Architecture (URL mới mới bị kiểm tên miền); `href` của liên kết chỉ bị giới hạn scheme http/https.
 
 ### Examples
 
@@ -356,7 +363,7 @@ Request:
 {"title":"Chọn sơn","categoryIds":[]}
 
 Response 201:
-{"id":"10000000-0000-0000-0000-000000000001","version":1,"state":"Draft","title":"Chọn sơn","readingTimeMinutes":null,"contentHtml":null,"coverImageUrl":null,"categoryIds":[],"firstPublishedAtUtc":null}
+{"id":"10000000-0000-0000-0000-000000000001","version":1,"state":"Draft","title":"Chọn sơn","summary":null,"readingTimeMinutes":null,"contentHtml":null,"coverImageUrl":null,"categoryIds":[],"firstPublishedAtUtc":null}
 
 Error Response:
 {"title":"Forbidden","code":"Forbidden","status":403,"detail":"You do not have permission to access this resource.","messageCode":"AccessForbidden","errors":null}
@@ -458,6 +465,7 @@ Lỗi xin URL upload hoặc upload ảnh xảy ra giữa frontend và dịch v�
 
 ## Change Log
 
+- 2026-10-08: Thêm lại Summary tùy chọn tối đa 500 ký tự Unicode, giữ ReadingTimeMinutes và điều kiện công bố. Bổ sung migration thêm cột nullable, luồng ghi/đọc và form quản trị; tham chiếu [UT-NEWS-058](../unittest/UT-NEWS-058.md) và [ST-NEWS-036](../systemtest/ST-NEWS-036.md).
 - 2026-09-29: Bỏ Summary, thêm ReadingTimeMinutes nhập tay; cập nhật API, ràng buộc công bố, ngoại lệ bài cũ và migration chỉ tiến.
 
 - 2026-09-28 (đối chiếu code): Ghi ở Context & Goals rằng commit `4714e68` và `e390e2d` đã có trên `develop` của `bmt-be`. Mục “Phần chưa triển khai” trong Notes vẫn đúng: handler Tin tức chưa ghi log có cấu trúc riêng. Không đổi thiết kế.

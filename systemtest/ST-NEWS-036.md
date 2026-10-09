@@ -35,7 +35,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# ST-NEWS-031
+# ST-NEWS-036
 
 ## System Test
 
@@ -44,12 +44,11 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-NEWS-031 | STORY-NEWS-001 | Main / EXC / Integration boundary | REGRESSION | P1 | Môi trường thử có quản trị và trang đọc tin; A có news.manage. Có bài Published từ trước migration với số phút NULL. | 1. Tạo nháp để trống số phút rồi thử công bố.<br>2. Nhập lần lượt 0, -1, 1.5 và 7; lưu, mở lại và công bố khi đủ trường khác.<br>3. Đổi riêng số phút thành 12; kiểm API danh sách/chi tiết quản trị và công khai cùng dữ liệu lưu.<br>4. Đọc bài cũ NULL; thử lưu sửa thiếu số phút rồi bổ sung 9 và lưu lại. | Các số là dữ liệu thử, không phải mặc định. Bài cũ giữ nguyên nội dung, trạng thái, ngày đầu và Version qua migration. | Ô số phút đọc vẫn có bên cạnh mô tả ngắn tùy chọn theo yêu cầu 08/10/2026; hành vi mô tả kiểm ở ST-NEWS-036. Nháp lưu được NULL; công bố thiếu số phút bị từ chối. Chỉ số nguyên dương được lưu; số phút hiển thị đúng giá trị nhập, không tính từ nội dung. Bài cũ vẫn đọc được và không hiện 0 phút; lần sửa Published thiếu số phút bị từ chối, bổ sung 9 thì lưu được và giữ ngày đầu. | STORY-NEWS-001/AC-010<br>STORY-NEWS-001/EXC-05<br>STORY-NEWS-003/AC-001<br>BR-NEWS-001/Then<br>BR-NEWS-001/Except | Quyết định người dùng ngày 29/09/2026. Đặc tả chưa thực thi trên giao diện. | [Chưa xác định] | Draft |
+| ST-NEWS-036 | STORY-NEWS-001 | Main / EXC / Integration boundary | REGRESSION | P1 | Môi trường thử có quản trị và API tin tức; A có news.manage. Migration OptionalSummary đã áp dụng; có bài cũ Published với Summary=NULL. | 1. Tạo bài không nhập mô tả, lưu nháp rồi công bố khi đủ trường khác.<br>2. Mở sửa, nhập mô tả có khoảng trắng đầu/cuối; lưu và kiểm API danh sách/chi tiết quản trị, công khai cùng DB.<br>3. Mở lại và xóa mô tả; lưu khi bài vẫn Published.<br>4. Thử 500 rồi 501 ký tự Unicode; kiểm bộ đếm, lỗi, dữ liệu bài và Version.<br>5. Kiểm bài cũ sau migration và thẻ Bản tin/Cẩm nang dùng excerpt khi có mô tả. | Mô tả thử: NULL, chuỗi rỗng, khoảng trắng, "  Mô tả mới  "; 500/501 ký tự 𠀀. Dữ liệu là fixture thử riêng. | Ô mô tả ghi rõ không bắt buộc, tối đa 500 ký tự; nạp đúng khi sửa. Công bố/lưu Published không cần mô tả. API và DB lưu chuỗi đã trim hoặc NULL, thẻ có vùng mô tả hiện nội dung khi có. 500 ký tự được nhận, 501 bị từ chối và giữ bài cũ. Thêm/xóa mô tả không đổi ngày đầu. Bài cũ giữ nguyên nội dung, trạng thái, Version và có Summary=NULL. | STORY-NEWS-001/AC-013<br>STORY-NEWS-001/EXC-04<br>STORY-NEWS-003/AC-001<br>BR-NEWS-001/Then | Yêu cầu ngày 08/10/2026. Đặc tả cho toàn luồng; kiểm browser bằng API fixture không thay thế việc chạy cùng backend và DB. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- STORY-NEWS-001/AC-010
-- STORY-NEWS-001/EXC-05
+- STORY-NEWS-001/AC-013
+- STORY-NEWS-001/EXC-04
 - STORY-NEWS-003/AC-001
 - BR-NEWS-001/Then
-- BR-NEWS-001/Except

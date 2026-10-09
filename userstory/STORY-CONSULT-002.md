@@ -66,12 +66,15 @@ Khách chọn KTS và bắt đầu gửi yêu cầu tư vấn.
 
 ### Main Flow
 
+Phần bổ sung mô tả ngắn và dự án thiết kế ngày 08/10/2026 đã được người dùng chốt cùng STORY-CONSULT-001 và BR-CONSULT-001 trong hội thoại. Người dùng đã xác nhận làm cả quản trị, hồ sơ công khai và backend; hai phần mới là tùy chọn, nhưng mỗi dự án đã thêm phải có tên và ít nhất một ảnh.
+
 1. Khách xem các hồ sơ đang hiển thị; danh sách và trang chi tiết KTS đều có công ty, số sao và số đánh giá hiện tại. Khách chọn KTS, ngày và khung giờ mong muốn từ danh sách dùng chung trên frontend, theo giờ Việt Nam (UTC+7).
 2. Hệ thống điền số liên lạc từ tài khoản nếu có; khách kiểm tra hoặc đổi số riêng cho đơn.
 3. Khách có thể nhập nội dung cần tư vấn hoặc để trống rồi bấm gửi.
 4. Backend kiểm tra đăng nhập hợp lệ, email tài khoản đã xác minh, KTS còn hiển thị, có số liên lạc và thời gian mong muốn còn ở tương lai.
 5. Hệ thống lưu yêu cầu ở trạng thái Chưa xử lý và thông báo đã tiếp nhận; admin sẽ gọi lại xác nhận lịch.
 6. Hệ thống gửi email đến tài khoản với KTS, ngày giờ mong muốn, số liên lạc, nội dung nếu có và lời nhắc admin gọi lại.
+7. Trên trang hồ sơ công khai của KTS đang hiển thị, khách đọc thêm mô tả ngắn và xem các dự án thiết kế, mỗi dự án có tên cùng các ảnh thiết kế tương ứng. Hai phần này lấy từ hồ sơ do người có quyền quản lý lưu ở backend.
 
 ### Alternative Flow
 
@@ -203,6 +206,13 @@ Gửi email thất bại sau khi đã tiếp nhận.
 - **When**: Khách xem danh sách hoặc mở chi tiết KTS để lựa chọn người tư vấn.
 - **Then**: Cả hai nơi hiển thị đúng công ty, số sao và số đánh giá hiện tại do người có quyền quản lý nhập; hai số bằng 0 vẫn được hiển thị.
 - **And**: Việc xem các số liệu này không yêu cầu khách gửi đánh giá và không thay đổi điều kiện gửi yêu cầu tư vấn.
+
+#### AC-014
+
+- **Given**: KTS đang hiển thị và đã lưu mô tả ngắn cùng các dự án thiết kế.
+- **When**: Khách mở trang hồ sơ công khai của KTS.
+- **Then**: Hiển thị đúng mô tả ngắn, tên từng dự án và các ảnh thuộc dự án đó.
+- **And**: Phần giới thiệu hiện có vẫn dùng dữ liệu đã lưu; việc xem hai phần mới không thay đổi điều kiện gửi yêu cầu tư vấn.
 
 ## References
 

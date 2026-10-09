@@ -34,6 +34,11 @@ Nội dung ba User Story và năm Business Rule đã được người dùng ch�
 | [STORY-CONSULT-003/AC-004](../userstory/STORY-CONSULT-003.md#ac-004) | [ST-CONSULT-026](../systemtest/ST-CONSULT-026.md) |
 | [STORY-CONSULT-003/AC-005](../userstory/STORY-CONSULT-003.md#ac-005) | [ST-CONSULT-027](../systemtest/ST-CONSULT-027.md) |
 | [STORY-CONSULT-003/AC-006](../userstory/STORY-CONSULT-003.md#ac-006) | [ST-CONSULT-028](../systemtest/ST-CONSULT-028.md), [ST-CONSULT-032](../systemtest/ST-CONSULT-032.md) |
+| [STORY-CONSULT-001/AC-017](../userstory/STORY-CONSULT-001.md#ac-017) | [ST-CONSULT-042](../systemtest/ST-CONSULT-042.md) |
+| [STORY-CONSULT-001/AC-018](../userstory/STORY-CONSULT-001.md#ac-018) | [ST-CONSULT-043](../systemtest/ST-CONSULT-043.md) |
+| [STORY-CONSULT-001/AC-019](../userstory/STORY-CONSULT-001.md#ac-019) | [ST-CONSULT-044](../systemtest/ST-CONSULT-044.md) |
+| [STORY-CONSULT-001/AC-020](../userstory/STORY-CONSULT-001.md#ac-020) | [ST-CONSULT-045](../systemtest/ST-CONSULT-045.md) |
+| [STORY-CONSULT-002/AC-014](../userstory/STORY-CONSULT-002.md#ac-014) | [ST-CONSULT-042](../systemtest/ST-CONSULT-042.md), [ST-CONSULT-043](../systemtest/ST-CONSULT-043.md) |
 | [STORY-CONSULT-001/ALT-01](../userstory/STORY-CONSULT-001.md#alt-01) | [ST-CONSULT-001](../systemtest/ST-CONSULT-001.md), [ST-CONSULT-039](../systemtest/ST-CONSULT-039.md) |
 | [STORY-CONSULT-001/ALT-02](../userstory/STORY-CONSULT-001.md#alt-02) | [ST-CONSULT-002](../systemtest/ST-CONSULT-002.md), [ST-CONSULT-003](../systemtest/ST-CONSULT-003.md) |
 | [STORY-CONSULT-001/ALT-03](../userstory/STORY-CONSULT-001.md#alt-03) | [ST-CONSULT-007](../systemtest/ST-CONSULT-007.md), [ST-CONSULT-010](../systemtest/ST-CONSULT-010.md) |
@@ -123,3 +128,21 @@ Backend tại commit [ae1bc8b](https://github.com/TaskCoper/bmt-be/commit/ae1bc8
 Lệnh `BMT_REQUIRE_DOCKER_TESTS=1 dotnet test bmt-be.sln -c Release --no-restore -m:1` chạy qua **2.335 test**, không lỗi, không bỏ qua: domain 1, application 1.379, persistence 17, infrastructure 163, API 338, integration 437. Lệnh EF `migrations has-pending-model-changes` xác nhận model khớp migration snapshot. Đây là kết quả trên bản commit cuối sau khi rebase, bổ sung cho bằng chứng kiểm thử theo phạm vi ngày 29/09 ở trên.
 
 Push lên `develop` tự kích hoạt workflow [Deploy Application](https://github.com/TaskCoper/bmt-be/actions/workflows/main.yaml), gồm bước áp dụng migration và triển khai Dev. Kết quả local không xác nhận workflow đã triển khai thành công; theo dõi trạng thái CI của đúng commit. Frontend vẫn chưa được cập nhật vì workspace chưa có mã nguồn giao diện.
+
+
+## Bằng chứng mô tả và dự án thiết kế ngày 08/10/2026
+
+Nghiệp vụ và thiết kế được người dùng chốt trong hội thoại; Tân Trần là Reviewer/Approver đã xác nhận. Mô tả ngắn và danh sách dự án đều tùy chọn; mỗi dự án có tên và ít nhất một ảnh. Dữ liệu mới dùng chung version và transaction với hồ sơ; trường mới thiếu/null trong PUT giữ dữ liệu cũ. Đặc tả bổ sung: UT-CONSULT-060..066 và ST-CONSULT-042..045.
+
+| Phần kiểm tra | Kết quả | Bằng chứng và giới hạn |
+| --- | --- | --- |
+| Nghiệp vụ KTS/tư vấn | Pass, 153 test, không bỏ qua | `ArchitectPortfolioValidatorTests`, `ArchitectPortfolioHandlerTests`, `ArchitectPortfolioMediaTests` và các test hiện có; kiểm validator, trim, thứ tự ảnh, tương thích/clear, projection và nhận diện nguồn MEDIA. EF InMemory không chứng minh ràng buộc hoặc transaction PostgreSQL. |
+| HTTP và quyền module tư vấn | Pass, 42 test, không bỏ qua | `ConsultationApiPipelineTests`: route, CSRF, xác thực/phân quyền, binding JSON mới. MediatR giả lập; không chứng minh lưu database. |
+| TypeScript, ESLint, Prettier frontend | Pass | `pnpm typecheck`, `pnpm lint`, `pnpm format:check`. Thêm `packages: [.]` vào cấu hình workspace để pnpm 11 chạy được lệnh kiểm tra. |
+| UI local qua Chromium headless | Pass với API giả lập | Hai dự án/ba ảnh; mô tả riêng với giới thiệu; mở đúng ảnh theo dự án; màn hình nhỏ 390px; form sửa đọc đủ dữ liệu và gửi lại đủ ảnh; thiếu tên/ảnh hoặc xóa ảnh cuối bị chặn lưu; thay ảnh đang upload chặn lưu đến khi nhận Completed rồi gửi đúng URL mới. Không phải E2E với backend/database thật. `/en/*` vẫn chuyển về `/vi/*` theo proxy hiện có; đã thêm đủ khóa dịch vi/en. |
+| Migration | Đã tạo và rà soát SQL | `20261008061007_AddArchitectDesignPortfolio`: cột `ShortDescription` nullable, bảng dự án/ảnh, FK cascade, CHECK và index. Chưa chạy trên database đang dùng hoặc production. |
+| PostgreSQL và MEDIA thật | Blocked do môi trường | `ArchitectPortfolioTests` cùng ca `MediaFlowTests.Architect_design_images_track_replacement_removal_and_hidden_profiles` đã biên dịch; hai lần chạy bị lỗi khởi tạo Testcontainers do Docker socket không đáp ứng ping. Chưa có bằng chứng transaction, thay/xóa dòng con hoặc giữ ảnh khi hồ sơ ẩn trên PostgreSQL thật. |
+
+ST-CONSULT-042..045 chưa được chạy trọn luồng UI–API–database. Không đổi trạng thái tài liệu thành Approved từ tên người duyệt; Owner kiểm thử vẫn chưa được phân công. Chưa commit, push hoặc triển khai phần bổ sung này.
+
+Bằng chứng thực thi local: [test nghiệp vụ](../../bmt-be/results/consult/architect-portfolio-20261008/unit.log), [HTTP](../../bmt-be/results/consult/architect-portfolio-20261008/http.log), [UI với API giả lập](../../bmt-be/results/consult/architect-portfolio-20261008/ui-fixture.json), [lỗi môi trường PostgreSQL](../../bmt-be/results/consult/architect-portfolio-20261008/postgres-blocked.log) và [SQL migration đã xuất](../../bmt-be/results/consult/architect-portfolio-20261008/migration.sql).

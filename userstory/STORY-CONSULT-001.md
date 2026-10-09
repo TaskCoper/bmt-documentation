@@ -65,9 +65,13 @@ Admin mở chức năng quản lý hồ sơ KTS.
 
 ### Main Flow
 
+Phần bổ sung ngày 08/10/2026 đã được người dùng chốt cùng BR-CONSULT-001 trong hội thoại: người dùng đã xác nhận làm cả quản trị, hồ sơ công khai và backend. Mô tả ngắn và danh sách dự án đều tùy chọn. Khi thêm dự án, bắt buộc có tên và ít nhất một ảnh.
+
 1. Người có quyền tạo thêm hồ sơ với ảnh đại diện, họ tên, chức danh, chuyên môn chọn từ danh mục category, số năm kinh nghiệm, số công trình, giới thiệu, công ty, số sao và số đánh giá; một KTS có thể chọn nhiều category. Công ty nhập tên trực tiếp và bắt buộc có nội dung. Số sao và số đánh giá nhập thủ công, mặc định bằng 0 khi tạo hồ sơ.
 2. Người tạo chọn Ẩn/Hiện. Hệ thống kiểm tra thông tin bắt buộc và các quy tắc tại BR-CONSULT-001: số sao từ 0 đến 5, tối đa một chữ số thập phân; số đánh giá là số nguyên không âm; khi số đánh giá bằng 0 thì số sao phải bằng 0. Hồ sơ hợp lệ được lưu trực tiếp, không qua phê duyệt. Người có quyền có thể đổi trạng thái sau khi tạo.
 3. Khách xem công ty, số sao và số đánh giá ở cả danh sách và trang chi tiết của các hồ sơ đang hiển thị, rồi chọn KTS để gửi yêu cầu.
+4. Người có quyền có thể nhập mô tả ngắn riêng với phần giới thiệu và thêm các dự án thiết kế vào hồ sơ. Mỗi dự án chỉ gồm tên dự án và danh sách ảnh thiết kế. Người thao tác có thể để trống mô tả ngắn hoặc không thêm dự án khi tạo hoặc sửa hồ sơ.
+5. Sau khi lưu thành công, mở lại hồ sơ trong quản trị và trên trang hồ sơ công khai để đọc mô tả ngắn, tên dự án và các ảnh của từng dự án đã lưu.
 
 ### Alternative Flow
 
@@ -128,6 +132,13 @@ Số sao hoặc số đánh giá không hợp lệ.
 
 1. Hệ thống từ chối lưu nếu số sao ngoài khoảng 0–5 hoặc có hơn một chữ số thập phân; số đánh giá âm hoặc không phải số nguyên; hoặc số đánh giá bằng 0 nhưng số sao khác 0.
 2. Hệ thống chỉ rõ trường cần sửa, không lưu một phần thay đổi của hồ sơ.
+
+#### EXC-05
+
+Dự án đã thêm chưa có tên hoặc chưa có ảnh.
+
+1. Hệ thống từ chối lưu và chỉ rõ dự án cần bổ sung tên hoặc ảnh.
+2. Người thao tác bổ sung tên và ít nhất một ảnh rồi lưu lại; không lưu một phần hồ sơ hoặc dự án.
 
 ## Acceptance Criteria
 
@@ -242,6 +253,34 @@ Số sao hoặc số đánh giá không hợp lệ.
 - **When**: Áp dụng thay đổi rồi đọc lại hồ sơ.
 - **Then**: Giữ nguyên hồ sơ và trạng thái Ẩn/Hiện; không tự điền tên công ty; số sao và số đánh giá bằng 0.
 - **And**: Hồ sơ đang Hiện vẫn xem được ở danh sách và chi tiết; lần sửa tiếp theo phải bổ sung công ty hợp lệ mới lưu được.
+
+#### AC-017
+
+- **Given**: Người thao tác có quyền tạo hoặc sửa hồ sơ, các trường hiện có hợp lệ.
+- **When**: Nhập mô tả ngắn rồi lưu hồ sơ.
+- **Then**: Mở lại hồ sơ đọc được đúng mô tả ngắn đã nhập.
+- **And**: Mô tả ngắn là trường riêng; phần giới thiệu hiện có được giữ theo nội dung người thao tác lưu.
+
+#### AC-018
+
+- **Given**: Người thao tác có quyền tạo hoặc sửa hồ sơ, các trường hiện có hợp lệ.
+- **When**: Thêm dự án thiết kế có tên và nhiều ảnh rồi lưu.
+- **Then**: Mở lại hồ sơ đọc được tên và đầy đủ ảnh của từng dự án.
+- **And**: Trang hồ sơ công khai của KTS đang hiển thị trả đúng các dự án đã lưu; không gộp ảnh của các dự án thành một danh sách mất tên dự án.
+
+#### AC-019
+
+- **Given**: Người thao tác có quyền tạo hoặc sửa hồ sơ, các trường hiện có hợp lệ.
+- **When**: Để trống mô tả ngắn và danh sách dự án rồi lưu.
+- **Then**: Hồ sơ vẫn được lưu thành công.
+- **And**: Hai phần mới không trở thành điều kiện bắt buộc đối với hồ sơ cũ hoặc hồ sơ mới.
+
+#### AC-020
+
+- **Given**: Người thao tác có quyền lưu hồ sơ và đã thêm một dự án thiết kế.
+- **When**: Lưu khi tên dự án bị thiếu, rỗng hoặc chỉ có khoảng trắng; hoặc dự án chưa có ảnh.
+- **Then**: Hệ thống từ chối lưu và chỉ rõ phần còn thiếu.
+- **And**: Không lưu một phần hồ sơ hoặc dự án; dự án có tên hợp lệ và ít nhất một ảnh thì được lưu khi các thông tin khác hợp lệ.
 
 ## References
 

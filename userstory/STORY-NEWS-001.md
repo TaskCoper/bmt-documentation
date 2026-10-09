@@ -65,7 +65,7 @@ Người quản lý tạo hoặc cập nhật bài.
 
 ### Main Flow
 
-1. Tạo bài và nhập tiêu đề, ảnh đại diện, số phút đọc do người viết nhập, nội dung rich text; kiểm lại đường dẫn hệ thống sinh từ tiêu đề và sửa nếu cần. Chọn một hoặc nhiều danh mục nếu muốn; danh mục không bắt buộc.
+1. Tạo bài và nhập tiêu đề, ảnh đại diện, số phút đọc do người viết nhập, nội dung rich text; có thể nhập thêm mô tả ngắn hoặc để trống. Kiểm lại đường dẫn hệ thống sinh từ tiêu đề và sửa nếu cần. Chọn một hoặc nhiều danh mục nếu muốn; danh mục không bắt buộc.
 2. Khi chèn ảnh nội dung, FE tải ảnh lên cloud rồi chèn URL vào rich text.
 3. Lưu nháp để nhập dần hoặc chọn công bố; hệ thống kiểm đủ dữ liệu trước công bố.
 4. Công bố bài hợp lệ trực tiếp, không qua người duyệt; ghi ngày công bố đầu tiên.
@@ -115,7 +115,7 @@ Upload ảnh thất bại.
 
 #### EXC-04
 
-Tiêu đề hoặc nội dung vượt giới hạn độ dài.
+Tiêu đề, mô tả ngắn hoặc nội dung vượt giới hạn độ dài.
 
 1. Từ chối lưu, chỉ rõ phần vượt giới hạn; giữ nguyên bài hiện tại và không tự cắt ngắn.
 
@@ -150,7 +150,8 @@ Số phút đọc không phải số nguyên lớn hơn 0.
 
 - **Given**: Ảnh được FE upload thành công
 - **When**: Chèn vào rich text rồi lưu bài
-- **Then**: Nội dung lưu tham chiếu URL ảnh; hỗ trợ nhiều ảnh, định dạng chữ, tiêu đề đoạn, danh sách và liên kết.
+- **Then**: Nội dung lưu tham chiếu URL ảnh; hỗ trợ nhiều ảnh, định dạng chữ, tiêu đề đoạn, danh sách, liên kết và bảng có dòng/cột.
+- **And**: Khi lưu và mở lại bảng, giữ dòng tiêu đề, nội dung ô, ô gộp và độ rộng cột hợp lệ. Bảng nằm trong nội dung rich text; bảng rỗng không thay thế điều kiện nội dung có nghĩa để công bố.
 
 #### AC-005
 
@@ -188,7 +189,7 @@ Số phút đọc không phải số nguyên lớn hơn 0.
 - **Given**: Người có quyền tạo hoặc sửa bài
 - **When**: Nhập số phút đọc hoặc để trống
 - **Then**: Số nguyên lớn hơn 0 được lưu đúng giá trị đã nhập; 0, số âm hoặc số không nguyên bị từ chối. Nháp được để trống; công bố hoặc lưu sửa bài đang công bố phải có số phút đọc.
-- **And**: Không còn trường mô tả ngắn. Bài cũ giữ số phút đọc trống và vẫn đọc được nếu đang công bố; bổ sung khi lưu sửa bài đang công bố, không tự gán mặc định.
+- **And**: Bài cũ giữ số phút đọc trống và vẫn đọc được nếu đang công bố; bổ sung khi lưu sửa bài đang công bố, không tự gán mặc định.
 
 #### AC-011
 
@@ -203,6 +204,13 @@ Số phút đọc không phải số nguyên lớn hơn 0.
 - **When**: Đặt đường dẫn trùng với đường dẫn hiện tại hoặc đường dẫn cũ của bài khác
 - **Then**: Từ chối lưu và giữ nguyên bài hiện tại.
 - **And**: Sửa tiêu đề không tự đổi đường dẫn; đổi đường dẫn thì đường dẫn cũ vẫn trỏ về bài đó.
+
+#### AC-013
+
+- **Given**: Người có quyền tạo hoặc sửa bài nháp, công bố hoặc ẩn
+- **When**: Để trống mô tả ngắn, nhập mô tả tối đa 500 ký tự sau trim hoặc xóa mô tả đã có
+- **Then**: Lưu được và đọc lại đúng mô tả; chuỗi rỗng hoặc chỉ có khoảng trắng được lưu là chưa nhập. Bài đủ các trường bắt buộc vẫn công bố được khi không có mô tả ngắn.
+- **And**: Mô tả dài 501 ký tự bị từ chối mà không thay đổi bài. Ký tự được đếm theo Unicode như BR-NEWS-001 khoản 9; thêm hoặc xóa mô tả không thay đổi ngày công bố đầu tiên.
 
 ## References
 

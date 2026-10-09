@@ -11,13 +11,11 @@
 -->
 
 <!-- Mỗi file chứa một test, đúng một dòng dữ liệu và 13 cột theo thứ tự bên dưới.
-Thay ST-001 ở heading và Test ID, STORY-001 bằng mã Story cần kiểm thử.
-Trong ô bảng: xuống dòng bằng <br>, dấu | viết thành \|. Steps gồm các bước đánh số.
-Loại: Main / ALT / EXC / NFR / Integration boundary; ghép nhiều loại bằng dấu /.
-Suite: SMOKE / REGRESSION / FULL. Priority: P0 / P1 / P2 / P3.
+Thay UT-001 ở heading và Test ID. Trong ô bảng: xuống dòng bằng <br>, dấu | viết thành \|.
+Loại: Happy / Branch / Boundary / Error / Quirk / Determinism. Suite: SMOKE / REGRESSION / FULL. Priority: P0 / P1 / P2 / P3.
 TEST_LINKS là nguồn liên kết khi import; cột Trace to chỉ để đọc. Giữ hai nơi nhất quán.
-Owner là tên hiển thị; phê duyệt thực hiện sau import.
-Steps và Expected result phải bám Flow, AC và Business Rule của Story có thật. Test data là dữ liệu kiểm thử minh hoạ; không tự thêm hành vi nghiệp vụ hoặc ghi Pass/đã chạy nếu chưa có bằng chứng thực thi.
+Mỗi liên kết dùng DOC-KEY/section: ghi chú. Owner là tên hiển thị; phê duyệt thực hiện sau import.
+Expected output và assertion phải suy ra từ Business Rule/contract đã xác nhận. Dữ liệu mock chỉ là dữ liệu kiểm thử minh hoạ, không phải dữ liệu production; không ghi Pass/đã chạy nếu chưa có bằng chứng thực thi.
 BẮT BUỘC KHI HOÀN THIỆN MẪU: phải có cả Reviewer và Approver, mỗi tên 1–200 ký tự sau khi bỏ khoảng trắng đầu/cuối. Không xoá hai dòng metadata, để trống, dùng tên bịa hoặc giữ placeholder rồi coi là hoàn tất.
 Nếu chưa biết người review hoặc người phê duyệt, phải hỏi người dùng và báo tài liệu chưa đủ thông tin; không tự lấy Author/Owner làm người thay thế. Tên trong file không tự gán tài khoản hoặc xác nhận đã duyệt; gán thành viên trên giao diện sau import.
 Đây là yêu cầu hoàn thiện mẫu; backend hiện vẫn nhận file cũ thiếu hai trường để tương thích.
@@ -29,27 +27,25 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Không dùng Status trong Markdown hoặc tên Approver để tự xác nhận phê duyệt; import không cấp quyền hay gán tài khoản từ tên. Chạy Kiểm tra file và xử lý lỗi/cảnh báo trước khi nhập.
 - Giới hạn độ dài bên dưới tính theo string.Length của .NET (đơn vị UTF-16); không tự cắt ngắn dữ kiện quan trọng để vượt validation, hãy viết lại có căn cứ hoặc hỏi người dùng.
 - Bảng phải có header, dòng phân cách và đúng một dòng dữ liệu, đủ 13 cột theo thứ tự mẫu. Reviewer/Approver là hai bullet trước bảng, không thêm thành cột. Test ID trong bảng phải nhất quán với heading; mã tài liệu import lấy từ heading.
-- Story tối đa 100 ký tự và được dùng làm tiêu đề tài liệu; Owner tối đa 200. Trạng thái parser nhận: Draft / Approved; đây không phải kết quả chạy test hoặc quyền phê duyệt.
-- Giữ Loại: Main / ALT / EXC / NFR / Integration boundary, có thể ghép bằng dấu /; Suite: SMOKE / REGRESSION / FULL; Priority: P0 / P1 / P2 / P3. Không dùng số ngoài dải Priority 0–3.
-- Steps là các bước đánh số trong một ô, tách bằng <br>; không xuống dòng vật lý trong ô, dấu | trong nội dung phải viết \|. TEST_LINKS mới là nguồn liên kết import; cột Trace to chỉ hiển thị, hai nơi phải nhất quán.
+- Module tối đa 200 ký tự; Unit under test tối đa 500 (được dùng làm tiêu đề tài liệu); Owner tối đa 200. Trạng thái parser nhận: Draft / Approved; đây không phải kết quả chạy test hoặc quyền phê duyệt.
+- Giữ Loại: Happy / Branch / Boundary / Error / Quirk / Determinism; Suite: SMOKE / REGRESSION / FULL; Priority: P0 / P1 / P2 / P3. Không dùng số ngoài dải Priority 0–3.
+- Không xuống dòng vật lý trong ô: dùng <br>; dấu phân cột trong nội dung phải viết \|. TEST_LINKS mới là nguồn liên kết import; cột Trace to chỉ hiển thị, hai nơi phải nhất quán.
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# ST-NEWS-031
+# UT-CONSULT-064
 
-## System Test
+## Unit Test
 
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
 
-| Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
+| Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-NEWS-031 | STORY-NEWS-001 | Main / EXC / Integration boundary | REGRESSION | P1 | Môi trường thử có quản trị và trang đọc tin; A có news.manage. Có bài Published từ trước migration với số phút NULL. | 1. Tạo nháp để trống số phút rồi thử công bố.<br>2. Nhập lần lượt 0, -1, 1.5 và 7; lưu, mở lại và công bố khi đủ trường khác.<br>3. Đổi riêng số phút thành 12; kiểm API danh sách/chi tiết quản trị và công khai cùng dữ liệu lưu.<br>4. Đọc bài cũ NULL; thử lưu sửa thiếu số phút rồi bổ sung 9 và lưu lại. | Các số là dữ liệu thử, không phải mặc định. Bài cũ giữ nguyên nội dung, trạng thái, ngày đầu và Version qua migration. | Ô số phút đọc vẫn có bên cạnh mô tả ngắn tùy chọn theo yêu cầu 08/10/2026; hành vi mô tả kiểm ở ST-NEWS-036. Nháp lưu được NULL; công bố thiếu số phút bị từ chối. Chỉ số nguyên dương được lưu; số phút hiển thị đúng giá trị nhập, không tính từ nội dung. Bài cũ vẫn đọc được và không hiện 0 phút; lần sửa Published thiếu số phút bị từ chối, bổ sung 9 thì lưu được và giữ ngày đầu. | STORY-NEWS-001/AC-010<br>STORY-NEWS-001/EXC-05<br>STORY-NEWS-003/AC-001<br>BR-NEWS-001/Then<br>BR-NEWS-001/Except | Quyết định người dùng ngày 29/09/2026. Đặc tả chưa thực thi trên giao diện. | [Chưa xác định] | Draft |
+| UT-CONSULT-064 | Tư vấn kiến trúc sư | UpdateArchitectCommandHandler.Handle: URL bị từ chối | Error | REGRESSION | P1 | Hồ sơ và dự án biết trước; version khớp; policy từ chối URL mới. | Đổi tên hồ sơ và dự án cùng một URL ngoài kho. | Lỗi DesignProjects[0].ImageUrls[0]/ConsultationInputInvalid; tên, version, dự án và category của hồ sơ không đổi. | BR-CONSULT-001/Then<br>TDD-CONSULT-001/Data Model<br>STORY-CONSULT-001/AC-020 | Kiểm chứng mô tả và dự án thiết kế theo phần bổ sung đã chốt. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- STORY-NEWS-001/AC-010
-- STORY-NEWS-001/EXC-05
-- STORY-NEWS-003/AC-001
-- BR-NEWS-001/Then
-- BR-NEWS-001/Except
+- BR-CONSULT-001/Then
+- TDD-CONSULT-001/Data Model
+- STORY-CONSULT-001/AC-020

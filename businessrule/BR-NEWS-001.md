@@ -58,7 +58,7 @@ Người quản lý tạo, lưu, sửa, công bố, ẩn hoặc xóa bài viết
 
 1. Dùng chung quyền quản lý tin tức theo STORY-RBAC-001 cho bài viết và danh mục. Người không có quyền không được thực hiện thao tác quản lý.
 2. Bài có các trạng thái Nháp, Công bố và Ẩn. Cho lưu nháp thiếu thông tin; chỉ cho công bố khi có tiêu đề, ảnh đại diện, số phút đọc, nội dung rich text và đường dẫn theo [BR-NEWS-004](BR-NEWS-004.md). Danh mục không còn là điều kiện công bố: bài không gắn danh mục nào vẫn công bố được.
-3. Rich text hỗ trợ định dạng chữ, tiêu đề đoạn, danh sách, liên kết và chèn nhiều ảnh. FE tải ảnh lên cloud trước rồi chèn URL ảnh vào nội dung lưu. Đợt này không có video hoặc tệp đính kèm.
+3. Rich text hỗ trợ định dạng chữ, tiêu đề đoạn, danh sách, liên kết, chèn nhiều ảnh và bảng có dòng/cột. Bảng được lưu cùng nội dung rich text, giữ dòng tiêu đề, ô gộp và độ rộng cột hợp lệ khi mở lại; không có bảng dữ liệu nghiệp vụ riêng cho từng bảng nội dung. FE tải ảnh lên cloud trước rồi chèn URL ảnh vào nội dung lưu. Đợt này không có video hoặc tệp đính kèm.
 4. Một bài được gắn nhiều danh mục, không có danh mục chính. Được chọn danh mục tại bất kỳ cấp nào; chọn con không bắt buộc gắn thêm cha. Bài không gắn danh mục nào được coi là chưa phân loại và vẫn hiển thị công khai.
 5. Sửa bài đã công bố cập nhật ngay bài đang hiển thị, không tạo phiên bản riêng hoặc lịch sử xem. Nội dung sau sửa vẫn phải đáp ứng điều kiện công bố.
 6. Ẩn bài làm bài không xuất hiện trong danh sách công khai và không đọc được qua đường dẫn trực tiếp. Bài đã ẩn có thể công bố lại khi đủ dữ liệu.
@@ -66,7 +66,8 @@ Người quản lý tạo, lưu, sửa, công bố, ẩn hoặc xóa bài viết
 8. Ghi ngày công bố đầu tiên khi bài được công bố lần đầu. Sửa bài, ẩn bài hoặc công bố lại không thay đổi ngày này.
 9. Tiêu đề tối đa 200 ký tự, tính sau khi bỏ khoảng trắng đầu và cuối. Nội dung rich text tối đa 200.000 ký tự, tính trên nội dung đã được hệ thống làm sạch. Giới hạn áp dụng cho mọi lần lưu, kể cả bản nháp. Vượt giới hạn thì từ chối lưu và giữ nguyên bài hiện tại, không tự cắt ngắn.
 
-10. Bỏ trường mô tả ngắn. Số phút đọc do người viết nhập, phải là số nguyên lớn hơn 0 nếu có giá trị; không tự tính từ nội dung. Được để trống khi lưu nháp hoặc sửa bài ẩn; bắt buộc khi công bố và khi lưu sửa bài đang công bố.
+10. Số phút đọc do người viết nhập, phải là số nguyên lớn hơn 0 nếu có giá trị; không tự tính từ nội dung. Được để trống khi lưu nháp hoặc sửa bài ẩn; bắt buộc khi công bố và khi lưu sửa bài đang công bố.
+11. Mô tả ngắn là văn bản thường, không bắt buộc ở mọi trạng thái, kể cả khi công bố hoặc sửa bài đang công bố. Giữ giới hạn 500 ký tự đã xác nhận ngày 26/09/2026, tính sau khi bỏ khoảng trắng đầu/cuối theo cùng cách đếm Unicode ở khoản 9. Chuỗi rỗng hoặc chỉ có khoảng trắng được lưu là chưa nhập; được xóa mô tả đã nhập. Vượt giới hạn thì từ chối lưu và giữ bài hiện tại, không tự cắt ngắn.
 
 ## Except
 
@@ -81,5 +82,9 @@ Giới hạn độ dài ở khoản 9 do người dùng xác nhận ngày 26/09/
 Quyết định ngày 29/09/2026: người dùng yêu cầu bỏ mô tả ngắn, thêm số phút đọc nhập tay và xác nhận quy tắc tại khoản 10 cùng cách xử lý bài cũ trong Except.
 
 Quyết định ngày 07/10/2026: người dùng yêu cầu bỏ điều kiện "ít nhất một danh mục" khi công bố. Bài không gắn danh mục được coi là chưa phân loại, hiển thị nhãn tương ứng trên thẻ bài và vẫn nằm trong danh sách khi người đọc không lọc danh mục. Thay đổi này sửa khoản 2 và khoản 4; các điều kiện công bố còn lại giữ nguyên.
+
+Yêu cầu ngày 08/10/2026: thêm lại mô tả ngắn và để tùy chọn trong `bmt-be` và `buildx-fe-web`. Khoản 11 thay phần bỏ mô tả của quyết định ngày 29/09/2026; quy tắc số phút đọc ở khoản 10 vẫn áp dụng. Bài cũ có mô tả NULL, không tự tạo mô tả từ nội dung hoặc khôi phục dữ liệu đã bị xóa bởi migration cũ.
+
+Cùng ngày, người dùng yêu cầu hỗ trợ bảng ở frontend và xác nhận bổ sung lưu bảng ở backend. Khoản 3 mở rộng rich text bằng cấu trúc bảng trong HTML; bảng vẫn chịu quy tắc làm sạch và điều kiện nội dung có nghĩa.
 
 Owner và ngày hiệu lực chưa xác định. Người dùng đã chốt bộ US/BR Tin tức trong hội thoại. Status Draft vẫn giữ theo quy trình tài liệu; xác nhận này không thay cho phê duyệt trên hệ thống hoặc kết quả kiểm thử.

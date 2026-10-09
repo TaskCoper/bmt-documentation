@@ -121,6 +121,8 @@ Giới hạn: đọc bài theo bước phải đi qua phép nối đệ quy. Tra
 - `IconKey` lưu dạng chuỗi tự do, backend không kiểm thuộc bộ biểu tượng nào. Bộ biểu tượng do frontend định nghĩa (`HANDBOOK_TOPIC_ICONS`), và frontend đã rơi về biểu tượng mặc định khi khóa lạ. Đổi lại backend không chặn được khóa sai; đánh đổi này tránh việc mỗi lần thêm biểu tượng phải sửa và triển khai lại backend.
 - Thuộc tính Cẩm nang của danh mục đặt ở endpoint riêng chứ không nhét thêm trường vào `UpdateNewsCategoryCommand`. Lý do: record hiện tại dùng `null` cho `ParentId` với nghĩa "đưa về gốc"; thêm `stageId` nullable vào đó sẽ nhập nhằng giữa "không đổi" và "xóa bước".
 
+Ngày 09/10/2026, quản trị bổ sung trạng thái biên tập cho phần Các bước Cẩm nang. Seed của `HandbookStage` có Version = 1; handler tăng Version khi nội dung tên/mô tả/ảnh thay đổi. Vì vậy từng bước có Version > 1 hiển thị Đã biên tập, còn Version = 1 hiển thị Đang dùng bản mặc định. Tiêu đề phần hiển thị Đã biên tập khi có bước đã sửa hoặc đã có chủ đề hướng dẫn; trạng thái dùng chung mọi ngôn ngữ. Dùng cùng query snapshot của bảng nhóm để cập nhật khi lưu và tải lại; không suy trạng thái này từ PageSection, không đổi API hoặc database.
+
 ## Sequence Diagram
 
 Người quản lý biến một danh mục gốc thành chủ đề hướng dẫn.

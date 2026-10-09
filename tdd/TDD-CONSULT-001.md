@@ -84,6 +84,14 @@ Checkout khảo sát có .NET 8, Carter/MediatR/FluentValidation, EF Core/Npgsql
 
 ## Architecture
 
+**Bổ sung mô tả ngắn và dự án thiết kế (08/10/2026) — thiết kế đã được Tân Trần chốt trong hội thoại ngày 08/10/2026:** người dùng đã chốt phần bổ sung trong STORY-CONSULT-001/AC-017 đến AC-020, STORY-CONSULT-002/AC-014 và BR-CONSULT-001 khoản 14–17. Frontend thực tế nằm ở `../buildx-fe-web/` tính từ backend. Thêm ô mô tả ngắn và danh sách dự án có tên, nhiều ảnh trong `/admin/consultants`; trên `/consult/{consultantId}` hiển thị mô tả ngắn, từng tên dự án và lưới ảnh có thể mở lớn. Giữ phần giới thiệu và luồng tư vấn hiện có.
+
+**Hiện trạng triển khai 08/10/2026:** backend và frontend `buildx-fe-web` đã bổ sung hai phần dữ liệu; migration `20261008061007_AddArchitectDesignPortfolio` chỉ thêm cột nullable và hai bảng con. Tân Trần được người dùng xác nhận là Reviewer/Approver và người duyệt thiết kế trong hội thoại. Đã xuất SQL migration để rà soát, chưa áp dụng vào database đang chạy. Bằng chứng và phần chưa kiểm được nằm trong [độ phủ kiểm thử](../discovery/consult-system-test-coverage.md#bằng-chứng-mô-tả-và-dự-án-thiết-kế-ngày-08102026).
+
+Tiếp tục dùng POST/PUT hồ sơ và quyền `consultation.manage`, khóa hồ sơ và `expectedVersion` hiện có. Lưu mô tả, dự án, ảnh và category cùng transaction; lỗi ở bất kỳ phần nào hoàn tác cả hồ sơ. Upload dùng `ImagePicker` và MEDIA hiện có, hoàn tất trước khi lưu hồ sơ; SQL không hoàn tác upload nhưng MEDIA giữ/dọn ảnh theo vòng đời hiện tại. Bổ sung nguồn `ArchitectDesignProject` trong `MediaReferenceSynchronizer` và `MediaSourceReader` để ảnh của dự án đang lưu, kể cả KTS ẩn, được giữ và không bị dọn nhầm.
+
+Thứ tự triển khai: model/configuration/migration cộng thêm → contract/validator/handler và projection → theo dõi ảnh MEDIA → form quản trị/API client → hồ sơ công khai → kiểm thử. Danh sách chỉ cần mô tả ngắn; chi tiết public/admin mới trả các dự án và ảnh để tránh tải cả bộ ảnh khi chỉ chọn KTS. Tên dự án và ảnh không được lưu thành JSON, CSV hoặc các cột đánh số trong Architect; mỗi bảng sở hữu một nhóm dữ kiện.
+
 **Upload và dọn ảnh — áp dụng MEDIA:** [TDD-MEDIA-001](TDD-MEDIA-001.md) thay các mô tả trước đây trong tài liệu này về dịch vụ presign ngoài backend, chỉ frontend kiểm ảnh và backend không dọn file. Upload ảnh mới dùng ba route MEDIA của BMT, nhận JPG/PNG/WebP tối đa 5 MiB và chỉ có URL xem sau khi backend xác minh bytes. API nghiệp vụ tiếp tục nhận URL; khi bật MEDIA, SaveChangesAsync kiểm trạng thái ảnh và đồng bộ nơi sử dụng cùng transaction. Ảnh còn trong nháp, nội dung ẩn hoặc lịch sử được giữ. Sau khi mất nơi sử dụng cuối phải chờ ít nhất 24 giờ; ảnh cũ thiếu lịch sử chờ từ lần đối soát đầy đủ đầu tiên. Ảnh Deleting/Deleted không được gắn lại. Các đoạn mô tả giới hạn hoặc trách nhiệm upload cũ bên dưới chỉ ghi bối cảnh trước MEDIA, không là yêu cầu hiện hành cho ảnh mới. Tệp đính kèm không phải ảnh và luồng đọc nội dung riêng tư vẫn theo hợp đồng riêng của module.
 
 **Phần bổ sung ba trường (29/09/2026):** tiếp tục dùng bảng `Architect`, các API hồ sơ và quyền `consultation.manage`. Công ty là tên nhập trên từng hồ sơ; số sao/số đánh giá là dữ liệu gốc do người có quyền nhập. Không thêm bảng Company, Review, dịch vụ hoặc tác vụ tổng hợp. Cập nhật cả ba trường cùng hồ sơ/category trong transaction hiện có; giữ khóa và `Version` để tránh ghi đè thay đổi của người khác.
@@ -335,6 +343,46 @@ stateDiagram-v2
 
 ## Data Model
 
+**Phần bổ sung 08/10/2026:**
+
+| Bảng/cột | Kiểu và ràng buộc | Ý nghĩa |
+| --- | --- | --- |
+| Architect.ShortDescription | varchar(500), nullable; trim, chuỗi trắng lưu NULL | Mô tả ngắn do người có quyền nhập, riêng với Introduction; hồ sơ cũ mặc định NULL. Giới hạn 500 là lựa chọn kỹ thuật. |
+| ArchitectDesignProject.Id | uuid, PK, app sinh | Một dòng là một dự án thiết kế thuộc hồ sơ KTS; không liên kết với dự toán hoặc công trình của khách. |
+| ArchitectDesignProject.ArchitectId | uuid, NOT NULL, FK Architect, CASCADE | Dự án là dữ liệu con của đúng một hồ sơ; không có API xóa KTS. |
+| ArchitectDesignProject.Name | varchar(200), NOT NULL, CHECK có nội dung sau btrim | Tên dự án do người quản trị nhập; không áp quy tắc tên duy nhất. Giới hạn 200 dùng cùng quy ước tên của module. |
+| ArchitectDesignProject.SortOrder | integer, NOT NULL, CHECK >= 0 | Vị trí dự án trong mảng đầu vào; index (ArchitectId, SortOrder, Id) phục vụ đọc các dự án theo hồ sơ. |
+| ArchitectDesignProjectImage.ProjectId | uuid, PK thành phần, FK ArchitectDesignProject, CASCADE | Một dòng là một ảnh thuộc đúng một dự án. |
+| ArchitectDesignProjectImage.SortOrder | integer, PK thành phần, CHECK >= 0 | Vị trí ảnh trong mảng đầu vào; khóa chính (ProjectId, SortOrder) phục vụ đọc theo dự án. |
+| ArchitectDesignProjectImage.Url | varchar(2048), NOT NULL, CHECK có nội dung | URL ảnh đã upload; validator kiểm HTTPS như avatar, handler kiểm URL mới thuộc kho ảnh dùng chung. |
+
+Một KTS có 0..n dự án; mỗi dự án có ít nhất một ảnh theo validator/handler, không khẳng định FK/CHECK tự kiểm được số dòng con. Dự án và ảnh không có trạng thái/phê duyệt riêng; hiển thị đi theo hồ sơ cha. Dùng Version của hồ sơ để bảo vệ toàn bộ thay đổi; không cần thêm version cho từng ảnh. Số công trình (`ProjectCount`) hiện có vẫn là số nhập thủ công; không tự tính lại từ số dự án thiết kế.
+
+```mermaid
+erDiagram
+    Architect ||--o{ ArchitectDesignProject : co_du_an
+    ArchitectDesignProject ||--|{ ArchitectDesignProjectImage : co_anh
+    Architect {
+        uuid Id PK
+        string ShortDescription "nullable"
+    }
+    ArchitectDesignProject {
+        uuid Id PK
+        uuid ArchitectId FK
+        string Name
+        int SortOrder
+    }
+    ArchitectDesignProjectImage {
+        uuid ProjectId PK,FK
+        int SortOrder PK
+        string Url
+    }
+```
+
+**Dữ liệu giả định để giải thích, không phải seed đã chạy:** giữ hồ sơ A1 trong mẫu bên dưới, thêm ShortDescription="Thiết kế nhà phố và nội thất". Dự án P1 có ArchitectId=A1, Name="Nhà phố An", SortOrder=0. Hai ảnh (P1,0,`https://images.example.test/design/front.jpg`) và (P1,1,`https://images.example.test/design/living.jpg`) thuộc P1. A1/P1 là bí danh UUID. Khi chưa thêm dữ liệu, A1 có ShortDescription=NULL và không có dòng dự án/ảnh. Lần sửa có danh sách dự án thay thế tạo các dòng con theo nội dung mới; không sao chép tên KTS vào dòng ảnh. PK ảnh ngăn hai dòng cùng vị trí trong một dự án.
+
+**Migration:** thêm cột nullable và hai bảng mới, không đổi hồ sơ, trạng thái, category, đơn tư vấn hoặc số công trình cũ; không backfill dữ liệu mẫu. Áp migration trước backend mới và frontend mới, bằng bước triển khai riêng; không tự chạy trên database đang kết nối. Bản cũ vẫn dùng schema có thêm cột/bảng. Backend mới giữ hai phần bổ sung khi PUT của client cũ thiếu chúng. Kiểm schema, FK, index, model snapshot, số/ID hồ sơ và các liên kết cũ trên PostgreSQL riêng. DDL vẫn cần khóa ngắn; chưa có số liệu môi trường thật để cam kết thời gian. Nếu code mới lỗi, giữ schema và dữ liệu rồi sửa tiến; Down xóa hai bảng/cột sẽ mất phần nội dung mới, không dùng để phục hồi dữ liệu đã nhập.
+
 Module dùng bốn bảng trong schema `public`; phần bổ sung ngày 29/09 chỉ thêm ba cột vào Architect, tên PascalCase theo bảng `User` hiện có. UUID do ứng dụng sinh, không dùng tên KTS/category làm khóa. Một bảng chỉ sở hữu một nhóm dữ kiện: hồ sơ sở hữu thông tin KTS; category sở hữu tên chuyên môn; link sở hữu quan hệ; request sở hữu lần gửi và nội dung liên hệ. Không lưu category dạng CSV/JSON trong hồ sơ và không sao chép danh sách chuyên môn vào đơn.
 
 **Architect — một dòng là một hồ sơ KTS.** Người có quyền tạo/sửa; không liên kết với User của KTS. `IsVisible` chỉ điều khiển việc hiển thị/nhận yêu cầu mới. Số năm kinh nghiệm và số công trình do admin nhập, không tính từ các bảng dự án. `CompanyName`, `Rating` và `ReviewCount` cũng do người có quyền nhập; không có bảng đánh giá làm nguồn tổng hợp. Công ty là thuộc tính văn bản của hồ sơ, không phải khóa liên kết tới tổ chức.
@@ -561,6 +609,12 @@ File [20260929122151_ArchitectProfileSummary.cs](../../bmt-be/src/bmt-be.persist
 ### Endpoints
 
 Các đường dẫn dưới đây là hợp đồng v1 đã triển khai; Carter dùng `/api/v{version:apiVersion}`. Query list dùng pageIndex/pageSize; dữ liệu mới nhất đứng trước, category theo Name rồi Id. Không thêm filter category public trong bản này vì người dùng mới chốt phân loại, chưa yêu cầu rõ cách lọc nhiều category.
+
+**Contract bổ sung 08/10/2026, đã triển khai trong workspace:** POST/PUT nhận `shortDescription` và `designProjects:[{name,imageUrls:[url,...]}]`. Mô tả tối đa 500 ký tự sau trim; tên dự án 1–200 ký tự; mỗi dự án ít nhất một URL HTTPS hợp lệ, tối đa 2048 ký tự/URL. Không đặt số dự án hoặc số ảnh tối đa mới ngoài giới hạn request hiện có. Thiếu/null hai phần khi POST nghĩa chưa nhập. Khi PUT, thiếu/null nghĩa giữ phần đã lưu để client cũ không xóa dữ liệu; muốn xóa mô tả gửi chuỗi rỗng, muốn bỏ hết dự án gửi `[]`. Danh sách khác null thay toàn bộ dự án cùng ảnh theo thứ tự mảng; Id dòng con là nội bộ, không là định danh tài nguyên độc lập của client.
+
+Cả bốn GET hồ sơ thêm `shortDescription` nullable. GET chi tiết public/admin thêm `designProjects`, trả `[]` khi chưa có; GET danh sách không tải bộ ảnh. `PublicArchitectDetail` kế thừa dữ liệu công khai hiện có, thêm danh sách dự án; không lộ version/trạng thái quản trị. `AdminArchitectDetail` thêm cùng danh sách. Giữ mã lỗi `ConsultationInputInvalid` cho dữ liệu sai, `ConcurrencyConflict` khi phiên bản cũ và các lỗi MEDIA hiện có. Khi đổi Ẩn/Hiện, frontend tải chi tiết rồi gửi đủ cả mô tả và dự án để giữ nội dung đang lưu. Ảnh mới phải qua policy kho ảnh; URL đã lưu không bị kiểm lại tên miền chỉ vì đổi trường khác. Nguồn MEDIA vẫn kiểm trạng thái ảnh theo hợp đồng hiện có.
+
+Ví dụ phần đầu vào bổ sung: `{"shortDescription":"Thiết kế nhà phố","designProjects":[{"name":"Nhà phố An","imageUrls":["https://images.example.test/design/front.jpg","https://images.example.test/design/living.jpg"]}]}`. Các trường bắt buộc hiện có và `expectedVersion` khi PUT vẫn phải gửi như ví dụ bên dưới.
 
 | Nhóm | Quyền/policy |
 | --- | --- |
@@ -800,7 +854,9 @@ Mặc định source hiện là 3 lần retry, khoảng đầu 5 giây, mỗi l�
 
 ### Others
 
-- [Độ phủ System Test](../discovery/consult-system-test-coverage.md): 41 đặc tả, 35 AC; có bằng chứng backend ngày 29/09, chưa chạy trọn bộ E2E.
+- [UT-CONSULT-060](../unittest/UT-CONSULT-060.md) đến [UT-CONSULT-066](../unittest/UT-CONSULT-066.md): mô tả tùy chọn, dự án/ảnh, tương thích client cũ, mapping và theo dõi nguồn MEDIA.
+- [ST-CONSULT-042](../systemtest/ST-CONSULT-042.md) đến [ST-CONSULT-045](../systemtest/ST-CONSULT-045.md): mô tả ngắn, dự án/ảnh, dữ liệu tùy chọn và từ chối dự án thiếu thông tin; là đặc tả chưa thực thi.
+- [Độ phủ System Test](../discovery/consult-system-test-coverage.md): 45 đặc tả, 40 AC; có bằng chứng backend ngày 29/09, chưa chạy trọn bộ E2E.
 - [ST-CONSULT-001](../systemtest/ST-CONSULT-001.md) đến [ST-CONSULT-010](../systemtest/ST-CONSULT-010.md): hồ sơ và category.
 - [ST-CONSULT-011](../systemtest/ST-CONSULT-011.md) đến [ST-CONSULT-022](../systemtest/ST-CONSULT-022.md): gửi yêu cầu, giờ, liên lạc và email.
 - [ST-CONSULT-023](../systemtest/ST-CONSULT-023.md) đến [ST-CONSULT-030](../systemtest/ST-CONSULT-030.md): quản trị và bảo vệ ghi chú.

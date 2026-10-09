@@ -35,21 +35,18 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Tham chiếu dạng DOC-KEY/section: ghi chú: mã đích tối đa 100 ký tự, section tối đa 100, ghi chú tối đa 1.000. Không trùng bộ mã đích + section + loại liên kết trong cùng tài liệu.
 -->
 
-# ST-NEWS-031
+# ST-CMS-006
 
 ## System Test
 
-- **Reviewer**: Tân Trần
-- **Approver**: Tân Trần
+- **Reviewer**: [Chưa xác định]
+- **Approver**: [Chưa xác định]
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-NEWS-031 | STORY-NEWS-001 | Main / EXC / Integration boundary | REGRESSION | P1 | Môi trường thử có quản trị và trang đọc tin; A có news.manage. Có bài Published từ trước migration với số phút NULL. | 1. Tạo nháp để trống số phút rồi thử công bố.<br>2. Nhập lần lượt 0, -1, 1.5 và 7; lưu, mở lại và công bố khi đủ trường khác.<br>3. Đổi riêng số phút thành 12; kiểm API danh sách/chi tiết quản trị và công khai cùng dữ liệu lưu.<br>4. Đọc bài cũ NULL; thử lưu sửa thiếu số phút rồi bổ sung 9 và lưu lại. | Các số là dữ liệu thử, không phải mặc định. Bài cũ giữ nguyên nội dung, trạng thái, ngày đầu và Version qua migration. | Ô số phút đọc vẫn có bên cạnh mô tả ngắn tùy chọn theo yêu cầu 08/10/2026; hành vi mô tả kiểm ở ST-NEWS-036. Nháp lưu được NULL; công bố thiếu số phút bị từ chối. Chỉ số nguyên dương được lưu; số phút hiển thị đúng giá trị nhập, không tính từ nội dung. Bài cũ vẫn đọc được và không hiện 0 phút; lần sửa Published thiếu số phút bị từ chối, bổ sung 9 thì lưu được và giữ ngày đầu. | STORY-NEWS-001/AC-010<br>STORY-NEWS-001/EXC-05<br>STORY-NEWS-003/AC-001<br>BR-NEWS-001/Then<br>BR-NEWS-001/Except | Quyết định người dùng ngày 29/09/2026. Đặc tả chưa thực thi trên giao diện. | [Chưa xác định] | Draft |
+| ST-CMS-006 | STORY-CMS-001 | EXC | REGRESSION | P1 | Môi trường kiểm thử có API CMS và quyền phù hợp; dữ liệu fixture, không ghi production. | 1. Gửi ô kind không hợp lệ hoặc thiếu cột PRO.<br>2. Gửi chữ dài 1001 ký tự.<br>3. Gửi bản sửa bằng version cũ.<br>4. Đọc lại bản đã lưu. | Bản hiện tại version 2; request stale version 1; kind quota; chuỗi 1001 ký tự | Sai nội dung bị 422; version cũ bị 409; bản đã lưu và thông báo cache không bị thay bởi request lỗi. | STORY-CMS-001/AC-007; BR-CMS-001/Then | Từ chối nội dung sai và xung đột; đặc tả, chưa phải kết quả thực thi. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
-- STORY-NEWS-001/AC-010
-- STORY-NEWS-001/EXC-05
-- STORY-NEWS-003/AC-001
-- BR-NEWS-001/Then
-- BR-NEWS-001/Except
+- STORY-CMS-001/AC-007
+- BR-CMS-001/Then

@@ -35,138 +35,132 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - Sprint dùng số nguyên dương để đồng thời đáp ứng form yêu cầu số dương và parser đọc Int32 (tối đa 2.147.483.647). Không tự đặt Sprint hoặc số liệu khi chưa có nguồn.
 -->
 
-# STORY-NEWS-003
+# STORY-CMS-002
 
 ## Metadata
 
-- **Story**: Là người đọc Cẩm nang, tôi muốn tìm, lọc và đọc tin tức để tham khảo thông tin mà không cần tài khoản hoặc gói.
-- **Context**: Tin tức công khai, miễn lượt; danh mục đa cấp giúp tìm bài theo chủ đề.
-- **Sprint**:
+- **Story**: Là người quản lý nội dung, tôi muốn thêm, sửa, xóa và sắp xếp hạng mục, chọn icon cho từng hàng của bảng Giá trị khách hàng nhận được để cập nhật CMS Bảng giá.
+- **Context**: Bảng quản trị đã có bốn cột nhưng chỉ sửa được bốn hàng cố định; icon ở trang công khai đang viết cố định trong mã. Người dùng yêu cầu thêm hạng mục và chọn icon, đồng thời xác nhận cho phép xóa và sắp xếp hàng.
+- **Sprint**: [Chưa xác định]
 - **Priority**: Must
 - **Status**: Todo
-- **Creator**: Tân Trần
-- **Reviewer**: Tân Trần
-- **Approver**: Tân Trần
+- **Creator**: [Chưa xác định]
+- **Reviewer**: [Chưa xác định]
+- **Approver**: [Chưa xác định]
 - **Assignee**:
-  - Backend: [Chưa xác định]
+  - Fullstack: [Chưa xác định]
   - QA: [Chưa xác định]
 
 ## Conditions
 
 ### Preconditions
 
-- Không yêu cầu đăng nhập hoặc sở hữu gói.
+- Người quản lý đã đăng nhập và có quyền `news.manage` của CMS Bảng giá hiện có.
+- Màn Nội dung → Gói tư vấn → tab Gói thiết kế có phần Giá trị khách hàng nhận được.
 
 ### Trigger
 
-Người đọc mở phần Tin tức trong Cẩm nang hoặc đường dẫn bài.
+Người quản lý cần cập nhật các hạng mục và icon trong bảng giá trị khách hàng.
 
 ## Flow
 
 ### Main Flow
 
-1. Hiển thị các bài đang công bố theo ngày công bố đầu tiên, mới nhất trước, có phân trang.
-2. Người đọc nhập từ khóa tiêu đề và có thể chọn một danh mục.
-3. Lọc bài khớp từ khóa và thuộc danh mục đã chọn hoặc các danh mục con ở mọi cấp; loại trùng trước khi phân trang.
-4. Mở bài và hiển thị nội dung rich text cùng ảnh và số phút đọc do người viết nhập (nếu đã có); không kiểm gói và không trừ lượt.
+1. Người quản lý chọn tab Gói thiết kế, chọn ngôn ngữ và mở Giá trị khách hàng nhận được tại `/admin/plans-content`.
+2. Hệ thống hiển thị tiêu đề và bảng Hạng mục/BASIC/PLUS/PRO.
+3. Người quản lý thêm hạng mục, nhập tên hàng, chọn icon có xem trước và nhập chữ riêng trong ba cột.
+4. Người quản lý sửa, xóa hoặc sắp xếp các hạng mục.
+5. Người quản lý lưu phần nội dung. Hệ thống kiểm dữ liệu, quyền và phiên bản trước khi cập nhật CMS của ngôn ngữ đang sửa.
+6. Trang `/plans` hiển thị các hàng, nội dung, thứ tự và icon đã lưu. Thao tác CMS không đổi quyền, giá hoặc hạn mức thuê bao.
 
 ### Alternative Flow
 
 #### ALT-01
 
-Không chọn danh mục hoặc không nhập từ khóa.
+Bảng chưa có danh sách hạng mục động đã lưu.
 
-1. Chỉ áp dụng điều kiện được nhập; không có cả hai thì hiển thị danh sách công khai.
+1. hệ thống đưa bốn hàng hiện có cùng nội dung CMS đã nhập và bốn icon cũ vào bảng làm điểm bắt đầu.
+2. Khi lưu, hệ thống ghi danh sách động; mở bảng chưa tự ghi dữ liệu.
 
 #### ALT-02
 
-Không có bài khớp.
+Người quản lý xóa hạng mục cuối cùng.
 
-1. Hiển thị danh sách rỗng, cho thay đổi điều kiện tìm/lọc.
+1. hệ thống cho lưu danh sách rỗng.
+2. Trang công khai giữ tiêu đề và không tự thêm lại bốn hàng mặc định. Khôi phục mặc định là thao tác riêng theo ngôn ngữ hiện có.
 
 ### Exception Flow
 
 #### EXC-01
 
-Mở bài nháp, ẩn hoặc đã xóa bằng đường dẫn trực tiếp.
+Nội dung sai định dạng, không đủ quyền hoặc phiên bản đã bị thay đổi.
 
-1. Không cung cấp nội dung; bài đã xóa báo không tìm thấy.
+1. Hệ thống áp dụng thông báo validation, quyền và cơ chế xử lý xung đột phiên bản của CMS hiện có.
+2. Lỗi tải danh sách icon hoặc icon không tìm thấy không được làm mất chữ đã nhập; dùng icon dự phòng khi tên không tra được.
 
 ## Acceptance Criteria
 
 #### AC-001
 
-- **Given**: Người chưa đăng nhập hoặc không có gói
-- **When**: Mở một bài đang công bố
-- **Then**: Đọc được miễn phí, không trừ lượt hoặc yêu cầu mua gói; dữ liệu danh sách và chi tiết có số phút đọc đã nhập và mô tả ngắn nếu có. Bài cũ chưa nhập số phút hoặc mô tả ngắn vẫn đọc được.
+- **Given**: Người quản lý đang sửa bảng giá trị khách hàng.
+- **When**: Thêm một hạng mục và nhập tên, icon cùng chữ trong BASIC/PLUS/PRO rồi lưu.
+- **Then**: Mở lại admin và trang công khai thấy hàng mới với các giá trị đã nhập.
+- **And**: Không tạo hoặc sửa quyền sử dụng, giá và hạn mức thật.
 
 #### AC-002
 
-- **Given**: Bài gắn cả “Vật liệu” và “Vật liệu → Sơn”
-- **When**: Lọc “Vật liệu”
-- **Then**: Bài xuất hiện một lần; kết quả gồm bài gắn trực tiếp và mọi cấp con.
+- **Given**: Bảng có nhiều hạng mục.
+- **When**: Người quản lý sửa, xóa hoặc sắp xếp hàng rồi lưu.
+- **Then**: Trang công khai hiển thị nội dung và thứ tự đã lưu, không còn hàng đã xóa.
 
 #### AC-003
 
-- **Given**: Nhập từ khóa và chọn một danh mục
-- **When**: Tìm tin
-- **Then**: Chỉ trả bài đồng thời khớp tiêu đề và nhánh danh mục, có phân trang; không khớp thì danh sách rỗng.
+- **Given**: Người quản lý chọn icon của một hàng.
+- **When**: Chọn một icon trong thư viện icon đang dùng của frontend.
+- **Then**: Có xem trước trong admin và trang công khai hiển thị icon đã chọn sau khi lưu.
 
 #### AC-004
 
-- **Given**: Bài cũ được sửa hoặc ẩn rồi công bố lại
-- **When**: Xem danh sách
-- **Then**: Thứ tự dựa trên ngày công bố đầu tiên, không tự đẩy bài cũ lên đầu.
+- **Given**: Bảng chưa có danh sách động; người dùng đã sửa chữ trong bốn hàng cũ.
+- **When**: Mở bảng mới.
+- **Then**: Giữ toàn bộ chữ đã nhập, thứ tự và bốn icon cũ làm dữ liệu ban đầu.
 
 #### AC-005
 
-- **Given**: Bài đang nháp, ẩn hoặc đã xóa
-- **When**: Xem danh sách hoặc mở trực tiếp
-- **Then**: Không được đọc nội dung công khai; đường dẫn bài đã xóa báo không tìm thấy.
+- **Given**: Người quản lý đã xóa hết hạng mục.
+- **When**: Lưu bảng rỗng.
+- **Then**: Giữ tiêu đề công khai, không phục hồi hàng mặc định; khôi phục mặc định chỉ diễn ra qua thao tác riêng.
 
 #### AC-006
 
-- **Given**: Có bài đang công bố không gắn danh mục nào
-- **When**: Xem danh sách mà không lọc danh mục, rồi lọc một danh mục bất kỳ
-- **Then**: Lần đầu bài xuất hiện kèm nhãn chưa phân loại trên thẻ bài; lần sau bài không xuất hiện.
-- **And**: Bộ lọc không có lựa chọn riêng cho nhóm chưa phân loại.
-
-#### AC-007
-
-- **Given**: Một bài đang công bố đã từng đổi đường dẫn
-- **When**: Mở bài bằng đường dẫn cũ, rồi mở bằng đường dẫn hiện tại
-- **Then**: Đường dẫn cũ chuyển hướng vĩnh viễn sang đường dẫn hiện tại; đường dẫn hiện tại trả nội dung bài.
-- **And**: Đường dẫn không tồn tại báo không tìm thấy.
+- **Given**: Người quản lý đang sửa một ngôn ngữ.
+- **When**: Lưu hoặc khôi phục bảng.
+- **Then**: Chỉ nội dung của ngôn ngữ đang sửa thay đổi.
+- **And**: Đóng/mở section giữ nội dung đang nhập; điện thoại cuộn và sửa được cả cột PRO; kiểm quyền, độ dài chữ và phiên bản theo CMS hiện có.
 
 ## References
 
 ### TDDs
 
-- TDD-NEWS-001
-- TDD-NEWS-002
-- TDD-NEWS-003
+- TDD-HB-003/Architecture: CMS PageSection và khối plans/value hiện có; danh sách động và tương thích dữ liệu cũ.
 
 ### Rules
 
-- BR-NEWS-001
-- BR-NEWS-002
-- BR-NEWS-003
-- BR-NEWS-004
+- BR-CMS-002
+- BR-SUB-008/Then: CMS không tạo entitlement hoặc đổi hai hạn mức sử dụng thật.
 
 ### Dependencies
 
-- STORY-NEWS-001
-- STORY-NEWS-002
+- STORY-CMS-001: Dùng lại màn CMS Bảng giá và cơ chế ngôn ngữ, lưu, khôi phục đã có.
 
 ## Non-Functional
 
-- Kiểm tra quyền quản lý tại backend, kể cả yêu cầu trực tiếp; quyền đọc công khai không cấp quyền sửa dữ liệu.
-- Rich text phải hiển thị an toàn, không thực thi mã do người soạn chèn. Chi tiết kiểm soát thuộc bước thiết kế kỹ thuật.
-- Chưa chốt ngưỡng hiệu năng hoặc giới hạn truyền tải. Backend đã merge vào `develop` của `bmt-be`; phần đường dẫn và bài không danh mục chưa triển khai và chưa chạy System Test.
+- Giữ quyền CMS `news.manage`, kiểm phiên bản và giới hạn chữ hiện có.
+- Không đưa toàn bộ mã component icon của thư viện vào bundle client chỉ để chọn icon.
+- Ô nhập và thao tác chọn icon, thêm, xóa, sắp xếp phải dùng được bằng bàn phím.
 
 ## Out of Scope
 
-- Bình luận, thích, lưu yêu thích và thống kê lượt đọc.
-- Lịch sử xem, quota, tìm trong toàn bộ nội dung hoặc lọc nhiều danh mục cùng lúc.
-- Bộ lọc riêng cho nhóm bài chưa phân loại.
-- Khối Bản tin và cách xem theo bước thuộc STORY-HB-002 và STORY-HB-003.
+- Thay cấu hình gói, giá, quyền sử dụng và hạn mức thuê bao.
+- Thay các khối CMS khác của trang bảng giá.
+- Tải lên icon tùy chỉnh hoặc ảnh riêng; yêu cầu này dùng thư viện icon của frontend.

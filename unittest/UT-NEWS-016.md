@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-NEWS-016 | Tin tức | NewsArticleService — nội dung có nghĩa sau làm sạch | Boundary | REGRESSION | P1 | Sanitizer thật hoặc kết quả chuẩn hóa cố định; các trường bắt buộc khác đủ. | ContentHtml lần lượt NULL, p/br rỗng, khoảng trắng, script bị loại hết, văn bản hợp lệ, một img hợp lệ. | Bốn biến thể đầu không đủ công bố; văn bản hoặc ảnh hợp lệ đủ điều kiện nội dung. Kiểm sau sanitization, không dùng raw HTML length. | TDD-NEWS-001/Architecture<br>BR-NEWS-001/Then | Theo thiết kế đã chốt. Mã test ở bảng độ phủ kiểm thử đơn vị Tin tức; không ghi kết quả chạy vào đặc tả. | [Chưa xác định] | Draft |
+| UT-NEWS-016 | Tin tức | NewsArticleService — nội dung có nghĩa sau làm sạch | Boundary | REGRESSION | P1 | Sanitizer thật hoặc kết quả chuẩn hóa cố định; các trường bắt buộc khác đủ. | ContentHtml lần lượt NULL, p/br rỗng, khoảng trắng, script bị loại hết, bảng có ô chỉ chứa p/br hoặc khoảng trắng, văn bản hợp lệ, một img hợp lệ. | Các biến thể không có chữ/ảnh có nghĩa không đủ công bố; bảng rỗng vẫn lưu nháp được và bị từ chối công bố mà không đổi trạng thái/version. Văn bản hoặc ảnh hợp lệ, kể cả nằm trong ô bảng, đủ điều kiện nội dung. Kiểm sau sanitization, không dùng raw HTML length. | TDD-NEWS-001/Architecture<br>BR-NEWS-001/Then | Theo thiết kế đã chốt. Mã test ở bảng độ phủ kiểm thử đơn vị Tin tức; không ghi kết quả chạy vào đặc tả. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
