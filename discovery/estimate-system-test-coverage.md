@@ -291,3 +291,130 @@ Người dùng xác nhận bốn quyết định cho TDD-PROJ-003: giới hạn 
 | [ST-PROJ-077](../systemtest/ST-PROJ-077.md) | STORY-PROJ-004 / EXC-03, AC-007 | Email kẹt chuyển Unknown `EmailTimedOut`, không gửi lại từ yêu cầu cũ |
 
 US, BR không đổi. Code ở nhánh `feature/estimate-sharing-hardening` của `bmt-be` (commit `8de4c21`) có test qua pipeline HTTP cho 429 và integration test PostgreSQL cho job chạy đồng thời với consumer; đó không phải kết quả chạy các ST này. Bảng truy vết AC ở trên chưa được đánh lại để thêm bốn ca này.
+
+## Mốc cập nhật ngày 11/10/2026: luồng bốn chặng
+
+Người dùng chốt bộ US/BR của luồng bốn chặng (2D → Dự toán → Phối cảnh 3D → Hồ sơ) trong hội thoại ngày 11/10/2026, gồm STORY-PROJ-001 đến STORY-PROJ-013, BR-PROJ-001 đến BR-PROJ-019, BR-SUB-003, BR-SUB-016 và BR-MEDIA-001. Các phần mô tả ở đầu tài liệu này phản ánh trạng thái trước mốc này; khi khác nhau, mục này là căn cứ.
+
+- **Ca mới:** 70 ca ST-PROJ-128 đến ST-PROJ-197.
+- **Ca cũ đã sửa theo US/BR mới:** 92 trong 127 ca. Mã ca giữ nguyên, không xóa file. Các nhóm chính:
+  - STORY-PROJ-002 (021–032, 057, 064, 072, 073, 125) viết lại thành chặng 2D;
+  - STORY-PROJ-003 (033–038, 069, 076) viết lại thành xem kết quả theo chặng và tải 4 tệp sau chặng Hồ sơ;
+  - STORY-PROJ-001: bỏ Diện tích, ảnh lô bắt buộc và được soi, mô tả 4.000 ký tự, khóa theo chặng 2D;
+  - STORY-PROJ-004: chia sẻ sau chặng Hồ sơ;
+  - STORY-PROJ-005: mã gốc, “Mô tả cho AI”;
+  - STORY-PROJ-006, 007: năm trạng thái, chặn xóa khi có chặng đang chạy.
+- **Độ phủ:** mọi AC, ALT và EXC của STORY-PROJ-001 đến STORY-PROJ-013 có ít nhất một ca (tổng 241 mục); mọi BR-PROJ-001 đến BR-PROJ-019 có ít nhất một ca. Kiểm tra bằng script: mỗi file một heading trùng Test ID, đúng 13 cột, Trace to khớp TEST_LINKS, mọi mã và section được dẫn đều có thật.
+- **Phủ gián tiếp, chưa có bước kiểm riêng:** BR-PROJ-012 khoản 7 (mỗi lời gọi AI chỉ dùng phần thời gian còn lại) và BR-PROJ-010 khoản 6 (chặng sau dùng đầu vào đã chốt). Hai khoản này nên kiểm bằng integration test khi có TDD.
+- **Ca nên cân nhắc cho ngừng dùng** (chưa xóa): ST-PROJ-072 có thể trùng ST-PROJ-197 về chuyển luồng; ST-PROJ-076 gần trùng ST-PROJ-038 (lỗi khi tải tệp); ST-PROJ-125 phụ thuộc thiết kế bản chụp đầu vào, cần soạn lại khi viết lại TDD-PROJ-002.
+- **Môi trường:** các ca chạy với chế độ AI giả phát lại phản hồi ghi sẵn (dự kiến theo TDD của từng đợt); kết quả với chế độ giả không phải bằng chứng tích hợp AI thật. Tất cả ca ở trạng thái Draft, chưa thực thi.
+
+| Test | Story | Mục tiêu | Loại | Ưu tiên |
+|---|---|---|---|---|
+| [ST-PROJ-128](../systemtest/ST-PROJ-128.md) | [STORY-PROJ-002](../userstory/STORY-PROJ-002.md) | Luồng chính của chặng 2D với mô hình một lượt cho cả bộ: giữ lượt khi tiếp nhận, tính đã dùng khi 2D thành công, không tự chạy chặng sau | Main | P0 |
+| [ST-PROJ-129](../systemtest/ST-PROJ-129.md) | [STORY-PROJ-002](../userstory/STORY-PROJ-002.md) | Ảnh lô phải Đạt mới mở chặng 2D; yêu cầu bị từ chối trước khi tiếp nhận thì không giữ lượt | EXC | P0 |
+| [ST-PROJ-130](../systemtest/ST-PROJ-130.md) | [STORY-PROJ-002](../userstory/STORY-PROJ-002.md) | Tự vẽ lại một lần không tính là lỗi và không kéo dài hạn chờ | ALT | P1 |
+| [ST-PROJ-131](../systemtest/ST-PROJ-131.md) | [STORY-PROJ-002](../userstory/STORY-PROJ-002.md) | Bản vẽ vẫn hỏng sau một lần vẽ lại thì lần chạy lỗi, hoàn lượt và mở sửa đầu vào | EXC | P0 |
+| [ST-PROJ-132](../systemtest/ST-PROJ-132.md) | [STORY-PROJ-002](../userstory/STORY-PROJ-002.md) | Chạy lại 2D sau lỗi kiểm tra lại đủ điều kiện và giữ lượt mới vì lượt cũ đã hoàn | ALT | P1 |
+| [ST-PROJ-133](../systemtest/ST-PROJ-133.md) | [STORY-PROJ-002](../userstory/STORY-PROJ-002.md) | Đạt giới hạn lỗi chặn chạy lại; giới hạn mới nhỏ hơn số lần lỗi vẫn chặn; chỉ Admin đặt lại bộ đếm | EXC / ALT | P1 |
+| [ST-PROJ-134](../systemtest/ST-PROJ-134.md) | [STORY-PROJ-002](../userstory/STORY-PROJ-002.md) | Mỗi bản dự toán chỉ có một chặng chạy tại một thời điểm; gửi lặp không giữ thêm lượt | EXC | P0 |
+| [ST-PROJ-135](../systemtest/ST-PROJ-135.md) | [STORY-PROJ-002](../userstory/STORY-PROJ-002.md) | Gián đoạn kỹ thuật được tự tiếp tục trong hạn chờ không tính là lỗi và không gọi lại AI đã có kết quả | ALT / NFR | P1 |
+| [ST-PROJ-136](../systemtest/ST-PROJ-136.md) | [STORY-PROJ-002](../userstory/STORY-PROJ-002.md) | Quá hạn chặng 2D hoàn lượt; kết quả muộn bị bỏ | EXC | P0 |
+| [ST-PROJ-137](../systemtest/ST-PROJ-137.md) | [STORY-PROJ-002](../userstory/STORY-PROJ-002.md) | Sau khi 2D thành công đầu vào khóa vĩnh viễn và chặng 2D không chạy lại; đổi tên vẫn được | EXC | P0 |
+| [ST-PROJ-138](../systemtest/ST-PROJ-138.md) | [STORY-PROJ-002](../userstory/STORY-PROJ-002.md) | Gói hết hạn không hủy lần chạy 2D đã tiếp nhận; lượt tính vào kỳ đã giữ | ALT | P2 |
+| [ST-PROJ-139](../systemtest/ST-PROJ-139.md) | [STORY-PROJ-002](../userstory/STORY-PROJ-002.md) | Cờ cấu hình và quyền chủ sở hữu được kiểm tra trước khi tiếp nhận lần chạy | EXC | P1 |
+| [ST-PROJ-140](../systemtest/ST-PROJ-140.md) | [STORY-PROJ-008](../userstory/STORY-PROJ-008.md) | Luồng chính chặng Dự toán: không tính lượt, chốt phiên bản luật giá và cấu hình, không tự chạy chặng sau | Main | P0 |
+| [ST-PROJ-141](../systemtest/ST-PROJ-141.md) | [STORY-PROJ-008](../userstory/STORY-PROJ-008.md) | Thứ tự chặng và quy tắc chặng đã thành công không chạy lại được kiểm tra tại backend | EXC | P1 |
+| [ST-PROJ-142](../systemtest/ST-PROJ-142.md) | [STORY-PROJ-008](../userstory/STORY-PROJ-008.md) | Lưới an toàn giá của app demo đổi số gửi khách; lý do chỉ nằm trong phần nội bộ | Main | P1 |
+| [ST-PROJ-143](../systemtest/ST-PROJ-143.md) | [STORY-PROJ-008](../userstory/STORY-PROJ-008.md) | Lọc nội dung nội bộ khỏi phần gửi khách; cờ cần rà không chặn chặng | Main | P1 |
+| [ST-PROJ-144](../systemtest/ST-PROJ-144.md) | [STORY-PROJ-008](../userstory/STORY-PROJ-008.md) | AI trả thiếu trường bắt buộc thì chặng lỗi, không công bố một phần | EXC | P1 |
+| [ST-PROJ-145](../systemtest/ST-PROJ-145.md) | [STORY-PROJ-008](../userstory/STORY-PROJ-008.md) | Chặng sau 2D không phụ thuộc gói và lượt; lần chạy lại chốt luật giá hiện hành | ALT | P1 |
+| [ST-PROJ-146](../systemtest/ST-PROJ-146.md) | [STORY-PROJ-008](../userstory/STORY-PROJ-008.md) | Đổi luật giá không tính lại dự toán đã có | ALT | P2 |
+| [ST-PROJ-147](../systemtest/ST-PROJ-147.md) | [STORY-PROJ-008](../userstory/STORY-PROJ-008.md) | Lỗi hết tiền hoặc khóa bị từ chối không thử lại và được báo cho Admin | EXC / Integration boundary | P1 |
+| [ST-PROJ-148](../systemtest/ST-PROJ-148.md) | [STORY-PROJ-008](../userstory/STORY-PROJ-008.md) | Quá hạn chặng sau 2D không ảnh hưởng lượt; hạn mới chỉ áp cho lần chạy sau | EXC | P1 |
+| [ST-PROJ-149](../systemtest/ST-PROJ-149.md) | [STORY-PROJ-009](../userstory/STORY-PROJ-009.md) | Luồng chính chặng 3D, không phụ thuộc gói và quyền 3D | Main / ALT | P0 |
+| [ST-PROJ-150](../systemtest/ST-PROJ-150.md) | [STORY-PROJ-009](../userstory/STORY-PROJ-009.md) | Hai nhóm phong cách được dùng đúng chỗ; kiểu mái dùng chung giữa Dự toán và 3D | Main | P1 |
+| [ST-PROJ-151](../systemtest/ST-PROJ-151.md) | [STORY-PROJ-009](../userstory/STORY-PROJ-009.md) | Ảnh ban đêm phụ thuộc ảnh ban ngày | Main | P2 |
+| [ST-PROJ-152](../systemtest/ST-PROJ-152.md) | [STORY-PROJ-009](../userstory/STORY-PROJ-009.md) | Tự dựng lại một lần, lần chạy lại chỉ dựng ảnh còn thiếu | EXC / ALT | P0 |
+| [ST-PROJ-153](../systemtest/ST-PROJ-153.md) | [STORY-PROJ-009](../userstory/STORY-PROJ-009.md) | Quá hạn 3D giữ phần đã lưu trước hạn cho lần chạy lại; kết quả muộn bị bỏ | EXC | P1 |
+| [ST-PROJ-154](../systemtest/ST-PROJ-154.md) | [STORY-PROJ-009](../userstory/STORY-PROJ-009.md) | Điều kiện mở chặng 3D và trạng thái hiển thị từng chặng | EXC | P1 |
+| [ST-PROJ-155](../systemtest/ST-PROJ-155.md) | [STORY-PROJ-010](../userstory/STORY-PROJ-010.md) | Luồng chính chặng Hồ sơ: không gọi AI, đủ 4 tệp, đúng thứ tự trang và thông tin in | Main / ALT | P0 |
+| [ST-PROJ-156](../systemtest/ST-PROJ-156.md) | [STORY-PROJ-010](../userstory/STORY-PROJ-010.md) | Tải và chia sẻ chỉ mở sau chặng Hồ sơ | EXC | P0 |
+| [ST-PROJ-157](../systemtest/ST-PROJ-157.md) | [STORY-PROJ-010](../userstory/STORY-PROJ-010.md) | Tệp lỗi được dựng lại một lần; chạy lại chỉ dựng tệp còn thiếu | EXC / ALT | P1 |
+| [ST-PROJ-158](../systemtest/ST-PROJ-158.md) | [STORY-PROJ-010](../userstory/STORY-PROJ-010.md) | Đổi tên sau khi xong Hồ sơ chỉ đổi tên tệp tải về | ALT | P2 |
+| [ST-PROJ-159](../systemtest/ST-PROJ-159.md) | [STORY-PROJ-010](../userstory/STORY-PROJ-010.md) | Điều kiện mở chặng Hồ sơ, chặng đã thành công không chạy lại và hạn chờ 5 phút | EXC | P1 |
+| [ST-PROJ-160](../systemtest/ST-PROJ-160.md) | [STORY-PROJ-001](../userstory/STORY-PROJ-001.md) | Kích thước lô thay cho Diện tích: không bắt buộc, hai ô đi cùng nhau, giới hạn số | Main / EXC | P1 |
+| [ST-PROJ-161](../systemtest/ST-PROJ-161.md) | [STORY-PROJ-001](../userstory/STORY-PROJ-001.md) | Điền sẵn kích thước từ kết quả soi chỉ khi ô trống; không ghi đè số khách nhập | Main / ALT | P1 |
+| [ST-PROJ-162](../systemtest/ST-PROJ-162.md) | [STORY-PROJ-002](../userstory/STORY-PROJ-002.md) | Thứ tự ưu tiên kích thước lô là thuật toán; lô mặc định lấy từ bộ quy tắc AI | Main / ALT | P1 |
+| [ST-PROJ-163](../systemtest/ST-PROJ-163.md) | [STORY-PROJ-001](../userstory/STORY-PROJ-001.md) | Giới hạn tệp ảnh lô do backend tự đọc từ kho kiểm tra, không tin thông tin giao diện gửi | EXC / Integration boundary | P1 |
+| [ST-PROJ-164](../systemtest/ST-PROJ-164.md) | [STORY-PROJ-001](../userstory/STORY-PROJ-001.md) | Purpose ảnh lô 10 MiB chỉ dành cho chủ bản dự toán đang được sửa | EXC / Integration boundary | P1 |
+| [ST-PROJ-165](../systemtest/ST-PROJ-165.md) | [STORY-PROJ-001](../userstory/STORY-PROJ-001.md) | Kết quả soi quyết định có được chạy 2D hay không | Main / EXC | P0 |
+| [ST-PROJ-166](../systemtest/ST-PROJ-166.md) | [STORY-PROJ-001](../userstory/STORY-PROJ-001.md) | Nhớ kết quả soi theo tài khoản, hash ảnh, prompt và model; không dùng chéo tài khoản | Main / Integration boundary | P1 |
+| [ST-PROJ-167](../systemtest/ST-PROJ-167.md) | [STORY-PROJ-001](../userstory/STORY-PROJ-001.md) | Hạn mức soi 30 ảnh mới mỗi ngày theo giờ Việt Nam | EXC / ALT | P1 |
+| [ST-PROJ-168](../systemtest/ST-PROJ-168.md) | [STORY-PROJ-002](../userstory/STORY-PROJ-002.md) | Đổi model hoặc prompt soi không bắt soi lại ảnh đã Đạt (khoản 9) | ALT | P2 |
+| [ST-PROJ-169](../systemtest/ST-PROJ-169.md) | [STORY-PROJ-001](../userstory/STORY-PROJ-001.md) | Ảnh lô bắt buộc; mô tả không bắt buộc, tối đa 4.000 ký tự | Main / ALT / EXC | P1 |
+| [ST-PROJ-170](../systemtest/ST-PROJ-170.md) | [STORY-PROJ-001](../userstory/STORY-PROJ-001.md) | Số phòng ngủ 1–10 bắt buộc trước khi chạy 2D | Main / EXC | P1 |
+| [ST-PROJ-171](../systemtest/ST-PROJ-171.md) | [STORY-PROJ-001](../userstory/STORY-PROJ-001.md) | Ba giá trị mặc định của đầu vào mới | Main | P2 |
+| [ST-PROJ-172](../systemtest/ST-PROJ-172.md) | [STORY-PROJ-001](../userstory/STORY-PROJ-001.md) | Số tầng 1–4 cộng tum; căn hộ một sàn | Main / ALT / EXC | P1 |
+| [ST-PROJ-173](../systemtest/ST-PROJ-173.md) | [STORY-PROJ-001](../userstory/STORY-PROJ-001.md) | Khóa đầu vào theo chặng 2D, gồm cả ảnh lô và soi ảnh | Main / EXC | P0 |
+| [ST-PROJ-174](../systemtest/ST-PROJ-174.md) | [STORY-PROJ-003](../userstory/STORY-PROJ-003.md) | Khách dừng giữa chừng: xem được kết quả đã xong, chưa tải được tệp | ALT / EXC | P1 |
+| [ST-PROJ-175](../systemtest/ST-PROJ-175.md) | [STORY-PROJ-003](../userstory/STORY-PROJ-003.md) | Cờ và ghi chú nội bộ không lộ cho khách | Main / EXC | P1 |
+| [ST-PROJ-176](../systemtest/ST-PROJ-176.md) | [STORY-PROJ-004](../userstory/STORY-PROJ-004.md) | Chia sẻ chỉ mở sau chặng Hồ sơ; nội dung người nhận xem được | EXC / Main | P0 |
+| [ST-PROJ-177](../systemtest/ST-PROJ-177.md) | [STORY-PROJ-005](../userstory/STORY-PROJ-005.md) | Loại và phong cách chưa gắn mã gốc lưu được nhưng chặn 2D | Main / EXC | P1 |
+| [ST-PROJ-178](../systemtest/ST-PROJ-178.md) | [STORY-PROJ-005](../userstory/STORY-PROJ-005.md) | Ô Mô tả cho AI bắt buộc, tối đa 1.000 ký tự | EXC / Main | P1 |
+| [ST-PROJ-179](../systemtest/ST-PROJ-179.md) | [STORY-PROJ-005](../userstory/STORY-PROJ-005.md) | Giới hạn 1–4 tầng; căn hộ một sàn | EXC | P2 |
+| [ST-PROJ-180](../systemtest/ST-PROJ-180.md) | [STORY-PROJ-006](../userstory/STORY-PROJ-006.md) | Năm trạng thái và thứ tự ưu tiên Đang xử lý > Thất bại > Hoàn tất > Đang làm dở > Nháp | Main | P1 |
+| [ST-PROJ-181](../systemtest/ST-PROJ-181.md) | [STORY-PROJ-007](../userstory/STORY-PROJ-007.md) | Chặn xóa khi có chặng đang chờ hoặc đang chạy, kể cả chặng Hồ sơ không gọi AI | Main / EXC | P1 |
+| [ST-PROJ-182](../systemtest/ST-PROJ-182.md) | [STORY-PROJ-011](../userstory/STORY-PROJ-011.md) | Chỉ người có quyền quản lý luật giá được xem và sửa | Main / EXC | P1 |
+| [ST-PROJ-183](../systemtest/ST-PROJ-183.md) | [STORY-PROJ-011](../userstory/STORY-PROJ-011.md) | Lưu luật giá tạo phiên bản, tính lại dải giá, chỉ áp dụng cho lần chạy sau | Main | P0 |
+| [ST-PROJ-184](../systemtest/ST-PROJ-184.md) | [STORY-PROJ-011](../userstory/STORY-PROJ-011.md) | Từ chối nội dung không tính được dải giá và lưu đè đồng thời | EXC | P1 |
+| [ST-PROJ-185](../systemtest/ST-PROJ-185.md) | [STORY-PROJ-011](../userstory/STORY-PROJ-011.md) | So sánh và khôi phục phiên bản luật giá | ALT | P2 |
+| [ST-PROJ-186](../systemtest/ST-PROJ-186.md) | [STORY-PROJ-011](../userstory/STORY-PROJ-011.md) | Miền giá chốt lúc chạy 2D; bảng thiếu miền bị chặn | ALT / EXC | P1 |
+| [ST-PROJ-187](../systemtest/ST-PROJ-187.md) | [STORY-PROJ-012](../userstory/STORY-PROJ-012.md) | Cấu hình AI có phiên bản, chốt vào lần chạy | Main / EXC | P0 |
+| [ST-PROJ-188](../systemtest/ST-PROJ-188.md) | [STORY-PROJ-012](../userstory/STORY-PROJ-012.md) | Phân quyền cấu hình và chống lưu đè | EXC | P1 |
+| [ST-PROJ-189](../systemtest/ST-PROJ-189.md) | [STORY-PROJ-012](../userstory/STORY-PROJ-012.md) | Đổi giới hạn số lần lỗi áp dụng ở lần kiểm tra kế tiếp | Main / ALT | P1 |
+| [ST-PROJ-190](../systemtest/ST-PROJ-190.md) | [STORY-PROJ-012](../userstory/STORY-PROJ-012.md) | Admin đặt lại bộ đếm lỗi không cấp hay hoàn lượt | ALT / EXC | P0 |
+| [ST-PROJ-191](../systemtest/ST-PROJ-191.md) | [STORY-PROJ-012](../userstory/STORY-PROJ-012.md) | Xem chi tiết lần chạy cho người có quyền | ALT | P2 |
+| [ST-PROJ-192](../systemtest/ST-PROJ-192.md) | [STORY-PROJ-013](../userstory/STORY-PROJ-013.md) | Sửa số theo mã gốc không cần đổi mã nguồn; kết quả cũ giữ nguyên | Main | P1 |
+| [ST-PROJ-193](../systemtest/ST-PROJ-193.md) | [STORY-PROJ-013](../userstory/STORY-PROJ-013.md) | Ma trận mái dùng chung cho Dự toán và 3D, mỗi cặp một dòng | ALT / EXC | P1 |
+| [ST-PROJ-194](../systemtest/ST-PROJ-194.md) | [STORY-PROJ-013](../userstory/STORY-PROJ-013.md) | Bảng lời dặn chung: thêm quy tắc chữ theo phạm vi, tối đa 2.000 ký tự | Main / EXC | P1 |
+| [ST-PROJ-195](../systemtest/ST-PROJ-195.md) | [STORY-PROJ-013](../userstory/STORY-PROJ-013.md) | Sửa phần lời dặn prompt với xem trước và chạy thử | ALT / EXC | P1 |
+| [ST-PROJ-196](../systemtest/ST-PROJ-196.md) | [STORY-PROJ-013](../userstory/STORY-PROJ-013.md) | Phiên bản, khôi phục, phân quyền và chống lưu đè của bộ quy tắc | ALT / EXC | P2 |
+| [ST-PROJ-197](../systemtest/ST-PROJ-197.md) | [STORY-PROJ-002](../userstory/STORY-PROJ-002.md) | Chuyển luồng: xem trước, xóa hẳn bản mock-v1, không hoàn lượt, xử lý bản đang chạy | Integration boundary / EXC | P1 |
+
+## Mốc cập nhật ngày 12/10/2026: sửa theo bản rà soát TDD và câu trả lời của người dùng
+
+Sau khi chốt phần sửa TDD-PROJ-006/007/008, người dùng trả lời thêm 11 điểm. US/BR được cập nhật:
+- BR-PROJ-011: lỗi hệ thống không tính giới hạn; bộ đếm riêng từng chặng; dùng lại phần đã xong khi đổi cấu hình.
+- BR-PROJ-012 khoản 8–11: hàng chờ đầy, tạm ngắt dịch vụ AI, cảnh báo chi phí, thứ tự tiếp nhận.
+- BR-PROJ-015 khoản 10–11: trần soi chung, soi bị từ chối khi tạm ngắt.
+- BR-PROJ-006 khoản 12: tệp riêng tư, link 15 phút.
+- BR-PROJ-018 khoản 8: quay lui.
+- Các story mới có: STORY-PROJ-001/EXC-09, AC-032; STORY-PROJ-002/AC-014, AC-015; STORY-PROJ-009/AC-007; STORY-PROJ-012/ALT-03, AC-007 đến AC-009.
+
+- **Ca cũ đã sửa** (giữ mã):
+  - ST-PROJ-136, 147, 148, 153, 157, 159: lỗi do quá hạn, hết tiền hoặc lỗi dựng tệp không còn tăng bộ đếm lỗi; 147 thêm bước tạm ngắt.
+  - ST-PROJ-133: Admin có thêm quyền vận hành; ghi rõ lỗi được tính.
+  - ST-PROJ-128, 165: màn hình tự cập nhật trạng thái chặng và kết quả soi (soi ảnh bất đồng bộ).
+- **Ca mới:** 16 ca ST-PROJ-198 đến ST-PROJ-213.
+- **Độ phủ:** mọi AC, ALT, EXC mới nêu trên có ít nhất một ca. Script kiểm tra cho kết quả: mỗi file một dòng 13 cột, Trace to khớp TEST_LINKS, mọi mã và mục được dẫn đều có thật.
+- **Môi trường:** như mốc 11/10/2026. ST-PROJ-212 và 213 cần dừng RabbitMQ hoặc khởi động lại máy chủ của môi trường thử. Tất cả ở trạng thái Draft, chưa thực thi.
+
+| Test | Story | Mục tiêu | Loại | Ưu tiên |
+|---|---|---|---|---|
+| [ST-PROJ-198](../systemtest/ST-PROJ-198.md) | [STORY-PROJ-002](../userstory/STORY-PROJ-002.md) | Hàng chờ đầy thì từ chối lúc bấm, không để khách chờ rồi lỗi quá hạn. | EXC / NFR | P0 |
+| [ST-PROJ-199](../systemtest/ST-PROJ-199.md) | [STORY-PROJ-008](../userstory/STORY-PROJ-008.md) | Tạm ngắt theo từng dịch vụ AI, tự mở lại và chỉ báo Admin một lần mỗi đợt. | EXC / Integration boundary | P0 |
+| [ST-PROJ-200](../systemtest/ST-PROJ-200.md) | [STORY-PROJ-002](../userstory/STORY-PROJ-002.md) | Chỉ lỗi do kết quả AI với đầu vào của khách mới bị đếm. | EXC | P0 |
+| [ST-PROJ-201](../systemtest/ST-PROJ-201.md) | [STORY-PROJ-008](../userstory/STORY-PROJ-008.md) | Mỗi chặng có bộ đếm lỗi riêng (người dùng chốt ngày 12/10/2026). | EXC | P1 |
+| [ST-PROJ-202](../systemtest/ST-PROJ-202.md) | [STORY-PROJ-012](../userstory/STORY-PROJ-012.md) | Vượt ngưỡng chi phí chỉ cảnh báo (BR-PROJ-012 khoản 10). | NFR | P2 |
+| [ST-PROJ-203](../systemtest/ST-PROJ-203.md) | [STORY-PROJ-002](../userstory/STORY-PROJ-002.md) | Xử lý theo thứ tự tiếp nhận, không ưu tiên chặng (BR-PROJ-012 khoản 11). | NFR | P2 |
+| [ST-PROJ-204](../systemtest/ST-PROJ-204.md) | [STORY-PROJ-009](../userstory/STORY-PROJ-009.md) | Dùng lại phần đã xong khi Admin đổi cấu hình giữa hai lần chạy (BR-PROJ-011 khoản 8). | ALT | P1 |
+| [ST-PROJ-205](../systemtest/ST-PROJ-205.md) | [STORY-PROJ-001](../userstory/STORY-PROJ-001.md) | Trần chung chống lạm dụng soi miễn phí bằng nhiều tài khoản (BR-PROJ-015 khoản 10). | EXC / NFR | P1 |
+| [ST-PROJ-206](../systemtest/ST-PROJ-206.md) | [STORY-PROJ-003](../userstory/STORY-PROJ-003.md) | Tệp kết quả riêng tư, chỉ mở qua link backend cấp có hạn 15 phút (BR-PROJ-006 khoản 12). | NFR / Integration boundary | P0 |
+| [ST-PROJ-207](../systemtest/ST-PROJ-207.md) | [STORY-PROJ-004](../userstory/STORY-PROJ-004.md) | Người nhận link chia sẻ đi qua route backend để thu hồi có hiệu lực ngay (BR-PROJ-006 khoản 4 và 12). | EXC | P1 |
+| [ST-PROJ-208](../systemtest/ST-PROJ-208.md) | [STORY-PROJ-012](../userstory/STORY-PROJ-012.md) | Quyền vận hành tách khỏi quyền xem và quyền cấu hình. | EXC | P0 |
+| [ST-PROJ-209](../systemtest/ST-PROJ-209.md) | [STORY-PROJ-012](../userstory/STORY-PROJ-012.md) | Nhật ký giữ vĩnh viễn nên mọi lần xem bản thô phải để lại dấu vết. | ALT / NFR | P1 |
+| [ST-PROJ-210](../systemtest/ST-PROJ-210.md) | [STORY-PROJ-012](../userstory/STORY-PROJ-012.md) | Các ngưỡng mới do Admin cấu hình, có phiên bản như cấu hình AI khác. | Main / EXC | P1 |
+| [ST-PROJ-211](../systemtest/ST-PROJ-211.md) | [STORY-PROJ-002](../userstory/STORY-PROJ-002.md) | Cách quay lui đã chốt: tắt luồng, giữ kết quả (BR-PROJ-018 khoản 8). | EXC / Integration boundary | P1 |
+| [ST-PROJ-212](../systemtest/ST-PROJ-212.md) | [STORY-PROJ-002](../userstory/STORY-PROJ-002.md) | Hàng đợi tin nhắn chỉ để đánh thức worker; dữ liệu trong DB vẫn là nguồn sự thật. | NFR / Integration boundary | P1 |
+| [ST-PROJ-213](../systemtest/ST-PROJ-213.md) | [STORY-PROJ-001](../userstory/STORY-PROJ-001.md) | Soi ảnh bất đồng bộ phải chịu được tiến trình chết giữa chừng mà không tính suất hai lần. | EXC / Integration boundary | P2 |

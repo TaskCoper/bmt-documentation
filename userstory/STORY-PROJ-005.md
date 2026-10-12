@@ -40,7 +40,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 ## Metadata
 
 - **Story**: Là Admin, tôi muốn quản lý loại công trình, cấu hình tầng/tum và hai danh mục phong cách để khách có các lựa chọn phù hợp khi tạo dự toán mới.
-- **Context**: Thay danh mục năm loại cố định và phần phong cách gộp trên trang mẫu bằng danh mục có thể quản lý. Cấu hình phong cách chỉ điều khiển lựa chọn đầu vào; AI vẫn trả đủ kết quả. Bản dự toán cũ giữ cấu hình đã áp dụng, kể cả bản nháp.
+- **Context**: Thay danh mục năm loại cố định và phần phong cách gộp trên trang mẫu bằng danh mục có thể quản lý. Cấu hình phong cách chỉ điều khiển lựa chọn đầu vào; AI vẫn trả đủ kết quả. Bản dự toán cũ giữ cấu hình đã áp dụng, kể cả bản nháp. Ngày 11/10/2026 người dùng chốt bổ sung cho luồng bốn chặng: mỗi loại công trình và phong cách kiến trúc gắn mã gốc của app demo `design-estimate`; phong cách nội thất có ô “Mô tả cho AI” bắt buộc; số tầng 1–4 cộng tum.
 - **Sprint**: [Chưa xác định]
 - **Priority**: Must
 - **Status**: Todo
@@ -68,12 +68,12 @@ Admin thêm loại công trình, sửa cấu hình theo loại hoặc thêm/sử
 
 1. Admin mở phần quản lý danh mục loại công trình. Trước khi khách sử dụng, Admin tự nhập và gán danh mục phong cách ban đầu theo các bước dưới; không có bộ phong cách chuẩn bị sẵn từ trang mẫu.
 2. Admin thêm loại công trình hoặc chọn loại đã có để sửa cấu hình.
-3. Admin bật/tắt riêng trường chọn tầng và trường chọn có tum; cấu hình các số tầng được chọn cho loại đó.
-4. Admin quản lý riêng danh mục phong cách kiến trúc và danh mục phong cách nội thất, gồm tên và bắt buộc một ảnh minh họa JPG/PNG/WebP tối đa 5 MB theo BR-PROJ-004.
+3. Admin chọn mã gốc cho loại công trình (`nha-pho`, `villa-biet-thu`, `nha-mai`, `nha-vuon-cap4`, `can-ho`) theo BR-PROJ-004 khoản 19. Admin bật/tắt riêng trường chọn tầng và trường chọn có tum; cấu hình các số tầng được chọn trong khoảng 1–4 theo khoản 22. Loại có mã gốc `can-ho` luôn một sàn.
+4. Admin quản lý riêng danh mục phong cách kiến trúc và danh mục phong cách nội thất, gồm tên và bắt buộc một ảnh minh họa JPG/PNG/WebP tối đa 5 MB theo BR-PROJ-004. Phong cách kiến trúc gắn mã phong cách gốc (khoản 20); phong cách nội thất có ô “Mô tả cho AI” bắt buộc (khoản 21).
 5. Với từng loại công trình, Admin bật/tắt từng nhóm lựa chọn phong cách và gán các phong cách được chọn cho nhóm tương ứng.
 6. Backend kiểm tra quyền và yêu cầu mỗi danh sách chọn tầng/phong cách được bật phải có ít nhất một lựa chọn phù hợp theo BR-PROJ-004. Chỉ lưu cấu hình hợp lệ và báo thành công khi đã lưu được. Ảnh phong cách phải đáp ứng BR-PROJ-004; tên loại công trình và phong cách phải có nội dung sau trim, tối đa 200 ký tự; cho phép trùng tên.
 7. Bản dự toán mới áp dụng cấu hình mới. Bản dự toán đã tạo tiếp tục dùng danh mục và cấu hình đã áp dụng trước đó theo BR-PROJ-004; không được chọn loại công trình Admin thêm sau thời điểm tạo. Muốn dùng loại mới thêm, khách phải tạo bản dự toán mới.
-8. Khi khách chuẩn bị gửi AI, mỗi nhóm phong cách được bật phải có đúng một lựa chọn hợp lệ. Nhóm bị tắt không yêu cầu chọn; AI vẫn trả đầy đủ kết quả.
+8. Khi khách chuẩn bị chạy chặng 2D, mỗi nhóm phong cách được bật phải có đúng một lựa chọn hợp lệ. Nhóm bị tắt không yêu cầu chọn; AI vẫn trả đầy đủ kết quả. Loại hoặc phong cách kiến trúc chưa gắn mã gốc thì chặng 2D bị chặn kèm lý do danh mục chưa đủ cấu hình.
 
 ### Alternative Flow
 
@@ -83,7 +83,7 @@ Admin sửa cấu hình khi đã có bản dự toán sử dụng cấu hình tr
 
 1. Lưu thay đổi để áp dụng cho bản dự toán mới.
 2. Giữ cấu hình và lựa chọn của các bản dự toán đã tạo, kể cả bản nháp, bản dự toán đang chạy AI, đã thất bại hoặc đã thành công.
-3. Khi khách mở lại hoặc gửi/thử lại AI, dùng cấu hình của bản dự toán đó để kiểm tra lựa chọn; vẫn kiểm tra quyền, gói/lượt và khóa sửa theo các quy tắc hiện hành.
+3. Khi khách mở lại hoặc chạy, chạy lại chặng 2D, dùng cấu hình của bản dự toán đó để kiểm tra lựa chọn; vẫn kiểm tra quyền, gói/lượt và khóa sửa theo các quy tắc hiện hành.
 
 ### Exception Flow
 
@@ -109,6 +109,13 @@ Admin lưu cấu hình có danh sách chọn tầng hoặc nhóm phong cách đ�
 1. Từ chối lưu và báo rõ danh sách cần thêm ít nhất một lựa chọn phù hợp.
 2. Không lưu cấu hình không hợp lệ; nếu đang sửa, giữ cấu hình đã lưu trước đó.
 3. Áp dụng cả khi thêm cấu hình và khi bỏ lựa chọn cuối cùng khỏi danh sách đang bật; danh sách bị tắt không bắt buộc có lựa chọn theo điều kiện này.
+
+#### EXC-04
+
+Admin lưu phong cách nội thất thiếu “Mô tả cho AI” hoặc mô tả vượt 1.000 ký tự, hoặc lưu số tầng ngoài khoảng 1–4.
+
+1. Từ chối lưu và chỉ rõ trường cần sửa theo BR-PROJ-004 khoản 21, 22.
+2. Giữ dữ liệu đã lưu trước đó.
 
 ## Acceptance Criteria
 
@@ -136,7 +143,7 @@ Admin lưu cấu hình có danh sách chọn tầng hoặc nhóm phong cách đ�
 #### AC-004
 
 - **Given**: Loại công trình bật một hoặc cả hai nhóm lựa chọn phong cách.
-- **When**: Khách gửi AI từ bản dự toán dùng cấu hình đó.
+- **When**: Khách chạy chặng 2D từ bản dự toán dùng cấu hình đó.
 - **Then**: Mỗi nhóm được bật phải có đúng một phong cách hợp lệ; nhóm bị tắt không yêu cầu chọn.
 - **And**: Cấu hình lựa chọn không cắt phần kiến trúc, nội thất, dự toán hoặc hồ sơ khỏi bộ kết quả AI.
 
@@ -145,7 +152,7 @@ Admin lưu cấu hình có danh sách chọn tầng hoặc nhóm phong cách đ�
 - **Given**: Đã có bản dự toán dùng cấu hình cũ, kể cả bản dự toán còn là bản nháp.
 - **When**: Admin sửa cấu hình loại công trình hoặc phong cách và lưu thành công.
 - **Then**: Bản dự toán cũ giữ cấu hình đã áp dụng và lựa chọn đã lưu; chỉ bản dự toán mới dùng thay đổi.
-- **And**: Kiểm tra lựa chọn của bản dự toán cũ khi lưu hoặc gửi/thử lại AI không buộc khách tuân theo cấu hình mới; quyền và lượt vẫn được kiểm tra ở thời điểm yêu cầu.
+- **And**: Kiểm tra lựa chọn của bản dự toán cũ khi lưu hoặc chạy, chạy lại chặng 2D không buộc khách tuân theo cấu hình mới; quyền và lượt vẫn được kiểm tra ở thời điểm yêu cầu.
 
 #### AC-006
 
@@ -182,12 +189,33 @@ Admin lưu cấu hình có danh sách chọn tầng hoặc nhóm phong cách đ�
 - **Then**: Bỏ khoảng trắng đầu/cuối và yêu cầu tên có nội dung, tối đa 200 ký tự; từ chối tên rỗng, chỉ có khoảng trắng hoặc vượt giới hạn.
 - **And**: Cho phép trùng tên; không tự cắt ngắn tên hoặc thay mục khác vì trùng tên.
 
+#### AC-011
+
+- **Given**: Admin thêm loại công trình “Shophouse” gắn mã gốc `nha-pho`.
+- **When**: Khách tạo bản dự toán loại này và chạy chặng 2D.
+- **Then**: Luồng AI xử lý theo luật lô đất, luật phương án và khung giá của mã gốc `nha-pho`.
+- **And**: Loại chưa gắn mã gốc vẫn lưu được nhưng bản dự toán dùng loại đó bị chặn chạy 2D kèm lý do danh mục chưa đủ cấu hình.
+
+#### AC-012
+
+- **Given**: Admin thêm hoặc sửa phong cách nội thất.
+- **When**: Lưu phong cách với ô “Mô tả cho AI” trống hoặc dài hơn 1.000 ký tự.
+- **Then**: Từ chối lưu và chỉ rõ cần nhập mô tả có nội dung, tối đa 1.000 ký tự; không tự cắt ngắn.
+- **And**: Có mô tả thì lưu được; mô tả được dùng cho bản vẽ nội thất và ảnh phòng của các lần chạy sau.
+
+#### AC-013
+
+- **Given**: Admin cấu hình danh sách số tầng cho một loại công trình.
+- **When**: Thêm số tầng 5 vào danh sách và lưu.
+- **Then**: Từ chối vì số tầng phải trong khoảng 1–4.
+- **And**: Loại có mã gốc `can-ho` không có lựa chọn tầng hay tum.
+
 ## References
 
 ### TDDs
 
 - TDD-PROJ-001
-- TDD-PROJ-002: Kiểm lựa chọn phong cách theo cấu hình khi gửi AI (AC-004).
+- TDD-PROJ-002: Kiểm lựa chọn phong cách theo cấu hình khi chạy chặng 2D (AC-004).
 - TDD-LIB-001: Thư viện mẫu dùng chung danh mục loại công trình.
 
 ### Rules

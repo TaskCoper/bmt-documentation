@@ -83,6 +83,8 @@ Tại thời điểm thiết kế, code chưa có endpoint xóa hoặc trạng t
 
 ## Architecture
 
+**Chặng đang chạy, ngày 11/10/2026 — thiết kế, chưa triển khai:** khi luồng bốn chặng bật, điều kiện "đang được AI xử lý" là có `EstimateStageRun` ở Queued/Running (BR-PROJ-009 khoản 3, [TDD-PROJ-006](TDD-PROJ-006.md)/Architecture). Kiểm dưới cùng khóa Estimate như hiện nay.
+
 Xử lý đồng bộ một lô tối đa 100 Id, cùng giới hạn một trang tối đa của TDD-PROJ-004. Giới hạn này bảo vệ request và thời gian giữ khóa, không giới hạn tổng số dự toán của tài khoản. Không thêm hàng đợi cho thao tác xóa; RabbitMQ/outbox hiện có chỉ liên quan công việc export/email đã được nhận trước đó.
 
 | Thành phần | Thay đổi dự kiến |
@@ -163,7 +165,7 @@ sequenceDiagram
         loop Mỗi Id khác nhau
             H->>DB: Kiểm owner, dấu xóa, liên kết SITE và AI
             alt Đủ điều kiện
-                H->>DB: Kiểm SITE; UPDATE khi chưa xóa, không SITE, không Pending
+                H->>DB: Kiểm SITE, UPDATE khi chưa xóa, không SITE, không Pending
             else Có SITE, Pending hoặc không thể thao tác
                 Note over H,DB: Ghi kết quả phần tử, không ném lỗi nghiệp vụ cả lô
             end

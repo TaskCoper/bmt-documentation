@@ -44,7 +44,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Owner**: [Chưa xác định]
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
-- **Source**: Người dùng xác nhận trong hội thoại: giữ đủ PDF, Excel, link, QR và email; ai có link/QR đều được xem và tải không cần đăng nhập; chủ sở hữu bản dự toán chọn ngày hết hạn, được thu hồi sớm; email gửi link dùng cùng thời hạn và quyền thu hồi. Ngày 07/10/2026 người dùng bổ sung hiển thị mã dự toán trên trang chia sẻ (khoản 10).
+- **Source**: Người dùng xác nhận trong hội thoại: giữ đủ PDF, Excel, link, QR và email; ai có link/QR đều được xem và tải không cần đăng nhập; chủ sở hữu bản dự toán chọn ngày hết hạn, được thu hồi sớm; email gửi link dùng cùng thời hạn và quyền thu hồi. Ngày 07/10/2026 người dùng bổ sung hiển thị mã dự toán trên trang chia sẻ (khoản 10). Ngày 12/10/2026 người dùng chốt tệp kết quả của luồng bốn chặng lưu riêng tư và chỉ mở qua link tải có hạn ngắn (khoản 12).
 
 ## Statement
 
@@ -60,13 +60,15 @@ Chủ sở hữu bản dự toán chia sẻ hồ sơ, chọn ngày hết hạn h
 2. QR và link gửi trong email dẫn tới cùng quyền truy cập hồ sơ được chia sẻ. Chủ sở hữu bản dự toán nhập một địa chỉ email nhận mỗi lần gửi. Email gửi link, không đính kèm PDF hoặc Excel.
 3. Khi link còn hiệu lực và chưa bị thu hồi, cho người nhận xem và tải hồ sơ mà không yêu cầu đăng nhập.
 4. Chủ sở hữu bản dự toán có thể thu hồi sớm. Sau khi thu hồi hoặc đến hạn, từ chối yêu cầu xem và tải mới qua link đó, kể cả mở từ QR hoặc email đã gửi trước đây.
-5. Quyền qua link chỉ cho xem và tải hồ sơ được chia sẻ; không cấp quyền sửa đầu vào, gửi AI, quản lý chia sẻ hoặc xem bản dự toán khác.
+5. Quyền qua link chỉ cho xem và tải hồ sơ được chia sẻ; không cấp quyền sửa đầu vào, chạy chặng, quản lý chia sẻ hoặc xem bản dự toán khác.
 6. Việc hết hạn hoặc thu hồi link không xóa kết quả nguồn của bản dự toán và không tạo một lần xử lý AI mới.
 7. Chủ sở hữu bản dự toán vẫn được xuất PDF/Excel, tạo link/QR, gửi email và thu hồi link của hồ sơ đã có khi gói hết hạn theo BR-SUB-007. Gói hết hạn không tự làm link hết hiệu lực; kiểm tra ngày hết hạn và việc thu hồi của chính link đó.
 
 8. Link dùng được hết ngày chủ sở hữu chọn theo giờ Việt Nam (Asia/Ho_Chi_Minh); từ 00:00 ngày kế tiếp thì hết hiệu lực. Cho phép chọn ngày hiện tại, không cho chọn ngày đã qua theo múi giờ này. Ví dụ chọn 25/09/2026 thì hết hiệu lực lúc 00:00 ngày 26/09/2026 giờ Việt Nam.
 9. Mỗi bản dự toán chỉ có một link đang hiệu lực, dùng chung cho sao chép, QR và email. Khi link còn hiệu lực thì dùng lại; chỉ tạo link khác sau khi link cũ hết hạn hoặc bị thu hồi. Các yêu cầu đồng thời không được tạo nhiều link đang hiệu lực cho cùng bản dự toán.
 10. Trang xem qua link hiển thị mã dự toán theo BR-PROJ-003 khoản 12 cùng tên hiện tại của bản dự toán. Biết mã dự toán không cấp quyền xem hồ sơ khi không có link còn hiệu lực.
+11. Chỉ tạo link, QR hoặc gửi email khi chặng Hồ sơ của bản dự toán đã thành công theo BR-PROJ-010. Trước đó, yêu cầu chia sẻ bị từ chối kèm lý do cần hoàn tất chặng Hồ sơ. Người nhận link xem được kết quả 2D, phần dự toán gửi khách (BR-PROJ-017), ảnh phối cảnh 3D và tải bốn tệp hồ sơ của chặng Hồ sơ.
+12. Ảnh, Excel và PDF do luồng bốn chặng tạo ra được lưu ở chế độ riêng tư; không ai mở được tệp chỉ bằng đường dẫn kho. Mỗi lần chủ bản dự toán xem hoặc tải, backend kiểm quyền rồi cấp một link tải dùng được 15 phút; hết 15 phút thì trang tự xin link mới. Người nhận link chia sẻ xem và tải qua route của backend, được kiểm link còn hiệu lực ở từng yêu cầu như khoản 4; không nhận đường dẫn tải trực tiếp.
 
 ## Except
 
@@ -76,6 +78,8 @@ Thu hồi hoặc hết hạn chỉ ngăn truy cập tiếp qua link; không thu 
 
 ## Notes
 
+- **Đã xác nhận (12/10/2026):** tệp kết quả lưu riêng tư, link tải có hạn 15 phút (khoản 12). Người nhận link chia sẻ vẫn đi qua route backend kiểm hiệu lực ở từng yêu cầu, để giữ đúng khoản 4: thu hồi xong là không tải mới được, không có khoảng trễ 15 phút.
+- **Cập nhật ngày 11/10/2026 theo luồng bốn chặng:** chia sẻ chỉ mở sau chặng Hồ sơ (khoản 11, người dùng đã chốt). Tệp hồ sơ nay do backend dựng ở chặng Hồ sơ (BR-PROJ-007), không còn là URL do AI trả; cơ chế tải qua route backend để giữ hiệu lực thu hồi giữ nguyên. **Đã xác nhận (11/10/2026):** nội dung người nhận xem được ở câu cuối khoản 11.
 - Ngoại lệ cho bản đã xóa được bổ sung theo quyết định của người dùng trong hội thoại chuẩn bị danh sách và xóa dự toán. Xóa bản chấm dứt cả quyền mở lại của chủ sở hữu; thu hồi link đơn thuần vẫn giữ bản dự toán và quyền của chủ sở hữu như quy tắc hiện có. Người dùng đã chốt phần bổ sung cùng STORY-PROJ-006/007 và BR-PROJ-008/009 trong hội thoại ngày 30/09/2026. Đặc tả ST bổ sung ở [bảng độ phủ](../discovery/my-estimates-system-test-coverage.md); chưa triển khai hoặc thực thi.
 - Phạm vi đã xác nhận gồm tải PDF hồ sơ và Excel dự toán. Người dùng xác nhận ngày 26/09/2026: AI trả URL cho mọi tệp kết quả, kể cả PDF và Excel; backend chỉ lưu URL, không có kho tệp riêng và không tự dựng PDF/Excel. Hợp đồng API của AI service vẫn chưa có.
 - Cách giữ hiệu lực của khoản 4 khi tệp nằm ở URL do AI trả (người dùng xác nhận ngày 26/09/2026): người nhận không bao giờ nhận URL gốc của tệp. Mỗi yêu cầu xem hoặc tải qua link đi qua route của backend; backend kiểm link còn hiệu lực và chưa bị thu hồi rồi mới chuyển tiếp nội dung tệp. Vì vậy sau khi thu hồi hoặc đến hạn, yêu cầu tải mới bị từ chối như khoản 4. Chi tiết ở TDD-PROJ-003/Architecture. Ghi chú này chỉ mô tả cách thực hiện, không đổi quy tắc.

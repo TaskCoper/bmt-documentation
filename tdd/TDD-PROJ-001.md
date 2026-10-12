@@ -88,6 +88,8 @@ Hiện trạng code kiểm lại ngày 26/09/2026: thiết kế này đã đư�
 
 ## Architecture
 
+**Đầu vào luồng bốn chặng, ngày 11/10/2026 — thiết kế, chưa triển khai:** các cột đầu vào mới của `Estimate` (kích thước lô, cạnh cửa vào, số phòng ngủ, gara, kết quả soi ảnh), mô tả 4.000 ký tự, mã gốc và mô tả cho AI của danh mục, số tầng 1–4, purpose upload `EstimateLotImage` và kiểm đầu vào trước chặng 2D được thiết kế ở [TDD-PROJ-007](TDD-PROJ-007.md) mục A–C. Tự lưu, changedFields, receipt, khóa và revision danh mục của tài liệu này giữ nguyên; khóa đầu vào tính theo lần chạy chặng 2D ([TDD-PROJ-006](TDD-PROJ-006.md)).
+
 **Mã dự toán, ngày 07/10/2026 — người dùng chốt, backend đang triển khai cùng ngày:** theo BR-PROJ-003 khoản 12, `CreateEstimateCommandHandler` cấp `Estimate.Code` dạng `BUILDX-YYYYMMDD-XXXXXX` trong cùng transaction tạo bản, sau các bước kiểm quyền/gói/lượt hiện có. Bộ sinh mã dùng chung `BuildXCodes` (domain) cho mã dự toán, mã hồ sơ công trình và mã chuyển khoản: ngày lấy từ thời điểm tạo do server ghi, đổi sang giờ Việt Nam bằng độ lệch cố định +07:00 (Việt Nam không có giờ mùa hè); 6 ký tự ngẫu nhiên lấy bằng bộ sinh số ngẫu nhiên mật mã từ bảng 31 ký tự `ABCDEFGHJKMNPQRSTUVWXYZ23456789` (bỏ 0, O, 1, I, L). 31^6 ≈ 887 triệu giá trị mỗi ngày nên va chạm rất hiếm; handler vẫn kiểm trùng rồi sinh lại tối đa 5 lần (`BuildXCodeAllocator`), và unique index là lớp chặn cuối khi hai yêu cầu song song cùng nhận một mã. Hết 5 lần vẫn trùng thì trả 503 `DependencyUnavailable` và không tạo bản. Gửi lại cùng Idempotency-Key trả `code` của bản đã tạo, không sinh mã mới. Mã không thuộc hash chống gửi lặp và không nằm trong snapshot gửi AI. Đổi tên, lưu đầu vào và xóa mềm không sửa cột này; không có API sửa mã.
 
 **Dùng danh mục và đầu vào hoàn tất cho công trình, ngày 01/10/2026 — backend đã triển khai; xem [báo cáo](../discovery/construction-site-implementation.md):** [TDD-SITE-003](TDD-SITE-003.md) dùng cùng identity/revision catalog và FK tới Estimate/EstimateGenerationInput. SITE lấy snapshot của operation Succeeded, không lấy kết quả AI làm diện tích/ngân sách và không dùng lượt. SITE có policy bắt buộc riêng; BR-PROJ-004 vẫn từ chối nhóm bật nhưng danh sách rỗng khi Admin lưu catalog. Danh mục cũ được giữ vì site có thể tham chiếu ngay cả khi không còn Estimate dùng revision đó. Xóa nguồn bị chặn theo [TDD-PROJ-005](TDD-PROJ-005.md). Quyền xem công trình không cấp quyền đọc kết quả dự toán riêng của khách.
@@ -243,7 +245,7 @@ sequenceDiagram
     participant DB as PostgreSQL
     participant Q as Subscription trong cùng UoW
     U->>API: Tạo nhanh bằng tên và key, tọa độ tùy chọn
-    API->>API: Kiểm tên; nếu gửi tọa độ thì kiểm đủ cặp và miền
+    API->>API: Kiểm tên, nếu gửi tọa độ thì kiểm đủ cặp và miền
     API->>DB: Khóa account, tìm receipt, khóa đọc catalog
     API->>Q: Kiểm kỳ/quyền/lượt hiện tại
     Q-->>API: Đủ điều kiện, không giữ lượt
@@ -256,7 +258,7 @@ sequenceDiagram
     alt Hết gói, thiếu quyền, hết lượt, AI đang chạy hoặc thành công, version cũ
       API-->>U: 403 hoặc 409, không ghi
     else Đủ điều kiện
-      API->>DB: Kiểm cặp tọa độ khi đổi địa chỉ; lưu cùng nhau và tăng InputVersion
+      API->>DB: Kiểm cặp tọa độ khi đổi địa chỉ, lưu cùng nhau và tăng InputVersion
       DB-->>API: Commit
       API-->>U: 200 receipt phiên bản đã lưu
     end

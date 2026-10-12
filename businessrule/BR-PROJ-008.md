@@ -48,7 +48,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Statement
 
-Dự toán của tôi chỉ hiển thị các bản chưa bị xóa thuộc tài khoản khách hàng đang đăng nhập. Danh sách gồm bản nháp, đang xử lý, thành công và thất bại; có phân trang, tìm theo tên hoặc mã dự toán và lọc theo trạng thái. Khách không cần gói còn hiệu lực hoặc còn lượt chỉ để xem dữ liệu của mình.
+Dự toán của tôi chỉ hiển thị các bản chưa bị xóa thuộc tài khoản khách hàng đang đăng nhập. Danh sách gồm năm trạng thái Nháp, Đang xử lý, Thất bại, Đang làm dở và Hoàn tất; có phân trang, tìm theo tên hoặc mã dự toán và lọc theo trạng thái. Khách không cần gói còn hiệu lực hoặc còn lượt chỉ để xem dữ liệu của mình.
 
 ## When
 
@@ -57,7 +57,14 @@ Khách mở Dự toán của tôi, đổi trang, tìm theo tên hoặc mã, lọ
 ## Then
 
 1. Xác định chủ sở hữu từ tài khoản đăng nhập. Không trả dự toán của khách khác, kể cả thông qua tìm kiếm, bộ lọc hoặc thông tin phân trang. Loại tài khoản áp dụng BR-RBAC-005.
-2. Khi không lọc trạng thái, tập kết quả gồm đủ nháp, đang xử lý, thành công và thất bại. Không yêu cầu đã chọn loại công trình hoặc có kết quả AI mới được xuất hiện.
+2. Khi không lọc trạng thái, tập kết quả gồm đủ năm trạng thái. Không yêu cầu đã chọn loại công trình hoặc có kết quả AI mới được xuất hiện. Trạng thái của một bản xác định theo các chặng của BR-PROJ-010, theo thứ tự ưu tiên:
+   - Đang xử lý: có một chặng đang chờ chạy hoặc đang chạy.
+   - Thất bại: lần chạy gần nhất của bản kết thúc lỗi và chặng đó chưa thành công.
+   - Hoàn tất: chặng Hồ sơ đã thành công.
+   - Đang làm dở: chặng 2D đã thành công nhưng chặng Hồ sơ chưa thành công.
+   - Nháp: chưa có lần chạy nào, hoặc chưa có chặng 2D thành công và không thuộc các trạng thái trên.
+
+   Mỗi dòng hiển thị thêm chặng đã thành công gần nhất (Bản vẽ 2D, Dự toán, Phối cảnh 3D hoặc Hồ sơ) khi có.
 3. Mỗi bản hiển thị mã dự toán theo BR-PROJ-003 khoản 12, tên, loại công trình nếu đã chọn, trạng thái, ngày tạo và lần sửa gần nhất. Không hiển thị ảnh đại diện hoặc cột địa chỉ. Bản nháp chưa chọn loại phải thể hiện đúng tình trạng chưa chọn, không tự gán loại khác.
 4. Mặc định sắp xếp theo lần sửa gần nhất, mới nhất trước. Áp dụng thứ tự trên tập kết quả đã lọc rồi mới chia trang.
 5. Hỗ trợ tìm một phần tên không phân biệt hoa/thường hoặc dấu, kết hợp đồng thời với lọc trạng thái; ví dụ “nha” tìm được “Nhà”. Mọi kết quả vẫn phải thuộc khách, chưa bị xóa và đáp ứng các điều kiện đang áp dụng. Cùng ô tìm kiếm còn tìm theo một phần mã dự toán, không phân biệt hoa/thường và bỏ qua dấu gạch ngang; ví dụ “q7k2m9” hoặc “20261005Q7K” tìm được `BUILDX-20261005-Q7K2M9`. Phần thương hiệu `BUILDX` không dùng để so vì mã nào cũng có; vì vậy từ khóa ngắn như “i” không khớp mọi mã. Một bản thuộc kết quả khi tên hoặc mã khớp từ khóa.
@@ -72,6 +79,7 @@ Người chưa có phiên hợp lệ hoặc dùng tài khoản nhân viên khôn
 
 ## Notes
 
+- **Cập nhật ngày 11/10/2026 theo luồng bốn chặng (người dùng đã chốt):** thêm trạng thái Đang làm dở; Thành công đổi thành Hoàn tất, nghĩa là đã xong chặng Hồ sơ; mỗi dòng hiện chặng đã xong gần nhất. **Đã xác nhận (11/10/2026):** thứ tự ưu tiên khi một bản thỏa nhiều điều kiện (khoản 2), ví dụ đã xong 2D nhưng Dự toán vừa lỗi thì hiện Thất bại.
 - Bổ sung ngày 07/10/2026 theo quyết định của người dùng: hiển thị mã dự toán và tìm theo một phần mã trong cùng ô tìm kiếm (khoản 3, 5). Cách chuẩn hóa từ khóa cho phần mã thuộc TDD-PROJ-004.
 - Áp dụng cho STORY-PROJ-006; thao tác xóa từ danh sách theo STORY-PROJ-007 và BR-PROJ-009.
 - “Dự án” trong các câu trả lời về hai tính năng này được hiểu là bản dự toán thuộc nhóm PROJ, không phải thực thể Công trình của nhóm SITE.

@@ -80,6 +80,8 @@ Tại thời điểm thiết kế, code có API đọc từng bản nhưng chưa
 
 ## Architecture
 
+**Trạng thái luồng bốn chặng, ngày 11/10/2026 — thiết kế, chưa triển khai:** khi luồng mới bật, danh sách có năm trạng thái Nháp, Đang xử lý, Thất bại, Đang làm dở, Hoàn tất và trả thêm chặng đã thành công gần nhất (BR-PROJ-008 khoản 2). Biểu thức tính trạng thái và giá trị lọc mới ở [TDD-PROJ-006](TDD-PROJ-006.md)/Architecture.
+
 Thêm query vào feature `estimate` hiện có, giữ Carter → MediatR → repository → PostgreSQL. Không gọi handler đọc chi tiết cho từng dòng vì handler đó tải toàn bộ catalog và tính quyền sửa theo gói; danh sách chỉ cần các trường hiển thị.
 
 | Thành phần | Trách nhiệm và thay đổi dự kiến |

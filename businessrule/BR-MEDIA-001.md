@@ -59,7 +59,7 @@ Backend BMT cấp presigned URL qua BizFly cho mọi tài khoản đã đăng nh
 ## Then
 
 1. Chỉ cấp URL upload khi phiên đăng nhập hợp lệ. Luồng ảnh mặc định không yêu cầu vai trò quản trị; purpose ContractorImage và ContractorScan chỉ dành cho admin.
-2. Purpose Image mặc định nhận JPG/PNG/WebP ≤5 MiB; ContractorImage nhận JPG/PNG/WebP ≤10 MiB; ContractorScan nhận PDF/JPG/PNG ≤20 MiB. Không nhận WebP làm bản scan.
+2. Purpose Image mặc định nhận JPG/PNG/WebP ≤5 MiB; ContractorImage nhận JPG/PNG/WebP ≤10 MiB; ContractorScan nhận PDF/JPG/PNG ≤20 MiB. Không nhận WebP làm bản scan. Ảnh lô đất của bản dự toán dùng purpose riêng, nhận JPG/PNG/WebP ≤10 MiB và tối thiểu 640×480 điểm ảnh theo BR-PROJ-015; chỉ khách hàng có quyền sửa bản dự toán dùng purpose này.
 3. Frontend upload trực tiếp lên BizFly bằng presigned URL do backend BMT cấp.
 4. URL upload có thời hạn. Với các luồng ảnh công khai của quy tắc này, URL xem là URL https cố định, không hết hạn theo thời hạn URL upload; người có URL không cần đăng nhập BMT. Không áp dụng khoản này cho tệp công trình theo BR-SITE-007.
 5. API nghiệp vụ vẫn kiểm tra quyền và các điều kiện lưu hiện có. Có quyền upload không cấp thêm quyền tạo hoặc sửa bài viết, dự toán hay nội dung khác.
@@ -72,10 +72,13 @@ Backend BMT cấp presigned URL qua BizFly cho mọi tài khoản đã đăng nh
 - Quy tắc định dạng và dung lượng ở đây áp dụng cho luồng upload ảnh mới; không tự biến thành điều kiện xóa các ảnh cũ đã tồn tại.
 - URL xem ảnh không còn bảo đảm đọc được sau khi ảnh đủ điều kiện dọn và đã bị xóa theo BR-MEDIA-002.
 
+- Ảnh lô đất của bản dự toán là ngoại lệ về dung lượng và kích thước tối thiểu theo [BR-PROJ-015](BR-PROJ-015.md); URL xem vẫn công khai, cố định như các luồng ảnh khác.
+
 - Tệp công trình là ngoại lệ riêng theo [BR-SITE-007](BR-SITE-007.md): tối đa 10 MB/tệp, tổng 9 tệp/công trình, định dạng theo nhóm, xem/tải theo quyền công trình. Không cấp URL công khai cho tệp gốc hoặc bản xem trước. Chưa định nghĩa purpose/API mới trong BR này.
 
 ## Notes
 
+- **Cập nhật ngày 11/10/2026:** người dùng chốt giới hạn 10 MiB riêng cho ảnh lô đất của luồng Tạo dự toán bốn chặng; các ảnh khác giữ 5 MiB. **Đã xác nhận (11/10/2026):** chỉ khách hàng có quyền sửa bản dự toán được xin URL tải ảnh lô (khoản 2).
 - Người dùng cung cấp domain CDN `bmt-cdn-vnzdna.cdn.vccloud.vn` và yêu cầu bắt đầu triển khai phương án cho ảnh cũ lẫn ảnh mới trong hội thoại ngày 01/10/2026. Người dùng sau đó chốt thay URL trong cột hiện có và chuyển dữ liệu cũ bằng migration khi triển khai. Không thay chính sách phân quyền hoặc thời gian dọn ảnh.
 
 - Người dùng đã chốt bản US/BR trong hội thoại ngày 01/10/2026. System Test đã được cập nhật; xem [bảng độ phủ](../discovery/construction-site-system-test-coverage.md). Chưa chạy các ca; xác nhận hội thoại không thay cho phê duyệt/import trên hệ thống tài liệu.

@@ -202,7 +202,7 @@ sequenceDiagram
     DB-->>API: Grant còn hiệu lực
     API-->>V: DTO hồ sơ, đường tải có kiểm quyền
     V->>API: GET file qua route public với share header
-    API->>DB: Kiểm lại grant, export và nguồn; đọc tên hiện tại
+    API->>DB: Kiểm lại grant, export và nguồn, đọc tên hiện tại
     API->>S: Đọc tệp theo URL đã lưu
     S-->>API: Nội dung tệp
     API-->>V: Chuyển tiếp nội dung, tên tệp theo tên hiện tại, không lộ URL gốc

@@ -149,3 +149,227 @@ TDD-PROJ-003 được bổ sung bốn quyết định người dùng xác nhận
 | [UT-PROJ-071](../unittest/UT-PROJ-071.md) | EstimateSharingStuckRecovery: Job đóng yêu cầu xuất tệp và email bị kẹt | [TDD-PROJ-003](../tdd/TDD-PROJ-003.md) | [ST-PROJ-076](../systemtest/ST-PROJ-076.md), [ST-PROJ-077](../systemtest/ST-PROJ-077.md) |
 
 Giới hạn tần suất kiểm qua pipeline HTTP thật (TestServer), không có proxy thật. Điều kiện kẹt và việc job chạy đồng thời với consumer xuất tệp và consumer gửi email kiểm trên PostgreSQL thật trong `EstimateSharingStuckRecoveryFlowTests`. Đã kiểm cấu trúc ba file UT mới (một dòng, 13 cột, Trace to khớp TEST_LINKS).
+
+## Mốc cập nhật ngày 11/10/2026: luồng bốn chặng, đợt 1
+
+Người dùng chốt TDD-PROJ-006, TDD-PROJ-007 và TDD-PROJ-008 ngày 11/10/2026. Đã soạn 134 đặc tả Unit Test mới:
+- UT-PROJ-133 → 173 cho TDD-PROJ-006;
+- UT-PROJ-180 → 224 cho TDD-PROJ-007;
+- UT-PROJ-240 → 287 cho TDD-PROJ-008.
+
+Các mã 174–179, 225–239 và 288–289 còn trống lúc đó; đã dùng ở mốc 12/10/2026 bên dưới.
+
+Tất cả là unit dự kiến, chưa có mã và chưa chạy. Script kiểm tra cho kết quả:
+- mỗi file một heading trùng Test ID;
+- đúng 13 cột;
+- Trace to khớp TEST_LINKS;
+- mọi mã và mục được dẫn đều có thật.
+
+Mọi khoản BR-PROJ-010 đến 015, 017, 018, 019 thuộc đợt 1 đều có ca truy vết. BR-PROJ-016 (luật giá) thuộc đợt 2.
+
+Các hành vi chỉ chứng minh được trên PostgreSQL thật không viết thành unit test. Rationale của ca gần nhất ghi rõ chúng thuộc integration test:
+- chỉ mục duy nhất từng phần của `EstimateStageRun`;
+- `SKIP LOCKED`;
+- tranh chấp giữa finalizer và `ExpireStaleUsageJob`;
+- CHECK mới;
+- upsert hạn mức soi ảnh đồng thời;
+- `xmin` của bảng miền giá;
+- migration nạp quyền.
+
+| Test | TDD | Unit | Loại | Ưu tiên |
+|---|---|---|---|---|
+| [UT-PROJ-133](../unittest/UT-PROJ-133.md) | TDD-PROJ-006 | RunEstimateStageCommandHandler — Luồng bốn chặng đang tắt | Branch | P0 |
+| [UT-PROJ-134](../unittest/UT-PROJ-134.md) | TDD-PROJ-006 | RunEstimateStageCommandHandler — Chặng chưa được bật trong EnabledStages | Branch | P1 |
+| [UT-PROJ-135](../unittest/UT-PROJ-135.md) | TDD-PROJ-006 | RunEstimateStageCommandHandler — Gửi lặp cùng key, cùng nội dung | Determinism | P0 |
+| [UT-PROJ-136](../unittest/UT-PROJ-136.md) | TDD-PROJ-006 | RunEstimateStageCommandHandler — Cùng key, khác nội dung | Error | P1 |
+| [UT-PROJ-137](../unittest/UT-PROJ-137.md) | TDD-PROJ-006 | RunEstimateStageCommandHandler — Chặng trước chưa thành công | Branch | P0 |
+| [UT-PROJ-138](../unittest/UT-PROJ-138.md) | TDD-PROJ-006 | RunEstimateStageCommandHandler — Chặng đã thành công | Branch | P0 |
+| [UT-PROJ-139](../unittest/UT-PROJ-139.md) | TDD-PROJ-006 | RunEstimateStageCommandHandler — Đang có lần chạy hoạt động | Branch | P0 |
+| [UT-PROJ-140](../unittest/UT-PROJ-140.md) | TDD-PROJ-006 | RunEstimateStageCommandHandler — Chạm giới hạn lỗi và sau khi Admin đặt lại | Boundary | P0 |
+| [UT-PROJ-141](../unittest/UT-PROJ-141.md) | TDD-PROJ-006 | RunEstimateStageCommandHandler — Giới hạn lỗi bị hạ thấp hơn số lần đã lỗi | Boundary | P1 |
+| [UT-PROJ-142](../unittest/UT-PROJ-142.md) | TDD-PROJ-006 | RunEstimateStageCommandHandler — Plan2d gửi phiên bản đầu vào cũ | Error | P1 |
+| [UT-PROJ-143](../unittest/UT-PROJ-143.md) | TDD-PROJ-006 | RunEstimateStageCommandHandler — Plan2d đầu vào chưa đủ | Error | P0 |
+| [UT-PROJ-144](../unittest/UT-PROJ-144.md) | TDD-PROJ-006 | RunEstimateStageCommandHandler — Plan2d tiếp nhận hợp lệ giữ lượt và chụp đầu vào | Happy | P0 |
+| [UT-PROJ-145](../unittest/UT-PROJ-145.md) | TDD-PROJ-006 | RunEstimateStageCommandHandler — Chặng sau 2D không chạm lượt | Branch | P0 |
+| [UT-PROJ-146](../unittest/UT-PROJ-146.md) | TDD-PROJ-006 | RunEstimateStageCommandHandler — Bản dự toán đã xóa hoặc không thuộc khách | Error | P1 |
+| [UT-PROJ-147](../unittest/UT-PROJ-147.md) | TDD-PROJ-006 | RunEstimateStageCommandHandler — Plan2d khi gói không còn hiệu lực hoặc hết lượt | Error | P1 |
+| [UT-PROJ-148](../unittest/UT-PROJ-148.md) | TDD-PROJ-006 | RunEstimateStageCommandValidator — Kiểm yêu cầu chạy chặng | Boundary | P1 |
+| [UT-PROJ-149](../unittest/UT-PROJ-149.md) | TDD-PROJ-006 | FinalizeStageRunCommandHandler — 2D thành công trước hạn tính một lượt | Happy | P0 |
+| [UT-PROJ-150](../unittest/UT-PROJ-150.md) | TDD-PROJ-006 | FinalizeStageRunCommandHandler — 2D lỗi hoàn lượt | Branch | P0 |
+| [UT-PROJ-151](../unittest/UT-PROJ-151.md) | TDD-PROJ-006 | FinalizeStageRunCommandHandler — Kết quả tới sau hạn chờ | Boundary | P0 |
+| [UT-PROJ-152](../unittest/UT-PROJ-152.md) | TDD-PROJ-006 | FinalizeStageRunCommandHandler — Lần chạy đã kết thúc | Determinism | P1 |
+| [UT-PROJ-153](../unittest/UT-PROJ-153.md) | TDD-PROJ-006 | FinalizeStageRunCommandHandler — UsageOperation đã bị job chung chốt quá hạn | Quirk | P0 |
+| [UT-PROJ-154](../unittest/UT-PROJ-154.md) | TDD-PROJ-006 | FinalizeStageRunCommandHandler — Thiếu bước bắt buộc | Error | P1 |
+| [UT-PROJ-155](../unittest/UT-PROJ-155.md) | TDD-PROJ-006 | FinalizeStageRunCommandHandler — Chặng sau 2D lỗi không chạm lượt | Branch | P1 |
+| [UT-PROJ-156](../unittest/UT-PROJ-156.md) | TDD-PROJ-006 | RecordStageStepCommandHandler — Ghi bước có điều kiện lease | Branch | P0 |
+| [UT-PROJ-157](../unittest/UT-PROJ-157.md) | TDD-PROJ-006 | EstimateInputLock.IsInputLocked — Bảng chân trị khóa đầu vào | Branch | P0 |
+| [UT-PROJ-158](../unittest/UT-PROJ-158.md) | TDD-PROJ-006 | SaveEstimateInputCommandHandler — Từ chối lưu khi đầu vào khóa theo chặng 2D | Error | P0 |
+| [UT-PROJ-159](../unittest/UT-PROJ-159.md) | TDD-PROJ-006 | StageStatusProjector — Trạng thái và số lần chạy lại còn lại | Branch | P1 |
+| [UT-PROJ-160](../unittest/UT-PROJ-160.md) | TDD-PROJ-006 | MyEstimateStatusResolver — Năm trạng thái và thứ tự ưu tiên | Branch | P0 |
+| [UT-PROJ-161](../unittest/UT-PROJ-161.md) | TDD-PROJ-006 | MyEstimatesQueryValidator — Giá trị lọc trạng thái mới | Boundary | P2 |
+| [UT-PROJ-162](../unittest/UT-PROJ-162.md) | TDD-PROJ-006 | ResetStageFailuresCommandHandler — Đặt lại bộ đếm lỗi | Happy | P0 |
+| [UT-PROJ-163](../unittest/UT-PROJ-163.md) | TDD-PROJ-006 | ResetStageFailuresCommandHandler — Từ chối khi không có gì để đặt lại | Error | P1 |
+| [UT-PROJ-164](../unittest/UT-PROJ-164.md) | TDD-PROJ-006 | EstimatePipelineModeGuard — Kiểm cấu hình lúc khởi động | Error | P0 |
+| [UT-PROJ-165](../unittest/UT-PROJ-165.md) | TDD-PROJ-006 | RequestEstimateGenerationCommandHandler — Luồng cũ bị chặn khi luồng mới bật | Branch | P0 |
+| [UT-PROJ-166](../unittest/UT-PROJ-166.md) | TDD-PROJ-006 | DeleteMyEstimatesCommandHandler — Chặn xóa bản có lần chạy hoạt động | Branch | P0 |
+| [UT-PROJ-167](../unittest/UT-PROJ-167.md) | TDD-PROJ-006 | EstimateStageWorker — Mất lease khi gia hạn | Error | P0 |
+| [UT-PROJ-168](../unittest/UT-PROJ-168.md) | TDD-PROJ-006 | EstimatePipelineMaintenanceJob — Quét quá hạn gửi TimedOut cho từng run | Branch | P1 |
+| [UT-PROJ-169](../unittest/UT-PROJ-169.md) | TDD-PROJ-006 | EstimateStageWorker — Chạy tiếp bỏ qua bước đã lưu | Happy | P0 |
+| [UT-PROJ-170](../unittest/UT-PROJ-170.md) | TDD-PROJ-006 | EstimateStageWorker — Lỗi cuối của executor chốt Failed | Branch | P1 |
+| [UT-PROJ-171](../unittest/UT-PROJ-171.md) | TDD-PROJ-006 | EstimateStageWorker — Hủy do mất lease không chốt Failed | Quirk | P1 |
+| [UT-PROJ-172](../unittest/UT-PROJ-172.md) | TDD-PROJ-006 | EstimateStageWorker — Token của executor hết hạn tại DeadlineUtc | Boundary | P1 |
+| [UT-PROJ-173](../unittest/UT-PROJ-173.md) | TDD-PROJ-006 | EstimatePipelineMaintenanceJob — Cảnh báo lần chạy chờ quá lâu | Branch | P2 |
+| [UT-PROJ-180](../unittest/UT-PROJ-180.md) | TDD-PROJ-007 | SaveEstimateInputCommandValidator — kích thước lô dạng chuỗi thập phân | Boundary | P1 |
+| [UT-PROJ-181](../unittest/UT-PROJ-181.md) | TDD-PROJ-007 | SaveEstimateInputCommandValidator — cạnh cửa vào, số phòng ngủ, gara | Boundary | P1 |
+| [UT-PROJ-182](../unittest/UT-PROJ-182.md) | TDD-PROJ-007 | SaveEstimateInputCommandValidator — mô tả tối đa 4.000 ký tự đếm theo Rune | Boundary | P1 |
+| [UT-PROJ-183](../unittest/UT-PROJ-183.md) | TDD-PROJ-007 | SaveEstimateInputCommandHandler — đổi ảnh lô xóa con trỏ kết quả soi | Branch | P0 |
+| [UT-PROJ-184](../unittest/UT-PROJ-184.md) | TDD-PROJ-006 | SaveEstimateInputCommandHandler — đầu vào khóa theo lần chạy 2D | Branch | P0 |
+| [UT-PROJ-185](../unittest/UT-PROJ-185.md) | TDD-PROJ-007 | EstimateInputPolicy.FindMissingForStage(Plan2d) — đủ đầu vào, có và không có mô tả | Happy | P0 |
+| [UT-PROJ-186](../unittest/UT-PROJ-186.md) | TDD-PROJ-007 | EstimateInputPolicy.FindMissingForStage(Plan2d) — thiếu ảnh, chưa soi Đạt, kết quả soi lệch ảnh | Branch | P0 |
+| [UT-PROJ-187](../unittest/UT-PROJ-187.md) | TDD-PROJ-007 | EstimateInputPolicy.FindMissingForStage(Plan2d) — số phòng ngủ thiếu | Branch | P1 |
+| [UT-PROJ-188](../unittest/UT-PROJ-188.md) | TDD-PROJ-007 | EstimateInputPolicy.FindMissingForStage(Plan2d) — kích thước lô một ô và ngoài giới hạn | Boundary | P0 |
+| [UT-PROJ-189](../unittest/UT-PROJ-189.md) | TDD-PROJ-007 | EstimateInputPolicy.FindMissingForStage(Plan2d) — danh mục chưa gắn mã gốc hoặc thiếu mô tả cho AI | Branch | P0 |
+| [UT-PROJ-190](../unittest/UT-PROJ-190.md) | TDD-PROJ-007 | EstimateInputPolicy.FindMissingForStage(Plan2d) — tỉnh chưa có miền giá | Branch | P1 |
+| [UT-PROJ-191](../unittest/UT-PROJ-191.md) | TDD-PROJ-007 | EstimateInputPolicy.FindMissingForStage(Plan2d) — Căn hộ không đòi tầng, tum, phong cách kiến trúc | Branch | P1 |
+| [UT-PROJ-192](../unittest/UT-PROJ-192.md) | TDD-PROJ-007 | CatalogConfigurationPolicy — mã gốc và mã phong cách gốc | Branch | P1 |
+| [UT-PROJ-193](../unittest/UT-PROJ-193.md) | TDD-PROJ-007 | CatalogConfigurationPolicy — mô tả cho AI của phong cách nội thất | Boundary | P1 |
+| [UT-PROJ-194](../unittest/UT-PROJ-194.md) | TDD-PROJ-007 | CatalogConfigurationPolicy — số tầng 1 đến 4 | Boundary | P1 |
+| [UT-PROJ-195](../unittest/UT-PROJ-195.md) | TDD-PROJ-007 | MediaUploadInputValidator — purpose EstimateLotImage cần estimateId và giới hạn 10 MiB | Boundary | P0 |
+| [UT-PROJ-196](../unittest/UT-PROJ-196.md) | TDD-PROJ-007 | CreateMediaUploadCommandHandler — chỉ chủ bản dự toán chưa khóa được xin URL ảnh lô | Branch | P0 |
+| [UT-PROJ-197](../unittest/UT-PROJ-197.md) | TDD-PROJ-007 | MediaUploadPayload.PrepareAsync(EstimateLotImage) — kích thước, điểm ảnh, tỷ lệ, định dạng thật | Boundary | P0 |
+| [UT-PROJ-198](../unittest/UT-PROJ-198.md) | TDD-PROJ-007 | RequestLotVerificationCommandHandler — từ chối, trả yêu cầu đang soi, tạo yêu cầu mới | Error | P1 |
+| [UT-PROJ-199](../unittest/UT-PROJ-199.md) | TDD-PROJ-007 | LotVerificationRequestedConsumer (Tx B) — dùng lại kết quả theo tài khoản, hash, prompt, model | Branch | P0 |
+| [UT-PROJ-200](../unittest/UT-PROJ-200.md) | TDD-PROJ-007 | LotVerificationRequestedConsumer (Tx B, lỗi) — hạn mức 30 lần mỗi ngày và trả suất khi AI lỗi | Boundary | P0 |
+| [UT-PROJ-201](../unittest/UT-PROJ-201.md) | TDD-PROJ-007 | LotVerificationVerdictMapper — ánh xạ PlotQuickCheck sang Đạt/Không đạt | Branch | P0 |
+| [UT-PROJ-202](../unittest/UT-PROJ-202.md) | TDD-PROJ-007 | LotVerificationRequestedConsumer — model soi không khả dụng thì thử một lần bằng model văn bản | Branch | P2 |
+| [UT-PROJ-203](../unittest/UT-PROJ-203.md) | TDD-PROJ-007 | LotVerificationRequestedConsumer (Tx C) — khách đã thay ảnh trong lúc soi | Quirk | P1 |
+| [UT-PROJ-204](../unittest/UT-PROJ-204.md) | TDD-PROJ-007 | LotVerificationRequestedConsumer (Tx C) — kết quả Đạt không tăng InputVersion và báo kết quả sau commit | Happy | P0 |
+| [UT-PROJ-205](../unittest/UT-PROJ-205.md) | TDD-PROJ-006 | EstimateGenerationInputFactory (SchemaVersion 3) — nội dung bản chụp | Happy | P0 |
+| [UT-PROJ-206](../unittest/UT-PROJ-206.md) | TDD-PROJ-007 | EstimateGenerationInputFactory (SchemaVersion 3) — mã phong cách hiệu lực khi tắt nhóm kiến trúc | Branch | P1 |
+| [UT-PROJ-207](../unittest/UT-PROJ-207.md) | TDD-PROJ-007 | MediaTextExtractor — đọc URL ảnh từ bản chụp InputV3 | Happy | P1 |
+| [UT-PROJ-208](../unittest/UT-PROJ-208.md) | TDD-PROJ-006 | Plan2dStageExecutor — thứ tự bước và ghi điểm lưu | Happy | P0 |
+| [UT-PROJ-209](../unittest/UT-PROJ-209.md) | TDD-PROJ-006 | Plan2dStageExecutor — chạy tiếp bỏ qua bước đã xong | Branch | P0 |
+| [UT-PROJ-210](../unittest/UT-PROJ-210.md) | TDD-PROJ-007 | Plan2dStageExecutor — khổ giấy chọn một lần, bản nội thất dùng khổ của bản kỹ thuật | Determinism | P1 |
+| [UT-PROJ-211](../unittest/UT-PROJ-211.md) | TDD-PROJ-007 | Plan2dStageExecutor — ảnh tham chiếu theo tầng | Branch | P1 |
+| [UT-PROJ-212](../unittest/UT-PROJ-212.md) |  | Plan2dStageExecutor — AI không trả ảnh: vẽ lại một lần rồi lỗi | Error | P0 |
+| [UT-PROJ-213](../unittest/UT-PROJ-213.md) |  | Plan2dStageExecutor — viền nhà lệch: vẽ lại một lần, giữ bản tốt hơn | Branch | P0 |
+| [UT-PROJ-214](../unittest/UT-PROJ-214.md) |  | Plan2dStageExecutor — cờ vẽ lại viền tắt thì chỉ ghi lại | Branch | P1 |
+| [UT-PROJ-215](../unittest/UT-PROJ-215.md) | TDD-PROJ-007 | Plan2dStageExecutor — các trường hợp miễn kiểm viền | Quirk | P2 |
+| [UT-PROJ-216](../unittest/UT-PROJ-216.md) | TDD-PROJ-008 | Plan2dStageExecutor — lỗi hệ thống AI và nội dung bị chặn | Error | P0 |
+| [UT-PROJ-217](../unittest/UT-PROJ-217.md) | TDD-PROJ-007 | Plan2dStageExecutor — HouseSpec sai schema sau hai lần | Error | P1 |
+| [UT-PROJ-218](../unittest/UT-PROJ-218.md) | TDD-PROJ-007 | Plan2dResultBuilder — tách phần gửi khách và phần nội bộ | Branch | P0 |
+| [UT-PROJ-219](../unittest/UT-PROJ-219.md) |  | Plan2dStageExecutor — đọc quy tắc từ phiên bản đã chốt | Determinism | P1 |
+| [UT-PROJ-220](../unittest/UT-PROJ-220.md) | TDD-PROJ-007 | Parity BriefReader — đọc mô tả tiếng Việt | Determinism | P0 |
+| [UT-PROJ-221](../unittest/UT-PROJ-221.md) | TDD-PROJ-007 | Parity CustomerLot và luật lô đất | Determinism | P0 |
+| [UT-PROJ-222](../unittest/UT-PROJ-222.md) | TDD-PROJ-007 | Parity SpecRuleEngine — 17 luật theo đúng thứ tự | Determinism | P0 |
+| [UT-PROJ-223](../unittest/UT-PROJ-223.md) | TDD-PROJ-007 | Parity Plan2dPrompts (2d-13) — prompt trùng từng ký tự | Determinism | P0 |
+| [UT-PROJ-224](../unittest/UT-PROJ-224.md) | TDD-PROJ-007 | Parity OutlineMeasurer — đo viền nhà trên ảnh | Determinism | P1 |
+| [UT-PROJ-240](../unittest/UT-PROJ-240.md) | TDD-PROJ-008 | AiCallRunner — gọi thành công ngay lần đầu | Happy | P0 |
+| [UT-PROJ-241](../unittest/UT-PROJ-241.md) | TDD-PROJ-008 | AiCallRunner — thử lại khi 503 với thời gian chờ 2 rồi 4 giây có ngẫu nhiên ±25% | Branch | P0 |
+| [UT-PROJ-242](../unittest/UT-PROJ-242.md) | TDD-PROJ-008 | AiCallRunner — hết 4 lần thử khi lỗi 500 liên tục | Boundary | P1 |
+| [UT-PROJ-243](../unittest/UT-PROJ-243.md) | TDD-PROJ-008 | AiCallRunner — dùng Retry-After của 429 thay cho lịch chờ, không cộng ngẫu nhiên | Branch | P1 |
+| [UT-PROJ-244](../unittest/UT-PROJ-244.md) | TDD-PROJ-008 | AiCallRunner — dừng ngay khi thời gian còn lại không đủ cho lần chờ kế tiếp | Boundary | P0 |
+| [UT-PROJ-245](../unittest/UT-PROJ-245.md) | TDD-PROJ-008 | AiCallRunner — phân loại mã 5xx: 501 không thử lại, 502 và 504 thử lại | Branch | P2 |
+| [UT-PROJ-246](../unittest/UT-PROJ-246.md) | TDD-PROJ-008 | AiCallRunner — lỗi mạng và hết thời gian một lần gọi được thử lại | Branch | P1 |
+| [UT-PROJ-247](../unittest/UT-PROJ-247.md) | TDD-PROJ-008 | AiCallRunner — 401 và 403 không thử lại, báo lỗi hệ thống | Error | P0 |
+| [UT-PROJ-248](../unittest/UT-PROJ-248.md) | TDD-PROJ-008 | AiCallRunner — hết tiền theo HTTP 402 và mã insufficient_quota | Error | P0 |
+| [UT-PROJ-249](../unittest/UT-PROJ-249.md) | TDD-PROJ-008 | AiCallRunner — nhận diện hết tiền theo mã lỗi trước, không bắt nhầm chữ billing | Quirk | P1 |
+| [UT-PROJ-250](../unittest/UT-PROJ-250.md) | TDD-PROJ-008 | AiCallRunner — cảnh báo tài khoản AI tối đa một lần mỗi 10 phút mỗi nhà cung cấp | Determinism | P2 |
+| [UT-PROJ-251](../unittest/UT-PROJ-251.md) | TDD-PROJ-008 | AiCallRunner — bỏ tham số ảnh không được hỗ trợ và nhớ theo model | Branch | P1 |
+| [UT-PROJ-252](../unittest/UT-PROJ-252.md) | TDD-PROJ-008 | AiCallRunner — bỏ temperature, reasoning hoặc strict khi model từ chối | Branch | P2 |
+| [UT-PROJ-253](../unittest/UT-PROJ-253.md) | TDD-PROJ-008 | AiCallRunner — không bao giờ bỏ size, quality hoặc background | Error | P1 |
+| [UT-PROJ-254](../unittest/UT-PROJ-254.md) | TDD-PROJ-008 | AiCallRunner — không gửi temperature cùng reasoning | Quirk | P2 |
+| [UT-PROJ-255](../unittest/UT-PROJ-255.md) | TDD-PROJ-008 | AiCallRunner — chỗ trong giới hạn chung không bị giữ trong lúc chờ thử lại | Determinism | P1 |
+| [UT-PROJ-256](../unittest/UT-PROJ-256.md) | TDD-PROJ-008 | AiCallRunner — timeout một lần gọi bằng min(thời gian còn lại, timeout + 5 giây) | Boundary | P1 |
+| [UT-PROJ-257](../unittest/UT-PROJ-257.md) | TDD-PROJ-008 | AiCallRunner — JSON sai được gọi lại một lần rồi mới báo AiOutputIncomplete | Error | P0 |
+| [UT-PROJ-258](../unittest/UT-PROJ-258.md) | TDD-PROJ-008 | AiCallRunner — nội dung bị chặn không thử lại | Error | P1 |
+| [UT-PROJ-259](../unittest/UT-PROJ-259.md) | TDD-PROJ-008 | AiCallRunner — ảnh 200 không có ảnh được gọi lại tối đa 2 lần với câu nhắc chỉ trả ảnh | Branch | P0 |
+| [UT-PROJ-260](../unittest/UT-PROJ-260.md) | TDD-PROJ-008 | AiCallRunner — loại ảnh đọc từ byte trả về | Quirk | P2 |
+| [UT-PROJ-261](../unittest/UT-PROJ-261.md) | TDD-PROJ-008 | OpenAiImagesClient — chọn edits hay generations và giới hạn 16 ảnh tham chiếu | Branch | P2 |
+| [UT-PROJ-262](../unittest/UT-PROJ-262.md) | TDD-PROJ-008 | AnthropicMessagesClient — luồng bị cắt được thử lại, max_tokens và refusal không thử lại (đợt 2) | Branch | P2 |
+| [UT-PROJ-263](../unittest/UT-PROJ-263.md) | TDD-PROJ-008 | Soi ảnh — model soi không khả dụng thì thử lại một lần bằng FallbackModel | Branch | P2 |
+| [UT-PROJ-264](../unittest/UT-PROJ-264.md) | TDD-PROJ-008 | AiCallRecorder — một dòng nhật ký cho một lời gọi logic | Happy | P0 |
+| [UT-PROJ-265](../unittest/UT-PROJ-265.md) | TDD-PROJ-008 | AiCallRecorder — công thức chi phí có token đệm và token ghi đệm | Boundary | P1 |
+| [UT-PROJ-266](../unittest/UT-PROJ-266.md) | TDD-PROJ-008 | AiCallRecorder — model không có giá thì chi phí NULL | Branch | P2 |
+| [UT-PROJ-267](../unittest/UT-PROJ-267.md) | TDD-PROJ-008 | AiCallRecorder — bản thô không có ảnh và không có khóa API | Quirk | P0 |
+| [UT-PROJ-268](../unittest/UT-PROJ-268.md) | TDD-PROJ-008 | AiCallRecorder — ghi kết quả Error và Cancelled | Branch | P2 |
+| [UT-PROJ-269](../unittest/UT-PROJ-269.md) | TDD-PROJ-008 | FakeAiProvider — phát lại theo task và stepKey, rơi về mặc định của task | Happy | P1 |
+| [UT-PROJ-270](../unittest/UT-PROJ-270.md) | TDD-PROJ-008 | FakeAiProvider — lỗi theo kịch bản đi qua đúng logic của AiCallRunner | Error | P1 |
+| [UT-PROJ-271](../unittest/UT-PROJ-271.md) | TDD-PROJ-008 | FakeAiProvider — model ghi là fake và chi phí bằng 0 | Quirk | P2 |
+| [UT-PROJ-272](../unittest/UT-PROJ-272.md) | TDD-PROJ-008 | EstimatePipeline startup guard — từ chối cấu hình không hợp lệ | Error | P0 |
+| [UT-PROJ-273](../unittest/UT-PROJ-273.md) | TDD-PROJ-008 | PermissionNames — có năm quyền mới và được gán cho Admin | Happy | P1 |
+| [UT-PROJ-274](../unittest/UT-PROJ-274.md) | TDD-PROJ-008 | SavePipelineConfigCommandHandler — lưu tạo phiên bản mới, chép toàn bộ dòng con | Happy | P0 |
+| [UT-PROJ-275](../unittest/UT-PROJ-275.md) | TDD-PROJ-008 | SavePipelineConfigCommandHandler — expectedVersion cũ bị từ chối | Error | P0 |
+| [UT-PROJ-276](../unittest/UT-PROJ-276.md) | TDD-PROJ-008 | SavePipelineConfigCommandHandler — gửi lặp cùng key trả phiên bản cũ, khác nội dung thì 409 | Determinism | P1 |
+| [UT-PROJ-277](../unittest/UT-PROJ-277.md) | TDD-PROJ-008 | PipelineConfigValidator — model ngoài danh sách hỗ trợ | Error | P0 |
+| [UT-PROJ-278](../unittest/UT-PROJ-278.md) | TDD-PROJ-008 | PipelineConfigValidator — tham số phải khớp cờ khả năng của model | Branch | P1 |
+| [UT-PROJ-279](../unittest/UT-PROJ-279.md) | TDD-PROJ-008 | PipelineConfigValidator — biên của các số cấu hình | Boundary | P1 |
+| [UT-PROJ-280](../unittest/UT-PROJ-280.md) | TDD-PROJ-008 | IPipelineConfigReader — lần chạy đọc đúng phiên bản đã chốt | Determinism | P0 |
+| [UT-PROJ-281](../unittest/UT-PROJ-281.md) | TDD-PROJ-008 | PromptAssembler — ghép khung mã với chỗ chèn nạp sẵn trùng nguyên văn app demo | Happy | P0 |
+| [UT-PROJ-282](../unittest/UT-PROJ-282.md) | TDD-PROJ-008 | PromptAssembler — chọn lời dặn chung theo phạm vi, thứ tự và trạng thái | Branch | P1 |
+| [UT-PROJ-283](../unittest/UT-PROJ-283.md) | TDD-PROJ-008 | AiRuleSetValidator — lời dặn có nội dung, tối đa 2.000 ký tự | Boundary | P2 |
+| [UT-PROJ-284](../unittest/UT-PROJ-284.md) | TDD-PROJ-008 | IAiRuleSetReader — lần chạy đọc đúng phiên bản quy tắc đã chốt | Determinism | P0 |
+| [UT-PROJ-285](../unittest/UT-PROJ-285.md) | TDD-PROJ-008 | IAiRuleSetReader — nạp đủ quy tắc theo mã gốc như app demo | Happy | P1 |
+| [UT-PROJ-286](../unittest/UT-PROJ-286.md) | TDD-PROJ-008 | SavePricingRegionsCommandHandler — lưu tăng TableVersion, rowVersion cũ bị từ chối | Branch | P1 |
+| [UT-PROJ-287](../unittest/UT-PROJ-287.md) | TDD-PROJ-008 | PricingRegionValidator — tỉnh không tồn tại, thiếu miền, Tây Nguyên ngoài miền Trung | Error | P1 |
+
+## Mốc cập nhật ngày 12/10/2026: sửa theo bản rà soát TDD và câu trả lời của người dùng
+
+Người dùng chốt phần sửa TDD-PROJ-006/007/008 theo bản rà soát độc lập, rồi trả lời thêm 11 điểm (lỗi hệ thống không tính giới hạn, hàng chờ đầy, tạm ngắt dịch vụ AI, cảnh báo chi phí, trần soi chung, tệp riêng tư, quyền vận hành, ghi vết đọc nhật ký thô…). Đặc tả Unit Test được cập nhật như sau.
+
+**Sửa ca đã có** (giữ mã):
+- UT-PROJ-140, 144, 151, 153, 155: chỉ lỗi do kết quả AI mới có `CountsTowardLimit=true`; quá hạn và lỗi hệ thống luôn false.
+- UT-PROJ-162: người đặt lại bộ đếm dùng quyền `estimate.pipeline.operate`.
+- UT-PROJ-168, 173: quét quá hạn và cảnh báo chuyển sang job `EstimatePipelineMaintenanceJob`, chạy cả khi `Mode=Off`.
+- UT-PROJ-198 → 204 (trừ 201): soi ảnh bất đồng bộ. 198 là handler gửi yêu cầu; 199, 200, 202, 203, 204 là `LotVerificationRequestedConsumer` theo ba transaction ngắn.
+- UT-PROJ-255: chỗ trong giới hạn chung qua Redis thay cho semaphore theo instance.
+- UT-PROJ-264: token và chi phí cộng mọi lần thử đã bị tính tiền.
+- UT-PROJ-267: khóa bản thô dưới `media/site-private/`.
+- UT-PROJ-273: năm quyền, thêm `estimate.pipeline.operate`.
+- UT-PROJ-274, 279: các cột cấu hình mới và biên của chúng.
+
+**Thêm 29 ca mới**, dùng hết các mã trống 174–179, 225–239, 288–289 và thêm 290–295. Mã 290–295 thuộc TDD-PROJ-006 vì dải 174–179 không đủ.
+
+| Test | TDD | Unit | Loại | Ưu tiên |
+|---|---|---|---|---|
+| [UT-PROJ-174](../unittest/UT-PROJ-174.md) | TDD-PROJ-006 | RunEstimateStageCommandHandler — Hàng chờ đầy | Boundary | P0 |
+| [UT-PROJ-175](../unittest/UT-PROJ-175.md) | TDD-PROJ-006 | RunEstimateStageCommandHandler — Nhà cung cấp AI đang tạm ngắt | Branch | P0 |
+| [UT-PROJ-176](../unittest/UT-PROJ-176.md) | TDD-PROJ-006 | StageFailureClassifier — phân nhóm mã lỗi lần chạy | Branch | P0 |
+| [UT-PROJ-177](../unittest/UT-PROJ-177.md) | TDD-PROJ-006 | FinalizeStageRunCommandHandler — đặt CountsTowardLimit theo nhóm lỗi | Branch | P0 |
+| [UT-PROJ-178](../unittest/UT-PROJ-178.md) | TDD-PROJ-006 | StageRunQueuedConsumer — chỉ đánh thức worker, không chạm DB | Determinism | P0 |
+| [UT-PROJ-179](../unittest/UT-PROJ-179.md) | TDD-PROJ-006 | EstimateStageWorker — nhận theo tín hiệu và nhận việc kế tiếp theo thứ tự tiếp nhận | Branch | P1 |
+| [UT-PROJ-290](../unittest/UT-PROJ-290.md) | TDD-PROJ-006 | EstimateStageWorker — vòng quét dự phòng khi không có tin | Branch | P1 |
+| [UT-PROJ-291](../unittest/UT-PROJ-291.md) | TDD-PROJ-006 | EstimateStageWorker — dừng êm khi ứng dụng tắt | Branch | P1 |
+| [UT-PROJ-292](../unittest/UT-PROJ-292.md) | TDD-PROJ-006 | StageRunFinishedConsumer — báo trình duyệt và cảnh báo chi phí | Branch | P1 |
+| [UT-PROJ-293](../unittest/UT-PROJ-293.md) | TDD-PROJ-006 | GetStageFileQueryHandler — link tải riêng tư có hạn 15 phút | Branch | P0 |
+| [UT-PROJ-294](../unittest/UT-PROJ-294.md) | TDD-PROJ-006 | EstimatePipelineMaintenanceJob — đối soát chặng 2D với sổ lượt | Branch | P2 |
+| [UT-PROJ-295](../unittest/UT-PROJ-295.md) | TDD-PROJ-006 | StageArtifactLookup — dùng lại phần đã xong dù cấu hình đổi | Branch | P1 |
+| [UT-PROJ-225](../unittest/UT-PROJ-225.md) | TDD-PROJ-007 | RequestLotVerificationCommandHandler — tạm ngắt và trần soi chung | Branch | P0 |
+| [UT-PROJ-226](../unittest/UT-PROJ-226.md) | TDD-PROJ-007 | LotVerificationRequestedConsumer (Tx A) — nhận việc có điều kiện | Branch | P0 |
+| [UT-PROJ-227](../unittest/UT-PROJ-227.md) | TDD-PROJ-007 | LotVerificationRequestedConsumer — không giữ transaction khi tải ảnh và gọi AI | Determinism | P0 |
+| [UT-PROJ-228](../unittest/UT-PROJ-228.md) | TDD-PROJ-007 | LotVerificationRequestedConsumer (Tx B) — trần soi chung đầy và cảnh báo 80% | Boundary | P0 |
+| [UT-PROJ-229](../unittest/UT-PROJ-229.md) | TDD-PROJ-007 | LotVerificationRequestedConsumer (Tx C) — yêu cầu đã bị job bảo trì chốt | Quirk | P1 |
+| [UT-PROJ-230](../unittest/UT-PROJ-230.md) | TDD-PROJ-007 | EstimatePipelineMaintenanceJob — yêu cầu soi quá hạn | Branch | P1 |
+| [UT-PROJ-231](../unittest/UT-PROJ-231.md) | TDD-PROJ-007 | LotVerificationCompletedConsumer — báo kết quả soi | Happy | P2 |
+| [UT-PROJ-232](../unittest/UT-PROJ-232.md) | TDD-PROJ-007 | Cấu hình endpoint `lot-verification-requested` của MassTransit | Determinism | P1 |
+| [UT-PROJ-233](../unittest/UT-PROJ-233.md) | TDD-PROJ-008 | AiConcurrencyLimiter — Redis lỗi thì dùng giới hạn trong tiến trình | Error | P1 |
+| [UT-PROJ-234](../unittest/UT-PROJ-234.md) | TDD-PROJ-008 | AiCircuitBreaker — ngắt sau đủ lỗi liên tiếp | Boundary | P0 |
+| [UT-PROJ-235](../unittest/UT-PROJ-235.md) | TDD-PROJ-008 | AiCircuitBreaker — hết tiền ngắt ngay, mỗi lần ngắt một cảnh báo | Branch | P0 |
+| [UT-PROJ-236](../unittest/UT-PROJ-236.md) | TDD-PROJ-008 | AiCircuitBreaker — mở lại và Redis lỗi | Branch | P1 |
+| [UT-PROJ-237](../unittest/UT-PROJ-237.md) | TDD-PROJ-008 | GetAiCallRawQueryHandler — đọc bản thô có ghi vết | Branch | P0 |
+| [UT-PROJ-238](../unittest/UT-PROJ-238.md) | TDD-PROJ-008 | Chính sách quyền của API vận hành luồng AI | Branch | P0 |
+| [UT-PROJ-239](../unittest/UT-PROJ-239.md) | TDD-PROJ-008 | Đăng ký nhà cung cấp AI giả theo Mode | Branch | P1 |
+| [UT-PROJ-288](../unittest/UT-PROJ-288.md) | TDD-PROJ-008 | AiConcurrencyLimiter — giữ chỗ chung qua Redis | Boundary | P0 |
+| [UT-PROJ-289](../unittest/UT-PROJ-289.md) | TDD-PROJ-008 | AiConcurrencyLimiter — chỗ tự hết hạn khi instance chết | Quirk | P1 |
+
+Tất cả vẫn là unit dự kiến, chưa có mã và chưa chạy. Script kiểm tra cho kết quả:
+- 249 file UT/ST của luồng bốn chặng đều có một dòng 13 cột;
+- Trace to khớp TEST_LINKS;
+- mọi mã và mục được dẫn đều có thật.
+
+Phần chỉ chứng minh được trên hạ tầng thật vẫn để cho integration test:
+- không có kết nối `idle in transaction` quá 1 giây khi 10 lần chạy và 20 yêu cầu soi chạy cùng lúc;
+- upsert đồng thời bộ đếm soi chung;
+- script Lua của limiter và breaker trên Redis thật;
+- endpoint SignalR qua nhiều instance.
+

@@ -40,7 +40,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 ## Metadata
 
 - **Story**: Là chủ sở hữu bản dự toán, tôi muốn chia sẻ hồ sơ qua link, QR hoặc email và kiểm soát thời hạn để người nhận xem, tải hồ sơ mà không cần tài khoản.
-- **Context**: Chủ sở hữu bản dự toán chọn ngày hết hạn và có thể thu hồi sớm. Email gửi link thay vì tệp đính kèm. Quyền chia sẻ hồ sơ cũ vẫn được dùng khi gói thiết kế hết hạn; AI và dịch vụ email là các phụ thuộc cần tích hợp.
+- **Context**: Chủ sở hữu bản dự toán chọn ngày hết hạn và có thể thu hồi sớm. Email gửi link thay vì tệp đính kèm. Quyền chia sẻ hồ sơ cũ vẫn được dùng khi gói thiết kế hết hạn. Theo luồng bốn chặng (người dùng chốt ngày 11/10/2026), chia sẻ chỉ mở sau khi chặng Hồ sơ thành công.
 - **Sprint**: [Chưa xác định]
 - **Priority**: Must
 - **Status**: Todo
@@ -55,7 +55,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ### Preconditions
 
-- Chủ sở hữu bản dự toán đã đăng nhập và có hồ sơ có thể cung cấp theo STORY-PROJ-003.
+- Chủ sở hữu bản dự toán đã đăng nhập; chặng Hồ sơ của bản dự toán đã thành công theo STORY-PROJ-010 và BR-PROJ-006 khoản 11.
 - Người nhận không phải đăng nhập; quyền xem/tải căn cứ vào link còn hiệu lực theo BR-PROJ-006.
 
 ### Trigger
@@ -70,7 +70,7 @@ Chủ sở hữu bản dự toán tạo link/QR, gửi email chứa link hoặc 
 2. Backend kiểm tra quyền chủ sở hữu bản dự toán và hồ sơ. Nếu đã có link đang hiệu lực thì dùng lại; nếu chưa có, đã hết hạn hoặc bị thu hồi thì tạo link với ngày hết hạn hợp lệ theo BR-PROJ-006.
 3. Chủ sở hữu bản dự toán nhận link hoặc QR dẫn tới cùng quyền truy cập hồ sơ đó.
 4. Người nhận mở link hoặc quét QR; backend kiểm tra hiệu lực và việc thu hồi link.
-5. Khi link hợp lệ, cung cấp hồ sơ để người nhận xem và tải mà không yêu cầu đăng nhập.
+5. Khi link hợp lệ, cung cấp hồ sơ để người nhận xem và tải mà không yêu cầu đăng nhập: kết quả 2D, phần dự toán gửi khách, ảnh phối cảnh 3D và bốn tệp hồ sơ.
 
 ### Alternative Flow
 
@@ -136,6 +136,13 @@ Chủ sở hữu chọn ngày hết hạn đã qua theo giờ Việt Nam.
 1. Từ chối tạo link và yêu cầu chọn ngày hiện tại hoặc ngày sau đó.
 2. Không tạo link hoặc thay đổi quyền chia sẻ đã lưu.
 
+#### EXC-06
+
+Chủ sở hữu yêu cầu tạo link, QR hoặc gửi email khi chặng Hồ sơ chưa thành công.
+
+1. Từ chối và báo cần hoàn tất chặng Hồ sơ trước theo BR-PROJ-006 khoản 11.
+2. Không tạo link, không gửi email.
+
 ## Acceptance Criteria
 
 #### AC-001
@@ -150,7 +157,7 @@ Chủ sở hữu chọn ngày hết hạn đã qua theo giờ Việt Nam.
 - **Given**: Người nhận có link còn hiệu lực, chưa bị thu hồi.
 - **When**: Mở link trực tiếp, từ email hoặc quét QR.
 - **Then**: Được xem và tải hồ sơ không cần đăng nhập.
-- **And**: Không được sửa đầu vào, gửi AI, quản lý chia sẻ hay xem bản dự toán khác.
+- **And**: Không được sửa đầu vào, chạy chặng, quản lý chia sẻ hay xem bản dự toán khác.
 
 #### AC-003
 
@@ -215,6 +222,13 @@ Chủ sở hữu chọn ngày hết hạn đã qua theo giờ Việt Nam.
 - **Then**: Trang xem qua link hiển thị mã `BUILDX-20261005-Q7K2M9` cùng tên hiện tại của bản dự toán theo BR-PROJ-006 khoản 10.
 - **And**: Không có thao tác nào cho xem hồ sơ chỉ bằng mã dự toán; link hết hạn hoặc bị thu hồi vẫn bị từ chối dù người mở biết mã.
 
+#### AC-012
+
+- **Given**: Bản dự toán đã xong 2D, Dự toán và Phối cảnh 3D nhưng chặng Hồ sơ chưa thành công.
+- **When**: Chủ sở hữu yêu cầu tạo link, QR hoặc gửi email, kể cả gửi trực tiếp tới backend.
+- **Then**: Từ chối và báo cần hoàn tất chặng Hồ sơ trước.
+- **And**: Không tạo link, không gửi email; sau khi chặng Hồ sơ thành công thì chia sẻ được như AC-001.
+
 ## References
 
 ### TDDs
@@ -226,11 +240,13 @@ Chủ sở hữu chọn ngày hết hạn đã qua theo giờ Việt Nam.
 - BR-PROJ-006
 - BR-PROJ-003/Then: Khoản 12, định dạng và tính bất biến của mã dự toán.
 - BR-PROJ-007
+- BR-PROJ-010
 - BR-SUB-007
 
 ### Dependencies
 
 - STORY-PROJ-003
+- STORY-PROJ-010
 
 ## Non-Functional
 

@@ -53,6 +53,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ### Problem
 
+**Cập nhật ngày 11/10/2026:** người dùng chốt luồng bốn chặng (BR-PROJ-010). Thiết kế ở [TDD-PROJ-006](TDD-PROJ-006.md), [TDD-PROJ-007](TDD-PROJ-007.md), [TDD-PROJ-008](TDD-PROJ-008.md). Luồng một lần gửi AI của tài liệu này vẫn chạy ở môi trường chưa bật `EstimatePipelineOption__Mode` (production hiện nay) và bị gỡ ở đợt 4 khi chuyển luồng (BR-PROJ-018). Khi luồng mới bật, `POST /generations` trả 409 `PipelineEnabled`.
+
 STORY-PROJ-002 cần tiếp nhận đầu vào đã lưu, giữ một lượt, khóa sửa và chỉ tính đã dùng khi đủ kết quả đã lưu/có thể mở. AI do nhóm khác phụ trách; chưa có API, danh sách đầu ra bắt buộc, cơ chế callback/polling hoặc môi trường tích hợp. Thiết kế này hoàn thành ranh giới nội bộ và các bảo đảm dữ liệu; phần giao tiếp nhà cung cấp vẫn chờ hợp đồng. Ngày 26/09/2026 người dùng xác nhận làm trước toàn bộ phần của BMT với một adapter AI giả chạy trong tiến trình backend (không mở endpoint AI giả), xem đoạn quyết định bên dưới.
 
 TDD-SUB-002 đã thiết kế `UsageOperation`, quota và worker, nhưng vẫn dùng tên Project và thứ tự khóa User. TDD-PAY-001/TDD-SUB-005 bổ sung AccountCommerceState và vòng đời kỳ. TDD này nối Estimate vào đúng sổ lượt đó và quy định một thứ tự khóa chung; không tạo bảng quota hoặc trạng thái cuối AI thứ hai.
@@ -180,7 +182,7 @@ sequenceDiagram
     participant FS as Tệp do AI lưu (URL)
     C->>API: POST generation, key, inputVersion
     API->>L: PrepareAsync, lấy phiên bản hiện hành (trước khi khóa)
-    API->>DB: Khóa account và dữ liệu; kiểm owner/key/input/quota
+    API->>DB: Khóa account và dữ liệu, kiểm owner/key/input/quota
     API->>L: VerifyAsync nếu LocationDatasetVersion khác bản hiện hành
     L-->>API: Mã và tên xã hiện hành, hoặc NULL thì trả 422 wardCode
     API->>DB: Snapshot + Pending + Reserved tăng 1
@@ -191,7 +193,7 @@ sequenceDiagram
     AI-->>W: Kết quả đúng attempt kèm URL tệp, hoặc lỗi
     W->>FS: Đọc thử từng URL tệp, không lưu bản sao
     W->>DB: Ghi candidate gồm payload và URL tệp
-    W->>DB: Khóa lại theo thứ tự; kiểm state và deadline
+    W->>DB: Khóa lại theo thứ tự, kiểm state và deadline
     alt Pending và trước hạn, đủ kết quả
       W->>DB: ResultRef + Succeeded + Reserved giảm + Used tăng
       DB-->>W: Commit công bố

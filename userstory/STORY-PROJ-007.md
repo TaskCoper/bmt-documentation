@@ -40,7 +40,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 ## Metadata
 
 - **Story**: Là khách hàng, tôi muốn chọn nhiều dự toán của mình để xóa cùng lúc và biết kết quả từng bản, nhằm bỏ những bản không còn cần dùng.
-- **Context**: Người dùng xác nhận xóa các bản đủ điều kiện, chặn bản đang được AI xử lý, không hoàn lượt và vẫn cho xóa khi hết hạn gói hoặc hết lượt. Chọn tất cả chỉ áp dụng cho trang đang xem. Xóa thành công thì không mở lại, không khôi phục và ngừng truy cập qua link đã chia sẻ. Người dùng đã chốt bộ US/BR trong hội thoại ngày 30/09/2026; đã đồng ý đánh dấu xóa và giữ dữ liệu nội bộ, chưa tự động dọn tệp hoặc đặt thời hạn lưu. Thiết kế API ở TDD-PROJ-005, chưa triển khai. Metadata phân công còn thiếu.
+- **Context**: Người dùng xác nhận xóa các bản đủ điều kiện, chặn bản đang được AI xử lý, không hoàn lượt và vẫn cho xóa khi hết hạn gói hoặc hết lượt. Chọn tất cả chỉ áp dụng cho trang đang xem. Xóa thành công thì không mở lại, không khôi phục và ngừng truy cập qua link đã chia sẻ. Người dùng đã chốt bộ US/BR trong hội thoại ngày 30/09/2026; đã đồng ý đánh dấu xóa và giữ dữ liệu nội bộ, chưa tự động dọn tệp hoặc đặt thời hạn lưu. Thiết kế API ở TDD-PROJ-005, chưa triển khai. Metadata phân công còn thiếu. Từ ngày 11/10/2026 (luồng bốn chặng), “đang được AI xử lý” trong Story này nghĩa là bản có một chặng đang chờ chạy hoặc đang chạy theo BR-PROJ-010, kể cả chặng Hồ sơ không gọi AI; quy tắc xóa khác giữ nguyên theo BR-PROJ-009.
 - **Sprint**: [Chưa xác định]
 - **Priority**: Must
 - **Status**: Todo
@@ -149,7 +149,7 @@ Lỗi mạng hoặc máy chủ khiến chưa xác định được đầy đủ 
 
 #### AC-002
 
-- **Given**: Khách chọn các bản nháp, thành công hoặc thất bại thuộc mình, chưa bị xóa và không có AI đang xử lý.
+- **Given**: Khách chọn các bản ở trạng thái Nháp, Thất bại, Đang làm dở hoặc Hoàn tất thuộc mình, chưa bị xóa và không có chặng đang chờ chạy hoặc đang chạy.
 - **When**: Yêu cầu xóa.
 - **Then**: Xóa các bản đủ điều kiện và trả kết quả cho từng bản theo BR-PROJ-009.
 - **And**: Áp dụng được khi chọn một hoặc nhiều bản; không yêu cầu tất cả có cùng trạng thái.

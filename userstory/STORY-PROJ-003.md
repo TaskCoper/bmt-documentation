@@ -39,8 +39,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Metadata
 
-- **Story**: Là chủ sở hữu bản dự toán, tôi muốn xem kết quả dự toán, hồ sơ và tải PDF/Excel để sử dụng kết quả thiết kế đã tạo.
-- **Context**: Bao phủ bước dự toán và hồ sơ của trang mẫu. Nội dung do AI service trả; hợp đồng dữ liệu và cách bàn giao hoặc xuất tệp đang chờ tích hợp. Story không đặt công thức hoặc bảng đơn giá cho backend BMT.
+- **Story**: Là chủ sở hữu bản dự toán, tôi muốn xem kết quả của từng chặng đã xong và tải bốn tệp hồ sơ để sử dụng kết quả thiết kế đã tạo.
+- **Context**: Bao phủ việc xem kết quả của bốn chặng Bản vẽ 2D, Dự toán, Phối cảnh 3D, Hồ sơ (BR-PROJ-010) và tải bốn tệp do chặng Hồ sơ dựng (STORY-PROJ-010). Giao diện có thanh tiến trình 5 bước: Nhập liệu → Bản vẽ 2D → Dự toán → Phối cảnh 3D → Hồ sơ; mỗi chặng có màn hình kết quả riêng. Kết quả do backend tạo và lưu theo BR-PROJ-007; xem và tải không gọi AI. Cập nhật theo quyết định của người dùng ngày 10–11/10/2026.
 - **Sprint**: [Chưa xác định]
 - **Priority**: Must
 - **Status**: Todo
@@ -49,6 +49,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Approver**: Tân Trần
 - **Assignee**:
   - Backend: [Chưa xác định]
+  - Frontend: [Chưa xác định]
   - QA: [Chưa xác định]
 
 ## Conditions
@@ -56,22 +57,24 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 ### Preconditions
 
 - Khách đã đăng nhập và là chủ sở hữu bản dự toán.
-- Bản dự toán có kết quả đã lưu và có thể mở xem theo STORY-PROJ-002.
-- Hợp đồng AI phải xác định dữ liệu và tệp đầu ra trước khi kiểm chứng tích hợp thật.
+- Bản dự toán có ít nhất một chặng đã thành công để xem kết quả; tải tệp cần chặng Hồ sơ đã thành công.
 
 ### Trigger
 
-Khách mở bước Nhận dự toán hoặc Hồ sơ thi công, yêu cầu chuẩn bị/tải PDF hay tải Excel dự toán.
+Khách mở một bước trên thanh tiến trình của bản dự toán, hoặc yêu cầu tải một tệp hồ sơ.
 
 ## Flow
 
 ### Main Flow
 
-1. Khách mở kết quả dự toán của bản dự toán đã tạo.
-2. Backend kiểm tra quyền truy cập và trả kết quả đã lưu theo BR-PROJ-007: tổng dự toán, các nhóm phần thô/hoàn thiện/nội thất và thông tin chi tiết, tư vấn theo dữ liệu AI trả.
-3. Khách chuyển sang hồ sơ để xem thông tin bản dự toán và nội dung kết quả thiết kế/dự toán.
-4. Khi khách yêu cầu PDF hoặc Excel, hệ thống cung cấp tệp của đúng kết quả nguồn; chuẩn bị tệp nếu hợp đồng tích hợp yêu cầu xuất từ dữ liệu đã lưu.
-5. Khi tệp sẵn sàng, khách tải xuống. Việc xem, xuất và tải không khởi chạy lại AI tạo thiết kế hoặc giữ/trừ lượt.
+1. Khách mở bản dự toán; hệ thống hiển thị thanh tiến trình 5 bước cùng trạng thái từng chặng theo BR-PROJ-010.
+2. Khách chọn một chặng đã thành công. Backend kiểm tra quyền truy cập và trả kết quả đã lưu:
+   - Bản vẽ 2D: phương án từng tầng (tên phòng, diện tích), bản vẽ kỹ thuật và bản vẽ bố trí nội thất của từng tầng.
+   - Dự toán: tổng dự toán, đơn giá trên m² sàn quy đổi, ba phần thô, hoàn thiện, nội thất với các dòng chi tiết, thời gian thi công dự kiến và tư vấn; chỉ phần gửi khách theo BR-PROJ-017.
+   - Phối cảnh 3D: các ảnh ngoại thất và ảnh phòng kèm nhãn.
+   - Hồ sơ: danh sách bốn tệp gồm PDF hồ sơ gộp, PDF phối cảnh 3D, PDF bản vẽ kiến trúc và Excel dự toán.
+3. Khi khách yêu cầu tải một tệp, backend kiểm tra quyền và chuyển nội dung tệp của đúng bản dự toán; tên tệp theo tên hiện tại của bản dự toán.
+4. Việc xem và tải không chạy lại chặng nào, không gọi AI và không giữ hay trừ lượt.
 
 ### Alternative Flow
 
@@ -79,9 +82,15 @@ Khách mở bước Nhận dự toán hoặc Hồ sơ thi công, yêu cầu chu�
 
 Gói thiết kế đã hết hạn nhưng bản dự toán có kết quả cũ.
 
-1. Vẫn cho chủ sở hữu bản dự toán xem kết quả và tải tệp.
-2. Cho phép xuất PDF/Excel từ kết quả cũ dù chưa có tệp trước khi gói hết hạn, theo BR-SUB-007.
-3. Không cấp kỳ hoặc lượt mới chỉ vì dùng các thao tác này.
+1. Vẫn cho chủ sở hữu xem kết quả các chặng đã xong và tải tệp theo BR-SUB-007.
+2. Không cấp kỳ hoặc lượt mới chỉ vì dùng các thao tác này.
+
+#### ALT-02
+
+Khách dừng sau một chặng, chẳng hạn đã xong 2D và Dự toán nhưng chưa chạy 3D.
+
+1. Hiển thị kết quả của 2D và Dự toán; chặng 3D ở trạng thái Sẵn sàng, chặng Hồ sơ ở trạng thái Chưa mở.
+2. Không có tệp để tải và chưa mở chia sẻ cho tới khi chặng Hồ sơ thành công.
 
 ### Exception Flow
 
@@ -90,73 +99,92 @@ Gói thiết kế đã hết hạn nhưng bản dự toán có kết quả cũ.
 Khách không có quyền truy cập bản dự toán được yêu cầu.
 
 1. Từ chối trả nội dung kết quả hoặc tệp của bản dự toán đó.
-2. Luồng người nhận link công khai được kiểm tra riêng theo STORY-PROJ-004, không bỏ qua kiểm tra quyền của luồng chủ sở hữu bản dự toán.
+2. Luồng người nhận link công khai được kiểm tra riêng theo STORY-PROJ-004, không bỏ qua kiểm tra quyền của luồng chủ sở hữu.
 
 #### EXC-02
 
-Kết quả chưa sẵn sàng hoặc tác vụ AI đã thất bại.
+Chặng được yêu cầu chưa thành công (chưa mở, đang chạy hoặc lỗi).
 
-1. Trả tình trạng thực tế của bản dự toán theo STORY-PROJ-002.
-2. Không lấy dữ liệu minh họa hoặc kết quả chưa đủ làm hồ sơ hoàn chỉnh để xuất/tải.
+1. Trả trạng thái thực tế của chặng; không trả kết quả dở dang hay dữ liệu minh họa như kết quả hoàn chỉnh.
+2. Với chặng 3D đang chạy, khách xem được các ảnh đã dựng xong theo STORY-PROJ-009.
 
 #### EXC-03
 
-Chuẩn bị hoặc tải tệp thất bại sau khi kết quả thiết kế đã thành công.
+Tải tệp thất bại sau khi chặng Hồ sơ đã thành công.
 
-1. Báo thao tác tệp chưa thành công, giữ nguyên kết quả nguồn.
-2. Không trừ lượt hoặc gửi lại yêu cầu AI tạo thiết kế để thay thế thao tác xuất tệp bị lỗi.
-3. Cho phép khách yêu cầu lại thao tác tệp; cách xử lý kỹ thuật và lỗi nhà cung cấp còn chờ thiết kế/hợp đồng.
+1. Báo tải chưa thành công, giữ nguyên tệp và kết quả đã lưu.
+2. Không trừ lượt, không chạy lại chặng Hồ sơ; khách tải lại được.
+
+#### EXC-04
+
+Khách yêu cầu tải tệp khi chặng Hồ sơ chưa thành công.
+
+1. Từ chối và báo cần hoàn tất chặng Hồ sơ trước.
 
 ## Acceptance Criteria
 
 #### AC-001
 
-- **Given**: Chủ sở hữu bản dự toán có kết quả AI hợp lệ đã lưu.
-- **When**: Mở dự toán hoặc hồ sơ.
-- **Then**: Nhận nội dung của đúng bản dự toán và kết quả nguồn, theo BR-PROJ-007.
-- **And**: Backend không tự tính lại số tiền hoặc dùng dữ liệu mẫu thay cho dữ liệu AI.
+- **Given**: Chủ sở hữu có bản dự toán với chặng 2D và Dự toán đã thành công.
+- **When**: Mở bước Bản vẽ 2D rồi bước Dự toán.
+- **Then**: Nhận đúng kết quả đã lưu của bản dự toán đó cho từng chặng theo BR-PROJ-007.
+- **And**: Backend không tính lại số tiền, không gọi AI và không dùng dữ liệu mẫu thay cho kết quả thật.
 
 #### AC-002
 
-- **Given**: Có kết quả nguồn đủ để cung cấp PDF/Excel theo hợp đồng tích hợp.
-- **When**: Chủ sở hữu bản dự toán yêu cầu xuất và tải tệp.
-- **Then**: Cung cấp tệp đúng bản dự toán và cùng kết quả đang xem khi tệp sẵn sàng.
-- **And**: Không tạo thiết kế AI mới hoặc giữ/trừ lượt.
+- **Given**: Chặng Hồ sơ đã thành công.
+- **When**: Chủ sở hữu tải từng tệp trong bốn tệp hồ sơ.
+- **Then**: Nhận đúng tệp của bản dự toán, cùng kết quả đang xem.
+- **And**: Không chạy lại chặng nào, không giữ hay trừ lượt.
 
 #### AC-003
 
-- **Given**: Gói đã hết hạn, bản dự toán có kết quả cũ thuộc khách.
-- **When**: Khách xem, xuất PDF/Excel hoặc tải tệp kết quả cũ.
-- **Then**: Cho phép theo BR-SUB-007 dù tệp chưa được xuất trước khi hết hạn.
+- **Given**: Gói đã hết hạn; bản dự toán có kết quả cũ thuộc khách.
+- **When**: Khách xem kết quả hoặc tải tệp.
+- **Then**: Cho phép theo BR-SUB-007.
 - **And**: Không tự gia hạn gói hay làm mới lượt.
 
 #### AC-004
 
-- **Given**: Khách không có quyền truy cập bản dự toán trong luồng chủ sở hữu bản dự toán.
-- **When**: Yêu cầu nội dung hoặc tệp của bản dự toán đó.
+- **Given**: Khách không có quyền truy cập bản dự toán trong luồng chủ sở hữu.
+- **When**: Yêu cầu kết quả hoặc tệp của bản dự toán đó.
 - **Then**: Từ chối, không trả dữ liệu hoặc tệp.
 - **And**: Quyền qua link chia sẻ chỉ được xét qua luồng có kiểm tra link còn hiệu lực.
 
 #### AC-005
 
-- **Given**: Kết quả thiết kế đã thành công nhưng thao tác xuất/tải tệp bị lỗi.
-- **When**: Hệ thống phản hồi thao tác bị lỗi.
-- **Then**: Không báo tệp đã sẵn sàng hoặc đã tải thành công khi chưa có căn cứ.
-- **And**: Giữ kết quả nguồn, không tính thêm lượt; khách có thể yêu cầu lại thao tác tệp.
+- **Given**: Chặng Hồ sơ đã thành công nhưng một lần tải tệp bị lỗi.
+- **When**: Hệ thống phản hồi lần tải bị lỗi.
+- **Then**: Không báo đã tải thành công khi chưa có căn cứ.
+- **And**: Giữ tệp và kết quả, không tính thêm lượt; khách tải lại được.
 
 #### AC-006
 
-- **Given**: Bản dự toán "Phương án 3" đã có tệp PDF do AI tạo và đang được chia sẻ qua link còn hiệu lực.
-- **When**: Chủ sở hữu đổi tên thành "Phương án chốt", rồi chủ sở hữu và người nhận link lần lượt mở hồ sơ và tải PDF.
-- **Then**: Cả hai đều thấy tên "Phương án chốt" trên hồ sơ; tệp PDF tải về có tên tệp "Phương án chốt", còn nội dung tệp giữ nguyên như lúc AI tạo theo BR-PROJ-007 khoản 7 (người dùng xác nhận ngày 26/09/2026).
-- **And**: Việc tải lại không tính lượt, không gọi AI, không tự dựng lại tệp và không thay kết quả nguồn.
+- **Given**: Bản dự toán “Phương án 3” đã xong chặng Hồ sơ và đang được chia sẻ qua link còn hiệu lực.
+- **When**: Chủ sở hữu đổi tên thành “Phương án chốt”, rồi chủ sở hữu và người nhận link lần lượt mở hồ sơ và tải PDF.
+- **Then**: Cả hai đều thấy tên “Phương án chốt” trên màn hình; tệp PDF tải về có tên tệp “Phương án chốt”, còn nội dung tệp giữ nguyên như lúc dựng ở chặng Hồ sơ theo BR-PROJ-007 khoản 7.
+- **And**: Việc tải lại không tính lượt, không gọi AI và không dựng lại tệp.
 
 #### AC-007
 
-- **Given**: Bản dự toán có mã `BUILDX-20261005-Q7K2M9` và đã có kết quả thành công.
-- **When**: Chủ sở hữu mở kết quả và hồ sơ, kể cả sau khi đổi tên bản dự toán.
+- **Given**: Bản dự toán có mã `BUILDX-20261005-Q7K2M9` và đã có ít nhất một chặng thành công.
+- **When**: Chủ sở hữu mở kết quả, kể cả sau khi đổi tên bản dự toán.
 - **Then**: Màn hình kết quả hiển thị mã `BUILDX-20261005-Q7K2M9` cùng tên hiện tại theo BR-PROJ-003 khoản 12.
 - **And**: Đổi tên không đổi mã; mở kết quả không tính lượt và không gọi AI.
+
+#### AC-008
+
+- **Given**: Bản dự toán đã xong 2D và Dự toán, chưa chạy 3D.
+- **When**: Khách mở bản dự toán.
+- **Then**: Thanh tiến trình cho thấy Nhập liệu, Bản vẽ 2D, Dự toán đã xong; Phối cảnh 3D Sẵn sàng; Hồ sơ Chưa mở.
+- **And**: Không có nút tải tệp hay chia sẻ; yêu cầu tải gửi trực tiếp tới backend bị từ chối.
+
+#### AC-009
+
+- **Given**: Chặng Dự toán đã thành công và có cờ “cần kỹ sư rà” trong phần nội bộ.
+- **When**: Chủ sở hữu mở bước Dự toán hoặc tải Excel.
+- **Then**: Chỉ thấy phần gửi khách; không thấy cờ, ghi chú nội bộ, tên model hay chi phí AI theo BR-PROJ-017.
+- **And**: Cờ không làm thay đổi trạng thái chặng.
 
 ## References
 
@@ -169,22 +197,27 @@ Chuẩn bị hoặc tải tệp thất bại sau khi kết quả thiết kế đ
 ### Rules
 
 - BR-PROJ-003/Then: Khoản 12, mã dự toán hiển thị ở kết quả của chủ sở hữu.
+- BR-PROJ-006
 - BR-PROJ-007
-- BR-SUB-003
+- BR-PROJ-010
+- BR-PROJ-017
 - BR-SUB-007
 
 ### Dependencies
 
 - STORY-PROJ-002
+- STORY-PROJ-008
+- STORY-PROJ-009
+- STORY-PROJ-010
 - STORY-PROJ-004
 
 ## Non-Functional
 
-- Kiểm tra quyền truy cập trước khi cung cấp nội dung hoặc tệp; không để tên/mã bản dự toán là căn cứ duy nhất cấp quyền.
-- [Chờ hợp đồng AI về cấu trúc dự toán, ảnh/bản vẽ, tệp, đơn vị tiền và phần kết quả bắt buộc. Chưa chốt công nghệ xuất tệp hoặc cam kết thời gian xử lý.]
+- Kiểm tra quyền truy cập trước khi cung cấp nội dung hoặc tệp; không để tên hay mã bản dự toán là căn cứ duy nhất cấp quyền.
+- Tệp của luồng bốn chặng lưu riêng tư ở kho. Mỗi lần xem hoặc tải, backend kiểm quyền rồi cấp link tải dùng được 15 phút (BR-PROJ-006 khoản 12); không ai mở được tệp chỉ bằng đường dẫn kho.
 
 ## Out of Scope
 
-- Backend tự tạo nội dung chuyên môn, quản lý đơn giá hoặc tính lại dự toán.
-- Thay đổi một thiết kế đã thành công; đối chiếu hoặc tối ưu nhiều phương án.
+- Sửa kết quả của một chặng đã thành công; so sánh hoặc tối ưu nhiều phương án.
+- Tải tệp riêng lẻ của từng chặng trước khi xong chặng Hồ sơ.
 - Gửi link và quản lý quyền chia sẻ thuộc STORY-PROJ-004.

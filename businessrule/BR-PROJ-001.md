@@ -36,7 +36,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Rule Info
 
-- **Name**: Các loại công trình dùng một trường diện tích chung.
+- **Name**: Kích thước lô đất (mặt tiền × chiều sâu) thay cho trường Diện tích; không bắt buộc.
 - **Category**: Tạo dự toán — thông tin đầu vào
 - **Status**: Draft
 - **Version**:
@@ -44,35 +44,42 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Owner**: [Chưa xác định]
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
-- **Source**: Người dùng xác nhận: hỗ trợ năm loại công trình, dùng một trường diện tích bắt buộc chung thay hai trường diện tích đất/xây dựng. Diện tích lớn hơn 0, tối đa hai chữ số thập phân, chưa đặt giới hạn tối đa theo nghiệp vụ.
+- **Source**: Người dùng chốt ngày 11/10/2026: bỏ ô Diện tích, thay bằng mặt tiền × chiều sâu, không bắt buộc; ngày 11/10/2026 (lượt sau) bỏ điền sẵn kích thước từ bước soi ảnh, giống app demo. Thay quyết định trước đó dùng một trường Diện tích bắt buộc chung cho mọi loại công trình. Danh mục năm loại ban đầu giữ nguyên.
 
 ## Statement
 
-Danh mục ban đầu gồm Nhà phố, Villa/Biệt thự, Nhà mái, Nhà vườn/Nhà cấp 4 và Căn hộ; Admin được thêm loại theo BR-PROJ-004. Các loại công trình dùng một trường bắt buộc có nhãn Diện tích, đơn vị m²; giá trị lớn hơn 0 và có tối đa hai chữ số thập phân. Chưa đặt giới hạn tối đa theo nghiệp vụ. Không yêu cầu nhập riêng diện tích đất, diện tích xây dựng hoặc chiều ngang/dài.
+Danh mục ban đầu gồm Nhà phố, Villa/Biệt thự, Nhà mái, Nhà vườn/Nhà cấp 4 và Căn hộ; Admin được thêm loại theo BR-PROJ-004. Đầu vào không còn trường Diện tích. Khách có thể nhập kích thước lô đất gồm mặt tiền và chiều sâu, đơn vị mét; hai ô không bắt buộc. Hai ô không được điền sẵn; khi khách để trống, chặng 2D tự đọc kích thước trên ảnh lô như app demo.
 
 ## When
 
-Hệ thống kiểm tra tính đầy đủ của thông tin bản dự toán dùng làm đầu vào cho AI service.
+Khách nhập hoặc sửa kích thước lô đất, hoặc hệ thống kiểm tra đầu vào trước khi chạy chặng 2D.
 
 ## Then
 
 1. Cho phép chọn loại công trình từ danh mục do Admin quản lý theo BR-PROJ-004; giữ hỗ trợ năm loại ban đầu.
-2. Yêu cầu có giá trị cho trường Diện tích cho các loại công trình. Thiếu diện tích thì thông tin chưa đủ để gửi AI.
-3. Không thêm trường diện tích đất hoặc diện tích xây dựng bắt buộc cho một nhóm loại công trình.
-4. Không coi diện tích là dữ liệu chỉ dành cho Căn hộ hoặc cho bốn loại còn lại.
-5. Truyền giá trị diện tích người dùng cung cấp theo hợp đồng tích hợp sau này. Không tự thay trường này bằng một giá trị nhân với số tầng; tính toán kết quả thuộc AI service theo quyết định của người dùng.
-6. Giá trị diện tích đã nhập phải là số lớn hơn 0, tối đa hai chữ số thập phân. Số nguyên dương vẫn hợp lệ; giá trị 0, âm hoặc vượt độ chính xác này không hợp lệ. Không tự làm tròn dữ liệu vượt độ chính xác để coi là hợp lệ.
-7. Không tự đặt trần diện tích theo loại công trình hoặc một con số tối đa nghiệp vụ khi chưa có quyết định mới.
+2. Không có trường Diện tích trên biểu mẫu và không dùng Diện tích làm điều kiện chạy chặng 2D.
+3. Mặt tiền và chiều sâu, khi có, phải là số lớn hơn 0, tối đa hai chữ số thập phân. Giá trị 0, âm hoặc vượt độ chính xác không hợp lệ; không tự làm tròn để chấp nhận.
+4. Hai ô đi cùng nhau: hoặc để trống cả hai, hoặc có cả hai. Chỉ có một ô có giá trị thì đầu vào chưa đủ điều kiện chạy 2D; bản nháp vẫn được lưu.
+5. Hệ thống không tự điền hay ghi đè hai ô này. Bước soi ảnh (BR-PROJ-015) không đọc kích thước lô; kích thước trên ảnh chỉ được AI đọc trong chặng 2D.
+6. Khi chạy 2D, kích thước lô của phương án lấy theo thứ tự ưu tiên:
+   1. số khách nhập hoặc chấp nhận ở hai ô;
+   2. kích thước AI đọc được từ ảnh lô trong bước lập phương án của chặng 2D;
+   3. kích thước đọc được từ mô tả;
+   4. kích thước lô mặc định theo mã gốc của loại công trình, lấy từ bộ quy tắc AI theo BR-PROJ-019.
+
+   Thứ tự này là thuật toán trong mã nguồn, Admin không đổi được; Admin chỉ đổi được kích thước mặc định ở bước 4.
+7. Không tự đổi hai số khách nhập thành một giá trị diện tích hay nhân với số tầng. Diện tích sàn và diện tích xây dựng là kết quả của chặng 2D, lưu riêng, không ghi đè đầu vào.
+8. Kích thước khách nhập phải nằm trong giới hạn lô của mã gốc loại công trình (mặc định theo app demo: mỗi cạnh 2,5–120 m, diện tích 12–5.000 m²; lấy từ bộ quy tắc AI theo BR-PROJ-019). Ngoài giới hạn thì yêu cầu tạo bản vẽ 2D bị từ chối ngay ở ô kích thước, trước khi giữ lượt; bản nháp vẫn lưu được.
 
 ## Except
 
-Được tạo dự toán với tên và đủ kinh độ, vĩ độ, đồng thời tự lưu tiến độ khi chưa nhập diện tích theo BR-PROJ-003. Điều kiện bắt buộc có diện tích áp dụng trước khi gửi AI, không chặn lưu thông tin chưa đầy đủ.
+Bản nháp được tạo và tự lưu khi chưa có kích thước lô theo BR-PROJ-003. Bản dự toán tạo trước khi đổi quy tắc mà đã có giá trị Diện tích vẫn giữ giá trị đó để tra cứu; giá trị này không còn là đầu vào của luồng bốn chặng.
 
 ## Notes
 
-- Người dùng đã chốt bộ US/BR của Tạo dự toán trong hội thoại. Status Draft và metadata chưa đủ vẫn được giữ; chưa import hoặc phê duyệt trên hệ thống quản lý tài liệu.
-- Phương án hai trường diện tích đất/diện tích xây dựng và việc xác định trường diện tích xây dựng là diện tích chiếm đất đã được trao đổi trước quyết định một trường chung. Không dùng cấu trúc hai trường cũ để triển khai.
-- Đã chốt giá trị lớn hơn 0 và tối đa hai chữ số thập phân. Ví dụ 70, 70.5 và 70.25 đáp ứng giới hạn số; 0, -1 và 70.251 không đáp ứng. Các số này chỉ minh họa quy tắc, không phải giá trị mặc định.
-- Kiểu dữ liệu lưu trữ và giới hạn biểu diễn kỹ thuật sẽ xác định khi thiết kế; không coi “chưa đặt trần nghiệp vụ” là khả năng lưu số lớn tùy ý. Cách diễn giải diện tích trong hợp đồng với AI service còn chờ tích hợp; backend không tự đặt công thức tính tổng diện tích sàn.
-- AI service do bên khác phụ trách và đang chờ tích hợp. Chưa có tên trường hoặc kiểu dữ liệu API đã thống nhất.
+- **Đã xác nhận (11/10/2026):** bỏ Diện tích; thêm mặt tiền × chiều sâu không bắt buộc. Lượt sau cùng ngày: bỏ điền sẵn từ bước soi ảnh, vì ở chế độ AI thật app demo không đọc kích thước khi soi.
+- **Đã xác nhận (11/10/2026):** giới hạn số ở khoản 3 (giữ như trường Diện tích cũ); hai ô phải có cùng nhau ở khoản 4; không tự điền hay ghi đè ở khoản 5.
+- **Đã xác nhận (11/10/2026):** thứ tự ưu tiên kích thước lô ở khoản 6; kích thước mặc định và các ngưỡng luật lô đất theo loại công trình lưu trong bộ quy tắc AI (BR-PROJ-019).
+- **Đã xác nhận (11/10/2026, khi duyệt TDD):** lô khách nhập ngoài giới hạn bị chặn trước khi giữ lượt (khoản 8), giống app demo từ chối trước khi gọi AI. Các luật lô đất khác của app demo (`savico/modules/plan2d/lot_rules.py`) vẫn có thể khiến lần chạy 2D lỗi; đó là kết quả của chặng 2D theo BR-PROJ-011.
+- Quyết định trước (một trường Diện tích bắt buộc, lớn hơn 0, tối đa hai chữ số thập phân) không còn áp dụng cho luồng bốn chặng.
 - Reviewer và Approver là Tân Trần theo xác nhận trong hội thoại; việc ghi tên không có nghĩa tài liệu đã được phê duyệt. Owner và ngày hiệu lực chưa xác định; chưa có kết quả kiểm thử.

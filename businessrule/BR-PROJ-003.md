@@ -52,23 +52,23 @@ Khách nhập tên để tạo nhanh dự toán khi đáp ứng các điều ki�
 
 ## When
 
-Khách tạo nhanh dự toán bằng tên, hoặc nhập, sửa thông tin đầu vào của bản dự toán đang chuẩn bị gửi AI.
+Khách tạo nhanh dự toán bằng tên, hoặc nhập, sửa thông tin đầu vào của bản dự toán đang chuẩn bị chạy chặng 2D.
 
 ## Then
 
-1. Tạo dự toán sau thao tác tạo với tên hợp lệ, không đợi có tọa độ hoặc đến khi khách bấm Nhận dự toán. Có thể nhập mô tả ngay khi tạo nhanh; mô tả không bắt buộc, tối đa 500 ký tự và dùng chung Mô tả chi tiết của biểu mẫu đầu vào theo BR-PROJ-002. Không thêm trường ghi chú riêng.
-2. Cho phép tạo dự toán khi chưa có diện tích, ảnh hoặc mô tả thiết kế. Đây là thông tin chưa hoàn tất, chưa đủ điều kiện gửi AI.
+1. Tạo dự toán sau thao tác tạo với tên hợp lệ, không đợi có tọa độ hoặc đến khi khách bấm Tạo bản vẽ 2D. Có thể nhập mô tả ngay khi tạo nhanh; mô tả không bắt buộc, tối đa 4.000 ký tự và dùng chung Mô tả chi tiết của biểu mẫu đầu vào theo BR-PROJ-002. Không thêm trường ghi chú riêng.
+2. Cho phép tạo dự toán khi chưa có ảnh lô đất, mô tả, số phòng ngủ hay kích thước lô. Đây là thông tin chưa hoàn tất, chưa đủ điều kiện chạy chặng 2D.
 3. Tự lưu các thay đổi đầu vào trong bản dự toán đang chuẩn bị; không yêu cầu khách bấm Lưu nháp cho từng lần lưu.
 4. Khi mở lại bản dự toán, trả thông tin đã lưu thành công để khách nhập tiếp.
-5. Cho phép lưu tiến độ chưa đầy đủ. Điều kiện có diện tích và có ít nhất ảnh hoặc mô tả được kiểm tra khi chuẩn bị gửi AI theo BR-PROJ-001 và BR-PROJ-002.
-6. Thao tác tạo dự toán hoặc tự lưu không tự khởi chạy AI. Cách tiếp nhận yêu cầu AI thuộc luồng gửi tạo thiết kế.
+5. Cho phép lưu tiến độ chưa đầy đủ. Các điều kiện đầu vào của BR-PROJ-001, BR-PROJ-002 và BR-PROJ-004 được kiểm tra khi chạy chặng 2D.
+6. Thao tác tạo dự toán hoặc tự lưu không tự chạy chặng nào. Tiếp nhận lần chạy thuộc luồng bốn chặng theo BR-PROJ-010. Riêng ảnh lô mới tải lên được soi theo BR-PROJ-015; việc soi không phải lần chạy chặng.
 
 7. Khi tự lưu thất bại do mất mạng hoặc lỗi máy chủ, giữ nội dung đang nhập khi trang còn mở, thông báo chưa lưu và cung cấp thao tác Thử lại. Tự thử lưu lại khi kết nối phục hồi; mỗi yêu cầu thử lại vẫn phải kiểm tra quyền, điều kiện gói/lượt, dữ liệu và trạng thái khóa đầu vào.
-8. Chỉ báo đã lưu sau khi backend xác nhận lưu thành công. Tự thử lưu lại hoặc bấm Thử lại ở đây không gửi lại tác vụ AI.
+8. Chỉ báo đã lưu sau khi backend xác nhận lưu thành công. Tự thử lưu lại hoặc bấm Thử lại ở đây không chạy lại chặng nào.
 
 9. Tên bản dự toán bắt buộc có nội dung, tối đa 200 ký tự sau khi bỏ khoảng trắng đầu/cuối. Lưu tên sau khi bỏ khoảng trắng đầu/cuối; tên rỗng, chỉ có khoảng trắng hoặc vượt 200 ký tự sau bước này không hợp lệ. Từ chối tạo hoặc lưu tên không hợp lệ; không tự cắt ngắn tên để chấp nhận, giữ dữ liệu đã lưu khi yêu cầu sửa bị từ chối. Đổi tên bản dự toán đã có chỉ cần quyền sở hữu và tên hợp lệ; không phụ thuộc gói, lượt hay khóa đầu vào, theo BR-SUB-007 khoản 11.
 
-10. Tạo nhanh được bỏ cả kinh độ và vĩ độ hoặc gửi cả hai null; backend lưu NULL, không tự điền (0,0). Nếu gửi tọa độ thì phải có đủ cặp hợp lệ. Chỉ gửi một tọa độ hoặc gửi giá trị sai bị từ chối. Bản chưa có tọa độ vẫn tự lưu các trường khác khi không đổi địa chỉ. Trước khi gửi AI phải có đủ tọa độ hợp lệ.
+10. Tạo nhanh được bỏ cả kinh độ và vĩ độ hoặc gửi cả hai null; backend lưu NULL, không tự điền (0,0). Nếu gửi tọa độ thì phải có đủ cặp hợp lệ. Chỉ gửi một tọa độ hoặc gửi giá trị sai bị từ chối. Bản chưa có tọa độ vẫn tự lưu các trường khác khi không đổi địa chỉ. Trước khi chạy chặng 2D phải có đủ tọa độ hợp lệ.
 
 11. Khi khách đổi địa chỉ, frontend lấy lại kinh độ và vĩ độ từ dịch vụ bản đồ, gửi đủ cả hai cùng yêu cầu lưu địa chỉ theo BR-PROJ-004 khoản 18. Backend lưu địa chỉ và tọa độ cùng nhau; thiếu một hoặc cả hai tọa độ thì từ chối yêu cầu, giữ nguyên dữ liệu đã lưu. Việc sửa vẫn phải đáp ứng điều kiện quyền/gói/lượt và khóa đầu vào hiện hành.
 
@@ -82,13 +82,14 @@ Bản dự toán tạo trước khi áp dụng khoản 12, kể cả bản đã 
 
 ## Notes
 
+- **Cập nhật ngày 11/10/2026 theo luồng bốn chặng:** mô tả tối đa 4.000 ký tự (khoản 1); bỏ Diện tích khỏi điều kiện (khoản 2, 5); “gửi AI” đổi thành “chạy chặng 2D” (BR-PROJ-010). Quy tắc tạo nhanh, tự lưu, tên, tọa độ và mã dự toán giữ nguyên.
 - **Đã xác nhận ngày 07/10/2026 (mã dự toán)**: định dạng, bảng ký tự, ngày theo giờ Việt Nam, mã không đổi và không cấp lại mã của bản đã xóa, cấp mã cho bản đã có theo ngày tạo gốc, nơi hiển thị và tìm theo mã (BR-PROJ-008 khoản 5). Mã chỉ để nhận diện, không phải mã bí mật và không cấp quyền truy cập.
 - **Đã xác nhận ngày 01/10/2026 (điều chỉnh tạo nhanh)**: tên là dữ liệu bắt buộc để tạo; tọa độ có thể bổ sung sau. Đổi địa chỉ vẫn phải gửi đủ cặp tọa độ từ bản đồ. Không thay đổi tọa độ đã lưu của bản cũ.
 - **Đề xuất chưa chốt**: chưa có đề xuất nghiệp vụ bổ sung trong phạm vi thay đổi tọa độ này.
 - **Đã chốt US/BR trong hội thoại ngày 01/10/2026**: người dùng đã chốt phần bổ sung tọa độ của STORY-PROJ-001, BR-PROJ-003 và BR-PROJ-004. System Test và TDD đã được cập nhật; backend đã lên `develop` tại commit `5e396fc`. Phạm vi kiểm thử và phần chưa kiểm được ghi trong [bàn giao tọa độ](../discovery/estimate-coordinates-implementation.md). Xác nhận hội thoại không thay cho phê duyệt/import trên hệ thống tài liệu.
 - Quy tắc nói về thời điểm tạo và lưu, không có nghĩa tạo một bản dự toán mới sau mỗi ký tự trong ô tên.
 - Lưu thông tin chưa đầy đủ không đồng nghĩa chấp nhận mọi giá trị không hợp lệ. Ràng buộc cho dữ liệu đã nhập sẽ được chốt theo từng trường.
-- BR-PROJ-001 và BR-PROJ-002 quy định điều kiện đầy đủ trước khi gửi AI; thiếu dữ liệu theo hai quy tắc đó không tự chặn lưu tiến độ.
+- BR-PROJ-001 và BR-PROJ-002 quy định điều kiện đầy đủ trước khi chạy chặng 2D; thiếu dữ liệu theo hai quy tắc đó không tự chặn lưu tiến độ.
 - Điều kiện quyền sở hữu, quyền tạo/lưu bản dự toán và hạn mức vẫn cần được áp dụng theo bộ quy tắc liên quan. Tự lưu không tạo ngoại lệ cho các điều kiện đó.
 - Khoảng chờ trước mỗi lần lưu, xử lý yêu cầu đến sai thứ tự và cập nhật đồng thời thuộc thiết kế kỹ thuật; chưa đặt con số hoặc chọn cách giải quyết xung đột trong bản nháp này.
 - Thông tin đầu vào bị khóa khi AI đang chạy; sau thất bại được sửa khi đủ điều kiện theo BR-PROJ-005. Bản dự toán đã thành công muốn phương án khác phải tạo dự toán mới; tự lưu không mở quyền thay thế kết quả cũ.
