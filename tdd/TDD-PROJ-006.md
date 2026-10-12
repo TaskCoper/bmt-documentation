@@ -338,7 +338,7 @@ Response 202:
 {"value":{"runId":"7d1c2b9e-0000-4000-8000-000000000001","stage":"Plan2d","state":"Queued","acceptedAtUtc":"2026-10-11T03:00:00Z","deadlineUtc":"2026-10-11T03:20:00Z"},"isSuccess":true,"isFailure":false,"error":{"code":"","message":""}}
 
 Error Response:
-{"title":"Conflict","code":"StagePrerequisiteNotMet","status":409,"detail":"Cần hoàn tất chặng Bản vẽ 2D trước.","messageCode":"StagePrerequisiteNotMet","errors":null}
+{"title":"Conflict","code":"Conflict","status":409,"detail":"Cần hoàn tất chặng Bản vẽ 2D trước.","messageCode":"StagePrerequisiteNotMet","errors":null}
 ```
 
 #### GET /api/v1/estimates/{estimateId}/stages
@@ -351,7 +351,7 @@ Response 200:
 {"value":{"stages":[{"stage":"Plan2d","status":"Succeeded","runId":"7d1c2b9e-0000-4000-8000-000000000001","finishedAtUtc":"2026-10-11T03:08:00Z","retriesLeft":3},{"stage":"Estimate","status":"Failed","runId":"7d1c2b9e-0000-4000-8000-000000000002","failureCode":"AiOutputIncomplete","retriesLeft":2},{"stage":"Render3d","status":"Locked","blockedReason":"StagePrerequisiteNotMet"},{"stage":"Dossier","status":"Locked","blockedReason":"StagePrerequisiteNotMet"}]},"isSuccess":true,"isFailure":false,"error":{"code":"","message":""}}
 
 Error Response:
-{"title":"Not Found","code":"EstimateNotFound","status":404,"detail":"Không tìm thấy bản dự toán.","messageCode":"EstimateNotFound","errors":null}
+{"title":"Not Found","code":"NotFound","status":404,"detail":"Không tìm thấy bản dự toán.","messageCode":"EstimateNotFound","errors":null}
 ```
 
 ### Error Codes

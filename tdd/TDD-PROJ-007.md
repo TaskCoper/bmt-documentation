@@ -355,7 +355,7 @@ Response 202:
 {"value":{"requestId":"9a41…","state":"Pending","deadlineUtc":"2026-10-11T02:52:00Z"},"isSuccess":true,"isFailure":false,"error":{"code":"","message":""}}
 
 Error Response:
-{"title":"Conflict","code":"EstimateInputLocked","status":409,"detail":"Đầu vào đang bị khóa, không thể soi ảnh mới.","messageCode":"EstimateInputLocked","errors":null}
+{"title":"Conflict","code":"Conflict","status":409,"detail":"Đầu vào đang bị khóa, không thể soi ảnh mới.","messageCode":"EstimateInputLocked","errors":null}
 ```
 
 #### GET /api/v1/estimates/{estimateId}/lot-verifications/current
@@ -368,7 +368,7 @@ Response 200:
 {"value":{"requestId":"9a41…","state":"Completed","verdict":"Fail","issues":[{"code":"not_a_plot","message":"Ảnh chụp công trình thực tế, không phải bản vẽ."}],"reason":"Ảnh chụp ngôi nhà đang xây.","reused":false,"remainingToday":28},"isSuccess":true,"isFailure":false,"error":{"code":"","message":""}}
 
 Error Response:
-{"title":"Not Found","code":"LotVerificationRequired","status":404,"detail":"Ảnh lô chưa được soi.","messageCode":"LotVerificationRequired","errors":null}
+{"title":"Not Found","code":"NotFound","status":404,"detail":"Ảnh lô chưa được soi.","messageCode":"LotVerificationRequired","errors":null}
 ```
 
 #### GET /api/v1/estimates/{estimateId}/stages/Plan2d/result
@@ -381,7 +381,7 @@ Response 200:
 {"value":{"runId":"7d1c…","lot":{"widthM":5,"depthM":20,"source":"customer"},"totalFloorAreaM2":180.5,"floors":[{"index":1,"name":"Tầng 1","areaM2":95.0,"rooms":[{"name":"Phòng khách","areaM2":22.5,"size":"4,5m × 5,0m"}]}],"notes":["Mô tả có 4 phòng ngủ nhưng lô chỉ đủ 3 phòng ngủ đạt diện tích tối thiểu."],"drawings":[{"floorIndex":1,"floorName":"Tầng 1","kind":"technical","fileUrl":"/api/v1/estimates/…/stage-files/a1…","width":864,"height":1152}]},"isSuccess":true,"isFailure":false,"error":{"code":"","message":""}}
 
 Error Response:
-{"title":"Conflict","code":"StageResultNotReady","status":409,"detail":"Chặng Bản vẽ 2D chưa hoàn tất.","messageCode":"StageResultNotReady","errors":null}
+{"title":"Conflict","code":"Conflict","status":409,"detail":"Chặng Bản vẽ 2D chưa hoàn tất.","messageCode":"StageResultNotReady","errors":null}
 ```
 
 ### Error Codes

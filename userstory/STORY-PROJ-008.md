@@ -104,11 +104,12 @@ Chặng 2D chưa thành công, chặng Dự toán đã thành công, đang có c
 
 #### EXC-02
 
-AI trả thiếu trường bắt buộc sau lượt hỏi lại, bị cắt ngang, từ chối trả lời, hoặc dịch vụ AI lỗi sau khi đã thử lại theo cấu hình.
+Lượt AI chính trả thiếu trường bắt buộc, bị cắt ngang, từ chối trả lời, hoặc dịch vụ AI lỗi sau khi đã thử lại theo cấu hình; hoặc kết quả cuối vẫn thiếu trường bắt buộc sau các lượt hỏi lại.
 
 1. Lần chạy lỗi. Tăng bộ đếm lỗi của chặng Dự toán khi AI trả thiếu hoặc từ chối trả lời. Không tăng khi kết quả AI bị cắt ngang vì vượt giới hạn độ dài đầu ra, hoặc khi dịch vụ AI lỗi hay không phản hồi sau khi đã thử lại; đây là lỗi hệ thống (BR-PROJ-011 khoản 1).
 2. Khi kết quả AI bị cắt ngang, hệ thống gửi cảnh báo vận hành (Discord) để Admin nâng giới hạn độ dài đầu ra.
-3. Không công bố phần dự toán dở dang; kết quả 2D giữ nguyên.
+3. Lượt hỏi lại của các lưới an toàn bị lỗi (kể cả bị cắt ngang, hết tiền hoặc dịch vụ AI lỗi) thì làm như app demo: giữ kết quả trước lượt hỏi lại, ghi chú nội bộ và chạy tiếp; cảnh báo vận hành vẫn được gửi. Lần chạy chỉ lỗi nếu kết quả cuối vẫn không đạt kiểm tra.
+4. Không công bố phần dự toán dở dang; kết quả 2D giữ nguyên.
 
 #### EXC-03
 
@@ -121,7 +122,7 @@ Lần chạy quá hạn chờ (mặc định 20 phút).
 
 Dịch vụ AI báo hết tiền hoặc khóa truy cập bị từ chối.
 
-1. Lần chạy lỗi ngay, không thử lại và không tăng bộ đếm lỗi.
+1. Ở lượt AI chính: lần chạy lỗi ngay, không thử lại và không tăng bộ đếm lỗi. Ở lượt hỏi lại: giữ kết quả trước lượt hỏi lại và chạy tiếp như app demo.
 2. Hệ thống tạm ngắt nhận lần chạy mới dùng dịch vụ đó theo BR-PROJ-012 khoản 9 và gửi cảnh báo cho Admin qua kênh cảnh báo hiện có; khách thấy thông báo lỗi chung và chạy lại sau.
 
 ## Acceptance Criteria
@@ -163,7 +164,7 @@ Dịch vụ AI báo hết tiền hoặc khóa truy cập bị từ chối.
 
 #### AC-006
 
-- **Given**: AI vẫn thiếu trường bắt buộc sau lượt hỏi lại, AI từ chối xử lý nội dung khách gửi, kết quả AI bị cắt ngang vì vượt giới hạn độ dài đầu ra, hoặc dịch vụ AI lỗi sau khi đã thử lại.
+- **Given**: Kết quả cuối vẫn thiếu trường bắt buộc sau lượt hỏi lại, hoặc ở lượt AI chính: AI từ chối xử lý nội dung khách gửi, kết quả bị cắt ngang vì vượt giới hạn độ dài đầu ra, hoặc dịch vụ AI lỗi sau khi đã thử lại.
 - **When**: Hệ thống kết thúc lần chạy.
 - **Then**: Lần chạy lỗi; không công bố dự toán dở dang. Bộ đếm lỗi của chặng Dự toán chỉ tăng khi AI vẫn thiếu trường bắt buộc hoặc AI từ chối xử lý nội dung khách gửi. Kết quả bị cắt ngang và dịch vụ AI lỗi là lỗi hệ thống nên không tăng bộ đếm (BR-PROJ-011 khoản 1).
 - **And**: Khi kết quả bị cắt ngang, Admin nhận cảnh báo vận hành (Discord) để nâng giới hạn. Kết quả 2D giữ nguyên; khách được chạy lại khi chưa đạt giới hạn.
@@ -185,7 +186,7 @@ Dịch vụ AI báo hết tiền hoặc khóa truy cập bị từ chối.
 #### AC-009
 
 - **Given**: Dịch vụ AI báo hết tiền hoặc từ chối khóa truy cập.
-- **When**: Hệ thống gọi AI trong lần chạy Dự toán.
+- **When**: Hệ thống gọi lượt AI chính của lần chạy Dự toán. (Ở lượt hỏi lại, lần chạy giữ kết quả trước đó và chạy tiếp như app demo; Admin vẫn nhận cảnh báo.)
 - **Then**: Lần chạy lỗi ngay, không thử lại; Admin nhận cảnh báo.
 - **And**: Khách thấy thông báo lỗi chung, không thấy tên nhà cung cấp hay chi tiết khóa.
 
@@ -218,7 +219,7 @@ Dịch vụ AI báo hết tiền hoặc khóa truy cập bị từ chối.
 
 - Hạn chờ chặng Dự toán mặc định 20 phút, Admin cấu hình được (BR-PROJ-012).
 - Với cùng phản hồi AI đã ghi, kết quả sau lưới an toàn của hệ thống thật phải khớp app demo ở mốc `059e876` (số dòng, thành tiền, tổng, cờ nội bộ), kể cả cách làm tròn số.
-- Prompt luật giá được bật bộ nhớ đệm phía nhà cung cấp (prompt cache) để giảm chi phí; đây là ghi chú kỹ thuật, không đổi tiêu chí; thiết kế ở TDD-PROJ-009.
+- Bộ nhớ đệm prompt phía nhà cung cấp (prompt cache) mặc định tắt như app demo: số đo của app demo cho thấy khi các dự toán cách nhau quá 5 phút, bật lên làm tiền token vào của lượt chính tăng khoảng 9% (khoảng 3% chi phí của lượt đó) mà không lần nào trúng bộ nhớ đệm. Admin bật được trong cấu hình AI khi lượng dự toán đủ dày. Đây là ghi chú kỹ thuật, không đổi tiêu chí; thiết kế ở TDD-PROJ-009.
 
 ## Out of Scope
 

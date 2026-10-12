@@ -69,6 +69,6 @@ Lưới an toàn có thể tự đổi số liệu trước khi lưu (ví dụ t
 ## Notes
 
 - **Đã xác nhận (11/10/2026):** cờ chỉ lưu nội bộ, không có bước duyệt; lọc ghi chú nội bộ như app demo.
-- Ví dụ từ lần chạy thử ngày 11/10/2026: đơn giá AI trả 4,42 triệu/m² dưới sàn 6,96 triệu/m², hệ thống tự nâng đơn giá lên 6,97 triệu/m². Khách thấy bảng giá sau khi nâng; dòng “đã tự nâng đơn giá ×1,575 để đạt neo” chỉ nằm trong phần nội bộ.
+- Ví dụ từ lần chạy thử ngày 11/10/2026: đơn giá AI trả 4,42 triệu/m² dưới sàn 6,96 triệu/m², hệ thống tự nâng đơn giá lên 6,97 triệu/m². Khách thấy bảng giá sau khi nâng. Ghi chú như app demo, “hệ đã TỰ NÂNG ĐƠN GIÁ các dòng ×… (GIỮ NGUYÊN khối lượng theo bản vẽ; … dòng; … dòng vật liệu cơ bản … GIỮ NGUYÊN đơn giá)”, chỉ nằm trong phần nội bộ. Số in sau dấu × là hệ số nâng của từng dòng được nâng; hệ số này lớn hơn tỷ lệ cần để chạm neo (6,96 ÷ 4,42 ≈ 1,575) vì các dòng vật liệu cơ bản giữ nguyên giá.
 - Màn xem chi tiết cho người có quyền thuộc STORY-PROJ-012.
 - Reviewer và Approver là Tân Trần; việc ghi tên không có nghĩa tài liệu đã được phê duyệt. Owner và ngày hiệu lực chưa xác định; chưa có kết quả kiểm thử.
