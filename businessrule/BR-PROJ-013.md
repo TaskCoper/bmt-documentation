@@ -44,11 +44,11 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Owner**: [Chưa xác định]
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
-- **Source**: Người dùng chốt ngày 11/10/2026: vùng giá theo tỉnh khách chọn; bảng 34 tỉnh/thành → miền, có đánh dấu Tây Nguyên; Admin sửa được. App demo `design-estimate` dùng miền Bắc/Trung/Nam và nhóm Tây Nguyên để chọn đơn giá, nhân công, hãng vật tư và mùa khởi công (`resources/rules/khung_gia_tham_khao.md` mục 6 và 9, `quy_tac_boc_tach.md`).
+- **Source**: Người dùng chốt ngày 11/10/2026: vùng giá theo tỉnh khách chọn; bảng 34 tỉnh/thành → miền; Admin sửa được. Người dùng chốt ngày 12/10/2026: Tây Nguyên thuộc miền Trung, bỏ dấu Tây Nguyên. App demo `design-estimate` dùng miền Bắc/Trung/Nam và nhóm Tây Nguyên để chọn đơn giá, nhân công, hãng vật tư và mùa khởi công (`resources/rules/khung_gia_tham_khao.md` mục 6 và 9, `quy_tac_boc_tach.md`).
 
 ## Statement
 
-Mỗi tỉnh/thành trong danh sách 34 tỉnh/thành theo địa giới mới thuộc đúng một miền giá: Bắc, Trung hoặc Nam; tỉnh/thành thuộc Tây Nguyên có thêm dấu Tây Nguyên. Hệ thống xác định miền giá của bản dự toán từ tỉnh/thành khách chọn, theo bảng này. Admin xem và sửa được bảng.
+Mỗi tỉnh/thành trong danh sách 34 tỉnh/thành theo địa giới mới thuộc đúng một miền giá: Bắc, Trung hoặc Nam. Các tỉnh Tây Nguyên thuộc miền Trung. Hệ thống xác định miền giá của bản dự toán từ tỉnh/thành khách chọn, theo bảng này. Admin xem và sửa được bảng.
 
 ## When
 
@@ -56,8 +56,8 @@ Hệ thống tiếp nhận lần chạy 2D của bản dự toán, các chặng 
 
 ## Then
 
-1. Bảng được nạp sẵn đủ 34 tỉnh/thành theo cùng nguồn địa giới đang dùng cho địa chỉ dự toán (BR-PROJ-004 ghi chú về provinces.open-api.vn). Mỗi tỉnh/thành có đúng một miền và một giá trị có/không thuộc Tây Nguyên.
-2. Khi tiếp nhận lần chạy 2D, hệ thống chốt miền giá và dấu Tây Nguyên của tỉnh/thành đã chọn vào đầu vào của lần chạy. Cả bốn chặng của bản dự toán dùng giá trị đã chốt này.
+1. Bảng được nạp sẵn đủ 34 tỉnh/thành theo cùng nguồn địa giới đang dùng cho địa chỉ dự toán (BR-PROJ-004 ghi chú về provinces.open-api.vn). Mỗi tỉnh/thành có đúng một miền.
+2. Khi tiếp nhận lần chạy 2D, hệ thống chốt miền giá của tỉnh/thành đã chọn vào đầu vào của lần chạy. Cả bốn chặng của bản dự toán dùng giá trị đã chốt này.
 3. Admin sửa bảng thì thay đổi chỉ áp dụng cho lần chạy 2D được tiếp nhận sau khi lưu. Bản dự toán đã chốt miền giá không đổi theo.
 4. Tỉnh/thành không có trong bảng, hoặc dòng của nó thiếu miền, thì chặn chạy 2D và báo cấu hình vùng giá chưa đủ; không tự gán miền mặc định.
 5. Chỉ người có quyền quản lý luật giá được sửa bảng. Lưu thất bại thì giữ nguyên bảng cũ, không báo đã lưu.
@@ -68,8 +68,8 @@ Căn hộ cũng xác định miền giá như các loại công trình khác; qu
 
 ## Notes
 
-- **Đã xác nhận (11/10/2026):** miền giá theo tỉnh/thành khách chọn; bảng 34 tỉnh/thành có dấu Tây Nguyên; Admin sửa được.
+- **Đã xác nhận (11/10/2026):** miền giá theo tỉnh/thành khách chọn; bảng 34 tỉnh/thành → miền; Admin sửa được.
 - **Đã xác nhận (11/10/2026):** chốt miền giá vào đầu vào tại lúc tiếp nhận lần chạy 2D (khoản 2 và 3). Cách này giữ đúng nguyên tắc “bản dự toán đã tạo giữ cấu hình đã áp dụng” của BR-PROJ-004 và giúp 2D, dự toán, 3D dùng cùng một miền.
-- App demo đoán miền bằng từ khóa trong chuỗi địa chỉ (ví dụ “Đà Lạt”). Theo tỉnh/thành sau sáp nhập, một tỉnh có thể gồm cả vùng cao nguyên và vùng ven biển; dấu Tây Nguyên theo tỉnh vì vậy kém chi tiết hơn app demo. Người dùng đã chọn cách theo tỉnh.
+- **Đã xác nhận (12/10/2026):** Người dùng chốt Tây Nguyên chỉ là một phần của miền Trung, bỏ dấu Tây Nguyên. Các tỉnh Gia Lai, Đắk Lắk, Lâm Đồng thuộc miền Trung và dùng mọi cấu hình của miền Trung: cột hãng vật tư, dòng mùa khởi công, lời dặn thời tiết ảnh 3D và lời dặn AI theo miền (BR-PROJ-019). Không có mức giảm giá riêng cho Tây Nguyên; mức giảm 5% giá mốc của app demo không được chuyển sang. Ví dụ: nhà ở Đà Lạt (Lâm Đồng) dùng mọi cấu hình của miền Trung.
 - Giá trị cụ thể của từng tỉnh/thành do nhóm dự án chuẩn bị khi nạp sẵn và Admin rà lại; chưa ghi danh sách ở đây.
 - Reviewer và Approver là Tân Trần; việc ghi tên không có nghĩa tài liệu đã được phê duyệt. Owner và ngày hiệu lực chưa xác định; chưa có kết quả kiểm thử.

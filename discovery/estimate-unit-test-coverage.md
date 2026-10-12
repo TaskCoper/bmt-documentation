@@ -286,7 +286,7 @@ Các hành vi chỉ chứng minh được trên PostgreSQL thật không viết 
 | [UT-PROJ-259](../unittest/UT-PROJ-259.md) | TDD-PROJ-008 | AiCallRunner — ảnh 200 không có ảnh được gọi lại tối đa 2 lần với câu nhắc chỉ trả ảnh | Branch | P0 |
 | [UT-PROJ-260](../unittest/UT-PROJ-260.md) | TDD-PROJ-008 | AiCallRunner — loại ảnh đọc từ byte trả về | Quirk | P2 |
 | [UT-PROJ-261](../unittest/UT-PROJ-261.md) | TDD-PROJ-008 | OpenAiImagesClient — chọn edits hay generations và giới hạn 16 ảnh tham chiếu | Branch | P2 |
-| [UT-PROJ-262](../unittest/UT-PROJ-262.md) | TDD-PROJ-008 | AnthropicMessagesClient — luồng bị cắt được thử lại, max_tokens và refusal không thử lại (đợt 2) | Branch | P2 |
+| [UT-PROJ-262](../unittest/UT-PROJ-262.md) | TDD-PROJ-008 | AnthropicMessagesClient — luồng bị đứt được thử lại, max_tokens và refusal không thử lại (đợt 2) | Branch | P2 |
 | [UT-PROJ-263](../unittest/UT-PROJ-263.md) | TDD-PROJ-008 | Soi ảnh — model soi không khả dụng thì thử lại một lần bằng FallbackModel | Branch | P2 |
 | [UT-PROJ-264](../unittest/UT-PROJ-264.md) | TDD-PROJ-008 | AiCallRecorder — một dòng nhật ký cho một lời gọi logic | Happy | P0 |
 | [UT-PROJ-265](../unittest/UT-PROJ-265.md) | TDD-PROJ-008 | AiCallRecorder — công thức chi phí có token đệm và token ghi đệm | Boundary | P1 |
@@ -311,7 +311,7 @@ Các hành vi chỉ chứng minh được trên PostgreSQL thật không viết 
 | [UT-PROJ-284](../unittest/UT-PROJ-284.md) | TDD-PROJ-008 | IAiRuleSetReader — lần chạy đọc đúng phiên bản quy tắc đã chốt | Determinism | P0 |
 | [UT-PROJ-285](../unittest/UT-PROJ-285.md) | TDD-PROJ-008 | IAiRuleSetReader — nạp đủ quy tắc theo mã gốc như app demo | Happy | P1 |
 | [UT-PROJ-286](../unittest/UT-PROJ-286.md) | TDD-PROJ-008 | SavePricingRegionsCommandHandler — lưu tăng TableVersion, rowVersion cũ bị từ chối | Branch | P1 |
-| [UT-PROJ-287](../unittest/UT-PROJ-287.md) | TDD-PROJ-008 | PricingRegionValidator — tỉnh không tồn tại, thiếu miền, Tây Nguyên ngoài miền Trung | Error | P1 |
+| [UT-PROJ-287](../unittest/UT-PROJ-287.md) | TDD-PROJ-008 | PricingRegionValidator — tỉnh không tồn tại, thiếu miền, miền không hợp lệ | Error | P1 |
 
 ## Mốc cập nhật ngày 12/10/2026: sửa theo bản rà soát TDD và câu trả lời của người dùng
 

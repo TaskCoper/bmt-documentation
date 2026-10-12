@@ -60,7 +60,7 @@ Mục tiêu:
   - nội thất quyết định bảng màu, ảnh phòng và vật liệu.
 
   Vì vậy phải sửa prompt so với app demo.
-- **Vùng giá theo tỉnh khách chọn:** bảng 34 tỉnh → miền, có đánh dấu Tây Nguyên; Admin sửa được.
+- **Vùng giá theo tỉnh khách chọn:** bảng 34 tỉnh → miền Bắc, Trung hoặc Nam; Admin sửa được. Ngày 12/10/2026 người dùng chốt Tây Nguyên thuộc miền Trung, bỏ dấu Tây Nguyên.
 
 **Danh mục, luật giá, AI**
 - **Danh mục do Admin quản lý.** Mỗi loại công trình gắn một **mã gốc** của app demo (`nha-pho`, `villa-biet-thu`, `nha-mai`, `nha-vuon-cap4`, `can-ho`). Mỗi phong cách kiến trúc gắn một mã phong cách gốc.

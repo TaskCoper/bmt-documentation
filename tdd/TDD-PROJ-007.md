@@ -141,7 +141,7 @@ Người dùng chốt ngày 12/10/2026: soi ảnh bất đồng bộ qua RabbitM
 
 **E. Bản chụp đầu vào phiên bản 3**
 
-`EstimateGenerationInput.Payload` (SchemaVersion=3) chụp lúc tiếp nhận 2D, gồm: `estimateId, inputVersion, catalogRevisionId, buildingType{id,name,baseCode}, architectureStyle{id,name,baseStyleCode}|null, interiorStyle{id,name,promptDescriptor}|null, effectiveBaseStyleCode, finishPackage, floorCount, hasTum, description, lot{frontageM,depthM}|null, entranceSide|null, desiredBedrooms, hasGarage, address{…như v2, có latitude, longitude}, pricingRegion{region,highland,tableVersion}, lotImage{url,objectKey,sha256,width,height,verificationId}`. Không có tên bản dự toán. `MediaSourceReader` thêm `InputV3` vào CASE và `MediaTextExtractor` đọc `lotImage.url`, như V1/V2 đọc `inputImageUrl`.
+`EstimateGenerationInput.Payload` (SchemaVersion=3) chụp lúc tiếp nhận 2D, gồm: `estimateId, inputVersion, catalogRevisionId, buildingType{id,name,baseCode}, architectureStyle{id,name,baseStyleCode}|null, interiorStyle{id,name,promptDescriptor}|null, effectiveBaseStyleCode, finishPackage, floorCount, hasTum, description, lot{frontageM,depthM}|null, entranceSide|null, desiredBedrooms, hasGarage, address{…như v2, có latitude, longitude}, pricingRegion{region,tableVersion}, lotImage{url,objectKey,sha256,width,height,verificationId}`. Không có tên bản dự toán. `MediaSourceReader` thêm `InputV3` vào CASE và `MediaTextExtractor` đọc `lotImage.url`, như V1/V2 đọc `inputImageUrl`.
 
 **F. Chặng 2D: `Plan2dStageExecutor`**
 
@@ -317,7 +317,7 @@ erDiagram
 | EstimateLotVerification | Cùng yêu cầu | Id=LV1; AccountId=U1; ImageSha256=S1; ImageUrl=…/9f2c.jpg; Width=1600; Height=1200; PromptVersion=drawing-v12; PromptHash=PH1; RequestedModel=gpt-5.4-nano; ModelUsed=gpt-5.4-nano; Verdict=Pass; Issues=[]; Reason="Bản vẽ tay mặt bằng lô đất có ghi kích thước"; DocumentType=hand_sketch; PlanCount=1 |
 | Estimate, EstimateLotVerificationRequest | Tx C lưu kết quả (02:51) | D1.LotVerificationId=LV1; InputVersion vẫn 8. VR1: State=Completed; VerificationId=LV1; CompletedAtUtc=02:51. Outbox có `LotVerificationCompleted(VR1)` |
 | Estimate | PUT input nhập lô 5 × 20 (02:55) | InputVersion=9; LotFrontageM=5.00; LotDepthM=20.00 |
-| EstimateGenerationInput | Tiếp nhận 2D (03:00) | OperationId=O1; SchemaVersion=3; Payload.lot={frontageM:5,depthM:20}; Payload.lotImage={sha256:S1,verificationId:LV1,…}; Payload.pricingRegion={region:South,highland:false,tableVersion:1} |
+| EstimateGenerationInput | Tiếp nhận 2D (03:00) | OperationId=O1; SchemaVersion=3; Payload.lot={frontageM:5,depthM:20}; Payload.lotImage={sha256:S1,verificationId:LV1,…}; Payload.pricingRegion={region:South,tableVersion:1} |
 | EstimatePlanResult | Chặng xong (03:08) | RunId=R1; EstimateId=D1; CustomerJson={floors:[{index:1,name:"Tầng 1",rooms:[…]},…],lot:{widthM:5,depthM:20,source:"customer"},drawings:[{floorIndex:1,kind:"technical",artifactId:A1},…]}; InternalJson={staffFlags:[],ruleFixes:[…],outline:{…}}; PromptVersion=2d-13 |
 
 Nhánh dùng lại kết quả soi: U1 tạo bản D2, tải đúng ảnh đó → yêu cầu VR2 → consumer tra thấy LV1 cùng hash, prompt, model → VR2 Completed với LV1, đặt D2.LotVerificationId=LV1, Count giữ 1, VR2.QuotaHeld=false. Nhánh lỗi: AI lỗi ở yêu cầu VR3 → VR3 Failed `LotVerificationUnavailable`, Count giảm lại, QuotaHeld=false. Tài khoản U2 tải cùng ảnh → không thấy (khác AccountId) → soi mới, tính vào hạn mức của U2.
@@ -460,6 +460,7 @@ Theo TDD-PROJ-008: thử lại 2 → 4 → 8 giây khi 429/5xx/lỗi mạng, tô
 
 ## Change Log
 
+- 2026-10-12 (Người dùng chốt Tây Nguyên thuộc miền Trung): Bản chụp `pricingRegion` chỉ còn `region` và `tableVersion`, bỏ `highland`; sửa dữ liệu mẫu.
 - 2026-10-12 (sửa theo bản rà soát độc lập): Soi ảnh lô bất đồng bộ; consumer làm ba transaction ngắn (Tx A nhận việc, Tx B tra kết quả cũ và giữ suất, Tx C lưu kết quả), gọi AI ngoài transaction, tắt inbox MassTransit cho riêng endpoint này. Bảng yêu cầu soi thêm trạng thái `Processing`, `ProcessingSince`, `Attempts`; trả suất chỉ khi `QuotaHeld` đổi true→false. Kết quả soi được dùng lại theo (tài khoản, hash ảnh, `PromptHash`, `RequestedModel`), lưu thêm `ModelUsed`. Cập nhật sơ đồ tuần tự, thêm sơ đồ trạng thái của yêu cầu soi.
 - 2026-10-12 (câu trả lời sau rà soát): Thêm trần soi ảnh chung của cả hệ thống mỗi ngày: bảng `EstimateLotVerificationSystemDailyUsage`, giữ suất chung cùng Tx B, trả suất cùng lúc với suất tài khoản, cảnh báo khi đạt 80%. Gửi yêu cầu soi kiểm nhanh tạm ngắt và trần chung (503 `AiServiceUnavailable`, `LotVerificationBusy`). Thêm mã lỗi yêu cầu soi `LotVerificationBusy`.
 - 2026-10-12 (khi triển khai đợt 1): Bản kỹ thuật tầng 1 không dùng ảnh lô làm ảnh tham chiếu, theo đúng app demo (ảnh lô chỉ gửi ở bước `spec`). Executor ghi đủ bước `job` và `result`; HouseSpec sai cấu trúc thì gọi lại một lần như `generate_json` của app demo.

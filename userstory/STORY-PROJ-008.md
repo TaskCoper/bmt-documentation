@@ -106,8 +106,9 @@ Chặng 2D chưa thành công, chặng Dự toán đã thành công, đang có c
 
 AI trả thiếu trường bắt buộc sau lượt hỏi lại, bị cắt ngang, từ chối trả lời, hoặc dịch vụ AI lỗi sau khi đã thử lại theo cấu hình.
 
-1. Lần chạy lỗi. Tăng bộ đếm lỗi của chặng Dự toán khi AI trả thiếu, bị cắt ngang hoặc từ chối trả lời; không tăng khi dịch vụ AI lỗi hoặc không phản hồi sau khi đã thử lại (BR-PROJ-011 khoản 1).
-2. Không công bố phần dự toán dở dang; kết quả 2D giữ nguyên.
+1. Lần chạy lỗi. Tăng bộ đếm lỗi của chặng Dự toán khi AI trả thiếu hoặc từ chối trả lời. Không tăng khi kết quả AI bị cắt ngang vì vượt giới hạn độ dài đầu ra, hoặc khi dịch vụ AI lỗi hay không phản hồi sau khi đã thử lại; đây là lỗi hệ thống (BR-PROJ-011 khoản 1).
+2. Khi kết quả AI bị cắt ngang, hệ thống gửi cảnh báo vận hành (Discord) để Admin nâng giới hạn độ dài đầu ra.
+3. Không công bố phần dự toán dở dang; kết quả 2D giữ nguyên.
 
 #### EXC-03
 
@@ -162,10 +163,10 @@ Dịch vụ AI báo hết tiền hoặc khóa truy cập bị từ chối.
 
 #### AC-006
 
-- **Given**: AI vẫn thiếu trường bắt buộc sau lượt hỏi lại, hoặc dịch vụ AI lỗi sau khi đã thử lại.
+- **Given**: AI vẫn thiếu trường bắt buộc sau lượt hỏi lại, kết quả AI bị cắt ngang vì vượt giới hạn độ dài đầu ra, hoặc dịch vụ AI lỗi sau khi đã thử lại.
 - **When**: Hệ thống kết thúc lần chạy.
-- **Then**: Lần chạy lỗi, tăng bộ đếm lỗi của chặng Dự toán; không công bố dự toán dở dang.
-- **And**: Kết quả 2D giữ nguyên; khách được chạy lại khi chưa đạt giới hạn.
+- **Then**: Lần chạy lỗi; không công bố dự toán dở dang. Bộ đếm lỗi của chặng Dự toán chỉ tăng khi AI vẫn thiếu trường bắt buộc. Kết quả bị cắt ngang và dịch vụ AI lỗi là lỗi hệ thống nên không tăng bộ đếm (BR-PROJ-011 khoản 1).
+- **And**: Khi kết quả bị cắt ngang, Admin nhận cảnh báo vận hành (Discord) để nâng giới hạn. Kết quả 2D giữ nguyên; khách được chạy lại khi chưa đạt giới hạn.
 
 #### AC-007
 

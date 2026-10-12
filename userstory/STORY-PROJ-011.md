@@ -80,8 +80,8 @@ Admin mở màn Luật giá hoặc màn Miền giá theo tỉnh/thành để xem
 
 Admin sửa bảng miền giá theo tỉnh/thành.
 
-1. Admin mở màn Miền giá, thấy 34 tỉnh/thành cùng miền (Bắc, Trung, Nam) và dấu Tây Nguyên.
-2. Admin đổi miền hoặc dấu Tây Nguyên của một hay nhiều tỉnh/thành rồi lưu.
+1. Admin mở màn Miền giá, thấy 34 tỉnh/thành cùng miền (Bắc, Trung, Nam). Các tỉnh Tây Nguyên thuộc miền Trung.
+2. Admin đổi miền của một hay nhiều tỉnh/thành rồi lưu.
 3. Backend kiểm tra quyền và dữ liệu; mỗi tỉnh/thành phải có đúng một miền.
 4. Thay đổi áp dụng cho lần chạy 2D được tiếp nhận sau khi lưu theo BR-PROJ-013.
 
@@ -172,7 +172,7 @@ Bảng miền giá có tỉnh/thành thiếu miền.
 
 #### AC-007
 
-- **Given**: Bảng miền giá đang xếp Lâm Đồng vào miền Trung, có dấu Tây Nguyên.
+- **Given**: Bảng miền giá đang xếp Lâm Đồng vào miền Trung.
 - **When**: Admin đổi một tỉnh/thành sang miền khác và lưu.
 - **Then**: Lần chạy 2D tiếp nhận sau đó dùng miền mới; bản dự toán đã chạy 2D trước đó giữ miền đã chốt.
 - **And**: Lưu bảng có tỉnh/thành thiếu miền bị từ chối.

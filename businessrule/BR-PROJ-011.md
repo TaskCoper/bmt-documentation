@@ -58,7 +58,8 @@ Một lần chạy chặng kết thúc lỗi, khách yêu cầu chạy lại ch�
 
 1. Mỗi chặng của một bản dự toán có bộ đếm lỗi riêng. Lỗi ở chặng này không làm giảm số lần chạy lại của chặng khác.
    - **Tính một lần vào bộ đếm** khi lần chạy lỗi vì kết quả AI không dùng được với đầu vào của khách: AI vẫn trả thiếu hoặc sai cấu trúc sau lượt hỏi lại, AI từ chối xử lý nội dung khách gửi, bản vẽ 2D hoặc ảnh 3D vẫn hỏng sau lần làm lại ở khoản 7.
-   - **Không tính** khi lần chạy lỗi vì hệ thống: dịch vụ AI lỗi hoặc không phản hồi sau khi đã thử lại, tài khoản AI hết tiền hoặc khóa truy cập bị từ chối, quá hạn chờ theo BR-PROJ-012 (kể cả do phải chờ trong hàng), lỗi lưu tệp, lỗi dựng tệp hồ sơ, lỗi nội bộ hoặc phiên bản xử lý đã ngừng dùng.
+   - **Không tính** khi lần chạy lỗi vì hệ thống: dịch vụ AI lỗi hoặc không phản hồi sau khi đã thử lại, tài khoản AI hết tiền hoặc khóa truy cập bị từ chối, quá hạn chờ theo BR-PROJ-012 (kể cả do phải chờ trong hàng), kết quả AI bị cắt ngang vì vượt giới hạn độ dài đầu ra, lỗi lưu tệp, lỗi dựng tệp hồ sơ, lỗi nội bộ hoặc phiên bản xử lý đã ngừng dùng.
+   - Khi kết quả AI bị cắt ngang vì vượt giới hạn độ dài đầu ra, lần chạy lỗi và hệ thống gửi cảnh báo vận hành (Discord) để Admin nâng giới hạn.
 
    Ví dụ: dịch vụ AI gián đoạn 2 tiếng, khách bấm chạy 2D ba lần và cả ba lần đều lỗi vì dịch vụ AI: chặng 2D vẫn còn đủ 3 lần.
 2. Khi bộ đếm của chặng đã bằng hoặc vượt giới hạn đang cấu hình, từ chối yêu cầu chạy lại chặng đó và báo khách liên hệ hỗ trợ. Kết quả của các chặng đã thành công giữ nguyên.
@@ -83,6 +84,7 @@ Một lần chạy chặng kết thúc lỗi, khách yêu cầu chạy lại ch�
 ## Notes
 
 - **Đã xác nhận (12/10/2026):** lỗi hệ thống không tính vào bộ đếm, chỉ tính lỗi do kết quả AI với đầu vào của khách; bộ đếm và giới hạn riêng từng chặng; đặt lại bộ đếm dùng quyền vận hành riêng `estimate.pipeline.operate`; phần đã xong được dùng lại dù Admin đổi model hoặc lời dặn giữa hai lần chạy.
+- **Đã xác nhận (12/10/2026, lượt sau):** Người dùng chốt kết quả AI bị cắt ngang vì vượt giới hạn độ dài đầu ra là lỗi hệ thống: lần chạy lỗi nhưng không tính vào bộ đếm của khách, và hệ thống gửi cảnh báo vận hành (Discord) để Admin nâng giới hạn.
 - **Đã xác nhận (11/10/2026, lượt sau):** bản vẽ 2D "hỏng" gồm AI không trả được ảnh và viền nhà lệch tỷ lệ quá ngưỡng; có cờ tắt phần viền lệch. Viền vẫn lệch sau lần vẽ lại thì giữ bản tốt hơn, không làm chặng lỗi (theo cách app demo giữ bản tốt hơn); người dùng xác nhận khi chốt TDD-PROJ-007 ngày 11/10/2026.
 - **Đã xác nhận (11/10/2026):** giới hạn 3 lần mỗi chặng, Admin cấu hình được; quá giới hạn báo liên hệ hỗ trợ; Admin đặt lại bộ đếm; tự làm lại 1 lần cho bản vẽ 2D, ảnh 3D và tệp hồ sơ; chạy lại 3D chỉ dựng ảnh còn thiếu.
 - Ví dụ: chặng 3D cần 8 ảnh. Lần chạy đầu dựng được 6 ảnh; ảnh thứ 7 lỗi cả 2 lần thử nên lần chạy lỗi (bộ đếm 3D = 1). Khách bấm chạy lại: hệ thống chỉ dựng ảnh 7 và 8.
