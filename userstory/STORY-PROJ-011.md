@@ -189,6 +189,7 @@ Bảng miền giá có tỉnh/thành thiếu miền.
 ### TDDs
 
 - TDD-PROJ-008
+- TDD-PROJ-009
 
 ### Rules
 

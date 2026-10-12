@@ -373,3 +373,261 @@ Phần chỉ chứng minh được trên hạ tầng thật vẫn để cho inte
 - script Lua của limiter và breaker trên Redis thật;
 - endpoint SignalR qua nhiều instance.
 
+## Mốc cập nhật ngày 12/10/2026: chặng Dự toán, đợt 2
+
+Người dùng chốt TDD-PROJ-009 ngày 12/10/2026 bằng lựa chọn "Chốt TDD, viết Unit Test (Đề xuất)", sau khi TDD được rà lại theo đúng app demo `design-estimate` ở commit `059e876`. Đây là xác nhận thiết kế trong hội thoại, không phải phê duyệt trên hệ thống quản lý tài liệu; Status của TDD vẫn là Draft.
+
+### Mốc TDD được chốt
+
+Hash dưới đây ghi nhận nội dung TDD làm căn cứ cho 133 ca của đợt 2, chỉ dùng để đối chiếu nội dung. TDD-PROJ-006, 007 là phần dùng chung đã chốt ở đợt 1; các ca đợt 2 chỉ dẫn tới chúng, không sửa chúng.
+
+**Cập nhật mốc chốt, cùng ngày 12/10/2026.** Sau khi viết Unit Test, TDD-PROJ-009 và TDD-PROJ-008 được sửa để hết mâu thuẫn và chốt các điểm còn mở của bản bàn giao đầu. Căn cứ là nguyên tắc "bám sát app demo" người dùng đã đặt: điểm nào app demo có cách làm tương ứng thì làm theo app demo, điểm còn lại theo thiết kế sẵn có của BMT (TDD-PROJ-009 mục R, quyết định 8). Đây là quyết định kỹ thuật, chưa có xác nhận riêng của người dùng cho bản sửa. Những gì thay đổi:
+- Chỗ sửa 1 của văn bản luật giá nạp sẵn chỉ bỏ cụm "Tây Nguyên / ", giữ phần tỉnh lẻ, khớp BR-PROJ-016 Notes (mục O).
+- Bản gửi khách dùng ngưỡng 8 ký tự cho mọi ô như `fill.py`; 25 ký tự chỉ là mặc định khi gọi thẳng hàm lọc (mục G).
+- Anthropic chờ thử lại đúng 2 → 4 → 8 giây, không cộng ngẫu nhiên; ±25% chỉ áp dụng cho OpenAI (TDD-PROJ-009 mục C, TDD-PROJ-008 mục B). Quy tắc gọi lại một lần khi JSON sai chỉ thuộc lời gọi OpenAI theo JSON schema (TDD-PROJ-008 mục B).
+- Mã lỗi cuối khi có lượt hỏi lại lỗi: lượt hỏi lại không tự đặt mã lỗi; nhiều lượt lỗi hệ thống thì lấy lượt đầu tiên; lượt hỏi lại bị từ chối nội dung tính như thiếu kết quả (mục E).
+- Thêm các chi tiết còn thiếu: khóa `prompt_fingerprint` (mục B); `vung_re` luôn `false` (mục F); làm tròn `pricePerM2Vnd` nửa xa số 0 như ô D22 của `template.xlsx` (mục G); thông báo lỗi 422, cảnh báo xem trước, khôi phục cả giá neo và hệ số gói của bản cũ, phân trang theo `PagedResult` (mục H); danh sách 9 chỗ chèn (mục I); câu cảnh báo `EstimateNeedsEngineerReview` (mục M); `MaxOutputTokens` và khoảng hợp lệ của bốn tham số giới hạn đầu ra (mục C, O).
+- STORY-PROJ-011 References/TDDs thêm TDD-PROJ-009.
+
+16 ca được sửa theo: UT-PROJ-299, 312, 313, 321, 362, 364, 384, 392, 394, 395, 396, 403, 408, 413, 416, 419. Số ca, mã ca và phân bổ theo mục không đổi.
+
+**Cập nhật lần hai, cùng ngày 12/10/2026.** Ba điểm còn mở sau lần cập nhật trên đã được chốt:
+- **Người dùng chốt** bằng câu trả lời "Không tính, lỗi hệ thống (Đề xuất)": lượt chính thiếu kết quả, lượt hỏi lại lỗi vì hệ thống (bị cắt, dịch vụ lỗi, hết tiền, `AiRequestInvalid`), rồi kiểm trường bắt buộc vẫn thất bại thì lần chạy lỗi không tính vào giới hạn lỗi; mã lỗi là mã hệ thống của lượt hỏi lại lỗi đầu tiên theo thứ tự chạy. Lượt hỏi lại bị từ chối nội dung hoặc không trả `tool_use` thì lần chạy lỗi `AiOutputIncomplete` có tính. Ghi ở TDD-PROJ-009 mục R, quyết định 9; UT-PROJ-362 khẳng định đúng các nhánh này.
+- **Quyết định kỹ thuật:** giữ câu lỗi 422 "Không đọc được khoảng giá của dòng '{tên dòng}' ở mục {N}." cho ô giá không có chữ số; ô ghi "0" vẫn hợp lệ (UT-PROJ-392).
+- **Quyết định kỹ thuật:** lưu cả hai tài liệu luật giá đều trả `warnings` không chặn khi thiếu tiêu đề mục mà bộ rút gọn cần, cùng câu như xem trước. Quy tắc bóc tách kiểm tiêu đề mục 2, 5, 6, 9; Khung giá kiểm mục 2, 7, 8, 9, 10 (UT-PROJ-389, 393, 394).
+
+Tính cả hai lần cập nhật, 18 ca đã sửa: UT-PROJ-299, 312, 313, 321, 362, 364, 384, 389, 392, 393, 394, 395, 396, 403, 408, 413, 416, 419. TDD-PROJ-008 không đổi ở lần hai.
+
+| TDD | Bản | SHA-256 |
+|---|---|---|
+| [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Bản người dùng chốt bằng lựa chọn "Chốt TDD, viết Unit Test (Đề xuất)" | `5d7afb5fdfee169e34c637ff036cd2fedf3c4ff1a5952f2c0fd92d2af9322251` |
+| [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Bản cập nhật lần một cùng ngày | `078924b9e1fd851d518f127dfaf998f61fe3770985fc8e42b466786674e28aec` |
+| [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Bản cập nhật lần hai cùng ngày (quyết định 9 của người dùng), căn cứ hiện hành của 133 ca | `4a0a22165746b7007d6f67abb5874159a2af312e5c975a3503eabe7eb51ed0dc` |
+| [TDD-PROJ-008](../tdd/TDD-PROJ-008.md) | Bản cập nhật cùng ngày (lịch chờ theo nhà cung cấp, `MaxOutputTokens`) | `3985dd8bd1fc1bb0bc80ba4c0baa24063aa16a343de53efa84522298159a31c7` |
+
+### Danh sách 133 ca
+
+Đã soạn 133 đặc tả mới, UT-PROJ-296 → 428: 125 unit test và 8 test tích hợp trên PostgreSQL thật (ràng buộc database, khóa đồng thời, migration). Tất cả là Draft, chưa có mã và chưa chạy. Reviewer/Approver: Tân Trần; Owner chưa xác định. Một file chứa một test và một dòng bảng; các biến thể của cùng hành vi nằm trong Input.
+
+Số ca theo mục của TDD-PROJ-009:
+- A. Tiếp nhận và chốt phiên bản: 3 ca (UT-PROJ-296 → 298)
+- B. Executor, thứ tự xử lý và điểm lưu: 11 ca (UT-PROJ-299 → 309)
+- C. Lời gọi Anthropic: 12 ca (UT-PROJ-310 → 321)
+- D. Dựng đầu vào cho AI: 21 ca (UT-PROJ-322 → 342)
+- E. Lưới an toàn, hỏi lại và phân loại lỗi: 20 ca (UT-PROJ-343 → 362)
+- F. Giá neo, dải giá và làm tròn: 17 ca (UT-PROJ-363 → 379)
+- G. Phần gửi khách và phần nội bộ: 9 ca (UT-PROJ-380 → 388)
+- H. Luật giá có phiên bản: 12 ca (UT-PROJ-389 → 400)
+- I. Bộ quy tắc AI bổ sung: 3 ca (UT-PROJ-401 → 403)
+- J. Excel dự toán: 2 ca (UT-PROJ-404 → 405)
+- K. Đối chiếu với app demo: 4 ca (UT-PROJ-406 → 409)
+- L. Bảo mật và quyền: 3 ca (UT-PROJ-410 → 412)
+- M. Quan sát và cảnh báo: 2 ca (UT-PROJ-413 → 414)
+- O. Cấu hình, triển khai và migration: 4 ca (UT-PROJ-415 → 418)
+- P. Hợp đồng màn hình khách: 1 ca (UT-PROJ-419)
+- Internal API — mã lỗi: 1 ca (UT-PROJ-420)
+- Data Model — test tích hợp PostgreSQL: 8 ca (UT-PROJ-421 → 428)
+
+| Ca | Unit / hành vi | TDD | System Test liên quan |
+|---|---|---|---|
+| [UT-PROJ-296](../unittest/UT-PROJ-296.md) | RunEstimateStageCommandHandler (chặng Estimate) — chốt hai phiên bản luật giá, không kiểm gói và lượt | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | [ST-PROJ-140](../systemtest/ST-PROJ-140.md) |
+| [UT-PROJ-297](../unittest/UT-PROJ-297.md) | RunEstimateStageCommandHandler (chặng Estimate) — chạy lại sau lỗi chốt phiên bản đang áp dụng lúc chạy lại | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | [ST-PROJ-145](../systemtest/ST-PROJ-145.md) |
+| [UT-PROJ-298](../unittest/UT-PROJ-298.md) | RunEstimateStageCommandHandler (chặng Estimate) — bước 7a kiểm tạm ngắt theo nhà cung cấp của việc estimate | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | [ST-PROJ-199](../systemtest/ST-PROJ-199.md), [ST-PROJ-147](../systemtest/ST-PROJ-147.md) |
+| [UT-PROJ-299](../unittest/UT-PROJ-299.md) | EstimateStageExecutor.ExecuteAsync — đọc đầu vào đã chốt, ghi bước context và tiến độ | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | [ST-PROJ-140](../systemtest/ST-PROJ-140.md) |
+| [UT-PROJ-300](../unittest/UT-PROJ-300.md) | EstimateStageExecutor.ExecuteAsync — thiếu kết quả 2D, thiếu phiên bản luật giá, lỗi đọc kho ảnh | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-301](../unittest/UT-PROJ-301.md) | EstimateRunner.RunAsync — gọi các lượt AI và các lưới theo đúng thứ tự của run_estimate_pipeline | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-302](../unittest/UT-PROJ-302.md) | CheckpointedEstimateTurns.AskAsync — bước đã có thì phát lại, chưa có thì gọi AI rồi ghi bước | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-303](../unittest/UT-PROJ-303.md) | CheckpointedEstimateTurns.AskAsync — lượt hỏi lại lỗi được ghi thành bước đã xong; lượt chính lỗi không ghi bước | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-304](../unittest/UT-PROJ-304.md) | EstimateStageExecutor — nhận lại sau khi worker chết chỉ gọi lượt chưa có kết quả | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-305](../unittest/UT-PROJ-305.md) | EstimateRunner — khóa bước của lưới hai khuôn giá theo lần chạy lưới | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-306](../unittest/UT-PROJ-306.md) | PriceSplitNet — sửa ngay trên dòng của kết quả AI, lượt rà giá gửi bản đã sửa | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-307](../unittest/UT-PROJ-307.md) | EstimateComposer.Compose — ngày lập theo ngày tiếp nhận giờ Việt Nam, hạn báo giá 90 ngày | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-308](../unittest/UT-PROJ-308.md) | EstimateStageExecutor — ghi EstimateCostResult có điều kiện lease, ghi bước result rồi chốt Succeeded | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-309](../unittest/UT-PROJ-309.md) | EstimateResultRecord — cột có kiểu khớp phần JSON và hai cờ cần rà | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-310](../unittest/UT-PROJ-310.md) | AnthropicMessagesClient — thân yêu cầu Messages streaming và ghép tool input từ SSE | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-311](../unittest/UT-PROJ-311.md) | AiCallRunner.CallToolAsync — phân loại phản hồi 200 theo stop_reason và khối tool_use | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-312](../unittest/UT-PROJ-312.md) | AiCallRunner.CallToolAsync — lỗi tạm thời của Anthropic được thử lại, tối đa 4 lần gửi | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-313](../unittest/UT-PROJ-313.md) | AiCallRunner.CallToolAsync — chờ theo retry-after-ms rồi retry-after khi Anthropic trả 429 | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-314](../unittest/UT-PROJ-314.md) | AnthropicMessagesClient — sự kiện error giữa luồng đổi sang mã HTTP theo error.type | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-315](../unittest/UT-PROJ-315.md) | AiCallRunner.CallToolAsync — hết tiền, sai khóa và bị từ chối quyền với Anthropic | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | [ST-PROJ-147](../systemtest/ST-PROJ-147.md) |
+| [UT-PROJ-316](../unittest/UT-PROJ-316.md) | AiCallRunner.CallToolAsync — 400 có chữ "cache" khi đang gắn bộ nhớ đệm prompt | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-317](../unittest/UT-PROJ-317.md) | AiCallRunner — hạn một lần gọi Anthropic theo max_tokens và thời hạn chỗ giữ của nhóm anthropic | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-318](../unittest/UT-PROJ-318.md) | Bộ nhớ đệm prompt của việc estimate — mặc định tắt; khi bật chỉ gắn ở lượt chính và lượt rà giá | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-319](../unittest/UT-PROJ-319.md) | AiCallRecorder — token và chi phí của lượt Anthropic có đọc và ghi bộ nhớ đệm | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-320](../unittest/UT-PROJ-320.md) | AiCircuitBreaker — lời gọi dò Anthropic khi khóa ngắt do hết tiền hoặc sai khóa vừa hết hạn | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-321](../unittest/UT-PROJ-321.md) | PipelineConfigValidator và AnthropicMessagesClient — model, temperature và khoảng hợp lệ của tham số việc estimate | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-322](../unittest/UT-PROJ-322.md) | EstimateInputs.Build — mã gốc, nhãn danh mục của app demo và mã gói | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-323](../unittest/UT-PROJ-323.md) | EstimateInputs.Build — số tầng và tum lấy từ bản chụp trước, HouseSpec sau; căn hộ luôn 1 tầng | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-324](../unittest/UT-PROJ-324.md) | EstimateInputs.Build và EstimatePrompts — yêu cầu thêm của khách và cách bọc dữ liệu khách | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-325](../unittest/UT-PROJ-325.md) | EstimateInputs.Build — vùng miền lấy từ miền giá đã chốt lúc 2D, không dò địa chỉ | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-326](../unittest/UT-PROJ-326.md) | EstimateInputs.Build và EstimatePrompts — không gửi tên khách cho AI | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-327](../unittest/UT-PROJ-327.md) | EstimateInputs.Build — số liệu lấy từ HouseSpec: diện tích xây dựng, lô, số phòng ngủ, số WC, tổng sàn tham chiếu | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-328](../unittest/UT-PROJ-328.md) | PriceTypeResolver.Resolve — sáu loại neo giá theo mã gốc và mã phong cách | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-329](../unittest/UT-PROJ-329.md) | RoofResolver — kiểu mái mặc định tra ma trận mái của bộ quy tắc đã chốt | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-330](../unittest/UT-PROJ-330.md) | RoofResolver — mái do phương án nêu: trùng kiểu mặc định thì dùng dòng mặc định | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-331](../unittest/UT-PROJ-331.md) | QuantityTakeoff.RoofFromSpec — đọc mái từ phần chữ của phương án | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-332](../unittest/UT-PROJ-332.md) | QuantityTakeoff.BaseQuantities — khối lượng cơ sở theo tầng và toàn nhà | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-333](../unittest/UT-PROJ-333.md) | QuantityTakeoff — lô không vuông vức đo theo đường bao thật | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-334](../unittest/UT-PROJ-334.md) | EstimatePrompts.TailorRules — rút gọn Khung giá tham khảo theo dự án | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-335](../unittest/UT-PROJ-335.md) | EstimatePrompts.TailorRules — rút gọn Quy tắc bóc tách; không có dự án thì giữ nguyên văn | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-336](../unittest/UT-PROJ-336.md) | EstimatePrompts.TailorRules — chọn cột và dòng theo miền đã chốt, không có khóa Tây Nguyên | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-337](../unittest/UT-PROJ-337.md) | EstimatePrompts — ghép prompt từ khung trong mã và chỗ chèn AiPromptPart nạp sẵn trùng app demo | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-338](../unittest/UT-PROJ-338.md) | EstimateImages.Collect — mỗi tầng một ảnh nội thất, ảnh kỹ thuật chỉ thay khi thiếu | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-339](../unittest/UT-PROJ-339.md) | EstimateImages.Fit — trần base64 mỗi ảnh và cách nén ảnh vượt trần | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-340](../unittest/UT-PROJ-340.md) | EstimateImages.Arrange — tối đa 9 ảnh, nhãn "Ảnh i/N", lượt chạy không có ảnh | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-341](../unittest/UT-PROJ-341.md) | EstimateTools — schema của bốn công cụ và biến thể theo dự án | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-342](../unittest/UT-PROJ-342.md) | EstimatePrompts.Fingerprint và hash phương án — ổn định và đổi theo nội dung | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-343](../unittest/UT-PROJ-343.md) | ShapeNormalizer.RecoverParts — khôi phục các phần bóc tách nằm sai chỗ | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-344](../unittest/UT-PROJ-344.md) | ShapeNormalizer — không ghi đè phần đã có dòng và không chuyển nhóm nhầm vào phần đã có | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-345](../unittest/UT-PROJ-345.md) | ShapeNormalizer.NormalizeAiShape — gom trường phân tích bị trải phẳng, đọc phan_tich là chuỗi JSON | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-346](../unittest/UT-PROJ-346.md) | EstimateMerge.MergeAiResults — chỉ ghi đè phần có dòng, ghép phân tích theo từng trường | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-347](../unittest/UT-PROJ-347.md) | TakeoffNet — điều kiện hỏi lại, công cụ chỉ khai báo phần thiếu, giới hạn token, chỉ ghép phần được hỏi | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-348](../unittest/UT-PROJ-348.md) | TakeoffNet — không hỏi lại, vẫn thiếu sau lượt hỏi lại, lượt hỏi lại lỗi | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-349](../unittest/UT-PROJ-349.md) | RoughPartGuards.Regroup — chia lại nhóm phần thô khi có từ 3 dòng sai nhóm | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-350](../unittest/UT-PROJ-350.md) | RoughPartGuards.DropNewBuildRoughLines — căn hộ bỏ dòng xây mới khỏi phần thô | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-351](../unittest/UT-PROJ-351.md) | AnalysisNet — điều kiện hỏi lại, 4.000 token, chỉ ghép trường thiếu | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-352](../unittest/UT-PROJ-352.md) | PriceSplitNet.SplitByGroupCode — tách VT/NC bằng 24 tỷ lệ theo mã nhóm vật tư | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-353](../unittest/UT-PROJ-353.md) | PriceSplitNet.Run — phần hỏng, hỏi lại tách giá, ràng buộc ±1.000 đ và tách theo tỷ lệ tên nhóm | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-354](../unittest/UT-PROJ-354.md) | PriceSplitNet.SplitByRatio — làm tròn khi tách VT/NC theo tỷ lệ | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-355](../unittest/UT-PROJ-355.md) | EstimateNormalizer.Normalize — loại dòng 0 đồng, làm tròn khối lượng, đơn vị đếm | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-356](../unittest/UT-PROJ-356.md) | QuantityTakeoff.CheckQuantities — kiểm khối lượng theo hình học, chỉ ghi nội bộ | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-357](../unittest/UT-PROJ-357.md) | QuantityTakeoff.CheckMinRows — số dòng tối thiểu theo loại công trình | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-358](../unittest/UT-PROJ-358.md) | EstimateValidator.Validate — 24 ô bắt buộc, tong_san_so là số dương, đủ ba phần | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | [ST-PROJ-144](../systemtest/ST-PROJ-144.md) |
+| [UT-PROJ-359](../unittest/UT-PROJ-359.md) | MaterialBrands.Summarize — đếm dòng thiếu hãng và ngưỡng cần nhân viên rà | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-360](../unittest/UT-PROJ-360.md) | EstimateRunner — lượt hỏi lại lỗi vì bất kỳ lý do gì được bỏ qua, lần chạy đi tiếp | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-361](../unittest/UT-PROJ-361.md) | EstimateStageExecutor — mã lỗi cuối khi lượt chính lỗi | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | [ST-PROJ-147](../systemtest/ST-PROJ-147.md) |
+| [UT-PROJ-362](../unittest/UT-PROJ-362.md) | EstimateStageExecutor — mã lỗi cuối khi kiểm trường bắt buộc thất bại | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | [ST-PROJ-144](../systemtest/ST-PROJ-144.md), [ST-PROJ-201](../systemtest/ST-PROJ-201.md) |
+| [UT-PROJ-363](../unittest/UT-PROJ-363.md) | PriceAnchors — sàn giá, chỉ tiêu từng phần và trần của 18 ô loại neo giá × gói | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-364](../unittest/UT-PROJ-364.md) | PriceAnchors.CheckFloor — công thức theo loại, ngưỡng 0,95 sàn, trần và trường hợp không đủ dữ liệu | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-365](../unittest/UT-PROJ-365.md) | PriceAnchors.Allocate — một vị trí chung trên dải, phần cuối hấp thụ phần làm tròn | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-366](../unittest/UT-PROJ-366.md) | PriceAnchors.Targets — chỉ tiêu dự toán của nhà phố hiện đại ba gói | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-367](../unittest/UT-PROJ-367.md) | PriceAnchors.Targets — chỉ tiêu của mọi ô cộng lại bằng neo và nằm cùng một vị trí trên dải | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-368](../unittest/UT-PROJ-368.md) | PriceFloorNet — giá trong khoảng: trên đầu cao dải thì cần kỹ sư rà, trên dải × 1,8 và trên sàn × 1,05 thì nghi bóc trùng | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | [ST-PROJ-143](../systemtest/ST-PROJ-143.md) |
+| [UT-PROJ-369](../unittest/UT-PROJ-369.md) | PriceFloorNet — câu lưu ý chỉ nói đã đạt sàn khi số đã đạt | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-370](../unittest/UT-PROJ-370.md) | PriceFloorNet và EstimateRunner — trên trần hỏi lại AI đúng một lần, dưới sàn không hỏi lại | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-371](../unittest/UT-PROJ-371.md) | EstimateRunner — ghép lại câu trả lời của lượt rà giá như lượt chính | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-372](../unittest/UT-PROJ-372.md) | PriceFloorNet — lượt rà giá làm giá giảm được ghi lại và luôn cần kỹ sư rà | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-373](../unittest/UT-PROJ-373.md) | PriceFloorNet.RaisePrices — tự nâng đơn giá tới 100% neo, giữ nguyên khối lượng | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | [ST-PROJ-142](../systemtest/ST-PROJ-142.md) |
+| [UT-PROJ-374](../unittest/UT-PROJ-374.md) | PriceFloorNet.RaisePrices — giới hạn ×6 tổng, ×3 mỗi dòng và dòng vật liệu cơ bản | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-375](../unittest/UT-PROJ-375.md) | PriceFloorNet.RaisePrices — thiếu do đơn giá hay do khối lượng; không có dòng nào nâng được | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-376](../unittest/UT-PROJ-376.md) | PriceFloorNet — không bao giờ hạ giá và không đổi khối lượng trên mọi ô | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-377](../unittest/UT-PROJ-377.md) | Common/JsMath và EstimateTotals — các quy tắc làm tròn trộn JavaScript và Python | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-378](../unittest/UT-PROJ-378.md) | EstimateNormalizer.ParseNumber (ep_so) — đọc số AI trả theo quy ước dấu phẩy Việt Nam | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-379](../unittest/UT-PROJ-379.md) | StaffReviewBuilder — ghi chú cho kỹ sư theo từng nhánh của lưới sàn giá | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-380](../unittest/UT-PROJ-380.md) | CustomerCopy.Reasons — nội dung nội bộ và câu viết lại không dùng từ cấm đều bị từ chối | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | [ST-PROJ-143](../systemtest/ST-PROJ-143.md) |
+| [UT-PROJ-381](../unittest/UT-PROJ-381.md) | CustomerCopy — câu trung thực và phép tính bóc tách được giữ nguyên từng byte | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-382](../unittest/UT-PROJ-382.md) | CustomerCopy.Reasons — luật tiền chạy trên chữ có dấu | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-383](../unittest/UT-PROJ-383.md) | CustomerCopy.StripInternal — cắt nhỏ nhất theo thứ tự ngoặc, mệnh đề, vế dấu phẩy, cả câu | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-384](../unittest/UT-PROJ-384.md) | CustomerCopy.AdmitCell — ngưỡng 8 ký tự cho mọi ô gửi khách, 25 chỉ khi gọi thẳng hàm lọc, bỏ mảnh vụn | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-385](../unittest/UT-PROJ-385.md) | CustomerCopy.Build — thứ tự 11 ô gửi khách và nội dung soạn lại khi phải bỏ cả ô | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-386](../unittest/UT-PROJ-386.md) | CustomerCopy.Build — nhận xét dự toán luôn do hệ thống soạn, đoạn của AI chỉ được nối khi sạch cả đoạn | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-387](../unittest/UT-PROJ-387.md) | CustomerCopy.Build — bỏ ghi_chu_noi_bo theo tên, khối phân tích khớp ô in ra, báo cáo các ô đã cắt | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-388](../unittest/UT-PROJ-388.md) | CustomerCopy.CleanForExcel — bỏ ký tự điều khiển trước khi dựng bản gửi khách | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-389](../unittest/UT-PROJ-389.md) | SavePriceRuleDocumentCommandHandler — lưu Khung giá tạo phiên bản mới và tính lại dải giá | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | [ST-PROJ-183](../systemtest/ST-PROJ-183.md) |
+| [UT-PROJ-390](../unittest/UT-PROJ-390.md) | SavePriceRuleDocumentCommandHandler — expectedVersion cũ bị từ chối | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | [ST-PROJ-184](../systemtest/ST-PROJ-184.md) |
+| [UT-PROJ-391](../unittest/UT-PROJ-391.md) | SavePriceRuleDocumentCommandHandler — gửi lặp cùng Idempotency-Key | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-392](../unittest/UT-PROJ-392.md) | SavePriceRuleDocumentCommandHandler — nội dung không hợp lệ bị từ chối, chỉ rõ mục và dòng | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | [ST-PROJ-184](../systemtest/ST-PROJ-184.md) |
+| [UT-PROJ-393](../unittest/UT-PROJ-393.md) | SavePriceRuleDocumentCommandHandler — lưu Quy tắc bóc tách không tính lại dải giá, cảnh báo khi thiếu tiêu đề mục | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | [ST-PROJ-183](../systemtest/ST-PROJ-183.md) |
+| [UT-PROJ-394](../unittest/UT-PROJ-394.md) | PreviewPriceFrameworkQueryHandler — xem trước dải giá không ghi gì, kèm cảnh báo không chặn | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | [ST-PROJ-183](../systemtest/ST-PROJ-183.md) |
+| [UT-PROJ-395](../unittest/UT-PROJ-395.md) | RestorePriceRuleVersionCommandHandler — khôi phục đầy đủ luật giá của bản cũ thành phiên bản mới | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | [ST-PROJ-185](../systemtest/ST-PROJ-185.md) |
+| [UT-PROJ-396](../unittest/UT-PROJ-396.md) | Truy vấn luật giá — tài liệu hiện hành, danh sách phiên bản, một phiên bản, không tìm thấy | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | [ST-PROJ-182](../systemtest/ST-PROJ-182.md), [ST-PROJ-185](../systemtest/ST-PROJ-185.md) |
+| [UT-PROJ-397](../unittest/UT-PROJ-397.md) | PriceFrameworkTables.Parse — đọc khoảng giá mục 3–5 từ văn bản | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-398](../unittest/UT-PROJ-398.md) | PriceBandDeriver — 41 dải giá tính từ văn bản gốc và từ bản nạp sẵn trùng các dải đang ghim của app demo | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-399](../unittest/UT-PROJ-399.md) | PriceBandDeriver — hình học ghim, kết cấu biệt thự, mái và nội thất theo gói | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-400](../unittest/UT-PROJ-400.md) | PriceBandDeriver — ví dụ tăng 10% đơn giá bê tông M250 | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-401](../unittest/UT-PROJ-401.md) | AiRoofRuleValidator — kiểm ma trận mái khi nạp | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-402](../unittest/UT-PROJ-402.md) | AiRoofRule → kiểu mái của app demo — câu "Kéo theo", tên thành phần mái và một hệ mái trong cả prompt | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-403](../unittest/UT-PROJ-403.md) | Dữ liệu nạp sẵn bộ quy tắc RS2 — ma trận mái và chỗ chèn lời dặn của prompt dự toán | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-404](../unittest/UT-PROJ-404.md) | ClosedXmlEstimateWorkbookWriter — dựng sheet, công thức, named range và chiều cao ô như fill_template.py | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-405](../unittest/UT-PROJ-405.md) | ClosedXmlEstimateWorkbookWriter — tính lại tổng như dung_sheet và đối chiếu với tổng của kết quả Dự toán | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-406](../unittest/UT-PROJ-406.md) | Parity Estimate — phát lại 7 hồ sơ nhật ký thô của app demo | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-407](../unittest/UT-PROJ-407.md) | Parity Estimate theo hàm — các hàm thuần trùng app demo ở các biên | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-408](../unittest/UT-PROJ-408.md) | Văn bản luật giá nạp sẵn chỉ khác bản gốc đúng bốn chỗ và cho cùng dải giá | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-409](../unittest/UT-PROJ-409.md) | FakeAiProvider (IToolCallModel) — phát lại tool input theo việc và khóa bước | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-410](../unittest/UT-PROJ-410.md) | GetStageResultQueryHandler (chặng Estimate) — chỉ chủ bản đọc, chỉ khi Succeeded, chỉ đọc CustomerJson | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | [ST-PROJ-143](../systemtest/ST-PROJ-143.md) |
+| [UT-PROJ-411](../unittest/UT-PROJ-411.md) | Chính sách quyền của API luật giá, bộ quy tắc AI và phần nội bộ | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | [ST-PROJ-182](../systemtest/ST-PROJ-182.md) |
+| [UT-PROJ-412](../unittest/UT-PROJ-412.md) | GetEstimatePipelineQueryHandler — khối estimate của lần chạy Dự toán cho người có quyền xem | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | [ST-PROJ-142](../systemtest/ST-PROJ-142.md), [ST-PROJ-143](../systemtest/ST-PROJ-143.md) |
+| [UT-PROJ-413](../unittest/UT-PROJ-413.md) | StageRunFinishedConsumer — cảnh báo EstimateNeedsEngineerReview cho Admin | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-414](../unittest/UT-PROJ-414.md) | Nhật ký của chặng Dự toán — không ghi mô tả, địa chỉ, prompt hay tool input | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-415](../unittest/UT-PROJ-415.md) | EstimatePriceRuleSeedData — phiên bản 1 của hai tài liệu luật giá, giá neo, gói và dải giá | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-416](../unittest/UT-PROJ-416.md) | Migration EstimatePipelineEstimateStage — phiên bản cấu hình mới cho việc estimate | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-417](../unittest/UT-PROJ-417.md) | Hằng số và công tắc của app demo được ghim trong mã ở giá trị mặc định | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-418](../unittest/UT-PROJ-418.md) | Kiểm cấu hình lúc khởi động — khóa Anthropic và AnthropicOption__BaseUrl | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-419](../unittest/UT-PROJ-419.md) | EstimateResultProjection — dựng hợp đồng estimate-v1 từ CustomerJson | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | [ST-PROJ-140](../systemtest/ST-PROJ-140.md), [ST-PROJ-057](../systemtest/ST-PROJ-057.md) |
+| [UT-PROJ-420](../unittest/UT-PROJ-420.md) | ExceptionHandlingMiddleware — mã lỗi của chặng Dự toán nằm ở messageCode, title và code theo loại ngoại lệ | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-421](../unittest/UT-PROJ-421.md) | EstimateStageRun — CHECK hai cột phiên bản luật giá theo chặng | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-422](../unittest/UT-PROJ-422.md) | PriceRuleDocument và PriceRuleDocumentVersion — khóa, FK ghép theo loại và CHECK | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-423](../unittest/UT-PROJ-423.md) | PriceAnchor, PricePackage, PriceBand — ràng buộc theo phiên bản Khung giá | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-424](../unittest/UT-PROJ-424.md) | EstimateCostResult và AiRoofRule — ràng buộc database | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-425](../unittest/UT-PROJ-425.md) | SavePriceRuleDocumentCommandHandler — hai Admin lưu đồng thời từ cùng một phiên bản | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | [ST-PROJ-184](../systemtest/ST-PROJ-184.md) |
+| [UT-PROJ-426](../unittest/UT-PROJ-426.md) | RecordEstimateResult và đọc kết quả — lần chạy đã TimedOut hoặc chưa Succeeded | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | [ST-PROJ-148](../systemtest/ST-PROJ-148.md) |
+| [UT-PROJ-427](../unittest/UT-PROJ-427.md) | Migration EstimatePipelineEstimateStage — Up trên dữ liệu có sẵn và điều kiện Down | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+| [UT-PROJ-428](../unittest/UT-PROJ-428.md) | RunEstimateStageCommandHandler — hai cột phiên bản trỏ đúng loại tài liệu khi Admin lưu cùng lúc | [TDD-PROJ-009](../tdd/TDD-PROJ-009.md) | Chưa liên kết System Test |
+
+Truy vết nhanh tới tiêu chí nghiệm thu và luật:
+- STORY-PROJ-008: AC-001 → UT-PROJ-296; AC-002 → UT-PROJ-137 của đợt 1 (bước 6 của TDD-PROJ-006, chặng Dự toán dùng lại); AC-003 → UT-PROJ-299, 308, 419; AC-004 → UT-PROJ-364, 373; AC-005 → UT-PROJ-380, 385, 386; AC-006 → UT-PROJ-358, 361, 362; AC-007 → UT-PROJ-297; AC-008 → UT-PROJ-296, 389 và UT-PROJ-138 của đợt 1; AC-009 → UT-PROJ-315, 361.
+- STORY-PROJ-011: AC-001 → UT-PROJ-396, 411; AC-002 → UT-PROJ-394; AC-003 → UT-PROJ-389; AC-004 → UT-PROJ-392; AC-005 → UT-PROJ-390, 425; AC-006 → UT-PROJ-395; AC-008 → UT-PROJ-393. AC-007 (miền giá) đã có ở đợt 1 (UT-PROJ-286, 287).
+- BR-PROJ-016 khoản 1 → UT-PROJ-408, 415; khoản 2 → UT-PROJ-396; khoản 3 → UT-PROJ-394; khoản 4 → UT-PROJ-392; khoản 5 → UT-PROJ-389; khoản 6 → UT-PROJ-390, 425; khoản 7 → UT-PROJ-395; khoản 8 → UT-PROJ-296, 297, 428; khoản 9 → UT-PROJ-411; Except → UT-PROJ-393.
+- BR-PROJ-017 khoản 1 → UT-PROJ-309; khoản 2 → UT-PROJ-380 → 387; khoản 3 → UT-PROJ-410, 419; khoản 4 → UT-PROJ-309, 359, 413; khoản 5 → UT-PROJ-410, 412; Except → UT-PROJ-373.
+
+### Đối chiếu với test của app demo
+
+TDD-PROJ-009 mục K chuyển 14 tệp `tests/estimate/test_*.py` sang `test/bmt-be.estimatepipeline.tests/Ported/Estimate/`, giữ tên ca. Đặc tả Unit Test không lặp lại từng ca đó. Khi một hành vi có test của app demo, đặc tả lấy lại đầu vào và assertion của test đó và ghi tên `tệp::test` ở cột Rationale. Ca không có đặc tả riêng được phủ theo một trong ba cách ghi ở cột cuối. Đếm theo hàm test, chưa tính các biến thể tham số hóa.
+
+| Tệp test của app demo | Số ca | Có đặc tả riêng | Ca còn lại: cách phủ hoặc lý do |
+|---|---|---|---|
+| `test_estimate.py` | 24 | 14 | 7 ca không áp dụng (Excel qua tiến trình con, chế độ demo, event loop, đọc tệp dự án, khách ngắt kết nối). 2 ca là điều kiện tiếp nhận của TDD-PROJ-006 (UT-PROJ-137, 139). 1 ca khác có chủ đích: app demo cho chạy dự toán khi 2D xong một phần, hệ thống thật chỉ mở chặng khi 2D thành công (BR-PROJ-010 khoản 1). |
+| `test_estimate_checklist.py` | 20 | 4 | 16 ca kiểm chữ của prompt, schema dt-14 và khối lượng tham chiếu in trong prompt: chuyển nguyên; schema có ở UT-PROJ-341, chữ của prompt được UT-PROJ-337, 406 chứng minh trùng từng ký tự. |
+| `test_estimate_customer_cells.py` | 16 | 13 | 2 ca kiểm chữ của prompt: như trên. 1 ca chạy tiến trình con điền Excel và thư mục staff của app demo: không áp dụng; phần ranh giới gửi khách đã có ở UT-PROJ-387. |
+| `test_estimate_live_path.py` | 18 | 17 | 1 ca hủy khi khách ngắt kết nối: không áp dụng vì lần chạy chạy nền và dừng theo lease (TDD-PROJ-006). |
+| `test_estimate_pipeline_nets.py` | 10 | 6 | 3 ca về tệp nhật ký thô và chế độ demo: không áp dụng (bản thô theo TDD-PROJ-008 mục C). 1 ca mỗi lượt một dòng metrics: phủ ở UT-PROJ-264 của đợt 1 và UT-PROJ-321. |
+| `test_estimate_price_invariants.py` | 17 | 11 | 4 ca kiểm chữ của dòng giá neo và chỉ tiêu trong prompt: chuyển nguyên, phủ bằng UT-PROJ-406. 2 ca tra gói với giá trị kiểu JavaScript: chuyển nguyên; ở hệ thống thật gói là enum có kiểu trong bản chụp v3. |
+| `test_estimate_prompt_cache.py` | 9 | 9 | — |
+| `test_estimate_prompt_tailoring.py` | 45 | 6 | 39 ca kiểm chữ của prompt đã rút gọn: chuyển nguyên, phủ bằng UT-PROJ-334, 335, 337, 406. Ca dùng địa chỉ Tây Nguyên (ví dụ `test_a_highland_project_is_told_which_end_of_the_band_each_column_takes`) phải sửa theo quyết định 5 của mục R. |
+| `test_estimate_quantity.py` | 40 | 25 | 4 ca không áp dụng (cấu hình qua biến môi trường, chế độ demo, Excel của bản demo, ranh giới module Python). 3 ca kiểm chữ của prompt và schema: chuyển nguyên, phủ bằng UT-PROJ-341, 406. 8 ca hình học lô không vuông và lô chữ nhật: chuyển nguyên, hành vi chính có ở UT-PROJ-333. |
+| `test_estimate_quote_window.py` | 3 | 2 | 1 ca qua HTTP và tệp dự án: không áp dụng; công thức ngày đã có ở UT-PROJ-307. |
+| `test_estimate_recovery.py` | 12 | 12 | — |
+| `test_estimate_regroup.py` | 2 | 2 | — |
+| `test_estimate_roof.py` | 9 | 9 | — |
+| `test_price_band_derivation.py` | 12 | 12 | — |
+| Tổng | 237 | 142 | |
+
+Các test của app demo được lấy lại có điều chỉnh theo quyết định đã chốt, và đặc tả ghi rõ chỗ điều chỉnh:
+- Không hạ 5% giá neo theo vùng và không có khóa Tây Nguyên (quyết định 5 của mục R, BR-PROJ-013): bỏ các vòng dùng địa chỉ Buôn Ma Thuột ở UT-PROJ-366, 376, 379; UT-PROJ-325, 336 khẳng định hành vi mới.
+- Không gửi tên khách cho AI (quyết định 1): UT-PROJ-326 thay assertion `ten_khach_hang` của `test_form_from_project_maps_every_field_and_derives_area_with_roof_component`.
+- Ngày lập theo ngày tiếp nhận (quyết định 2): UT-PROJ-307.
+- `stop_reason=refusal` thành `AiContentBlocked` (khác app demo có chủ đích ở mục C): UT-PROJ-311.
+- Các hằng số và công tắc ghim ở giá trị mặc định (quyết định 3, mục O): bỏ nửa "tắt cờ" của các test đổi cấu hình, xem UT-PROJ-353, 417.
+
+### Phần cần kiểm chứng ngoài unit test
+
+- Ràng buộc database, khóa FOR UPDATE khi hai Admin lưu đồng thời, ghi kết quả sau khi lần chạy đã TimedOut và migration có test tích hợp riêng trên PostgreSQL thật: UT-PROJ-421 → 428. Không dùng store giả hay EF InMemory để tuyên bố đã chứng minh các hành vi này.
+- Đầu-cuối ở chế độ Fake theo ST-PROJ-140 → 148, ST-PROJ-182 → 186, ST-PROJ-199, ST-PROJ-201 và phần Dự toán của ST-PROJ-057. Chạy thật có trả phí trên dev để so số dòng, tổng, thời gian và chi phí với số đo của app demo (TDD-PROJ-009 mục N) không thuộc unit test.
+- Test với nhà cung cấp AI giả chứng minh điều phối và các lưới, không chứng minh chất lượng câu trả lời của Anthropic.
+
+### Cần làm rõ
+
+Không còn điểm cần làm rõ. Mười hai điểm của bản bàn giao đầu được chốt ở lần cập nhật thứ nhất (TDD-PROJ-009 mục R, quyết định 8). Ba điểm còn lại được chốt ở lần cập nhật thứ hai:
+- **Đã xác nhận (12/10/2026):** người dùng chọn "Không tính, lỗi hệ thống (Đề xuất)" cho trường hợp lượt hỏi lại lỗi vì hệ thống rồi kiểm trường bắt buộc thất bại (mục R, quyết định 9; UT-PROJ-362).
+- **Quyết định kỹ thuật:** câu lỗi 422 cho ô giá không có chữ số (UT-PROJ-392 ca g).
+- **Quyết định kỹ thuật:** cảnh báo thiếu tiêu đề khi lưu, kể cả với Quy tắc bóc tách (UT-PROJ-393).
+
+Các mâu thuẫn giữa tài liệu ghi ở bản bàn giao đầu đều đã được sửa trong bản cập nhật cùng ngày:
+- Chỗ sửa 1 ở mục O của TDD-PROJ-009 nay chỉ bỏ cụm "Tây Nguyên / ", khớp BR-PROJ-016 Notes (UT-PROJ-408).
+- Mục G của TDD-PROJ-009 nay ghi ngưỡng 8 ký tự cho mọi ô gửi khách như `fill.py` (UT-PROJ-384).
+- TDD-PROJ-008 mục B tách lịch chờ theo nhà cung cấp, khớp TDD-PROJ-009 mục C (UT-PROJ-312, 313).
+- TDD-PROJ-008 mục B ghi rõ quy tắc gọi lại một lần khi JSON sai chỉ thuộc OpenAI; lời gọi công cụ của Anthropic theo TDD-PROJ-009 mục C.
+- STORY-PROJ-011 References/TDDs đã có TDD-PROJ-009.
+
+### Kiểm tra tài liệu đã thực hiện
+
+Script kiểm tra trên 133 file mới cho kết quả:
+- mỗi file một heading trùng Test ID, đúng một dòng dữ liệu 13 cột;
+- giá trị Loại, Suite, Priority, Trạng thái hợp lệ;
+- Trace to khớp TEST_LINKS;
+- mọi mã và mục được dẫn đều có thật;
+- mọi tên `tệp::test` của app demo được dẫn đều có trong `tests/estimate/` ở commit `059e876`.
+
+Một số kết quả của bộ lọc gửi khách (UT-PROJ-382, 384, 385) đã chạy thử trên bản chép các hàm thuần của `fill.py`, không nạp cấu hình của app demo. Chưa chạy importer, mã Unit Test hay test tích hợp.
+
+Sau bản cập nhật cùng ngày đã chạy lại script trên cả 133 file và không có lỗi. Năm sơ đồ mermaid của TDD-PROJ-008 và năm sơ đồ của TDD-PROJ-009 đều đọc được bằng mermaid 10.9.1. Ô D22 của `template.xlsx` (công thức và định dạng) được đọc trực tiếp từ tệp của app demo. Các số làm tròn ở UT-PROJ-419 được tính lại bằng phép chia thập phân. Sau lần cập nhật thứ hai, script lại báo không lỗi trên 133 file và cả mười sơ đồ vẫn đọc được bằng mermaid 10.9.1.
