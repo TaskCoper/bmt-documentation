@@ -631,3 +631,72 @@ Script kiểm tra trên 133 file mới cho kết quả:
 Một số kết quả của bộ lọc gửi khách (UT-PROJ-382, 384, 385) đã chạy thử trên bản chép các hàm thuần của `fill.py`, không nạp cấu hình của app demo. Chưa chạy importer, mã Unit Test hay test tích hợp.
 
 Sau bản cập nhật cùng ngày đã chạy lại script trên cả 133 file và không có lỗi. Năm sơ đồ mermaid của TDD-PROJ-008 và năm sơ đồ của TDD-PROJ-009 đều đọc được bằng mermaid 10.9.1. Ô D22 của `template.xlsx` (công thức và định dạng) được đọc trực tiếp từ tệp của app demo. Các số làm tròn ở UT-PROJ-419 được tính lại bằng phép chia thập phân. Sau lần cập nhật thứ hai, script lại báo không lỗi trên 133 file và cả mười sơ đồ vẫn đọc được bằng mermaid 10.9.1.
+
+
+## Mốc xác nhận ngày 13/10/2026: Phối cảnh 3D, đợt 3
+
+Người dùng xác nhận trong hội thoại: “Ok hợp lí rồi, làm di”, sau khi xem TDD và phần giải thích luồng 3D so với app demo. Phạm vi được chốt là [TDD-PROJ-010](../tdd/TDD-PROJ-010.md) tại commit tài liệu `f294de1`, gồm kế hoạch ảnh, prompt, kiểm chất lượng, lưu từng ảnh, chạy tiếp, API và giao diện.
+
+- SHA-256 của TDD đã chốt: `0d7c05cb1064dcfa7e9f5e1e7f4402c424430edadc2eac0e1d57f5a65a4aa26c`.
+- Xác nhận hội thoại cho phép tiếp tục đặc tả Unit Test và triển khai BE/FE; không thay Status Draft hoặc ghi phê duyệt trên hệ thống tài liệu.
+- Đặc tả tiếp theo bắt đầu UT-PROJ-429. Kết quả kiểm thử thực thi được cập nhật sau khi chạy, không coi bản đặc tả là bằng chứng đã đạt.
+
+### Đặc tả đợt 3
+
+Các ca dưới đây là đặc tả; chưa phải kết quả thực thi. Ca có repository/schema/migration phải kiểm trên PostgreSQL; UI tương tác kiểm thêm qua browser theo ST-PROJ-149–154 và ST-PROJ-204.
+
+| Mã | Unit dự kiến |
+|---|---|
+| [UT-PROJ-429](../unittest/UT-PROJ-429.md) | Render3dPlanner.Build |
+| [UT-PROJ-430](../unittest/UT-PROJ-430.md) | Render3dPlanner.Build |
+| [UT-PROJ-431](../unittest/UT-PROJ-431.md) | Render3dPlanner.RoomViews |
+| [UT-PROJ-432](../unittest/UT-PROJ-432.md) | Render3dPlanner.RoomViews |
+| [UT-PROJ-433](../unittest/UT-PROJ-433.md) | Render3dPlanner.RoomViews |
+| [UT-PROJ-434](../unittest/UT-PROJ-434.md) | Render3dPlanner.RoomViews |
+| [UT-PROJ-435](../unittest/UT-PROJ-435.md) | Render3dPlanner.RoomRenderable |
+| [UT-PROJ-436](../unittest/UT-PROJ-436.md) | Render3dPlanner.RoomViews |
+| [UT-PROJ-437](../unittest/UT-PROJ-437.md) | Render3dPlanner.Build |
+| [UT-PROJ-438](../unittest/UT-PROJ-438.md) | Render3dPlanner.RoomLabel |
+| [UT-PROJ-439](../unittest/UT-PROJ-439.md) | Render3dPrompts.Day |
+| [UT-PROJ-440](../unittest/UT-PROJ-440.md) | Render3dPrompts.Frontage |
+| [UT-PROJ-441](../unittest/UT-PROJ-441.md) | Render3dPrompts.SiteContext |
+| [UT-PROJ-442](../unittest/UT-PROJ-442.md) | Render3dPrompts.Roof |
+| [UT-PROJ-443](../unittest/UT-PROJ-443.md) | Render3dPrompts.InteriorStyle |
+| [UT-PROJ-444](../unittest/UT-PROJ-444.md) | Render3dPrompts.InteriorStyle |
+| [UT-PROJ-445](../unittest/UT-PROJ-445.md) | Render3dPrompts.Weather |
+| [UT-PROJ-446](../unittest/UT-PROJ-446.md) | Render3dPrompts.Night |
+| [UT-PROJ-447](../unittest/UT-PROJ-447.md) | Render3dPrompts.Room |
+| [UT-PROJ-448](../unittest/UT-PROJ-448.md) | Render3dPrompts.ExtraView |
+| [UT-PROJ-449](../unittest/UT-PROJ-449.md) | Render3dPrompts.Truncate |
+| [UT-PROJ-450](../unittest/UT-PROJ-450.md) | Render3dQuality.DHash |
+| [UT-PROJ-451](../unittest/UT-PROJ-451.md) | Render3dQuality.Duplicate |
+| [UT-PROJ-452](../unittest/UT-PROJ-452.md) | Render3dQuality.Checks |
+| [UT-PROJ-453](../unittest/UT-PROJ-453.md) | Render3dOptions.Parse |
+| [UT-PROJ-454](../unittest/UT-PROJ-454.md) | Render3dStageExecutor.ExecuteAsync |
+| [UT-PROJ-455](../unittest/UT-PROJ-455.md) | Render3dStageExecutor.NightReferences |
+| [UT-PROJ-456](../unittest/UT-PROJ-456.md) | Render3dStageExecutor.Resume |
+| [UT-PROJ-457](../unittest/UT-PROJ-457.md) | Render3dStageExecutor.Resume |
+| [UT-PROJ-458](../unittest/UT-PROJ-458.md) | Render3dStageExecutor.Redraw |
+| [UT-PROJ-459](../unittest/UT-PROJ-459.md) | Render3dStageExecutor.Redraw |
+| [UT-PROJ-460](../unittest/UT-PROJ-460.md) | Render3dStageExecutor.QcUnavailable |
+| [UT-PROJ-461](../unittest/UT-PROJ-461.md) | Render3dStageExecutor.QcRetryUnavailable |
+| [UT-PROJ-462](../unittest/UT-PROJ-462.md) | Render3dStageExecutor.ContentBlocked |
+| [UT-PROJ-463](../unittest/UT-PROJ-463.md) | Render3dStageExecutor.RequiredReference |
+| [UT-PROJ-464](../unittest/UT-PROJ-464.md) | Render3dStageExecutor.StorageRead |
+| [UT-PROJ-465](../unittest/UT-PROJ-465.md) | Render3dStageExecutor.Deadline |
+| [UT-PROJ-466](../unittest/UT-PROJ-466.md) | Render3dStageExecutor.PinnedInputs |
+| [UT-PROJ-467](../unittest/UT-PROJ-467.md) | Render3dResultProjection.Project |
+| [UT-PROJ-468](../unittest/UT-PROJ-468.md) | Render3dResultProjection.Project |
+| [UT-PROJ-469](../unittest/UT-PROJ-469.md) | Render3dResultProjection.Project |
+| [UT-PROJ-470](../unittest/UT-PROJ-470.md) | GetStageResultQueryHandler.Handle |
+| [UT-PROJ-471](../unittest/UT-PROJ-471.md) | RunEstimateStageCommandHandler.Handle |
+| [UT-PROJ-472](../unittest/UT-PROJ-472.md) | EstimatePipelineStore.RecordStepAsync |
+| [UT-PROJ-473](../unittest/UT-PROJ-473.md) | EstimatePipelineStore.Progress |
+| [UT-PROJ-474](../unittest/UT-PROJ-474.md) | EstimatePipelineStore.Render3dSnapshot |
+| [UT-PROJ-475](../unittest/UT-PROJ-475.md) | AiRegionInstructionConfiguration |
+| [UT-PROJ-476](../unittest/UT-PROJ-476.md) | EstimatePipelineRender3dStageMigration |
+| [UT-PROJ-477](../unittest/UT-PROJ-477.md) | render3dResultSchema |
+| [UT-PROJ-478](../unittest/UT-PROJ-478.md) | render3dViewState |
+| [UT-PROJ-479](../unittest/UT-PROJ-479.md) | render3dPolling |
+
+Kết quả chạy đợt 3 và các giới hạn kiểm chứng: [báo cáo Phối cảnh 3D](estimate-render3d-validation.md). Đặc tả vẫn giữ Draft; không tự coi mỗi đặc tả đã được thực thi.
