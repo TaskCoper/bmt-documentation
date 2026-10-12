@@ -257,7 +257,7 @@ Mục tiêu:
   - validator;
   - retry và đọc stream qua stub `HttpMessageHandler`: 429 + Retry-After, 5xx, lỗi 400 tham số, stream bị cắt, lỗi tool ép buộc;
   - Excel ClosedXML so với Excel do openpyxl tạo;
-  - `PriceBandDeriver` cho ra đúng 36 dải giá của app demo.
+  - `PriceBandDeriver` cho ra đúng 41 dải giá (82 con số) của app demo.
 - **Integration (Testcontainers Postgres):** migration và các check, chỉ mục duy nhất từng phần, `SKIP LOCKED`, mất lease, tranh chấp giữa quét hạn chờ và `ExpireStaleUsageJob`, tham chiếu tệp trong kho.
 - **Chạy đầu-cuối ở chế độ Fake** bằng skill `run-local-api`: đủ 4 chặng, tắt worker giữa chừng rồi chạy tiếp, giới hạn lần lỗi, và luồng FE.
 - **Chạy thật có trả phí trên staging** với cùng đầu vào đã dùng ngày 11/10 (hồ sơ app demo `BUILDX-20261011-YQH93J`). So sánh:

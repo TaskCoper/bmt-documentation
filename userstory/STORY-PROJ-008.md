@@ -163,9 +163,9 @@ Dịch vụ AI báo hết tiền hoặc khóa truy cập bị từ chối.
 
 #### AC-006
 
-- **Given**: AI vẫn thiếu trường bắt buộc sau lượt hỏi lại, kết quả AI bị cắt ngang vì vượt giới hạn độ dài đầu ra, hoặc dịch vụ AI lỗi sau khi đã thử lại.
+- **Given**: AI vẫn thiếu trường bắt buộc sau lượt hỏi lại, AI từ chối xử lý nội dung khách gửi, kết quả AI bị cắt ngang vì vượt giới hạn độ dài đầu ra, hoặc dịch vụ AI lỗi sau khi đã thử lại.
 - **When**: Hệ thống kết thúc lần chạy.
-- **Then**: Lần chạy lỗi; không công bố dự toán dở dang. Bộ đếm lỗi của chặng Dự toán chỉ tăng khi AI vẫn thiếu trường bắt buộc. Kết quả bị cắt ngang và dịch vụ AI lỗi là lỗi hệ thống nên không tăng bộ đếm (BR-PROJ-011 khoản 1).
+- **Then**: Lần chạy lỗi; không công bố dự toán dở dang. Bộ đếm lỗi của chặng Dự toán chỉ tăng khi AI vẫn thiếu trường bắt buộc hoặc AI từ chối xử lý nội dung khách gửi. Kết quả bị cắt ngang và dịch vụ AI lỗi là lỗi hệ thống nên không tăng bộ đếm (BR-PROJ-011 khoản 1).
 - **And**: Khi kết quả bị cắt ngang, Admin nhận cảnh báo vận hành (Discord) để nâng giới hạn. Kết quả 2D giữ nguyên; khách được chạy lại khi chưa đạt giới hạn.
 
 #### AC-007
@@ -195,6 +195,7 @@ Dịch vụ AI báo hết tiền hoặc khóa truy cập bị từ chối.
 
 - TDD-PROJ-006
 - TDD-PROJ-008
+- TDD-PROJ-009
 
 ### Rules
 
@@ -217,7 +218,7 @@ Dịch vụ AI báo hết tiền hoặc khóa truy cập bị từ chối.
 
 - Hạn chờ chặng Dự toán mặc định 20 phút, Admin cấu hình được (BR-PROJ-012).
 - Với cùng phản hồi AI đã ghi, kết quả sau lưới an toàn của hệ thống thật phải khớp app demo ở mốc `059e876` (số dòng, thành tiền, tổng, cờ nội bộ), kể cả cách làm tròn số.
-- Prompt luật giá được bật bộ nhớ đệm phía nhà cung cấp (prompt cache) để giảm chi phí; đây là ghi chú kỹ thuật, không đổi tiêu chí; thiết kế trong TDD của đợt 2 (chưa soạn).
+- Prompt luật giá được bật bộ nhớ đệm phía nhà cung cấp (prompt cache) để giảm chi phí; đây là ghi chú kỹ thuật, không đổi tiêu chí; thiết kế ở TDD-PROJ-009.
 
 ## Out of Scope
 

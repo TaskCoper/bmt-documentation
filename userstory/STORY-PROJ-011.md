@@ -204,7 +204,7 @@ Bảng miền giá có tỉnh/thành thiếu miền.
 ## Non-Functional
 
 - Kiểm tra quyền quản trị tại backend, không chỉ ẩn thao tác trên giao diện.
-- Phiên bản nạp sẵn phải cho ra đúng 36 dải giá như app demo ở mốc `059e876`.
+- Phiên bản nạp sẵn phải cho ra đúng 41 dải giá (82 con số) như app demo ở mốc `059e876`.
 
 ## Out of Scope
 
