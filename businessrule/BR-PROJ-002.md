@@ -44,11 +44,11 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Owner**: [Chưa xác định]
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
-- **Source**: Người dùng chốt ngày 11/10/2026: giữ biểu mẫu hiện có, xử lý theo cách “Tải ảnh lô đất + mô tả” của app demo `design-estimate`; ảnh lô đất bắt buộc, JPG/PNG/WebP, tối đa 10 MB riêng cho ảnh lô, tối thiểu 640×480; mô tả tối đa 4.000 ký tự, không bắt buộc khi đã có ảnh lô; thêm số phòng ngủ 1–10 bắt buộc, có gara ô tô không bắt buộc, cạnh có cửa vào mặc định cạnh trái. Thay quy tắc trước “có ít nhất ảnh hoặc mô tả; ảnh tối đa 5 MiB; mô tả tối đa 500 ký tự”.
+- **Source**: Người dùng chốt ngày 11/10/2026: giữ biểu mẫu hiện có, xử lý theo cách “Tải ảnh lô đất + mô tả” của app demo `design-estimate`; ảnh lô đất bắt buộc, JPG/PNG/WebP, tối đa 10 MB riêng cho ảnh lô, tối thiểu 640×480; mô tả tối đa 4.000 ký tự, không bắt buộc khi đã có ảnh lô; thêm số phòng ngủ 1–10 bắt buộc, có gara ô tô không bắt buộc. Người dùng chốt ngày 12/10/2026: bỏ ô cạnh có cửa vào khỏi biểu mẫu, AI đọc cạnh mặt tiền từ ảnh lô hoặc mô tả như app demo. Thay quy tắc trước “có ít nhất ảnh hoặc mô tả; ảnh tối đa 5 MiB; mô tả tối đa 500 ký tự”.
 
 ## Statement
 
-Trước khi chạy chặng 2D, bản dự toán phải có đúng một ảnh lô đất hợp lệ và đã soi Đạt theo BR-PROJ-015, số phòng ngủ mong muốn từ 1 đến 10, và cạnh có cửa vào của lô. Mô tả chi tiết không bắt buộc, tối đa 4.000 ký tự. Ô có gara ô tô không bắt buộc. Không có trường ghi chú riêng.
+Trước khi chạy chặng 2D, bản dự toán phải có đúng một ảnh lô đất hợp lệ và đã soi Đạt theo BR-PROJ-015, và số phòng ngủ mong muốn từ 1 đến 10. Mô tả chi tiết không bắt buộc, tối đa 4.000 ký tự. Ô có gara ô tô không bắt buộc. Không có trường ghi chú riêng.
 
 ## When
 
@@ -60,10 +60,10 @@ Khách nhập hoặc sửa đầu vào, hệ thống tự lưu, hoặc kiểm tr
 2. Mô tả chi tiết không bắt buộc. Khi có, nội dung không vượt 4.000 ký tự và được dùng làm đầu vào của chặng 2D. Mô tả vượt giới hạn bị từ chối khi tạo và khi tự lưu; không tự cắt ngắn.
 3. Số phòng ngủ mong muốn là số nguyên từ 1 đến 10, bắt buộc trước khi chạy 2D. Đây là mong muốn của khách; số phòng thực tế trên phương án có thể ít hơn khi lô không đủ chỗ, và lý do được ghi trong kết quả 2D. Diện tích và cạnh tối thiểu của phòng ngủ lấy từ bộ quy tắc AI theo BR-PROJ-019.
 4. Có gara ô tô là lựa chọn có/không, mặc định không. Chọn có thì chặng 2D bố trí gara khi lô cho phép; mặt tiền tối thiểu để bố trí gara lấy từ bộ quy tắc AI theo BR-PROJ-019 (app demo dùng 4,5 m). Lô không đủ thì phương án không có gara và ghi lý do trong kết quả 2D.
-5. Cạnh có cửa vào là một trong Trái, Phải, Trên, Dưới, chọn quanh ảnh lô; mặc định Trái như app demo. Ô này luôn có giá trị.
+5. Biểu mẫu không có ô cạnh có cửa vào. Chặng 2D để AI xác định cạnh mặt tiền (cạnh có cửa vào) từ ảnh lô, như cửa, cổng, đường vẽ trên ảnh, hoặc từ mô tả của khách. Không xác định được thì dùng cạnh trái như app demo và gắn cờ nội bộ cho nhân viên rà (BR-PROJ-017); khách không phải chọn gì.
 6. Khi thay ảnh lô, giữ ảnh cũ cho tới khi ảnh mới hợp lệ, tải lên và lưu thay thế thành công. Nếu tải hoặc lưu ảnh mới thất bại, ảnh cũ vẫn là ảnh đầu vào; không báo đã thay thành công. Kết quả soi đi theo ảnh: thay ảnh thì phải có kết quả soi của ảnh mới.
 7. Sau khi thay thành công, bản dự toán chỉ có một ảnh lô là ảnh mới. Việc xử lý tệp tải tạm không có nghĩa cho phép nhiều ảnh đầu vào.
-8. Các điều kiện ở khoản 1–5 cùng với BR-PROJ-001 và BR-PROJ-004 là điều kiện đầu vào của chặng 2D; đáp ứng điều kiện này không thay thế việc kiểm tra quyền, gói và lượt.
+8. Các điều kiện ở khoản 1–4 cùng với BR-PROJ-001 và BR-PROJ-004 là điều kiện đầu vào của chặng 2D; đáp ứng điều kiện này không thay thế việc kiểm tra quyền, gói và lượt.
 
 ## Except
 
@@ -71,8 +71,9 @@ Bản dự toán được tạo nhanh chỉ với tên và tự lưu khi chưa c
 
 ## Notes
 
-- **Đã xác nhận (11/10/2026):** ảnh lô bắt buộc; JPG/PNG/WebP; tối thiểu 640×480; 10 MiB riêng cho ảnh lô (các ảnh khác giữ 5 MiB); mô tả tối đa 4.000 ký tự và không bắt buộc khi đã có ảnh lô; số phòng ngủ 1–10 bắt buộc; gara không bắt buộc; cạnh cửa vào mặc định Trái.
+- **Đã xác nhận (11/10/2026):** ảnh lô bắt buộc; JPG/PNG/WebP; tối thiểu 640×480; 10 MiB riêng cho ảnh lô (các ảnh khác giữ 5 MiB); mô tả tối đa 4.000 ký tự và không bắt buộc khi đã có ảnh lô; số phòng ngủ 1–10 bắt buộc; gara không bắt buộc.
 - **Đã xác nhận (11/10/2026):** gara mặc định không (khoản 4).
+- **Đã xác nhận (12/10/2026):** bỏ ô cạnh có cửa vào (khoản 5). Lý do: luồng “Tải ảnh lô đất + mô tả” của app demo không hiện ô này; ô “Cửa vào ở cạnh” chỉ có trong tab mô tả đã bị ẩn, và ở tab vẽ lô khách chọn cạnh bằng cách bấm lên hình. Bắt khách chọn một cạnh (mặc định Trái) khiến AI bỏ qua cửa vẽ trên ảnh lô.
 - App demo nhận nhiều ảnh, mỗi ảnh một tầng, và cho chạy chỉ với mô tả khi không có ảnh. Hệ thống thật giữ một ảnh lô cho mỗi bản dự toán và bắt buộc có ảnh.
 - Tầng thực thi: frontend tải ảnh lên kho qua URL presign; backend tự đọc nội dung ảnh từ kho để kiểm tra định dạng, dung lượng, kích thước và tính hash (BR-PROJ-015). Ảnh cũ chỉ được gỡ sau khi lưu ảnh mới thành công; dọn ảnh không còn nơi dùng theo BR-MEDIA-002.
 - Reviewer và Approver là Tân Trần theo xác nhận trong hội thoại; việc ghi tên không có nghĩa tài liệu đã được phê duyệt. Owner và ngày hiệu lực chưa xác định; chưa có kết quả kiểm thử.

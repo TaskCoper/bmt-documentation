@@ -70,7 +70,7 @@ Khách chọn Tạo dự toán mới hoặc mở lại bản dự toán đang ch
 1. Khách nhập tên bắt buộc, tối đa 200 ký tự sau khi bỏ khoảng trắng đầu/cuối, rồi tạo nhanh bằng tên. Không cần chờ bản đồ hoặc gửi kinh độ, vĩ độ theo BR-PROJ-003.
 2. Backend kiểm tên, cặp tọa độ nếu có theo BR-PROJ-003, cùng điều kiện tạo theo BR-RBAC-005 và BR-SUB-007. Khi hợp lệ, tạo bản để khách nhập tiếp; chưa có tọa độ thì lưu cả hai NULL, không tự điền số 0.
 3. Khách chọn loại công trình từ danh mục do Admin quản lý. Khách có thể nhập kích thước lô gồm mặt tiền và chiều sâu (mét) theo BR-PROJ-001; hai ô không bắt buộc.
-4. Khách tải một ảnh lô đất JPG/PNG/WebP không vượt 10 MiB, tối thiểu 640×480, theo BR-PROJ-002. Backend đọc ảnh từ kho, kiểm tra rồi cho AI soi theo BR-PROJ-015; khách thấy kết quả Đạt hoặc Không đạt kèm lý do. Khách chọn cạnh có cửa vào quanh ảnh (mặc định Trái) và có thể nhập Mô tả chi tiết không bắt buộc, tối đa 4.000 ký tự; không có trường ghi chú riêng.
+4. Khách tải một ảnh lô đất JPG/PNG/WebP không vượt 10 MiB, tối thiểu 640×480, theo BR-PROJ-002. Backend đọc ảnh từ kho, kiểm tra rồi cho AI soi theo BR-PROJ-015; khách thấy kết quả Đạt hoặc Không đạt kèm lý do. Khách không phải chọn cạnh có cửa vào: AI đọc cạnh mặt tiền từ ảnh lô hoặc mô tả khi chạy 2D (BR-PROJ-002 khoản 5). Khách có thể nhập Mô tả chi tiết không bắt buộc, tối đa 4.000 ký tự; không có trường ghi chú riêng.
 5. Khách nhập địa chỉ, số phòng ngủ mong muốn (1–10, bắt buộc trước khi chạy 2D), chọn có gara ô tô hay không và chọn gói hoàn thiện/nội thất (mặc định Tiêu chuẩn). Thông tin phong cách kiến trúc và phong cách nội thất được tách riêng; số tầng (1–4) và tum áp dụng theo cấu hình loại công trình tại BR-PROJ-004. Chỉ cho chọn những nhóm phong cách được bật theo loại; AI vẫn trả đủ kết quả dù một nhóm lựa chọn bị tắt. Trước khi gửi AI, mỗi nhóm được bật phải có đúng một phong cách hợp lệ; bản nháp vẫn được phép chưa chọn đủ.
 6. Các thay đổi được tự lưu theo BR-PROJ-003. Backend kiểm tra lại quyền truy cập, điều kiện lưu và khóa đầu vào theo BR-PROJ-005 tại từng yêu cầu; bản nháp được phép chưa đủ dữ liệu.
 7. Khi khách mở lại bản dự toán, hệ thống trả dữ liệu đã lưu thành công và cấu hình đã áp dụng cho bản dự toán để khách tiếp tục nhập. Thay đổi danh mục/cấu hình của Admin không làm mất lựa chọn hoặc thay điều kiện đầu vào của bản dự toán cũ theo BR-PROJ-004.
@@ -105,7 +105,7 @@ Khách đổi loại công trình trong bản nháp khi còn đủ điều kiệ
 
 1. Khách chọn loại khác trong danh mục đã áp dụng khi tạo bản dự toán. Không cho chọn loại được Admin thêm sau đó; muốn dùng loại mới thêm phải tạo bản dự toán mới. Đối chiếu phong cách của từng nhóm, số tầng và tum với cấu hình loại được chọn áp dụng cho bản dự toán.
 2. Giữ lựa chọn còn hợp lệ; xóa lựa chọn không phù hợp hoặc thuộc trường không áp dụng. Không chuyển phong cách kiến trúc sang nội thất hoặc ngược lại.
-3. Giữ nguyên kích thước lô, địa chỉ, ảnh lô cùng kết quả soi, mô tả, số phòng ngủ, gara và cạnh có cửa vào. Tự lưu bản nháp theo điều kiện hiện hành; khách cần chọn lại phần bắt buộc còn thiếu trước khi chạy chặng 2D.
+3. Giữ nguyên kích thước lô, địa chỉ, ảnh lô cùng kết quả soi, mô tả, số phòng ngủ và gara. Tự lưu bản nháp theo điều kiện hiện hành; khách cần chọn lại phần bắt buộc còn thiếu trước khi chạy chặng 2D.
 
 #### ALT-05
 
@@ -292,7 +292,7 @@ Cả hệ thống đã đạt trần số lần soi mới trong ngày, hoặc d�
 - **Given**: Bản dự toán ở trạng thái được sửa, có các lựa chọn phong cách, tầng/tum và khách đáp ứng điều kiện lưu.
 - **When**: Khách đổi loại công trình.
 - **Then**: Giữ lựa chọn còn hợp lệ theo cấu hình loại mới áp dụng cho bản dự toán; xóa lựa chọn không phù hợp hoặc thuộc trường không áp dụng và yêu cầu chọn lại phần bắt buộc trước khi chạy chặng 2D.
-- **And**: Giữ nguyên kích thước lô, địa chỉ, ảnh lô cùng kết quả soi, mô tả, số phòng ngủ, gara và cạnh có cửa vào; không chuyển lựa chọn giữa nhóm phong cách kiến trúc và nội thất. Bản nháp được phép chưa chọn đủ.
+- **And**: Giữ nguyên kích thước lô, địa chỉ, ảnh lô cùng kết quả soi, mô tả, số phòng ngủ và gara; không chuyển lựa chọn giữa nhóm phong cách kiến trúc và nội thất. Bản nháp được phép chưa chọn đủ.
 
 #### AC-015
 
@@ -402,9 +402,9 @@ Cả hệ thống đã đạt trần số lần soi mới trong ngày, hoặc d�
 #### AC-030
 
 - **Given**: Khách mở biểu mẫu đầu vào của bản dự toán mới.
-- **When**: Khách chưa chọn cạnh có cửa vào, gara hay gói hoàn thiện.
-- **Then**: Cạnh có cửa vào mặc định Trái, gara mặc định không, gói mặc định Tiêu chuẩn.
-- **And**: Khách đổi được cả ba lựa chọn khi bản dự toán còn được sửa.
+- **When**: Khách chưa chọn gara hay gói hoàn thiện.
+- **Then**: Gara mặc định không, gói mặc định Tiêu chuẩn. Biểu mẫu không có ô cạnh có cửa vào; AI đọc cạnh mặt tiền từ ảnh lô hoặc mô tả, không đọc được thì dùng cạnh trái và gắn cờ nội bộ (BR-PROJ-002 khoản 5).
+- **And**: Khách đổi được cả hai lựa chọn khi bản dự toán còn được sửa.
 
 #### AC-031
 

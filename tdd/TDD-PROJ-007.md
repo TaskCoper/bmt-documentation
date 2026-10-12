@@ -53,7 +53,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ### Problem
 
-Chặng đầu tiên của luồng bốn chặng (TDD-PROJ-006) cần đầu vào mà biểu mẫu hiện tại chưa có: ảnh lô đất bắt buộc và đã được AI soi, số phòng ngủ, gara, cạnh có cửa vào, kích thước lô thay cho Diện tích (BR-PROJ-001, 002, 015). Danh mục phải gắn mã gốc của app demo và mô tả cho AI (BR-PROJ-004 khoản 19–24). Sau đó chặng 2D phải lập phương án và vẽ bản vẽ đúng như app demo `design-estimate` ở commit `059e876`, prompt `2d-13`, quy tắc soi ảnh `drawing-v12` (STORY-PROJ-002).
+Chặng đầu tiên của luồng bốn chặng (TDD-PROJ-006) cần đầu vào mà biểu mẫu hiện tại chưa có: ảnh lô đất bắt buộc và đã được AI soi, số phòng ngủ, gara, kích thước lô thay cho Diện tích (BR-PROJ-001, 002, 015). Danh mục phải gắn mã gốc của app demo và mô tả cho AI (BR-PROJ-004 khoản 19–24). Sau đó chặng 2D phải lập phương án và vẽ bản vẽ đúng như app demo `design-estimate` ở commit `059e876`, prompt `2d-13`, quy tắc soi ảnh `drawing-v12` (STORY-PROJ-002).
 
 Hiện trạng mã (đối chiếu 11/10/2026): `Estimate` có `AreaM2 numeric(28,2)`, `Description varchar(500)`, `InputImageUrl`; `EstimateInputPolicy.FindMissingForGeneration` đòi diện tích và "ảnh hoặc mô tả"; upload ảnh dùng purpose `Image` tối đa 5 MiB (TDD-MEDIA-001); app demo chạy 2D qua hai endpoint (`/api/plan2d/generate` vẽ bản kỹ thuật, `/api/plan2d/furniture` vẽ bản nội thất), tuần tự từng tầng, mỗi lần gọi một project mới. Mọi bảng, lớp và API dưới đây là thiết kế đề xuất.
 
@@ -97,8 +97,8 @@ flowchart TD
 
 **A. Đầu vào mới trên `Estimate` và hợp đồng lưu**
 
-- Thêm cột `LotFrontageM`, `LotDepthM` (`numeric(6,2)`, NULL), `EntranceSide` (NN, mặc định `Left`), `DesiredBedrooms` (int NULL), `HasGarage` (bool NN, mặc định false), `LotVerificationId` (uuid NULL). `Description` nới tới 4000 ký tự (Rune). `AreaM2` giữ nguyên cột và dữ liệu cũ để tra cứu, nhưng luồng bốn chặng không đọc và không đòi (BR-PROJ-001 Except). Bản mới tạo có `FinishPackage='Standard'` (BR-PROJ-004 khoản 23).
-- `EstimateInputDto` thêm `lotFrontageM`, `lotDepthM` (chuỗi thập phân như `areaM2`, tối đa 2 chữ số lẻ, > 0), `entranceSide` (`Left|Right|Top|Bottom`), `desiredBedrooms` (1–10), `hasGarage`. Các tên này vào `EstimateInputFields`, nên `changedFields` và hash chống gửi lặp tự bao phủ. Validator giữ kiểu kiểm hiện có: sai dạng trả 422 `InvalidEstimateInput` theo trường. Hai ô kích thước lô không có ràng buộc "đi cùng" ở bước lưu, vì bản nháp được dở dang (BR-PROJ-001 khoản 4); ràng buộc nằm ở bước kiểm trước 2D.
+- Thêm cột `LotFrontageM`, `LotDepthM` (`numeric(6,2)`, NULL), `EntranceSide` (NULL, không có mặc định; biểu mẫu không có ô này, AI đọc cạnh mặt tiền từ ảnh lô hoặc mô tả — BR-PROJ-002 khoản 5, chốt 12/10/2026), `DesiredBedrooms` (int NULL), `HasGarage` (bool NN, mặc định false), `LotVerificationId` (uuid NULL). `Description` nới tới 4000 ký tự (Rune). `AreaM2` giữ nguyên cột và dữ liệu cũ để tra cứu, nhưng luồng bốn chặng không đọc và không đòi (BR-PROJ-001 Except). Bản mới tạo có `FinishPackage='Standard'` (BR-PROJ-004 khoản 23).
+- `EstimateInputDto` thêm `lotFrontageM`, `lotDepthM` (chuỗi thập phân như `areaM2`, tối đa 2 chữ số lẻ, > 0), `entranceSide` (`Left|Right|Top|Bottom` hoặc null; không bắt buộc, frontend không gửi; giữ trong hợp đồng như API của app demo), `desiredBedrooms` (1–10), `hasGarage`. Các tên này vào `EstimateInputFields`, nên `changedFields` và hash chống gửi lặp tự bao phủ. Validator giữ kiểu kiểm hiện có: sai dạng trả 422 `InvalidEstimateInput` theo trường. Hai ô kích thước lô không có ràng buộc "đi cùng" ở bước lưu, vì bản nháp được dở dang (BR-PROJ-001 khoản 4); ràng buộc nằm ở bước kiểm trước 2D.
 - `EstimateInputPolicy.FindMissingForStage(Plan2d, state, catalog, rules)` thay `FindMissingForGeneration` khi luồng mới bật. Trả danh sách trường thiếu: `inputImageUrl`, `lotVerification` (chưa Đạt hoặc không khớp ảnh hiện tại), `desiredBedrooms`, `lotSize` (chỉ có một ô), địa chỉ và tọa độ như cũ, `buildingTypeId`, `finishPackage`, số tầng, tum, phong cách theo nhóm bật, `catalogMapping` (loại hoặc phong cách chưa gắn mã gốc, hoặc phong cách nội thất thiếu mô tả cho AI), `pricingRegion` (tỉnh không có trong bảng miền giá). Không còn đòi `areaM2` hay `imageOrDescription`.
 - **Kiểm lô trước khi giữ lượt (người dùng xác nhận 11/10/2026, BR-PROJ-001 khoản 8):** app demo từ chối lô ngoài giới hạn trước khi gọi AI (cạnh 2,5–120 m, diện tích 12–5.000 m²). Thiết kế đặt kiểm này trong `FindMissingForStage` với giới hạn đọc từ bộ quy tắc theo mã gốc; lô sai trả 422 `InvalidStageInput` trường `lotSize`, không giữ lượt. Khách biết sớm và không tốn một lần chạy.
 - `SaveEstimateInputCommandHandler` giữ thứ tự kiểm cũ; `EnsureInputUnlocked` dùng `IsInputLocked` của TDD-PROJ-006. Khi `inputImageUrl` đổi, `LotVerificationId` được đặt NULL cùng lần lưu (kết quả soi đi theo ảnh, BR-PROJ-002 khoản 6).
@@ -141,7 +141,7 @@ Người dùng chốt ngày 12/10/2026: soi ảnh bất đồng bộ qua RabbitM
 
 **E. Bản chụp đầu vào phiên bản 3**
 
-`EstimateGenerationInput.Payload` (SchemaVersion=3) chụp lúc tiếp nhận 2D, gồm: `estimateId, inputVersion, catalogRevisionId, buildingType{id,name,baseCode}, architectureStyle{id,name,baseStyleCode}|null, interiorStyle{id,name,promptDescriptor}|null, effectiveBaseStyleCode, finishPackage, floorCount, hasTum, description, lot{frontageM,depthM}|null, entranceSide, desiredBedrooms, hasGarage, address{…như v2, có latitude, longitude}, pricingRegion{region,highland,tableVersion}, lotImage{url,objectKey,sha256,width,height,verificationId}`. Không có tên bản dự toán. `MediaSourceReader` thêm `InputV3` vào CASE và `MediaTextExtractor` đọc `lotImage.url`, như V1/V2 đọc `inputImageUrl`.
+`EstimateGenerationInput.Payload` (SchemaVersion=3) chụp lúc tiếp nhận 2D, gồm: `estimateId, inputVersion, catalogRevisionId, buildingType{id,name,baseCode}, architectureStyle{id,name,baseStyleCode}|null, interiorStyle{id,name,promptDescriptor}|null, effectiveBaseStyleCode, finishPackage, floorCount, hasTum, description, lot{frontageM,depthM}|null, entranceSide|null, desiredBedrooms, hasGarage, address{…như v2, có latitude, longitude}, pricingRegion{region,highland,tableVersion}, lotImage{url,objectKey,sha256,width,height,verificationId}`. Không có tên bản dự toán. `MediaSourceReader` thêm `InputV3` vào CASE và `MediaTextExtractor` đọc `lotImage.url`, như V1/V2 đọc `inputImageUrl`.
 
 **F. Chặng 2D: `Plan2dStageExecutor`**
 
@@ -149,7 +149,7 @@ Executor ghép hai endpoint của app demo thành một lần chạy, giữ đú
 
 | Bước (StepKey) | Việc | Nguồn trong app demo | Gọi AI |
 |---|---|---|---|
-| `job` | Dựng Job từ bản chụp: chuẩn hóa văn bản, đọc mô tả (`BriefReader`), lô của khách (`CustomerLot`), cạnh cửa vào, lô đề xuất khi mô tả không nêu lô | `service.normalize_request`, `inputs.customer_lot`, `brief.read_brief` | Không |
+| `job` | Dựng Job từ bản chụp: chuẩn hóa văn bản, đọc mô tả (`BriefReader`), lô của khách (`CustomerLot`), cạnh cửa vào nếu có (rỗng thì để AI đọc từ ảnh lô, không đọc được dùng cạnh trái kèm cờ `entrance_side_default`), lô đề xuất khi mô tả không nêu lô | `service.normalize_request`, `inputs.customer_lot`, `brief.read_brief` | Không |
 | `spec` | Lập phương án `HouseSpec` bằng Responses API json_schema, ảnh lô làm ảnh tham chiếu; sau đó chạy `SpecRuleEngine` (17 luật theo đúng thứ tự `enforce_spec_rules`), đếm lại phòng ngủ/WC, ghi đè trường lấy từ Job | `service.build_spec`, `enforce_spec_rules`, `lot_rules.*` | 1 lần (có thử lại trong lớp AI) |
 | `plan:technical:f{n}` | Vẽ bản vẽ kỹ thuật từng tầng, từ tầng 1 lên. Tầng 1: không có ảnh tham chiếu, vẽ theo phương án đã lập. Ảnh lô chỉ được gửi ở bước `spec`, giống app demo; app demo chỉ đính ảnh của khách vào bản vẽ tầng 1 khi ảnh đó là mặt bằng do khách vẽ, việc này nằm ngoài luồng sản phẩm. Tầng trên: bản kỹ thuật các tầng dưới | `service.render_floor_image`, `gate.generate_checked`, `prompts.technical_prompt` | 1 lần mỗi tầng, +1 khi vẽ lại |
 | `plan:furniture:f{n}` | Vẽ bản nội thất từng tầng; tham chiếu bản kỹ thuật của tầng và bản nội thất các tầng dưới; prompt có mức đồ đạc theo gói và mô tả cho AI của phong cách nội thất | `service.draw_all_floors(furniture)`, `prompts.furniture_prompt` | 1 lần mỗi tầng, +1 khi vẽ lại |
@@ -280,7 +280,7 @@ Chỉ `Processing → Failed` mới có thể trả suất hạn mức (khi `Quo
 
 | Bảng | Cột, null và ràng buộc |
 |---|---|
-| Estimate — cột mới | LotFrontageM numeric(6,2) NULL CHECK NULL OR > 0; LotDepthM numeric(6,2) NULL CHECK NULL OR > 0; EntranceSide varchar(8) NN DEFAULT 'Left' CHECK IN ('Left','Right','Top','Bottom'); DesiredBedrooms int NULL CHECK NULL OR BETWEEN 1 AND 10; HasGarage boolean NN DEFAULT false; LotVerificationId uuid NULL FK (OwnerId, LotVerificationId) → EstimateLotVerification(AccountId, Id). Description đổi varchar(4000). |
+| Estimate — cột mới | LotFrontageM numeric(6,2) NULL CHECK NULL OR > 0; LotDepthM numeric(6,2) NULL CHECK NULL OR > 0; EntranceSide varchar(8) NULL CHECK NULL OR IN ('Left','Right','Top','Bottom'); DesiredBedrooms int NULL CHECK NULL OR BETWEEN 1 AND 10; HasGarage boolean NN DEFAULT false; LotVerificationId uuid NULL FK (OwnerId, LotVerificationId) → EstimateLotVerification(AccountId, Id). Description đổi varchar(4000). |
 | CatalogBuildingType — cột mới | BaseCode varchar(32) NULL CHECK NULL OR IN (5 mã); DefaultBaseStyleCode varchar(64) NULL. |
 | CatalogStyle — cột mới | BaseStyleCode varchar(64) NULL; PromptDescriptor varchar(1000) NULL CHECK NULL OR "PromptDescriptor" ~ '[^[:space:]]'; CHECK Group='Architecture' OR BaseStyleCode IS NULL; CHECK Group='Interior' OR PromptDescriptor IS NULL. |
 | CatalogFloor | CHECK FloorCount BETWEEN 1 AND 4 (thay CHECK ≥ 1). |
@@ -309,7 +309,7 @@ erDiagram
 
 | Bảng | Bước | Giá trị |
 |---|---|---|
-| Estimate | Trước | D1; InputVersion=7; InputImageUrl=NULL; LotFrontageM=NULL; LotDepthM=NULL; EntranceSide=Left; DesiredBedrooms=NULL; HasGarage=false; FinishPackage=Standard; LotVerificationId=NULL |
+| Estimate | Trước | D1; InputVersion=7; InputImageUrl=NULL; LotFrontageM=NULL; LotDepthM=NULL; EntranceSide=NULL; DesiredBedrooms=NULL; HasGarage=false; FinishPackage=Standard; LotVerificationId=NULL |
 | Estimate | PUT input lưu ảnh và 3 phòng ngủ (02:50) | InputVersion=8; InputImageUrl=https://cdn.example.test/estimates/lot/9f2c.jpg; DesiredBedrooms=3; LotVerificationId=NULL |
 | EstimateLotVerificationRequest | Khách bấm soi (02:50:30); consumer nhận việc ở Tx A (02:50:31) | Id=VR1; AccountId=U1; EstimateId=D1; ImageUrl=…/9f2c.jpg; State=Pending → Processing; ProcessingSince=02:50:31; Attempts=1; QuotaHeld=false; RequestedAtUtc=02:50:30; DeadlineUtc=02:52:00. Outbox có một dòng `LotVerificationRequested(VR1)` cùng commit |
 | EstimateLotVerificationDailyUsage | Tx B: không thấy kết quả cũ, giữ suất (02:50:32, tức 09:50 giờ VN) | U1, DayVn=2026-10-11, Count=1; VR1: QuotaHeld=true; QuotaDayVn=2026-10-11 |
@@ -335,7 +335,7 @@ Nhánh dùng lại kết quả soi: U1 tạo bản D2, tải đúng ảnh đó �
 
 ### Endpoints
 
-- **PUT** `/api/v1/estimates/{estimateId}/input` — Như TDD-PROJ-001; `input` thêm `lotFrontageM`, `lotDepthM`, `entranceSide`, `desiredBedrooms`, `hasGarage`; `description` tối đa 4000.
+- **PUT** `/api/v1/estimates/{estimateId}/input` — Như TDD-PROJ-001; `input` thêm `lotFrontageM`, `lotDepthM`, `entranceSide` (không bắt buộc), `desiredBedrooms`, `hasGarage`; `description` tối đa 4000.
 - **POST** `/api/v1/estimates/{estimateId}/lot-verifications` — Khách là chủ bản; gửi yêu cầu soi ảnh lô đang gắn với bản; bất đồng bộ. 202 với `{requestId, state:"Pending"}`; đã có yêu cầu Pending cho đúng ảnh thì 200 với yêu cầu đó.
 - **GET** `/api/v1/estimates/{estimateId}/lot-verifications/current` — Yêu cầu soi mới nhất cho ảnh hiện tại: `Pending`, `Completed` kèm kết quả (`verdict`, `issues`, `reason`, `reused`, `remainingToday`), hoặc `Failed` kèm `failureCode`; chưa từng soi thì 404 `LotVerificationRequired`.
 - **POST** `/api/v1/media/uploads` — Như TDD-MEDIA-001; purpose `EstimateLotImage` bắt buộc kèm `estimateId`.
@@ -463,3 +463,4 @@ Theo TDD-PROJ-008: thử lại 2 → 4 → 8 giây khi 429/5xx/lỗi mạng, tô
 - 2026-10-12 (sửa theo bản rà soát độc lập): Soi ảnh lô bất đồng bộ; consumer làm ba transaction ngắn (Tx A nhận việc, Tx B tra kết quả cũ và giữ suất, Tx C lưu kết quả), gọi AI ngoài transaction, tắt inbox MassTransit cho riêng endpoint này. Bảng yêu cầu soi thêm trạng thái `Processing`, `ProcessingSince`, `Attempts`; trả suất chỉ khi `QuotaHeld` đổi true→false. Kết quả soi được dùng lại theo (tài khoản, hash ảnh, `PromptHash`, `RequestedModel`), lưu thêm `ModelUsed`. Cập nhật sơ đồ tuần tự, thêm sơ đồ trạng thái của yêu cầu soi.
 - 2026-10-12 (câu trả lời sau rà soát): Thêm trần soi ảnh chung của cả hệ thống mỗi ngày: bảng `EstimateLotVerificationSystemDailyUsage`, giữ suất chung cùng Tx B, trả suất cùng lúc với suất tài khoản, cảnh báo khi đạt 80%. Gửi yêu cầu soi kiểm nhanh tạm ngắt và trần chung (503 `AiServiceUnavailable`, `LotVerificationBusy`). Thêm mã lỗi yêu cầu soi `LotVerificationBusy`.
 - 2026-10-12 (khi triển khai đợt 1): Bản kỹ thuật tầng 1 không dùng ảnh lô làm ảnh tham chiếu, theo đúng app demo (ảnh lô chỉ gửi ở bước `spec`). Executor ghi đủ bước `job` và `result`; HouseSpec sai cấu trúc thì gọi lại một lần như `generate_json` của app demo.
+- 2026-10-12 (người dùng chốt khi thử local): Bỏ ô cạnh có cửa vào khỏi biểu mẫu như app demo; `EntranceSide` cho phép NULL, không mặc định (migration `EstimateEntranceSideOptional` đưa giá trị mặc định `Left` cũ về NULL); bản chụp v3 mang `entranceSide` rỗng để AI đọc cạnh mặt tiền từ ảnh lô hoặc mô tả.
