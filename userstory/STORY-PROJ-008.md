@@ -75,7 +75,7 @@ Khách bấm Tạo dự toán ở chặng Dự toán, hoặc bấm Chạy lại 
 5. Hệ thống áp dụng các lưới an toàn của app demo: hỏi lại AI khi thiếu trường bắt buộc; kiểm tra dòng 0 đồng, khối lượng lệch so với hình học, đơn giá so với sàn và trần của dải giá; tự nâng đơn giá khi dưới sàn. Cờ và ghi chú phát sinh được lưu nội bộ theo BR-PROJ-017.
 6. Hệ thống lọc nội dung nội bộ khỏi phần gửi khách, rồi lưu kết quả gồm phần gửi khách và phần nội bộ.
 7. Khi kết quả đủ trường bắt buộc và đã lưu, chặng Dự toán thành công. Chặng Phối cảnh 3D chuyển sang Sẵn sàng; hệ thống không tự chạy tiếp.
-8. Khách xem kết quả: tổng dự toán, đơn giá trên m² sàn quy đổi, ba phần thô, hoàn thiện, nội thất với từng dòng (hạng mục, đơn vị, khối lượng, đơn giá, thành tiền, hãng vật tư nếu có), thời gian thi công dự kiến và nội dung tư vấn.
+8. Khách xem kết quả: tổng dự toán, đơn giá trên m² sàn quy đổi, ba phần thô, hoàn thiện, nội thất với từng dòng (hạng mục, đơn vị, khối lượng, đơn giá, thành tiền), thời gian thi công dự kiến và nội dung tư vấn. Màn không hiện hãng vật tư, giống app demo; hãng chỉ có trong tệp Excel của chặng Hồ sơ (người dùng chốt ngày 12/10/2026).
 
 ### Alternative Flow
 
