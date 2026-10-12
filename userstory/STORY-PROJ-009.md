@@ -171,6 +171,7 @@ Lần chạy quá hạn chờ (mặc định 40 phút).
 
 - TDD-PROJ-006
 - TDD-PROJ-008
+- TDD-PROJ-010
 
 ### Rules
 
