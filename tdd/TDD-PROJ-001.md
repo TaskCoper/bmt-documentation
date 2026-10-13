@@ -59,7 +59,7 @@ Hiện trạng lúc thiết kế ngày 21/09/2026: .NET 8, EF Core/Npgsql 8.0.0,
 
 Hiện trạng code kiểm lại ngày 26/09/2026: thiết kế này đã được triển khai và merge vào `develop` của `bmt-be` (commit `a557993`), trừ các phần ghi ở mục "Phần chưa triển khai" trong Notes của Architecture. Migration `EstimateCatalogAndDraft` tạo mười bảng của Data Model, seed dòng `EstimateCatalog` và quyền `estimate.catalog.manage` cho vai trò `admin`. Khóa thương mại dùng `DesignSubscriptionStore.LockAccountAsync` hiện có (khóa `AccountCommerceState`, commit `a53faeb`). Migration chưa được áp dụng lên database dùng chung. Bốn quyết định bổ sung ngày 26/09/2026 (lần 2) ở đoạn dưới được triển khai trên nhánh `feature/estimate-followups` (tách từ `develop` tại `de3c61f`), không đổi schema và không thêm migration; nay đã có trên `develop` ở commit `388a426` (đối chiếu ngày 28/09/2026).
 
-**Đã xác nhận**: tạo bằng tên, tự lưu bản nháp chưa đủ; một diện tích chung; một ảnh hoặc mô tả; cấu hình tầng/tum và hai nhóm phong cách; giữ toàn bộ danh mục của bản cũ; kiểm tra quyền/quota khi tạo và lưu nhưng không giữ/trừ lượt. Bổ sung ngày 21/09/2026: tên loại công trình/phong cách có nội dung sau trim, tối đa 200 ký tự, cho phép trùng tên. Bổ sung ngày 25/09/2026: chủ sở hữu đổi tên bản dự toán bất cứ lúc nào, kể cả khi gói hết hạn, hết lượt, toàn bộ lượt còn lại đang giữ hoặc AI đang xử lý; chỉ cần quyền sở hữu và tên hợp lệ. Tên không phải đầu vào gửi AI (BR-SUB-007 khoản 11, BR-PROJ-003 khoản 9). Quyền quản trị danh mục là `estimate.catalog.manage`, không gắn phân công (STORY-RBAC-001/Preconditions). Bổ sung ngày 26/09/2026 về tệp và ảnh: frontend xin URL upload từ dịch vụ presigned URL, tự upload tệp lên URL đó rồi gửi URL của tệp cho backend; backend chỉ lưu URL, không nhận bytes, không làm kho lưu trữ và không tạo presigned URL. Frontend kiểm định dạng và dung lượng ảnh (ảnh đầu vào JPG/PNG/HEIC tối đa 10 MB theo BR-PROJ-002 khoản 6; ảnh phong cách JPG/PNG/WebP tối đa 5 MB theo BR-PROJ-004 khoản 15). Backend kiểm URL là URL tuyệt đối dùng https; điều kiện "không giới hạn tên miền" của lần xác nhận này đã được thay bằng quyết định lần 2 bên dưới. Người dùng chấp nhận ảnh đầu vào của khách nằm ở URL công khai. Khi làm việc với AI service (TDD-PROJ-002, TDD-PROJ-003), AI trả URL các tệp kết quả và backend lưu các URL đó.
+**Đã xác nhận**: tạo nhanh bằng tên, tọa độ có thể bổ sung sau (điều chỉnh 01/10/2026), tự lưu bản nháp chưa đủ các trường còn lại; một diện tích chung; một ảnh hoặc mô tả; cấu hình tầng/tum và hai nhóm phong cách; giữ toàn bộ danh mục của bản cũ; kiểm tra quyền/quota khi tạo và lưu nhưng không giữ/trừ lượt. Bổ sung ngày 21/09/2026: tên loại công trình/phong cách có nội dung sau trim, tối đa 200 ký tự, cho phép trùng tên. Bổ sung ngày 25/09/2026: chủ sở hữu đổi tên bản dự toán bất cứ lúc nào, kể cả khi gói hết hạn, hết lượt, toàn bộ lượt còn lại đang giữ hoặc AI đang xử lý; chỉ cần quyền sở hữu và tên hợp lệ. Tên không phải đầu vào gửi AI (BR-SUB-007 khoản 11, BR-PROJ-003 khoản 9). Quyền quản trị danh mục là `estimate.catalog.manage`, không gắn phân công (STORY-RBAC-001/Preconditions). Bổ sung ngày 26/09/2026 về tệp và ảnh: frontend xin URL upload từ dịch vụ presigned URL, tự upload tệp lên URL đó rồi gửi URL của tệp cho backend; backend chỉ lưu URL, không nhận bytes, không làm kho lưu trữ và không tạo presigned URL. Frontend kiểm định dạng và dung lượng ảnh (ảnh đầu vào JPG/PNG/HEIC tối đa 10 MB theo BR-PROJ-002 khoản 6; ảnh phong cách JPG/PNG/WebP tối đa 5 MB theo BR-PROJ-004 khoản 15). Backend kiểm URL là URL tuyệt đối dùng https; điều kiện "không giới hạn tên miền" của lần xác nhận này đã được thay bằng quyết định lần 2 bên dưới. Người dùng chấp nhận ảnh đầu vào của khách nằm ở URL công khai. Khi làm việc với AI service (TDD-PROJ-002, TDD-PROJ-003), AI trả URL các tệp kết quả và backend lưu các URL đó.
 
 **Đã xác nhận ngày 26/09/2026 (lần 2)**:
 
@@ -72,6 +72,7 @@ Hiện trạng code kiểm lại ngày 26/09/2026: thiết kế này đã đư�
 
 ### Goals
 
+- Tạo nhanh không bắt buộc kinh độ, vĩ độ. Khi đổi địa chỉ, lưu địa chỉ và đủ cặp tọa độ trong cùng transaction; lỗi không để lại địa chỉ mới đi với tọa độ cũ.
 - Tạo/lưu không làm thay quota; kiểm quyền và ghi đầu vào trong cùng giao dịch database.
 - Mỗi bản giữ đúng phiên bản danh mục đã chọn lúc tạo; Admin không sửa lịch sử đang được bản cũ sử dụng.
 - Yêu cầu đến muộn hoặc từ tab khác không âm thầm ghi đè đầu vào đã lưu; đầu vào không sửa được khi AI đang chạy hoặc đã thành công.
@@ -81,11 +82,61 @@ Hiện trạng code kiểm lại ngày 26/09/2026: thiết kế này đã đư�
 ### Non-goals
 
 - Viết frontend, triển khai code/migration, tạo phong cách mẫu, chạy AI hoặc gửi email thật trong tác vụ thiết kế.
-- Liên kết bản dự toán với Công trình (`ConstructionSite`, thực thể riêng do khách tạo cho gói giám sát, đặc tả ở STORY-SITE-001 và [TDD-SITE-001](TDD-SITE-001.md); STORY-SITE-001/Out of Scope không gắn công trình với bản dự toán) hoặc với gói giám sát; xóa/ngừng dùng danh mục; chuyển bản cũ sang danh mục mới.
+- Liên kết trực tiếp bản dự toán với gói giám sát; xóa/ngừng dùng danh mục; chuyển bản cũ sang danh mục mới. Liên kết nguồn dự toán của Công trình đã được bổ sung tại [TDD-SITE-003](TDD-SITE-003.md), không thuộc phần tạo bản nháp của TDD này.
 - Nhật ký riêng cho thao tác đổi tên bản dự toán (chưa có yêu cầu).
 - Thêm ghi chú riêng, bảng đơn giá, công thức dự toán hoặc quyền AI theo cờ phong cách.
 
 ## Architecture
+
+**Đầu vào luồng bốn chặng, ngày 11/10/2026 — thiết kế, chưa triển khai:** các cột đầu vào mới của `Estimate` (kích thước lô, cạnh cửa vào để trống mặc định, số phòng ngủ, gara, kết quả soi ảnh), mô tả 4.000 ký tự, mã gốc và mô tả cho AI của danh mục, số tầng 1–4, purpose upload `EstimateLotImage` và kiểm đầu vào trước chặng 2D được thiết kế ở [TDD-PROJ-007](TDD-PROJ-007.md) mục A–C. Tự lưu, changedFields, receipt, khóa và revision danh mục của tài liệu này giữ nguyên; khóa đầu vào tính theo lần chạy chặng 2D ([TDD-PROJ-006](TDD-PROJ-006.md)).
+
+**Mã dự toán, ngày 07/10/2026 — người dùng chốt, backend đang triển khai cùng ngày:** theo BR-PROJ-003 khoản 12, `CreateEstimateCommandHandler` cấp `Estimate.Code` dạng `BUILDX-YYYYMMDD-XXXXXX` trong cùng transaction tạo bản, sau các bước kiểm quyền/gói/lượt hiện có. Bộ sinh mã dùng chung `BuildXCodes` (domain) cho mã dự toán, mã hồ sơ công trình và mã chuyển khoản: ngày lấy từ thời điểm tạo do server ghi, đổi sang giờ Việt Nam bằng độ lệch cố định +07:00 (Việt Nam không có giờ mùa hè); 6 ký tự ngẫu nhiên lấy bằng bộ sinh số ngẫu nhiên mật mã từ bảng 31 ký tự `ABCDEFGHJKMNPQRSTUVWXYZ23456789` (bỏ 0, O, 1, I, L). 31^6 ≈ 887 triệu giá trị mỗi ngày nên va chạm rất hiếm; handler vẫn kiểm trùng rồi sinh lại tối đa 5 lần (`BuildXCodeAllocator`), và unique index là lớp chặn cuối khi hai yêu cầu song song cùng nhận một mã. Hết 5 lần vẫn trùng thì trả 503 `DependencyUnavailable` và không tạo bản. Gửi lại cùng Idempotency-Key trả `code` của bản đã tạo, không sinh mã mới. Mã không thuộc hash chống gửi lặp và không nằm trong snapshot gửi AI. Đổi tên, lưu đầu vào và xóa mềm không sửa cột này; không có API sửa mã.
+
+**Dùng danh mục và đầu vào hoàn tất cho công trình, ngày 01/10/2026 — backend đã triển khai; xem [báo cáo](../discovery/construction-site-implementation.md):** [TDD-SITE-003](TDD-SITE-003.md) dùng cùng identity/revision catalog và FK tới Estimate/EstimateGenerationInput. SITE lấy snapshot của operation Succeeded, không lấy kết quả AI làm diện tích/ngân sách và không dùng lượt. SITE có policy bắt buộc riêng; BR-PROJ-004 vẫn từ chối nhóm bật nhưng danh sách rỗng khi Admin lưu catalog. Danh mục cũ được giữ vì site có thể tham chiếu ngay cả khi không còn Estimate dùng revision đó. Xóa nguồn bị chặn theo [TDD-PROJ-005](TDD-PROJ-005.md). Quyền xem công trình không cấp quyền đọc kết quả dự toán riêng của khách.
+
+**Bổ sung tọa độ ngày 01/10/2026 — đã triển khai backend trên nhánh `feature/estimate-coordinates`:** người dùng đã chốt STORY-PROJ-001/AC-021 đến AC-024, BR-PROJ-003 khoản 10–11 và BR-PROJ-004 khoản 18. Điều chỉnh tạo nhanh ngày 01/10/2026: POST chỉ cần tên, được bỏ cả cặp tọa độ hoặc gửi cả hai null; không chờ bản đồ. Đổi địa chỉ vẫn phải lấy lại và gửi đủ cặp. Code đã nhận và lưu cặp tọa độ, bổ sung validation, hash, GET và snapshot v2. Migration `20261001093238_EstimateCoordinates` đã kiểm trên PostgreSQL tạm, chưa áp dụng DB dùng chung. FE/bản đồ chưa triển khai trong tác vụ này. Xem [bàn giao tọa độ](../discovery/estimate-coordinates-implementation.md) để biết payload và phạm vi kiểm thử.
+
+**Contract tọa độ và trách nhiệm**:
+
+| Thành phần | Thay đổi tọa độ đã triển khai |
+|---|---|
+| `EstimateApi.CreateRequest`, `Command.CreateEstimateCommand` | Nhận thêm `latitude`, `longitude`; C# `double?` ở request để phân biệt thiếu với số 0. POST vẫn nhận tên và Idempotency-Key, không nhận owner hoặc địa chỉ dưới dạng tên do client tự khai. |
+| `EstimateInputDto`, `Response.EstimateInputView`, `EstimateInputState`, `EstimateInputFields` | Thêm hai trường cùng tên JSON. PUT tiếp tục gửi toàn bộ input; GET trả tọa độ trong `value.input`. Bổ sung ánh xạ From/ApplyTo và query để không mất tọa độ khi lưu trường khác. |
+| `CreateEstimateCommandValidator`, `SaveEstimateInputCommandValidator` | Cho phép cả hai null; nếu có giá trị thì kiểm đủ cặp, `double.IsFinite` và miền; lỗi theo `latitude`/`longitude` khi tạo, `input.latitude`/`input.longitude` khi lưu. Không dùng NotEmpty cho số vì 0 hợp lệ. |
+| `CreateEstimateCommandHandler` | Băm tên đã trim cùng hai tọa độ đã chuẩn hóa; ghi hai cột cùng Estimate và receipt. Không gọi bản đồ từ backend. |
+| `EstimateInputPolicy`, `SaveEstimateInputCommandHandler` | Kiểm cặp tọa độ trong changedFields, phát hiện địa chỉ thực sự đổi, áp địa chỉ/tọa độ cùng lần lưu; hash bao gồm hai tọa độ. Giữ kiểm gói, khóa AI, version và quyền hiện hành. |
+| `Estimate`, `EstimateConfiguration` | Hai cột nullable, CHECK miền và CHECK cùng null hoặc cùng có giá trị; không thêm bảng, quan hệ hoặc chỉ mục tọa độ. |
+| `EstimateGenerationInputFactory`, `RequestEstimateGenerationCommandHandler` | Đóng băng tọa độ đã lưu vào snapshot nội bộ v2 theo TDD-PROJ-002, kiểm hợp lệ trước giữ lượt. Không đổi contract của nhà cung cấp AI chưa tích hợp. |
+
+Tọa độ dùng WGS84 theo độ: `latitude` trong [-90,90], `longitude` trong [-180,180], nhận cả hai đầu mút và (0,0). JSON phải là number hữu hạn; không chuỗi số, boolean, array hoặc object. Dùng `JsonNumberHandling.Strict` trên hai thuộc tính request để không nhận chuỗi số theo mặc định web. Bỏ cả hai hoặc gửi cả hai null được tạo nhanh; chỉ có một giá trị hoặc số ngoài miền trả 422 `InvalidEstimateInput`. Khi lưu, policy vẫn bắt đủ tọa độ nếu địa chỉ đổi, có khai báo sửa tọa độ hoặc bản đã có tọa độ. Sai kiểu JSON, chuỗi rỗng, JSON sai cú pháp hoặc số không bind được trả 400 theo lớp binding hiện hành, không vào handler. Không tự làm tròn theo số chữ số thập phân cố định, không kẹp giá trị vào miền, không dùng 0 làm mặc định khi thiếu.
+
+**Đổi địa chỉ và changedFields:** sau kiểm phiên bản và `FindUnrequestedChanges`, policy tính địa chỉ sẽ lưu theo quy tắc hiện có (đổi tỉnh có thể xóa xã). So sánh `ProvinceCode`, `WardCode`, `AddressDetail` của kết quả đó với bản đang lưu. Bất kỳ giá trị nào khác, kể cả null ↔ có giá trị, đều là đổi địa chỉ. Chỉ đổi `LocationDatasetVersion` hoặc tên tỉnh/xã do nguồn đổi tên không tự coi là đổi vị trí.
+
+- Khi địa chỉ đổi, `changedFields` phải có cả `latitude` và `longitude`, dù bản đồ trả đúng cặp số cũ. Chỉ có tọa độ trong full input mà không khai báo cặp trong changedFields không chứng minh đây là cặp vừa xác định cho địa chỉ mới: trả 422 với lỗi `changedFields`.
+- Khi chỉ một tên tọa độ xuất hiện trong changedFields, từ chối 422; cập nhật cặp phải là một thao tác. Khi cả hai xuất hiện, áp cả hai giá trị hợp lệ. Không thêm endpoint chỉ cập nhật một tọa độ.
+- Khi không sửa địa chỉ và không khai báo cặp tọa độ, full input giữ cặp đã đọc từ GET, kể cả cả hai null ở bản tạo nhanh; policy kiểm khớp bản đã lưu rồi giữ nguyên. Sửa mô tả, đổi loại, đổi tên hoặc đổi danh mục không tự xóa hay tính lại tọa độ.
+- Backend không xác minh được client có thật sự gọi bản đồ hay tọa độ có nằm trong địa giới đã chọn chỉ từ hai con số. Backend kiểm sự hiện diện, miền số và tính nguyên tử; kiểm tỉnh/xã thuộc nhau tiếp tục dùng nguồn địa chỉ hiện có. Không thêm geocoding, polygon hoặc khoảng cách suy đoán ở backend.
+- FE gắn kết quả bản đồ với đúng lần sửa địa chỉ. Nếu đang chờ kết quả cho A mà khách đã đổi sang B, bỏ kết quả A đến muộn; chỉ lưu B khi có cặp cho B. Trong lúc chờ, không gửi full input chứa địa chỉ B với tọa độ A. Muốn lưu trường độc lập phải dùng địa chỉ và tọa độ đã được backend xác nhận.
+
+**Gửi lại và transaction:** Create giữ hash cũ gồm thao tác, tên đã trim, latitude, longitude khi description là null hoặc không gửi. Khi description khác null, hash là SHA-256 qua EstimateAccess.Hash("CreateWithDescription:v1", hashCũ, description), giữ nguyên mô tả, kể cả chuỗi rỗng. Cách này cho phép replay yêu cầu cũ chưa có mô tả và phát hiện đổi mô tả khi dùng lại key; Save hash giữ estimateId, expectedInputVersion, changedFields đã sắp xếp/loại trùng và toàn bộ input, thêm hai tọa độ. Biểu diễn số bằng `ToString("R", InvariantCulture)` sau khi đổi -0 về 0, nên 10, 10.0 và 1e1 là cùng giá trị; không so theo chuỗi JSON gốc. Cùng key, khác một tọa độ hợp lệ trả 409 `IdempotencyConflict`; cùng nội dung trả receipt cũ, không tăng version. Lookup receipt tiếp tục trước kiểm gói/khóa AI/version; replay lần lưu cũ không ghi tọa độ cũ đè lên lần lưu mới. Validation hình thức vẫn chạy trước handler. Mọi lỗi trước commit rollback địa chỉ, tọa độ, InputVersion và receipt cùng nhau; không gọi bản đồ trong transaction.
+
+**Thứ tự triển khai dự kiến:** contract/validator → entity/EF và migration chưa áp dụng → policy, Create/Save/GET/hash → snapshot nội bộ → cập nhật fixture và kiểm chứng API/PostgreSQL/frontend. Đọc lại toàn bộ TDD-PROJ liên quan trước khi viết code. Cụ thể file nằm dưới `contract/services/estimate`, `application/usecases/{commands,queries}/estimate`, `application/services`, `application/abstractions/IEstimateInputPolicy.cs`, `domain/entities/Estimate.cs`, `persistence/configurations/EstimateConfigurations.cs`, `presentation/apis/estimate/EstimateApi.cs`. Phần tọa độ dự kiến dùng quy ước kiểu số của module ConstructionSite đã có; không tạo phụ thuộc từ Estimate sang entity ConstructionSite.
+
+**Độ phủ đặc tả của phần tọa độ:** người dùng đã chốt US/BR và sau đó chốt phần tọa độ trong TDD-PROJ-001/002 qua hội thoại ngày 01/10/2026. Đã bổ sung đặc tả Unit Test theo thiết kế này; mỗi file là một ca, có Trace to và TEST_LINKS. Đã triển khai backend và chạy các bộ test liên quan; phạm vi từng nhóm và phần chưa kiểm được ghi tại [bàn giao tọa độ](../discovery/estimate-coordinates-implementation.md). Xác nhận hội thoại không thay trạng thái phê duyệt/import trên hệ thống tài liệu.
+
+| Yêu cầu hoặc ranh giới | System Test | Unit Test |
+|---|---|---|
+| AC-001/002: tạo và mở lại, lưu bản nháp | ST-PROJ-001 đã cập nhật fixture tọa độ | UT-PROJ-004, UT-PROJ-012, UT-PROJ-124 |
+| AC-021, EXC-05: tạo nhanh thiếu cả cặp, từ chối cặp dở dang | ST-PROJ-115 | UT-PROJ-118 |
+| AC-022: tạo nhanh không chờ bản đồ | ST-PROJ-116 | FE tạo không chờ bản đồ cần kiểm qua trình duyệt; UT-PROJ-012/124 kiểm lưu và ánh xạ trả cặp |
+| AC-023, AC-015, ALT-05/06: đổi địa chỉ cùng cặp | ST-PROJ-010 đã cập nhật; ST-PROJ-117 | UT-PROJ-007, UT-PROJ-063, UT-PROJ-121/122/129 |
+| AC-024, EXC-06: thiếu cặp khi đổi địa chỉ, phản hồi bản đồ đến muộn | ST-PROJ-118, ST-PROJ-119 | UT-PROJ-118/121/122/129 kiểm backend; phản hồi bản đồ đến muộn kiểm bằng ST |
+| Giữ cặp khi sửa trường khác; chống gửi lại; transaction và version | ST-PROJ-120, ST-PROJ-121, ST-PROJ-122 | UT-PROJ-014/015, UT-PROJ-123/125/126/129; transaction và tranh chấp thật cần PostgreSQL |
+| Quyền/gói/lượt/khóa AI tiếp tục áp dụng | ST-PROJ-123; ST-PROJ-015/017 đã cập nhật fixture | UT-PROJ-013/014/016 và UT-PROJ-124; fixture tạo/lưu luôn có đủ cặp hợp lệ |
+| Kiểu JSON, miền tọa độ, CHECK miền và cặp nullable trên PostgreSQL | ST-PROJ-124 | UT-PROJ-118/119/120; HTTP binding và constraint DB phải kiểm tích hợp |
+| Snapshot nội bộ theo đúng lần gửi AI | ST-PROJ-125, TDD-PROJ-002 | UT-PROJ-023/065, UT-PROJ-127/128 |
+
+Ca tạo nhanh được thiếu cả cặp; ca nhập hoặc đổi địa chỉ phải có đủ tọa độ. ST-PROJ-002/057/071/073 đã cập nhật trực tiếp phần tên, luồng xuyên suốt và địa chỉ. Chưa coi các ca cũ có kết quả chạy là bằng chứng cho contract mới. Unit Test tập trung validator, changedFields, hash, ánh xạ và snapshot; PostgreSQL integration chứng minh constraint/transaction, browser chứng minh thứ tự phản hồi bản đồ. Bằng chứng chạy ngày 01/10/2026 được ghi tại [bàn giao tọa độ](../discovery/estimate-coordinates-implementation.md); không dùng kết quả cũ để chứng minh contract tọa độ mới và không tự coi các System Test qua trình duyệt đã đạt.
 
 **Upload và dọn ảnh — áp dụng MEDIA:** [TDD-MEDIA-001](TDD-MEDIA-001.md) thay các mô tả trước đây trong tài liệu này về dịch vụ presign ngoài backend, chỉ frontend kiểm ảnh và backend không dọn file. Upload ảnh mới dùng ba route MEDIA của BMT, nhận JPG/PNG/WebP tối đa 5 MiB và chỉ có URL xem sau khi backend xác minh bytes. API nghiệp vụ tiếp tục nhận URL; khi bật MEDIA, SaveChangesAsync kiểm trạng thái ảnh và đồng bộ nơi sử dụng cùng transaction. Ảnh còn trong nháp, nội dung ẩn hoặc lịch sử được giữ. Sau khi mất nơi sử dụng cuối phải chờ ít nhất 24 giờ; ảnh cũ thiếu lịch sử chờ từ lần đối soát đầy đủ đầu tiên. Ảnh Deleting/Deleted không được gắn lại. Các đoạn mô tả giới hạn hoặc trách nhiệm upload cũ bên dưới chỉ ghi bối cảnh trước MEDIA, không là yêu cầu hiện hành cho ảnh mới. Tệp đính kèm không phải ảnh và luồng đọc nội dung riêng tư vẫn theo hợp đồng riêng của module.
 
@@ -167,7 +218,7 @@ flowchart LR
     - Giới hạn: đợt lỗi chỉ được đo khi có lần tải. Bản lưu còn mới thì không gọi nguồn; sau một lần lỗi, mỗi instance chờ `RefreshRetrySeconds` mới thử lại. Vì vậy cảnh báo đến ở lần tải lỗi đầu tiên sau khi vượt ngưỡng; không ai đọc danh sách thì không có lần tải và không có cảnh báo. Khoảng thời gian không có lần tải nào vẫn tính vào đợt lỗi, vì chưa có lần tải thành công để kết thúc đợt. Redis lỗi khi ghi trạng thái thì chỉ ghi log, lần đọc địa chỉ vẫn chạy như cũ nhưng cảnh báo của đợt đó có thể bị mất. Cảnh báo chỉ gửi khi đã bật Discord (`DiscordOption__Enabled` và webhook). Các instance cần đồng bộ đồng hồ (NTP) vì mốc lỗi lấy từ đồng hồ của instance ghi.
     - Tín hiệu vận hành: mỗi lần tải lỗi ghi log Warning như trước. Lúc gửi cảnh báo ghi log Error kèm `OutageStartedAtUtc`, `OutageMinutes`, `AlertAfterMinutes`; lúc hồi phục ghi log Information kèm `OutageStartedAtUtc`. Không ghi được trạng thái vào Redis thì ghi log Warning "Không ghi được trạng thái đợt lỗi…". Nhận cảnh báo thì kiểm tra provinces.open-api.vn và đường mạng ra ngoài; khách vẫn dùng được bản lưu, chỉ API địa chỉ trả 503 nếu chưa có bản lưu nào.
 - Backend áp dụng chuẩn hóa đổi loại trên dữ liệu cũ trước, rồi áp các trường được gửi trong DTO: chỉ giữ giá trị cũ hợp lệ trong loại mới; dữ liệu mới được khách chọn phải hợp lệ. Để tránh coi giá trị cũ vô hiệu là lựa chọn mới, client gửi `changedFields` với PUT; backend chỉ áp các trường trong danh sách đó như lựa chọn chủ động. Các trường không có trong changedFields phải khớp bản đã lưu tại expectedInputVersion trước chuẩn hóa, nếu khác thì trả 422; sau chuẩn hóa không áp lại các giá trị cũ vừa bị xóa. Hash chống lặp bao gồm expectedInputVersion, input và changedFields đã sắp xếp, loại trùng. Đổi tỉnh luôn xóa xã cũ; nếu cùng PUT chọn xã mới thì kiểm xã đó thuộc tỉnh mới. Không đổi diện tích/địa chỉ chi tiết/ảnh/mô tả vì đổi loại. Response GET sau lưu là dữ liệu đã chuẩn hóa.
-- Bản nháp được NULL các trường bắt buộc trước AI, nhưng dữ liệu có giá trị phải hợp lệ. Nhóm phong cách tắt luôn lưu NULL; bật yêu cầu đúng một lựa chọn khi gửi AI. Tầng bật yêu cầu một giá trị trong danh sách; tum bật yêu cầu boolean có giá trị, false khác NULL. Không tự chọn phong cách hoặc Có/Không tum.
+- Bản nháp được NULL các trường chỉ bắt buộc trước AI; kinh độ/vĩ độ được cùng NULL ở bản tạo nhanh chưa nhập địa chỉ. Dữ liệu có giá trị phải hợp lệ. Nhóm phong cách tắt luôn lưu NULL; bật yêu cầu đúng một lựa chọn khi gửi AI. Tầng bật yêu cầu một giá trị trong danh sách; tum bật yêu cầu boolean có giá trị, false khác NULL. Không tự chọn phong cách hoặc Có/Không tum.
 - Quy ước kỹ thuật: kiểm dung lượng ảnh thuộc frontend; đề xuất frontend dùng 1 MB = 1.000.000 byte (ảnh đầu vào ≤10.000.000 byte, ảnh phong cách ≤5.000.000 byte) và tính trên số byte thực của tệp. URL ảnh tối đa 2048 ký tự là giới hạn kỹ thuật cho cột `varchar(2048)`, chọn theo độ dài URL mà trình duyệt và CDN thường hỗ trợ; đây không phải quy tắc nghiệp vụ. Chuỗi đếm Unicode scalar (Rune), không đếm UTF-16 như giới hạn nhập tài liệu; không tự đổi chuẩn Unicode. Tên trim khoảng trắng đầu/cuối, mô tả giữ nội dung gốc nhưng whitespace-only không đáp ứng điều kiện mô tả. Mã tỉnh, mã xã và phiên bản dữ liệu địa chỉ tối đa 64 ký tự, không có khoảng trắng đầu/cuối (giới hạn kỹ thuật ở validator; cột vẫn là `text`).
 - Diện tích dùng `numeric(28,2)`/C# decimal; JSON gửi chuỗi thập phân như `"70.25"` để không mất chính xác trong JavaScript. Validator kiểm chuỗi số trước chuyển kiểu: tối đa 26 chữ số phần nguyên, 0–2 phần lẻ, >0, không exponent/NaN/Infinity. Đây là giới hạn biểu diễn, không trần diện tích nghiệp vụ; từ chối thay vì làm tròn. PostgreSQL có thể làm tròn khi ép vào numeric có scale, nên kiểm trước ghi là bắt buộc. [PostgreSQL 15 — numeric](https://www.postgresql.org/docs/15/datatype-numeric.html).
 - Danh mục địa chỉ là phụ thuộc riêng. Adapter trả `datasetVersion, provinceCode/name, wardCode/name`; backend lưu giá trị đã xác minh. Thay địa chỉ phải kiểm tập dữ liệu tương ứng; nguồn chưa sẵn sàng thì không nhận địa chỉ giả. Việc xử lý xã đã bị ngừng dùng trong bản cũ còn mở; không suy ra quy tắc giữ catalog loại/phong cách cũng áp dụng địa giới.
@@ -193,11 +244,12 @@ sequenceDiagram
     participant API as EstimateApi
     participant DB as PostgreSQL
     participant Q as Subscription trong cùng UoW
-    U->>API: Tạo bằng tên và key
+    U->>API: Tạo nhanh bằng tên và key, tọa độ tùy chọn
+    API->>API: Kiểm tên, nếu gửi tọa độ thì kiểm đủ cặp và miền
     API->>DB: Khóa account, tìm receipt, khóa đọc catalog
     API->>Q: Kiểm kỳ/quyền/lượt hiện tại
     Q-->>API: Đủ điều kiện, không giữ lượt
-    API->>DB: Insert Estimate với CatalogRevisionId và receipt
+    API->>DB: Insert Estimate với tọa độ hoặc cả cặp NULL, CatalogRevisionId và receipt
     DB-->>API: Commit
     API-->>U: 201 estimateId, inputVersion=1
     U->>API: PUT đầu vào, expectedInputVersion, key
@@ -206,7 +258,7 @@ sequenceDiagram
     alt Hết gói, thiếu quyền, hết lượt, AI đang chạy hoặc thành công, version cũ
       API-->>U: 403 hoặc 409, không ghi
     else Đủ điều kiện
-      API->>DB: Chuẩn hóa theo catalog cũ, lưu và tăng InputVersion
+      API->>DB: Kiểm cặp tọa độ khi đổi địa chỉ, lưu cùng nhau và tăng InputVersion
       DB-->>API: Commit
       API-->>U: 200 receipt phiên bản đã lưu
     end
@@ -224,6 +276,27 @@ sequenceDiagram
 Tạo bản dự toán và lưu đầu vào mới cần gói, quyền tạo thiết kế và lượt sẵn dùng; lưu đầu vào còn bị khóa khi AI đang chạy hoặc đã thành công. Đổi tên chỉ cần phiên khách là chủ sở hữu và tên hợp lệ, nên chạy được cả khi gói hết hạn, hết lượt, toàn bộ lượt đang giữ, tác vụ AI đang Pending hoặc đã thành công.
 
 ## Activity Diagram
+
+Luồng tọa độ bổ sung cho tạo/lưu dự toán; sơ đồ Admin bên dưới giữ nguyên:
+
+```mermaid
+flowchart TD
+    A{Thao tác của FE} -->|Tạo nhanh| E[Gửi tên, có thể bỏ cả cặp]
+    A -->|Đổi địa chỉ| B[Đợi bản đồ trả cặp cho địa chỉ hiện tại]
+    B --> C{Đủ cặp và kết quả chưa lỗi thời?}
+    C -->|Không| D[Chưa gửi thao tác lưu địa chỉ]
+    C -->|Có| E2[Gửi full input kèm đủ cặp]
+    E2 --> F
+    E --> F{Binding và validation hợp lệ?}
+    F -->|Không| X[400 hoặc 422, không ghi]
+    F -->|Có| G[Kiểm phiên, owner, key, quyền và khóa như hiện hành]
+    G --> H{Yêu cầu mới được phép ghi và version khớp?}
+    H -->|Không| Y[Trả receipt hoặc lỗi tương ứng, không ghi lại]
+    H -->|Có| I{Không đổi địa chỉ hoặc đã khai báo đủ cặp?}
+    I -->|Không| X
+    I -->|Có hoặc tạo mới| J[Ghi địa chỉ và tọa độ cùng receipt]
+    J --> K[Commit rồi trả thành công]
+```
 
 ```mermaid
 flowchart TD
@@ -243,7 +316,7 @@ flowchart TD
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Draft: Tạo bằng tên
+    [*] --> Draft: Tên hợp lệ, tọa độ tùy chọn theo cặp
     Draft --> Draft: Tự lưu hợp lệ
     Draft --> Processing: Nhận AI và giữ lượt cùng commit
     Processing --> Failed: Failed hoặc TimedOut ở UsageOperation
@@ -257,6 +330,40 @@ Trạng thái bản dự toán là giá trị đọc từ UsageOperation gần n
 
 ## Data Model
 
+**Hai cột tọa độ — thiết kế bổ sung 01/10/2026:** một dòng `Estimate` vẫn là một bản dự toán thuộc một khách. `Latitude` và `Longitude` là vị trí hiện tại do FE gửi lúc tạo hoặc khi sửa; Create/Save ghi cùng các trường của bản. Tọa độ thuộc Estimate.Id, không thuộc mã xã hoặc danh mục, vì nhiều bản trong cùng xã có vị trí khác nhau. Không tách bảng vị trí dùng chung, không sao tọa độ vào receipt. Các quan hệ User–Estimate, catalog–Estimate và Estimate–receipt giữ nguyên; không thêm FK tới ConstructionSite. Snapshot AI là lịch sử bất biến của từng lần gửi, không phải một bản sao vị trí hiện hành phải đồng bộ.
+
+EF ánh xạ `double?` bằng `HasColumnType("double precision")`; entity, request và response cùng cho phép null. Tạo `CK_Estimate_Latitude` với `"Latitude" BETWEEN -90 AND 90` và `CK_Estimate_Longitude` với `"Longitude" BETWEEN -180 AND 180`, kết hợp `CK_Estimate_CoordinatePair`: `("Latitude" IS NULL) = ("Longitude" IS NULL)`. NULL ở cả cặp nghĩa chưa có vị trí; không chấp nhận chỉ một cột NULL. Cận hữu hạn cũng loại ±Infinity và NaN trong PostgreSQL; không dùng `isfinite(double precision)` vốn không phải hàm kiểm số thực của PostgreSQL. Không có mặc định 0. Chọn cùng kiểu đã dùng ở ConstructionSite để khớp JSON number của FE; đây là số gần đúng, không bảo toàn cách viết thập phân gốc. [PostgreSQL 15 — Floating-Point Types](https://www.postgresql.org/docs/15/datatype-numeric.html#DATATYPE-FLOAT).
+
+Không thêm spatial index hoặc PostGIS vì phạm vi chỉ đọc/ghi vị trí theo Id/owner, chưa có truy vấn không gian. Index và khóa hiện có tiếp tục bảo vệ quyền sở hữu và tranh chấp ghi.
+
+**Ví dụ cập nhật nguyên tử** — dữ liệu giả định, D1/RCP3 là bí danh UUID, trích cột:
+
+| Tình huống | Estimate | EstimateMutationReceipt |
+|---|---|---|
+| Trước sửa | D1; AddressDetail=Địa chỉ thử A; Latitude=21.033; Longitude=105.814; InputVersion=3 | Chưa có key save-coordinate-1 |
+| Đổi sang địa chỉ thử B và đủ cặp | D1; AddressDetail=Địa chỉ thử B; Latitude=21.034; Longitude=105.815; InputVersion=4; NameVersion giữ nguyên | RCP3; EstimateId=D1; ActorId=U1; Operation=Save; RequestKey=save-coordinate-1; RequestHash=H3; ResultInputVersion=4 |
+| Thiếu longitude, stale version hoặc lỗi trước commit | Toàn bộ dòng giữ giá trị trước yêu cầu lỗi | Không thêm receipt cho yêu cầu lỗi |
+| Mất phản hồi sau commit, gửi lại cùng key/body | Giữ dòng version=4; nếu đã có lần sửa tiếp thì giữ dòng mới hơn | Trả RCP3 với savedInputVersion=4, không thêm dòng |
+
+H3 là bí danh SHA-256 64 ký tự, băm cả địa chỉ và tọa độ. Các trường NN khác của receipt dùng mẫu đầy đủ hơn bên dưới, CreatedAtUtc lấy UTC lúc ghi. Không có dữ liệu thật trong ví dụ.
+
+**Migration tạo nhanh `20261001105408_OptionalEstimateCoordinates`:** bỏ NOT NULL ở hai cột, giữ CHECK miền và thêm CHECK cùng null hoặc cùng có giá trị. Không sửa dữ liệu, default, FK, index, receipt hoặc snapshot lịch sử; không phát sinh bảng hoặc dữ liệu trùng cần chuẩn hóa. Ví dụ D0 vừa tạo bằng tên có Latitude=NULL, Longitude=NULL, InputVersion=1; lưu mô tả tăng version nhưng cặp vẫn NULL; nhập địa chỉ cùng (21.033,105.814) mới điền cả cột trong một transaction.
+
+Triển khai trong cửa sổ dừng writer cũ: áp migration rồi chạy toàn bộ API/worker mới trước khi mở tạo nhanh. Code cũ đọc `double` không tương thích sau khi có dòng NULL, nên không quay code cũ trong trạng thái đó. ALTER TABLE cần khóa; chọn lock timeout theo môi trường, chưa có số liệu để cam kết thời gian. Up đã kiểm giữ tọa độ cũ; test PostgreSQL kiểm tạo/lưu/bổ sung cặp, miền và rollback. Down chỉ chạy khi không còn dòng thiếu tọa độ, nếu có thì dừng và giữ nguyên dữ liệu, không tự điền số 0. Migration chỉ được chạy trên PostgreSQL tạm trong lần sửa này.
+
+**Lịch sử migration tọa độ ban đầu — các bước dưới mô tả `20261001093238_EstimateCoordinates`, trước thay đổi tạo nhanh:**
+
+1. Kiểm DB đích, số Estimate kể cả đã xóa mềm, receipt và snapshot AI đang tham chiếu. Người dùng xác nhận chưa có dữ liệu thật cần giữ; nếu phát hiện dữ liệu thật thì dừng, không tự geocode, xóa hoặc gán (0,0).
+2. Chuẩn bị FE/BE cùng contract mới; dừng writer cũ và chờ các lần ghi đang chạy hoàn tất. Backend cũ không tương thích với cột NOT NULL không có default; frontend cũ thiếu tọa độ cũng không tương thích.
+3. Migration thêm hai cột nullable không có default, xử lý dữ liệu cũ rồi đặt NOT NULL và CHECK miền. Mặc định, nếu còn dòng thiếu tọa độ thì migration dừng và rollback; không tự gán `(0,0)` hoặc suy tọa độ từ địa chỉ. Ngoại lệ phục hồi Dev ngày 01/10/2026: người dùng xác nhận các dự toán cũ chỉ là dữ liệu thử và yêu cầu điền tọa độ ngẫu nhiên. Khi phiên PostgreSQL có `bmt.seed_estimate_test_coordinates=on`, migration điền các giá trị còn NULL trong miền vĩ độ [-90,90), kinh độ [-180,180), gồm cả bản đã xóa mềm. Giữ nguyên dự toán, liên kết, version và receipt; không xóa dữ liệu. Workflow chỉ bật cờ qua `PGOPTIONS` của phiên psql khi cả profile và environment là `dev`; môi trường khác nhận `off`. Đây là tọa độ thử, không bảo đảm khớp địa chỉ và không được dùng để bổ sung dữ liệu thật. Sau migration, hai cột vẫn NOT NULL, có CHECK và không có DEFAULT; chạy lại script không đổi tọa độ đã lưu. Việc đổi hash đòi dùng key mới cho fixture tạo/lưu theo contract mới, không tính lại receipt lịch sử từ đầu vào hiện tại.
+4. Migration thay đổi schema có khóa bảng; chạy trong cửa sổ dừng ghi trên tập dữ liệu đã kiểm. Không cần backfill production hoặc concurrent index trong giả định hiện tại. Kiểm schema, NOT NULL, CHECK, FK, số dòng và fixture; khởi động BE mới, FE tương thích rồi mới mở ghi.
+5. Kiểm trên PostgreSQL riêng: NULL, NaN, ±Infinity, ngoài miền bị chặn; biên và (0,0) được lưu. Kiểm tạo/đổi địa chỉ/GET/replay, hai lần sửa cùng inputVersion, lỗi trước commit, quyền/khóa AI. Chỉ coi triển khai xong khi các kiểm tra đó đạt.
+6. Nếu triển khai lỗi trước mở ghi, rollback transaction migration và code như cũ. Sau khi đã có ghi mới, giữ cột/dữ liệu và dừng ghi để sửa tiến; không dùng Down xóa cột để quay code. Backend cũ có thể đổi địa chỉ mà không đổi tọa độ nên không được mở ghi bằng code cũ trên dữ liệu mới. Đã tạo migration `20261001093238_EstimateCoordinates`; bằng chứng kiểm và giới hạn triển khai ở [bàn giao tọa độ](../discovery/estimate-coordinates-implementation.md).
+
+**Cột mã dự toán — bổ sung 07/10/2026:** `Code` là định danh dễ đọc của bản, bất biến sau khi cấp. Phần ngày trùng ngày của `CreatedAtUtc` theo giờ Việt Nam, nhưng đây là giá trị được chụp một lần làm định danh chứ không phải dữ liệu suy ra cần đồng bộ: `CreatedAtUtc` cũng không đổi nên hai cột không thể lệch nhau. Unique index không lọc `DeletedAtUtc` để mã của bản đã xóa không bị cấp lại. Không thêm index tìm kiếm cho mã: danh sách luôn lọc theo chủ sở hữu trước (TDD-PROJ-004).
+
+Migration của đợt này chạy theo thứ tự: thêm cột NULL; cấp mã cho mọi dòng đã có, kể cả bản đã xóa mềm, theo `CreatedAtUtc` đổi sang giờ Việt Nam và cùng bảng ký tự; sinh lại phần ngẫu nhiên cho dòng trùng; rồi đặt NOT NULL và tạo `UX_Estimate_Code`. Ví dụ một bản tạo lúc 2026-10-04T18:30:00Z (01:30 ngày 05/10 giờ Việt Nam) nhận mã `BUILDX-20261005-…`. Down bỏ index và cột. Code cũ không ghi cột này nên phải triển khai code mới cùng lúc với migration. Migration chưa áp dụng lên database dùng chung.
+
 PK là khóa chính, FK là khóa ngoại, NN là bắt buộc. Mọi ID mới là uuid, thời gian timestamptz/UTC, bảng/cột PascalCase theo ánh xạ hiện có. Các bảng lịch sử không kế thừa cơ chế xóa mềm của Entity nếu dẫn đến lọc mất dữ liệu cũ. Không có API xóa trong phạm vi này; tất cả FK dùng ON DELETE RESTRICT trừ khi mô tả khác.
 
 | Bảng | Một dòng lưu việc gì, ai ghi, ý nghĩa NULL |
@@ -269,7 +376,7 @@ PK là khóa chính, FK là khóa ngoại, NN là bắt buộc. Mọi ID mới l
 | CatalogStyle | Tên và URL một ảnh minh họa của phong cách trong revision. Không NULL ảnh. Cùng StyleId có tên/ảnh khác ở revision khác. |
 | CatalogFloor | Một số tầng đã cấu hình cho một loại trong revision; 1 nghĩa là Trệt, 3 là Trệt + 2 lầu. Tum tách riêng, không cộng vào số này. Khi loại tắt chọn tầng, dòng vẫn được giữ để bật lại nhưng khách không chọn được. |
 | CatalogTypeStyle | Một phong cách được gán cho một loại ở một nhóm trong revision. Bảng nối nhiều–nhiều, không lưu danh sách ID bằng chuỗi. Khi nhóm tắt, dòng vẫn được giữ nhưng khách không chọn được. |
-| Estimate | Một bản dự toán thuộc một khách, giữ revision, tên và đầu vào hiện tại, gồm URL ảnh đầu vào. Tên là nhãn quản lý bắt buộc, không phải đầu vào AI; các đầu vào được NULL khi chưa nhập. InputVersion đếm số lần ghi đầu vào, NameVersion đếm số lần đổi tên; hai bộ đếm độc lập. Không lưu quota hoặc đơn giá. |
+| Estimate | Một bản dự toán thuộc một khách, giữ revision, mã dự toán, tên và đầu vào hiện tại, gồm URL ảnh đầu vào. Mã cấp một lần lúc tạo, không đổi và không được cấp lại kể cả khi bản bị xóa mềm. Tên là nhãn quản lý bắt buộc, không phải đầu vào AI; kinh độ và vĩ độ có thể cùng NULL khi tạo nhanh, các đầu vào khác được NULL khi chưa nhập. InputVersion đếm số lần ghi đầu vào, NameVersion đếm số lần đổi tên; hai bộ đếm độc lập. Không lưu quota hoặc đơn giá. |
 | EstimateMutationReceipt | Một lần tạo/lưu đầu vào đã commit. Dùng khi mất phản hồi, không phải lịch sử mọi ký tự gõ. Mỗi receipt thuộc đúng một Estimate. Đổi tên không tạo receipt; gửi lại đổi tên được nhận diện bằng NameVersion và tên hiện tại. |
 
 | Bảng | Cột, kiểu và ràng buộc |
@@ -282,7 +389,7 @@ PK là khóa chính, FK là khóa ngoại, NN là bắt buộc. Mọi ID mới l
 | CatalogStyle | RevisionId uuid NN FK revision; StyleId uuid NN; Group varchar(16) NN; Name varchar(200) NN CHECK có ít nhất một ký tự không phải khoảng trắng; ImageUrl varchar(2048) NN CHECK bắt đầu bằng https:// (không phân biệt hoa thường); PK(RevisionId,StyleId); UNIQUE(RevisionId,StyleId,Group); FK(StyleId,Group) tới EstimateStyle. URL đầy đủ (tuyệt đối, https, có host) kiểm ở validator. Không UNIQUE Name. |
 | CatalogFloor | RevisionId uuid NN; BuildingTypeId uuid NN; FloorCount int NN CHECK>=1; PK(RevisionId,BuildingTypeId,FloorCount); FK(RevisionId,BuildingTypeId) tới CatalogBuildingType. Giới hạn int là giới hạn kỹ thuật, không trần tầng nghiệp vụ. |
 | CatalogTypeStyle | RevisionId,BuildingTypeId,StyleId uuid NN; Group varchar(16) NN; PK(RevisionId,BuildingTypeId,Group,StyleId); FK(RevisionId,BuildingTypeId) tới CatalogBuildingType; FK(RevisionId,StyleId,Group) tới CatalogStyle. |
-| Estimate | Id uuid PK; OwnerId uuid NN FK User; CatalogRevisionId uuid NN FK revision; Name varchar(200) NN; NameVersion bigint NN DEFAULT 1 CHECK>0; InputVersion bigint NN DEFAULT 1 CHECK>0; CreatedAtUtc,ModifiedAtUtc timestamptz NN; BuildingTypeId uuid NULL; AreaM2 numeric(28,2) NULL CHECK NULL OR >0; Description varchar(500) NULL; ProvinceCode,ProvinceName,WardCode,WardName,LocationDatasetVersion,AddressDetail text NULL; FinishPackage varchar(16) NULL CHECK Basic/Standard/Vip; FloorCount int NULL; HasTum boolean NULL; ArchitectureStyleId,InteriorStyleId uuid NULL; InputImageUrl varchar(2048) NULL CHECK NULL hoặc bắt đầu bằng https://. UNIQUE(OwnerId,Id), UNIQUE(Id,CatalogRevisionId). Name phải có nội dung sau trim. |
+| Estimate | Id uuid PK; OwnerId uuid NN FK User; CatalogRevisionId uuid NN FK revision; Code varchar(22) NN, UNIQUE `UX_Estimate_Code` trên toàn bảng kể cả bản đã xóa mềm; Name varchar(200) NN; NameVersion bigint NN DEFAULT 1 CHECK>0; InputVersion bigint NN DEFAULT 1 CHECK>0; CreatedAtUtc,ModifiedAtUtc timestamptz NN; BuildingTypeId uuid NULL; AreaM2 numeric(28,2) NULL CHECK NULL OR >0; Description varchar(500) NULL; ProvinceCode,ProvinceName,WardCode,WardName,LocationDatasetVersion,AddressDetail text NULL; Latitude double precision NULL CHECK BETWEEN -90 AND 90; Longitude double precision NULL CHECK BETWEEN -180 AND 180; CHECK cả cặp cùng NULL hoặc cùng có giá trị; không có DEFAULT; FinishPackage varchar(16) NULL CHECK Basic/Standard/Vip; FloorCount int NULL; HasTum boolean NULL; ArchitectureStyleId,InteriorStyleId uuid NULL; InputImageUrl varchar(2048) NULL CHECK NULL hoặc bắt đầu bằng https://. UNIQUE(OwnerId,Id), UNIQUE(Id,CatalogRevisionId). Name phải có nội dung sau trim. |
 | EstimateMutationReceipt | Id uuid PK; ActorId uuid NN FK User; EstimateId uuid NN; Operation varchar(16) NN CHECK Create/Save; RequestKey varchar(100) NN; RequestHash char(64) NN; ResultInputVersion bigint NN; CreatedAtUtc timestamptz NN; UNIQUE(ActorId,Operation,RequestKey); FK(ActorId,EstimateId) tới Estimate(OwnerId,Id). |
 
 Ràng buộc bổ sung của Estimate: FK `(CatalogRevisionId,BuildingTypeId)` tới CatalogBuildingType; FK `(CatalogRevisionId,BuildingTypeId,FloorCount)` tới CatalogFloor. Hai cột nhóm cố định `ArchitectureGroup varchar(16) NN DEFAULT Architecture CHECK=Architecture` và `InteriorGroup ... Interior` phục vụ FK ghép từ mỗi lựa chọn tới CatalogTypeStyle đúng nhóm. CHECK BuildingTypeId NULL thì tầng/tum/phong cách phải NULL; WardCode NULL đồng thời WardName NULL; nếu có ward phải có tỉnh và datasetVersion. Cặp code/name tỉnh cùng NULL hoặc cùng có giá trị. Giá trị địa chỉ chi tiết được nhập độc lập từ bản nháp. Snapshot tên địa chỉ là dữ liệu lịch sử đã xác minh, không phải nguồn danh mục địa chỉ mới.
@@ -302,6 +409,13 @@ erDiagram
     CatalogStyle ||--o{ CatalogTypeStyle : selectable
     EstimateCatalogRevision ||--o{ Estimate : frozen_catalog
     Estimate ||--o{ EstimateMutationReceipt : writes
+    Estimate {
+        uuid Id PK
+        uuid OwnerId FK
+        double Latitude "nullable as a pair"
+        double Longitude "nullable as a pair"
+        bigint InputVersion
+    }
 ```
 
 Quan hệ current trong sơ đồ chỉ là con trỏ, không có nghĩa xóa các revision không còn current. Một revision chứa các dòng con bắt buộc có cha; một type/style có thể hiện diện ở nhiều revision. Một Estimate có 0 hoặc 1 ảnh đầu vào, lưu bằng URL trong cột InputImageUrl; backend không giữ lịch sử các URL đã thay. User, AccountCommerceState và các bảng quyền/gói dùng lại schema và mẫu tại TDD-RBAC-001/Data Model, TDD-PAY-001/Data Model và TDD-SUB-002/Data Model.
@@ -318,12 +432,12 @@ Quan hệ current trong sơ đồ chỉ là con trỏ, không có nghĩa xóa c�
 | CatalogStyle | V1/K1/Architecture/“Kiến trúc thử”/ImageUrl=https://cdn.example.test/style/k1.jpg; V1/N1/Interior/“Nội thất thử”/ImageUrl=https://cdn.example.test/style/n1.webp. Đây là dữ liệu Admin tự nhập; frontend đã kiểm định dạng và dung lượng trước khi upload. |
 | CatalogFloor | Hai dòng V1/B1/1 và V1/B1/3. |
 | CatalogTypeStyle | V1/B1/Architecture/K1 và V1/B1/Interior/N1. |
-| Estimate — vừa tạo | D1; OwnerId=U1; CatalogRevisionId=V1; Name=Nhà A; NameVersion=1; InputVersion=1; CreatedAtUtc=ModifiedAtUtc=T1; các đầu vào khác NULL. |
+| Estimate — vừa tạo | D1; OwnerId=U1; CatalogRevisionId=V1; Code=BUILDX-20260921-Q7K2M9 (T1 là 10:00 ngày 21/09/2026 giờ Việt Nam; phần ngẫu nhiên là ví dụ); Name=Nhà A; NameVersion=1; InputVersion=1; CreatedAtUtc=ModifiedAtUtc=T1; Latitude=NULL; Longitude=NULL; các đầu vào khác NULL. |
 | EstimateMutationReceipt — create | RCP1; ActorId=U1; EstimateId=D1; Operation=Create; RequestKey=create-1; RequestHash=HC1; ResultInputVersion=1; CreatedAtUtc=T1. |
 | Estimate — sau tự lưu | D1; InputVersion=2; BuildingTypeId=B1; AreaM2=70.25; Description=Nhà hai phòng ngủ; FloorCount=3; HasTum=false; ArchitectureStyleId=K1; InteriorStyleId=N1; FinishPackage=Standard; địa chỉ còn NULL nên chưa gửi AI. |
 | EstimateMutationReceipt — save | RCP2; ActorId=U1; EstimateId=D1; Operation=Save; RequestKey=save-1; RequestHash=HS1; ResultInputVersion=2. |
 | Estimate — sau đổi tên | D1; Name=Nhà A - phương án chốt; NameVersion=2; InputVersion=2 (giữ nguyên); ModifiedAtUtc=T2 với T2=2026-09-21T05:00:00Z; các đầu vào không đổi. Kết quả này giống nhau dù lúc đó gói của U1 đã hết hạn, hết lượt hay bản đang có tác vụ AI Pending, vì đổi tên không kiểm các điều kiện đó. Không có dòng EstimateMutationReceipt mới. TDD-PROJ-003/Data Model dùng tiếp sự kiện đổi tên này cho tệp xuất. |
-| Estimate — sau chọn địa chỉ | D1; InputVersion=3 (lần lưu sau đổi tên); NameVersion=2; ProvinceCode=1; ProvinceName=Thành phố Hà Nội; WardCode=4; WardName=Phường Ba Đình; LocationDatasetVersion=pov2-3f9c0a1b2c4d5e6f (bí danh phiên bản, không phải giá trị thật). Mã và tên lấy từ provinces.open-api.vn v2 lúc xác minh, không lấy từ client. |
+| Estimate — sau chọn địa chỉ | D1; InputVersion=3 (lần lưu sau đổi tên); NameVersion=2; ProvinceCode=1; ProvinceName=Thành phố Hà Nội; WardCode=4; WardName=Phường Ba Đình; LocationDatasetVersion=pov2-3f9c0a1b2c4d5e6f (bí danh phiên bản, không phải giá trị thật); Latitude=21.034; Longitude=105.815, lấy lại từ bản đồ và lưu cùng địa chỉ. Mã và tên lấy từ provinces.open-api.vn v2 lúc xác minh, không lấy từ client. |
 
 Admin sửa tên K1 ở V2: tạo revision V2 ParentId=V1, sao chép cấu hình, chỉ thay CatalogStyle V2/K1; singleton trỏ V2. D1 giữ V1/K1. D2 tạo sau commit mới ghim V2. Không UPDATE dòng V1/K1. Nếu upload ảnh mới lỗi ở frontend thì không có yêu cầu lưu, V1 giữ nguyên; nếu lưu revision lỗi, singleton vẫn V1. Với ảnh đầu vào, D1.InputImageUrl=https://cdn.example.test/input/d1-a.jpg; khách thay ảnh thì frontend upload tệp mới rồi PUT với https://cdn.example.test/input/d1-b.jpg; chỉ khi PUT thành công D1.InputImageUrl mới đổi sang URL mới, lỗi thì giữ URL cũ. Trong ví dụ, `UploadedFileOption__AllowedHosts__0=cdn.example.test`; PUT với https://img.cdn.example.test/d1-c.jpg hoặc https://other.example.test/d1-c.jpg bị từ chối 422 và D1 giữ d1-b.
 
@@ -348,11 +462,11 @@ Nhóm tắt giữ danh sách: Admin tắt chọn tầng của B1 ở V3 nhưng v
 
 Tất cả route dưới đây là đề xuất v1. Response JSON thành công dùng envelope `Result<T>` hiện có; ví dụ chỉ lược trường trong value khi đã ghi rõ. Unknown JSON members bị từ chối cho DTO mutation, không bind EF entity. OwnerId/quota/revision hiệu lực do server quyết định.
 
-- **POST** `/api/v1/estimates` — `{name}` + Idempotency-Key; 201 `{estimateId,inputVersion,nameVersion}`. Kiểm quyền tạo, ghim catalog hiện hành; cùng key trả receipt cũ.
-- **GET** `/api/v1/estimates/{estimateId}` — Chủ sở hữu đọc `{estimateId,name,nameVersion,canRename,inputVersion,catalogRevisionId,input,state,failureCode,canEdit,writeDeniedCode,missingFields}`; hết gói vẫn xem được. `canEdit` và `writeDeniedCode` chỉ nói về đầu vào. `canRename` là true khi người gọi là chủ sở hữu Customer, không phụ thuộc gói, lượt hay trạng thái AI. Cả hai cờ chỉ là gợi ý, mutation kiểm lại.
+- **POST** `/api/v1/estimates` — `{name}` hoặc `{name,latitude,longitude}` + Idempotency-Key; 201 `{estimateId,code,inputVersion,nameVersion}`. `code` là mã dự toán vừa cấp; replay trả mã của bản đã tạo. Kiểm quyền tạo, ghim catalog hiện hành; cùng key trả receipt cũ. Trường `description` tùy chọn (bỏ qua hoặc null), tối đa 500 Unicode scalar, giữ nguyên nội dung và lưu vào `Estimate.Description` hiện có; GET trả qua `input.description`, PUT /input sửa cùng trường. Chuỗi rỗng hoặc chỉ khoảng trắng được lưu ở bản nháp nhưng không đáp ứng điều kiện mô tả trước AI. Không thêm cột hay migration cho mô tả.
+- **GET** `/api/v1/estimates/{estimateId}` — Chủ sở hữu đọc `{estimateId,code,name,nameVersion,canRename,inputVersion,catalogRevisionId,input,state,failureCode,canEdit,writeDeniedCode,missingFields}`; hết gói vẫn xem được. `canEdit` và `writeDeniedCode` chỉ nói về đầu vào. `canRename` là true khi người gọi là chủ sở hữu Customer, không phụ thuộc gói, lượt hay trạng thái AI. Cả hai cờ chỉ là gợi ý, mutation kiểm lại.
 - **PATCH** `/api/v1/estimates/{estimateId}/name` — Chủ sở hữu đổi tên với `{name,nameVersion}`; `nameVersion` là giá trị đã đọc từ GET. 200 `{name,nameVersion}` với tên đã trim và NameVersion mới (hoặc hiện tại nếu tên không đổi). Chỉ kiểm phiên Customer, quyền sở hữu, tên hợp lệ và NameVersion; không kiểm gói, quyền tạo thiết kế, lượt hay tác vụ AI, không đổi InputVersion, không gọi AI và không giữ/trừ lượt. Kiểm Origin theo [TDD-AUTH-001](TDD-AUTH-001.md) khi dùng cookie; không cần Idempotency-Key.
 - **GET** `/api/v1/estimates/{estimateId}/catalog` — Chủ sở hữu đọc snapshot danh mục của bản, gồm loại/cờ/danh sách tầng/hai nhóm tên và URL ảnh. Danh sách của nhóm đang tắt trả rỗng vì khách không được chọn. Không trả catalog hiện hành thay thế.
-- **PUT** `/api/v1/estimates/{estimateId}/input` — `{expectedInputVersion,changedFields,input}` + key; 200 `{estimateId,savedInputVersion}`. Input đủ tất cả trường DTO, NULL nghĩa chưa nhập; changedFields xác định trường chủ động sửa, không cho sửa field ngoài danh sách. Đọc lại GET sau thành công để lấy chuẩn hóa; không gọi AI.
+- **PUT** `/api/v1/estimates/{estimateId}/input` — `{expectedInputVersion,changedFields,input}` + key; 200 `{estimateId,savedInputVersion}`. Input đủ tất cả trường DTO, latitude/longitude được cùng NULL khi chưa có tọa độ và không đổi địa chỉ; NULL nghĩa chưa nhập; changedFields xác định trường chủ động sửa, không cho sửa field ngoài danh sách. Đọc lại GET sau thành công để lấy chuẩn hóa; không gọi AI.
 - **GET** `/api/v1/estimate-locations/provinces` — Phiên verified nhận `datasetVersion` và danh sách tỉnh `{code,name}` từ provinces.open-api.vn v2 qua bản lưu Redis. Nguồn lỗi thì dùng bản đã lưu; chưa có bản nào thì 503.
 - **GET** `/api/v1/estimate-locations/provinces/{provinceCode}/wards` — Phiên verified, query datasetVersion; chỉ trả xã/phường thuộc tỉnh trong dataset đó. `datasetVersion` khác phiên bản hiện hành trả 409 `LocationDatasetChanged`; mã tỉnh không có trong dữ liệu trả danh sách rỗng.
 - **GET** `/api/v1/admin/estimate-catalog` — Quyền estimate.catalog.manage, trả cấu hình hiện hành và catalogVersion, gồm cả danh sách được giữ của nhóm đang tắt.
@@ -361,7 +475,7 @@ Tất cả route dưới đây là đề xuất v1. Response JSON thành công d
 - **POST** `/api/v1/admin/estimate-catalog/styles` — `{expectedCatalogVersion,group,name,imageUrl}` + key; group Architecture/Interior; `imageUrl` là URL https của ảnh frontend đã upload, tối đa 2048 ký tự, thuộc tên miền kho presign. 201 `{styleId,catalogRevisionId,catalogVersion}`.
 - **PUT** `/api/v1/admin/estimate-catalog/styles/{styleId}` — `{expectedCatalogVersion,name,imageUrl}` + key; giữ group, 200 cùng dạng kết quả. Chỉ kiểm tên miền khi `imageUrl` khác URL đang lưu.
 
-DTO input gồm `buildingTypeId,areaM2,description,provinceCode,wardCode,locationDatasetVersion,addressDetail,finishPackage,floorCount,hasTum,architectureStyleId,interiorStyleId,inputImageUrl`. `inputImageUrl` là URL https của ảnh frontend đã upload qua dịch vụ presigned URL, tối đa 2048 ký tự, thuộc tên miền kho presign khi là URL mới; backend không nhận tệp. PUT /input không nhận `name`: gửi `name` trong input hoặc changedFields bị từ chối 422 như mọi trường lạ; muốn đổi tên dùng PATCH /name. Backend không nhận tên tỉnh/xã để ghi trực tiếp; lấy từ adapter. Với địa chỉ chưa đổi, dùng snapshot đã xác minh đang lưu; không gọi nguồn địa chỉ để chặn thao tác sửa mô tả. Chọn tỉnh/xã mới phải gửi `locationDatasetVersion` bằng phiên bản hiện hành. Xã đã lưu mà nay bị gộp hoặc ngừng dùng vẫn được giữ và hiển thị; trước khi gửi AI khách phải chọn lại xã theo dữ liệu hiện hành (kiểm ở TDD-PROJ-002).
+DTO input gồm `buildingTypeId,areaM2,description,provinceCode,wardCode,locationDatasetVersion,addressDetail,latitude,longitude,finishPackage,floorCount,hasTum,architectureStyleId,interiorStyleId,inputImageUrl`. `inputImageUrl` là URL https của ảnh frontend đã upload qua dịch vụ presigned URL, tối đa 2048 ký tự, thuộc tên miền kho presign khi là URL mới; backend không nhận tệp. PUT /input không nhận `name`: gửi `name` trong input hoặc changedFields bị từ chối 422 như mọi trường lạ; muốn đổi tên dùng PATCH /name. Backend không nhận tên tỉnh/xã để ghi trực tiếp; lấy từ adapter. Với địa chỉ chưa đổi, dùng snapshot đã xác minh đang lưu; không gọi nguồn địa chỉ để chặn thao tác sửa mô tả. Chọn tỉnh/xã mới phải gửi `locationDatasetVersion` bằng phiên bản hiện hành. Xã đã lưu mà nay bị gộp hoặc ngừng dùng vẫn được giữ và hiển thị; trước khi gửi AI khách phải chọn lại xã theo dữ liệu hiện hành (kiểm ở TDD-PROJ-002).
 
 ### Examples
 
@@ -371,10 +485,10 @@ DTO input gồm `buildingTypeId,areaM2,description,provinceCode,wardCode,locatio
 Request:
 Idempotency-Key: create-estimate-1
 Origin: https://app.example.test
-{"name":"  Nhà A  "}
+{"name":"  Nhà A  ","description":"Nhà hai tầng, có sân"}
 
 Response 201:
-{"value":{"estimateId":"11111111-1111-4111-8111-111111111111","inputVersion":1,"nameVersion":1},"isSuccess":true,"isFailure":false,"error":{"code":"","message":""}}
+{"value":{"estimateId":"11111111-1111-4111-8111-111111111111","code":"BUILDX-20261005-Q7K2M9","inputVersion":1,"nameVersion":1},"isSuccess":true,"isFailure":false,"error":{"code":"","message":""}}
 
 Error Response:
 {"title":"Conflict","code":"QuotaUnavailable","status":409,"detail":"Không còn lượt tạo thiết kế sẵn dùng.","messageCode":"QuotaUnavailable","errors":null}
@@ -386,13 +500,45 @@ Error Response:
 Request:
 Idempotency-Key: save-estimate-1
 Origin: https://app.example.test
-{"expectedInputVersion":1,"changedFields":["areaM2","description"],"input":{"buildingTypeId":null,"areaM2":"70.25","description":"Nhà hai phòng ngủ","provinceCode":null,"wardCode":null,"locationDatasetVersion":null,"addressDetail":null,"finishPackage":null,"floorCount":null,"hasTum":null,"architectureStyleId":null,"interiorStyleId":null,"inputImageUrl":null}}
+{"expectedInputVersion":1,"changedFields":["areaM2","description"],"input":{"buildingTypeId":null,"areaM2":"70.25","description":"Nhà hai phòng ngủ","provinceCode":null,"wardCode":null,"locationDatasetVersion":null,"addressDetail":null,"latitude":null,"longitude":null,"finishPackage":null,"floorCount":null,"hasTum":null,"architectureStyleId":null,"interiorStyleId":null,"inputImageUrl":null}}
 
 Response 200:
 {"value":{"estimateId":"11111111-1111-4111-8111-111111111111","savedInputVersion":2},"isSuccess":true,"isFailure":false,"error":{"code":"","message":""}}
 
 Error Response:
 {"title":"Conflict","code":"InputVersionConflict","status":409,"detail":"Thông tin đã thay đổi. Đọc lại bản đã lưu trước khi tiếp tục.","messageCode":"InputVersionConflict","errors":null}
+```
+
+Ví dụ đổi địa chỉ chi tiết trên bản vừa tự lưu ở trên. Các trường còn lại khớp bản đã lưu; bổ sung cả hai tọa độ lấy từ bản đồ và khai báo cả hai tên trong changedFields. Nếu bản đã có tọa độ, cặp mới trùng cặp cũ vẫn khai báo cả hai.
+
+```
+Request:
+Idempotency-Key: save-address-2
+Origin: https://app.example.test
+{"expectedInputVersion":2,"changedFields":["addressDetail","latitude","longitude"],"input":{"buildingTypeId":null,"areaM2":"70.25","description":"Nhà hai phòng ngủ","provinceCode":null,"wardCode":null,"locationDatasetVersion":null,"addressDetail":"Địa chỉ thử B","latitude":21.034,"longitude":105.815,"finishPackage":null,"floorCount":null,"hasTum":null,"architectureStyleId":null,"interiorStyleId":null,"inputImageUrl":null}}
+
+Response 200:
+{"value":{"estimateId":"11111111-1111-4111-8111-111111111111","savedInputVersion":3},"isSuccess":true,"isFailure":false,"error":{"code":"","message":""}}
+
+Error Response:
+{"title":"Validation Failure","code":"ValidationFailure","status":422,"detail":"One or more validation errors occurred","messageCode":"InvalidEstimateInput","errors":[{"PropertyName":"changedFields","ErrorMessage":"Đổi địa chỉ phải khai báo cả latitude và longitude trong changedFields."}]}
+```
+
+Error Response minh họa nhánh handler khi bỏ hai tên tọa độ khỏi changedFields nhưng giữ đủ giá trị trong input. Lỗi thiếu một giá trị trong cặp được validator trả 422 với `errors[].code` là tên trường, `errors[].messageCode=InvalidEstimateInput`, theo envelope validation hiện có; frontend đọc đúng cấu trúc tương ứng: lỗi handler dùng messageCode và errors[].PropertyName/ErrorMessage theo middleware hiện tại; không giả định mọi 422 đều có top-level code nghiệp vụ. Hai ví dụ save dùng bản nháp chưa chọn tỉnh/xã, nên sửa địa chỉ chi tiết không đòi chọn đủ địa chỉ trước khi gửi AI.
+
+#### GET /api/v1/estimates/{estimateId}
+
+Response dưới đây chỉ trích `value.estimateId`, `value.inputVersion` và `value.input`, không phải toàn bộ envelope. GET giữ các trường quyền, tên, trạng thái, missingFields và phần input khác như contract hiện có. `latitude` và `longitude` là JSON number hoặc cùng null ở bản tạo nhanh chưa có tọa độ; `missingFields` vẫn báo hai trường còn thiếu trước AI.
+
+```
+Request:
+GET với phiên chủ sở hữu sau lần lưu địa chỉ trên
+
+Response 200:
+{"value":{"estimateId":"11111111-1111-4111-8111-111111111111","inputVersion":3,"input":{"addressDetail":"Địa chỉ thử B","latitude":21.034,"longitude":105.815}}}
+
+Error Response:
+{"title":"Not Found","code":"EstimateNotFound","status":404,"detail":"Không tìm thấy bản dự toán.","messageCode":"EstimateNotFound","errors":null}
 ```
 
 #### PATCH /api/v1/estimates/{estimateId}/name
@@ -413,6 +559,7 @@ Ví dụ vẫn trả 200 khi gói đã hết hạn hoặc bản đang có tác v
 
 ### Error Codes
 
+- **BadRequest** (400): sai cú pháp/kiểu JSON khi bind request, gồm tọa độ là chuỗi hoặc không bind được sang double. Có thể do lớp HTTP binding trả trực tiếp; không cam kết envelope lỗi nghiệp vụ ở nhánh này.
 - **Unauthorized** (401): phiên không hợp lệ; dùng mapping xác thực hiện có.
 - **AccessForbidden** (403): thiếu quyền `estimate.catalog.manage` khi gọi API quản trị danh mục, hoặc tài khoản không phải Customer (AccountKind khác Customer) gọi thao tác khách, gồm cả đổi tên.
 - **CsrfInvalid** (403): mutation dùng cookie có `Origin`/`Referer` ngoài danh sách được phép, hoặc thiếu cả hai; theo [TDD-AUTH-001](TDD-AUTH-001.md).
@@ -426,11 +573,11 @@ Ví dụ vẫn trả 200 khi gói đã hết hạn hoặc bản đang có tác v
 - **GenerationInProgress** (409): chỉ khi lưu đầu vào: có tác vụ Pending, không sửa đầu vào. Không áp cho đổi tên.
 - **EstimateAlreadyGenerated** (409): chỉ khi lưu đầu vào: đã có kết quả thành công, cần bản mới. Không áp cho đổi tên.
 - **IdempotencyConflict** (409): key trùng nhưng hash khác.
-- **InvalidEstimateInput** (422): dữ liệu có giá trị sai giới hạn/cặp địa chỉ/lựa chọn (gồm lựa chọn thuộc nhóm đang tắt), tên sai khi tạo hoặc đổi tên, `inputImageUrl` không phải URL tuyệt đối https, dài hơn 2048 ký tự hoặc URL mới không thuộc tên miền kho presign, trường lạ (gồm `name` trong PUT /input) hoặc changedFields không khớp.
+- **InvalidEstimateInput** (422): cặp tọa độ dở dang hoặc ngoài miền, thiếu tọa độ khi đổi địa chỉ, changedFields thiếu đủ cặp khi đổi địa chỉ, hoặc dữ liệu có giá trị sai giới hạn/cặp địa chỉ/lựa chọn (gồm lựa chọn thuộc nhóm đang tắt), tên sai khi tạo hoặc đổi tên, `inputImageUrl` không phải URL tuyệt đối https, dài hơn 2048 ký tự hoặc URL mới không thuộc tên miền kho presign, trường lạ (gồm `name` trong PUT /input) hoặc changedFields không khớp.
 - **InvalidCatalogConfiguration** (422): danh sách đang bật rỗng, sai nhóm, tên không hợp lệ, hoặc `imageUrl` thiếu, không phải URL tuyệt đối https, dài hơn 2048 ký tự hay URL mới không thuộc tên miền kho presign.
 - **CatalogItemNotFound** (404): loại công trình hoặc phong cách cần sửa không có trong danh mục hiện hành.
 - **LocationDatasetChanged** (409): `datasetVersion` của GET wards hoặc `locationDatasetVersion` khi chọn tỉnh/xã khác phiên bản dữ liệu địa chỉ hiện hành; client tải lại danh sách rồi chọn lại, không ghi gì.
-- **DependencyUnavailable** (503): danh mục chưa thiết lập, cổng tạo bản dự toán chưa mở, nguồn địa chỉ lỗi khi chưa có bản lưu nào, hoặc chưa cấu hình tên miền kho presign mà yêu cầu gửi URL ảnh mới; không lưu thành công giả.
+- **DependencyUnavailable** (503): sinh mã dự toán trùng liên tiếp 5 lần (rất hiếm, khách gửi lại sau), danh mục chưa thiết lập, cổng tạo bản dự toán chưa mở, nguồn địa chỉ lỗi khi chưa có bản lưu nào, hoặc chưa cấu hình tên miền kho presign mà yêu cầu gửi URL ảnh mới; không lưu thành công giả.
 
 Không còn mã InvalidAsset (422) và UploadTooLarge (413): backend không nhận tệp; định dạng và dung lượng ảnh do frontend kiểm. Lỗi nghiệp vụ trả cùng cấu trúc code/status/detail/messageCode/errors; không dùng Result.Failure mặc định thành 400 cho mọi lỗi. Không trả exception nhà cung cấp hoặc đường dẫn object.
 
@@ -438,18 +585,22 @@ Không còn mã InvalidAsset (422) và UploadTooLarge (413): backend không nh�
 
 ### Endpoints
 
+- **Dịch vụ bản đồ của frontend** — FE xác định tọa độ khi nhập/đổi địa chỉ; tạo nhanh không cần chờ bản đồ. Provider chưa được chỉ định, không thêm adapter hoặc credential bản đồ vào backend.
 - **Dịch vụ presigned URL — ngoài phạm vi backend** — Frontend xin URL upload, tự upload tệp và nhận URL của tệp; backend không gọi dịch vụ này và không tạo presigned URL. Backend chỉ nhận URL có tên máy chủ nằm trong `UploadedFileOption__AllowedHosts`.
 - **GET https://provinces.open-api.vn/api/v2/?depth=2 — Danh mục địa chỉ sau sáp nhập 07/2025** — Trả mảng 34 tỉnh/thành, mỗi tỉnh kèm mảng `wards`. Gốc URL lấy từ `ProvincesOpenApiOption__BaseUrl` (mặc định `https://provinces.open-api.vn/api/v2/`), thời gian chờ `TimeoutSeconds` (mặc định 10 giây). Không dùng API v1 vì v1 là dữ liệu trước sáp nhập (ba cấp có quận/huyện). Các endpoint khác của v2 (`/p/`, `/p/{code}`, `/w/?province=`, `/w/{code}`, `/w/from-legacy/`, `/w/{code}/to-legacies/`) chưa dùng.
 
 ### Fields
 
+- **latitude / longitude** — Số hữu hạn theo độ WGS84 do FE gửi. Tách khỏi mã tỉnh/xã của provinces.open-api.vn; không suy tọa độ từ tâm tỉnh/xã.
 - **imageUrl / inputImageUrl** — URL https cố định, không hết hạn, của tệp do dịch vụ presigned URL trả sau khi frontend upload xong. Backend lưu nguyên chuỗi; kiểm URL tuyệt đối dùng https, có host, không khoảng trắng, tối đa 2048 ký tự, và URL mới phải có tên máy chủ khớp chính xác một phần tử của `UploadedFileOption__AllowedHosts` (không phân biệt hoa thường, không nhận tên miền con).
 - **code (tỉnh) / code (xã)** — Số nguyên dương của nguồn, ví dụ Hà Nội là 1, Phường Ba Đình là 4. Backend lưu dạng chuỗi số thập phân (`"1"`, `"4"`) vào `ProvinceCode`/`WardCode`.
 - **name** — Tên đầy đủ kèm cấp, ví dụ "Thành phố Hà Nội", "Phường Ba Đình". Backend lưu vào `ProvinceName`/`WardName` lúc xác minh.
-- **wards[].province_code** — Mã tỉnh chứa xã. Backend kiểm trường này bằng mã của tỉnh bao ngoài; lệch thì bỏ cả lần tải.
+- **wards[].province_code** — Trường tùy chọn. Quan hệ tỉnh–xã lấy từ tỉnh bao ngoài chứa mảng `wards`; phản hồi `?depth=2` kiểm tra ngày 01/10/2026 không có trường này. Khi trường thiếu hoặc NULL, vẫn nhận xã thuộc tỉnh bao ngoài. Nếu có giá trị thì phải bằng mã tỉnh bao ngoài; lệch, kể cả 0 hoặc số âm, thì bỏ cả lần tải.
 - **datasetVersion** — Không có trong API. Backend tính từ nội dung: `pov2-` cộng 16 ký tự hex đầu của SHA-256 danh sách mã và tên tỉnh/xã đã sắp theo mã. Dùng để biết lựa chọn đã lưu thuộc bộ dữ liệu nào và phát hiện dữ liệu nguồn đã đổi.
 
 ### Error Handling
+
+Bản đồ lỗi hoặc chưa có kết quả cho địa chỉ mới thì FE chưa gửi thao tác lưu địa chỉ; tạo nhanh bằng tên vẫn được phép. Không gửi kết quả của địa chỉ cũ đến muộn, không tự thay bằng tọa độ mặc định. Backend không gọi bản đồ và không biến lỗi bản đồ phía FE thành 503 của API BMT.
 
 Upload do frontend làm, ngoài backend và ngoài transaction ghi. Upload lỗi thì frontend không gửi yêu cầu lưu, URL cũ giữ nguyên. Upload xong nhưng lưu lỗi có thể để lại tệp không được tham chiếu ở kho; backend không xóa tệp nào, việc dọn thuộc dịch vụ lưu trữ. Backend không tự tải nội dung ở URL khách hoặc Admin gửi; adapter địa chỉ chỉ dùng host được cấu hình.
 
@@ -457,6 +608,7 @@ Nguồn địa chỉ: HTTP khác 2xx, quá thời gian chờ, lỗi mạng, JSON
 
 ### Quirks
 
+- Gọi `/api/v2/` không có `depth=2` có thể chỉ trả danh sách tỉnh với `wards: []`. Adapter cần cả tỉnh và xã để xác minh địa chỉ nên luôn gọi `?depth=2`; không dùng phản hồi chỉ có tỉnh làm bộ dữ liệu đầy đủ. Không cần thêm API key cho lần gọi công khai đã kiểm tra ngày 01/10/2026.
 - Ảnh minh họa (JPG/PNG/WebP, tối đa 5 MB) và ảnh đầu vào (JPG/PNG/HEIC, tối đa 10 MB) có quy tắc định dạng/dung lượng khác nhau; frontend áp đúng quy tắc cho từng loại. Backend dùng chung một phép kiểm URL https cho cả hai.
 - Backend không kiểm nội dung tệp ở URL, nên không chứng minh được tệp thực sự là ảnh hợp lệ; đây là hệ quả đã chấp nhận của quyết định ngày 26/09/2026.
 - provinces.open-api.vn không công bố số phiên bản bộ dữ liệu, thời điểm cập nhật hay điều khoản SLA trên trang tài liệu (kiểm ngày 26/09/2026); vì vậy phiên bản do backend tự tính. Phản hồi có `cache-control: s-maxage=30`, không dùng để quyết định thời gian lưu. Trọn bộ `?depth=2` khoảng 600 KB, 34 tỉnh và 3.321 xã tại thời điểm kiểm.
@@ -494,6 +646,40 @@ Nguồn địa chỉ: HTTP khác 2xx, quá thời gian chờ, lỗi mạng, JSON
 
 ### Others
 
+- UT-PROJ-004/Unit Test
+- UT-PROJ-130/Unit Test
+- UT-PROJ-131/Unit Test
+- ST-PROJ-126/System Test
+- UT-PROJ-007/Unit Test
+- UT-PROJ-012/Unit Test
+- UT-PROJ-014/Unit Test
+- UT-PROJ-015/Unit Test
+- UT-PROJ-023/Unit Test
+- UT-PROJ-063/Unit Test
+- UT-PROJ-065/Unit Test
+- UT-PROJ-118/Unit Test
+- UT-PROJ-119/Unit Test
+- UT-PROJ-120/Unit Test
+- UT-PROJ-121/Unit Test
+- UT-PROJ-122/Unit Test
+- UT-PROJ-123/Unit Test
+- UT-PROJ-124/Unit Test
+- UT-PROJ-125/Unit Test
+- UT-PROJ-126/Unit Test
+- UT-PROJ-127/Unit Test
+- UT-PROJ-128/Unit Test
+- UT-PROJ-129/Unit Test
+- ST-PROJ-115/System Test
+- ST-PROJ-116/System Test
+- ST-PROJ-117/System Test
+- ST-PROJ-118/System Test
+- ST-PROJ-119/System Test
+- ST-PROJ-120/System Test
+- ST-PROJ-121/System Test
+- ST-PROJ-122/System Test
+- ST-PROJ-123/System Test
+- ST-PROJ-124/System Test
+- ST-PROJ-125/System Test
 - TDD-PROJ-002/Architecture
 - TDD-PROJ-003/Architecture
 - TDD-SUB-002/Data Model
@@ -510,6 +696,7 @@ Nguồn địa chỉ: HTTP khác 2xx, quá thời gian chờ, lỗi mạng, JSON
 
 ## Change Log
 
+- 2026-10-07 (mã dự toán): Theo quyết định người dùng cùng ngày, thêm cột `Estimate.Code` varchar(22) NOT NULL với unique index `UX_Estimate_Code` không lọc bản đã xóa; mã dạng `BUILDX-YYYYMMDD-XXXXXX` cấp lúc tạo, ngày theo giờ Việt Nam, 6 ký tự ngẫu nhiên từ 31 ký tự bỏ 0 O 1 I L; bản đã có được cấp mã theo ngày tạo gốc trong migration. POST và GET trả thêm `code`; thêm trường hợp 503 khi sinh mã trùng liên tiếp. Thêm UT-PROJ-130, UT-PROJ-131, ST-PROJ-126. Căn cứ BR-PROJ-003 khoản 12, STORY-PROJ-001/AC-025.
 - 2026-09-28 (đối chiếu code): Mục “Phần chưa triển khai” sửa khoản (2): việc kiểm xã còn thuộc tỉnh trước khi gửi AI đã có từ commit `62a626d`. Ghi ở Context & Goals rằng bốn quyết định lần 2 đã có trên `develop` ở commit `388a426`. Không đổi thiết kế.
 - 2026-09-27 (cảnh báo nguồn địa chỉ lỗi kéo dài): Theo quyết định người dùng ngày 26/09/2026 (có cảnh báo, không giới hạn tuổi bản lưu), thêm cảnh báo Discord khi provinces.open-api.vn lỗi liên tục quá `ProvincesOpenApiOption__OutageAlertAfterMinutes` (mặc định 30 phút): mỗi đợt lỗi chỉ gửi một cảnh báo, đợt đã cảnh báo thì gửi một tin khi hồi phục. Trạng thái đợt lỗi lưu trong Redis bằng script Lua để đúng khi có nhiều instance. Thêm ghi chú "Cảnh báo khi nguồn lỗi kéo dài" ở Architecture, một câu ở External API/Error Handling, bỏ mục này khỏi "Cần làm rõ trước tích hợp"; thêm UT-PROJ-067, UT-PROJ-068. Code trên nhánh `feature/provinces-outage-alert` (commit `63c7466`). Không đổi schema, không thêm migration.
 - 2026-09-26 (tên tệp sau đổi tên): Theo xác nhận của người dùng cùng ngày, đổi tên không làm tệp PDF/Excel mất hiệu lực; tên mới chỉ áp vào tên tệp tải về (TDD-PROJ-003). Sửa ghi chú ở phần đổi tên và phần kiểm chứng; `NameVersion` vẫn dùng để chống ghi đè khi đổi tên.

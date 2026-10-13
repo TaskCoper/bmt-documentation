@@ -53,6 +53,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ### Problem
 
+**Cập nhật ngày 11/10/2026:** người dùng chốt luồng bốn chặng (BR-PROJ-010). Thiết kế ở [TDD-PROJ-006](TDD-PROJ-006.md), [TDD-PROJ-007](TDD-PROJ-007.md), [TDD-PROJ-008](TDD-PROJ-008.md). Luồng một lần gửi AI của tài liệu này vẫn chạy ở môi trường chưa bật `EstimatePipelineOption__Mode` (production hiện nay) và bị gỡ ở đợt 4 khi chuyển luồng (BR-PROJ-018). Khi luồng mới bật, `POST /generations` trả 409 `PipelineEnabled`.
+
 STORY-PROJ-002 cần tiếp nhận đầu vào đã lưu, giữ một lượt, khóa sửa và chỉ tính đã dùng khi đủ kết quả đã lưu/có thể mở. AI do nhóm khác phụ trách; chưa có API, danh sách đầu ra bắt buộc, cơ chế callback/polling hoặc môi trường tích hợp. Thiết kế này hoàn thành ranh giới nội bộ và các bảo đảm dữ liệu; phần giao tiếp nhà cung cấp vẫn chờ hợp đồng. Ngày 26/09/2026 người dùng xác nhận làm trước toàn bộ phần của BMT với một adapter AI giả chạy trong tiến trình backend (không mở endpoint AI giả), xem đoạn quyết định bên dưới.
 
 TDD-SUB-002 đã thiết kế `UsageOperation`, quota và worker, nhưng vẫn dùng tên Project và thứ tự khóa User. TDD-PAY-001/TDD-SUB-005 bổ sung AccountCommerceState và vòng đời kỳ. TDD này nối Estimate vào đúng sổ lượt đó và quy định một thứ tự khóa chung; không tạo bảng quota hoặc trạng thái cuối AI thứ hai.
@@ -62,7 +64,7 @@ Người dùng xác nhận ngày 26/09/2026 về tệp: backend không có kho t
 **Đã xác nhận ngày 26/09/2026 (lần 2) — làm trước với adapter AI giả**:
 
 1. Chưa có hợp đồng API AI thật nên làm toàn bộ phần của BMT theo tài liệu này, với một cổng kết nối AI (`IEstimateAiGateway`) và một adapter giả (mock). Khi có API thật chỉ thay adapter; giữ nguyên ClaimEstimateDispatch, worker, kiểm và ghi candidate, lệnh chốt và ContractVersion. Hợp đồng của adapter giả là `mock-v1`.
-2. Adapter giả chỉ bật bằng cấu hình `EstimateAiOption__Mode=Mock` ở Development hoặc Staging. Môi trường khác mà đặt Mock thì API từ chối khởi động. Không cấu hình adapter thì yêu cầu tạo thiết kế trả 503 và không giữ lượt.
+2. Cập nhật theo yêu cầu ngày 06/10/2026: adapter giả bật bằng cấu hình `EstimateAiOption__Mode=Mock` ở Development, Staging hoặc Production. Môi trường tùy chỉnh khác mà đặt Mock thì API từ chối khởi động. Không cấu hình adapter thì yêu cầu tạo thiết kế trả 503 và không giữ lượt.
 3. Adapter giả luôn thành công, không giả lập lỗi hay chậm. Nó trả một bộ kết quả mẫu cố định theo BR-PROJ-007: ảnh bìa, mặt bằng 2D, phối cảnh, bảng dự toán (JSON giả, ghi rõ là dữ liệu mẫu), PDF và Excel. URL năm tệp mẫu đọc từ cấu hình, tệp nằm trên kho presign. Người dùng chưa upload tệp mẫu nên giá trị mặc định là URL giữ chỗ, cần thay.
 4. URL tệp kết quả của AI tạm được kiểm bằng `UploadedFileOption__AllowedHosts`. AI thật có cần danh sách tên miền riêng hay không vẫn là câu hỏi mở (Architecture/Notes).
 6. Bổ sung cùng ngày (lần 3): URL tệp AI trả về sai dạng (không phải https tuyệt đối) hoặc có tên máy chủ ngoài danh sách cho phép thì tác vụ thất bại ngay với `InvalidProviderResult` và trả lượt ở kỳ gốc. URL đúng dạng nhưng đọc thử không được (404, lỗi mạng) vẫn chờ tới hạn 15 phút rồi hết hạn với `ResultFileUnavailable`.
@@ -86,6 +88,15 @@ Người dùng xác nhận ngày 26/09/2026 về tệp: backend không có kho t
 
 ## Architecture
 
+**Tọa độ — bổ sung 01/10/2026, đã triển khai backend trên nhánh `feature/estimate-coordinates`:** US/BR và phần tọa độ của TDD-PROJ-001/002 đã được người dùng chốt trong hội thoại ngày 01/10/2026. Xác nhận này không thay trạng thái phê duyệt/import trên hệ thống tài liệu. Theo thiết kế TDD-PROJ-001, vị trí hiện tại được lưu ở `Estimate.Latitude/Longitude`; khi tiếp nhận AI, chép cả hai vào `address.latitude/longitude` của snapshot bất biến. `EstimateGenerationInputFactory.SchemaVersion` đã tăng từ 1 lên 2 và dùng record `EstimateGenerationSnapshotV2`; request gửi AI công khai vẫn chỉ có inputVersion, không nhận tọa độ mới chưa lưu. Xem [bàn giao tọa độ](../discovery/estimate-coordinates-implementation.md) về kết quả kiểm thử; chưa triển khai lên môi trường dùng chung hoặc tích hợp AI thật.
+
+- `FindMissingForGeneration`/handler kiểm tọa độ đủ và trong miền trước reserve. Nếu đầu vào nội bộ bị sai, trả 422 `InvalidGenerationInput` theo latitude/longitude, không giữ lượt. Bản tạo nhanh được có cả cặp NULL theo TDD-PROJ-001; CHECK cặp và miền chặn dữ liệu sai ở DB, còn handler chặn thiếu tọa độ trước reserve; bước kiểm trong ứng dụng bảo vệ đường dựng snapshot và báo lỗi rõ.
+- `ResolveAddressAsync` lấy cặp tọa độ từ đúng Estimate đang khóa. Khi nguồn hành chính đổi tên, chỉ cập nhật tên/phiên bản trong snapshot như hiện hành; không tự geocode lại hoặc đổi tọa độ vì tên đổi. Trong `SnapshotAddress` thêm hai số bắt buộc; factory ghi đúng cặp cùng InputVersion.
+- V2 ghi một lần tại lúc accept. J1 nhận cặp A; J1 lỗi rồi khách đổi địa chỉ sang cặp B và thử lại thì J2 giữ B, J1 vẫn A. Worker gửi Payload và SchemaVersion đã lưu; không đọc tọa độ hiện tại của Estimate để dựng lại payload.
+- Không sửa snapshot v1 lịch sử, không bổ sung tọa độ suy đoán vào payload cũ. Reader/adapter phải phân biệt SchemaVersion; đường cũ đang đọc payload thô tiếp tục đọc được v1, đường mới nhận v2. Adapter mock hiện nhận SchemaVersion và payload thô nên cần kiểm với v2; hợp đồng kết quả `mock-v1` giữ nguyên vì đây là phiên bản đầu ra, khác schema đầu vào. Hợp đồng AI thật vẫn chờ nhóm tích hợp, không tuyên bố nhà cung cấp nhận hai trường này.
+- Không thêm cột Latitude/Longitude thứ hai vào EstimateGenerationInput: cặp lịch sử nằm trong Payload jsonb cùng địa chỉ. Không tạo index JSON hoặc đổi quan hệ/FK/quota. Không mở thêm dữ liệu tọa độ trên trang chia sẻ hoặc tự sửa tệp kết quả AI.
+- Kiểm chứng bằng ST-PROJ-125 và các ca khóa đầu vào/quota hiện có. Đã bổ sung tọa độ vào UT-PROJ-023/065 và tạo UT-PROJ-127/128: kiểm snapshot v2 bất biến, giữ cặp khi nguồn hành chính đổi tên, từ chối dữ liệu sai trước reserve và worker gửi payload/schema đã lưu. Đã có mã backend và kết quả kiểm thử liên quan; xem [bàn giao tọa độ](../discovery/estimate-coordinates-implementation.md). Chưa chạy đầy đủ System Test qua FE hoặc AI thật.
+
 **Bổ sung ngày 30/09/2026 — đã triển khai trên nhánh `feature/my-estimates`, chưa triển khai lên môi trường dùng chung:** [TDD-PROJ-005](TDD-PROJ-005.md) bổ sung thứ tự giữa xóa và tiếp nhận AI: cùng khóa account rồi Estimate, kiểm DeletedAtUtc trước replay/reserve. Bản Pending chặn xóa; bản đã xóa chặn mọi generation mới. Finalizer tiếp tục đọc lịch sử nội bộ, không hồi sinh bản hoặc sửa lượt vì xóa.
 
 Tái sử dụng `UsageOperation` làm một lần sử dụng AI và nguồn trạng thái cuối. Module Estimate sở hữu đầu vào/kết quả; Subscription sở hữu kỳ, quyền, Used/Reserved và quyết định chốt lượt. Cả hai cùng PostgreSQL/DbContext, gọi service nội bộ cùng transaction thay vì gọi API HTTP giữa hai module.
@@ -93,7 +104,7 @@ Tái sử dụng `UsageOperation` làm một lần sử dụng AI và nguồn tr
 | Thành phần dự kiến | Trách nhiệm |
 |---|---|
 | RequestEstimateGenerationHandler | Xác thực owner, khóa account/bản, replay key, kiểm inputVersion, kiểm đầu vào đầy đủ bằng `IEstimateInputPolicy.FindMissingForGeneration`, kiểm địa chỉ theo dữ liệu hiện hành qua `IEstimateLocationCatalog`, kiểm quyền/quota, tạo operation cùng input snapshot. |
-| EstimateGenerationInputFactory | Tạo snapshot phiên bản nội bộ v1 từ dữ liệu đã xác minh; chỉ đưa số tầng/phong cách khi `CanSelectFloor`/`CanSelectStyle` trả true; không nhận prompt/giá/quota tùy ý của client. |
+| EstimateGenerationInputFactory | Tạo snapshot phiên bản nội bộ v2 từ dữ liệu đã xác minh (đã bổ sung tọa độ trên nhánh `feature/estimate-coordinates`, ngày 01/10/2026); chỉ đưa số tầng/phong cách khi `CanSelectFloor`/`CanSelectStyle` trả true; không nhận prompt/giá/quota tùy ý của client. |
 | IDesignUsageCoordinator | Adapter tới store/policy TDD-SUB-002; Reserve/Complete/Fail/Expire tham gia UoW của handler gọi, không commit lồng. |
 | UsageMaintenanceWorker | Worker theo TDD-SUB-002: nhận việc gửi AI, đối soát và timeout. Mỗi việc dùng scope/DbContext mới; không thêm RabbitMQ. Trong code: `EstimateGenerationWorker` (tiến trình nền) gọi `EstimateGenerationRunner` cho phần gửi, hỏi và chốt; tác vụ quá hạn do job Quartz `ExpireStaleUsageJob` có sẵn của TDD-SUB-002 trả lượt. |
 | IEstimateAiGateway | Gửi/đối chiếu trạng thái theo hợp đồng nhà cung cấp sau này. Chưa có adapter thật; hiện có adapter giả `MockEstimateAiGateway` (`mock-v1`) và adapter "chưa cấu hình" `NotConfiguredEstimateAiGateway` khi không đặt Mode. |
@@ -141,7 +152,7 @@ flowchart LR
 - Hết hạn, hủy hoặc đổi kỳ sau tiếp nhận không hủy J1. Chốt vào `UsageOperation.PeriodId/BenefitId`, không tìm kỳ mới để giảm/tăng bộ đếm. Finalizer không dùng policy “được tạo mới” để từ chối lưu kết quả của tác vụ đã được nhận.
 - **Adapter AI giả và cách thay adapter thật** (quyết định ngày 26/09/2026, Problem):
   - Adapter là lớp trong tiến trình backend, cài cổng `IEstimateAiGateway`, không phải một endpoint HTTP giả. Cổng có bốn phần: `IsConfigured`, `ContractVersion`, `SupportsLookupByOperationId` (AI tra được tác vụ theo mã BMT khi chưa có mã lần xử lý), `SubmitAsync` trả Accepted/Completed/Rejected/NotDelivered và `PollAsync` trả Running/Completed/Failed/NotFound. Kết quả là `EstimateAiResult` gồm operationId, providerAttemptId, contractVersion, payload JSON và danh sách `{roleKey, ordinal, fileUrl}`.
-  - Chọn adapter bằng `EstimateAiOption__Mode`. Trống: đăng ký `NotConfiguredEstimateAiGateway`, không chạy worker, `IEstimateGenerationAvailability` trả "chưa sẵn sàng" nên POST generations trả 503 `DependencyUnavailable` trước khi giữ lượt. `IEstimateGenerationAvailability` cũng trả "chưa sẵn sàng" khi `UploadedFileOption__AllowedHosts` trống (`IUploadedFileUrlPolicy.IsConfigured`), kể cả khi đã bật Mock. `Mock`: đăng ký `MockEstimateAiGateway`, hợp đồng `MockEstimateResultContract` và worker. `AddEstimateAiInfrastructure` kiểm Mode lúc khởi động: giá trị lạ, hoặc `Mock` ngoài Development/Staging, thì ném lỗi để API dừng khởi động.
+  - Chọn adapter bằng `EstimateAiOption__Mode`. Trống: đăng ký `NotConfiguredEstimateAiGateway`, không chạy worker, `IEstimateGenerationAvailability` trả "chưa sẵn sàng" nên POST generations trả 503 `DependencyUnavailable` trước khi giữ lượt. `IEstimateGenerationAvailability` cũng trả "chưa sẵn sàng" khi `UploadedFileOption__AllowedHosts` trống (`IUploadedFileUrlPolicy.IsConfigured`), kể cả khi đã bật Mock. `Mock`: đăng ký `MockEstimateAiGateway`, hợp đồng `MockEstimateResultContract` và worker. `AddEstimateAiInfrastructure` kiểm Mode lúc khởi động: giá trị lạ, hoặc `Mock` ngoài Development/Staging/Production, thì ném lỗi để API dừng khởi động.
   - Adapter giả không giữ trạng thái: gửi luôn trả Accepted với mã lần xử lý `mock-{operationId}`; hỏi (theo mã lần xử lý hay theo mã tác vụ) luôn trả cùng một bộ kết quả `mock-v1`. Payload có `isSample=true`, ghi chú là dữ liệu mẫu, ba phần `rough`/`finishing`/`interior`, `total` và `consultation`; số tiền là số giả cố định, không lấy từ website mẫu và không phụ thuộc đầu vào. Năm tệp có vai trò `cover-image`, `floor-plan-2d`, `perspective`, `dossier-pdf`, `estimate-xlsx`, URL đọc từ `EstimateAiOption__Mock__CoverImageUrl`, `__FloorPlanUrl`, `__PerspectiveUrl`, `__DossierPdfUrl`, `__EstimateXlsxUrl`. Mặc định là URL giữ chỗ `https://bmt.hcm.ss.bfcplatform.vn/mock-ai/v1/...`, chưa có tệp. Backend vẫn kiểm tên máy chủ và đọc thử từng URL như với AI thật, nên chừng nào chưa upload tệp mẫu thì tác vụ không thành công và hết hạn với `ResultFileUnavailable`. Đây là hành vi đúng của bước kiểm tệp.
   - Worker nhận kết quả ở lượt quét sau lần gửi (mặc định cách nhau `EstimateAiOption__PollIntervalSeconds=5` giây), nên luồng vẫn bất đồng bộ như thật dù adapter không có độ trễ.
   - Khi có API thật: thêm một giá trị Mode, viết adapter cài `IEstimateAiGateway` và một `IEstimateResultContract` cho ContractVersion của đối tác, rồi đăng ký trong `AddEstimateAiInfrastructure`. Handler tiếp nhận, worker, bước kiểm và ghi candidate, lệnh chốt và schema giữ nguyên. Adapter giả không chứng minh hợp đồng thật; kết quả chạy với nó chỉ là kết quả với giả lập.
@@ -171,7 +182,7 @@ sequenceDiagram
     participant FS as Tệp do AI lưu (URL)
     C->>API: POST generation, key, inputVersion
     API->>L: PrepareAsync, lấy phiên bản hiện hành (trước khi khóa)
-    API->>DB: Khóa account và dữ liệu; kiểm owner/key/input/quota
+    API->>DB: Khóa account và dữ liệu, kiểm owner/key/input/quota
     API->>L: VerifyAsync nếu LocationDatasetVersion khác bản hiện hành
     L-->>API: Mã và tên xã hiện hành, hoặc NULL thì trả 422 wardCode
     API->>DB: Snapshot + Pending + Reserved tăng 1
@@ -182,7 +193,7 @@ sequenceDiagram
     AI-->>W: Kết quả đúng attempt kèm URL tệp, hoặc lỗi
     W->>FS: Đọc thử từng URL tệp, không lưu bản sao
     W->>DB: Ghi candidate gồm payload và URL tệp
-    W->>DB: Khóa lại theo thứ tự; kiểm state và deadline
+    W->>DB: Khóa lại theo thứ tự, kiểm state và deadline
     alt Pending và trước hạn, đủ kết quả
       W->>DB: ResultRef + Succeeded + Reserved giảm + Used tăng
       DB-->>W: Commit công bố
@@ -252,7 +263,7 @@ Partial unique của TDD-SUB-002 dùng index đã có trong code: `UX_UsageOpera
 
 Kết quả JSON chưa có schema nhà cung cấp nên không chốt cấu trúc tiền/bản vẽ giả. ContractVersion gắn với validator và mapper đã triển khai trước khi bật tích hợp. Các trường được dùng cho FK/quyền/trạng thái không nằm riêng trong JSON. Payload là nội dung chuyên môn bất biến để đọc/xuất; không tạo GIN index khi chưa có truy vấn phần tử. Không dùng `jsonb` để né ràng buộc quota.
 
-**Snapshot nội bộ v1** gồm `estimateId,inputVersion,catalogRevisionId,buildingType{id,name},areaM2,description,address{datasetVersion,provinceCode,provinceName,wardCode,wardName,detail},finishPackage,floorCount,hasTum,architectureStyle{id,name,imageUrl}|null,interiorStyle{...}|null,inputImageUrl|null`. ID đều từ DB đã kiểm; areaM2 chuỗi thập phân theo TDD-PROJ-001. `address` lấy theo dữ liệu địa chỉ hiện hành sau bước kiểm ở Architecture/Notes: `datasetVersion` là phiên bản hiện hành, tên tỉnh/xã là tên mới nếu nguồn đã đổi tên. `imageUrl` lấy từ `CatalogStyle.ImageUrl` của revision đã ghim, `inputImageUrl` từ `Estimate.InputImageUrl`; cả hai đã được kiểm theo `UploadedFileOption__AllowedHosts` khi lưu. Đây là contract nội bộ BMT, không khẳng định AI chấp nhận payload này. Adapter chuyển ID/ảnh sang format được đối tác xác nhận, giữ đúng nghĩa NULL của nhóm không chọn. `buildingType.name` và tên phong cách là tên lựa chọn trong revision đã ghim; tên bản dự toán (`Estimate.Name`) không có trong snapshot.
+**Snapshot nội bộ v2 — đã bổ sung tọa độ trong mã backend ngày 01/10/2026** gồm `estimateId,inputVersion,catalogRevisionId,buildingType{id,name},areaM2,description,address{datasetVersion,provinceCode,provinceName,wardCode,wardName,detail,latitude,longitude},finishPackage,floorCount,hasTum,architectureStyle{id,name,imageUrl}|null,interiorStyle{...}|null,inputImageUrl|null`. ID đều từ DB đã kiểm; areaM2 chuỗi thập phân theo TDD-PROJ-001. `address` lấy theo dữ liệu địa chỉ hiện hành sau bước kiểm ở Architecture/Notes: `datasetVersion` là phiên bản hiện hành, tên tỉnh/xã là tên mới nếu nguồn đã đổi tên. `imageUrl` lấy từ `CatalogStyle.ImageUrl` của revision đã ghim, `inputImageUrl` từ `Estimate.InputImageUrl`; cả hai đã được kiểm theo `UploadedFileOption__AllowedHosts` khi lưu. Đây là contract nội bộ BMT, không khẳng định AI chấp nhận payload này. Adapter chuyển ID/ảnh sang format được đối tác xác nhận, giữ đúng nghĩa NULL của nhóm không chọn. `buildingType.name` và tên phong cách là tên lựa chọn trong revision đã ghim; tên bản dự toán (`Estimate.Name`) không có trong snapshot.
 
 ```mermaid
 erDiagram
@@ -274,7 +285,7 @@ Sơ đồ UsageOperation có cả loại TemplateDetail nên quan hệ Input/Res
 | AccountCommerceState dùng lại | AccountId=U1; các cột thứ tự đơn giữ nguyên. Luồng dự toán chỉ lấy khóa, không thay thứ tự mua. |
 | PeriodQuota dùng lại, trước nhận | PeriodId=P1; BenefitId=BGEN; IsUnlimited=false; Limit=3; Used=0; Reserved=0. |
 | UsageOperation — J1 | Id=J1; AccountId=U1; EstimateId=ResourceId=D1; UsageKind=DesignGeneration; PeriodId=P1; BenefitId=BGEN; OperationKey=gen-1; RequestHash=H1; State=Pending; AcceptedAtUtc=2026-09-21T03:00:00Z; DeadlineUtc=2026-09-21T03:10:00Z; SettledAtUtc=NULL; InputRef=estimate-input:J1; ResultRef=NULL; DispatchState=NotStarted; DispatchLeaseToken=NULL. |
-| EstimateGenerationInput | OperationId=J1; AccountId=U1; EstimateId=D1; InputVersion=7; SchemaVersion=1; CatalogRevisionId=V1; InputImageUrl=NULL; CreatedAtUtc=03:00Z; Payload chứa snapshot đầy đủ, areaM2="70.25", description="Nhà hai phòng ngủ", hai phong cách K1/N1 hợp lệ kèm `imageUrl` của từng phong cách (ví dụ https://cdn.example.test/style/k1.jpg theo mẫu của TDD-PROJ-001), `inputImageUrl`=null; không có tên bản dự toán. NULL ảnh được phép vì có mô tả. Giả sử D1 lưu LocationDatasetVersion=pov2-3f9c0a1b2c4d5e6f nhưng phiên bản hiện hành đã là pov2-9a8b7c6d5e4f3a2b (bí danh) và xã mã 4 đổi tên: VerifyAsync vẫn trả mã 4 thuộc tỉnh 1 kèm tên mới, nên Payload ghi datasetVersion mới và tên mới; cột địa chỉ của D1 giữ nguyên. Nếu mã 4 không còn thì không có dòng này: yêu cầu bị 422 trường `wardCode`, không giữ lượt. Nếu khách đổi tên D1 trong lúc J1 Pending, dòng này và InputVersion=7 giữ nguyên; chỉ D1.Name/NameVersion đổi. |
+| EstimateGenerationInput | OperationId=J1; AccountId=U1; EstimateId=D1; InputVersion=7; SchemaVersion=2; CatalogRevisionId=V1; InputImageUrl=NULL; CreatedAtUtc=03:00Z; Payload chứa snapshot đầy đủ, address.latitude=21.034, address.longitude=105.815 lấy từ D1 lúc nhận; areaM2="70.25", description="Nhà hai phòng ngủ", hai phong cách K1/N1 hợp lệ kèm `imageUrl` của từng phong cách (ví dụ https://cdn.example.test/style/k1.jpg theo mẫu của TDD-PROJ-001), `inputImageUrl`=null; không có tên bản dự toán. NULL ảnh được phép vì có mô tả. Giả sử D1 lưu LocationDatasetVersion=pov2-3f9c0a1b2c4d5e6f nhưng phiên bản hiện hành đã là pov2-9a8b7c6d5e4f3a2b (bí danh) và xã mã 4 đổi tên: VerifyAsync vẫn trả mã 4 thuộc tỉnh 1 kèm tên mới, nên Payload ghi datasetVersion mới và tên mới; cột địa chỉ của D1 giữ nguyên. Nếu mã 4 không còn thì không có dòng này: yêu cầu bị 422 trường `wardCode`, không giữ lượt. Nếu khách đổi tên D1 trong lúc J1 Pending, dòng này và InputVersion=7 giữ nguyên; chỉ D1.Name/NameVersion đổi. |
 | PeriodQuota — sau nhận | P1/BGEN: Used=0; Reserved=1; available đọc ra 2. |
 | UsageOperation — đã gửi | J1: DispatchState=Sent; ProviderAttemptId=provider-j1; lease đã nhả. Không tăng Used. |
 | EstimateGenerationResult — candidate | OperationId=J1; EstimateId=D1; ProviderAttemptId=provider-j1; ContractVersion=partner-contract-test-v1; Payload={...nội dung fixture theo schema đối tác...}; PayloadHash=HR1; StoredAtUtc=03:02Z; ReadVerifiedAtUtc=03:02:01Z. Đây là ký hiệu dữ liệu mẫu, không JSON gửi được hoặc schema giả định. |
@@ -359,7 +370,7 @@ Error Response:
 - **IdempotencyConflict** (409): cùng key nhưng đổi nội dung yêu cầu.
 - **GenerationInProgress** (409): một operation khác còn Pending.
 - **EstimateAlreadyGenerated** (409): bản đã thành công, không nhận phương án mới.
-- **InvalidGenerationInput** (422): thiếu hoặc sai đầu vào theo revision đã ghim (theo `FindMissingForGeneration`), hoặc xã đã lưu không còn trong dữ liệu địa chỉ hiện hành hay không còn thuộc tỉnh đã chọn (trường `wardCode`); trả lỗi theo trường, không giữ lượt.
+- **InvalidGenerationInput** (422): tọa độ không hợp lệ hoặc thiếu, hoặc thiếu/sai đầu vào theo revision đã ghim (theo `FindMissingForGeneration`), hoặc xã đã lưu không còn trong dữ liệu địa chỉ hiện hành hay không còn thuộc tỉnh đã chọn (trường `wardCode`); trả lỗi theo trường, không giữ lượt.
 - **DependencyUnavailable** (503): AI/contract/cấu hình timeout chưa sẵn sàng trước accept, `UploadedFileOption__AllowedHosts` trống (quyết định ngày 26/09/2026, phương án C), hoặc nguồn địa chỉ lỗi khi chưa có bản lưu nào. Không giữ lượt, không tạo tác vụ.
 
 GenerationTimedOut, ProviderRejected, InvalidProviderResult (kết quả sai hợp đồng, gồm URL tệp sai dạng hoặc ngoài danh sách tên máy chủ), ResultFileUnavailable (URL tệp kết quả đúng dạng nhưng không mở được tới hạn) là failureCode của operation khi được xác định, không phải HTTP 500 cho GET trạng thái. Mã provider cụ thể chỉ map sau khi có hợp đồng; không đẩy raw message về khách.
@@ -369,7 +380,7 @@ GenerationTimedOut, ProviderRejected, InvalidProviderResult (kết quả sai h�
 ### Endpoints
 
 - **AI service — chờ tích hợp** — Chưa biết base URL, method/path, xác thực, submit/status/result, webhook hay polling. Không mở callback công khai trước khi có cơ chế xác thực và chống phát lại được xác nhận với nhóm AI.
-- **Adapter AI giả mock-v1 — trong tiến trình, chỉ Development/Staging** — Bật bằng `EstimateAiOption__Mode=Mock`; không gọi mạng. Gửi luôn được nhận, hỏi luôn trả bộ kết quả mẫu cố định (Architecture/Notes). Dùng để chạy trọn luồng của BMT trước khi có hợp đồng; không thay kiểm thử với AI thật.
+- **Adapter AI giả mock-v1 — trong tiến trình, Development/Staging/Production** — Bật bằng `EstimateAiOption__Mode=Mock`; không gọi mạng. Gửi luôn được nhận, hỏi luôn trả bộ kết quả mẫu cố định (Architecture/Notes). Dùng để chạy trọn luồng của BMT trước khi có hợp đồng; không thay kiểm thử với AI thật.
 - **Tệp kết quả của AI — đọc qua URL** — AI trả URL cho mọi tệp kết quả, kể cả PDF và Excel. Backend lưu URL, đọc thử trước khi chốt và chuyển tiếp nội dung khi khách tải (TDD-PROJ-003); không ghi tệp vào kho riêng. Chưa biết URL có hết hạn, cần xác thực hay nằm ở tên miền nào.
 - **Ảnh đầu vào gửi AI — URL công khai** — AI tự tải ảnh từ `inputImageUrl` và `imageUrl` trong snapshot. Các URL này thuộc kho presign và đã kiểm tên miền khi lưu (TDD-PROJ-001); người dùng đã chấp nhận ảnh đầu vào nằm ở URL công khai.
 
@@ -392,7 +403,7 @@ Mất phản hồi gửi không tương đương provider từ chối. Quy trìn
 - Tắt nhóm chọn phong cách không tắt nhóm output; BMT không kiểm entitlement 3D để cắt output trong phạm vi hiện tại.
 - Provider báo completed chưa đủ: BMT phải kiểm đủ và mọi URL tệp mở được. Nếu PDF/Excel được AI tạo sau thành công, việc đó không được biến thành operation AI tính lượt mới.
 - URL tệp của AI có thể hết hạn hoặc bị xóa phía AI; backend không giữ bản sao nên khi đó hồ sơ không tải được, dù kết quả vẫn Succeeded và lượt không hoàn lại.
-- Thiếu hợp đồng làm phần tích hợp chưa thể triển khai hoàn chỉnh; mock chỉ dành môi trường thử. Không trả số tiền/ảnh của website mẫu để lấp kết quả.
+- Thiếu hợp đồng làm phần tích hợp AI thật chưa thể triển khai hoàn chỉnh; người dùng cho phép dùng mock ở Production ngày 06/10/2026, kết quả vẫn ghi rõ `isSample=true`. Không trả số tiền/ảnh của website mẫu để lấp kết quả.
 - Adapter giả luôn thành công nên không tạo được nhánh AI từ chối hay AI trả sai hợp đồng; các nhánh đó chỉ kiểm bằng test với bản giả điều khiển được. Nhánh URL tệp không mở được tạo được bằng URL tệp mẫu chưa có tệp.
 
 ## References
@@ -427,6 +438,11 @@ Mất phản hồi gửi không tương đương provider từ chối. Quy trìn
 
 ### Others
 
+- UT-PROJ-023/Unit Test
+- UT-PROJ-065/Unit Test
+- UT-PROJ-127/Unit Test
+- UT-PROJ-128/Unit Test
+- ST-PROJ-125/System Test
 - TDD-PROJ-001/Data Model
 - TDD-PROJ-001/Architecture
 - TDD-PROJ-003/Data Model
@@ -437,6 +453,8 @@ Mất phản hồi gửi không tương đương provider từ chối. Quy trìn
 - [TransactionPipelineBehavior](../../bmt-be/src/bmt-be.application/behaviors/TransactionPipelineBehavior.cs), [EfUnitOfWork](../../bmt-be/src/bmt-be.persistence/repositories/EFUnitOfWork.cs).
 
 ## Change Log
+
+- 2026-10-06: Theo yêu cầu người dùng, cho phép `EstimateAiOption__Mode=Mock` ở Production cùng Development/Staging, thay quy định chặn Production ngày 26/09/2026. Adapter trả bộ dữ liệu `mock-v1` cố định có `isSample=true`, dự toán 200.000.000 VND, tư vấn và năm URL tệp từ cấu hình. Luồng bất đồng bộ, kiểm URL/tệp, quyền và quyết toán lượt giữ nguyên. Cập nhật UT-PROJ-064, UT-PROJ-066 và ST-PROJ-072.
 
 - 2026-09-28 (đối chiếu code): Sửa hiện trạng code ở Context & Goals: thiết kế đã merge vào `develop`; route đọc kết quả của TDD-PROJ-003 đã có (commit `f8a7ffa`); URL tệp mẫu của adapter giả đã khai trong compose. Adapter AI thật vẫn chưa có. Không đổi thiết kế.
 - 2026-09-26 (TDD-PROJ-003): Ghi các thay đổi ở phần dùng chung khi triển khai TDD-PROJ-003 (commit `f8a7ffa`): `IEstimateResultFileClient.OpenAsync`, kiểm tên máy chủ trên mọi lần đọc tệp, `IEstimateResultContract.ProjectDossier`/`ExportFileRole`, hợp đồng `mock-v1` luôn được đăng ký; route kết quả mà `resultUrl` trỏ tới đã có. Nghiệp vụ và luồng gửi AI không đổi.

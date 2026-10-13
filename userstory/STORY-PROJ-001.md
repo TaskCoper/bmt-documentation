@@ -40,7 +40,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 ## Metadata
 
 - **Story**: Là khách hàng, tôi muốn tạo dự toán và được tự lưu thông tin đang nhập để có thể quay lại hoàn thiện đầu vào thiết kế.
-- **Context**: Nhóm tính năng có tên Tạo dự toán; đối tượng được tạo và lưu gọi là bản dự toán. Mã STORY-PROJ-*** được giữ để bảo toàn tham chiếu. Đây là đổi tên nghiệp vụ, không đổi phạm vi thiết kế, dự toán và hồ sơ thi công đã chốt. Bản nháp cho phần tạo và lưu đầu vào trong tính năng gồm ba bước nhập liệu, nhận dự toán và hồ sơ thi công. Backend hiện chỉ có tài khoản/xác thực. AI service do bên khác phụ trách, chờ tích hợp. Người dùng đã chốt bộ US/BR trong hội thoại. Hợp đồng AI, thiết kế kỹ thuật và metadata phân công còn thiếu; xác nhận nghiệp vụ không có nghĩa đã triển khai hoặc phê duyệt trên hệ thống quản lý tài liệu.
+- **Context**: Nhóm tính năng có tên Tạo dự toán; đối tượng được tạo và lưu gọi là bản dự toán. Mã STORY-PROJ-*** được giữ để bảo toàn tham chiếu. Đây là đổi tên nghiệp vụ, không đổi phạm vi thiết kế, dự toán và hồ sơ thi công đã chốt. Bản nháp cho phần tạo và lưu đầu vào trong tính năng gồm ba bước nhập liệu, nhận dự toán và hồ sơ thi công. Ngày 11/10/2026 người dùng chốt chuyển sang luồng bốn chặng theo app demo `design-estimate`: giữ biểu mẫu hiện có, xử lý theo cách “Tải ảnh lô đất + mô tả”; ảnh lô đất bắt buộc và được AI soi ngay khi tải; thêm số phòng ngủ, gara, cạnh có cửa vào; bỏ Diện tích, thay bằng mặt tiền × chiều sâu không bắt buộc. Metadata phân công còn thiếu; xác nhận nghiệp vụ không có nghĩa đã triển khai hoặc phê duyệt trên hệ thống quản lý tài liệu.
 - **Sprint**: [Chưa xác định]
 - **Priority**: Must
 - **Status**: Todo
@@ -67,14 +67,14 @@ Khách chọn Tạo dự toán mới hoặc mở lại bản dự toán đang ch
 
 ### Main Flow
 
-1. Khách nhập tên bắt buộc, tối đa 200 ký tự sau khi bỏ khoảng trắng đầu/cuối, rồi thực hiện thao tác tạo dự toán theo BR-PROJ-003.
-2. Backend kiểm tra điều kiện tạo theo BR-RBAC-005 và BR-SUB-007, sau đó tạo dự toán để khách nhập tiếp. Chưa yêu cầu đủ thông tin dùng để gửi AI.
-3. Khách chọn loại công trình từ danh mục do Admin quản lý và nhập trường Diện tích chung, đơn vị m², theo BR-PROJ-001.
-4. Khách cung cấp tối đa một ảnh JPG/PNG/HEIC không vượt 10 MB, hoặc Mô tả chi tiết không vượt 500 ký tự, hoặc cả hai, theo BR-PROJ-002. Mô tả chi tiết dùng để gửi AI khi khách cung cấp; không có trường ghi chú riêng.
-5. Khách nhập địa chỉ và chọn gói hoàn thiện/nội thất. Thông tin phong cách kiến trúc và phong cách nội thất được tách riêng; số tầng và tum áp dụng theo cấu hình loại công trình tại BR-PROJ-004. Chỉ cho chọn những nhóm phong cách được bật theo loại; AI vẫn trả đủ kết quả dù một nhóm lựa chọn bị tắt. Trước khi gửi AI, mỗi nhóm được bật phải có đúng một phong cách hợp lệ; bản nháp vẫn được phép chưa chọn đủ.
+1. Khách nhập tên bắt buộc, tối đa 200 ký tự sau khi bỏ khoảng trắng đầu/cuối, rồi tạo nhanh bằng tên. Không cần chờ bản đồ hoặc gửi kinh độ, vĩ độ theo BR-PROJ-003.
+2. Backend kiểm tên, cặp tọa độ nếu có theo BR-PROJ-003, cùng điều kiện tạo theo BR-RBAC-005 và BR-SUB-007. Khi hợp lệ, tạo bản để khách nhập tiếp; chưa có tọa độ thì lưu cả hai NULL, không tự điền số 0.
+3. Khách chọn loại công trình từ danh mục do Admin quản lý. Khách có thể nhập kích thước lô gồm mặt tiền và chiều sâu (mét) theo BR-PROJ-001; hai ô không bắt buộc.
+4. Khách tải một ảnh lô đất JPG/PNG/WebP không vượt 10 MiB, tối thiểu 640×480, theo BR-PROJ-002. Backend đọc ảnh từ kho, kiểm tra rồi cho AI soi theo BR-PROJ-015; khách thấy kết quả Đạt hoặc Không đạt kèm lý do. Khi ảnh soi Đạt, khách xác nhận cạnh có cửa vào bên cạnh ảnh thu nhỏ; mặc định Trái, không bắt buộc bấm (BR-PROJ-002 khoản 5). Khách có thể nhập Mô tả chi tiết không bắt buộc, tối đa 4.000 ký tự; không có trường ghi chú riêng.
+5. Khách nhập địa chỉ, số phòng ngủ mong muốn (1–10, bắt buộc trước khi chạy 2D), chọn có gara ô tô hay không và chọn gói hoàn thiện/nội thất (mặc định Tiêu chuẩn). Thông tin phong cách kiến trúc và phong cách nội thất được tách riêng; số tầng (1–4) và tum áp dụng theo cấu hình loại công trình tại BR-PROJ-004. Chỉ cho chọn những nhóm phong cách được bật theo loại; AI vẫn trả đủ kết quả dù một nhóm lựa chọn bị tắt. Trước khi gửi AI, mỗi nhóm được bật phải có đúng một phong cách hợp lệ; bản nháp vẫn được phép chưa chọn đủ.
 6. Các thay đổi được tự lưu theo BR-PROJ-003. Backend kiểm tra lại quyền truy cập, điều kiện lưu và khóa đầu vào theo BR-PROJ-005 tại từng yêu cầu; bản nháp được phép chưa đủ dữ liệu.
 7. Khi khách mở lại bản dự toán, hệ thống trả dữ liệu đã lưu thành công và cấu hình đã áp dụng cho bản dự toán để khách tiếp tục nhập. Thay đổi danh mục/cấu hình của Admin không làm mất lựa chọn hoặc thay điều kiện đầu vào của bản dự toán cũ theo BR-PROJ-004.
-8. Luồng này kết thúc ở thông tin đầu vào đã lưu. Gửi AI, tiếp nhận kết quả và cung cấp hồ sơ thuộc các phần tiếp theo của tính năng, chưa có hợp đồng tích hợp.
+8. Luồng này kết thúc ở thông tin đầu vào đã lưu. Tạo bản vẽ 2D và các chặng sau thuộc STORY-PROJ-002, STORY-PROJ-008, STORY-PROJ-009 và STORY-PROJ-010.
 
 ### Alternative Flow
 
@@ -87,16 +87,16 @@ Khách rời biểu mẫu trước khi nhập đủ dữ liệu.
 
 #### ALT-02
 
-Khách chỉ cung cấp ảnh hoặc chỉ cung cấp mô tả.
+Khách tải ảnh lô đất nhưng không nhập mô tả.
 
 1. Lưu dữ liệu được cung cấp khi yêu cầu lưu đáp ứng các điều kiện áp dụng.
-2. Không yêu cầu bổ sung loại còn lại chỉ để đáp ứng điều kiện có ít nhất ảnh hoặc mô tả.
+2. Không yêu cầu nhập mô tả; ảnh lô đã soi Đạt cùng các ô bắt buộc là đủ điều kiện đầu vào cho chặng 2D theo BR-PROJ-002.
 
 #### ALT-03
 
 Khách chọn loại công trình được cấu hình không chọn số tầng và tum, như Căn hộ trên trang mẫu.
 
-1. Dùng trường Diện tích chung, không thêm trường diện tích đất.
+1. Căn hộ luôn là một sàn theo BR-PROJ-004 khoản 22; ảnh lô là bản vẽ mặt bằng căn hộ.
 2. Không yêu cầu số tầng hoặc tum khi cấu hình loại không có các trường này. Hai phần lựa chọn phong cách áp dụng BR-PROJ-004; cấu hình lựa chọn không thu hẹp bộ kết quả AI.
 
 #### ALT-04
@@ -105,15 +105,23 @@ Khách đổi loại công trình trong bản nháp khi còn đủ điều kiệ
 
 1. Khách chọn loại khác trong danh mục đã áp dụng khi tạo bản dự toán. Không cho chọn loại được Admin thêm sau đó; muốn dùng loại mới thêm phải tạo bản dự toán mới. Đối chiếu phong cách của từng nhóm, số tầng và tum với cấu hình loại được chọn áp dụng cho bản dự toán.
 2. Giữ lựa chọn còn hợp lệ; xóa lựa chọn không phù hợp hoặc thuộc trường không áp dụng. Không chuyển phong cách kiến trúc sang nội thất hoặc ngược lại.
-3. Giữ nguyên diện tích, địa chỉ, ảnh và mô tả. Tự lưu bản nháp theo điều kiện hiện hành; khách cần chọn lại phần bắt buộc còn thiếu trước khi gửi AI.
+3. Giữ nguyên kích thước lô, địa chỉ, ảnh lô cùng kết quả soi, mô tả, số phòng ngủ, gara và cạnh có cửa vào. Tự lưu bản nháp theo điều kiện hiện hành; khách cần chọn lại phần bắt buộc còn thiếu trước khi chạy chặng 2D.
 
 #### ALT-05
 
 Khách đổi tỉnh/thành trong bản nháp khi còn đủ điều kiện lưu.
 
 1. Xóa xã/phường đã chọn và cung cấp lựa chọn thuộc tỉnh/thành mới.
-2. Giữ địa chỉ chi tiết để khách tự sửa; tự lưu theo điều kiện hiện hành.
-3. Yêu cầu chọn lại xã/phường hợp lệ trước khi gửi AI; chưa chọn lại vẫn được lưu như bản nháp chưa đầy đủ.
+2. Giữ địa chỉ chi tiết để khách tự sửa. Frontend lấy lại kinh độ và vĩ độ từ bản đồ cho địa chỉ đang sửa; gửi đủ cả hai cùng lần tự lưu theo BR-PROJ-004 khoản 18.
+3. Yêu cầu chọn lại xã/phường hợp lệ trước khi chạy chặng 2D; chưa chọn lại vẫn được lưu như bản nháp chưa đầy đủ nếu có đủ tọa độ và đáp ứng các điều kiện lưu khác.
+
+#### ALT-06
+
+Khách đổi địa chỉ khi bản dự toán còn được phép sửa.
+
+1. Khi tỉnh/thành, xã/phường hoặc địa chỉ chi tiết thay đổi, frontend gọi bản đồ lấy lại kinh độ và vĩ độ cho địa chỉ đang sửa.
+2. Frontend gửi địa chỉ cùng đủ cặp tọa độ trong một yêu cầu lưu. Backend kiểm tra điều kiện lưu và lưu địa chỉ, tọa độ cùng nhau theo BR-PROJ-003 khoản 11 và BR-PROJ-004 khoản 18.
+3. Khi mở lại bản dự toán, trả địa chỉ và tọa độ của lần lưu thành công đó.
 
 ### Exception Flow
 
@@ -138,7 +146,7 @@ Một lần tự lưu không thành công.
 
 1. Không xác nhận đã lưu cho phần thay đổi chưa được backend lưu thành công.
 2. Nếu lỗi do mất mạng hoặc máy chủ, giữ nội dung đang nhập khi trang còn mở, báo chưa lưu và có nút Thử lại; tự thử lưu lại khi kết nối phục hồi theo BR-PROJ-003.
-3. Mỗi yêu cầu thử lại kiểm tra lại quyền/gói/lượt, dữ liệu và trạng thái khóa. Không tự thử lại yêu cầu bị từ chối do không đủ quyền/gói/lượt; không tự gửi lại AI.
+3. Mỗi yêu cầu thử lại kiểm tra lại quyền/gói/lượt, dữ liệu và trạng thái khóa. Không tự thử lại yêu cầu bị từ chối do không đủ quyền/gói/lượt; không tự chạy lại chặng nào.
 4. Sau khi đóng hoặc tải lại trang, chỉ trả dữ liệu đã lưu thành công; không hỗ trợ khôi phục phần chưa lưu.
 
 #### EXC-04
@@ -147,15 +155,52 @@ Khách thay ảnh nhưng tải lên hoặc lưu ảnh mới thất bại.
 
 1. Giữ ảnh cũ đang gắn với bản dự toán, báo thay ảnh chưa thành công.
 2. Chỉ thay ảnh cũ sau khi ảnh mới hợp lệ, tải lên và lưu thay thế thành công; bản dự toán vẫn chỉ có một ảnh đầu vào.
-3. Nếu chưa có ảnh cũ, bản dự toán vẫn chưa có ảnh hợp lệ; điều kiện có ít nhất ảnh hoặc mô tả vẫn áp dụng trước khi gửi AI.
+3. Nếu chưa có ảnh cũ, bản dự toán vẫn chưa có ảnh lô hợp lệ và chưa đủ điều kiện chạy chặng 2D.
+
+#### EXC-05
+
+Yêu cầu tạo gửi một tọa độ nhưng thiếu tọa độ còn lại, hoặc giá trị không hợp lệ.
+
+1. Tạo nhanh không cần gọi bản đồ. Nếu chọn gửi tọa độ, frontend gửi đủ cặp hợp lệ.
+2. Backend từ chối cặp không đầy đủ hoặc sai giá trị theo BR-PROJ-003 khoản 10. Bỏ cả hai hoặc gửi cả hai null vẫn được tạo nhanh.
+3. Không khởi chạy AI và không giữ/trừ lượt; khách sửa cặp sai hoặc bỏ cả hai để tạo nhanh.
+
+#### EXC-06
+
+Khách đổi địa chỉ nhưng frontend chưa lấy được đủ tọa độ từ bản đồ, hoặc yêu cầu lưu gửi lên thiếu tọa độ.
+
+1. Frontend chưa gửi lần lưu thay đổi địa chỉ khi chưa có đủ kinh độ và vĩ độ từ bản đồ.
+2. Nếu yêu cầu lưu đổi địa chỉ vẫn được gửi trực tiếp mà thiếu một hoặc cả hai tọa độ, backend từ chối yêu cầu và giữ nguyên dữ liệu đã lưu, gồm địa chỉ và tọa độ cũ.
+3. Không báo đã lưu cho thay đổi bị từ chối. Khách cần có đủ cặp tọa độ trước khi gửi lại; quyền/gói/lượt và khóa đầu vào vẫn được kiểm tra ở lần gửi lại.
+
+#### EXC-07
+
+Ảnh lô vừa tải có kết quả soi Không đạt, hoặc chưa soi được do dịch vụ AI lỗi.
+
+1. Hiển thị kết quả kèm lý do theo BR-PROJ-015; ảnh vẫn được lưu vào bản nháp.
+2. Bản dự toán chưa đủ điều kiện chạy chặng 2D. Khách thay ảnh khác, hoặc bấm soi lại khi lỗi do dịch vụ AI.
+
+#### EXC-08
+
+Tài khoản đã dùng hết hạn mức soi ảnh mới trong ngày (mặc định 30).
+
+1. Từ chối soi ảnh mới và báo khách thử lại vào ngày hôm sau theo BR-PROJ-015 khoản 7.
+2. Ảnh đã từng soi trong cùng tài khoản vẫn dùng lại kết quả cũ, không tính vào hạn mức.
+
+#### EXC-09
+
+Cả hệ thống đã đạt trần số lần soi mới trong ngày, hoặc dịch vụ AI soi ảnh đang tạm ngắt.
+
+1. Từ chối soi ảnh mới, báo hệ thống đang bận và gợi ý thử lại sau theo BR-PROJ-015 khoản 10–11; không tính vào hạn mức của tài khoản.
+2. Ảnh đã từng soi trong cùng tài khoản vẫn dùng lại kết quả cũ.
 
 ## Acceptance Criteria
 
 #### AC-001
 
-- **Given**: Khách đáp ứng điều kiện tạo dự toán và đã nhập tên.
+- **Given**: Khách đáp ứng điều kiện tạo dự toán và đã nhập tên hợp lệ.
 - **When**: Khách thực hiện thao tác tạo.
-- **Then**: Bản dự toán được tạo để nhập thông tin chi tiết dù chưa có diện tích, ảnh hoặc mô tả thiết kế.
+- **Then**: Bản dự toán được tạo dù chưa có tọa độ, ảnh lô, mô tả, số phòng ngủ hay kích thước lô. Tọa độ chưa có được lưu NULL.
 - **And**: Chưa khởi chạy AI và không giữ/trừ lượt vì tạo dự toán.
 
 #### AC-002
@@ -163,21 +208,21 @@ Khách thay ảnh nhưng tải lên hoặc lưu ảnh mới thất bại.
 - **Given**: Khách có bản dự toán đang nhập và đáp ứng điều kiện lưu.
 - **When**: Khách thay đổi thông tin rồi lần tự lưu thành công.
 - **Then**: Mở lại bản dự toán trả dữ liệu đã lưu mà không cần bấm Lưu nháp.
-- **And**: Bản nháp có thể chưa đủ dữ liệu để gửi AI.
+- **And**: Bản nháp có thể chưa đủ dữ liệu để chạy chặng 2D.
 
 #### AC-003
 
 - **Given**: Khách nhập thông tin cho một loại công trình trong danh mục.
-- **When**: Hệ thống nhận và trả dữ liệu diện tích.
-- **Then**: Dùng một trường Diện tích, đơn vị m², không giới hạn tính năng ở năm loại ban đầu.
-- **And**: Không yêu cầu riêng diện tích đất/diện tích xây dựng hoặc tự thay giá trị bằng diện tích nhân số tầng.
+- **When**: Hệ thống nhận và trả dữ liệu kích thước lô.
+- **Then**: Biểu mẫu không có trường Diện tích; kích thước lô gồm hai ô mặt tiền và chiều sâu (mét), không bắt buộc, theo BR-PROJ-001.
+- **And**: Chỉ một trong hai ô có giá trị thì bản nháp vẫn lưu nhưng chưa đủ điều kiện chạy chặng 2D.
 
 #### AC-004
 
-- **Given**: Khách cung cấp chỉ ảnh, chỉ mô tả hoặc cả hai.
-- **When**: Hệ thống kiểm tra điều kiện có ảnh/mô tả.
-- **Then**: Cả ba trường hợp đều đáp ứng điều kiện về sự hiện diện của dữ liệu này.
-- **And**: Không có cả hai được lưu như thông tin chưa hoàn tất, nhưng chưa đủ để gửi AI.
+- **Given**: Bản dự toán có ảnh lô đã soi Đạt, đủ các ô bắt buộc, có hoặc không có mô tả.
+- **When**: Hệ thống kiểm tra đầu vào trước khi chạy chặng 2D.
+- **Then**: Cả hai trường hợp có mô tả và không có mô tả đều đủ điều kiện về ảnh và mô tả theo BR-PROJ-002.
+- **And**: Chỉ có mô tả mà không có ảnh lô thì được lưu như bản nháp nhưng chưa đủ điều kiện chạy chặng 2D.
 
 #### AC-005
 
@@ -209,36 +254,36 @@ Khách thay ảnh nhưng tải lên hoặc lưu ảnh mới thất bại.
 
 #### AC-009
 
-- **Given**: Khách cung cấp ảnh hoặc mô tả thiết kế cho bản dự toán.
+- **Given**: Khách tải ảnh lô đất hoặc nhập mô tả cho bản dự toán.
 - **When**: Hệ thống kiểm tra dữ liệu được cung cấp.
-- **Then**: Chỉ tối đa một ảnh JPG/PNG/HEIC không vượt 10 MB và mô tả không vượt 500 ký tự mới đáp ứng các giới hạn tương ứng.
-- **And**: Có cả ảnh và mô tả vẫn phải tuân thủ từng giới hạn; không bắt buộc bổ sung loại dữ liệu còn lại nếu đã có một loại hợp lệ. Ghi chú kỹ thuật, không đổi tiêu chí: định dạng và dung lượng ảnh do frontend kiểm trước khi tải ảnh lên qua presign; với ảnh, backend chỉ kiểm URL là URL https thuộc tên miền được phép trong `UploadedFileOption__AllowedHosts` (TDD-PROJ-001).
+- **Then**: Chỉ một ảnh lô JPG/PNG/WebP không vượt 10 MiB, tối thiểu 640×480, và mô tả không vượt 4.000 ký tự mới đáp ứng các giới hạn tương ứng.
+- **And**: Backend tự đọc ảnh từ kho để kiểm tra định dạng thật, dung lượng và kích thước theo BR-PROJ-015; không tin thông tin do giao diện gửi lên. Ảnh không đạt các giới hạn này không được gửi AI soi.
 
 #### AC-010
 
-- **Given**: Khách nhập giá trị Diện tích.
+- **Given**: Khách nhập mặt tiền hoặc chiều sâu của lô.
 - **When**: Hệ thống kiểm tra giá trị này.
 - **Then**: Chỉ chấp nhận số lớn hơn 0 và có tối đa hai chữ số thập phân; không tự làm tròn giá trị vượt độ chính xác để chấp nhận.
-- **And**: Chưa đặt trần diện tích theo nghiệp vụ; thiếu diện tích được lưu trong bản nháp nhưng không đủ điều kiện gửi AI.
+- **And**: Để trống cả hai ô vẫn đủ điều kiện chạy chặng 2D; khi đó hệ thống dùng kích thước đọc từ ảnh lô, mô tả hoặc mặc định theo loại công trình.
 
 #### AC-011
 
-- **Given**: Bản dự toán đang được AI xử lý sau khi tiếp nhận yêu cầu hợp lệ.
-- **When**: Có yêu cầu tự lưu hoặc cập nhật trực tiếp đầu vào.
-- **Then**: Từ chối thay đổi theo BR-PROJ-005, giữ đầu vào của tác vụ đang chạy.
-- **And**: Sau thất bại chỉ được sửa khi đáp ứng lại điều kiện lưu; bản dự toán đã thành công muốn phương án khác phải tạo mới.
+- **Given**: Lần chạy chặng 2D đã được tiếp nhận, hoặc chặng 2D đã thành công.
+- **When**: Có yêu cầu tự lưu, thay ảnh lô hoặc cập nhật trực tiếp đầu vào.
+- **Then**: Từ chối thay đổi theo BR-PROJ-005, giữ đầu vào đã chốt.
+- **And**: 2D lỗi thì được sửa khi đáp ứng lại điều kiện lưu; 2D đã thành công thì đầu vào khóa vĩnh viễn, muốn phương án khác phải tạo bản mới.
 
 #### AC-012
 
 - **Given**: Loại công trình bật lựa chọn phong cách kiến trúc, nội thất hoặc cả hai theo BR-PROJ-004.
-- **When**: Kiểm tra đầu vào trước khi gửi AI.
-- **Then**: Mỗi nhóm được bật phải có đúng một phong cách thuộc nhóm và loại công trình đang áp dụng; thiếu lựa chọn, chọn nhiều hoặc chọn không phù hợp thì chưa đủ điều kiện gửi AI.
+- **When**: Kiểm tra đầu vào trước khi chạy chặng 2D.
+- **Then**: Mỗi nhóm được bật phải có đúng một phong cách thuộc nhóm và loại công trình đang áp dụng; thiếu lựa chọn, chọn nhiều hoặc chọn không phù hợp thì chưa đủ điều kiện chạy chặng 2D.
 - **And**: Nhóm bị tắt không yêu cầu lựa chọn; bản nháp được lưu khi chưa chọn đủ. Việc tắt nhóm lựa chọn không làm AI trả thiếu phần kết quả tương ứng.
 
 #### AC-013
 
 - **Given**: Bản dự toán đã được tạo trước khi Admin sửa cấu hình loại công trình hoặc phong cách.
-- **When**: Khách mở lại, lưu tiếp hoặc kiểm tra đầu vào để gửi/thử lại AI.
+- **When**: Khách mở lại, lưu tiếp hoặc kiểm tra đầu vào để chạy hoặc chạy lại chặng 2D.
 - **Then**: Áp dụng cấu hình của bản dự toán cũ; thay đổi của Admin không làm mất lựa chọn hoặc buộc khách đáp ứng cấu hình mới, kể cả khi bản dự toán còn là bản nháp.
 - **And**: Bản dự toán mới dùng cấu hình mới. Quyền, gói/lượt và khóa sửa vẫn được kiểm tra theo quy tắc áp dụng, không dùng quyền/lượt cũ thay kiểm tra hiện tại.
 
@@ -246,15 +291,15 @@ Khách thay ảnh nhưng tải lên hoặc lưu ảnh mới thất bại.
 
 - **Given**: Bản dự toán ở trạng thái được sửa, có các lựa chọn phong cách, tầng/tum và khách đáp ứng điều kiện lưu.
 - **When**: Khách đổi loại công trình.
-- **Then**: Giữ lựa chọn còn hợp lệ theo cấu hình loại mới áp dụng cho bản dự toán; xóa lựa chọn không phù hợp hoặc thuộc trường không áp dụng và yêu cầu chọn lại phần bắt buộc trước khi gửi AI.
-- **And**: Giữ nguyên diện tích, địa chỉ, ảnh và mô tả; không chuyển lựa chọn giữa nhóm phong cách kiến trúc và nội thất. Bản nháp được phép chưa chọn đủ.
+- **Then**: Giữ lựa chọn còn hợp lệ theo cấu hình loại mới áp dụng cho bản dự toán; xóa lựa chọn không phù hợp hoặc thuộc trường không áp dụng và yêu cầu chọn lại phần bắt buộc trước khi chạy chặng 2D.
+- **And**: Giữ nguyên kích thước lô, địa chỉ, ảnh lô cùng kết quả soi, mô tả, số phòng ngủ, gara và cạnh có cửa vào; không chuyển lựa chọn giữa nhóm phong cách kiến trúc và nội thất. Bản nháp được phép chưa chọn đủ.
 
 #### AC-015
 
 - **Given**: Bản nháp có tỉnh/thành, xã/phường và địa chỉ chi tiết, khách đáp ứng điều kiện lưu.
 - **When**: Khách đổi tỉnh/thành.
-- **Then**: Xóa xã/phường đã chọn, yêu cầu chọn lại xã/phường thuộc tỉnh/thành mới trước khi gửi AI.
-- **And**: Giữ địa chỉ chi tiết để khách tự sửa; cho lưu bản nháp khi chưa chọn lại xã/phường.
+- **Then**: Xóa xã/phường đã chọn, yêu cầu chọn lại xã/phường thuộc tỉnh/thành mới trước khi chạy chặng 2D.
+- **And**: Giữ địa chỉ chi tiết để khách tự sửa; cho lưu bản nháp khi chưa chọn lại xã/phường nếu frontend đã lấy lại và gửi đủ cặp tọa độ từ bản đồ theo BR-PROJ-004 khoản 18.
 
 #### AC-016
 
@@ -268,7 +313,7 @@ Khách thay ảnh nhưng tải lên hoặc lưu ảnh mới thất bại.
 - **Given**: Một lần tự lưu thất bại do mạng hoặc máy chủ, trang còn mở và giữ nội dung chưa lưu.
 - **When**: Kết nối phục hồi hoặc khách bấm Thử lại.
 - **Then**: Gửi lại yêu cầu lưu, kiểm tra lại quyền/gói/lượt, dữ liệu và khóa đầu vào; chỉ báo đã lưu khi backend lưu thành công.
-- **And**: Không tự thử lại yêu cầu bị từ chối do quyền/gói/lượt, không vượt qua khóa sửa và không khởi chạy lại AI.
+- **And**: Không tự thử lại yêu cầu bị từ chối do quyền/gói/lượt, không vượt qua khóa sửa và không chạy lại chặng nào.
 
 #### AC-018
 
@@ -282,14 +327,98 @@ Khách thay ảnh nhưng tải lên hoặc lưu ảnh mới thất bại.
 - **Given**: Khách tạo bản dự toán hoặc gửi yêu cầu lưu tên khi được phép sửa.
 - **When**: Backend kiểm tra tên sau khi bỏ khoảng trắng đầu/cuối.
 - **Then**: Chỉ chấp nhận tên có nội dung và không vượt 200 ký tự; lưu tên đã bỏ khoảng trắng đầu/cuối. Tên rỗng, chỉ có khoảng trắng hoặc quá dài bị từ chối, không tự cắt ngắn.
-- **And**: Yêu cầu tạo bị từ chối không tạo bản dự toán; yêu cầu sửa bị từ chối giữ tên đã lưu trước đó. Yêu cầu tạo vẫn cần điều kiện quyền/gói/lượt; đổi tên bản dự toán đã có chỉ cần quyền sở hữu và tên hợp lệ, không bị chặn bởi hết hạn gói, hết lượt hay khóa sửa khi AI đang xử lý theo BR-SUB-007 khoản 11.
+- **And**: Yêu cầu tạo bị từ chối không tạo bản dự toán; yêu cầu sửa bị từ chối giữ tên đã lưu trước đó. Yêu cầu tạo vẫn cần điều kiện quyền/gói/lượt; đổi tên bản dự toán đã có chỉ cần quyền sở hữu và tên hợp lệ, không bị chặn bởi hết hạn gói, hết lượt hay khóa sửa khi chặng đang chạy theo BR-SUB-007 khoản 11.
 
 #### AC-020
 
 - **Given**: Khách tạo bản dự toán và nhập thông tin thiết kế.
-- **When**: Cung cấp nội dung mô tả để gửi AI.
-- **Then**: Chỉ có một trường Mô tả chi tiết tối đa 500 ký tự; nội dung được dùng làm đầu vào AI khi khách cung cấp, không thêm trường ghi chú riêng.
-- **And**: Trước khi gửi AI vẫn chỉ yêu cầu có ít nhất ảnh hoặc mô tả hợp lệ; chỉ có ảnh thì không bắt buộc nhập mô tả. Bản nháp được phép chưa có cả hai.
+- **When**: Cung cấp nội dung mô tả khi tạo nhanh hoặc sửa thông tin thiết kế.
+- **Then**: Chỉ có một trường Mô tả chi tiết tối đa 4.000 ký tự, dùng chung ở tạo nhanh, biểu mẫu đầu vào và chặng 2D. Mô tả là tùy chọn; nội dung đã nhập được giữ nguyên khi mở lại, không thêm trường ghi chú riêng.
+- **And**: Mô tả vượt 4.000 ký tự bị từ chối, không tự cắt ngắn.
+
+#### AC-021
+
+- **Given**: Yêu cầu tạo dự toán có tên hợp lệ và đáp ứng điều kiện quyền/gói/lượt.
+- **When**: Yêu cầu không gửi cả kinh độ, vĩ độ hoặc gửi cả hai null.
+- **Then**: Backend tạo bản dự toán, lưu cả hai tọa độ NULL theo BR-PROJ-003 khoản 10.
+- **And**: Không gọi AI hoặc giữ/trừ lượt. Nếu chỉ gửi một tọa độ hoặc gửi cặp sai thì từ chối, không tạo bản hay receipt.
+
+#### AC-022
+
+- **Given**: Khách đang tạo nhanh dự toán và chưa có tọa độ từ bản đồ.
+- **When**: Khách nhập tên hợp lệ và thực hiện thao tác tạo.
+- **Then**: Frontend gửi tên để tạo ngay, không chờ bản đồ. Mở lại bản đã tạo trả cả hai tọa độ null.
+- **And**: Khách vẫn tự lưu mô tả, kích thước lô hoặc trường khác khi chưa đổi địa chỉ. Tọa độ được bổ sung cùng lần nhập địa chỉ; trước khi chạy chặng 2D phải có đủ cặp hợp lệ.
+
+#### AC-023
+
+- **Given**: Bản dự toán đã có địa chỉ, kinh độ, vĩ độ và khách đáp ứng điều kiện sửa đầu vào.
+- **When**: Khách đổi tỉnh/thành, xã/phường hoặc địa chỉ chi tiết.
+- **Then**: Frontend lấy lại kinh độ, vĩ độ từ bản đồ và gửi đủ cả hai cùng yêu cầu lưu địa chỉ; backend lưu địa chỉ và tọa độ cùng nhau.
+- **And**: Khi mở lại, trả địa chỉ và cặp tọa độ vừa lưu. Tọa độ bản đồ trả về trùng với cặp cũ vẫn được chấp nhận nếu các điều kiện lưu khác hợp lệ.
+
+#### AC-024
+
+- **Given**: Khách đổi địa chỉ của bản dự toán đang được phép sửa.
+- **When**: Frontend chưa lấy được đủ cặp tọa độ từ bản đồ, hoặc có yêu cầu lưu trực tiếp thiếu kinh độ, vĩ độ hay cả hai.
+- **Then**: Frontend chưa gửi lần lưu thay đổi địa chỉ; backend từ chối yêu cầu trực tiếp thiếu tọa độ và giữ nguyên dữ liệu đã lưu.
+- **And**: Không chỉ lưu địa chỉ mới rồi giữ tọa độ cũ hoặc bổ sung tọa độ bằng một lần lưu riêng.
+
+#### AC-025
+
+- **Given**: Khách đáp ứng điều kiện tạo dự toán; hôm nay là 05/10/2026 theo giờ Việt Nam.
+- **When**: Khách tạo nhanh dự toán, sau đó đổi tên và lưu đầu vào.
+- **Then**: Bản dự toán có mã dạng `BUILDX-20261005-XXXXXX` theo BR-PROJ-003 khoản 12, trong đó `XXXXXX` là 6 ký tự ngẫu nhiên không có 0, O, 1, I, L. Mã hiển thị khi mở lại bản dự toán.
+- **And**: Đổi tên và lưu đầu vào không đổi mã; mã không trùng với bản dự toán khác của bất kỳ khách nào, kể cả bản đã xóa. Khách không nhập hay sửa được mã.
+
+#### AC-026
+
+- **Given**: Khách có quyền sửa bản dự toán và tải lên ảnh lô hợp lệ về tệp.
+- **When**: Hệ thống soi ảnh theo BR-PROJ-015.
+- **Then**: Khách thấy kết quả Đạt hoặc Không đạt kèm lý do; hai ô mặt tiền × chiều sâu không bị tự điền hay thay đổi.
+- **And**: Ảnh chụp công trình thực tế (không phải bản vẽ) có kết quả Không đạt và chặn chạy chặng 2D.
+
+#### AC-027
+
+- **Given**: Tài khoản A đã soi một ảnh lô và nhận kết quả Đạt.
+- **When**: Tài khoản A tải lại đúng ảnh đó cho bản dự toán khác; tài khoản B tải cùng ảnh đó.
+- **Then**: Tài khoản A dùng lại kết quả cũ, không gọi AI và không tính vào hạn mức soi.
+- **And**: Tài khoản B được soi mới và tính vào hạn mức của B.
+
+#### AC-028
+
+- **Given**: Tài khoản đã soi 30 ảnh mới trong ngày theo giờ Việt Nam.
+- **When**: Khách tải ảnh lô thứ 31 chưa từng soi.
+- **Then**: Từ chối soi và báo thử lại vào ngày hôm sau.
+- **And**: Không gọi AI; ảnh không đạt giới hạn tệp và lần soi lỗi do dịch vụ AI không tính vào hạn mức.
+
+#### AC-029
+
+- **Given**: Bản dự toán có ảnh lô Đạt, địa chỉ, tọa độ, loại công trình và phong cách hợp lệ.
+- **When**: Kiểm tra đầu vào trước khi chạy chặng 2D.
+- **Then**: Chưa nhập số phòng ngủ, hoặc số ngoài khoảng 1–10, thì chưa đủ điều kiện chạy 2D.
+- **And**: Bản nháp vẫn được lưu khi chưa có số phòng ngủ; số không phải số nguyên hoặc ngoài khoảng bị từ chối khi lưu.
+
+#### AC-030
+
+- **Given**: Khách mở biểu mẫu đầu vào của bản dự toán mới.
+- **When**: Khách chưa chọn cạnh có cửa vào, gara hay gói hoàn thiện.
+- **Then**: Gara mặc định không, gói mặc định Tiêu chuẩn. Sau khi ảnh lô soi Đạt, khối xác nhận hiện cạnh có cửa vào là Trái với lời nhắc “mặc định”; chưa bấm thì hệ thống dùng cạnh trái và ghi nhận là mặc định (BR-PROJ-002 khoản 5).
+- **And**: Khách đổi được cả ba lựa chọn khi bản dự toán còn được sửa.
+
+#### AC-031
+
+- **Given**: Loại công trình có mã gốc khác `can-ho` và cho chọn tầng.
+- **When**: Khách chọn số tầng.
+- **Then**: Chỉ chọn được trong danh sách Admin cấu hình, nằm trong khoảng 1–4, cộng tum khi loại cho phép.
+- **And**: Loại có mã gốc `can-ho` luôn một sàn, không hiện ô tầng hay tum.
+
+#### AC-032
+
+- **Given**: Tổng số lần soi mới của cả hệ thống trong ngày đã đạt trần Admin cấu hình; tài khoản của khách mới soi 2 lần trong ngày.
+- **When**: Khách tải một ảnh lô chưa từng soi.
+- **Then**: Ảnh được lưu vào bản nháp nhưng yêu cầu soi bị từ chối với thông báo hệ thống đang bận.
+- **And**: Hạn mức soi của tài khoản vẫn là 2/30; Admin đã nhận cảnh báo khi tổng đạt 80% trần.
 
 ## References
 
@@ -297,6 +426,7 @@ Khách thay ảnh nhưng tải lên hoặc lưu ảnh mới thất bại.
 
 - TDD-PROJ-001
 - TDD-PROJ-002
+- TDD-PROJ-007
 
 ### Rules
 
@@ -305,6 +435,8 @@ Khách thay ảnh nhưng tải lên hoặc lưu ảnh mới thất bại.
 - BR-PROJ-003
 - BR-PROJ-004
 - BR-PROJ-005
+- BR-PROJ-015
+- BR-MEDIA-001
 - BR-SUB-007
 - BR-RBAC-005
 
@@ -319,7 +451,7 @@ Khách thay ảnh nhưng tải lên hoặc lưu ảnh mới thất bại.
 
 - Thao tác Admin quản lý loại công trình và cấu hình thuộc STORY-PROJ-005; vẫn nằm trong phạm vi tính năng mở rộng.
 
-- Gửi tác vụ AI, tính lượt khi AI chạy, tạo dự toán và nhận kết quả: thuộc phần tiếp theo của tính năng, không bị loại khỏi phạm vi tổng thể.
-- Xuất hoặc chia sẻ hồ sơ: thuộc phần hồ sơ thi công trong phạm vi tổng thể, chờ làm rõ định dạng kết quả từ AI service và hành vi liên quan.
-- Xây AI service, bảng đơn giá, công thức tính dự toán hoặc tự tạo kết quả chuyên môn tại backend BMT.
+- Chạy bốn chặng và tính lượt: thuộc STORY-PROJ-002, STORY-PROJ-008, STORY-PROJ-009 và STORY-PROJ-010.
+- Xuất hoặc chia sẻ hồ sơ: thuộc STORY-PROJ-003, STORY-PROJ-004 và STORY-PROJ-010.
+- Nhiều ảnh đầu vào (mỗi ảnh một tầng) và vẽ lô đất trên khung vẽ như app demo.
 - Triển khai frontend, thay đổi mã ứng dụng, tạo/chạy migration hoặc triển khai dịch vụ trong tác vụ lập kế hoạch này.

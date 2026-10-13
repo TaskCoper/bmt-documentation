@@ -63,12 +63,15 @@ Một tác vụ tạo thiết kế còn đang chờ kết quả đã vượt th�
 4. Khi nhận kết quả muộn của tác vụ đã thất bại do quá thời gian, giữ nguyên trạng thái thất bại và không công bố kết quả đó cho khách qua giao diện hoặc API. Không gắn kết quả muộn vào yêu cầu mới nếu khách đã gửi lại.
 5. Tác vụ đã hoàn thành thành công và tính lượt trước khi xử lý quá thời gian không bị đổi thành thất bại hoặc trả lượt bởi xử lý quá thời gian đến sau.
 
+6. Với luồng bốn chặng (BR-PROJ-010), hạn chờ tính theo từng chặng theo BR-PROJ-012. Chỉ lần chạy chặng Bản vẽ 2D quá hạn mới hoàn lượt đang giữ; lần chạy Dự toán, Phối cảnh 3D hoặc Hồ sơ quá hạn chỉ chuyển sang lỗi, không ảnh hưởng lượt. Kết quả đến muộn của mọi chặng được xử lý như khoản 4.
+
 ## Except
 
 Không tự gửi lại tác vụ hoặc tạo tác vụ mới từ xử lý quá thời gian. Việc subscription hết hạn không phải nguyên nhân tự hủy tác vụ; thời gian chờ xử lý là điều kiện riêng.
 
 ## Notes
 
+- **Cập nhật ngày 11/10/2026 (luồng bốn chặng, người dùng đã chốt):** hạn chờ theo chặng, mặc định 2D 20 phút, Dự toán 20 phút, Phối cảnh 3D 40 phút, Hồ sơ 5 phút, Admin cấu hình được (BR-PROJ-012). Giá trị 15 phút cho một lần tạo ở ghi chú dưới chỉ áp dụng cho luồng cũ.
 - Thời gian chờ là cấu hình riêng. Ngày 26/09/2026 người dùng chốt: thời gian chờ một lần tạo thiết kế là 15 phút, tính từ lúc hệ thống tiếp nhận tác vụ; hệ thống rà tác vụ quá hạn mỗi 60 giây. Đây là hai giá trị cấu hình (`EstimateAiOption__GenerationTimeoutMinutes`, `UsageMaintenanceOption__ScanIntervalSeconds`, xem TDD-SUB-002/Architecture), không làm đổi quy tắc: quy tắc áp dụng với thời gian chờ đang được cấu hình.
 - Mốc bắt đầu đo thời gian, cơ chế phát hiện, xử lý kết quả đến sát hạn và chống giải phóng/trừ lặp sẽ được làm rõ trong TDD; không cho một tác vụ vừa hoàn lượt do quá thời gian vừa tính lượt thành công đến muộn.
 - Việc không đưa kết quả muộn cho khách không đồng nghĩa với yêu cầu xóa ngay dữ liệu nội bộ. Cách lưu phục vụ đối soát, thời hạn lưu và dọn dữ liệu thuộc thiết kế kỹ thuật, chưa chốt ở đây.

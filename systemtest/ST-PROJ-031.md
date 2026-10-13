@@ -44,14 +44,17 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-PROJ-031 | STORY-PROJ-002 | EXC | REGRESSION | P0 | Môi trường thử đã có chức năng tương ứng; C1 là khách đã đăng nhập, sở hữu bản dự toán; gói còn hiệu lực, quyền tạo thiết kế, quota hữu hạn 3, đã dùng 0, đang giữ 0, trừ khi ca nêu khác. Có thể đọc lại dữ liệu đã lưu, trạng thái tác vụ và sổ lượt. Có bộ giả lập AI kiểm soát được kết quả/lỗi theo hợp đồng tích hợp đã thống nhất. Ca chưa chạy; phần AI thật chờ hợp đồng, môi trường và bộ đầu ra mẫu. | 1. Chuẩn bị bản chưa chạy; với từng biến thể bỏ một điều kiện đầu vào hoặc quyền.<br>2. Gửi Nhận dự toán trực tiếp, quan sát AI và sổ lượt.<br>3. Với lỗi chỉ do đầu vào, sửa dữ liệu để kiểm tra bản chưa bị khóa như đang xử lý. | Thiếu diện tích; thiếu cả ảnh/mô tả; thiếu địa chỉ/loại/gói hoàn thiện; thiếu phong cách nhóm bật; xã sai tỉnh; không quyền sở hữu; gói hết hạn/hết lượt. | Từ chối trước khi giữ lượt/gửi AI, không tạo tác vụ đang chạy. Lỗi đầu vào không tự khóa sửa; lỗi quyền/gói vẫn chặn độc lập. Không tự cấp quyền hoặc điền dữ liệu để gửi. | STORY-PROJ-002/AC-001<br>STORY-PROJ-002/EXC-01<br>BR-PROJ-001/Then<br>BR-PROJ-002/Then<br>BR-PROJ-004/Then<br>BR-PROJ-005/Then<br>BR-SUB-007/Then | Yêu cầu không hợp lệ bị chặn trước khi giữ lượt hoặc gửi AI. Đặc tả chưa thực thi; dữ liệu trong ca là fixture kiểm thử, không phải mặc định sản phẩm. | [Chưa xác định] | Draft |
+| ST-PROJ-031 | STORY-PROJ-002 | EXC | REGRESSION | P0 | Môi trường thử bật luồng bốn chặng. C1 là khách đã đăng nhập, sở hữu bản dự toán D1 có đầu vào hợp lệ: ảnh lô đã soi Đạt, số phòng ngủ 3, địa chỉ có đủ tọa độ, loại công trình và phong cách hợp lệ. Gói còn hiệu lực, có quyền tạo thiết kế, quota hữu hạn 3 (sẵn 3/giữ 0/dùng 0), trừ khi ca nêu khác. Đọc được dữ liệu đã lưu, trạng thái chặng, các lần chạy và sổ lượt. Có chế độ AI giả phát lại phản hồi ghi sẵn, điều khiển được lỗi và độ trễ (dự kiến theo TDD). Ca chưa chạy. | 1. Chuẩn bị các bản chưa chạy; mỗi biến thể bỏ một điều kiện đầu vào hoặc quyền.<br>2. Gửi yêu cầu Tạo bản vẽ 2D trực tiếp tới backend; quan sát lần chạy, lời gọi AI và sổ lượt.<br>3. Với lỗi chỉ do đầu vào, sửa dữ liệu để kiểm tra bản chưa bị khóa. | Biến thể: thiếu ảnh lô; ảnh lô Không đạt; thiếu số phòng ngủ; chỉ có một trong hai ô mặt tiền × chiều sâu; thiếu địa chỉ, tọa độ, loại công trình; thiếu phong cách của nhóm đang bật; xã sai tỉnh; loại công trình chưa gắn mã gốc; không sở hữu bản; gói hết hạn hoặc hết lượt; luồng bốn chặng đang tắt. | Mọi biến thể bị từ chối kèm lý do trước khi giữ lượt hay gọi AI; không tạo lần chạy. Lỗi đầu vào không khóa sửa; lỗi quyền hoặc gói vẫn chặn độc lập. Không tự cấp quyền hay tự điền dữ liệu để chạy. | STORY-PROJ-002/AC-001<br>STORY-PROJ-002/AC-008<br>STORY-PROJ-002/EXC-01<br>BR-PROJ-001/Then<br>BR-PROJ-002/Then<br>BR-PROJ-004/Then<br>BR-PROJ-005/Then<br>BR-PROJ-010/Then<br>BR-PROJ-015/Then<br>BR-SUB-007/Then | Yêu cầu chạy 2D không hợp lệ bị chặn trước khi giữ lượt hoặc gọi AI. Đặc tả chưa thực thi; dữ liệu trong ca là fixture kiểm thử. Chạy được với chế độ AI giả phát lại phản hồi ghi sẵn (dự kiến theo TDD); kết quả với AI giả không phải bằng chứng tích hợp AI thật. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-PROJ-002/AC-001
+- STORY-PROJ-002/AC-008
 - STORY-PROJ-002/EXC-01
 - BR-PROJ-001/Then
 - BR-PROJ-002/Then
 - BR-PROJ-004/Then
 - BR-PROJ-005/Then
+- BR-PROJ-010/Then
+- BR-PROJ-015/Then
 - BR-SUB-007/Then

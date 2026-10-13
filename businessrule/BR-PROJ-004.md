@@ -52,7 +52,7 @@ Admin được thêm loại công trình và cấu hình theo từng loại vi�
 
 ## When
 
-Admin quản lý loại công trình và cấu hình của loại đó; khách nhập thông tin bản dự toán hoặc hệ thống kiểm tra đầu vào trước khi gửi AI.
+Admin quản lý loại công trình và cấu hình của loại đó; khách nhập thông tin bản dự toán hoặc hệ thống kiểm tra đầu vào trước khi chạy chặng 2D.
 
 ## Then
 
@@ -60,15 +60,15 @@ Admin quản lý loại công trình và cấu hình của loại đó; khách n
 2. Admin bật/tắt riêng việc cho chọn số tầng và việc cho chọn Có tum/Không tum theo loại công trình. Khi bật chọn tầng, Admin cấu hình các số tầng được chọn cho loại đó; khách chọn trong danh sách áp dụng. Phân biệt cấu hình cho phép chọn tum với giá trị có/không tum mà khách chọn cho bản dự toán.
 3. Tách thông tin phong cách kiến trúc và phong cách nội thất. Admin được thêm/sửa cả hai danh mục, gồm tên, ảnh minh họa và gán các phong cách được chọn cho từng loại công trình. Khách chọn trong danh mục đúng nhóm và đúng loại. Không tự sao chép một giá trị phong cách chung thành cả hai lựa chọn.
 4. Admin cấu hình theo từng loại công trình việc cho chọn phong cách kiến trúc và phong cách nội thất. Khi một nhóm lựa chọn không được bật, khách không phải chọn phong cách cho nhóm đó; AI vẫn trả đầy đủ kết quả, không loại phần kiến trúc hoặc nội thất vì nhóm lựa chọn bị tắt.
-5. Địa chỉ vẫn gồm tỉnh/thành phố, xã/phường và địa chỉ chi tiết. Xã/phường phải thuộc tỉnh/thành đã chọn.
+5. Địa chỉ vẫn gồm tỉnh/thành phố, xã/phường và địa chỉ chi tiết. Xã/phường phải thuộc tỉnh/thành đã chọn. Bản dự toán lưu thêm kinh độ và vĩ độ do frontend lấy từ dịch vụ bản đồ; tạo nhanh được để trống cả cặp theo BR-PROJ-003 khoản 10, nhưng trước khi chạy chặng 2D phải có đủ tọa độ hợp lệ.
 6. Gói hoàn thiện và nội thất vẫn gồm Cơ bản, Tiêu chuẩn và VIP. Đây là đầu vào thiết kế, không phải gói đăng ký cấp quyền hoặc lượt sử dụng.
-7. Trước khi gửi AI, yêu cầu đủ địa chỉ, loại công trình và gói hoàn thiện/nội thất; lựa chọn phong cách, số tầng và tum cần khớp cấu hình áp dụng. Mỗi nhóm phong cách được bật phải có đúng một lựa chọn hợp lệ trước khi gửi AI; bật cả hai nhóm thì chọn một phong cách kiến trúc và một phong cách nội thất. Nhóm bị tắt không yêu cầu khách nhập phong cách.
-8. Cấu hình danh mục không thay thế quyền sở hữu bản dự toán, điều kiện gói/lượt hoặc quy tắc khóa đầu vào khi AI đang chạy.
+7. Trước khi chạy chặng 2D, yêu cầu đủ địa chỉ, loại công trình và gói hoàn thiện/nội thất; lựa chọn phong cách, số tầng và tum cần khớp cấu hình áp dụng. Mỗi nhóm phong cách được bật phải có đúng một lựa chọn hợp lệ trước khi chạy chặng 2D; bật cả hai nhóm thì chọn một phong cách kiến trúc và một phong cách nội thất. Nhóm bị tắt không yêu cầu khách nhập phong cách.
+8. Cấu hình danh mục không thay thế quyền sở hữu bản dự toán, điều kiện gói/lượt hoặc quy tắc khóa đầu vào khi chặng đang chạy.
 9. Bản dự toán đã tạo giữ cấu hình loại công trình và phong cách đã áp dụng cho bản dự toán đó. Khi Admin sửa cấu hình hoặc danh mục phong cách, thay đổi chỉ áp dụng cho bản dự toán mới; không làm mất lựa chọn hoặc thay điều kiện đầu vào của bản dự toán cũ, kể cả bản nháp.
-10. Khi mở lại, lưu tiếp hoặc gửi/thử lại AI trên bản dự toán cũ, kiểm tra các lựa chọn theo cấu hình của bản dự toán đó. Các điều kiện quyền, gói/lượt và khóa sửa vẫn được kiểm tra theo quy tắc hiện hành; giữ cấu hình danh mục không có nghĩa giữ quyền hoặc lượt cũ.
+10. Khi mở lại, lưu tiếp, chạy hoặc chạy lại chặng 2D trên bản dự toán cũ, kiểm tra các lựa chọn theo cấu hình của bản dự toán đó. Các điều kiện quyền, gói/lượt và khóa sửa vẫn được kiểm tra theo quy tắc hiện hành; giữ cấu hình danh mục không có nghĩa giữ quyền hoặc lượt cũ.
 
-11. Khi khách đổi loại công trình trong bản nháp, giữ các lựa chọn phong cách kiến trúc, phong cách nội thất, số tầng và tum còn hợp lệ với loại mới theo cấu hình áp dụng cho bản dự toán. Xóa lựa chọn không còn phù hợp, gồm giá trị của trường không áp dụng cho loại mới; yêu cầu chọn lại phần bắt buộc trước khi gửi AI. Không tự chuyển phong cách giữa hai nhóm. Giữ nguyên diện tích, địa chỉ, ảnh và mô tả.
-12. Khi khách đổi tỉnh/thành, xóa xã/phường đã chọn và yêu cầu chọn lại xã/phường thuộc tỉnh/thành mới trước khi gửi AI. Giữ địa chỉ chi tiết để khách tự sửa; không tự xóa hoặc viết lại địa chỉ chi tiết.
+11. Khi khách đổi loại công trình trong bản nháp, giữ các lựa chọn phong cách kiến trúc, phong cách nội thất, số tầng và tum còn hợp lệ với loại mới theo cấu hình áp dụng cho bản dự toán. Xóa lựa chọn không còn phù hợp, gồm giá trị của trường không áp dụng cho loại mới; yêu cầu chọn lại phần bắt buộc trước khi chạy chặng 2D. Không tự chuyển phong cách giữa hai nhóm. Giữ nguyên diện tích, địa chỉ, ảnh và mô tả.
+12. Khi khách đổi tỉnh/thành, xóa xã/phường đã chọn và yêu cầu chọn lại xã/phường thuộc tỉnh/thành mới trước khi chạy chặng 2D. Giữ địa chỉ chi tiết để khách tự sửa; không tự xóa hoặc viết lại địa chỉ chi tiết. Lần lưu thay đổi địa chỉ phải gửi đủ cặp tọa độ do frontend lấy lại từ bản đồ theo khoản 18, kể cả khi bản nháp chưa chọn lại xã/phường.
 
 13. Khi Admin bật chọn tầng, danh sách số tầng phải có ít nhất một lựa chọn. Khi bật nhóm phong cách kiến trúc hoặc nội thất, nhóm đó phải được gán ít nhất một phong cách thuộc đúng nhóm cho loại công trình. Nếu bất kỳ danh sách được bật nào trống, từ chối lưu cấu hình và chỉ rõ danh sách cần bổ sung; không lưu cấu hình không hợp lệ hoặc thay cấu hình đã lưu trước đó. Điều kiện này áp dụng cả khi tạo cấu hình và khi sửa/xóa lựa chọn cuối cùng trong danh sách đang bật.
 
@@ -80,11 +80,35 @@ Admin quản lý loại công trình và cấu hình của loại đó; khách n
 
 17. Tên loại công trình và tên phong cách kiến trúc/nội thất bắt buộc có nội dung sau khi bỏ khoảng trắng đầu/cuối, tối đa 200 ký tự. Không tự cắt ngắn tên vượt giới hạn. Cho phép trùng tên; tên không thay thế mã định danh của từng mục.
 
+18. Khi khách thay đổi tỉnh/thành, xã/phường hoặc địa chỉ chi tiết của bản dự toán, frontend gọi dịch vụ bản đồ lấy lại kinh độ và vĩ độ cho địa chỉ đang sửa, rồi gửi cả hai trong cùng yêu cầu lưu. Backend chỉ lưu khi có đủ cặp tọa độ; lưu địa chỉ và tọa độ cùng nhau. Nếu chưa lấy được đủ tọa độ thì frontend chưa gửi lần lưu thay đổi địa chỉ; yêu cầu trực tiếp thiếu tọa độ bị từ chối và giữ nguyên toàn bộ dữ liệu đã lưu. Giá trị tọa độ bản đồ trả về có thể trùng với giá trị cũ; yêu cầu là lấy lại và gửi đủ cặp, không bắt buộc hai con số phải thay đổi.
+
+19. Mỗi loại công trình gắn đúng một mã gốc trong năm mã của app demo `design-estimate`: `nha-pho`, `villa-biet-thu`, `nha-mai`, `nha-vuon-cap4`, `can-ho`. Loại do Admin thêm phải chọn một mã gốc; luồng AI dùng mã gốc cho thuật toán phương án và khung giá demo, còn luật lô đất và ma trận mái được chọn bằng ID theo khoản 24. Loại chưa gắn mã gốc được lưu nhưng bản dự toán dùng loại đó không chạy được chặng 2D, kèm lý do danh mục chưa đủ cấu hình.
+
+20. Mỗi phong cách kiến trúc gắn một mã phong cách gốc của app demo, thuộc đúng mã gốc của loại công trình được gán. Phong cách chưa gắn mã gốc thì bản dự toán chọn nó không chạy được chặng 2D, kèm lý do như khoản 19.
+
+21. Mỗi phong cách nội thất có ô “Mô tả cho AI” bắt buộc, mô tả bảng màu, vật liệu và đồ đạc đặc trưng bằng lời. Luồng AI dùng ô này để vẽ bản vẽ nội thất và dựng ảnh phòng. Mô tả có nội dung sau khi bỏ khoảng trắng đầu/cuối, tối đa 1.000 ký tự; thiếu mô tả hoặc vượt giới hạn thì từ chối lưu phong cách nội thất, không tự cắt ngắn. Nhóm dự án viết sẵn mô tả cho các phong cách nội thất đang có trước khi bật luồng bốn chặng.
+
+22. Số tầng được chọn nằm trong khoảng 1 đến 4, cộng tum khi loại cho phép. Admin cấu hình danh sách số tầng của từng loại trong khoảng này; lưu số tầng ngoài khoảng bị từ chối. Loại có mã gốc `can-ho` luôn là một sàn, không chọn tầng hay tum.
+
+23. Gói hoàn thiện và nội thất mặc định là Tiêu chuẩn khi khách chưa chọn. Gói quyết định mức hoàn thiện, mức đồ đạc trên bản vẽ nội thất và khung giá của chặng Dự toán.
+
+24. Đặc điểm theo ID loại công trình (lô mặc định, số tầng tối đa, có mái, tum, phần thô hay không, ngưỡng lô đất, gara, phòng ngủ), kiểu mái theo cặp ID loại công trình và ID phong cách kiến trúc, lời dặn theo gói và theo miền được lưu trong bộ quy tắc AI theo BR-PROJ-019, không viết cố định theo tên loại công trình.
+
 ## Except
 
-Bản nháp được phép chưa chọn đủ thông tin theo BR-PROJ-003. Việc giữ cấu hình cũ không cho phép sửa đầu vào khi AI đang chạy hoặc thay thế kết quả thành công; BR-PROJ-005 vẫn áp dụng.
+Bản nháp được phép chưa chọn đủ thông tin theo BR-PROJ-003, kể cả chưa có tọa độ ở bước tạo nhanh; khi đổi địa chỉ vẫn phải gửi đủ kinh độ và vĩ độ. Việc giữ cấu hình cũ không cho phép sửa đầu vào khi chặng đang chạy hoặc thay thế kết quả thành công; BR-PROJ-005 vẫn áp dụng.
 
 ## Notes
+
+- **Bổ sung đã xác nhận ngày 13/10/2026:** trước khi khách chọn loại, hệ thống tự kiểm điều kiện cấu hình AI theo BR-PROJ-019 khoản 9–11. Loại thiếu cấu hình vẫn hiện nhưng khóa chọn, nhãn Chưa hỗ trợ; thay quy định chỉ phát hiện thiếu cấu hình khi chạy 2D. Cổng tạo dự toán vẫn do người vận hành bật; không thay quyền/gói. Danh mục đã ghim, dữ liệu bản nháp và kết quả cũ giữ nguyên.
+
+
+- **Cập nhật ngày 11/10/2026 theo luồng bốn chặng (người dùng đã chốt):** mã gốc cho loại công trình và phong cách kiến trúc (khoản 19, 20); ô “Mô tả cho AI” bắt buộc cho phong cách nội thất (khoản 21); giữ hai nhóm phong cách — kiến trúc quyết định mái và ngoại thất, nội thất quyết định bảng màu, vật liệu và ảnh phòng; số tầng 1–4 cộng tum, căn hộ luôn một sàn (khoản 22); gói mặc định Tiêu chuẩn (khoản 23). “Gửi AI” đổi thành “chạy chặng 2D” (BR-PROJ-010).
+- **Đã xác nhận (11/10/2026, khi duyệt TDD):** bản dự toán tạo trước khi Admin gắn mã gốc giữ revision danh mục cũ theo khoản 9, nên bị chặn tạo 2D với lý do danh mục chưa đủ cấu hình; khách tạo bản dự toán mới. Không sửa revision danh mục cũ.
+- **Đã xác nhận (11/10/2026):** loại hoặc phong cách chưa gắn mã gốc vẫn lưu được nhưng chặn chạy 2D (khoản 19, 20); ô “Mô tả cho AI” tối đa 1.000 ký tự (khoản 21).
+- Người dùng đã chốt bản US/BR trong hội thoại ngày 01/10/2026. System Test đã được cập nhật; xem [bảng độ phủ](../discovery/construction-site-system-test-coverage.md). Chưa chạy các ca; xác nhận hội thoại không thay cho phê duyệt/import trên hệ thống tài liệu.
+
+- Phần tọa độ bổ sung ngày 01/10/2026 đã được người dùng chốt cùng STORY-PROJ-001 và BR-PROJ-003: yêu cầu lấy tọa độ trước khi tạo đã được thay bằng tạo nhanh chỉ cần tên ở BR-PROJ-003; đổi địa chỉ phải gửi lại đủ cặp tọa độ; chưa có dữ liệu thật cần giữ. System Test và TDD đã được cập nhật; backend đã lên `develop` tại commit `5e396fc`. Phạm vi kiểm thử và phần chưa kiểm được ghi trong [bàn giao tọa độ](../discovery/estimate-coordinates-implementation.md). Xác nhận hội thoại không thay cho phê duyệt/import trên hệ thống tài liệu.
 
 - Hiện trạng trang mẫu: Nhà phố, Villa/Biệt thự, Nhà mái, Nhà vườn/Nhà cấp 4 có chọn tầng và tum; Căn hộ không có. Đây là cấu hình đang quan sát, không phải ngoại lệ phải viết cố định theo tên Căn hộ cho mọi phiên bản.
 - Danh sách tầng trên trang mẫu là Trệt đến Trệt + 4 lầu. Người dùng đã chốt Admin được cấu hình các số tầng theo loại; danh sách mẫu không còn là giới hạn cố định. Chưa tự đặt số tầng tối đa nghiệp vụ mới.
@@ -92,10 +116,12 @@ Bản nháp được phép chưa chọn đủ thông tin theo BR-PROJ-003. Việ
 - Ảnh danh mục và ảnh đầu vào dự toán có vai trò khác nhau; upload mới cùng áp dụng JPG/PNG/WebP tối đa 5 MiB theo [BR-MEDIA-001](BR-MEDIA-001.md). Ảnh cũ trong revision còn được giữ vẫn là nơi sử dụng theo [BR-MEDIA-002](BR-MEDIA-002.md).
 - Tầng thực thi hiện tại: frontend PUT theo URL BMT cấp; backend kiểm bytes tại complete theo [TDD-MEDIA-001](../tdd/TDD-MEDIA-001.md). API danh mục vẫn nhận URL https thuộc kho đã cấu hình và lưu reference cùng transaction; sao revision giữ nơi sử dụng của mọi ảnh được sao. Quyết định MEDIA thay phần chỉ frontend kiểm định dạng và dung lượng trước đây.
 - Người dùng đã xác nhận cấu hình chỉ điều khiển lựa chọn phong cách, AI vẫn trả đủ kết quả. Không dùng cấu hình này để cắt phần thiết kế, nhóm chi phí dự toán hoặc nội dung hồ sơ. Danh sách đầu ra cụ thể vẫn chờ hợp đồng AI; quy tắc thành công và tính lượt không thay đổi.
-- Khi khách không được chọn một nhóm phong cách, cách biểu diễn phần không có lựa chọn trong yêu cầu gửi AI cần thống nhất với bên tích hợp. Chưa tự chọn phong cách mặc định hoặc sao chép từ nhóm còn lại.
+- Khi khách không được chọn một nhóm phong cách, cách biểu diễn phần không có lựa chọn trong prompt được xác định trong TDD-PROJ-002; chưa tự chọn phong cách mặc định. Chưa tự chọn phong cách mặc định hoặc sao chép từ nhóm còn lại.
 - Người dùng đã chốt giữ cấu hình của bản dự toán cũ, chỉ áp dụng thay đổi cho bản dự toán mới. Phương án lưu và xác định phiên bản cấu hình thuộc thiết kế kỹ thuật; chưa chốt bảng dữ liệu hoặc cách sao lưu danh mục.
-- Người dùng xác nhận ngày 26/09/2026 (lần 2) về nhóm lựa chọn bị tắt: tắt chọn tầng, chọn tum hoặc một nhóm phong cách không xóa danh sách đã cấu hình; nhóm tắt được phép có danh sách rỗng hoặc có dữ liệu, để khi Admin bật lại thì danh sách cũ hiện ra. Khách vẫn chỉ thấy và chọn nhóm đang bật theo khoản 2 và 4; dữ liệu của nhóm tắt không được coi là lựa chọn hợp lệ khi lưu, khi đổi loại theo khoản 11 và khi kiểm trước khi gửi AI theo khoản 7. Khoản 13 giữ nguyên: nhóm bật phải có ít nhất một lựa chọn. Tum chỉ có cờ bật/tắt, không có danh sách.
+- Người dùng xác nhận ngày 26/09/2026 (lần 2) về nhóm lựa chọn bị tắt: tắt chọn tầng, chọn tum hoặc một nhóm phong cách không xóa danh sách đã cấu hình; nhóm tắt được phép có danh sách rỗng hoặc có dữ liệu, để khi Admin bật lại thì danh sách cũ hiện ra. Khách vẫn chỉ thấy và chọn nhóm đang bật theo khoản 2 và 4; dữ liệu của nhóm tắt không được coi là lựa chọn hợp lệ khi lưu, khi đổi loại theo khoản 11 và khi kiểm trước khi chạy chặng 2D theo khoản 7. Khoản 13 giữ nguyên: nhóm bật phải có ít nhất một lựa chọn. Tum chỉ có cờ bật/tắt, không có danh sách.
 - Người dùng xác nhận ngày 26/09/2026 (lần 2) về mở tính năng: người vận hành bật cổng tạo bản dự toán cho khách sau khi Admin xác nhận danh mục đủ theo khoản 16; hệ thống không tự kiểm danh mục đã đủ hay chưa.
-- Người dùng xác nhận ngày 26/09/2026 (lần 2) về nguồn địa chỉ của khoản 5 và 12: dùng dịch vụ bên thứ ba provinces.open-api.vn theo địa giới mới (34 tỉnh/thành, hai cấp tỉnh–xã). Khi dịch vụ lỗi, hệ thống dùng dữ liệu đã lưu trước đó; chỉ báo nguồn chưa sẵn sàng khi chưa có dữ liệu nào. Bản nháp đang giữ xã đã bị gộp hoặc ngừng dùng vẫn giữ và hiển thị xã đó, nhưng trước khi gửi AI khách phải chọn lại xã theo dữ liệu mới. Thiết kế ở TDD-PROJ-001.
+- Người dùng xác nhận ngày 26/09/2026 (lần 2) về nguồn địa chỉ của khoản 5 và 12: dùng dịch vụ bên thứ ba provinces.open-api.vn theo địa giới mới (34 tỉnh/thành, hai cấp tỉnh–xã). Khi dịch vụ lỗi, hệ thống dùng dữ liệu đã lưu trước đó; chỉ báo nguồn chưa sẵn sàng khi chưa có dữ liệu nào. Bản nháp đang giữ xã đã bị gộp hoặc ngừng dùng vẫn giữ và hiển thị xã đó, nhưng trước khi chạy chặng 2D khách phải chọn lại xã theo dữ liệu mới. Thiết kế ở TDD-PROJ-001.
 - Cách xử lý lựa chọn cũ khi đổi loại công trình hoặc tỉnh/thành đã được chốt tại khoản 11 và 12. Đã chốt bản dự toán cũ chỉ dùng danh mục tại thời điểm tạo; không được chọn loại mới thêm sau đó theo khoản 14.
 - Reviewer và Approver là Tân Trần; tên không có nghĩa tài liệu đã được phê duyệt. Owner và ngày hiệu lực chưa xác định; chưa có kiểm thử thực thi.
+
+- Bổ sung ngày 01/10/2026: công trình dùng lại danh mục này theo [BR-SITE-005](BR-SITE-005.md); tạo từ dự toán giữ cấu hình của nguồn, tạo độc lập giữ cấu hình lúc tạo. Không thay quy tắc nhập/gửi AI của PROJ hoặc cho phép Admin lưu nhóm bật rỗng ở khoản 13.

@@ -39,8 +39,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Metadata
 
-- **Story**: Là khách hàng, tôi muốn gửi đầu vào của bản dự toán cho AI và theo dõi kết quả để nhận thiết kế, dự toán hoặc chủ động thử lại khi xử lý thất bại.
-- **Context**: Bản nháp nghiệp vụ cho bước gửi AI và nhận kết quả. AI service do bên khác phụ trách; API, cơ chế nhận trạng thái/kết quả, định dạng tệp và danh sách đầu ra bắt buộc đang chờ tích hợp. Story mô tả hành vi đã có căn cứ, chưa phải hợp đồng kỹ thuật hoàn chỉnh.
+- **Story**: Là khách hàng, tôi muốn tạo bản vẽ 2D từ đầu vào của bản dự toán, theo dõi tiến độ và chạy lại khi lỗi để có phương án mặt bằng làm nền cho dự toán, phối cảnh 3D và hồ sơ.
+- **Context**: Chặng đầu tiên trong bốn chặng Bản vẽ 2D → Dự toán → Phối cảnh 3D → Hồ sơ (BR-PROJ-010), thay cho bước “gửi AI một lần, nhận toàn bộ kết quả” trước đây. Luồng chuyển từ app demo `design-estimate` (commit `059e876`, prompt `2d-13`) do khách hàng dựng để mô tả hành vi mong muốn; backend BMT tự gọi OpenAI, không còn AI service của bên khác. Một lượt tạo dự toán được giữ khi tiếp nhận chặng này và tính là đã dùng khi 2D thành công; các chặng sau không tính thêm lượt. Người dùng chốt nghiệp vụ trong hội thoại ngày 10–11/10/2026; xác nhận hội thoại không thay cho phê duyệt trên hệ thống quản lý tài liệu.
 - **Sprint**: [Chưa xác định]
 - **Priority**: Must
 - **Status**: Todo
@@ -49,142 +49,216 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Approver**: Tân Trần
 - **Assignee**:
   - Backend: [Chưa xác định]
+  - Frontend: [Chưa xác định]
   - QA: [Chưa xác định]
 
 ## Conditions
 
 ### Preconditions
 
-- Khách đã đăng nhập bằng tài khoản khách hàng và có quyền truy cập bản dự toán.
-- Có bản dự toán và thông tin đầu vào được chuẩn bị theo STORY-PROJ-001.
+- Khách đã đăng nhập bằng tài khoản khách hàng và là chủ bản dự toán.
+- Đầu vào của bản dự toán được chuẩn bị theo STORY-PROJ-001 và đủ điều kiện theo BR-PROJ-001, BR-PROJ-002, BR-PROJ-004; ảnh lô đất đang gắn có kết quả soi Đạt theo BR-PROJ-015.
 - Khách có gói thiết kế còn hiệu lực, quyền tạo thiết kế và lượt sẵn dùng hoặc không giới hạn theo BR-SUB-007.
-- Bản dự toán chưa có kết quả thành công; không dùng luồng này để chỉnh sửa một thiết kế đã thành công theo BR-SUB-017.
-- Tích hợp AI cần có hợp đồng và môi trường dùng được trước khi kiểm chứng xuyên suốt; hiện là phụ thuộc chưa sẵn sàng.
+- Chặng 2D của bản dự toán chưa thành công, không có chặng nào đang chạy và chưa đạt giới hạn số lần lỗi theo BR-PROJ-011.
+- Luồng bốn chặng đang được bật trên môi trường theo BR-PROJ-018.
 
 ### Trigger
 
-Khách bấm Nhận dự toán hoặc chủ động thử lại một lần tạo thiết kế đã thất bại.
+Khách bấm Tạo bản vẽ 2D, hoặc bấm Chạy lại khi lần chạy 2D trước bị lỗi.
 
 ## Flow
 
 ### Main Flow
 
-1. Khách yêu cầu tạo thiết kế từ thông tin đã nhập của bản dự toán.
-2. Backend kiểm tra quyền truy cập, điều kiện gói/lượt, tình trạng bản dự toán và tính đầy đủ/hợp lệ của đầu vào theo BR-PROJ-001, BR-PROJ-002 và BR-PROJ-004.
-3. Khi tiếp nhận hợp lệ, giữ một lượt nếu hạn mức hữu hạn theo BR-SUB-003; khóa sửa đầu vào theo BR-PROJ-005 và gửi đúng dữ liệu đã tiếp nhận sang AI service.
-4. Backend theo dõi quá trình xử lý và cung cấp trạng thái cho khách. Cơ chế trao đổi cụ thể với AI service chưa được chốt.
-5. AI service tạo và trả nội dung thiết kế/dự toán. Backend không tự bóc khối lượng, quản lý đơn giá hoặc tính lại dự toán.
-6. Backend kiểm tra kết quả theo hợp đồng, lưu đủ bộ kết quả và bảo đảm khách có thể mở xem. Chỉ lúc đó ghi nhận thành công và chuyển lượt giữ thành lượt đã dùng theo BR-SUB-003.
-7. Khách xem kết quả đã lưu của bản dự toán và đi tiếp bước hồ sơ. Không cần khách bấm duyệt hoặc hài lòng mới tính thành công; không tính riêng lượt cho từng phần của cùng bộ kết quả.
+1. Khách bấm Tạo bản vẽ 2D.
+2. Backend kiểm tra quyền sở hữu, điều kiện mở chặng theo BR-PROJ-010, đầu vào, kết quả soi ảnh lô, gói và lượt.
+3. Khi hợp lệ, backend tiếp nhận lần chạy: giữ một lượt nếu hạn mức hữu hạn theo BR-SUB-003, khóa sửa đầu vào theo BR-PROJ-005, chốt đầu vào cùng miền giá (BR-PROJ-013) và cấu hình AI (BR-PROJ-014) cho lần chạy.
+4. Hệ thống lập phương án mặt bằng từ ảnh lô, mô tả và các ô đầu vào: số tầng, danh sách phòng, diện tích từng phòng theo luật lô đất và luật phương án của app demo.
+5. Hệ thống vẽ, cho từng tầng, một bản vẽ kỹ thuật và một bản vẽ bố trí nội thất theo mức đồ đạc của gói hoàn thiện. Bản vẽ AI không trả được ảnh, hoặc có viền nhà lệch tỷ lệ quá ngưỡng so với lô, được vẽ lại 1 lần theo BR-PROJ-011 khoản 7.
+6. Trong lúc chạy, khách thấy chặng 2D ở trạng thái Đang chạy kèm tiến độ; khách được rời trang và quay lại xem tiếp.
+7. Khi phương án và toàn bộ bản vẽ đã được tạo, kiểm tra và lưu, chặng 2D thành công. Lượt đang giữ chuyển thành lượt đã dùng theo BR-SUB-003; đầu vào bị khóa vĩnh viễn theo BR-PROJ-005.
+8. Khách xem kết quả 2D: phương án theo từng tầng (tên phòng, diện tích) và các bản vẽ. Chặng Dự toán chuyển sang Sẵn sàng; hệ thống không tự chạy tiếp.
 
 ### Alternative Flow
 
 #### ALT-01
 
-Tác vụ thất bại và bản dự toán chưa có kết quả thành công.
+Lần chạy 2D bị lỗi hoặc quá hạn, bản dự toán chưa có 2D thành công và chưa đạt giới hạn số lần lỗi.
 
-1. Khách mở lại thông tin đã nhập; được sửa khi đáp ứng điều kiện lưu theo BR-SUB-007 và BR-PROJ-005.
-2. Khách chủ động thử lại trên cùng bản dự toán, có hoặc không sửa đầu vào.
-3. Backend kiểm tra lại toàn bộ điều kiện tại lần yêu cầu mới, không dùng quyền hoặc lượt của yêu cầu cũ để bỏ qua kiểm tra.
-4. Khi tiếp nhận hợp lệ, quay lại bước giữ lượt và khóa đầu vào của Main Flow.
+1. Khách mở lại đầu vào; được sửa khi đáp ứng điều kiện lưu theo BR-SUB-007 và BR-PROJ-005.
+2. Khách bấm Chạy lại, có hoặc không sửa đầu vào.
+3. Backend kiểm tra lại toàn bộ điều kiện như lần đầu, kể cả gói, lượt và kết quả soi ảnh; không dùng quyền hay lượt của lần trước.
+4. Khi hợp lệ, quay lại bước 3 của Main Flow với một lượt mới được giữ.
 
 #### ALT-02
 
-Gói hết hạn hoặc sang kỳ mới trong khi một tác vụ đã được tiếp nhận hợp lệ còn đang xử lý.
+Gói hết hạn hoặc sang kỳ mới trong khi lần chạy 2D đã được tiếp nhận còn đang chạy.
 
-1. Không hủy tác vụ chỉ vì hết hạn gói hoặc đổi kỳ.
-2. Kết quả xử lý và lượt được ghi nhận vào kỳ đã giữ theo BR-SUB-003; thất bại không cộng lượt sang kỳ mới.
-3. Giới hạn thời gian xử lý vẫn áp dụng theo BR-SUB-016.
+1. Không hủy lần chạy chỉ vì hết hạn gói hoặc đổi kỳ.
+2. Lượt được ghi nhận vào kỳ đã giữ theo BR-SUB-003; lỗi thì hoàn ở kỳ đó, không cộng sang kỳ mới.
+3. Hạn chờ của chặng vẫn áp dụng theo BR-PROJ-012.
+
+#### ALT-03
+
+Hệ thống bị gián đoạn kỹ thuật giữa lần chạy, chẳng hạn máy chủ khởi động lại.
+
+1. Hệ thống tự tiếp tục lần chạy từ bước đã lưu gần nhất, trong hạn chờ còn lại.
+2. Không tính là lỗi, không giữ thêm lượt và không gọi lại các bước AI đã có kết quả lưu.
 
 ### Exception Flow
 
 #### EXC-01
 
-Đầu vào thiếu hoặc không hợp lệ, khách không đủ quyền/lượt, hoặc bản dự toán đã có kết quả thành công.
+Đầu vào thiếu hoặc không hợp lệ, ảnh lô chưa Đạt, khách không đủ quyền, gói hoặc lượt, chặng 2D đã thành công, đang có chặng chạy, đã đạt giới hạn số lần lỗi, hệ thống đang quá tải hoặc dịch vụ AI đang tạm ngắt theo BR-PROJ-012, hoặc luồng bốn chặng đang tắt.
 
-1. Từ chối yêu cầu tương ứng trước khi bắt đầu tác vụ mới, không giữ/trừ lượt cho yêu cầu bị từ chối.
-2. Không thay đổi kết quả đã thành công hoặc gửi AI để tạo thêm phương án cho bản dự toán đó.
+1. Từ chối yêu cầu trước khi tiếp nhận, kèm lý do; không giữ hay trừ lượt, không tạo lần chạy và không tính vào bộ đếm lỗi.
+2. Không thay đổi kết quả 2D đã thành công.
 
 #### EXC-02
 
-Có yêu cầu thay đổi đầu vào trong lúc AI đang xử lý.
+Có yêu cầu thay đổi đầu vào sau khi lần chạy 2D đã được tiếp nhận.
 
-1. Từ chối cập nhật theo BR-PROJ-005, kể cả tự lưu đến muộn hoặc gửi trực tiếp.
-2. Giữ nguyên đầu vào của tác vụ đang chạy.
-3. Đổi tên bản dự toán không bị khóa, vì tên không phải đầu vào gửi AI; theo BR-SUB-007 khoản 11.
+1. Từ chối thay đổi theo BR-PROJ-005, kể cả tự lưu đến muộn hoặc gửi trực tiếp.
+2. Giữ nguyên đầu vào đã chốt của lần chạy.
+3. Đổi tên bản dự toán vẫn được phép theo BR-SUB-007 khoản 11.
 
 #### EXC-03
 
-Tạo thiết kế thất bại hoặc quá thời gian chờ được cấu hình.
+Lần chạy 2D lỗi, kể cả bản vẽ vẫn hỏng sau 1 lần vẽ lại, hoặc quá hạn chờ.
 
-1. Ghi nhận thất bại và giải phóng lượt đang giữ theo BR-SUB-003 và BR-SUB-016; không tính đã dùng.
-2. Không công bố một phần kết quả dở dang như bộ kết quả thành công.
-3. Giữ thông tin đầu vào; cho khách sửa/thử lại theo ALT-01 khi còn đủ điều kiện. Không tự gửi lại tác vụ.
+1. Ghi nhận lỗi và hoàn lượt đang giữ theo BR-SUB-003, BR-SUB-016. Chỉ tăng bộ đếm lỗi của chặng 2D khi lỗi do kết quả AI với đầu vào của khách (ví dụ bản vẽ vẫn không có ảnh sau lần vẽ lại); lỗi hệ thống như dịch vụ AI không phản hồi hoặc quá hạn chờ không tăng bộ đếm (BR-PROJ-011 khoản 1).
+2. Không công bố phần kết quả dở dang.
+3. Mở lại khả năng sửa đầu vào; khách chạy lại theo ALT-01 khi còn đủ điều kiện. Hệ thống không tự chạy lại.
 
 #### EXC-04
 
-Nhận kết quả sau khi tác vụ đã thất bại do quá thời gian.
+Kết quả đến sau khi lần chạy đã lỗi do quá hạn.
 
-1. Giữ trạng thái thất bại, không công bố kết quả muộn và không tính lại lượt theo BR-SUB-016.
-2. Không gắn kết quả này vào lần thử lại của khách.
+1. Giữ trạng thái lỗi; không công bố kết quả muộn, không tính lượt theo BR-PROJ-012 và BR-SUB-016.
+2. Không gắn kết quả này vào lần chạy lại.
+
+#### EXC-05
+
+Chặng 2D đã đạt giới hạn số lần lỗi.
+
+1. Từ chối chạy lại và báo khách liên hệ hỗ trợ theo BR-PROJ-011.
+2. Sau khi Admin đặt lại bộ đếm, khách chạy lại theo ALT-01.
 
 ## Acceptance Criteria
 
 #### AC-001
 
-- **Given**: Khách đủ điều kiện, bản dự toán chưa thành công và đầu vào hợp lệ.
-- **When**: Backend tiếp nhận yêu cầu tạo thiết kế.
-- **Then**: Giữ một lượt nếu hạn mức hữu hạn, khóa sửa đầu vào và gửi đúng thông tin tiếp nhận sang AI service.
-- **And**: Chưa ghi lượt đã dùng chỉ vì đã gửi yêu cầu.
+- **Given**: Khách đủ điều kiện; chặng 2D chưa thành công; đầu vào hợp lệ và ảnh lô đã soi Đạt.
+- **When**: Backend tiếp nhận yêu cầu Tạo bản vẽ 2D.
+- **Then**: Giữ một lượt nếu hạn mức hữu hạn, khóa sửa đầu vào và chốt đầu vào, miền giá, cấu hình AI cho lần chạy.
+- **And**: Chưa ghi lượt đã dùng chỉ vì đã tiếp nhận.
 
 #### AC-002
 
-- **Given**: AI đang xử lý một yêu cầu đã tiếp nhận hợp lệ.
-- **When**: Có yêu cầu lưu thay đổi đầu vào, kể cả yêu cầu gửi trực tiếp hoặc tự lưu đến muộn.
+- **Given**: Lần chạy 2D đã được tiếp nhận và chưa kết thúc.
+- **When**: Có yêu cầu lưu thay đổi đầu vào, kể cả gửi trực tiếp hoặc tự lưu đến muộn.
 - **Then**: Backend từ chối thay đổi đó.
-- **And**: Đầu vào tác vụ đang chạy giữ nguyên.
+- **And**: Đầu vào đã chốt của lần chạy giữ nguyên; đổi tên bản dự toán vẫn được phép.
 
 #### AC-003
 
-- **Given**: AI đã trả đủ kết quả theo hợp đồng tích hợp.
-- **When**: Hệ thống lưu thành công và khách có thể mở xem bộ kết quả.
-- **Then**: Ghi thành công và chuyển lượt giữ thành đã dùng theo BR-SUB-003.
-- **And**: Không chờ khách mở thực tế hoặc duyệt, không trừ thêm lượt cho từng phần của bộ kết quả.
+- **Given**: Phương án và bản vẽ kỹ thuật, bản vẽ nội thất của mọi tầng đã được tạo, kiểm tra và lưu.
+- **When**: Hệ thống kết thúc lần chạy 2D.
+- **Then**: Chặng 2D thành công; lượt đang giữ chuyển thành lượt đã dùng theo BR-SUB-003.
+- **And**: Không chờ khách mở xem hay duyệt; các chặng sau không trừ thêm lượt.
 
 #### AC-004
 
-- **Given**: Tác vụ thất bại hoặc quá thời gian, chưa có kết quả thành công.
-- **When**: Backend kết thúc tác vụ với trạng thái thất bại.
-- **Then**: Giải phóng lượt đang giữ, giữ thông tin đầu vào và mở lại khả năng sửa khi khách còn đủ điều kiện.
-- **And**: Chỉ gửi lại AI khi khách chủ động thử lại; mỗi lần thử lại kiểm tra quyền/lượt và đầu vào một lần nữa.
+- **Given**: Lần chạy 2D lỗi hoặc quá hạn, chưa có 2D thành công.
+- **When**: Backend kết thúc lần chạy với trạng thái lỗi.
+- **Then**: Hoàn lượt đang giữ, tăng bộ đếm lỗi của chặng 2D, giữ đầu vào và mở lại khả năng sửa.
+- **And**: Chỉ chạy lại khi khách bấm Chạy lại; mỗi lần chạy lại kiểm tra lại quyền, gói, lượt, đầu vào và giữ một lượt mới.
 
 #### AC-005
 
-- **Given**: Tác vụ đã thất bại do quá thời gian và giải phóng lượt giữ.
-- **When**: Kết quả của tác vụ đó đến muộn.
-- **Then**: Không công bố hoặc chuyển thành công, không tính lại lượt.
-- **And**: Không đưa kết quả vào lần thử lại khác.
+- **Given**: Lần chạy 2D đã lỗi do quá hạn và đã hoàn lượt.
+- **When**: Kết quả của lần chạy đó đến muộn.
+- **Then**: Không công bố, không đổi lần chạy thành thành công, không tính lại lượt.
+- **And**: Không đưa kết quả vào lần chạy lại.
 
 #### AC-006
 
-- **Given**: Một bản dự toán đã có kết quả thành công.
-- **When**: Khách yêu cầu tạo thêm hoặc sửa thiết kế bằng AI trên bản dự toán đó.
-- **Then**: Từ chối theo BR-SUB-017; muốn phương án khác phải tạo dự toán mới.
-- **And**: Kết quả cũ không bị thay thế và không giữ/trừ lượt cho yêu cầu bị từ chối.
+- **Given**: Chặng 2D của bản dự toán đã thành công.
+- **When**: Khách yêu cầu tạo lại 2D hoặc sửa đầu vào.
+- **Then**: Từ chối; kết quả 2D cũ giữ nguyên và đầu vào vẫn khóa.
+- **And**: Không giữ hay trừ lượt cho yêu cầu bị từ chối; muốn phương án khác phải tạo bản dự toán mới.
 
 #### AC-007
 
-- **Given**: Tác vụ đã được tiếp nhận hợp lệ rồi gói hết hạn hoặc chuyển kỳ.
-- **When**: Tác vụ kết thúc thành công hoặc thất bại trong giới hạn xử lý áp dụng.
+- **Given**: Lần chạy 2D đã được tiếp nhận rồi gói hết hạn hoặc chuyển kỳ.
+- **When**: Lần chạy kết thúc thành công hoặc lỗi trong hạn chờ.
 - **Then**: Xử lý lượt tại kỳ đã giữ theo BR-SUB-003.
-- **And**: Không cộng lượt lỗi sang kỳ mới hoặc hủy tác vụ chỉ vì gói hết hạn.
+- **And**: Không cộng lượt lỗi sang kỳ mới và không hủy lần chạy chỉ vì gói hết hạn.
+
+#### AC-008
+
+- **Given**: Ảnh lô đang gắn với bản dự toán có kết quả soi Không đạt, đang soi hoặc soi lỗi.
+- **When**: Khách bấm Tạo bản vẽ 2D.
+- **Then**: Từ chối kèm lý do ảnh lô chưa đạt theo BR-PROJ-015.
+- **And**: Không giữ lượt, không khóa đầu vào và không tạo lần chạy.
+
+#### AC-009
+
+- **Given**: Trong lần chạy 2D, AI không trả được ảnh cho bản vẽ của một tầng, hoặc viền nhà trên bản vẽ lệch tỷ lệ quá 5% so với lô.
+- **When**: Hệ thống xử lý bản vẽ đó.
+- **Then**: Vẽ lại đúng bản vẽ đó 1 lần. AI vẫn không trả được ảnh thì lần chạy lỗi theo EXC-03; viền vẫn lệch thì giữ bản có độ lệch nhỏ hơn, gắn cờ nội bộ và lần chạy tiếp tục.
+- **And**: Lần vẽ lại không tính vào bộ đếm lỗi và không kéo dài hạn chờ; khi Admin tắt cờ vẽ lại vì viền lệch, viền lệch chỉ được ghi lại, không vẽ lại.
+
+#### AC-010
+
+- **Given**: Chặng 2D đã lỗi đúng bằng giới hạn đang cấu hình (mặc định 3 lần).
+- **When**: Khách bấm Chạy lại.
+- **Then**: Từ chối và báo khách liên hệ hỗ trợ.
+- **And**: Sau khi Admin đặt lại bộ đếm theo STORY-PROJ-012, khách chạy lại được và lần chạy kiểm tra đủ điều kiện như AC-001.
+
+#### AC-011
+
+- **Given**: Lần chạy 2D của bản dự toán đang chờ hoặc đang chạy.
+- **When**: Có thêm yêu cầu Tạo bản vẽ 2D, kể cả gửi lặp hoặc từ thiết bị khác.
+- **Then**: Từ chối yêu cầu thêm; chỉ có một lần chạy và một lượt được giữ.
+- **And**: Yêu cầu gửi lặp có cùng khóa chống trùng (Idempotency-Key) nhận lại kết quả của lần đầu, không bị coi là lần chạy mới.
+
+#### AC-012
+
+- **Given**: Chặng 2D đã thành công.
+- **When**: Khách mở màn Bản vẽ 2D.
+- **Then**: Thấy phương án từng tầng (tên phòng, diện tích) và cho mỗi tầng một bản vẽ kỹ thuật, một bản vẽ bố trí nội thất.
+- **And**: Chặng Dự toán ở trạng thái Sẵn sàng; hệ thống không tự chạy Dự toán.
+
+#### AC-013
+
+- **Given**: Lần chạy 2D đang chạy thì máy chủ khởi động lại.
+- **When**: Hệ thống hoạt động trở lại trong hạn chờ.
+- **Then**: Lần chạy tiếp tục từ bước đã lưu gần nhất; các bước AI đã có kết quả không bị gọi lại.
+- **And**: Không tính lỗi và không giữ thêm lượt.
+
+#### AC-014
+
+- **Given**: Số lần chạy đang chờ của toàn hệ thống đã đạt ngưỡng Admin cấu hình, hoặc dịch vụ AI đang tạm ngắt.
+- **When**: Khách bấm Tạo bản vẽ 2D.
+- **Then**: Bị từ chối ngay với thông báo hệ thống đang bận hoặc dịch vụ AI đang tạm gián đoạn, kèm gợi ý thử lại sau.
+- **And**: Không tạo lần chạy, không giữ lượt, không tính vào bộ đếm lỗi; đầu vào vẫn sửa được.
+
+#### AC-015
+
+- **Given**: Chặng 2D đã lỗi 3 lần liên tiếp vì dịch vụ AI không phản hồi sau khi đã thử lại.
+- **When**: Khách xem trạng thái chặng 2D.
+- **Then**: Chặng ở trạng thái Lỗi và vẫn còn đủ số lần chạy lại theo giới hạn, vì lỗi hệ thống không bị đếm.
+- **And**: Mỗi lần lỗi đều đã hoàn lượt đang giữ.
 
 ## References
 
 ### TDDs
 
-- TDD-PROJ-002
-- TDD-PROJ-001: Đổi tên bản dự toán không bị khóa khi AI đang xử lý (EXC-02).
+- TDD-PROJ-006
+- TDD-PROJ-007
+- TDD-PROJ-008
+- TDD-PROJ-001: Đổi tên bản dự toán không bị khóa khi chặng đang chạy (EXC-02).
 
 ### Rules
 
@@ -192,6 +266,14 @@ Nhận kết quả sau khi tác vụ đã thất bại do quá thời gian.
 - BR-PROJ-002
 - BR-PROJ-004
 - BR-PROJ-005
+- BR-PROJ-010
+- BR-PROJ-011
+- BR-PROJ-012
+- BR-PROJ-013
+- BR-PROJ-014
+- BR-PROJ-015
+- BR-PROJ-018
+- BR-PROJ-019
 - BR-SUB-003
 - BR-SUB-007
 - BR-SUB-016
@@ -200,16 +282,19 @@ Nhận kết quả sau khi tác vụ đã thất bại do quá thời gian.
 ### Dependencies
 
 - STORY-PROJ-001
+- STORY-PROJ-012: Admin đặt lại bộ đếm lỗi và cấu hình hạn chờ, model AI.
 
 ## Non-Functional
 
-- Bảo vệ dữ liệu đầu vào đã tiếp nhận khỏi thay đổi trong lúc AI xử lý bằng kiểm tra tại backend.
-- [Chờ hợp đồng AI để xác định cấu trúc đầu ra bắt buộc, cách nhận trạng thái và phân loại lỗi.] Thời gian chờ một lần tạo mặc định 15 phút, đọc từ cấu hình (người dùng xác nhận ngày 26/09/2026, TDD-PROJ-002).
-- [Cơ chế xử lý yêu cầu mạng gửi lặp, cập nhật đồng thời và phản hồi trùng sẽ mô tả trong thiết kế; chưa có API hoặc phương án kỹ thuật được chốt.]
+- Bảo vệ đầu vào đã chốt khỏi thay đổi bằng kiểm tra tại backend, không chỉ khóa giao diện.
+- Hạn chờ chặng 2D mặc định 20 phút, Admin cấu hình được (BR-PROJ-012). Lần chạy thử app demo ngày 11/10/2026 cho cả bộ nhà phố 2 tầng mất khoảng 15 phút; chưa có số đo riêng cho chặng 2D trên hệ thống thật.
+- Mỗi bước AI tốn tiền được lưu ngay khi xong để khi gián đoạn chỉ mất tối đa một lời gọi đang chạy dở (TDD-PROJ-002).
+- Kết quả 2D trên hệ thống thật phải khớp hành vi app demo ở mốc `059e876` trên các bộ dữ liệu đối chiếu; sai số đo đường bao dưới 1%.
 
 ## Out of Scope
 
-- Xây AI service hoặc tự tính dự toán tại backend BMT.
-- Khách hàng hủy tác vụ; chỉnh sửa thiết kế sau thành công; tự thử lại tác vụ thất bại.
-- Xuất PDF/Excel, link chia sẻ, QR và email thuộc phần hồ sơ kế tiếp trong phạm vi tổng thể; chưa loại bỏ thao tác nào khỏi kế hoạch.
-- Cam kết chất lượng hoặc số lượng tệp đầu ra khi chưa có hợp đồng AI service; chưa được coi là tích hợp đã kiểm chứng.
+- Khách hủy lần chạy đang diễn ra.
+- Sửa phương án hoặc vẽ lại 2D sau khi chặng đã thành công.
+- Nhiều ảnh đầu vào (mỗi ảnh một tầng) như app demo; hệ thống thật giữ một ảnh lô cho mỗi bản dự toán.
+- Bản vẽ kết cấu.
+- Sửa các lỗi chất lượng đã thấy ở app demo (tự thêm giếng trời, `wc_count = 0`); sẽ làm sau bằng phiên bản prompt mới theo BR-PROJ-014.
