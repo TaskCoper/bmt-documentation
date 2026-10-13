@@ -36,42 +36,42 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Rule Info
 
-- **Name**: Khóa sửa đầu vào khi AI xử lý và cho sửa hoặc thử lại sau thất bại.
-- **Category**: Tạo dự toán — xử lý AI
+- **Name**: Đầu vào bị khóa từ lúc tiếp nhận chặng 2D; mở lại khi 2D lỗi và khóa vĩnh viễn khi 2D thành công.
+- **Category**: Tạo dự toán — xử lý theo chặng
 - **Status**: Draft
 - **Version**:
 - **Effective Date**:
 - **Owner**: [Chưa xác định]
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
-- **Source**: Người dùng xác nhận trong hội thoại: khóa sửa khi AI đang chạy; thất bại thì được sửa hoặc thử lại. Bản dự toán đã thành công muốn phương án khác phải tạo dự toán mới theo BR-SUB-017.
+- **Source**: Người dùng chốt ngày 11/10/2026: biểu mẫu bị khóa từ lúc bấm tạo 2D; 2D lỗi thì mở lại cho khách sửa; 2D thành công thì khóa vĩnh viễn; tên bản dự toán vẫn đổi được như quy tắc hiện có. Thay quy tắc trước “khóa khi AI xử lý, mở khi thất bại” của luồng một lần gửi AI.
 
 ## Statement
 
-Sau khi yêu cầu tạo thiết kế được tiếp nhận hợp lệ, đầu vào của bản dự toán bị khóa sửa trong thời gian AI xử lý. Nếu tác vụ thất bại và bản dự toán chưa có kết quả thành công, khách được sửa thông tin hoặc chủ động thử lại khi còn đáp ứng điều kiện sử dụng.
+Đầu vào thiết kế của bản dự toán bị khóa sửa từ lúc hệ thống tiếp nhận lần chạy chặng 2D. Nếu lần chạy 2D lỗi, đầu vào được mở lại để khách sửa hoặc chạy lại. Khi chặng 2D thành công, đầu vào bị khóa vĩnh viễn, kể cả khi các chặng sau lỗi. Tên bản dự toán không thuộc phạm vi khóa.
 
 ## When
 
-Khách gửi yêu cầu tạo thiết kế, lưu thay đổi đầu vào khi AI đang xử lý, hoặc sửa/thử lại một bản dự toán đã xử lý thất bại.
+Khách lưu thay đổi đầu vào (kể cả tự lưu, thay ảnh lô, yêu cầu soi ảnh), hệ thống tiếp nhận hoặc kết thúc lần chạy 2D, hoặc khách đổi tên bản dự toán.
 
 ## Then
 
-1. Khóa sửa đầu vào khi tiếp nhận hợp lệ yêu cầu tạo thiết kế. Tác vụ dùng đúng thông tin đã tiếp nhận.
-2. Từ chối cập nhật đầu vào trong lúc AI đang xử lý, kể cả yêu cầu gửi trực tiếp và yêu cầu tự lưu đến muộn từ biểu mẫu đã mở trước đó. Không chỉ khóa các trường trên giao diện.
-3. Khi tác vụ thất bại, gồm thất bại do quá thời gian theo BR-SUB-016, mở lại khả năng sửa đầu vào nếu bản dự toán chưa có kết quả thành công. Quyền tạo/lưu và điều kiện gói/lượt vẫn phải đáp ứng BR-SUB-007.
-4. Cho phép khách chủ động thử lại cùng bản dự toán, giữ dữ liệu đã có; khách có thể sửa trước khi thử lại. Mỗi yêu cầu thử lại phải kiểm tra lại dữ liệu, quyền và lượt theo BR-SUB-017.
-5. Sau khi yêu cầu thử lại được tiếp nhận hợp lệ, khóa sửa lại cho đến kết quả xử lý cuối cùng.
-6. Khi bản dự toán đã thành công, muốn phương án khác phải tạo dự toán mới. Không dùng thao tác sửa hoặc thử lại để thay thế kết quả thành công theo BR-SUB-017.
-7. Kết quả đến muộn của lần xử lý đã quá thời gian không mở lại thành công, không gắn vào lần thử lại và không được công bố theo BR-SUB-016.
+1. Khóa đầu vào khi tiếp nhận hợp lệ lần chạy 2D. Lần chạy dùng đúng đầu vào đã chốt lúc tiếp nhận.
+2. Từ chối mọi thay đổi đầu vào trong lúc lần chạy 2D chưa kết thúc, kể cả yêu cầu gửi trực tiếp và tự lưu đến muộn từ biểu mẫu đã mở trước đó. Không chỉ khóa các ô trên giao diện.
+3. Khi lần chạy 2D lỗi, kể cả lỗi do quá hạn theo BR-PROJ-012, mở lại khả năng sửa đầu vào. Quyền tạo/lưu và điều kiện gói/lượt vẫn phải đáp ứng BR-SUB-007.
+4. Khách được chạy lại 2D trên cùng bản dự toán, có hoặc không sửa đầu vào, theo BR-PROJ-011. Lần chạy lại được tiếp nhận thì khóa lại như khoản 1.
+5. Khi chặng 2D thành công, đầu vào bị khóa vĩnh viễn. Dự toán, Phối cảnh 3D và Hồ sơ lỗi hay chạy lại đều không mở khóa. Muốn đổi đầu vào, khách tạo bản dự toán mới.
+6. Kết quả đến muộn của lần chạy 2D đã lỗi do quá hạn không mở lại thành công, không gắn vào lần chạy lại và không được công bố.
+7. Thay ảnh lô và yêu cầu soi ảnh là thay đổi đầu vào, nên cũng bị khóa theo các khoản trên.
 
 ## Except
 
-Yêu cầu gửi tạo thiết kế bị từ chối trước khi được tiếp nhận hợp lệ không làm bản dự toán chuyển sang đang xử lý hoặc khóa đầu vào theo quy tắc này. Việc không được lưu do hết hạn gói, thiếu quyền hoặc hết lượt vẫn áp dụng độc lập theo BR-SUB-007.
+Đổi tên bản dự toán không bị khóa theo BR-SUB-007 khoản 11, kể cả khi chặng đang chạy hoặc sau khi 2D thành công. Yêu cầu chạy 2D bị từ chối trước khi tiếp nhận không khóa đầu vào. Việc không được lưu do hết hạn gói, thiếu quyền hoặc hết lượt vẫn áp dụng độc lập theo BR-SUB-007.
 
 ## Notes
 
-- Chỉ sửa dữ liệu sau thất bại không tự gửi lại AI. Khách phải chủ động gửi yêu cầu mới; không tự thử lại tác vụ theo các quy tắc hiện có.
-- Quy tắc khóa ở đây áp dụng cho đầu vào thiết kế, không áp dụng cho tên bản dự toán; đổi tên theo BR-SUB-007 khoản 11 (người dùng xác nhận ngày 25/09/2026). Không tự mở rộng thành chính sách khóa hoặc cho phép đổi các thông tin quản trị khác.
-- Không thêm quyền khách hàng hủy tác vụ; phạm vi hiện tại theo BR-SUB-003.
-- Mốc tiếp nhận, chống yêu cầu trùng và bảo vệ khỏi cập nhật đồng thời sẽ xác định trong thiết kế; không chọn công nghệ giao tiếp hoặc trạng thái API của AI khi chưa có hợp đồng.
+- **Đã xác nhận (11/10/2026):** khóa từ lúc tạo 2D; 2D lỗi thì mở; 2D thành công thì khóa vĩnh viễn; tên vẫn đổi được.
+- **Đã xác nhận (11/10/2026):** thay ảnh lô và soi ảnh thuộc phạm vi khóa (khoản 7), vì kết quả soi là đầu vào của chặng 2D.
+- Ví dụ: 2D thành công, Dự toán lỗi 3 lần. Khách không sửa được số phòng ngủ để thử lại; khách liên hệ hỗ trợ để Admin đặt lại bộ đếm theo BR-PROJ-011, hoặc tạo bản dự toán mới.
+- Không thêm quyền khách hủy lần chạy.
 - Reviewer và Approver là Tân Trần theo xác nhận trong hội thoại; việc ghi tên không có nghĩa tài liệu đã được phê duyệt. Owner và ngày hiệu lực chưa xác định; chưa có kết quả kiểm thử.

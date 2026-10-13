@@ -36,7 +36,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Rule Info
 
-- **Name**: Dự toán và hồ sơ dùng kết quả AI đã lưu; backend không tự tính nội dung chuyên môn.
+- **Name**: Backend tự chạy luồng AI và tính dự toán theo luật giá; màn hình, tệp và chia sẻ dùng kết quả đã lưu của từng chặng.
 - **Category**: Tạo dự toán — kết quả và hồ sơ
 - **Status**: Draft
 - **Version**:
@@ -44,42 +44,40 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Owner**: [Chưa xác định]
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
-- **Source**: Người dùng xác nhận phạm vi cả ba bước như trang mẫu; AI service do bên khác phụ trách và trả kết quả, BMT thu thập đầu vào; giữ PDF, Excel và các thao tác chia sẻ. Hợp đồng AI trước mắt ghi chờ tích hợp. Ngày 26/09/2026 người dùng xác nhận khoản 4 (AI trả PDF/Excel, backend không tự dựng) và khoản 7 (tên mới chỉ áp vào tên tệp tải về).
+- **Source**: Người dùng chốt ngày 10–11/10/2026: viết lại phần xử lý AI của app demo `design-estimate` bằng .NET trong backend, gọi OpenAI và Anthropic trực tiếp; luật giá do Admin quản lý; chặng Hồ sơ không gọi AI và tự dựng PDF, Excel. Thay quyết định trước “AI service của bên khác trả kết quả và URL tệp; backend không tự tính nội dung chuyên môn, không tự dựng PDF/Excel” (26/09/2026). Khoản 6–7 giữ từ quyết định ngày 25–26/09/2026.
 
 ## Statement
 
-Backend BMT dùng kết quả AI đã lưu để cung cấp bảng chi phí và hồ sơ thiết kế, thi công gắn với từng bản dự toán. AI service chịu trách nhiệm nội dung thiết kế, khối lượng, đơn giá và số tiền. Backend không xây bảng đơn giá, tự bóc khối lượng hoặc tính lại dự toán. Khách được xem kết quả, tải PDF hồ sơ và Excel dự toán trong phạm vi tính năng.
+Backend BMT tự chạy luồng tạo kết quả theo bốn chặng (BR-PROJ-010): gọi AI để lập phương án và bản vẽ 2D, lập dự toán theo luật giá (BR-PROJ-016), dựng phối cảnh 3D, rồi tự dựng PDF và Excel ở chặng Hồ sơ. Kết quả mỗi chặng được kiểm tra rồi lưu gắn với bản dự toán. Màn hình kết quả, tệp tải về và trang chia sẻ chỉ dùng kết quả đã lưu, không gọi lại AI.
 
 ## When
 
-Hệ thống nhận kết quả AI hoặc khách yêu cầu xem dự toán, xem hồ sơ và tải tệp của bản dự toán.
+Một chặng tạo kết quả; khách mở kết quả, tải tệp hoặc chia sẻ hồ sơ của bản dự toán.
 
 ## Then
 
-1. Giữ cấu trúc dự toán theo trang mẫu gồm phần thô, hoàn thiện và nội thất, cùng tổng dự toán và nội dung tư vấn do AI trả. Áp dụng phạm vi này cho mọi loại công trình trong danh mục theo BR-PROJ-004; không tự loại nhóm phần thô riêng với Căn hộ.
-2. Dữ liệu phục vụ màn hình, PDF và Excel phải thuộc đúng bản dự toán và cùng kết quả nguồn đã lưu. Không dùng số tiền, diện tích hoặc hình minh họa mẫu của website làm kết quả thật.
-3. Kiểm tra phản hồi theo hợp đồng AI trước khi công bố. Hợp đồng cần xác định trường và đầu ra bắt buộc; không tự điền kết quả chuyên môn còn thiếu để báo thành công.
-4. Hỗ trợ xem hồ sơ, chuẩn bị/tải PDF và tải Excel dự toán. AI trả tệp PDF và Excel như mọi tệp kết quả; backend không tự dựng tệp. Thời điểm AI trả từng tệp xác định khi có hợp đồng.
-5. Xem, xuất hoặc tải từ kết quả cũ không tạo thiết kế AI mới, không thay thế kết quả nguồn và không giữ/trừ thêm lượt tạo thiết kế.
-6. Khi gói hết hạn, vẫn được dùng các thao tác hồ sơ cũ theo BR-SUB-007. Chia sẻ qua link, QR và email áp dụng BR-PROJ-006.
-7. Sau khi chủ sở hữu đổi tên bản dự toán theo BR-SUB-007 khoản 11, màn hình của chủ sở hữu và trang xem qua link luôn hiện tên hiện tại. Tệp PDF/Excel tải về sau khi đổi tên mang tên hiện tại ở tên tệp; nội dung tệp giữ nguyên như lúc AI tạo, kể cả tên in trong tệp nếu có. Việc tải lại không tính lượt, không gọi AI, không tự dựng lại tệp và không thay kết quả nguồn. Tệp người nhận đã tải về trước đó không bị thu hồi.
+1. Dự toán gồm ba phần thô, hoàn thiện và nội thất, tổng dự toán, đơn giá trên m² sàn quy đổi, thời gian thi công dự kiến và nội dung tư vấn. Áp dụng cho mọi loại công trình trong danh mục; phạm vi từng phần theo luật giá của loại công trình đó (ví dụ căn hộ không có phần thô theo khung giá của app demo).
+2. Dữ liệu trên màn hình, PDF, Excel và trang chia sẻ phải thuộc đúng bản dự toán và cùng kết quả đã lưu của các chặng. Không dùng số tiền, diện tích hay hình minh họa mẫu làm kết quả thật.
+3. Kết quả AI của mỗi chặng được kiểm tra theo hợp đồng dữ liệu và các lưới an toàn của app demo trước khi lưu. Không tự điền nội dung chuyên môn còn thiếu để báo thành công; thiếu trường bắt buộc thì chặng lỗi theo BR-PROJ-011.
+4. Chặng Hồ sơ dựng bốn tệp từ kết quả đã lưu: PDF hồ sơ gộp, PDF phối cảnh 3D, PDF bản vẽ kiến trúc và Excel dự toán (STORY-PROJ-010). Tải tệp và chia sẻ chỉ mở khi chặng Hồ sơ đã thành công.
+5. Xem, tải hoặc chia sẻ kết quả không gọi AI, không thay kết quả đã lưu và không giữ hay trừ lượt.
+6. Khi gói hết hạn, chủ bản dự toán vẫn xem, tải và chia sẻ kết quả đã có theo BR-SUB-007; chia sẻ áp dụng BR-PROJ-006.
+7. Sau khi chủ bản dự toán đổi tên theo BR-SUB-007 khoản 11, màn hình của chủ sở hữu và trang xem qua link hiện tên hiện tại. Tệp tải về mang tên hiện tại ở tên tệp; nội dung tệp giữ nguyên như lúc dựng ở chặng Hồ sơ, kể cả tên in trong tệp. Tải lại không tính lượt, không gọi AI và không dựng lại tệp. Tệp người nhận đã tải trước đó không bị thu hồi.
+8. Nội dung gửi khách đã được lọc thông tin nội bộ theo BR-PROJ-017.
 
 ## Except
 
-Khi bản dự toán đã bị xóa theo [BR-PROJ-009](BR-PROJ-009.md), không cung cấp lại kết quả hoặc hồ sơ cho chủ sở hữu hay người nhận link. Việc còn dữ liệu kỹ thuật hoặc link chưa hết hạn không khôi phục quyền xem, xuất hay tải mới. Xóa không hoàn lượt đã dùng và không thu hồi tệp đã tải về trước đó.
+Khi bản dự toán đã bị xóa theo [BR-PROJ-009](BR-PROJ-009.md), không cung cấp lại kết quả hay tệp cho chủ sở hữu hoặc người nhận link. Còn dữ liệu kỹ thuật hoặc link chưa hết hạn không khôi phục quyền xem hay tải. Xóa không hoàn lượt đã dùng và không thu hồi tệp đã tải trước đó.
 
-Nếu chưa có bộ kết quả hợp lệ hoặc chưa chuẩn bị được tệp, không báo đã có tệp để tải. Lỗi xuất hoặc tải tệp từ một kết quả đã thành công không biến thành một lần tạo thiết kế mới hoặc tự trừ lượt; giữ kết quả nguồn để xử lý lại thao tác bị lỗi.
+Khi chưa có kết quả hợp lệ của một chặng, không báo chặng đó đã có kết quả. Lỗi khi tải tệp đã dựng không làm chặng Hồ sơ lỗi lại và không tự trừ lượt; khách tải lại được.
 
 ## Notes
 
-- Ngoại lệ cho bản đã xóa bổ sung theo quyết định của người dùng trong hội thoại chuẩn bị danh sách và xóa dự toán; đã được người dùng chốt cùng STORY-PROJ-006/007 và BR-PROJ-008/009 trong hội thoại ngày 30/09/2026. Đặc tả ST bổ sung ở [bảng độ phủ](../discovery/my-estimates-system-test-coverage.md); chưa triển khai hoặc thực thi.
-- Khoản 7 do người dùng xác nhận ngày 25/09/2026. Ngày 26/09/2026 người dùng xác nhận sửa phần về tệp: bản cũ yêu cầu tệp xuất trước khi đổi tên không được dùng nữa và lần tải sau xuất lại với tên mới. Vì AI tạo PDF/Excel và backend không tự dựng tệp, tên mới nay chỉ áp vào tên tệp tải về (backend đặt khi chuyển tiếp tệp, TDD-PROJ-003); nội dung tệp giữ tên tại lúc AI tạo.
-- Khoản 4 cập nhật ngày 26/09/2026: AI trả URL cho mọi tệp kết quả, kể cả PDF và Excel; backend chỉ lưu URL, không tự dựng tệp. Người dùng xác nhận giữ bản sửa khoản 4 này ngày 26/09/2026.
-
-- Trang mẫu mô tả dự toán là tham khảo. Không suy ra giá trị mẫu hoặc hình mẫu là định mức áp dụng cho công trình thực tế.
-- BR-PROJ-004 tách lựa chọn phong cách kiến trúc và nội thất theo loại công trình. Người dùng đã chốt cấu hình chỉ điều khiển lựa chọn đầu vào; AI vẫn trả đủ kết quả. Không loại phần thiết kế, dự toán hoặc hồ sơ chỉ vì một nhóm lựa chọn phong cách bị tắt.
-- Trang hồ sơ có bìa, mặt bằng 2D, phối cảnh và dự toán. Danh sách đầu ra thực sự bắt buộc, định dạng, độ chi tiết và điều kiện hoàn tất cần đối chiếu hợp đồng AI; không cam kết số trang hoặc bộ môn bản vẽ chưa được xác nhận.
-- Đầu vào Diện tích theo BR-PROJ-001 phải giữ đúng giá trị khách nhập. Nếu AI trả thêm diện tích sàn ước tính, đó là dữ liệu kết quả riêng, không âm thầm ghi đè trường đầu vào.
-- BR-SUB-003 quyết định thời điểm thành công và tính lượt. Cần chốt rõ tệp nào thuộc bộ kết quả bắt buộc lúc hoàn tất AI, tệp nào được xuất sau từ kết quả nguồn; không lấy nút Render hồ sơ trên trang mẫu để tự quyết định mốc này.
-- Chưa thêm bước nhân viên duyệt nội dung hoặc quy trình kiểm định chuyên môn vào luồng. Hợp đồng AI và các giới hạn của kết quả sẽ được làm rõ trước tích hợp.
-- Owner và ngày hiệu lực chưa xác định; bản nháp chưa được phê duyệt và chưa có kiểm thử thực thi.
+- **Đã xác nhận (10–11/10/2026):** backend tự chạy AI theo hành vi app demo; luật giá do Admin quản lý; chặng Hồ sơ tự dựng PDF và Excel; tải và chia sẻ chỉ mở sau chặng Hồ sơ.
+- Quyết định ngày 26/09/2026 về việc AI trả URL cho PDF và Excel, backend không tự dựng tệp, không còn áp dụng cho luồng bốn chặng. Cơ chế tải qua route của backend để giữ hiệu lực thu hồi link (BR-PROJ-006 ghi chú) vẫn giữ.
+- BR-PROJ-004 tách phong cách kiến trúc và nội thất; cả hai được dùng trong prompt 2D và 3D. Tắt một nhóm lựa chọn không cắt phần kết quả tương ứng.
+- Kết quả 2D có thể cho số phòng ngủ hoặc diện tích khác mong muốn của khách khi lô không đủ chỗ; đây là dữ liệu kết quả, không ghi đè đầu vào (BR-PROJ-001, BR-PROJ-002).
+- **Đã xác nhận (11/10/2026):** căn hộ không có phần thô (khoản 1), theo khung giá của app demo. Khung giá của app demo coi căn hộ là nhận bàn giao thô, chỉ tính hoàn thiện và nội thất; quy tắc cũ ghi “không tự loại phần thô riêng với Căn hộ”.
+- Chưa có bước nhân viên duyệt nội dung; cờ cần rà chỉ lưu nội bộ theo BR-PROJ-017.
+- Ngoại lệ cho bản đã xóa bổ sung theo quyết định ngày 30/09/2026 khi chuẩn bị danh sách và xóa dự toán.
+- Reviewer và Approver là Tân Trần. Owner và ngày hiệu lực chưa xác định; bản nháp chưa được phê duyệt và chưa có kiểm thử thực thi.

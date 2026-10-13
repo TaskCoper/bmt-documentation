@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PROJ-007 | Tạo dự toán | EstimateInputPolicy — Đổi tỉnh đúng quan hệ và giữ chi tiết | Branch | FULL | P1 | Unit dự kiến trong TDD, chưa có implementation hoặc mã test. Dùng clock cố định và fake dependency có thể đọc lại đối số/trạng thái; không gọi dịch vụ thật. Địa chỉ cũ P1/W1, chi tiết S; adapter giả xác nhận W2 thuộc P2. | Đổi P1 sang P2; biến thể có chọn W2 cùng yêu cầu. | Chỉ đổi tỉnh thì xóa W1; chọn W2 cùng yêu cầu thì giữ W2 đã xác minh. Luôn giữ S. Không gọi lại nguồn địa chỉ khi chỉ sửa mô tả. | TDD-PROJ-001/Architecture<br>TDD-PROJ-001/Internal API<br>BR-PROJ-004/Then<br>ST-PROJ-010/System Test | Đổi tỉnh đúng quan hệ và giữ chi tiết. Kiểm hành vi ở biên unit; không dùng mock để kết luận transaction, SQL hoặc tích hợp thật đúng. | [Chưa xác định] | Draft |
+| UT-PROJ-007 | Tạo dự toán | EstimateInputPolicy — Đổi tỉnh đúng quan hệ và giữ chi tiết | Branch | FULL | P1 | Đặc tả theo TDD; đối chiếu mã test và phần đã kiểm trong [bàn giao tọa độ](../discovery/estimate-coordinates-implementation.md). Dùng clock cố định và fake dependency có thể đọc lại đối số/trạng thái; không gọi dịch vụ thật. Địa chỉ cũ P1/W1, chi tiết S; adapter giả xác nhận W2 thuộc P2. Cặp A=(21.033,105.814), B=(21.034,105.815); cả hai theo thứ tự latitude, longitude. Bổ sung tọa độ theo TDD chốt ngày 01/10/2026; phạm vi mã test và kết quả chạy backend tại [bàn giao tọa độ](../discovery/estimate-coordinates-implementation.md), chưa chuyển trạng thái toàn bộ đặc tả. | Đổi P1 sang P2; biến thể có chọn W2 cùng yêu cầu. Mọi lần đổi tỉnh gửi đủ B trong full input và khai báo latitude, longitude trong changedFields; nhánh chỉ sửa mô tả gửi lại A, không khai báo sửa tọa độ. | Chỉ đổi tỉnh thì xóa W1; chọn W2 cùng yêu cầu thì giữ W2 đã xác minh. Luôn giữ S. Không gọi lại nguồn địa chỉ khi chỉ sửa mô tả. Đổi tỉnh áp đúng B, kể cả nhánh xã bị xóa; chỉ sửa mô tả giữ A. | TDD-PROJ-001/Architecture<br>TDD-PROJ-001/Internal API<br>BR-PROJ-004/Then<br>ST-PROJ-010/System Test<br>ST-PROJ-117/System Test | Đổi tỉnh đúng quan hệ và giữ chi tiết. Kiểm hành vi ở biên unit; không dùng mock để kết luận transaction, SQL hoặc tích hợp thật đúng. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
@@ -50,3 +50,4 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - TDD-PROJ-001/Internal API
 - BR-PROJ-004/Then
 - ST-PROJ-010/System Test
+- ST-PROJ-117/System Test

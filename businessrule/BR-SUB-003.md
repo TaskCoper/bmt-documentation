@@ -53,6 +53,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 Một yêu cầu tạo thiết kế chỉ được tính là đã dùng một lượt khi tạo thành công. Hệ thống giữ trước một lượt trong lúc xử lý để lượt đó không được dùng cho yêu cầu khác; nếu tạo lỗi thì giải phóng lượt đã giữ. Tác vụ chạy qua hai kỳ vẫn tính vào kỳ đã giữ lượt, không ảnh hưởng hạn mức kỳ mới. Tác vụ đã bắt đầu hợp lệ không bị hủy chỉ vì subscription hết hạn và chưa gia hạn; vẫn chịu giới hạn thời gian xử lý theo BR-SUB-016.
 
+**Luồng bốn chặng của Tạo dự toán (người dùng chốt ngày 11/10/2026):** một bản dự toán dùng một lượt cho cả bộ kết quả. Lượt được giữ khi tiếp nhận chặng Bản vẽ 2D và tính là đã dùng khi chặng 2D thành công; 2D lỗi hoặc quá hạn thì hoàn. Các chặng Dự toán, Phối cảnh 3D và Hồ sơ không giữ hay trừ thêm lượt và vẫn chạy được khi gói đã hết hạn. Khi luồng bốn chặng được bật, “tạo thành công” trong quy tắc này nghĩa là chặng 2D thành công; câu về trả toàn bộ bộ kết quả cùng lúc ở khoản 2 không áp dụng.
+
 ## When
 
 Tài khoản có quyền tạo thiết kế với hạn mức hữu hạn và còn ít nhất một lượt có thể sử dụng; yêu cầu được tiếp nhận để xử lý.
@@ -69,12 +71,15 @@ Tài khoản có quyền tạo thiết kế với hạn mức hữu hạn và c�
 
 6. Tác vụ AI đã được tiếp nhận hợp lệ hoàn tất theo bộ quyền của gói tại thời điểm tiếp nhận, kể cả quyền 3D, dù khách đổi gói hoặc chu kỳ trong lúc xử lý. Không bổ sung hoặc bỏ đầu ra của tác vụ đó theo gói mới. Yêu cầu mới sau khi chuyển kiểm tra quyền gói mới. Quy tắc này không cho phép trả kết quả muộn sau timeout; BR-SUB-016 vẫn áp dụng. Lượt vẫn được ghi nhận vào kỳ đã giữ theo các khoản trên.
 
+7. Với luồng bốn chặng (BR-PROJ-010): giữ một lượt khi tiếp nhận lần chạy 2D; chuyển thành đã dùng khi 2D thành công; hoàn khi lần chạy 2D lỗi hoặc quá hạn. Mỗi lần chạy lại 2D sau lỗi giữ một lượt mới. Không giữ, trừ hay hoàn lượt khi chạy hoặc chạy lại chặng Dự toán, Phối cảnh 3D, Hồ sơ; các chặng này không kiểm tra gói hay lượt. Các khoản 4–6 về kỳ và đổi gói áp dụng cho lượt của chặng 2D.
+
 ## Except
 
 Đợt này không hỗ trợ khách hàng hủy tác vụ tạo thiết kế. Tác vụ tiếp tục theo kết quả xử lý: thành công tính lượt, lỗi giải phóng lượt đã giữ. Tác vụ vượt thời gian chờ được cấu hình tự chuyển thất bại và giải phóng lượt theo [BR-SUB-016](BR-SUB-016.md). Kết quả đến muộn sau xử lý quá thời gian không tự tính lượt lại. Chưa chốt giá trị thời gian chờ.
 
 ## Notes
 
+- **Cập nhật ngày 11/10/2026 (luồng bốn chặng, người dùng đã chốt):** một lượt cho cả bộ, tính khi xong 2D; các chặng sau không tính lượt; gói hết hạn sau khi xong 2D vẫn chạy tiếp được. Quyền Phối cảnh 3D đã tạm bỏ ngày 10/10/2026 (BR-SUB-008 khoản 9), nên chặng 3D không kiểm tra quyền 3D. Ví dụ 10 lượt: bấm tạo 2D thì còn 9 sẵn dùng, 1 đang giữ; 2D thành công thì 9 sẵn dùng, 1 đã dùng; chạy Dự toán, 3D, Hồ sơ sau đó vẫn là 9 sẵn dùng, 1 đã dùng.
 - Giữ quyền tác vụ khi đổi gói theo BR-SUB-021 và [ST-SUB-102](../systemtest/ST-SUB-102.md); người dùng đã xác nhận.
 
 - Ví dụ cùng một kỳ: có 10 lượt; đang tạo thì còn 9 lượt sẵn dùng và 1 lượt đang giữ. Thành công thì còn 9 lượt sẵn dùng, 1 lượt đã dùng; lỗi thì trở lại 10 lượt sẵn dùng, không có lượt đã dùng từ yêu cầu này.

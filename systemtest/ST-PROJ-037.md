@@ -44,11 +44,13 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Story | Loại | Suite | Priority | Precondition | Steps | Test data | Expected result | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-PROJ-037 | STORY-PROJ-003 | EXC | REGRESSION | P1 | Môi trường thử đã có chức năng tương ứng; C1 là khách đã đăng nhập, sở hữu bản dự toán; gói còn hiệu lực, quyền tạo thiết kế, quota hữu hạn 3, đã dùng 0, đang giữ 0, trừ khi ca nêu khác. Có thể đọc lại dữ liệu đã lưu, trạng thái tác vụ và sổ lượt. Có kết quả và tệp thử theo hợp đồng đầu ra đã thống nhất; cách nhận hoặc xuất PDF/Excel còn chờ tích hợp. Không dùng tệp giả làm bằng chứng tích hợp thật. | 1. Chuẩn bị lần lượt bản đang chạy AI, bản thất bại và bản có kết quả lưu dở.<br>2. Yêu cầu xem dự toán/hồ sơ, chuẩn bị PDF/Excel và tải trực tiếp.<br>3. Đối chiếu trạng thái, nội dung trả về và dữ liệu nguồn. | Không dùng fixture kết quả thành công cho ba biến thể chưa sẵn sàng. | Trả đúng tình trạng chưa có kết quả hoàn chỉnh; không công bố bộ dở dang hoặc tệp giả/dữ liệu mẫu như kết quả thành công. Không khởi chạy lại AI do yêu cầu xem/tải. | STORY-PROJ-003/AC-001<br>STORY-PROJ-003/AC-002<br>STORY-PROJ-003/EXC-02<br>BR-PROJ-007/Then | Không cung cấp hồ sơ giả khi AI chưa xong hoặc thất bại. Đặc tả chưa thực thi; dữ liệu trong ca là fixture kiểm thử, không phải mặc định sản phẩm. | [Chưa xác định] | Draft |
+| ST-PROJ-037 | STORY-PROJ-003 | EXC | REGRESSION | P1 | Môi trường thử bật luồng bốn chặng. C1 là khách đã đăng nhập, sở hữu các bản dự toán trong ca. Kết quả các chặng được tạo trước bằng chế độ AI giả phát lại phản hồi ghi sẵn (dự kiến theo TDD); chặng Hồ sơ do backend dựng bốn tệp: PDF hồ sơ gộp, PDF phối cảnh 3D, PDF bản vẽ kiến trúc, Excel dự toán. Đọc được kết quả đã lưu, trạng thái chặng, số lần gọi AI và sổ lượt. Ca chưa chạy. | 1. Chuẩn bị lần lượt: D1 đang chạy chặng 2D; D2 có chặng Dự toán lỗi; D3 đang chạy chặng 3D đã dựng xong 3/8 ảnh; D4 đã xong 2D, Dự toán, 3D nhưng chưa chạy Hồ sơ.<br>2. Với từng bản, yêu cầu kết quả của chặng chưa thành công và yêu cầu tải tệp hồ sơ trực tiếp tới backend.<br>3. Đối chiếu trạng thái, nội dung trả về và dữ liệu nguồn. | Không dùng kết quả thành công làm dữ liệu cho các chặng chưa xong. | Trả đúng trạng thái thực tế: Đang chạy, Lỗi (kèm lý do) hoặc Sẵn sàng; không trả phần dở dang hay dữ liệu minh họa như kết quả hoàn chỉnh. D3 xem được 3 ảnh đã xong nhưng chặng 3D chưa thành công. Yêu cầu tải tệp của D1–D4 đều bị từ chối vì chặng Hồ sơ chưa xong. Không yêu cầu nào làm chạy lại chặng hay gọi AI. | STORY-PROJ-003/AC-001<br>STORY-PROJ-003/AC-008<br>STORY-PROJ-003/EXC-02<br>STORY-PROJ-003/EXC-04<br>BR-PROJ-007/Then<br>BR-PROJ-010/Then | Không cung cấp kết quả giả hay tệp khi chặng chưa xong. Đặc tả chưa thực thi; dữ liệu trong ca là fixture kiểm thử, không phải mặc định sản phẩm. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - STORY-PROJ-003/AC-001
-- STORY-PROJ-003/AC-002
+- STORY-PROJ-003/AC-008
 - STORY-PROJ-003/EXC-02
+- STORY-PROJ-003/EXC-04
 - BR-PROJ-007/Then
+- BR-PROJ-010/Then

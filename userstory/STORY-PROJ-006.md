@@ -39,8 +39,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Metadata
 
-- **Story**: Là khách hàng, tôi muốn xem, tìm kiếm và lọc các dự toán của mình để tìm lại bản đang làm hoặc mở kết quả đã tạo.
-- **Context**: Bổ sung màn hình Dự toán của tôi cho nhóm PROJ. Người dùng đã xác nhận hiển thị đủ trạng thái, thông tin dạng danh sách không có ảnh đại diện, phân trang, tìm theo tên, lọc trạng thái và sắp xếp theo lần sửa gần nhất. Người dùng đã chốt bộ US/BR trong hội thoại ngày 30/09/2026; đã bổ sung quyết định tìm không phân biệt hoa/thường và dấu. Thiết kế ở TDD-PROJ-004, chưa triển khai API danh sách. Metadata phân công còn thiếu.
+- **Story**: Là khách hàng, tôi muốn xem, tìm kiếm theo tên hoặc mã và lọc các dự toán của mình để tìm lại bản đang làm hoặc mở kết quả đã tạo.
+- **Context**: Bổ sung màn hình Dự toán của tôi cho nhóm PROJ. Người dùng đã xác nhận hiển thị đủ trạng thái, thông tin dạng danh sách không có ảnh đại diện, phân trang, tìm theo tên, lọc trạng thái và sắp xếp theo lần sửa gần nhất. Người dùng đã chốt bộ US/BR trong hội thoại ngày 30/09/2026; đã bổ sung quyết định tìm không phân biệt hoa/thường và dấu. Thiết kế ở TDD-PROJ-004, chưa triển khai API danh sách. Ngày 07/10/2026 người dùng bổ sung hiển thị mã dự toán và tìm theo một phần mã trong cùng ô tìm kiếm (AC-011). Metadata phân công còn thiếu.
 - **Sprint**: [Chưa xác định]
 - **Priority**: Must
 - **Status**: Todo
@@ -60,7 +60,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ### Trigger
 
-Khách mở Dự toán của tôi, đổi trang, tìm theo tên hoặc lọc trạng thái.
+Khách mở Dự toán của tôi, đổi trang, tìm theo tên hoặc mã, hoặc lọc trạng thái.
 
 ## Flow
 
@@ -68,8 +68,8 @@ Khách mở Dự toán của tôi, đổi trang, tìm theo tên hoặc lọc tr�
 
 1. Khách mở Dự toán của tôi.
 2. Hệ thống xác định tài khoản đang đăng nhập và chỉ lấy các bản dự toán chưa bị xóa của tài khoản đó theo BR-PROJ-008.
-3. Hệ thống hiển thị danh sách có phân trang, mặc định gồm đủ trạng thái nháp, đang xử lý, thành công và thất bại; bản sửa gần nhất đứng trước.
-4. Mỗi bản hiển thị tên, loại công trình nếu đã chọn, trạng thái, ngày tạo và lần sửa gần nhất. Không hiển thị ảnh đại diện hoặc bổ sung cột địa chỉ.
+3. Hệ thống hiển thị danh sách có phân trang, mặc định gồm đủ năm trạng thái Nháp, Đang xử lý, Thất bại, Đang làm dở và Hoàn tất theo BR-PROJ-008 khoản 2; bản sửa gần nhất đứng trước.
+4. Mỗi bản hiển thị tên, loại công trình nếu đã chọn, trạng thái, chặng đã thành công gần nhất nếu có, ngày tạo và lần sửa gần nhất. Không hiển thị ảnh đại diện hoặc bổ sung cột địa chỉ.
 5. Khách có thể tìm một phần tên không phân biệt hoa/thường hoặc dấu và lọc theo trạng thái. Danh sách trả về đồng thời đáp ứng các điều kiện đang chọn, vẫn giữ phạm vi tài khoản và thứ tự mặc định.
 6. Khách chọn một bản để mở thông tin hoặc kết quả hiện có. Hệ thống kiểm lại quyền truy cập và tình trạng đã xóa; việc mở không tự gửi AI hoặc cấp quyền sửa đầu vào.
 7. Khi khách muốn xóa một hoặc nhiều bản, chuyển sang STORY-PROJ-007.
@@ -123,9 +123,9 @@ Không tải được danh sách do lỗi mạng hoặc máy chủ.
 
 #### AC-001
 
-- **Given**: Khách đã đăng nhập và có các bản dự toán ở trạng thái nháp, đang xử lý, thành công và thất bại.
+- **Given**: Khách đã đăng nhập và có các bản dự toán ở trạng thái Nháp, Đang xử lý, Thất bại, Đang làm dở và Hoàn tất.
 - **When**: Mở danh sách mà không lọc trạng thái.
-- **Then**: Các bản chưa bị xóa ở cả bốn trạng thái đều thuộc tập kết quả có phân trang.
+- **Then**: Các bản chưa bị xóa ở cả năm trạng thái đều thuộc tập kết quả có phân trang.
 - **And**: Không trả dự toán của tài khoản khác hoặc dự toán đã xóa theo BR-PROJ-008.
 
 #### AC-002
@@ -191,6 +191,20 @@ Không tải được danh sách do lỗi mạng hoặc máy chủ.
 - **Then**: Thông báo chưa tải được danh sách và cho tải lại.
 - **And**: Không kết luận khách chưa có dự toán từ một lần tải bị lỗi.
 
+#### AC-011
+
+- **Given**: Khách có bản “Nhà An” mã `BUILDX-20261005-Q7K2M9` và bản “Nhà Bình” mã `BUILDX-20261006-T4W8NC`; khách khác có bản mã `BUILDX-20261005-Q7K2MA`.
+- **When**: Khách mở danh sách, rồi nhập vào ô tìm kiếm lần lượt “q7k2m9”, “20261005-Q7K” và “nhà”.
+- **Then**: Mỗi dòng hiển thị mã dự toán theo BR-PROJ-008 khoản 3. “q7k2m9” và “20261005-Q7K” chỉ trả “Nhà An” vì tìm theo một phần mã không phân biệt hoa/thường và bỏ qua dấu gạch ngang; “nhà” trả cả hai bản vì khớp tên.
+- **And**: Không trả bản của khách khác hoặc bản đã xóa dù mã khớp; tìm theo mã vẫn kết hợp được với lọc trạng thái và giữ phân trang, thứ tự sửa gần nhất.
+
+#### AC-013
+
+- **Given**: Khách có bốn bản: A chưa chạy chặng nào; B đã xong 2D và Dự toán; C đang chạy Phối cảnh 3D; D đã xong Hồ sơ.
+- **When**: Khách mở danh sách không lọc.
+- **Then**: A hiện Nháp; B hiện Đang làm dở kèm chặng gần nhất Dự toán; C hiện Đang xử lý; D hiện Hoàn tất.
+- **And**: Lọc theo Đang làm dở chỉ trả B.
+
 ## References
 
 ### TDDs
@@ -200,6 +214,8 @@ Không tải được danh sách do lỗi mạng hoặc máy chủ.
 ### Rules
 
 - BR-PROJ-008
+- BR-PROJ-010
+- BR-PROJ-003/Then: Khoản 12, định dạng mã dự toán.
 - BR-PROJ-009
 - BR-SUB-007
 - BR-RBAC-005
@@ -220,5 +236,5 @@ Không tải được danh sách do lỗi mạng hoặc máy chủ.
 
 - Danh sách dự toán của khách khác dành cho Admin hoặc nhân viên.
 - Thay đổi điều kiện sửa đầu vào, tạo thiết kế hoặc tính lượt hiện có.
-- Ảnh đại diện, cột địa chỉ và bộ lọc nâng cao ngoài tên, trạng thái.
+- Ảnh đại diện, cột địa chỉ và bộ lọc nâng cao ngoài tên, mã và trạng thái.
 - Thùng rác, xem lại hoặc khôi phục dự toán đã xóa.

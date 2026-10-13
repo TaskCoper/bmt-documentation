@@ -36,7 +36,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Rule Info
 
-- **Name**: Đầu vào thiết kế có ảnh hoặc mô tả và tuân thủ giới hạn dữ liệu.
+- **Name**: Đầu vào thiết kế gồm ảnh lô đất bắt buộc, mô tả không bắt buộc và các ô AI cần.
 - **Category**: Tạo dự toán — thông tin đầu vào
 - **Status**: Draft
 - **Version**:
@@ -44,38 +44,36 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Owner**: [Chưa xác định]
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
-- **Source**: Người dùng xác nhận trong hội thoại: có ít nhất ảnh hoặc mô tả, không bắt buộc đồng thời cả hai; một ảnh hoặc mô tả tối đa 500 ký tự; ảnh upload mới theo BR-MEDIA-001 đã chốt trong hội thoại.
+- **Source**: Người dùng chốt ngày 11/10/2026: giữ biểu mẫu hiện có, xử lý theo cách “Tải ảnh lô đất + mô tả” của app demo `design-estimate`; ảnh lô đất bắt buộc, JPG/PNG/WebP, tối đa 10 MB riêng cho ảnh lô, tối thiểu 640×480; mô tả tối đa 4.000 ký tự, không bắt buộc khi đã có ảnh lô; thêm số phòng ngủ 1–10 bắt buộc, có gara ô tô không bắt buộc. Người dùng chốt ngày 12/10/2026: cạnh có cửa vào làm như khối “Xác nhận trước khi vẽ” của app demo — hiện sau khi ảnh lô soi Đạt, mặc định Trái, chỉ ghi nhận khi khách bấm chọn. Thay quy tắc trước “có ít nhất ảnh hoặc mô tả; ảnh tối đa 5 MiB; mô tả tối đa 500 ký tự”.
 
 ## Statement
 
-Thông tin dùng để tạo thiết kế phải có ít nhất ảnh hoặc mô tả. Khách được cung cấp chỉ ảnh, chỉ mô tả hoặc cả hai. Mỗi bản dự toán nhận tối đa một ảnh thuộc định dạng JPG, PNG hoặc WebP, dung lượng tối đa 5 MiB (5.242.880 byte) cho upload mới theo BR-MEDIA-001; trường Mô tả chi tiết tối đa 500 ký tự, dùng làm đầu vào gửi AI. Không có trường ghi chú riêng trong phạm vi Tạo dự toán.
+Trước khi chạy chặng 2D, bản dự toán phải có đúng một ảnh lô đất hợp lệ và đã soi Đạt theo BR-PROJ-015, và số phòng ngủ mong muốn từ 1 đến 10. Mô tả chi tiết không bắt buộc, tối đa 4.000 ký tự. Ô có gara ô tô không bắt buộc. Không có trường ghi chú riêng.
 
 ## When
 
-Hệ thống kiểm tra tính đầy đủ của thông tin bản dự toán dùng làm đầu vào cho AI service.
+Khách nhập hoặc sửa đầu vào, hệ thống tự lưu, hoặc kiểm tra đầu vào trước khi chạy chặng 2D.
 
 ## Then
 
-1. Có ảnh mà không có mô tả thì đáp ứng điều kiện về sự hiện diện của ảnh/mô tả.
-2. Có mô tả mà không có ảnh thì đáp ứng điều kiện này.
-3. Có cả ảnh và mô tả thì đáp ứng điều kiện này; không bắt khách bỏ một trong hai.
-4. Không có cả ảnh lẫn mô tả thì thông tin chưa đủ để gửi AI; yêu cầu khách bổ sung ít nhất một trong hai.
-5. Đáp ứng điều kiện ảnh/mô tả không thay thế yêu cầu về diện tích hoặc các trường đầu vào khác được chốt riêng.
-6. Khi có ảnh, chỉ nhận tối đa một ảnh JPG, PNG hoặc WebP, không vượt quá 5 MiB (5.242.880 byte) khi upload mới theo BR-MEDIA-001. Ảnh ngoài định dạng hoặc vượt giới hạn không được coi là ảnh đầu vào hợp lệ.
-7. Khi có Mô tả chi tiết, nội dung không vượt quá 500 ký tự. Nội dung vượt giới hạn không được coi là mô tả đầu vào hợp lệ.
-
-8. Khi thay ảnh đầu vào, giữ ảnh cũ đang gắn với bản dự toán cho đến khi ảnh mới hợp lệ, tải lên và lưu thay thế thành công. Nếu tải hoặc lưu ảnh mới thất bại, ảnh cũ vẫn là ảnh đầu vào đã lưu; không báo đã thay ảnh thành công.
-9. Sau khi thay thành công, bản dự toán chỉ có một ảnh đầu vào là ảnh mới. Việc xử lý tệp tải tạm không có nghĩa cho phép nhiều ảnh đầu vào.
+1. Ảnh lô đất bắt buộc. Mỗi bản dự toán có tối đa một ảnh lô: JPG, PNG hoặc WebP, không vượt 10 MiB (10.485.760 byte), tối thiểu 640×480 điểm ảnh. Ảnh được tải qua luồng tải ảnh lô đất riêng theo BR-MEDIA-001 và được soi theo BR-PROJ-015. Thiếu ảnh, ảnh không hợp lệ hoặc chưa soi Đạt thì chưa đủ điều kiện chạy 2D.
+2. Mô tả chi tiết không bắt buộc. Khi có, nội dung không vượt 4.000 ký tự và được dùng làm đầu vào của chặng 2D. Mô tả vượt giới hạn bị từ chối khi tạo và khi tự lưu; không tự cắt ngắn.
+3. Số phòng ngủ mong muốn là số nguyên từ 1 đến 10, bắt buộc trước khi chạy 2D. Đây là mong muốn của khách; số phòng thực tế trên phương án có thể ít hơn khi lô không đủ chỗ, và lý do được ghi trong kết quả 2D. Diện tích và cạnh tối thiểu của phòng ngủ lấy từ bộ quy tắc AI theo BR-PROJ-019.
+4. Có gara ô tô là lựa chọn có/không, mặc định không. Chọn có thì chặng 2D bố trí gara khi lô cho phép; mặt tiền tối thiểu để bố trí gara lấy từ bộ quy tắc AI theo BR-PROJ-019 (app demo dùng 4,5 m). Lô không đủ thì phương án không có gara và ghi lý do trong kết quả 2D.
+5. Cạnh có cửa vào (Trên, Trái, Phải, Dưới) là cạnh của bản vẽ lô có cửa chính hoặc cổng. Khi ảnh lô đã soi Đạt, biểu mẫu hiện khối xác nhận cạnh này bên cạnh ảnh thu nhỏ, như khối “Xác nhận trước khi vẽ” của app demo: mặc định hiển thị Trái kèm lời nhắc chạm cạnh khác nếu bản vẽ có cửa ở cạnh khác. Ô không bắt buộc. Khách chưa bấm thì hệ thống dùng cạnh trái, ghi nhận đó là mặc định (không phải khách chọn) và gắn cờ nội bộ cho nhân viên rà theo BR-PROJ-017; khách đã bấm thì dùng đúng cạnh đó.
+6. Khi thay ảnh lô, giữ ảnh cũ cho tới khi ảnh mới hợp lệ, tải lên và lưu thay thế thành công. Nếu tải hoặc lưu ảnh mới thất bại, ảnh cũ vẫn là ảnh đầu vào; không báo đã thay thành công. Kết quả soi đi theo ảnh: thay ảnh thì phải có kết quả soi của ảnh mới.
+7. Sau khi thay thành công, bản dự toán chỉ có một ảnh lô là ảnh mới. Việc xử lý tệp tải tạm không có nghĩa cho phép nhiều ảnh đầu vào.
+8. Các điều kiện ở khoản 1–4 cùng với BR-PROJ-001 và BR-PROJ-004 là điều kiện đầu vào của chặng 2D; đáp ứng điều kiện này không thay thế việc kiểm tra quyền, gói và lượt.
 
 ## Except
 
-Được tạo dự toán bằng tên và tự lưu tiến độ khi chưa có ảnh hoặc mô tả theo BR-PROJ-003. Điều kiện có ít nhất một trong hai áp dụng trước khi gửi AI, không chặn lưu thông tin chưa đầy đủ.
+Bản dự toán được tạo nhanh chỉ với tên và tự lưu khi chưa có ảnh, mô tả, số phòng ngủ hay các ô khác theo BR-PROJ-003. Các điều kiện bắt buộc chỉ áp dụng khi chạy chặng 2D, không chặn lưu bản nháp.
 
 ## Notes
 
-- Người dùng đã chốt bộ US/BR trong hội thoại. Trạng thái Draft của file không phải bằng chứng phê duyệt hoặc import trên hệ thống quản lý tài liệu.
-- Đã chốt số lượng ảnh, định dạng, dung lượng và giới hạn mô tả. Đã chốt giữ ảnh cũ đến khi ảnh mới tải và lưu thay thế thành công; trường hợp chưa có ảnh cũ mà tải ảnh mới lỗi thì bản dự toán vẫn chưa có ảnh hợp lệ. Dấu bắt buộc trên giao diện mẫu không thay thế quyết định cho phép chỉ có mô tả.
-- Mô tả chi tiết là trường mô tả thiết kế duy nhất, được gửi AI khi khách cung cấp. Người dùng đã chọn không thêm ghi chú riêng; đề xuất ghi chú riêng tùy chọn 500 ký tự trước đó không áp dụng. Giới hạn tên bản dự toán được quy định riêng tại BR-PROJ-003.
-- Quy tắc này chỉ xác định sự hiện diện của dữ liệu, không khẳng định mọi tệp hoặc nội dung mô tả đều hợp lệ.
-- Tầng thực thi hiện tại: ảnh mới đi qua [BR-MEDIA-001](BR-MEDIA-001.md) và [TDD-MEDIA-001](../tdd/TDD-MEDIA-001.md). Frontend PUT lên kho; backend xác minh bytes, định dạng và dung lượng khi complete, rồi trả URL công khai cố định. API dự toán lưu URL và nơi sử dụng trong cùng transaction. Ảnh cũ đang dùng không bị loại theo giới hạn upload mới. Khi thay ảnh, URL cũ chỉ được gỡ sau khi lưu URL mới thành công; dọn sau ít nhất 24 giờ không còn bất kỳ nơi sử dụng nào theo [BR-MEDIA-002](BR-MEDIA-002.md). Quyết định này thay phần frontend tự kiểm và giới hạn HEIC/10 MB trước đây cho upload mới.
+- **Đã xác nhận (11/10/2026):** ảnh lô bắt buộc; JPG/PNG/WebP; tối thiểu 640×480; 10 MiB riêng cho ảnh lô (các ảnh khác giữ 5 MiB); mô tả tối đa 4.000 ký tự và không bắt buộc khi đã có ảnh lô; số phòng ngủ 1–10 bắt buộc; gara không bắt buộc.
+- **Đã xác nhận (11/10/2026):** gara mặc định không (khoản 4).
+- **Đã xác nhận (12/10/2026):** cạnh có cửa vào theo khối “Xác nhận trước khi vẽ” của luồng tải ảnh lô trong app demo (`web/app.js`, `confirmBlockHtml`): hiện sau khi soi Đạt, mặc định Trái, chưa bấm thì ghi nhận là mặc định. Thay quyết định bỏ ô cùng ngày, vốn dựa trên đối chiếu thiếu: AI không trả cạnh mặt tiền dưới dạng dữ liệu, nên không có ô này thì bản vẽ luôn đặt mặt tiền ở cạnh trái dù ảnh hay mô tả nêu cạnh khác.
+- App demo nhận nhiều ảnh, mỗi ảnh một tầng, và cho chạy chỉ với mô tả khi không có ảnh. Hệ thống thật giữ một ảnh lô cho mỗi bản dự toán và bắt buộc có ảnh.
+- Tầng thực thi: frontend tải ảnh lên kho qua URL presign; backend tự đọc nội dung ảnh từ kho để kiểm tra định dạng, dung lượng, kích thước và tính hash (BR-PROJ-015). Ảnh cũ chỉ được gỡ sau khi lưu ảnh mới thành công; dọn ảnh không còn nơi dùng theo BR-MEDIA-002.
 - Reviewer và Approver là Tân Trần theo xác nhận trong hội thoại; việc ghi tên không có nghĩa tài liệu đã được phê duyệt. Owner và ngày hiệu lực chưa xác định; chưa có kết quả kiểm thử.
