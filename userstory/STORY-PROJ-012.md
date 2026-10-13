@@ -84,9 +84,10 @@ Admin mở màn Cấu hình AI để xem hoặc sửa cấu hình; hoặc mở c
 
 Admin xem chi tiết luồng AI của một bản dự toán.
 
-1. Admin tìm bản dự toán theo mã `BUILDX-…` và mở chi tiết luồng AI.
-2. Hệ thống hiển thị trạng thái từng chặng và danh sách lần chạy: thời điểm tiếp nhận và kết thúc, kết quả, mã lỗi, model, phiên bản prompt, phiên bản cấu hình, phiên bản luật giá, số token và chi phí AI ước tính.
-3. Với chặng Dự toán, hệ thống hiển thị thêm phần nội bộ theo BR-PROJ-017: cờ cần rà, lý do và ghi chú chẩn đoán.
+1. Admin mở màn Tra cứu lần chạy AI; danh sách lượt chạy của khách hàng tự tải, mới nhất ở trên, có phân trang. Mỗi dòng có khách hàng, tên và mã dự toán, bước, trạng thái, thời điểm tiếp nhận/kết thúc và mã lỗi nếu có.
+2. Admin có thể lọc theo bước, trạng thái hoặc tìm theo tên/email khách hàng, tên/mã dự toán; tìm kiếm không bắt buộc. Bấm Xem chi tiết ở một dòng để mở dự toán và bung đúng lượt chạy đã chọn.
+3. Hệ thống hiển thị trạng thái từng chặng và danh sách lần chạy: thời điểm tiếp nhận và kết thúc, kết quả, mã lỗi, model, phiên bản prompt, phiên bản cấu hình, phiên bản luật giá, số token và chi phí AI ước tính.
+4. Với chặng Dự toán, hệ thống hiển thị thêm phần nội bộ theo BR-PROJ-017: cờ cần rà, lý do và ghi chú chẩn đoán.
 
 #### ALT-02
 
@@ -163,8 +164,8 @@ Admin đặt lại bộ đếm khi chặng đang chạy hoặc đã thành công
 #### AC-005
 
 - **Given**: Admin có quyền xem chi tiết luồng AI.
-- **When**: Mở chi tiết luồng AI của một bản dự toán.
-- **Then**: Thấy danh sách lần chạy từng chặng với kết quả, mã lỗi, model, các phiên bản đã dùng, số token và chi phí AI ước tính.
+- **When**: Mở màn Tra cứu lần chạy AI rồi chọn Xem chi tiết ở một lượt chạy.
+- **Then**: Danh sách lượt chạy khách hàng hiện ngay khi mở màn hình, không cần nhập mã; có phân trang và lọc. Chi tiết bung đúng lượt đã chọn, có kết quả, mã lỗi, model, các phiên bản đã dùng, số token và chi phí AI ước tính.
 - **And**: Với chặng Dự toán thấy thêm cờ cần rà và ghi chú nội bộ.
 
 #### AC-006
@@ -198,6 +199,8 @@ Admin đặt lại bộ đếm khi chặng đang chạy hoặc đã thành công
 ## References
 
 ### TDDs
+
+- TDD-PROJ-012
 
 - TDD-PROJ-006
 - TDD-PROJ-008

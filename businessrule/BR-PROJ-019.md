@@ -48,7 +48,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Statement
 
-Các quy tắc mà luồng AI dùng theo loại công trình, phong cách, gói và miền được lưu thành dữ liệu, không viết cố định trong mã nguồn. Mỗi quy tắc gồm phạm vi áp dụng và nội dung. Phạm vi lưu dạng quan hệ, trỏ tới mã gốc loại công trình, mã phong cách gốc, gói, miền hoặc chặng có thật. Nội dung là con số khi hệ thống cần tính, và là văn bản khi chỉ cần đưa cho AI đọc. Bộ quy tắc có phiên bản; mỗi lần chạy chặng chốt phiên bản đang áp dụng. Phần thuật toán (cách tính, cách đo, cách quyết định) vẫn nằm trong mã nguồn; Admin chỉ sửa được con số và lời dặn.
+Các quy tắc mà luồng AI dùng theo loại công trình, phong cách, gói và miền được lưu thành dữ liệu, không viết cố định trong mã nguồn. Mỗi quy tắc gồm phạm vi áp dụng và nội dung. Nhóm theo loại công trình trỏ tới ID loại công trình; ma trận mái trỏ tới cặp ID loại công trình và ID phong cách kiến trúc. Gói, miền và bước giữ phạm vi hiện có. Mã gốc chỉ còn dùng cho tương thích thuật toán demo và phạm vi lời dặn chung. Nội dung là con số khi hệ thống cần tính, và là văn bản khi chỉ cần đưa cho AI đọc. Bộ quy tắc có phiên bản; mỗi lần chạy chặng chốt phiên bản đang áp dụng. Phần thuật toán (cách tính, cách đo, cách quyết định) vẫn nằm trong mã nguồn; Admin chỉ sửa được con số và lời dặn.
 
 ## When
 
@@ -57,10 +57,10 @@ Hệ thống tiếp nhận lần chạy chặng và ghép đầu vào cho AI; Ad
 ## Then
 
 1. Bộ quy tắc gồm các nhóm sau:
-   - **Theo mã gốc loại công trình:** kích thước lô mặc định (mặt tiền, chiều sâu); số tầng tối đa; có tum, có mái, có phần thô hay không; các ngưỡng của luật lô đất (ví dụ bề ngang tối thiểu); mặt tiền tối thiểu để bố trí gara ô tô; diện tích và cạnh tối thiểu của phòng ngủ; kèm lời dặn cho AI.
-   - **Ma trận mái:** mỗi mã gốc có một kiểu mái mặc định; mỗi cặp (mã gốc, mã phong cách kiến trúc gốc) có thể có một kiểu mái riêng thay cho mặc định. Kiểu mái thuộc danh sách cố định của hệ thống (ví dụ mái ngói kiểu Thái, mái ngói kiểu Nhật, mái ngói/mansard tân cổ điển, mái bằng bê tông cốt thép, không có mái). Mỗi dòng có hệ số độ dốc, hệ số quy đổi sàn và câu tả mái dùng cho ảnh 3D.
+   - **Theo ID loại công trình:** kích thước lô mặc định (mặt tiền, chiều sâu); số tầng tối đa; có tum, có mái, có phần thô hay không; các ngưỡng của luật lô đất (ví dụ bề ngang tối thiểu); mặt tiền tối thiểu để bố trí gara ô tô; diện tích và cạnh tối thiểu của phòng ngủ; kèm lời dặn cho AI.
+   - **Ma trận mái:** mỗi loại công trình có một kiểu mái mặc định (ID phong cách để trống); mỗi cặp (ID loại công trình, ID phong cách kiến trúc) có thể có một kiểu mái riêng thay cho mặc định. Phong cách phải được gán cho loại công trình đó trong danh mục. Khi chạy, ưu tiên đúng cặp ID rồi mới dùng mặc định của chính loại đó; không mượn quy tắc của loại khác có cùng mã gốc. Kiểu mái thuộc danh sách cố định của hệ thống (ví dụ mái ngói kiểu Thái, mái ngói kiểu Nhật, mái ngói/mansard tân cổ điển, mái bằng bê tông cốt thép, không có mái). Mỗi dòng có hệ số độ dốc, hệ số quy đổi sàn và câu tả mái dùng cho ảnh 3D.
    - **Gói × chặng:** với mỗi gói (Cơ bản, Tiêu chuẩn, VIP) và mỗi chặng 2D, Dự toán, Phối cảnh 3D, có lời dặn riêng; ví dụ 2D là mức đồ đạc trên bản vẽ nội thất, 3D là chất lượng vật liệu. Số tiền và tỷ lệ theo gói vẫn nằm trong luật giá theo BR-PROJ-016, không lặp lại ở đây.
-   - **Theo miền:** với mỗi miền (Bắc, Trung, Nam) và mỗi chủ đề, có lời dặn riêng. Các tỉnh Tây Nguyên thuộc miền Trung nên dùng lời dặn của miền Trung (BR-PROJ-013). Phiên bản nạp sẵn có chủ đề thời tiết trên ảnh 3D (ví dụ nắng gắt miền Nam, mùa bão miền Trung). Thêm chủ đề mới là thêm dòng, không đổi cấu trúc dữ liệu. Hãng vật tư theo miền và mùa khởi công vẫn nằm trong hai tài liệu luật giá theo BR-PROJ-016, không lặp lại ở nhóm này.
+   - **Theo miền:** với mỗi chặng (2D, Dự toán hoặc Phối cảnh 3D), miền (Bắc, Trung, Nam) và chủ đề, có lời dặn riêng. Admin chọn chặng khi thêm chủ đề; chỉ chặng và miền khớp mới nhận lời dặn. Các tỉnh Tây Nguyên thuộc miền Trung nên dùng lời dặn của miền Trung (BR-PROJ-013). Phiên bản nạp sẵn có chủ đề thời tiết trên ảnh 3D (ví dụ nắng gắt miền Nam, mùa bão miền Trung). Thêm chủ đề mới là thêm dòng, không đổi cấu trúc dữ liệu. Hãng vật tư theo miền và mùa khởi công vẫn nằm trong hai tài liệu luật giá theo BR-PROJ-016, không lặp lại ở nhóm này.
    - **Lời dặn cho AI chung:** mỗi dòng có phạm vi gồm chặng (bắt buộc) và tùy chọn mã gốc, gói, miền; nội dung văn bản có nội dung, tối đa 2.000 ký tự; trạng thái bật/tắt. Không giới hạn số dòng được ghép vào một prompt. Khi chạy, mọi dòng đang bật và khớp phạm vi được ghép vào prompt của chặng đó. Đây là cách thêm quy tắc chữ mới mà không cần sửa mã nguồn hay cấu trúc dữ liệu.
    - **Prompt:** phần lời dặn của từng prompt theo BR-PROJ-014.
 2. Các quy tắc sau là thuật toán và nằm trong mã nguồn; Admin không sửa cách làm, chỉ sửa con số liên quan ở khoản 1:
@@ -68,18 +68,26 @@ Hệ thống tiếp nhận lần chạy chặng và ghép đầu vào cho AI; Ad
    - Đo hình học, đường bao lô và kiểm tra bản vẽ.
    - Quyết định lô có đủ chỗ cho số phòng ngủ hoặc gara mong muốn hay không; khi không đủ, phương án giảm số phòng hoặc bỏ gara và ghi lý do vào kết quả 2D.
    - Lưới an toàn của chặng Dự toán (BR-PROJ-017) và cách đọc mô tả tiếng Việt.
-3. Khi lưu, hệ thống từ chối: phạm vi trỏ tới mã gốc, phong cách, gói, miền hoặc chặng không tồn tại; con số ngoài khoảng hợp lệ của từng trường; hai dòng cùng phạm vi trong nhóm chỉ cho phép một dòng (ví dụ hai kiểu mái cho cùng một cặp). Lỗi chỉ rõ dòng và trường; bộ quy tắc hiện hành giữ nguyên.
+3. Khi lưu, hệ thống từ chối: phạm vi trỏ tới ID loại công trình, ID phong cách, gói, miền hoặc bước không tồn tại; phong cách không thuộc loại công trình đã chọn; con số ngoài khoảng hợp lệ của từng trường; hai dòng cùng phạm vi trong nhóm chỉ cho phép một dòng (ví dụ hai kiểu mái cho cùng một cặp). Lỗi chỉ rõ dòng và trường; bộ quy tắc hiện hành giữ nguyên.
 4. Mỗi lần lưu tạo phiên bản mới của bộ quy tắc; phiên bản cũ được giữ để tra cứu, so sánh và khôi phục như BR-PROJ-016 khoản 2, 7. Hai người lưu cùng lúc dựa trên cùng phiên bản thì người lưu sau bị từ chối.
 5. Lần chạy chặng chốt phiên bản bộ quy tắc đang áp dụng lúc tiếp nhận và dùng nó tới khi kết thúc, kể cả lúc tự làm lại. Kết quả ghi lại phiên bản đã dùng theo BR-PROJ-014. Đổi quy tắc không làm đổi kết quả đã có.
 6. Phiên bản đầu tiên được nạp sẵn từ app demo `design-estimate` ở mốc chuyển đổi (commit `059e876`): lô mặc định, ngưỡng, kiểu mái, mức đồ đạc, câu tả thời tiết theo miền và các lời dặn hiện viết trong mã của app demo. Với phiên bản nạp sẵn, kết quả trên các bộ dữ liệu đối chiếu phải giống app demo.
 7. Bảng và dữ liệu nạp sẵn của nhóm quy tắc nào có ngay ở đợt triển khai dùng nhóm đó; mã nguồn đọc quy tắc từ dữ liệu. Trước khi có màn quản trị (STORY-PROJ-013, sau đợt 4), quy tắc chỉ đổi qua bản phát hành có migration dữ liệu.
 8. Chỉ người có quyền quản lý quy tắc AI được xem và sửa. Khách không xem được quy tắc hay lời dặn.
 
+9. **Bổ sung đã chốt ngày 13/10/2026:** Admin thấy toàn bộ loại công trình trong danh mục dự toán hiện hành, kể cả loại chưa có quy tắc. Mỗi loại có trạng thái Đủ cấu hình hoặc Thiếu cấu hình và danh sách phần thiếu. Nút Cấu hình mở chung quy tắc lô đất, mái mặc định và mái theo phong cách; lưu cùng một phiên bản, giữ nguyên các loại/nhóm khác. Không cần lưu mái trước rồi mới thêm quy tắc lô đất.
+10. Loại đủ cấu hình phải có quy tắc đúng ID, mái mặc định của chính ID đó (kể cả loại không mái), mã loại dùng cho AI và dữ liệu phong cách bắt buộc của nhóm đang bật. Nếu không cho chọn kiến trúc, phải có phong cách kiến trúc mặc định hợp lệ. Nhóm nội thất bật phải có mô tả AI cho các lựa chọn. Khách vẫn thấy loại thiếu cấu hình với nhãn Chưa hỗ trợ nhưng không được chọn. Không dùng cấu hình loại khác chỉ vì trùng mã gốc.
+11. Trạng thái này được tính từ danh mục của bản dự toán và bộ quy tắc hiện hành, không sửa phiên bản danh mục đã ghim. API kiểm lại khi khách đổi loại và trước khi tiếp nhận 2D; không gọi AI hoặc giữ lượt khi thiếu cấu hình. Bản nháp đã chọn loại nay chưa sẵn sàng giữ lựa chọn và dữ liệu đã nhập, vẫn được lưu phần khác nhưng chưa được chạy 2D. Kết quả và lần chạy đã tiếp nhận giữ nguyên.
+
 ## Except
 
 Miền giá theo tỉnh/thành theo BR-PROJ-013, luật giá và dải giá theo BR-PROJ-016, model và hạn chờ theo STORY-PROJ-012 được quản lý riêng; quy tắc này không lặp lại các dữ liệu đó.
 
 ## Notes
+
+- **Đã xác nhận (13/10/2026):** hai nhóm Theo loại công trình và Ma trận mái dùng ID danh mục; Admin chọn theo tên. Bổ sung “Biệt thự sân vườn” và “Nhà vườn mái Nhật” vào Nhà vườn cấp 4 để chuyển đủ cấu hình demo. Tạo phiên bản quy tắc mới khi chuyển dữ liệu; không sửa lịch sử hay phiên bản đã ghim của lần chạy cũ.
+
+- **Đã xác nhận (13/10/2026):** chủ đề mới của nhóm Theo miền cho chọn chặng 2D / Dự toán / 3D; không mặc định mọi chủ đề chỉ dùng cho 3D. Chủ đề thời tiết hiện có tiếp tục dùng ở 3D. Thiết kế đợt Admin tại TDD-PROJ-012.
 
 - **Đã xác nhận (11/10/2026):** các nhóm quy tắc ở khoản 1; lưu theo hướng lai (phạm vi dạng quan hệ, số có kiểu, lời dặn văn bản, bảng lời dặn chung); quy tắc thuật toán vẫn là mã nguồn; bảng có ngay ở đợt dùng, màn Admin làm sau đợt 4.
 - **Đã xác nhận (11/10/2026):** mỗi thông tin chỉ có một nơi lưu. Hãng vật tư theo miền (mục 9 Khung giá tham khảo) và mùa khởi công (Quy tắc bóc tách) giữ trong luật giá như app demo; thời tiết trên ảnh 3D (đang viết trong mã của app demo) chuyển sang nhóm theo miền. Lời dặn chung tối đa 2.000 ký tự mỗi dòng, không giới hạn số dòng; Admin tự cân nhắc độ dài prompt.

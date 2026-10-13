@@ -96,8 +96,25 @@ Admin khôi phục hoặc so sánh phiên bản.
 
 Admin sửa ma trận mái cho một phong cách kiến trúc mới.
 
-1. Admin chọn cặp (mã gốc, phong cách kiến trúc) và chọn kiểu mái trong danh sách cố định.
-2. Hệ thống kiểm tra mỗi cặp chỉ có một kiểu mái; cặp không có dòng riêng dùng kiểu mái mặc định của mã gốc.
+1. Admin chọn cặp (ID loại công trình, ID phong cách kiến trúc); giao diện hiển thị tên và chỉ cho chọn phong cách thuộc loại đó và chọn kiểu mái trong danh sách cố định.
+2. Hệ thống kiểm tra mỗi cặp chỉ có một kiểu mái; cặp không có dòng riêng dùng kiểu mái mặc định của chính ID loại công trình đó.
+
+#### ALT-04
+
+Admin thêm chủ đề lời dặn theo miền, với chặng áp dụng do Admin chọn (người dùng chốt ngày 13/10/2026).
+
+1. Admin mở nhóm Theo miền, chọn chặng 2D, Dự toán hoặc Phối cảnh 3D, chọn miền và nhập chủ đề/lời dặn.
+2. Hệ thống kiểm dữ liệu và lưu thành phiên bản mới; không cần thêm chủ đề vào mã nguồn.
+3. Các lần chạy tiếp nhận sau đó chỉ ghép lời dặn khi cả chặng và miền đều khớp. Chủ đề thời tiết đã có tiếp tục thuộc chặng 3D.
+
+#### ALT-05
+
+Admin cấu hình cho một loại công trình đã tồn tại nhưng chưa sẵn sàng cho AI.
+
+1. Mở nhóm Theo loại công trình; thấy toàn bộ loại trong danh mục hiện hành cùng trạng thái và phần thiếu.
+2. Chọn Cấu hình tại một loại; nhập quy tắc lô đất, mái mặc định và các mái theo phong cách cần dùng trong cùng form. Có thể chủ động sao chép lô đất và mái mặc định từ loại đã cấu hình rồi chỉnh lại; không tự kế thừa lúc chạy.
+3. Nhập ghi chú và lưu. Hệ thống kiểm toàn bộ cấu hình rồi tạo một phiên bản; sai bất kỳ phần nào thì không lưu phần còn lại.
+4. Khách thấy loại chưa đủ cấu hình nhưng không chọn được, kèm nhãn Chưa hỗ trợ. Sau khi đủ cấu hình và tải lại danh sách, khách chọn được. Các lỗi mã loại/phong cách hoặc mô tả nội thất được chỉ rõ để Admin sửa tại Danh mục công trình.
 
 ### Exception Flow
 
@@ -131,16 +148,16 @@ Chạy thử prompt cho kết quả thiếu trường bắt buộc, hoặc dịc
 #### AC-001
 
 - **Given**: Admin có quyền quản lý quy tắc AI.
-- **When**: Đổi kích thước lô mặc định của mã gốc `nha-pho` từ 5×20 m thành 4×18 m và lưu.
+- **When**: Đổi kích thước lô mặc định của ID loại công trình Nhà phố từ 5×20 m thành 4×18 m và lưu.
 - **Then**: Tạo phiên bản bộ quy tắc mới; lần chạy 2D tiếp nhận sau đó, với bản dự toán nhà phố không có kích thước lô từ khách, ảnh hay mô tả, dùng lô 4×18 m.
 - **And**: Bản dự toán đã chạy 2D trước đó giữ kết quả và phiên bản quy tắc cũ.
 
 #### AC-002
 
-- **Given**: Admin thêm phong cách kiến trúc “Indochine” gắn mã gốc Villa.
+- **Given**: Admin thêm phong cách kiến trúc “Indochine” và gán ID phong cách này cho ID loại công trình Villa.
 - **When**: Admin đặt kiểu mái cho cặp (Villa, Indochine) là mái ngói/mansard tân cổ điển và lưu.
 - **Then**: Chặng Dự toán tính phần mái theo mái ngói và chặng 3D vẽ mái ngói cho bản dự toán chọn cặp này.
-- **And**: Thêm dòng thứ hai cho cùng cặp bị từ chối.
+- **And**: Thêm dòng thứ hai cho cùng cặp ID bị từ chối; phong cách thuộc loại khác bị từ chối. Hai loại cùng mã gốc vẫn có quy tắc riêng.
 
 #### AC-003
 
@@ -177,9 +194,26 @@ Chạy thử prompt cho kết quả thiếu trường bắt buộc, hoặc dịc
 - **Then**: Từ chối; không trả nội dung quy tắc hay prompt.
 - **And**: Không ghi thay đổi.
 
+#### AC-008
+
+- **Given**: Admin thêm chủ đề “Chống nóng”, chọn chặng 2D và miền Trung.
+- **When**: Lưu rồi chạy các dự án mẫu ở miền Trung và miền Nam.
+- **Then**: Prompt 2D của dự án miền Trung có lời dặn; prompt 2D miền Nam và prompt Dự toán/3D không nhận lời dặn này.
+- **And**: Thêm chủ đề không cần sửa mã nguồn; trùng chặng, miền và chủ đề bị từ chối; kết quả đã có giữ nguyên.
+
+#### AC-009
+
+- **Given**: Một loại đã tồn tại trong danh mục dự toán nhưng chưa có quy tắc lô đất hoặc mái mặc định.
+- **When**: Admin mở Quy tắc AI và khách mở danh sách loại công trình.
+- **Then**: Admin thấy loại đó cùng phần thiếu và nút Cấu hình; khách thấy loại đó bị khóa chọn với nhãn Chưa hỗ trợ.
+- **And**: Lưu đủ lô đất và mái trong một lần tạo đúng một phiên bản mới; lỗi, gửi lặp và xung đột phiên bản không gây lưu một phần hoặc mất quy tắc của loại khác. Khi danh sách được tải lại, loại đủ cấu hình được chọn.
+- **And**: API từ chối lựa chọn mới chưa đủ cấu hình và chặn tiếp nhận 2D trước khi giữ lượt. Bản nháp cũ giữ dữ liệu; lần chạy đã nhận và kết quả cũ không thay đổi.
+
 ## References
 
 ### TDDs
+
+- TDD-PROJ-012
 
 - TDD-PROJ-008
 
@@ -188,6 +222,10 @@ Chạy thử prompt cho kết quả thiếu trường bắt buộc, hoặc dịc
 - BR-PROJ-014
 - BR-PROJ-016
 - BR-PROJ-019
+
+### System Tests
+
+- ST-PROJ-215
 
 ### Dependencies
 

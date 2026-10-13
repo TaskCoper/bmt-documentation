@@ -700,3 +700,104 @@ Các ca dưới đây là đặc tả; chưa phải kết quả thực thi. Ca c
 | [UT-PROJ-479](../unittest/UT-PROJ-479.md) | render3dPolling |
 
 Kết quả chạy đợt 3 và các giới hạn kiểm chứng: [báo cáo Phối cảnh 3D](estimate-render3d-validation.md). Đặc tả vẫn giữ Draft; không tự coi mỗi đặc tả đã được thực thi.
+
+
+## Mốc xác nhận ngày 13/10/2026: Hồ sơ, đợt 4
+
+Người dùng xác nhận “theo giao diện đã chốt, làm đi” sau khi nhận TDD-PROJ-011 hoàn chỉnh. Tiếp tục đặc tả UT và triển khai BE/FE theo giao diện đã thống nhất.
+
+- SHA-256 TDD-PROJ-011 được chốt: `03016b28cc4e1ffcced853f5d710e2cc115ce6a8b018b9710f6fd3e81e3a6d25`.
+- Hiệu chỉnh ngày 13/10/2026 theo yêu cầu “OK sửa lại phần đó đi”: giữ Vật liệu/Hãng trong PDF và Excel; chỉ màn kết quả Dự toán không hiện cột hãng. Sửa TDD và UT-PROJ-484 tương ứng. SHA-256 TDD sau hiệu chỉnh: `ebdb629fda80354a79c7a8529aa723fc2c6d4795aa85bf245add7dbc3b6f4343`. Giữ SHA phê duyệt ban đầu ở trên để truy vết.
+- Giữ Status Draft, không giả phê duyệt/import.
+- UT-PROJ-480–509 là đặc tả, chưa phải bằng chứng thực thi. Transaction/FK/lease cần PostgreSQL, bố cục/tải/chia sẻ cần kiểm tệp và browser theo ST-PROJ-155–159, ST-PROJ-057.
+
+| Mã | Unit dự kiến |
+|---|---|
+| [UT-PROJ-480](../unittest/UT-PROJ-480.md) | DossierDocumentComposer.Build |
+| [UT-PROJ-481](../unittest/UT-PROJ-481.md) | DossierDocumentComposer.Build |
+| [UT-PROJ-482](../unittest/UT-PROJ-482.md) | DossierDocumentComposer.SelectPages |
+| [UT-PROJ-483](../unittest/UT-PROJ-483.md) | DossierDocumentComposer.Build |
+| [UT-PROJ-484](../unittest/UT-PROJ-484.md) | DossierDocumentComposer.CustomerData |
+| [UT-PROJ-485](../unittest/UT-PROJ-485.md) | DossierDocumentComposer.PrintContext |
+| [UT-PROJ-486](../unittest/UT-PROJ-486.md) | DossierDocumentComposer.Hero |
+| [UT-PROJ-487](../unittest/UT-PROJ-487.md) | DossierDocumentComposer.Branding |
+| [UT-PROJ-488](../unittest/UT-PROJ-488.md) | DossierStageExecutor.ExecuteAsync |
+| [UT-PROJ-489](../unittest/UT-PROJ-489.md) | DossierStageExecutor.Retry |
+| [UT-PROJ-490](../unittest/UT-PROJ-490.md) | DossierStageExecutor.Retry |
+| [UT-PROJ-491](../unittest/UT-PROJ-491.md) | DossierStageExecutor.Resume |
+| [UT-PROJ-492](../unittest/UT-PROJ-492.md) | DossierStageExecutor.Resume |
+| [UT-PROJ-493](../unittest/UT-PROJ-493.md) | DossierStageExecutor.Context |
+| [UT-PROJ-494](../unittest/UT-PROJ-494.md) | DossierStageExecutor.SourceValidation |
+| [UT-PROJ-495](../unittest/UT-PROJ-495.md) | DossierStageExecutor.Cancellation |
+| [UT-PROJ-496](../unittest/UT-PROJ-496.md) | DossierPublishedState.IsComplete |
+| [UT-PROJ-497](../unittest/UT-PROJ-497.md) | DossierPublishedState.IsComplete |
+| [UT-PROJ-498](../unittest/UT-PROJ-498.md) | FinalizeStageRunCommandHandler.Handle |
+| [UT-PROJ-499](../unittest/UT-PROJ-499.md) | FinalizeStageRunCommandHandler.Handle |
+| [UT-PROJ-500](../unittest/UT-PROJ-500.md) | FinalizeStageRunCommandHandler.Handle |
+| [UT-PROJ-501](../unittest/UT-PROJ-501.md) | DossierResultContract.ProjectDossier |
+| [UT-PROJ-502](../unittest/UT-PROJ-502.md) | GetStageFileQueryHandler.Handle |
+| [UT-PROJ-503](../unittest/UT-PROJ-503.md) | GetStageFileQueryHandler.Handle |
+| [UT-PROJ-504](../unittest/UT-PROJ-504.md) | EstimateFileQueryHandlers.DownloadName |
+| [UT-PROJ-505](../unittest/UT-PROJ-505.md) | RequestEstimateExportCommandHandler.Handle |
+| [UT-PROJ-506](../unittest/UT-PROJ-506.md) | GetSharedEstimateFileQueryHandler.Handle |
+| [UT-PROJ-507](../unittest/UT-PROJ-507.md) | dossierResultSchema |
+| [UT-PROJ-508](../unittest/UT-PROJ-508.md) | dossierViewState |
+| [UT-PROJ-509](../unittest/UT-PROJ-509.md) | myEstimatesRoute |
+
+
+### Tiến độ kiểm chứng đợt 4 — 13/10/2026
+
+Frontend W4 đã qua 38 test logic (34 ca pipeline có sẵn và 4 ca Hồ sơ mới), kiểm tra TypeScript, ESLint các tệp thay đổi và build production bằng Webpack. Test mới kiểm hợp đồng đủ bốn vai trò, URL/MIME/size/pageCount không hợp lệ, giữ tổng tiền nguồn trong bản chia sẻ và điều hướng đúng chặng; hỗ trợ UT-PROJ-507/509, chưa thay thế kiểm thử giao diện UT-PROJ-508 hoặc system test.
+
+Backend W4 đã có mã và test đang viết nhưng chưa biên dịch/chạy: build `--no-restore` dừng NETSDK1004 vì thiếu assets NuGet. Đang chờ xác nhận chạy restore theo AGENTS.md backend. Chưa tạo migration, chưa chạy Dossier trên dữ liệu local, chưa kiểm PDF/Excel thực tế, browser, PostgreSQL hoặc quyền chia sẻ. UT vẫn giữ Draft; chưa đánh dấu đạt.
+
+- Hiệu chỉnh format PDF ngày 13/10/2026 theo yêu cầu “chỉnh sửa lại file PDF cho giống với format trong app demo”: bìa/cảm ơn, hai cột, khung tên và bảng giá theo `pdf.py`; không đổi dữ liệu nguồn. SHA-256 TDD-PROJ-011 sau bổ sung chi tiết bố cục: `274bc24e952d4eefc9462a31cc9893931c68c570c7f12244b009ddcbe2b387c7`.
+
+
+## Đợt Admin — TDD-PROJ-012
+
+Người dùng xác nhận “Ok chốt” và “ok chốt” ngày 13/10/2026. SHA-256 bản TDD được chốt: `66bb1c9539f5fd1f61efc9b33236489e8c65d25574600fe38c96f244b72fe70d`. Phạm vi: STORY-PROJ-011/012/013; chủ đề theo miền chọn chặng 2D/Dự toán/3D. Không đổi Status thành Approved thay cho phê duyệt trên hệ thống.
+
+Đặc tả UT-PROJ-510–548 đã soạn theo bản này và giữ Draft. Kết quả thực thi ngày 13/10/2026 được ghi riêng trong [báo cáo triển khai Admin](estimate-admin-implementation.md): ứng dụng, HTTP, PostgreSQL, worker trial, model EF, frontend và browser Fake. Không suy ra mọi đặc tả đã chạy chỉ từ trạng thái tài liệu.
+
+| Đặc tả | Unit |
+|---|---|
+| [UT-PROJ-510](../unittest/UT-PROJ-510.md) | AiRuleSetWriteFlow.Save |
+| [UT-PROJ-511](../unittest/UT-PROJ-511.md) | AiRuleSetWriteFlow.Save |
+| [UT-PROJ-512](../unittest/UT-PROJ-512.md) | AiRuleSetWriteFlow.Save |
+| [UT-PROJ-513](../unittest/UT-PROJ-513.md) | AiRuleSetWriteFlow.Save |
+| [UT-PROJ-514](../unittest/UT-PROJ-514.md) | AiRuleSetWriteFlow.Restore |
+| [UT-PROJ-515](../unittest/UT-PROJ-515.md) | AiRuleSetWriteFlow.RestorePrompt |
+| [UT-PROJ-516](../unittest/UT-PROJ-516.md) | AiRuleSetValidator.BaseTypes |
+| [UT-PROJ-517](../unittest/UT-PROJ-517.md) | AiRuleSetValidator.Roofs |
+| [UT-PROJ-518](../unittest/UT-PROJ-518.md) | AiRuleSetValidator.Instructions |
+| [UT-PROJ-519](../unittest/UT-PROJ-519.md) | AiRuleSetValidator.RegionInstructions |
+| [UT-PROJ-520](../unittest/UT-PROJ-520.md) | AiRuleMapping.RegionInstructions |
+| [UT-PROJ-521](../unittest/UT-PROJ-521.md) | AiRuleMapping.Instructions |
+| [UT-PROJ-522](../unittest/UT-PROJ-522.md) | PromptSlotValidator |
+| [UT-PROJ-523](../unittest/UT-PROJ-523.md) | PromptSlotValidator |
+| [UT-PROJ-524](../unittest/UT-PROJ-524.md) | SaveAiPromptCommandValidator |
+| [UT-PROJ-525](../unittest/UT-PROJ-525.md) | AiPromptPreviewComposer |
+| [UT-PROJ-526](../unittest/UT-PROJ-526.md) | AiPromptPreviewComposer |
+| [UT-PROJ-527](../unittest/UT-PROJ-527.md) | AiPromptPreviewComposer.Hash |
+| [UT-PROJ-528](../unittest/UT-PROJ-528.md) | CreateAiPromptTrialCommandHandler |
+| [UT-PROJ-529](../unittest/UT-PROJ-529.md) | CreateAiPromptTrialCommandHandler |
+| [UT-PROJ-530](../unittest/UT-PROJ-530.md) | CreateAiPromptTrialCommandHandler |
+| [UT-PROJ-531](../unittest/UT-PROJ-531.md) | CreateAiPromptTrialCommandHandler |
+| [UT-PROJ-532](../unittest/UT-PROJ-532.md) | AiPromptTrialWorker |
+| [UT-PROJ-533](../unittest/UT-PROJ-533.md) | AiPromptTrialWorker |
+| [UT-PROJ-534](../unittest/UT-PROJ-534.md) | AiPromptTrialWorker |
+| [UT-PROJ-535](../unittest/UT-PROJ-535.md) | AiPromptTrialWorker |
+| [UT-PROJ-536](../unittest/UT-PROJ-536.md) | AiPromptTrialWorker |
+| [UT-PROJ-537](../unittest/UT-PROJ-537.md) | AiPromptTrialCost |
+| [UT-PROJ-538](../unittest/UT-PROJ-538.md) | AiRuleSetWriteFlow.Restore |
+| [UT-PROJ-539](../unittest/UT-PROJ-539.md) | AiRuleSetQueryProjection |
+| [UT-PROJ-540](../unittest/UT-PROJ-540.md) | AdminDraftState |
+| [UT-PROJ-541](../unittest/UT-PROJ-541.md) | PromptDraftState |
+| [UT-PROJ-542](../unittest/UT-PROJ-542.md) | PromptSaveWarnings |
+| [UT-PROJ-543](../unittest/UT-PROJ-543.md) | RevisionComparison |
+| [UT-PROJ-544](../unittest/UT-PROJ-544.md) | PriceRuleEditor |
+| [UT-PROJ-545](../unittest/UT-PROJ-545.md) | PriceRuleEditor.Conflict |
+| [UT-PROJ-546](../unittest/UT-PROJ-546.md) | AdminRouteAccess |
+| [UT-PROJ-547](../unittest/UT-PROJ-547.md) | GetAiCallRawQueryHandler |
+| [UT-PROJ-548](../unittest/UT-PROJ-548.md) | ResetStageFailuresCommandHandler |

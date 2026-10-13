@@ -105,6 +105,8 @@ flowchart TD
 
 **B. Danh mục: mã gốc và mô tả cho AI**
 
+Bổ sung đã chốt ngày 13/10/2026: danh mục của khách trả `aiAvailable` theo BR-PROJ-019 khoản 9–11, chi tiết tại TDD-PROJ-012/Data Model. Thiếu cấu hình được báo ngay từ ô chọn loại. `SaveEstimateInputCommandHandler` từ chối ID mới chưa sẵn sàng khi pipeline bật; ID không đổi vẫn cho lưu bản nháp. `RunEstimateStageCommandHandler` kiểm lại cùng policy với bộ quy tắc đã đọc để ghim cho lần chạy, trả `InvalidStageInput`/`catalogMapping` trước giữ lượt. Luồng cũ khi pipeline tắt không đổi. Không sửa danh mục đã ghim hoặc kết quả đã có.
+
 - `CatalogBuildingType` thêm `BaseCode` (`nha-pho|villa-biet-thu|nha-mai|nha-vuon-cap4|can-ho`, NULL được) và `DefaultBaseStyleCode` (NULL được). `DefaultBaseStyleCode` dùng khi loại không cho chọn phong cách kiến trúc (ví dụ Căn hộ: `hien-dai`), vì luật mái, bảng màu và khung giá của app demo cần một mã phong cách cho mỗi loại.
 - `CatalogStyle` thêm `BaseStyleCode` (phong cách kiến trúc; phải thuộc danh sách phong cách của mã gốc trong app demo, ví dụ `nha-mai` chỉ có `mai-thai-hien-dai`, `mai-nhat-hien-dai`) và `PromptDescriptor` (phong cách nội thất; 1–1.000 ký tự có nội dung).
 - `CatalogConfigurationPolicy` kiểm khi lưu: mã gốc thuộc danh sách; mã phong cách gốc hợp lệ với mọi loại mà phong cách được gán; phong cách nội thất mới hoặc sửa phải có `PromptDescriptor` (BR-PROJ-004 khoản 21). Cho phép lưu loại chưa có mã gốc (khoản 19); bản dự toán dùng loại đó bị chặn ở `FindMissingForStage` với trường `catalogMapping`.

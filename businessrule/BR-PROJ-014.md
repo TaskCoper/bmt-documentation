@@ -62,7 +62,7 @@ Admin lưu cấu hình AI hoặc luật giá; hệ thống tiếp nhận một l
 4. Mỗi prompt có một mã (ví dụ lập phương án 2D, lập dự toán, dựng ảnh phòng). Admin có quyền tương ứng sửa **phần lời dặn** của prompt; phần cấu trúc dữ liệu AI phải trả (các trường bắt buộc, công cụ `submit_estimate`, json_schema) chỉ đổi qua mã nguồn. Trước khi áp dụng, Admin xem trước prompt đã ghép đủ và chạy thử trên một bản dự toán mẫu; bản lưu tạo phiên bản mới, có so sánh và khôi phục phiên bản cũ như BR-PROJ-016 khoản 2, 7. Prompt nạp sẵn là bản của app demo ở mốc chuyển đổi.
 5. Kết quả mỗi chặng lưu: model đã gọi cho từng việc, phiên bản của từng prompt đã dùng, phiên bản bộ quy tắc AI, phiên bản cấu hình; chặng Dự toán lưu thêm phiên bản của hai tệp luật giá theo BR-PROJ-016 và miền giá đã chốt theo BR-PROJ-013.
 6. Đổi cấu hình, prompt, bộ quy tắc AI hoặc luật giá không làm đổi, tính lại hay xóa kết quả đã lưu của bất kỳ chặng nào.
-7. Khách không thấy tên model, phiên bản prompt hay chi phí AI. Chỉ người có quyền xem chi tiết luồng AI mới thấy các thông tin này.
+7. Khách không thấy tên model, phiên bản prompt hay chi phí AI. Chỉ người có quyền xem chi tiết luồng AI mới thấy các thông tin này. Người có quyền này mở màn Tra cứu lần chạy AI thì thấy ngay danh sách lượt chạy của khách hàng, mới nhất trước, có phân trang và bộ lọc; không bắt buộc biết mã dự toán. Danh sách giữ cả lịch sử của dự toán đã xóa mềm để đối soát và ghi nhãn đã xóa. Bản thô vẫn cần quyền vận hành và ghi vết như STORY-PROJ-012/ALT-03.
 
 ## Except
 

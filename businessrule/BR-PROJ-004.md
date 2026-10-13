@@ -82,7 +82,7 @@ Admin quản lý loại công trình và cấu hình của loại đó; khách n
 
 18. Khi khách thay đổi tỉnh/thành, xã/phường hoặc địa chỉ chi tiết của bản dự toán, frontend gọi dịch vụ bản đồ lấy lại kinh độ và vĩ độ cho địa chỉ đang sửa, rồi gửi cả hai trong cùng yêu cầu lưu. Backend chỉ lưu khi có đủ cặp tọa độ; lưu địa chỉ và tọa độ cùng nhau. Nếu chưa lấy được đủ tọa độ thì frontend chưa gửi lần lưu thay đổi địa chỉ; yêu cầu trực tiếp thiếu tọa độ bị từ chối và giữ nguyên toàn bộ dữ liệu đã lưu. Giá trị tọa độ bản đồ trả về có thể trùng với giá trị cũ; yêu cầu là lấy lại và gửi đủ cặp, không bắt buộc hai con số phải thay đổi.
 
-19. Mỗi loại công trình gắn đúng một mã gốc trong năm mã của app demo `design-estimate`: `nha-pho`, `villa-biet-thu`, `nha-mai`, `nha-vuon-cap4`, `can-ho`. Loại do Admin thêm phải chọn một mã gốc; luồng AI xử lý loại đó theo luật lô đất, luật phương án và khung giá của mã gốc. Loại chưa gắn mã gốc được lưu nhưng bản dự toán dùng loại đó không chạy được chặng 2D, kèm lý do danh mục chưa đủ cấu hình.
+19. Mỗi loại công trình gắn đúng một mã gốc trong năm mã của app demo `design-estimate`: `nha-pho`, `villa-biet-thu`, `nha-mai`, `nha-vuon-cap4`, `can-ho`. Loại do Admin thêm phải chọn một mã gốc; luồng AI dùng mã gốc cho thuật toán phương án và khung giá demo, còn luật lô đất và ma trận mái được chọn bằng ID theo khoản 24. Loại chưa gắn mã gốc được lưu nhưng bản dự toán dùng loại đó không chạy được chặng 2D, kèm lý do danh mục chưa đủ cấu hình.
 
 20. Mỗi phong cách kiến trúc gắn một mã phong cách gốc của app demo, thuộc đúng mã gốc của loại công trình được gán. Phong cách chưa gắn mã gốc thì bản dự toán chọn nó không chạy được chặng 2D, kèm lý do như khoản 19.
 
@@ -92,13 +92,16 @@ Admin quản lý loại công trình và cấu hình của loại đó; khách n
 
 23. Gói hoàn thiện và nội thất mặc định là Tiêu chuẩn khi khách chưa chọn. Gói quyết định mức hoàn thiện, mức đồ đạc trên bản vẽ nội thất và khung giá của chặng Dự toán.
 
-24. Đặc điểm theo mã gốc (lô mặc định, số tầng tối đa, có mái, tum, phần thô hay không, ngưỡng lô đất, gara, phòng ngủ), kiểu mái theo cặp mã gốc và phong cách kiến trúc, lời dặn theo gói và theo miền được lưu trong bộ quy tắc AI theo BR-PROJ-019, không viết cố định theo tên loại công trình.
+24. Đặc điểm theo ID loại công trình (lô mặc định, số tầng tối đa, có mái, tum, phần thô hay không, ngưỡng lô đất, gara, phòng ngủ), kiểu mái theo cặp ID loại công trình và ID phong cách kiến trúc, lời dặn theo gói và theo miền được lưu trong bộ quy tắc AI theo BR-PROJ-019, không viết cố định theo tên loại công trình.
 
 ## Except
 
 Bản nháp được phép chưa chọn đủ thông tin theo BR-PROJ-003, kể cả chưa có tọa độ ở bước tạo nhanh; khi đổi địa chỉ vẫn phải gửi đủ kinh độ và vĩ độ. Việc giữ cấu hình cũ không cho phép sửa đầu vào khi chặng đang chạy hoặc thay thế kết quả thành công; BR-PROJ-005 vẫn áp dụng.
 
 ## Notes
+
+- **Bổ sung đã xác nhận ngày 13/10/2026:** trước khi khách chọn loại, hệ thống tự kiểm điều kiện cấu hình AI theo BR-PROJ-019 khoản 9–11. Loại thiếu cấu hình vẫn hiện nhưng khóa chọn, nhãn Chưa hỗ trợ; thay quy định chỉ phát hiện thiếu cấu hình khi chạy 2D. Cổng tạo dự toán vẫn do người vận hành bật; không thay quyền/gói. Danh mục đã ghim, dữ liệu bản nháp và kết quả cũ giữ nguyên.
+
 
 - **Cập nhật ngày 11/10/2026 theo luồng bốn chặng (người dùng đã chốt):** mã gốc cho loại công trình và phong cách kiến trúc (khoản 19, 20); ô “Mô tả cho AI” bắt buộc cho phong cách nội thất (khoản 21); giữ hai nhóm phong cách — kiến trúc quyết định mái và ngoại thất, nội thất quyết định bảng màu, vật liệu và ảnh phòng; số tầng 1–4 cộng tum, căn hộ luôn một sàn (khoản 22); gói mặc định Tiêu chuẩn (khoản 23). “Gửi AI” đổi thành “chạy chặng 2D” (BR-PROJ-010).
 - **Đã xác nhận (11/10/2026, khi duyệt TDD):** bản dự toán tạo trước khi Admin gắn mã gốc giữ revision danh mục cũ theo khoản 9, nên bị chặn tạo 2D với lý do danh mục chưa đủ cấu hình; khách tạo bản dự toán mới. Không sửa revision danh mục cũ.

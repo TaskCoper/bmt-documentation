@@ -53,6 +53,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ### Problem
 
+**Bổ sung thiết kế đợt 4 (13/10/2026):** [TDD-PROJ-011](TDD-PROJ-011.md) đề xuất thay phần nhận URL PDF/Excel từ AI bằng bộ Hồ sơ do backend dựng và lưu riêng tư cho hợp đồng `dossier-v1`. Với luồng bốn chặng, tải/chia sẻ chỉ mở sau Dossier Succeeded; owner có thể dùng link ký hạn 15 phút theo BR-PROJ-006, public vẫn stream qua backend. Các mô tả URL/không dựng tệp bên dưới là thiết kế legacy; nghiệp vụ link, QR và email được dùng lại. TDD-PROJ-011 đang Draft, chưa phải thay đổi đã triển khai.
+
 STORY-PROJ-003/004 cần xem kết quả, PDF/Excel, link/QR và email từ cùng bộ kết quả AI đã lưu. Người nhận có link hợp lệ xem/tải không cần đăng nhập; chủ sở hữu vẫn dùng đầy đủ hồ sơ cũ khi gói hết hạn. Thu hồi phải chặn yêu cầu tải mới, nên người xem không bao giờ nhận URL gốc của tệp: mọi lần xem/tải đi qua route của backend có kiểm link còn hiệu lực, và backend chuyển tiếp (stream) nội dung tệp.
 
 Người dùng xác nhận bổ sung ngày 21/09/2026: mỗi bản có tối đa một link đang hiệu lực, dùng chung sao chép/QR/email; còn hiệu lực thì dùng lại, hết hạn hoặc thu hồi mới tạo khác. Ngày hết hạn dùng hết ngày theo Asia/Ho_Chi_Minh, 00:00 ngày kế tiếp hết hiệu lực, không chọn ngày đã qua.

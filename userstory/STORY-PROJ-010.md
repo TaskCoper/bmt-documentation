@@ -40,7 +40,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 ## Metadata
 
 - **Story**: Là khách hàng, tôi muốn tạo bộ hồ sơ từ các kết quả 2D, dự toán và 3D đã có để nhận tệp PDF, Excel và chia sẻ cho người khác.
-- **Context**: Chặng cuối trong bốn chặng (BR-PROJ-010). Chặng này không gọi AI: backend dựng bốn tệp từ kết quả đã lưu của ba chặng trước, gồm PDF hồ sơ gộp khổ A3 ngang theo thứ tự trang của app demo `design-estimate` (`savico/core/pdf.py`), PDF phối cảnh 3D, PDF bản vẽ kiến trúc (bản vẽ kỹ thuật và bản vẽ nội thất) và Excel dự toán theo mẫu `template.xlsx` của app demo. Không có bản vẽ kết cấu. Chia sẻ và tải tệp chỉ mở sau khi chặng này thành công. Thay cho quyết định ngày 26/09/2026 “AI trả URL PDF/Excel, backend không tự dựng tệp”. Người dùng chốt nghiệp vụ trong hội thoại ngày 10–11/10/2026.
+- **Context**: Chặng cuối trong bốn chặng (BR-PROJ-010). Chặng này không gọi AI: backend dựng bốn tệp từ kết quả đã lưu của ba chặng trước, gồm PDF hồ sơ gộp khổ A3 ngang theo thứ tự trang của app demo `design-estimate` (`savico/core/pdf.py`), PDF phối cảnh 3D, PDF bản vẽ kiến trúc (bản vẽ kỹ thuật và bản vẽ nội thất) và Excel dự toán theo mẫu `template.xlsx` của app demo. Không có bản vẽ kết cấu. Chia sẻ và tải tệp chỉ mở sau khi chặng này thành công. Thay cho quyết định ngày 26/09/2026 “AI trả URL PDF/Excel, backend không tự dựng tệp”. Người dùng chốt nghiệp vụ trong hội thoại ngày 10–11/10/2026; ngày 13/10/2026 xác nhận thứ tự trang gom theo từng tầng như demo.
 - **Sprint**: [Chưa xác định]
 - **Priority**: Must
 - **Status**: Todo
@@ -71,11 +71,11 @@ Khách bấm Tạo hồ sơ, hoặc bấm Chạy lại khi lần chạy trước
 1. Khách bấm Tạo hồ sơ.
 2. Backend kiểm tra quyền sở hữu và điều kiện mở chặng theo BR-PROJ-010. Không kiểm tra gói hay lượt.
 3. Backend tiếp nhận lần chạy và dựng bốn tệp từ kết quả đã lưu:
-   - PDF hồ sơ gộp, khổ A3 ngang, theo thứ tự: trang bìa; trang thông tin dự án kèm tóm tắt dự toán; các trang bản vẽ 2D có khung tên; các trang phối cảnh 3D có khung tên; trang dự toán chi tiết; trang cảm ơn.
+   - PDF hồ sơ gộp, khổ A3 ngang, theo thứ tự: trang bìa; trang thông tin dự án kèm tóm tắt dự toán; các trang theo từng tầng (2D kỹ thuật → 2D nội thất → phối cảnh 3D của tầng đó), sau cùng là phối cảnh 3D ngoại thất; các trang bản vẽ và phối cảnh có khung tên; trang dự toán chi tiết; trang cảm ơn.
    - PDF phối cảnh 3D.
    - PDF bản vẽ kiến trúc, gồm bản vẽ kỹ thuật và bản vẽ bố trí nội thất của từng tầng.
    - Excel dự toán theo mẫu của app demo.
-4. Thông tin in trên tệp: tên khách và số điện thoại lấy từ tài khoản của chủ bản dự toán; tên dự án là tên bản dự toán lúc dựng; mã hồ sơ là mã dự toán `BUILDX-…` (BR-PROJ-003 khoản 12); thông tin thương hiệu lấy từ cấu hình hệ thống. Nội dung dự toán chỉ dùng phần gửi khách theo BR-PROJ-017.
+4. Thông tin in trên tệp: tên khách và số điện thoại lấy từ tài khoản của chủ bản dự toán; tên dự án là tên bản dự toán lúc dựng; mã hồ sơ là mã dự toán `BUILDX-…` (BR-PROJ-003 khoản 12); thông tin thương hiệu lấy từ cấu hình hệ thống. Nội dung dự toán chỉ dùng phần gửi khách theo BR-PROJ-017. PDF dự toán và Excel giữ Vật liệu/Hãng đã lưu, như app demo.
 5. Tệp dựng lỗi được dựng lại 1 lần theo BR-PROJ-011.
 6. Khi cả bốn tệp đã được dựng và lưu, chặng Hồ sơ thành công.
 7. Khách thấy danh sách bốn tệp, tải được từng tệp và dùng được các thao tác chia sẻ link, QR, email theo STORY-PROJ-004.
@@ -136,8 +136,8 @@ Khách yêu cầu tải tệp hoặc tạo link chia sẻ khi chặng Hồ sơ c
 
 - **Given**: Bản dự toán có kết quả 2D, dự toán và 3D đã lưu.
 - **When**: Hệ thống dựng PDF hồ sơ gộp.
-- **Then**: Tệp khổ A3 ngang có các trang theo thứ tự: bìa, thông tin dự án kèm tóm tắt dự toán, bản vẽ 2D, phối cảnh 3D, dự toán chi tiết, trang cảm ơn.
-- **And**: Không có trang bản vẽ kết cấu.
+- **Then**: Tệp khổ A3 ngang có các trang theo thứ tự: bìa, thông tin dự án kèm tóm tắt dự toán; theo từng tầng là 2D kỹ thuật → 2D nội thất → phối cảnh 3D của tầng đó; sau các tầng là phối cảnh 3D ngoại thất; dự toán chi tiết; trang cảm ơn.
+- **And**: Không có trang bản vẽ kết cấu. Bảng dự toán chi tiết của cả ba phần có cột Vật liệu/Hãng với nội dung từ kết quả đã lưu; không thay số liệu dự toán.
 
 #### AC-003
 
@@ -164,7 +164,7 @@ Khách yêu cầu tải tệp hoặc tạo link chia sẻ khi chặng Hồ sơ c
 
 - **Given**: Một tệp dựng lỗi ở lần đầu.
 - **When**: Hệ thống xử lý tệp đó.
-- **Then**: Dựng lại 1 lần; vẫn lỗi thì lần chạy lỗi, tăng bộ đếm lỗi của chặng Hồ sơ.
+- **Then**: Dựng lại 1 lần; vẫn lỗi thì lần chạy lỗi hệ thống, không tăng bộ đếm lỗi của chặng Hồ sơ.
 - **And**: Không công bố bộ tệp còn thiếu.
 
 #### AC-007
@@ -178,6 +178,7 @@ Khách yêu cầu tải tệp hoặc tạo link chia sẻ khi chặng Hồ sơ c
 
 ### TDDs
 
+- TDD-PROJ-011
 - TDD-PROJ-006
 - TDD-PROJ-003
 
