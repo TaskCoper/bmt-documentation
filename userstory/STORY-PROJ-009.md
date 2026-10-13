@@ -39,8 +39,8 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Metadata
 
-- **Story**: Là khách hàng, tôi muốn tạo bộ ảnh phối cảnh 3D từ phương án 2D và dự toán đã có để hình dung ngoại thất và các phòng của ngôi nhà.
-- **Context**: Chặng thứ ba trong bốn chặng (BR-PROJ-010). Backend tự dựng ảnh bằng AI (OpenAI) theo kế hoạch dựng của app demo `design-estimate` (commit `059e876`): ảnh ngoại thất ban ngày, ảnh ngoại thất ban đêm dựng từ ảnh ban ngày, và các ảnh phòng theo từng tầng. Khác app demo, prompt dùng cả hai nhóm phong cách: kiến trúc quyết định mái và ngoại thất; nội thất quyết định bảng màu, vật liệu và ảnh phòng (ô “Mô tả cho AI” của phong cách nội thất theo BR-PROJ-004). Chặng này không tính thêm lượt. Lần chạy thử ngày 11/10/2026 cho nhà phố 2 tầng ra 8 ảnh. Quyền Phối cảnh 3D trong gói đã tạm bỏ ngày 10/10/2026 (BR-SUB-008 khoản 9), nên chặng này không kiểm tra quyền 3D.
+- **Story**: Là khách hàng, tôi muốn tạo bộ ảnh phối cảnh 3D từ phương án 2D đã có, cùng lúc với dự toán, để hình dung ngoại thất và các phòng của ngôi nhà mà không phải chờ lâu.
+- **Context**: Một trong hai chặng chạy cùng lúc sau chặng 2D (BR-PROJ-010): khách bấm Đi tiếp một lần thì Dự toán (STORY-PROJ-008) và Phối cảnh 3D cùng được tiếp nhận. Người dùng chốt ngày 13/10/2026 theo yêu cầu khách hàng giảm thời gian chờ; trước đó 3D chỉ chạy sau khi Dự toán thành công. Backend tự dựng ảnh bằng AI (OpenAI) theo kế hoạch dựng của app demo `design-estimate` (commit `059e876`): ảnh ngoại thất ban ngày, ảnh ngoại thất ban đêm dựng từ ảnh ban ngày, và các ảnh phòng theo từng tầng. Khác app demo, prompt dùng cả hai nhóm phong cách: kiến trúc quyết định mái và ngoại thất; nội thất quyết định bảng màu, vật liệu và ảnh phòng (ô “Mô tả cho AI” của phong cách nội thất theo BR-PROJ-004). Chặng này không tính thêm lượt. Lần chạy thử ngày 11/10/2026 cho nhà phố 2 tầng ra 8 ảnh. Quyền Phối cảnh 3D trong gói đã tạm bỏ ngày 10/10/2026 (BR-SUB-008 khoản 9), nên chặng này không kiểm tra quyền 3D.
 - **Sprint**: [Chưa xác định]
 - **Priority**: Must
 - **Status**: Todo
@@ -57,33 +57,33 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 ### Preconditions
 
 - Khách đã đăng nhập bằng tài khoản khách hàng và là chủ bản dự toán.
-- Chặng Dự toán đã thành công theo STORY-PROJ-008.
-- Chặng Phối cảnh 3D chưa thành công, không có chặng nào đang chạy và chưa đạt giới hạn số lần lỗi theo BR-PROJ-011.
+- Chặng 2D đã thành công theo STORY-PROJ-002.
+- Chặng Phối cảnh 3D chưa thành công, không có lần chạy 3D đang chờ hoặc đang chạy và chưa đạt giới hạn số lần lỗi theo BR-PROJ-011.
 
 ### Trigger
 
-Khách bấm Tạo phối cảnh 3D, hoặc bấm Chạy lại khi lần chạy trước bị lỗi.
+Khách bấm Đi tiếp ở màn kết quả 2D (chạy cùng lúc với chặng Dự toán), hoặc bấm Thử lại khi lần chạy trước bị lỗi.
 
 ## Flow
 
 ### Main Flow
 
-1. Khách bấm Tạo phối cảnh 3D.
-2. Backend kiểm tra quyền sở hữu và điều kiện mở chặng theo BR-PROJ-010. Không kiểm tra gói, lượt hay quyền 3D.
+1. Khách bấm Đi tiếp ở màn kết quả 2D.
+2. Backend kiểm tra quyền sở hữu và điều kiện của cả hai chặng Dự toán và Phối cảnh 3D theo BR-PROJ-010 khoản 1–2. Hai chặng cùng được tiếp nhận hoặc cùng bị từ chối. Không kiểm tra gói, lượt hay quyền 3D.
 3. Backend tiếp nhận lần chạy và lập kế hoạch dựng từ phương án 2D đã lưu: ảnh ngoại thất ban ngày, ảnh ngoại thất ban đêm, và các ảnh phòng theo từng tầng. Với căn hộ, hai ảnh đầu là ảnh toàn cảnh căn hộ.
-4. Hệ thống dựng từng ảnh dựa trên bản vẽ 2D, phong cách kiến trúc, phong cách nội thất, gói hoàn thiện và miền giá đã chốt. Ảnh ban đêm chỉ dựng sau khi có ảnh ban ngày.
+4. Hệ thống dựng từng ảnh dựa trên bản vẽ 2D, phong cách kiến trúc, phong cách nội thất, gói hoàn thiện và miền giá đã chốt. Kiểu mái được xác định bằng cùng quy tắc mái mà chặng Dự toán dùng để tính tiền (BR-PROJ-010 khoản 9), không chờ kết quả Dự toán. Ảnh ban đêm chỉ dựng sau khi có ảnh ban ngày.
 5. Mỗi ảnh dựng xong được lưu ngay. Ảnh lỗi được dựng lại 1 lần theo BR-PROJ-011.
-6. Trong lúc chạy, khách thấy tiến độ theo số ảnh đã xong trên tổng số ảnh và xem được các ảnh đã xong.
-7. Khi mọi ảnh trong kế hoạch đã được dựng và lưu, chặng Phối cảnh 3D thành công. Chặng Hồ sơ chuyển sang Sẵn sàng; hệ thống không tự chạy tiếp.
+6. Trong lúc chạy, khách ở tab 3D của bước Dự toán & 3D thấy tiến độ theo số ảnh đã xong trên tổng số ảnh và xem được các ảnh đã xong. Trong lúc chặng chạy, màn chờ hiện mẫu 3D tham khảo theo STORY-LIB-002.
+7. Khi mọi ảnh trong kế hoạch đã được dựng và lưu, chặng Phối cảnh 3D thành công. Nếu chặng Dự toán cũng đã thành công, chặng Hồ sơ chuyển sang Sẵn sàng và khách chuyển được sang bước Hồ sơ (STORY-PROJ-010).
 
 ### Alternative Flow
 
 #### ALT-01
 
-Lần chạy 3D lỗi khi đã dựng được một phần ảnh, chưa đạt giới hạn số lần lỗi.
+Lần chạy 3D lỗi khi đã dựng được một phần ảnh, chưa đạt giới hạn số lần lỗi. Áp dụng cả khi chặng Dự toán còn đang chạy (người dùng chốt ngày 14/10/2026).
 
 1. Các ảnh đã dựng và lưu được giữ.
-2. Khách bấm Chạy lại; hệ thống chỉ dựng các ảnh còn thiếu theo BR-PROJ-011 khoản 8, kể cả khi Admin đã đổi model hoặc lời dặn AI giữa hai lần chạy.
+2. Khách bấm Thử lại; hệ thống chạy lại chặng 3D, cùng chặng Dự toán nếu chặng đó cũng đang lỗi và còn được chạy lại (BR-PROJ-010 khoản 3). Chặng 3D chỉ dựng các ảnh còn thiếu theo BR-PROJ-011 khoản 8, kể cả khi Admin đã đổi model hoặc lời dặn AI giữa hai lần chạy.
 3. Khi đủ ảnh, quay lại bước 7 của Main Flow.
 
 #### ALT-02
@@ -92,13 +92,20 @@ Gói thiết kế của khách đã hết hạn hoặc hết lượt sau khi 2D 
 
 1. Vẫn cho chạy chặng Phối cảnh 3D; không giữ, trừ hay hoàn lượt.
 
+#### ALT-03
+
+Chặng 3D thành công trong khi chặng Dự toán còn đang chạy hoặc đã lỗi.
+
+1. Chặng 3D vẫn thành công; khách xem được toàn bộ ảnh ở tab 3D.
+2. Chặng Hồ sơ vẫn Chưa mở cho tới khi Dự toán thành công. Nếu Dự toán lỗi, khách bấm Thử lại theo STORY-PROJ-008; chặng 3D đã thành công không chạy lại.
+
 ### Exception Flow
 
 #### EXC-01
 
-Chặng Dự toán chưa thành công, chặng 3D đã thành công, đang có chặng chạy, đã đạt giới hạn số lần lỗi, hệ thống đang quá tải hoặc dịch vụ AI đang tạm ngắt theo BR-PROJ-012, hoặc luồng bốn chặng đang tắt.
+Chặng 2D chưa thành công, chặng 3D đã thành công, đang có lần chạy 3D chờ hoặc đang chạy, đã đạt giới hạn số lần lỗi, hệ thống đang quá tải hoặc dịch vụ AI đang tạm ngắt theo BR-PROJ-012, luồng bốn chặng đang tắt, hoặc chặng Dự toán được yêu cầu chạy cùng lần bấm không được tiếp nhận.
 
-1. Từ chối yêu cầu trước khi tiếp nhận, kèm lý do; không tạo lần chạy và không tính vào bộ đếm lỗi.
+1. Từ chối yêu cầu trước khi tiếp nhận, kèm lý do. Khi chặng Dự toán cũng được yêu cầu trong cùng lần bấm, từ chối cả hai chặng theo BR-PROJ-010 khoản 2; không tạo lần chạy và không tính vào bộ đếm lỗi.
 
 #### EXC-02
 
@@ -118,29 +125,29 @@ Lần chạy quá hạn chờ (mặc định 40 phút).
 
 #### AC-001
 
-- **Given**: Chặng Dự toán đã thành công; chặng 3D chưa thành công và không có chặng nào đang chạy.
-- **When**: Khách bấm Tạo phối cảnh 3D.
-- **Then**: Backend tiếp nhận lần chạy và lập kế hoạch dựng gồm ảnh ngoại thất ban ngày, ảnh ngoại thất ban đêm và các ảnh phòng theo từng tầng của phương án 2D.
-- **And**: Không kiểm tra gói, lượt hay quyền 3D.
+- **Given**: Chặng 2D đã thành công; chặng Dự toán và chặng 3D chưa chạy.
+- **When**: Khách bấm Đi tiếp.
+- **Then**: Backend tiếp nhận cùng lúc lần chạy Dự toán và lần chạy 3D; chặng 3D lập kế hoạch dựng gồm ảnh ngoại thất ban ngày, ảnh ngoại thất ban đêm và các ảnh phòng theo từng tầng của phương án 2D.
+- **And**: Không kiểm tra gói, lượt hay quyền 3D; chặng 3D không chờ chặng Dự toán xong.
 
 #### AC-002
 
 - **Given**: Bản dự toán nhà phố 2 tầng có phương án 2D và dự toán đã thành công.
 - **When**: Chặng 3D chạy xong mọi ảnh trong kế hoạch.
 - **Then**: Chặng 3D thành công; khách xem được toàn bộ ảnh kèm nhãn (ví dụ “Ngoại thất — Ban ngày”, “Tầng 1 — Phòng khách”).
-- **And**: Chặng Hồ sơ chuyển sang Sẵn sàng; hệ thống không tự chạy Hồ sơ.
+- **And**: Chặng Hồ sơ chuyển sang Sẵn sàng; hồ sơ chỉ được tạo khi khách vào bước Hồ sơ (STORY-PROJ-010).
 
 #### AC-003
 
 - **Given**: Bản dự toán chọn phong cách kiến trúc và phong cách nội thất khác nhau.
 - **When**: Hệ thống dựng ảnh.
 - **Then**: Ảnh ngoại thất theo phong cách kiến trúc (mái, mặt tiền); ảnh phòng theo phong cách nội thất (bảng màu, vật liệu, đồ đạc) dùng ô “Mô tả cho AI” của phong cách nội thất.
-- **And**: Kiểu mái trên ảnh khớp kiểu mái mà chặng Dự toán đã tính tiền.
+- **And**: Kiểu mái trên ảnh khớp kiểu mái mà chặng Dự toán tính tiền, kể cả khi chặng 3D xong trước chặng Dự toán.
 
 #### AC-004
 
 - **Given**: Kế hoạch có 8 ảnh; lần chạy dựng xong 6 ảnh thì ảnh thứ 7 lỗi cả 2 lần thử.
-- **When**: Khách bấm Chạy lại.
+- **When**: Khách bấm Thử lại.
 - **Then**: Hệ thống chỉ dựng ảnh 7 và 8; 6 ảnh cũ giữ nguyên.
 - **And**: Lần lỗi trước tính một lần vào bộ đếm lỗi của chặng 3D.
 
@@ -154,16 +161,37 @@ Lần chạy quá hạn chờ (mặc định 40 phút).
 #### AC-006
 
 - **Given**: Lần chạy 3D đang dựng ảnh.
-- **When**: Khách mở màn Phối cảnh 3D.
+- **When**: Khách mở tab 3D của bước Dự toán & 3D.
 - **Then**: Thấy tiến độ dạng số ảnh đã xong trên tổng số ảnh và xem được các ảnh đã xong.
 - **And**: Chặng chưa được tính thành công cho tới khi đủ ảnh.
 
 #### AC-007
 
 - **Given**: Lần chạy 3D trước đã dựng xong 5/8 ảnh rồi lỗi; sau đó Admin đổi model dựng 3D.
-- **When**: Khách bấm Chạy lại chặng 3D.
+- **When**: Khách bấm Thử lại.
 - **Then**: Hệ thống giữ 5 ảnh đã có và chỉ dựng 3 ảnh còn thiếu bằng model mới.
 - **And**: Admin xem được từng ảnh được dựng bằng model nào.
+
+#### AC-008
+
+- **Given**: Khách đã bấm Đi tiếp; chặng Dự toán còn đang chạy.
+- **When**: Chặng 3D dựng xong mọi ảnh trong kế hoạch.
+- **Then**: Chặng 3D thành công và khách xem được toàn bộ ảnh ở tab 3D ngay, không chờ chặng Dự toán.
+- **And**: Chặng Hồ sơ vẫn Chưa mở cho tới khi chặng Dự toán thành công.
+
+#### AC-009
+
+- **Given**: Khách bấm Đi tiếp khi dịch vụ AI dùng cho chặng Dự toán đang tạm ngắt theo BR-PROJ-012, còn dịch vụ AI dùng cho 3D vẫn hoạt động.
+- **When**: Backend kiểm tra yêu cầu.
+- **Then**: Cả hai chặng bị từ chối kèm lý do; không tạo lần chạy 3D hay lần chạy Dự toán.
+- **And**: Không tính vào bộ đếm lỗi của chặng nào.
+
+#### AC-010
+
+- **Given**: Chặng Dự toán thành công; lần chạy 3D lỗi và chặng 3D còn được chạy lại.
+- **When**: Khách bấm Thử lại.
+- **Then**: Chỉ chặng 3D được chạy lại; kết quả Dự toán giữ nguyên và khách vẫn xem được trong lúc 3D chạy lại.
+- **And**: Lần lỗi trước chỉ tính vào bộ đếm lỗi của chặng 3D.
 
 ## References
 
@@ -185,7 +213,9 @@ Lần chạy quá hạn chờ (mặc định 40 phút).
 
 ### Dependencies
 
+- STORY-PROJ-002
 - STORY-PROJ-008
+- STORY-LIB-002
 
 ## Non-Functional
 
@@ -196,5 +226,7 @@ Lần chạy quá hạn chờ (mặc định 40 phút).
 ## Out of Scope
 
 - Khách chọn số lượng hay danh sách ảnh cần dựng, hoặc dựng thêm ảnh sau khi chặng đã thành công.
+- Chạy riêng chặng 3D mà không kèm chặng Dự toán khi cả hai chặng đều chưa thành công.
+- Thông báo cho khách (email, thông báo trình duyệt) khi chặng xong.
 - Dựng lại một ảnh đã đạt vì khách không thích.
 - Xem hoặc xoay mô hình 3D.

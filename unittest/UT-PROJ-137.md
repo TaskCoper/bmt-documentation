@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PROJ-137 | Tạo dự toán — luồng bốn chặng | RunEstimateStageCommandHandler — Chặng trước chưa thành công | Branch | REGRESSION | P0 | Unit dự kiến theo TDD-PROJ-006, chưa có mã. Dùng clock cố định (now=2026-10-11T03:00:00Z), fake store/UoW và fake coordinator đọc lại được đối số; không gọi DB hay AI thật. D1 chỉ có run Plan2d Failed (CountsTowardLimit=true). | Lần lượt yêu cầu Estimate, Render3d, Dossier. | Cả ba trả 409 `StagePrerequisiteNotMet`; không thêm run, không gọi coordinator.<br>Tên test: `Handle_PreviousStageNotSucceeded_ReturnsStagePrerequisiteNotMet`. | TDD-PROJ-006/Architecture<br>BR-PROJ-010/Then<br>STORY-PROJ-008/AC-002<br>ST-PROJ-141/System Test | Thứ tự chặng cố định (BR-PROJ-010 khoản 1), kể cả khi gửi thẳng API. Đặc tả unit test dự kiến, chưa có mã và chưa chạy. | [Chưa xác định] | Draft |
+| UT-PROJ-137 | Tạo dự toán — luồng bốn chặng | RunEstimateStageCommandHandler — Chặng trước chưa thành công | Branch | REGRESSION | P0 | Unit dự kiến theo TDD-PROJ-006, chưa có mã. Dùng clock cố định (now=2026-10-11T03:00:00Z), fake store/UoW và fake coordinator đọc lại được đối số; không gọi DB hay AI thật. D1 chỉ có run Plan2d Failed (CountsTowardLimit=true). | Lần lượt yêu cầu Estimate, Render3d, Dossier qua route một chặng; thêm biến thể D2 có Plan2d và Render3d Succeeded, Estimate Failed, yêu cầu Dossier. | Cả ba yêu cầu của D1 và yêu cầu Dossier của D2 trả 409 `StagePrerequisiteNotMet`; không thêm run, không gọi coordinator.<br>Tên test: `Handle_PreviousStageNotSucceeded_ReturnsStagePrerequisiteNotMet`. | TDD-PROJ-006/Architecture<br>BR-PROJ-010/Then<br>STORY-PROJ-008/AC-002<br>ST-PROJ-141/System Test<br>TDD-PROJ-006/Activity Diagram<br>STORY-PROJ-010/AC-009 | Điều kiện mở chặng theo tập `Prerequisites` (BR-PROJ-010 khoản 1, sửa 13/10/2026): Dự toán và 3D cần 2D, Hồ sơ cần cả Dự toán và 3D; kiểm cả khi gửi thẳng API. Đặc tả unit test dự kiến, chưa có mã và chưa chạy. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
@@ -50,3 +50,5 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - BR-PROJ-010/Then
 - STORY-PROJ-008/AC-002
 - ST-PROJ-141/System Test
+- TDD-PROJ-006/Activity Diagram
+- STORY-PROJ-010/AC-009

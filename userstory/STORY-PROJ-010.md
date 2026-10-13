@@ -40,7 +40,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 ## Metadata
 
 - **Story**: Là khách hàng, tôi muốn tạo bộ hồ sơ từ các kết quả 2D, dự toán và 3D đã có để nhận tệp PDF, Excel và chia sẻ cho người khác.
-- **Context**: Chặng cuối trong bốn chặng (BR-PROJ-010). Chặng này không gọi AI: backend dựng bốn tệp từ kết quả đã lưu của ba chặng trước, gồm PDF hồ sơ gộp khổ A3 ngang theo thứ tự trang của app demo `design-estimate` (`savico/core/pdf.py`), PDF phối cảnh 3D, PDF bản vẽ kiến trúc (bản vẽ kỹ thuật và bản vẽ nội thất) và Excel dự toán theo mẫu `template.xlsx` của app demo. Không có bản vẽ kết cấu. Chia sẻ và tải tệp chỉ mở sau khi chặng này thành công. Thay cho quyết định ngày 26/09/2026 “AI trả URL PDF/Excel, backend không tự dựng tệp”. Người dùng chốt nghiệp vụ trong hội thoại ngày 10–11/10/2026; ngày 13/10/2026 xác nhận thứ tự trang gom theo từng tầng như demo.
+- **Context**: Chặng cuối trong bốn chặng (BR-PROJ-010). Chặng này không gọi AI: backend dựng bốn tệp từ kết quả đã lưu của ba chặng trước, gồm PDF hồ sơ gộp khổ A3 ngang theo thứ tự trang của app demo `design-estimate` (`savico/core/pdf.py`), PDF phối cảnh 3D, PDF bản vẽ kiến trúc (bản vẽ kỹ thuật và bản vẽ nội thất) và Excel dự toán theo mẫu `template.xlsx` của app demo. Không có bản vẽ kết cấu. Chia sẻ và tải tệp chỉ mở sau khi chặng này thành công. Thay cho quyết định ngày 26/09/2026 “AI trả URL PDF/Excel, backend không tự dựng tệp”. Người dùng chốt nghiệp vụ trong hội thoại ngày 10–11/10/2026; ngày 13/10/2026 xác nhận thứ tự trang gom theo từng tầng như demo, và chốt chặng này chỉ mở khi cả Dự toán và Phối cảnh 3D đã thành công, hồ sơ được tạo tự động khi khách vào bước Hồ sơ.
 - **Sprint**: [Chưa xác định]
 - **Priority**: Must
 - **Status**: Todo
@@ -57,18 +57,18 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 ### Preconditions
 
 - Khách đã đăng nhập bằng tài khoản khách hàng và là chủ bản dự toán.
-- Chặng Phối cảnh 3D đã thành công theo STORY-PROJ-009.
-- Chặng Hồ sơ chưa thành công, không có chặng nào đang chạy và chưa đạt giới hạn số lần lỗi theo BR-PROJ-011.
+- Chặng Dự toán đã thành công theo STORY-PROJ-008 và chặng Phối cảnh 3D đã thành công theo STORY-PROJ-009.
+- Chặng Hồ sơ chưa thành công, không có lần chạy Hồ sơ đang chờ hoặc đang chạy và chưa đạt giới hạn số lần lỗi theo BR-PROJ-011.
 
 ### Trigger
 
-Khách bấm Tạo hồ sơ, hoặc bấm Chạy lại khi lần chạy trước bị lỗi.
+Khách vào bước Hồ sơ: bấm chuyển sang bước Hồ sơ từ bước Dự toán & 3D, hoặc mở thẳng bước Hồ sơ từ danh sách hay thanh tiến trình, khi chưa có lần chạy Hồ sơ nào (BR-PROJ-010 khoản 4). Hoặc khách bấm Chạy lại khi lần chạy trước bị lỗi.
 
 ## Flow
 
 ### Main Flow
 
-1. Khách bấm Tạo hồ sơ.
+1. Khách vào bước Hồ sơ. Hệ thống tự yêu cầu tạo hồ sơ; khách không cần bấm Tạo hồ sơ.
 2. Backend kiểm tra quyền sở hữu và điều kiện mở chặng theo BR-PROJ-010. Không kiểm tra gói hay lượt.
 3. Backend tiếp nhận lần chạy và dựng bốn tệp từ kết quả đã lưu:
    - PDF hồ sơ gộp, khổ A3 ngang, theo thứ tự: trang bìa; trang thông tin dự án kèm tóm tắt dự toán; các trang theo từng tầng (2D kỹ thuật → 2D nội thất → phối cảnh 3D của tầng đó), sau cùng là phối cảnh 3D ngoại thất; các trang bản vẽ và phối cảnh có khung tên; trang dự toán chi tiết; trang cảm ơn.
@@ -102,13 +102,25 @@ Khách đổi tên bản dự toán sau khi chặng Hồ sơ đã thành công.
 1. Tên tệp khi tải về theo tên hiện tại; nội dung tệp giữ tên tại lúc dựng theo BR-PROJ-007 khoản 7.
 2. Không dựng lại tệp.
 
+#### ALT-04
+
+Khách vào lại bước Hồ sơ khi đã có hồ sơ thành công, hoặc khi lần chạy Hồ sơ đang chờ hay đang chạy.
+
+1. Hệ thống không tạo lần chạy mới. Đã có hồ sơ thì hiển thị danh sách bốn tệp; đang chạy thì hiển thị tiến độ.
+
+#### ALT-05
+
+Khách vào lại bước Hồ sơ sau khi lần chạy Hồ sơ trước đã lỗi.
+
+1. Hệ thống không tự chạy lại; khách thấy lý do lỗi và nút Chạy lại theo ALT-01.
+
 ### Exception Flow
 
 #### EXC-01
 
-Chặng 3D chưa thành công, chặng Hồ sơ đã thành công, đang có chặng chạy, đã đạt giới hạn số lần lỗi, hệ thống đang quá tải theo BR-PROJ-012, hoặc luồng bốn chặng đang tắt.
+Chặng Dự toán hoặc chặng 3D chưa thành công, chặng Hồ sơ đã thành công, đang có lần chạy Hồ sơ chờ hoặc đang chạy, đã đạt giới hạn số lần lỗi, hệ thống đang quá tải theo BR-PROJ-012, hoặc luồng bốn chặng đang tắt.
 
-1. Từ chối yêu cầu trước khi tiếp nhận, kèm lý do; không tạo lần chạy và không tính vào bộ đếm lỗi.
+1. Từ chối yêu cầu trước khi tiếp nhận, kèm lý do; không tạo lần chạy và không tính vào bộ đếm lỗi. Khi Dự toán hoặc 3D chưa thành công, khách không chuyển được sang bước Hồ sơ.
 
 #### EXC-02
 
@@ -127,8 +139,8 @@ Khách yêu cầu tải tệp hoặc tạo link chia sẻ khi chặng Hồ sơ c
 
 #### AC-001
 
-- **Given**: Chặng 3D đã thành công; chặng Hồ sơ chưa thành công và không có chặng nào đang chạy.
-- **When**: Khách bấm Tạo hồ sơ.
+- **Given**: Chặng Dự toán và chặng 3D đã thành công; chặng Hồ sơ chưa có lần chạy nào.
+- **When**: Khách bấm chuyển sang bước Hồ sơ.
 - **Then**: Backend tiếp nhận lần chạy và dựng bốn tệp: PDF hồ sơ gộp, PDF phối cảnh 3D, PDF bản vẽ kiến trúc và Excel dự toán.
 - **And**: Không gọi AI, không kiểm tra gói, không giữ hay trừ lượt.
 
@@ -174,6 +186,27 @@ Khách yêu cầu tải tệp hoặc tạo link chia sẻ khi chặng Hồ sơ c
 - **Then**: Tệp tải về có tên tệp theo “Phương án chốt”; nội dung trong tệp giữ “Phương án 3”.
 - **And**: Không dựng lại tệp, không tạo lần chạy mới.
 
+#### AC-008
+
+- **Given**: Chặng Dự toán và chặng 3D đã thành công từ hôm trước; khách chưa vào bước Hồ sơ lần nào.
+- **When**: Khách mở thẳng bước Hồ sơ từ danh sách dự toán.
+- **Then**: Hệ thống tự tiếp nhận lần chạy Hồ sơ và hiển thị tiến độ, khách không phải bấm Tạo hồ sơ.
+- **And**: Khi khách tải lại trang trong lúc lần chạy đang chạy, hoặc vào lại sau khi đã có hồ sơ, không có lần chạy Hồ sơ mới nào được tạo.
+
+#### AC-009
+
+- **Given**: Chặng 3D đã thành công; chặng Dự toán còn đang chạy hoặc đã lỗi.
+- **When**: Khách mở bước Hồ sơ hoặc gửi yêu cầu chạy chặng Hồ sơ trực tiếp tới backend.
+- **Then**: Không tạo lần chạy Hồ sơ; khách thấy điều kiện còn thiếu là chặng Dự toán chưa thành công.
+- **And**: Kết quả 3D giữ nguyên.
+
+#### AC-010
+
+- **Given**: Lần chạy Hồ sơ trước đã lỗi.
+- **When**: Khách vào lại bước Hồ sơ.
+- **Then**: Hệ thống không tự chạy lại; khách thấy lý do lỗi và nút Chạy lại.
+- **And**: Bấm Chạy lại thì hệ thống dựng lại các tệp chưa có theo ALT-01.
+
 ## References
 
 ### TDDs
@@ -194,6 +227,7 @@ Khách yêu cầu tải tệp hoặc tạo link chia sẻ khi chặng Hồ sơ c
 
 ### Dependencies
 
+- STORY-PROJ-008
 - STORY-PROJ-009
 - STORY-PROJ-003
 - STORY-PROJ-004

@@ -22,6 +22,13 @@ Mục tiêu:
 ## Quyết định đã chốt (11/10/2026)
 
 **Luồng và giao diện**
+- **Cập nhật 13/10/2026 (người dùng chốt theo yêu cầu khách hàng giảm thời gian chờ; thay hai ý “5 bước” và “tự bấm từng chặng, đúng thứ tự” bên dưới):**
+  - Thanh tiến trình 4 bước: Nhập liệu → Bản vẽ 2D → Dự toán & 3D → Hồ sơ. Bước Dự toán & 3D là một màn có hai tab.
+  - Khách bấm chạy 2D; trong lúc chờ, màn hình hiện mẫu 2D trong thư viện phù hợp với dự án.
+  - Xem xong 2D, khách bấm Đi tiếp một lần: Dự toán và 3D cùng được tiếp nhận hoặc cùng bị từ chối, rồi chạy cùng lúc. Trong lúc chờ, màn hình hiện mẫu 3D phù hợp. Không có mẫu khớp đủ thì hiện mẫu cùng loại công trình.
+  - Một chặng lỗi thì khách vẫn xem chặng đã xong; một nút Thử lại chạy lại các chặng đang lỗi.
+  - Hồ sơ chỉ mở khi cả Dự toán và 3D xong, và tự tạo khi khách vào bước Hồ sơ.
+  - Quy tắc chi tiết: BR-PROJ-010, BR-PROJ-011 khoản 9, BR-LIB-001 khoản 16.
 - **Thanh tiến trình 5 bước:** Nhập liệu → Bản vẽ 2D → Dự toán → Phối cảnh 3D → Hồ sơ. Mỗi chặng có màn hình kết quả riêng.
   - Đây là thay đổi giao diện đã được giao. Khi bàn giao phải nêu rõ màn hình trước → sau.
 - **Khách tự bấm chạy từng chặng, đúng thứ tự.** Dự toán mở sau khi xong 2D, 3D mở sau dự toán, Hồ sơ mở sau 3D. Khách có thể dừng giữa chừng.

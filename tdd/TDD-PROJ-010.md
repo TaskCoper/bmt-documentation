@@ -59,11 +59,14 @@ Hiện trạng đã kiểm tra: BE `feature/estimate-pipeline-w2` tại `3c1700c
 
 - BE đã có worker, cấu hình theo phiên bản, điểm lưu từng bước, tệp riêng tư, `render3dImage` và `render3dCheck`. `GetStageResultQueryHandler` hiện chỉ nhận Plan2d/Estimate đã thành công. `EstimatePipelineStore.RecordStepAsync` đếm tất cả bước thành tiến độ, chưa kiểm hạn cuối ngay trong SQL ghi bước.
 - Kiểu mái nằm trong `EstimateCostResult.CustomerJson.roof.kind/source`, được viết bởi `EstimateResultDocuments.Customer`; **không có cột RoofKind riêng** trên bảng này. Chặng 3D phải đọc kết quả của lần chạy Dự toán thành công.
+
+**Cập nhật 13/10/2026 (người dùng chốt US/BR theo yêu cầu khách hàng giảm thời gian chờ):** Dự toán và Phối cảnh 3D chạy cùng lúc ngay sau 2D (BR-PROJ-010 khoản 1–2), nên 3D không còn được chờ kết quả Dự toán. Hiện trạng trên `develop` (`a69d4d0`): `Render3dStageExecutor.ReadInputsAsync` ném `InternalError` khi chưa có `EstimateCostResult`, `Render3dPlanner.Build` nhận `estimateRunId` bắt buộc, `GetStageResultQueryHandler.Render3dAsync` trả `StagePrerequisiteNotMet` khi Dự toán chưa Succeeded. Phần sửa ở mục B bên dưới là đề xuất, chưa có mã.
 - FE đã có trạng thái Render3d và bước số 4 trong `pipeline.logic.ts`, nhưng chưa có route riêng cho màn 3D. Cần thêm `/design/[projectId]/render3d` và nối điều hướng từ kết quả Dự toán.
 
 ### Goals
 
-- Thực hiện STORY-PROJ-009: tiếp nhận chặng sau Dự toán, không giữ/trừ lượt hoặc kiểm quyền gói 3D; hiển thị ảnh ngay sau khi lưu.
+- Thực hiện STORY-PROJ-009: tiếp nhận ngay sau 2D, cùng một lần bấm với Dự toán (TDD-PROJ-006 mục “Chạy cùng lúc”), không giữ/trừ lượt hoặc kiểm quyền gói 3D; hiển thị ảnh ngay sau khi lưu, không chờ Dự toán.
+- Kiểu mái trên ảnh luôn trùng kiểu mái Dự toán tính tiền dù chặng nào xong trước (BR-PROJ-010 khoản 9, STORY-PROJ-009/AC-003).
 - Giữ thuật toán chọn phòng, góc máy và ảnh tham chiếu của demo; áp dụng các khác biệt đã chốt về hai nhóm phong cách, mái, miền, lỗi và lưu kết quả.
 - Lưu ảnh riêng tư từng bước; chạy lại chỉ dựng ảnh thiếu, kể cả khi model hoặc bộ quy tắc đã đổi. Không nhận kết quả đến sau hạn 40 phút mặc định.
 - Ghi được model, prompt, cấu hình, quy tắc và lời gọi tạo ra từng ảnh để Admin truy vết.
@@ -100,20 +103,22 @@ flowchart LR
 | `Render3dStageExecutor` | `src/bmt-be.infrastructure/estimatePipeline/render3d/`; đọc đầu vào đã chốt, tạo kế hoạch, gọi AI tuần tự và ghi từng ảnh. Đăng ký `IStageExecutor`, phiên bản dự kiến `render3d:r3d-1`. |
 | Kho điểm lưu | Mở rộng `IEstimatePipelineStore`, `StageCheckpoints` và `EstimatePipelineStore` để ghi kế hoạch, phục hồi ảnh và đếm riêng ảnh 3D; không đưa HTTP hay xử lý ảnh vào repository. |
 | `Render3dResultProjection` | Projection gửi khách đọc danh sách dự kiến và ảnh đã có, không trả JSON nội bộ hoặc thông tin model. Dùng từ `GetStageResultQueryHandler`. |
-| FE | Schema `render3d-v1`, API `getRender3dResult`, hook và `Render3dStageView` trong `src/features/design/`; route mới dưới `src/app/[locale]/(main)/design/[projectId]/render3d/`. |
+| FE | Schema `render3d-v1`, API `getRender3dResult`, hook và `Render3dStageView` trong `src/features/design/`. Từ 13/10/2026, `Render3dStageView` là tab Phối cảnh 3D của bước Dự toán & 3D tại route `/design/[projectId]/estimate?tab=render3d`; route `/render3d` cũ chuyển hướng tới tab này (TDD-PROJ-011/Notes “Frontend trước → sau”). |
 
 Thứ tự sau khi TDD được chốt: đặc tả Unit Test → thư viện thuần và đối chiếu demo → dữ liệu nạp sẵn và repository → executor/API → FE → kiểm thử Fake → một lần chạy thật ở local. Mã Unit Test kế tiếp bắt đầu từ UT-PROJ-429; chưa tạo các đặc tả này khi TDD còn chờ duyệt.
 
-- **Đã xác nhận:** nghiệp vụ của STORY-PROJ-009 và các BR được dẫn; một lượt cho cả bộ, lưu từng ảnh, chạy tiếp phần thiếu, mái theo Dự toán, tách hai phong cách.
+- **Đã xác nhận:** nghiệp vụ của STORY-PROJ-009 và các BR được dẫn; một lượt cho cả bộ, lưu từng ảnh, chạy tiếp phần thiếu, mái khớp mái đã tính tiền, tách hai phong cách. Ngày 13/10/2026: 3D chạy cùng lúc với Dự toán sau 2D; kết quả hai chặng hiển thị trên một màn hai tab; một nút Thử lại chung.
 - **Đề xuất chưa chốt:** thiết kế chi tiết trong bản TDD này, gồm kế hoạch lưu bằng Step JSON, bảng lời dặn theo miền và hợp đồng `render3d-v1`.
 - **Cần làm rõ:** không đặt thêm quyết định nghiệp vụ mới cho đợt 3; bản TDD hoàn chỉnh vẫn cần người dùng chốt trước khi viết đặc tả Unit Test. Các ngưỡng vận hành chung còn mở được giữ nguyên trạng ở mục H.
 
 **B. Tiếp nhận và đầu vào bất biến**
 
-1. Dùng `POST …/stages/Render3d/runs`, khóa chống gửi lặp và thứ tự kiểm của TDD-PROJ-006. Bản phải thuộc khách; Dự toán đã thành công; không có chặng đang chạy; Render3d chưa thành công; chưa hết giới hạn lỗi. Không hỏi gói còn hạn, quota hay `design.render3d`.
+1. Tiếp nhận qua `POST …/stage-runs` (thao tác Đi tiếp/Thử lại, TDD-PROJ-006 mục “Chạy cùng lúc”), cùng transaction với lần chạy Dự toán khi chặng đó cũng chạy được. Điều kiện của 3D: bản thuộc khách; **2D đã thành công** (không cần Dự toán); không có lần chạy 3D đang chờ hoặc đang chạy; Render3d chưa thành công; chưa hết giới hạn lỗi. Không hỏi gói còn hạn, quota hay `design.render3d`. Route một chặng `POST …/stages/Render3d/runs` chỉ được nhận khi Dự toán đã Succeeded hoặc đã hết giới hạn lỗi; ngược lại 409 `StageRunGroupRequired`.
 2. Chốt cấu hình và bộ quy tắc hiện hành vào lần chạy; `UsageOperationId=NULL`, hai phiên bản luật giá cũng NULL. `InputOperationId` vẫn là bản chụp v3 của chặng 2D thành công. Hạn cuối tính từ lúc tiếp nhận, gồm cả thời gian chờ hàng đợi.
-3. Executor đọc `EstimatePlanResult.InternalJson.spec`, danh sách ảnh 2D trong CustomerJson và bản chụp v3. Đọc `EstimateCostResult` của lần chạy Estimate thành công, không dùng kết quả dở dang. Thiếu dữ liệu nguồn là lỗi hệ thống `InternalError`, không gọi lại 2D/Dự toán để chữa ngầm.
-4. Miền dùng `snapshot.pricingRegion.region` (North/Central/South), không tra lại tỉnh hiện hành hoặc tin miền AI tự viết. Mái dùng `cost.CustomerJson.roof.kind`; `roof.source` giữ để truy vết. Cờ cần kỹ sư rà của Dự toán không chặn 3D.
+3. Executor đọc `EstimatePlanResult.InternalJson.spec`, danh sách ảnh 2D trong CustomerJson và bản chụp v3. Kết quả Dự toán **không** là dữ liệu nguồn bắt buộc: nếu lần chạy Estimate cùng `InputOperationId` đã Succeeded thì đọc `EstimateCostResult.CustomerJson.roof.kind` của nó; nếu chưa (đang chạy, lỗi hoặc chưa có) thì tự tính kiểu mái theo khoản 4. Thiếu phương án 2D là lỗi hệ thống `InternalError`, không gọi lại 2D để chữa ngầm.
+4. Miền dùng `snapshot.pricingRegion.region` (North/Central/South), không tra lại tỉnh hiện hành hoặc tin miền AI tự viết. Mái lấy theo thứ tự: (a) `cost.CustomerJson.roof.kind` của lần Dự toán đã Succeeded cùng đầu vào, nguồn ghi `estimate`; (b) chưa có thì tính bằng hàm thuần mới `RoofResolver.KindForSpec(spec, baseCode, baseStyleCode, matrix)` trong `bmt-be.estimatepipeline`, nguồn ghi `computed`. Hàm này gói đúng ba bước chặng Dự toán đang dùng (TDD-PROJ-009/Architecture, mục “Kiểu mái”): dựng `khoi_luong_co_so = QuantityTakeoff.BaseQuantities(spec, tổng sàn tham khảo)` để biết mái phương án nêu (`roof_source`, `roof_type`, `roof_pitch`), gọi `RoofResolver.ForProject` với ma trận mái `PriceRuleMapping.RoofMatrix(rules, typeId, styleId, baseCode, baseStyleCode)` của bộ quy tắc đã chốt cho lần chạy, rồi `RoofResolver.KindOf`. Vì Dự toán cũng tính kiểu mái bằng đúng ba bước này trước khi gọi AI (kiểu mái không do AI quyết định), hai chặng cho cùng kết quả khi cùng phương án 2D và cùng phiên bản ma trận mái. Kiểu mái và nguồn được ghi vào kế hoạch dựng (`roofKind`, `roofSource`, xem Data Model) và không đổi trong các lần chạy lại. Cờ cần kỹ sư rà của Dự toán không chặn 3D.
+
+   **Giới hạn và cách phát hiện lệch:** hai lần chạy tiếp nhận trong cùng một lần bấm ghim cùng `RuleSetRevisionId`, nên không lệch. Lệch chỉ có thể xảy ra khi một chặng được chạy lại sau khi Admin đã lưu phiên bản bộ quy tắc đổi dòng ma trận mái của đúng loại/phong cách này (BR-PROJ-011 khoản 8 cho phép lần chạy lại dùng cấu hình mới). Khi chốt Succeeded cho Estimate hoặc Render3d, `FinalizeStageRunCommandHandler` so `roof.kind` của Dự toán với `roofKind` trong kế hoạch 3D cùng đầu vào (nếu cả hai đã có); khác nhau thì ghi log Warning và gửi cảnh báo Discord `EstimateRoofMismatch` (mã dự toán, hai kiểu mái, hai phiên bản bộ quy tắc) để Admin xử lý, không đổi kết quả và không chặn chặng. Đây là tình huống vận hành hiếm, chưa có yêu cầu nghiệp vụ tự sửa.
 5. Khi đã có kế hoạch từ lần chạy trước, sao đúng kế hoạch đó vào điểm lưu của lần chạy mới. Không chọn lại phòng theo phiên bản thuật toán mới rồi bỏ các ảnh cũ. Nếu phiên bản kế hoạch không còn được hỗ trợ, báo `PipelineVersionRetired`, không tính lỗi khách.
 
 **C. Danh sách ảnh và nhãn**
@@ -151,7 +156,7 @@ Bản vẽ có metadata nhưng lỗi đọc kho là `ArtifactStoreFailed`, khôn
 Các khác biệt có căn cứ so với demo:
 
 - **Hai phong cách:** ngoại thất lấy `architectureStyle` và `effectiveBaseStyleCode` đã chốt; nội thất/căn hộ lấy tên và `interiorStyle.promptDescriptor`. Loại bỏ câu ép nội thất cùng bảng màu ngoại thất. Nhóm nội thất không áp dụng thì không tự sao phong cách kiến trúc sang; mô tả trung tính theo nhóm bị tắt của TDD-PROJ-007. BR-PROJ-004 khoản 21 và STORY-PROJ-009/AC-003 là căn cứ.
-- **Mái đã tính tiền:** không gọi `roof_kind` của demo để quyết định lại kiểu mái. Lời dặn và QC cùng nhận kind của kết quả Estimate. Dòng `AiRoofRule.Render3dText` hiện hành chỉ dùng khi BaseCode/BaseStyleCode (hoặc dòng `*`) và RoofKind đều khớp. Nếu Admin đổi ma trận mái khiến kind khác, dùng mô tả cố định theo kind ở slot `render3d.roof`; không nhận kiểu mái mới. `None` dành cho căn hộ, `Metal` dựng mái tôn theo kết quả phương án. Câu mô tả không được làm thay đổi kind đã chốt.
+- **Mái đã tính tiền:** không gọi `roof_kind` của demo để quyết định lại kiểu mái. Lời dặn và QC cùng nhận kind từ kết quả Estimate hoặc từ `RoofResolver.KindForSpec` theo mục B.4; hai nguồn này cho cùng giá trị khi cùng phương án và cùng ma trận mái. Dòng `AiRoofRule.Render3dText` hiện hành chỉ dùng khi BaseCode/BaseStyleCode (hoặc dòng `*`) và RoofKind đều khớp. Nếu Admin đổi ma trận mái khiến kind khác, dùng mô tả cố định theo kind ở slot `render3d.roof`; không nhận kiểu mái mới. `None` dành cho căn hộ, `Metal` dựng mái tôn theo kết quả phương án. Câu mô tả không được làm thay đổi kind đã chốt.
 - **Thời tiết:** giữ câu khí hậu của `REGION_WEATHER` và lời dặn thoát nước trong `roof_rule`; lấy miền từ bản chụp 2D. Đây là lời dặn thiết kế chống nắng/mưa, không phải gọi API dự báo thời tiết hay biến tất cả ảnh thành cảnh mưa.
 - **Lời dặn có phiên bản:** tách các đoạn tĩnh của prompt vào `AiPromptPart`; chèn `AiPackageStageInstruction` cho Render3d, `AiRegionInstruction` chủ đề `Render3dWeather`, rồi các `AiInstruction` khớp phạm vi theo quy tắc TDD-PROJ-008. Schema QC và cách chọn ảnh nằm trong mã. Nội dung khách là dữ liệu thiết kế, không phải lệnh điều khiển lưu trữ/quyền.
 
@@ -173,7 +178,7 @@ Phân biệt **dựng lại ảnh** với **thử lại giao tiếp AI**: lớp 
 
 **F. Điểm lưu, chạy tiếp và hạn cuối**
 
-Kế hoạch lưu thành StepKey `render3d:plan`, Internal=true, OutputJson có `schemaVersion=1`, `inputOperationId`, `planRunId`, `estimateRunId`, `items`, `notes`. Dữ liệu có cấu trúc biến đổi theo phiên bản và luôn đọc cả khối, nên dùng điểm lưu JSON hiện có thay vì thêm bảng kết quả 3D trùng dữ liệu tệp.
+Kế hoạch lưu thành StepKey `render3d:plan`, Internal=true, OutputJson có `schemaVersion=1`, `inputOperationId`, `planRunId`, `estimateRunId` (rỗng khi kế hoạch lập trước lúc Dự toán xong, 13/10/2026), `roofKind`, `roofSource` (`estimate` hoặc `computed`), `items`, `notes`. Dữ liệu có cấu trúc biến đổi theo phiên bản và luôn đọc cả khối, nên dùng điểm lưu JSON hiện có thay vì thêm bảng kết quả 3D trùng dữ liệu tệp.
 
 1. Giữ thứ tự trong kế hoạch: ngày → đêm → từng tầng, các góc chính trước góc thêm. Worker chạy tiếp kể cả khách đóng browser.
 2. Mỗi ảnh đã có của đúng Estimate/Render3d/itemKey và cùng InputOperationId được dùng lại, không kiểm lại bằng model mới, không dựng lại. Ghi Step `render3d:image:{itemKey}` của lần chạy hiện tại trỏ ArtifactId cũ; Model/PromptVersion vẫn là nguồn cũ. Dùng điểm lưu đã công bố, không tìm tệp mồ côi trong bucket để coi là hoàn thành.
@@ -227,10 +232,10 @@ sequenceDiagram
     participant Worker
     participant AI
     participant Files as Kho riêng tư
-    Customer->>API: POST Render3d/runs và Idempotency-Key
-    API->>DB: Kiểm điều kiện, chốt phiên bản, tạo Queued
+    Customer->>API: POST stage-runs (Đi tiếp) và Idempotency-Key
+    API->>DB: Kiểm điều kiện cả Dự toán và 3D, chốt phiên bản, tạo hai run Queued trong một transaction
     API-->>Customer: 202 runId, deadlineUtc
-    Worker->>DB: Claim lease, đọc nguồn và kế hoạch cũ
+    Worker->>DB: Claim lease run 3D, đọc phương án 2D, kế hoạch cũ và roof.kind của Dự toán nếu đã Succeeded (không thì tự tính)
     Worker->>DB: Ghi kế hoạch, tham chiếu ảnh dùng lại
     loop Từng ảnh thiếu theo thứ tự
         Worker->>Files: Đọc ảnh tham chiếu đã lưu
@@ -243,7 +248,7 @@ sequenceDiagram
         API-->>Customer: x/tổng, ảnh xong, ô còn thiếu
     end
     Worker->>DB: Kiểm đủ tập ảnh và hạn, chốt Succeeded
-    Note over API,DB: Hồ sơ Sẵn sàng, không tự chạy
+    Note over API,DB: Hồ sơ Sẵn sàng khi Dự toán cũng Succeeded; frontend tự tạo Hồ sơ khi khách vào bước đó
 ```
 
 ## Activity Diagram
@@ -323,7 +328,7 @@ erDiagram
 
 Các quan hệ cũ giữ delete behavior của TDD-PROJ-006/008/009; không thêm cascade từ khách sang nhật ký AI. FK của Step tới Artifact có thể NULL với kế hoạch hoặc bước không sinh tệp. Quan hệ Step–Artifact cho phép nhiều lần chạy dùng cùng ảnh; mỗi Step ảnh có đúng một ArtifactId. Việc ảnh thuộc cùng Estimate/Render3d/input được repository kiểm trong transaction, vì FK ArtifactId đơn lẻ chưa chứng minh điều này.
 
-**Mẫu dữ liệu lưu** — dữ liệu minh họa, ID ngắn là bí danh UUID, giờ UTC, chỉ trích cột cần thiết. D1 là nhà phố hai tầng, O1 là đầu vào 2D đã chốt South; R1 và R2 lần lượt đã thành công 2D/Dự toán. C2/RS2 là cấu hình/quy tắc cũ, C3/RS3 là revision được tạo khi triển khai đợt 3.
+**Mẫu dữ liệu lưu** — dữ liệu minh họa, ID ngắn là bí danh UUID, giờ UTC, chỉ trích cột cần thiết. D1 là nhà phố hai tầng, O1 là đầu vào 2D đã chốt South; R1 đã thành công 2D; R2 là lần chạy Dự toán được tiếp nhận cùng lúc với R3 (một lần bấm Đi tiếp, 13/10/2026) và còn đang chạy khi R3 lập kế hoạch. C2/RS2 là cấu hình/quy tắc cũ, C3/RS3 là revision được tạo khi triển khai đợt 3.
 
 | Bảng | Giá trị lưu |
 |---|---|
@@ -347,7 +352,9 @@ OutputJson của kế hoạch (trích hai mục; bản lưu phải chứa đủ 
   "schemaVersion": 1,
   "inputOperationId": "O1",
   "planRunId": "R1",
-  "estimateRunId": "R2",
+  "estimateRunId": null,
+  "roofKind": "FlatConcrete",
+  "roofSource": "computed",
   "items": [
     {"itemKey":"exterior_day","label":"Ngoại thất — Ban ngày","kind":"ExteriorDay","floorIndex":null,"floorName":null,"roomIndex":null,"view":1,"requires":[]},
     {"itemKey":"exterior_night","label":"Ngoại thất — Ban đêm","kind":"ExteriorNight","floorIndex":null,"floorName":null,"roomIndex":null,"view":1,"requires":["exterior_day"]}
@@ -356,11 +363,11 @@ OutputJson của kế hoạch (trích hai mục; bản lưu phải chứa đủ 
 }
 ```
 
-Các giá trị O1/R1/R2 trong ví dụ trên thay bằng UUID khi lưu thật. Tầng/phòng chỉ NULL với hai ảnh đầu; ảnh phòng có `floorIndex`, `floorName`, `roomIndex`, view đầy đủ. Không lưu fileUrl/signed URL trong kế hoạch. Thứ tự items là thứ tự hiển thị và dựng; jsonb giữ thứ tự mảng, prompt không phụ thuộc thứ tự khóa object.
+Các giá trị O1/R1 trong ví dụ trên thay bằng UUID khi lưu thật. Ví dụ lấy tình huống R3 được tiếp nhận cùng lúc với lần chạy Dự toán R2 và lập kế hoạch khi R2 còn đang chạy, nên `estimateRunId` rỗng và kiểu mái được tính (`roofSource=computed`); nếu R2 đã Succeeded trước lúc lập kế hoạch thì `estimateRunId="R2"`, `roofSource="estimate"` và `roofKind` đọc từ kết quả R2. Tầng/phòng chỉ NULL với hai ảnh đầu; ảnh phòng có `floorIndex`, `floorName`, `roomIndex`, view đầy đủ. Không lưu fileUrl/signed URL trong kế hoạch. Thứ tự items là thứ tự hiển thị và dựng; jsonb giữ thứ tự mảng, prompt không phụ thuộc thứ tự khóa object.
 
 **Notes**:
 
-- Chuẩn hóa: khóa (revision, miền, chủ đề) quyết định Text; không lặp lời dặn theo từng tỉnh/dự án. Mái vẫn do EstimateCostResult quyết định; không thêm một cột mái có thể sửa riêng trên dự án 3D. Kế hoạch là bản chụp bất biến có chủ đích, không phải bản sao danh mục phải đồng bộ mỗi khi Admin sửa.
+- Chuẩn hóa: khóa (revision, miền, chủ đề) quyết định Text; không lặp lời dặn theo từng tỉnh/dự án. Mái lấy từ EstimateCostResult hoặc tính lại bằng đúng quy tắc của chặng Dự toán (mục B.4) và ghim vào kế hoạch; không thêm một cột mái có thể sửa riêng trên dự án 3D. Kế hoạch thêm hai trường `roofKind` (một trong sáu kiểu của `AiRoofKinds`) và `roofSource` (`estimate` hoặc `computed`); `estimateRunId` được phép rỗng khi kế hoạch lập trước lúc Dự toán xong. Kế hoạch cũ chưa có hai trường này chỉ tồn tại khi Dự toán đã Succeeded, nên đọc như trước. Kế hoạch là bản chụp bất biến có chủ đích, không phải bản sao danh mục phải đồng bộ mỗi khi Admin sửa.
 - `ProgressDone` là dữ liệu tính sẵn từ Step ảnh và được cập nhật cùng transaction. API result tính lại từ cùng tập ảnh để tránh con số tạm trong lúc phục hồi; test kiểm con số cuối của run khớp tập artifact.
 - Migration dự kiến `EstimatePipelineRender3dStage`: thêm bảng mới, tạo revision quy tắc/cấu hình mới bằng cách sao revision hiện hành; thêm dữ liệu còn thiếu, giữ tùy chỉnh hiện có. Seed đóng gói cố định trong migration từ demo `059e876`, không gọi code thư viện có thể đổi về sau.
 - Nội dung roof/prompt mới: ma trận mái lấy lời tả từ `prompts.py:229–305`, các slot ngoại thất/căn hộ/phòng/kiểm/sửa lỗi từ các hàm tương ứng; riêng trường hợp đã chốt khác demo (mái tôn từ Estimate, tách phong cách) ghi rõ trong manifest seed. Không tạo một kiểu mái hoặc kiểu phong cách mới.
@@ -372,7 +379,8 @@ Các giá trị O1/R1/R2 trong ví dụ trên thay bằng UUID khi lưu thật. 
 
 ### Endpoints
 
-- **POST** `/api/v1/estimates/{estimateId}/stages/Render3d/runs` — tiếp nhận hoặc trả lần chạy trùng theo TDD-PROJ-006.
+- **POST** `/api/v1/estimates/{estimateId}/stage-runs` — tiếp nhận 3D cùng Dự toán (Đi tiếp/Thử lại) theo TDD-PROJ-006; đây là đường frontend dùng từ 13/10/2026.
+- **POST** `/api/v1/estimates/{estimateId}/stages/Render3d/runs` — route một chặng, chỉ được nhận khi Dự toán đã Succeeded hoặc hết giới hạn lỗi; ngược lại 409 `StageRunGroupRequired`.
 - **GET** `/api/v1/estimates/{estimateId}/stages/Render3d/result` — kế hoạch và ảnh đã lưu, kể cả đang chạy hoặc lỗi; bổ sung cho endpoint dùng chung.
 - **GET** `/api/v1/estimates/{estimateId}/stage-files/{artifactId}` — route tệp riêng tư dùng lại, ký link 15 phút.
 
@@ -407,7 +415,7 @@ Error Response:
 {"code":"EstimateNotFound"}
 ```
 
-Ví dụ trích hai items; phản hồi thật có đủ tám items. `fileUrl=NULL` nghĩa chưa có ảnh; không trả signed URL hoặc artifact nội bộ. `runId/status` theo lần chạy mới nhất (hoặc lần thành công). Trước khi có lần chạy, sau khi Estimate thành công: `runId=null`, `status=Ready`, `planReady=false`, `progress={done:0,total:null}`, `items=[]`. Khi Queued chưa có kế hoạch cũng trả 200 với trạng thái Running và planReady=false. Nếu chạy tiếp đã có kế hoạch cũ thì trả ngay kế hoạch/ảnh cũ, không đợi worker sao điểm lưu. Chưa xong Estimate trả 409 StagePrerequisiteNotMet. Response đặt Cache-Control: no-store.
+Ví dụ trích hai items; phản hồi thật có đủ tám items. `fileUrl=NULL` nghĩa chưa có ảnh; không trả signed URL hoặc artifact nội bộ. `runId/status` theo lần chạy mới nhất (hoặc lần thành công). Trước khi có lần chạy, sau khi 2D thành công: `runId=null`, `status=Ready`, `planReady=false`, `progress={done:0,total:null}`, `items=[]`. Khi Queued chưa có kế hoạch cũng trả 200 với trạng thái Running và planReady=false. Nếu chạy tiếp đã có kế hoạch cũ thì trả ngay kế hoạch/ảnh cũ, không đợi worker sao điểm lưu. Chưa xong 2D trả 409 StagePrerequisiteNotMet; Dự toán chưa xong không ảnh hưởng. Response đặt Cache-Control: no-store.
 
 #### GET /api/v1/estimates/{estimateId}/stage-files/{artifactId}
 
@@ -429,8 +437,9 @@ Chỉ ký artifact đã công bố thuộc đúng bản của chủ đang đăng
 
 - **EstimateNotFound** (404): không tồn tại hoặc không thuộc khách.
 - **StageFileNotFound** (404): tệp không thuộc bản hoặc chưa được công bố.
-- **StagePrerequisiteNotMet** (409): Dự toán chưa thành công.
-- **StageRunInProgress** (409): có chặng đang được xử lý theo contract chung.
+- **StagePrerequisiteNotMet** (409): 2D chưa thành công.
+- **StageRunInProgress** (409): chặng 3D đang có lần chạy Queued/Running (theo chặng, TDD-PROJ-006).
+- **StageRunGroupRequired** (409): gọi route một chặng khi Dự toán vẫn chạy được; dùng `POST …/stage-runs`.
 - **StageAlreadySucceeded** (409): 3D đã hoàn tất.
 - **StageRetryLimitReached** (409): hết giới hạn lỗi có tính của chặng 3D.
 - **IdempotencyConflict** (409): dùng lại khóa với nội dung khác theo contract chung.
@@ -471,14 +480,14 @@ Dùng lịch chờ, fallback model, giới hạn đồng thời và cảnh báo 
 ### User Stories
 
 - [STORY-PROJ-009](../userstory/STORY-PROJ-009.md): toàn bộ chặng 3D và AC-001 đến AC-007.
-- [STORY-PROJ-008](../userstory/STORY-PROJ-008.md): kết quả Dự toán là điều kiện đầu vào.
+- [STORY-PROJ-008](../userstory/STORY-PROJ-008.md): chặng chạy cùng lúc với 3D; kết quả Dự toán là nguồn kiểu mái khi đã có.
 - [STORY-PROJ-012](../userstory/STORY-PROJ-012.md): cấu hình và truy vết lần chạy, không mở rộng màn ngoài phạm vi.
 
 ### Business Rules
 
 - [BR-PROJ-004](../businessrule/BR-PROJ-004.md): hai nhóm phong cách, mã gốc và mô tả nội thất.
 - [BR-PROJ-006](../businessrule/BR-PROJ-006.md): tệp riêng tư, liên kết có hạn.
-- [BR-PROJ-010](../businessrule/BR-PROJ-010.md): thứ tự chặng và giữ nguồn đã thành công.
+- [BR-PROJ-010](../businessrule/BR-PROJ-010.md): 3D chỉ cần 2D, chạy cùng lúc với Dự toán, kiểu mái khớp mái đã tính tiền (khoản 9).
 - [BR-PROJ-011](../businessrule/BR-PROJ-011.md): dựng lại, chạy tiếp và bộ đếm lỗi.
 - [BR-PROJ-012](../businessrule/BR-PROJ-012.md): thời hạn, hàng đợi và kết quả muộn.
 - [BR-PROJ-013](../businessrule/BR-PROJ-013.md): miền đã chốt, Tây Nguyên thuộc miền Trung.
@@ -499,3 +508,5 @@ Dùng lịch chờ, fallback model, giới hạn đồng thời và cảnh báo 
 - App demo `059e876`: `savico/modules/render3d/{service,prompts,quality,router}.py`, `savico/core/config.py:160–172,391`, `web/app.js:5899–6090`; từng phần thiết kế dẫn vị trí nguồn ở trên.
 
 ## Change Log
+
+- 2026-10-13 (người dùng chốt US/BR chạy cùng lúc Dự toán và 3D; TDD đề xuất, chưa có mã): Điều kiện tiếp nhận 3D là 2D Succeeded, tiếp nhận qua `POST …/stage-runs` cùng Dự toán. Kiểu mái lấy từ Dự toán nếu đã có, không thì tính bằng `RoofResolver.KindForSpec` cùng quy tắc với chặng Dự toán; kế hoạch thêm `roofKind`, `roofSource`, `estimateRunId` được rỗng. Cảnh báo `EstimateRoofMismatch` khi hai chặng lệch mái do đổi ma trận mái giữa hai lần chạy. `GET …/Render3d/result` mở sau 2D. Màn 3D là tab của bước Dự toán & 3D.

@@ -57,6 +57,8 @@ Ba chặng 2D, Dự toán và Phối cảnh 3D đã có kết quả lưu bền v
 
 Tài liệu này là **thiết kế đề xuất của đợt 4**, chưa phải báo cáo triển khai. Căn cứ khảo sát: backend worktree `bmt-be-w3` tại `cdddaae`, frontend `buildx-fe-w3` tại `296ccca`, demo `design-estimate` tại `059e876`. Nghiệp vụ theo STORY-PROJ-010 và các quyết định trong HANDOFF-CODEX.md, mục D.
 
+**Cập nhật 13/10/2026 (người dùng chốt US/BR theo yêu cầu khách hàng giảm thời gian chờ):** chặng Hồ sơ chỉ mở khi **cả** Dự toán và Phối cảnh 3D đã thành công (hai chặng này nay chạy cùng lúc, TDD-PROJ-006 mục “Chạy cùng lúc”), và hồ sơ được **tự tạo khi khách vào bước Hồ sơ**, kể cả mở thẳng từ danh sách hay thanh tiến trình (BR-PROJ-010 khoản 1, 4; STORY-PROJ-010 ALT-04, ALT-05, AC-008 đến AC-010). Điều này thay câu “không tự POST khi mount” ở Notes “Frontend trước → sau” bên dưới. Backend không đổi cách tiếp nhận; chỉ đổi điều kiện mở chặng theo `PipelineStages.Prerequisites`.
+
 **Đã xác nhận:** bốn tệp, backend dựng PDF trực tiếp với PDFsharp/MigraDoc, Excel theo mẫu demo, không AI hoặc lượt mới, dùng thông tin tài khoản chủ bản, bộ hồ sơ chỉ mở khi đủ tệp. Ngày 13/10/2026 người dùng chốt thứ tự PDF gộp theo từng tầng: 2D kỹ thuật → 2D nội thất → 3D của tầng; hết các tầng mới tới 3D ngoại thất. Lỗi Hồ sơ là lỗi hệ thống và không tăng bộ đếm. Vật liệu/Hãng được in trong PDF dự toán và Excel theo demo; màn kết quả Dự toán vẫn không hiện cột hãng. Người dùng xác nhận sửa lại phạm vi này ngày 13/10/2026; ngày lập báo giá và hiệu lực 90 ngày lấy từ chặng Dự toán đã chốt.
 
 **Đề xuất chưa chốt:** cấu trúc lưu tham chiếu tệp riêng tư, bản chụp thông tin in, giao dịch công bố và hợp đồng đọc trình bày dưới đây. Chờ người dùng duyệt bản TDD hoàn chỉnh trước khi viết đặc tả Unit Test và code.
@@ -84,7 +86,7 @@ Tài liệu này là **thiết kế đề xuất của đợt 4**, chưa phải 
 
 | Thành phần | Hiện trạng và thay đổi đề xuất |
 |---|---|
-| `RunEstimateStageCommandHandler`, worker, checkpoint, heartbeat, outbox | Dùng lại TDD-PROJ-006. Dossier không có UsageOperation mới, bỏ qua circuit breaker AI và kiểm gói. Vẫn kiểm hàng chờ, owner, chặng trước, chặng đã xong, giới hạn lỗi và một lần chạy đang hoạt động. |
+| `RunEstimateStageCommandHandler`, worker, checkpoint, heartbeat, outbox | Dùng lại TDD-PROJ-006. Dossier không có UsageOperation mới, bỏ qua circuit breaker AI và kiểm gói. Vẫn kiểm hàng chờ, owner, hai chặng điều kiện (Dự toán và 3D đều Succeeded), chặng đã xong, giới hạn lỗi và một lần chạy Hồ sơ đang hoạt động. |
 | `DossierStageExecutor` | Mới ở infrastructure: đọc nguồn đã thành công, tạo/đọc bản chụp thông tin in, dựng tệp còn thiếu, lưu riêng tư, ghi checkpoint; xin finalizer chốt. Không gọi share/email hoặc AI. |
 | `DossierDocumentComposer` | Mới, logic thuần: chuyển dữ liệu gửi khách thành danh sách trang và khối bảng; sắp tầng/ảnh; chuẩn hóa nhãn, số tiền và mã bản vẽ. Không biết EF, HTTP, kho tệp hay font hệ điều hành. |
 | `IDossierPdfWriter` / `PdfSharpDossierWriter` | Cổng application và adapter infrastructure mới. PDFsharp/MigraDoc dựng và ghép các trang A3 ngang, nhúng font từ tài nguyên đóng gói; không chạy Chrome. |
@@ -132,8 +134,8 @@ flowchart LR
 - **Gate mọi đường đọc.** Với `dossier-v1`, reader phải JOIN DossierRun Succeeded, không chỉ kiểm UsageOperation 2D Succeeded. Chưa hoàn thành thì owner nhận StageResultNotReady ở stage API, ResultNotReady ở API chia sẻ cũ. `stage-files` hiện đọc mọi artifact của owner: phải bổ sung kiểm riêng cho Stage=Dossier, yêu cầu artifact nằm trong bộ đã công bố. Tệp tái dùng có thể được tạo bởi run Failed trước đó, nên không dùng `CreatedByRunId.State` làm điều kiện duy nhất. Quyền đọc ảnh 2D/3D trước Hồ sơ giữ như các chặng đã có.
 - **Tải và chia sẻ.** Bốn thẻ tệp dùng backend route. Owner stage-files trả 302 tới link ký hạn 15 phút sau kiểm owner và bộ đã công bố; filename cho tài liệu lấy tên Estimate hiện tại cộng loại tệp và phần mở rộng. API owner result-files/export cũ có thể tiếp tục stream để tương thích. Public kiểm token/hash, current pointer, chưa thu hồi, hạn UTC, chưa xóa, cùng nguồn/bản trước mỗi request kể cả Range; stream trực tiếp từ kho riêng tư. Không redirect public, không đưa ObjectKey/link ký vào JSON/log/HTML. Cache-Control private, no-store và header bảo vệ tệp dùng lại. Revoke chặn request mới, không hủy bytes người nhận đã tải hoặc stream đã được cấp quyền trước commit thu hồi.
 - **Export cũ không dựng thêm.** Dossier finalizer đã tạo hai dòng Ready: Pdf trỏ PDF gộp, Xlsx trỏ Excel. POST export với key chỉ ghi/replay biên nhận và trả dòng Ready đó; không publish PrepareEstimateExportEvent cho `dossier-v1`. Hai PDF chuyên đề dùng ResultFile. Thiếu alias export trong một bộ đã Succeeded là dữ liệu lỗi, không tự khởi động renderer cũ để che lỗi.
-- **Frontend trước → sau.** Route Hồ sơ hiện có luồng render và tải PDF phía client → dùng stage API, progress số tệp đã lưu/4, trạng thái server khi F5, và bốn tệp server. Render3d Succeeded hiện báo bước tiếp theo chưa mở → có nút “Tạo hồ sơ” dẫn tới tổng quan; không tự POST khi mount. Giữ màn tổng quan, bốn thẻ, link/QR/email; chỉ vô hiệu thao tác khi chưa đủ điều kiện. Không để animation/timer đặt Succeeded hoặc ép chạy lại hồ sơ đã xong. Nút thử lại dùng key mới; request mất phản hồi gửi lại key cũ. Lỗi hiện bằng thông báo có nghĩa, không lộ ObjectKey/stack trace. Chia sẻ không tự tạo lại link khi ngày mới khác: giữ hành vi requestedExpiryApplied của TDD-PROJ-003.
-- **Danh sách dự án.** Hoàn thiện projection TDD-PROJ-006/BR-PROJ-008: Processing ưu tiên khi có run hoạt động; Failed khi lần mới nhất lỗi mà chặng chưa thành công; Completed khi Dossier Succeeded; InProgress khi đã có Plan2d; còn lại Draft. FE mở bản theo stage đã xong/chặng đang chạy, Completed dẫn Hồ sơ. Alias Succeeded của bộ lọc cũ giữ tương thích. Mode=Off không đổi trạng thái đã lưu hoặc chặn đọc/tải/chia sẻ.
+- **Frontend trước → sau.** Route Hồ sơ hiện có luồng render và tải PDF phía client → dùng stage API, progress số tệp đã lưu/4, trạng thái server khi F5, và bốn tệp server. Bước Dự toán & 3D có nút “Sang bước Hồ sơ” khi cả hai chặng Succeeded → vào bước Hồ sơ là tự tạo hồ sơ (13/10/2026, thay cho nút “Tạo hồ sơ”). Quy tắc tự tạo ở frontend: khi `GET /stages` trả Dossier `status=Ready` và `runId=null` (chưa có lần chạy Hồ sơ nào), màn Hồ sơ gọi `POST …/stages/Dossier/runs` với Idempotency-Key **cố định** `dossier-auto:{estimateId}`; tải lại trang, mở hai tab hoặc vào từ danh sách đều gửi cùng key nên backend trả lại cùng lần chạy (200), không tạo thêm. Dossier `Failed` (đã có lần chạy) thì không tự gọi; khách bấm Chạy lại với key ngẫu nhiên mới. Dossier `Locked` (Dự toán hoặc 3D chưa xong) thì màn chỉ hiện điều kiện còn thiếu và không gọi. Trong lúc chờ phản hồi POST, màn hiện trạng thái đang tiếp nhận, không hiện nút Tạo hồ sơ. Giữ màn tổng quan, bốn thẻ, link/QR/email; chỉ vô hiệu thao tác khi chưa đủ điều kiện. Không để animation/timer đặt Succeeded hoặc ép chạy lại hồ sơ đã xong. Nút thử lại dùng key mới; request mất phản hồi gửi lại key cũ. Lỗi hiện bằng thông báo có nghĩa, không lộ ObjectKey/stack trace. Chia sẻ không tự tạo lại link khi ngày mới khác: giữ hành vi requestedExpiryApplied của TDD-PROJ-003.
+- **Danh sách dự án.** Hoàn thiện projection TDD-PROJ-006/BR-PROJ-008: Processing ưu tiên khi có run hoạt động; Failed khi lần mới nhất lỗi mà chặng chưa thành công; Completed khi Dossier Succeeded; InProgress khi đã có Plan2d; còn lại Draft. FE mở bản theo `succeededStages` (TDD-PROJ-006 mục “Chạy cùng lúc” khoản 7): có Dossier → bước Hồ sơ; có cả Estimate và Render3d → bước Hồ sơ (tự tạo nếu chưa có); có Plan2d → bước Dự toán & 3D; còn lại → Bản vẽ 2D hoặc Nhập liệu. Thanh tiến trình còn 4 bước: Nhập liệu → Bản vẽ 2D → Dự toán & 3D → Hồ sơ. Alias Succeeded của bộ lọc cũ giữ tương thích. Mode=Off không đổi trạng thái đã lưu hoặc chặn đọc/tải/chia sẻ.
 - **Quan sát và kiểm chứng.** Log run/estimate/step/role, thời gian dựng từng tệp, bytes và mã lỗi; không log context/PII/token. Unit test sau khi duyệt TDD tập trung composer, lọc dữ liệu và guard. Integration PostgreSQL kiểm FK, công bố nguyên tử, lease/deadline, replay, truy cập trước/sau công bố và thu hồi Range. Kiểm tệp bằng parser PDF/XLSX cùng xem trang thực tế: font tiếng Việt, A3, đủ ảnh, bảng nhiều trang, số liệu và đúng thứ tự. Browser kiểm tổng quan → tiến độ → bốn tệp → đổi tên → link/QR/email giả → thu hồi; F5 và Mode=Off. Không coi test mock chứng minh transaction hoặc kết quả SMTP thật. Đặc tả ST-PROJ-155–159 và ST-PROJ-057 là căn cứ; chưa chạy chúng trong bước TDD.
 
 ## Sequence Diagram
@@ -146,7 +148,7 @@ sequenceDiagram
     participant W as Dossier executor
     participant DOC as PDF và Excel writers
     participant S as Kho riêng tư
-    U->>API: POST Dossier runs, Idempotency-Key
+    U->>API: Vào bước Hồ sơ; FE tự POST Dossier runs, Idempotency-Key dossier-auto:{estimateId}
     API->>DB: Kiểm quyền và điều kiện, ghi Queued và outbox
     API-->>U: 202 runId, deadline
     W->>DB: Claim lease, đọc nguồn và context
@@ -174,7 +176,7 @@ sequenceDiagram
 
 ```mermaid
 flowchart TD
-    A[Khách bấm Tạo hoặc Chạy lại] --> B{Phiên và owner đúng?}
+    A[Khách vào bước Hồ sơ lần đầu: FE tự POST với key cố định; hoặc bấm Chạy lại] --> B{Phiên và owner đúng?}
     B -->|Không| X[Từ chối, không tạo run]
     B -->|Có| C{Key đã nhận?}
     C -->|Cùng yêu cầu| R[Trả run cũ]
@@ -301,7 +303,7 @@ erDiagram
 
 Dùng Result<T> cho JSON thành công, ProblemDetails cho lỗi và binary không bọc JSON như code hiện có. Chỉ `value` của kết quả Dossier được mở rộng. Các route owner đòi phiên Customer hợp lệ và cùng chủ bản; cookie tuân Origin. Các mutation giữ Idempotency-Key hiện có. Tất cả dữ liệu riêng tư dùng no-store.
 
-- **POST** `/api/v1/estimates/{estimateId}/stages/{stage}/runs` — Dùng route hiện có, stage=Dossier, body `{}`. 202 khi nhận mới, 200 replay cùng key/hash. Không tự chạy khi mở trang.
+- **POST** `/api/v1/estimates/{estimateId}/stages/{stage}/runs` — Dùng route hiện có, stage=Dossier, body `{}`. 202 khi nhận mới, 200 replay cùng key/hash. Frontend tự gọi khi khách vào bước Hồ sơ lần đầu với key cố định `dossier-auto:{estimateId}` (13/10/2026); Chạy lại dùng key mới.
 - **GET** `/api/v1/estimates/{estimateId}/stages` — Dossier trả progress số tệp/4 và trạng thái từ DB. Chưa đủ bốn tệp không trả thành công.
 - **GET** `/api/v1/estimates/{estimateId}/stages/{stage}/result` — stage=Dossier, mới hỗ trợ đọc hợp đồng dưới đây sau Succeeded.
 - **GET** `/api/v1/estimates/{estimateId}/stage-files/{artifactId}` — Giữ route, thêm gate Dossier và filename theo tên hiện tại khi download=true; owner nhận 302, link hạn 15 phút.
@@ -320,14 +322,14 @@ Các endpoint export status/file, create/current/revoke share, QR và email gi�
 ```
 Request:
 POST /api/v1/estimates/11111111-1111-4111-8111-111111111111/stages/Dossier/runs
-Idempotency-Key: dossier-1
+Idempotency-Key: dossier-auto:11111111-1111-4111-8111-111111111111
 {}
 
 Response 202:
 {"value":{"runId":"22222222-2222-4222-8222-222222222222","stage":"Dossier","state":"Queued","acceptedAtUtc":"2026-10-13T03:00:00Z","deadlineUtc":"2026-10-13T03:05:00Z"},"isSuccess":true,"isFailure":false,"error":{"code":"","message":""}}
 
 Error Response:
-{"title":"Conflict","code":"Conflict","status":409,"detail":"Cần hoàn tất chặng Phối cảnh 3D trước.","messageCode":"StagePrerequisiteNotMet","errors":null}
+{"title":"Conflict","code":"Conflict","status":409,"detail":"Cần hoàn tất chặng Dự toán và Phối cảnh 3D trước.","messageCode":"StagePrerequisiteNotMet","errors":null}
 ```
 
 #### GET /api/v1/estimates/{estimateId}/stages/{stage}/result
@@ -364,9 +366,9 @@ Error Response:
 
 ### Error Codes
 
-- **StagePrerequisiteNotMet** (409): 3D chưa thành công; không tiếp nhận Dossier.
+- **StagePrerequisiteNotMet** (409): Dự toán hoặc 3D chưa thành công; không tiếp nhận Dossier.
 - **StageAlreadySucceeded** (409): Hồ sơ đã thành công, không dựng lại.
-- **StageRunInProgress** (409): Bản dự toán có chặng Queued/Running.
+- **StageRunInProgress** (409): Chặng Hồ sơ đang có lần chạy Queued/Running (theo chặng, TDD-PROJ-006).
 - **StageRetryLimitReached** (409): Guard giới hạn theo TDD-PROJ-006; lỗi hệ thống của Dossier không làm tăng số này.
 - **IdempotencyConflict** (409): Cùng key nhưng khác yêu cầu.
 - **PipelineUnavailable** (503): Mode Off khi nhận mới; không áp vào route đọc.
@@ -449,3 +451,5 @@ Storage I/O chịu thời gian còn lại của run và cancellation. Lỗi dự
 - Handoff: `/Users/user/Documents/WorkSpace/bmt-wt/HANDOFF-CODEX.md`, mục 1.4 và mục D đợt Hồ sơ.
 
 ## Change Log
+
+- 2026-10-13 (người dùng chốt US/BR chạy cùng lúc Dự toán và 3D, Hồ sơ tự tạo; TDD đề xuất, chưa có mã): Điều kiện mở Hồ sơ là cả Dự toán và 3D Succeeded. Frontend tự gọi tiếp nhận Hồ sơ khi khách vào bước Hồ sơ lần đầu bằng Idempotency-Key cố định `dossier-auto:{estimateId}`; lỗi thì khách bấm Chạy lại. Thanh tiến trình 4 bước; danh sách dự toán mở bước theo `succeededStages`.

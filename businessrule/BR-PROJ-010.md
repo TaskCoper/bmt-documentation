@@ -36,7 +36,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ## Rule Info
 
-- **Name**: Bốn chặng tạo kết quả chạy lần lượt theo lệnh của khách; chặng đã thành công không chạy lại.
+- **Name**: Bốn chặng tạo kết quả: 2D trước, Dự toán và Phối cảnh 3D chạy cùng lúc, Hồ sơ sau cùng; chặng đã thành công không chạy lại.
 - **Category**: Tạo dự toán — xử lý theo chặng
 - **Status**: Draft
 - **Version**:
@@ -44,43 +44,60 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 - **Owner**: [Chưa xác định]
 - **Reviewer**: Tân Trần
 - **Approver**: Tân Trần
-- **Source**: Người dùng chốt trong hội thoại ngày 10–11/10/2026: chuyển luồng của app demo `design-estimate` vào hệ thống thật; thanh tiến trình 5 bước; khách tự bấm từng chặng, đúng thứ tự; chặng đã có kết quả không chạy lại. Tóm tắt ở `discovery/estimate-pipeline-planning.md`, mục “Luồng và giao diện”.
+- **Source**: Người dùng chốt trong hội thoại ngày 10–11/10/2026 (chuyển luồng app demo `design-estimate`; chặng đã có kết quả không chạy lại) và ngày 13/10/2026 theo yêu cầu khách hàng giảm thời gian chờ (Dự toán và 3D chạy cùng lúc sau một lần bấm; Hồ sơ tự tạo khi vào bước cuối; thanh tiến trình 4 bước). Tóm tắt ở `discovery/estimate-pipeline-planning.md`, mục “Luồng và giao diện”.
 
 ## Statement
 
-Một bản dự toán tạo kết quả qua bốn chặng theo thứ tự cố định: Bản vẽ 2D → Dự toán → Phối cảnh 3D → Hồ sơ. Khách tự bấm chạy từng chặng; một chặng chỉ mở khi chặng ngay trước đã thành công. Chặng đã thành công giữ nguyên kết quả và không chạy lại được. Mỗi bản dự toán chỉ có tối đa một chặng đang chạy tại một thời điểm.
+Một bản dự toán tạo kết quả qua bốn chặng: Bản vẽ 2D, Dự toán, Phối cảnh 3D và Hồ sơ. Khách bấm chạy 2D. Khi 2D thành công, khách bấm Đi tiếp một lần: hệ thống tiếp nhận cùng lúc Dự toán và Phối cảnh 3D, hoặc từ chối cả hai. Hồ sơ chỉ mở khi cả Dự toán và Phối cảnh 3D đã thành công, và được tạo tự động khi khách vào bước Hồ sơ. Chặng đã thành công giữ nguyên kết quả và không chạy lại được. Mỗi chặng có tối đa một lần chạy đang chờ hoặc đang chạy; chỉ Dự toán và Phối cảnh 3D được chạy cùng lúc với nhau.
 
 ## When
 
-Chủ bản dự toán yêu cầu chạy một chặng, hệ thống tiếp nhận hoặc kết thúc một lần chạy, hoặc khách mở bản dự toán để xem trạng thái các chặng.
+Chủ bản dự toán yêu cầu chạy 2D, bấm Đi tiếp hoặc Thử lại, vào bước Hồ sơ, hoặc mở bản dự toán để xem trạng thái các chặng; hệ thống tiếp nhận hoặc kết thúc một lần chạy.
 
 ## Then
 
 1. Điều kiện mở từng chặng:
    - Bản vẽ 2D: đầu vào đủ điều kiện theo BR-PROJ-001, BR-PROJ-002, BR-PROJ-004 và ảnh lô đất đã soi đạt theo BR-PROJ-015; khách đủ quyền, gói và lượt theo BR-SUB-007.
    - Dự toán: chặng 2D đã thành công.
-   - Phối cảnh 3D: chặng Dự toán đã thành công.
-   - Hồ sơ: chặng Phối cảnh 3D đã thành công.
+   - Phối cảnh 3D: chặng 2D đã thành công. Không cần chờ chặng Dự toán.
+   - Hồ sơ: cả chặng Dự toán và chặng Phối cảnh 3D đã thành công.
 
    Yêu cầu chạy một chặng chưa đủ điều kiện bị từ chối kèm lý do; không giữ hay trừ lượt và không ghi nhận lần chạy.
-2. Hệ thống không tự chạy chặng kế tiếp khi một chặng xong. Khách có thể dừng ở bất kỳ chặng nào; kết quả của các chặng đã thành công vẫn được giữ và xem được.
-3. Khi bản dự toán đang có một chặng chờ chạy hoặc đang chạy, từ chối mọi yêu cầu chạy chặng khác hoặc chạy lại cùng chặng đó, kể cả yêu cầu gửi lặp hay gửi từ thiết bị khác. Yêu cầu bị từ chối không tạo thêm lần chạy.
-4. Chặng đã thành công không được chạy lại; yêu cầu chạy lại bị từ chối và kết quả cũ giữ nguyên. Muốn phương án khác, khách tạo bản dự toán mới.
-5. Chỉ chủ bản dự toán (tài khoản khách hàng theo BR-RBAC-005) được yêu cầu chạy chặng. Gói và lượt chỉ được kiểm tra ở chặng 2D theo BR-SUB-003; các chặng sau không cần gói còn hiệu lực hay còn lượt.
-6. Mọi chặng dùng đầu vào đã chốt lúc tiếp nhận lần chạy 2D thành công cùng kết quả đã lưu của các chặng trước. Không đọc lại đầu vào, danh mục hay vùng giá mới hơn cho các chặng sau.
-7. Khách xem được trạng thái của từng chặng: Chưa mở, Sẵn sàng, Đang chạy, Thành công hoặc Lỗi. Chặng Lỗi kèm lý do và số lần chạy lại còn lại theo BR-PROJ-011; chặng Chưa mở kèm điều kiện còn thiếu.
-8. Chặng chỉ thành công khi toàn bộ kết quả bắt buộc của chặng đã được tạo, kiểm tra và lưu, và khách mở xem được. Không công bố một phần kết quả dở dang là kết quả thành công.
+2. Chạy Dự toán và Phối cảnh 3D bằng một lần bấm:
+   - Khi 2D thành công, khách có một thao tác Đi tiếp. Thao tác này yêu cầu chạy mọi chặng chưa thành công trong hai chặng Dự toán và Phối cảnh 3D. Không có thao tác chỉ chạy riêng một trong hai chặng.
+   - Hệ thống kiểm tra từng chặng được yêu cầu: điều kiện ở khoản 1, giới hạn số lần lỗi theo BR-PROJ-011, hàng chờ và tạm ngắt dịch vụ AI theo BR-PROJ-012. Chỉ cần một chặng không được tiếp nhận thì từ chối cả lần bấm, kèm lý do; không tạo lần chạy nào và không tính vào bộ đếm lỗi.
+   - Khi được tiếp nhận, hai chặng chạy độc lập. Chặng nào xong trước thì khách xem được kết quả chặng đó trước.
+3. Lỗi và thử lại ở hai chặng Dự toán và Phối cảnh 3D:
+   - Một chặng lỗi không làm dừng hay làm lỗi chặng kia. Kết quả của chặng đã thành công xem được ngay.
+   - Khách có một thao tác Thử lại. Thao tác này chạy lại mọi chặng đang lỗi trong hai chặng; mỗi chặng tính vào bộ đếm lỗi riêng theo BR-PROJ-011.
+   - Chặng đã đạt giới hạn số lần lỗi không được chạy lại và không chặn chặng lỗi còn lại. Khi mọi chặng đang lỗi đều đã đạt giới hạn, thao tác Thử lại bị từ chối và khách được báo liên hệ hỗ trợ theo BR-PROJ-011 khoản 2.
+   - Các chặng được chạy lại được tiếp nhận cùng nhau hoặc cùng bị từ chối theo cách kiểm tra ở khoản 2.
+
+   Ví dụ: Dự toán thành công, Phối cảnh 3D lỗi. Khách xem dự toán ngay; bấm Thử lại thì chỉ Phối cảnh 3D chạy lại. Nếu cả hai lỗi và Dự toán đã hết số lần chạy lại, bấm Thử lại thì chỉ Phối cảnh 3D chạy lại.
+4. Hồ sơ được tạo tự động khi khách vào bước Hồ sơ: khách bấm chuyển sang bước Hồ sơ, hoặc mở thẳng bước Hồ sơ từ danh sách hay thanh tiến trình. Hệ thống tiếp nhận lần chạy Hồ sơ khi chặng Hồ sơ đủ điều kiện ở khoản 1, chưa thành công, chưa có lần chạy Hồ sơ nào và không có lần chạy Hồ sơ đang chờ hoặc đang chạy. Đã có hồ sơ thành công thì chỉ hiển thị, không tạo lại. Sau khi lần chạy Hồ sơ lỗi, khách chạy lại theo BR-PROJ-011.
+5. Ngoài việc tự tạo Hồ sơ ở khoản 4, hệ thống không tự chạy chặng nào. Khi 2D thành công, hệ thống không tự chạy Dự toán hay Phối cảnh 3D. Khách có thể dừng ở bất kỳ bước nào; kết quả của các chặng đã thành công vẫn được giữ và xem được.
+6. Mỗi chặng của một bản dự toán có tối đa một lần chạy đang chờ hoặc đang chạy. Dự toán và Phối cảnh 3D được cùng chờ hoặc cùng chạy. Yêu cầu chạy một chặng đang có lần chạy chờ hoặc đang chạy bị từ chối, kể cả yêu cầu gửi lặp hay gửi từ thiết bị khác; yêu cầu bị từ chối không tạo thêm lần chạy.
+7. Chặng đã thành công không được chạy lại; yêu cầu chạy lại bị từ chối và kết quả cũ giữ nguyên. Muốn phương án khác, khách tạo bản dự toán mới.
+8. Chỉ chủ bản dự toán (tài khoản khách hàng theo BR-RBAC-005) được yêu cầu chạy chặng. Gói và lượt chỉ được kiểm tra ở chặng 2D theo BR-SUB-003; các chặng sau không cần gói còn hiệu lực hay còn lượt.
+9. Mọi chặng dùng đầu vào đã chốt lúc tiếp nhận lần chạy 2D thành công cùng kết quả đã lưu của chặng 2D. Không đọc lại đầu vào, danh mục hay vùng giá mới hơn cho các chặng sau. Phối cảnh 3D không dùng kết quả của chặng Dự toán: kiểu mái trên ảnh 3D được xác định bằng đúng quy tắc mái mà chặng Dự toán dùng để tính tiền (ma trận mái của bộ quy tắc AI đã chốt theo BR-PROJ-019 và phương án 2D), nên khớp với kiểu mái đã tính tiền.
+10. Khách xem được trạng thái của từng chặng: Chưa mở, Sẵn sàng, Đang chạy, Thành công hoặc Lỗi. Chặng Lỗi kèm lý do và số lần chạy lại còn lại theo BR-PROJ-011; chặng Chưa mở kèm điều kiện còn thiếu. Thanh tiến trình có 4 bước: Nhập liệu → Bản vẽ 2D → Dự toán & 3D → Hồ sơ. Bước Dự toán & 3D hiển thị trạng thái riêng của từng chặng.
+11. Chặng chỉ thành công khi toàn bộ kết quả bắt buộc của chặng đã được tạo, kiểm tra và lưu, và khách mở xem được. Không công bố một phần kết quả dở dang là kết quả thành công.
 
 ## Except
 
 - Admin không chạy chặng thay khách. Admin chỉ được đặt lại bộ đếm lỗi theo BR-PROJ-011.
-- Bản dự toán đã xóa theo BR-PROJ-009 không được chạy chặng nào.
+- Bản dự toán đã xóa theo BR-PROJ-009 không được chạy chặng nào và không tự tạo Hồ sơ.
 - Luồng bốn chặng chỉ hoạt động khi cờ cấu hình của hệ thống đang bật. Khi cờ tắt, yêu cầu chạy chặng bị từ chối với lý do tính năng chưa sẵn sàng; không giữ hay trừ lượt.
 
 ## Notes
 
-- **Đã xác nhận (11/10/2026):** thứ tự 4 chặng; khách tự bấm từng chặng; chặng đã có kết quả không chạy lại, chặng lỗi được chạy lại theo BR-PROJ-011; khách được dừng giữa chừng; gói hết hạn sau khi xong 2D vẫn chạy tiếp được.
+- **Đã xác nhận (13/10/2026), theo yêu cầu khách hàng giảm thời gian chờ:** sau 2D chỉ có một nút Đi tiếp chạy cả Dự toán và Phối cảnh 3D; nhận cả hai hoặc không nhận; một chặng lỗi thì khách vẫn xem chặng đã xong, một nút Thử lại chạy lại các chặng đang lỗi, chặng hết số lần chạy lại không chặn chặng còn lại; Hồ sơ chỉ mở khi cả hai xong và tự tạo khi khách vào bước Hồ sơ, kể cả mở thẳng bước này; thanh tiến trình 4 bước; kết quả Dự toán và 3D hiển thị trên một màn có hai tab (STORY-PROJ-003). Lượt, giới hạn lỗi và hạn chờ từng chặng không đổi.
+- **Đã xác nhận (14/10/2026):** khi một chặng lỗi trong lúc chặng kia của cặp còn đang chạy, bấm Thử lại thì chặng lỗi chạy lại ngay; chặng đang chạy không bị ảnh hưởng (khoản 3). Ca kiểm thử ST-PROJ-226.
+- **Thay đổi so với bản 11/10/2026:** bỏ quy định khách tự bấm từng chặng theo thứ tự cố định, bỏ điều kiện 3D cần Dự toán thành công và bỏ giới hạn tối đa một chặng chạy tại một thời điểm. Các quyết định khác của ngày 11/10/2026 giữ nguyên: chặng đã có kết quả không chạy lại, chặng lỗi chạy lại theo BR-PROJ-011, khách được dừng giữa chừng, gói hết hạn sau khi xong 2D vẫn chạy tiếp được.
+- **Đã xác nhận (13/10/2026, lượt sau):** người dùng chốt US/BR và đồng ý: Hồ sơ lỗi thì khi vào lại bước Hồ sơ hệ thống không tự chạy lại, khách bấm Chạy lại (khoản 4); bản đã xong Dự toán nhưng chưa chạy 3D thì Đi tiếp chỉ chạy 3D (khoản 2). Đặc tả System Test: ST-PROJ-216 đến ST-PROJ-225 và các ca cũ đã sửa, xem `discovery/estimate-system-test-coverage.md`; chưa thực thi.
+- Khoản 2 yêu cầu “mọi chặng chưa thành công” để bản dự toán đã xong Dự toán theo luồng cũ nhưng chưa chạy 3D vẫn đi tiếp được: bấm Đi tiếp chỉ chạy Phối cảnh 3D.
+- Khoản 9: trước 13/10/2026, chặng 3D đọc kiểu mái từ kết quả Dự toán đã lưu. Hai cách cho cùng kiểu mái khi dùng cùng bộ quy tắc và cùng phương án 2D; cách tính cụ thể thuộc TDD-PROJ-009 và TDD-PROJ-010.
 - Quy tắc này thay mô hình “một lần gửi AI trả toàn bộ bộ kết quả” trước đây của STORY-PROJ-002 và BR-SUB-003.
-- Ví dụ: khách xong 2D và Dự toán rồi dừng. Hai tuần sau gói đã hết hạn, khách bấm Phối cảnh 3D: yêu cầu được nhận vì gói chỉ được kiểm tra ở chặng 2D.
-- Tên trạng thái hiển thị trên giao diện có thể khác, miễn giữ đúng ý nghĩa của khoản 7.
+- Ví dụ: khách xong 2D rồi dừng. Hai tuần sau gói đã hết hạn, khách bấm Đi tiếp: yêu cầu được nhận vì gói chỉ được kiểm tra ở chặng 2D.
+- Tên trạng thái và tên nút hiển thị trên giao diện có thể khác, miễn giữ đúng ý nghĩa của khoản 2, 3 và 10.
 - Reviewer và Approver là Tân Trần theo các bản PROJ trước; việc ghi tên không có nghĩa tài liệu đã được phê duyệt. Owner và ngày hiệu lực chưa xác định; chưa có kết quả kiểm thử.

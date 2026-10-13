@@ -801,3 +801,38 @@ Người dùng xác nhận “Ok chốt” và “ok chốt” ngày 13/10/2026.
 | [UT-PROJ-546](../unittest/UT-PROJ-546.md) | AdminRouteAccess |
 | [UT-PROJ-547](../unittest/UT-PROJ-547.md) | GetAiCallRawQueryHandler |
 | [UT-PROJ-548](../unittest/UT-PROJ-548.md) | ResetStageFailuresCommandHandler |
+
+## Mốc cập nhật ngày 14/10/2026: Dự toán và 3D chạy cùng lúc
+
+Người dùng chốt TDD ngày 13/10/2026 (TDD-PROJ-006, 009, 010, 011) và ngày 14/10/2026 chốt thêm: khi 3D lỗi trong lúc Dự toán còn chạy, Thử lại chạy lại 3D ngay (TDD-PROJ-006 cập nhật tập chặng; thêm ST-PROJ-226).
+- **Ca cũ đã sửa** (giữ mã): UT-PROJ-137, 139, 159 (điều kiện mở chặng theo tập, lần chạy hoạt động theo chặng), UT-PROJ-442, 470 (3D không cần Dự toán), UT-PROJ-508 (hồ sơ tự tạo khi vào bước).
+- **Ca mới:** 25 ca UT-PROJ-549 đến UT-PROJ-573. Ba ca UT-PROJ-560, 561, 567 cần PostgreSQL thật. Tất cả Draft, chưa có mã, chưa chạy.
+- Script kiểm tra cho kết quả: mỗi file một dòng 13 cột, Trace to khớp TEST_LINKS, mọi mã và mục được dẫn đều có thật.
+
+| Test | Unit |
+|---|---|
+| [UT-PROJ-549](../unittest/UT-PROJ-549.md) | PipelineStages.Prerequisites |
+| [UT-PROJ-550](../unittest/UT-PROJ-550.md) | StageStatusProjector (Dự toán, 3D độc lập) |
+| [UT-PROJ-551](../unittest/UT-PROJ-551.md) | RunEstimateStageGroupCommandHandler — nhận cả hai |
+| [UT-PROJ-552](../unittest/UT-PROJ-552.md) | … chỉ chặng chưa thành công |
+| [UT-PROJ-553](../unittest/UT-PROJ-553.md) | … Thử lại 3D khi Dự toán còn chạy |
+| [UT-PROJ-554](../unittest/UT-PROJ-554.md) | … chặng hết giới hạn không chặn chặng còn lại |
+| [UT-PROJ-555](../unittest/UT-PROJ-555.md) | … tập rỗng và thứ tự lý do |
+| [UT-PROJ-556](../unittest/UT-PROJ-556.md) | … nhận cả hai hoặc không |
+| [UT-PROJ-557](../unittest/UT-PROJ-557.md) | … điều kiện bản và 2D |
+| [UT-PROJ-558](../unittest/UT-PROJ-558.md) | … gửi lặp |
+| [UT-PROJ-559](../unittest/UT-PROJ-559.md) | RunEstimateStageCommandHandler — StageRunGroupRequired |
+| [UT-PROJ-560](../unittest/UT-PROJ-560.md) | Chỉ mục (EstimateId, Stage) và migration — PostgreSQL |
+| [UT-PROJ-561](../unittest/UT-PROJ-561.md) | Rollback tiếp nhận nhóm — PostgreSQL |
+| [UT-PROJ-562](../unittest/UT-PROJ-562.md) | RoofResolver.KindForSpec — trùng mái Dự toán |
+| [UT-PROJ-563](../unittest/UT-PROJ-563.md) | RoofResolver.KindForSpec — mái phương án, căn hộ |
+| [UT-PROJ-564](../unittest/UT-PROJ-564.md) | Render3dStageExecutor.ReadInputs — nguồn mái |
+| [UT-PROJ-565](../unittest/UT-PROJ-565.md) | Render3dPlanner.Build, kế hoạch cũ |
+| [UT-PROJ-566](../unittest/UT-PROJ-566.md) | Cảnh báo EstimateRoofMismatch |
+| [UT-PROJ-567](../unittest/UT-PROJ-567.md) | MyEstimates.succeededStages — PostgreSQL |
+| [UT-PROJ-568](../unittest/UT-PROJ-568.md) | pipelineStepStates 4 bước |
+| [UT-PROJ-569](../unittest/UT-PROJ-569.md) | resumeStep |
+| [UT-PROJ-570](../unittest/UT-PROJ-570.md) | stageGroupActions |
+| [UT-PROJ-571](../unittest/UT-PROJ-571.md) | useStageGroupRun |
+| [UT-PROJ-572](../unittest/UT-PROJ-572.md) | dossierAutoStart |
+| [UT-PROJ-573](../unittest/UT-PROJ-573.md) | Tự tạo hồ sơ — key cố định |

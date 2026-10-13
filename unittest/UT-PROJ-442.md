@@ -42,7 +42,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PROJ-442 | EstimatePipeline.Render3d | Render3dPrompts.Roof | Branch | REGRESSION | P1 | Unit dự kiến theo TDD đã chốt. Dữ liệu minh họa hoặc fixture thu từ demo 059e876; chưa chạy kiểm thử. | Estimate chốt FlatConcrete; ma trận hiện hành đổi ThaiTile | Prompt và QC vẫn yêu cầu mái phẳng; không đổi mái theo ma trận mới | TDD-PROJ-010/Architecture<br>STORY-PROJ-009/AC-003 | Bảo vệ hành vi và nhánh riêng của chặng 3D theo nguồn đã chốt. | [Chưa xác định] | Draft |
+| UT-PROJ-442 | EstimatePipeline.Render3d | Render3dPrompts.Roof | Branch | REGRESSION | P1 | Unit dự kiến theo TDD đã chốt. Dữ liệu minh họa hoặc fixture thu từ demo 059e876; chưa chạy kiểm thử. | Kế hoạch 3D đã ghim roofKind=FlatConcrete (từ Estimate hoặc tự tính); ma trận hiện hành đổi ThaiTile | Prompt và QC vẫn yêu cầu mái phẳng theo roofKind đã ghim trong kế hoạch; không đổi mái theo ma trận mới | TDD-PROJ-010/Architecture<br>STORY-PROJ-009/AC-003 | Bảo vệ hành vi và nhánh riêng của chặng 3D theo nguồn đã chốt. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 

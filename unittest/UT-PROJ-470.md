@@ -42,9 +42,10 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PROJ-470 | EstimatePipeline.Render3d | GetStageResultQueryHandler.Handle | Error | REGRESSION | P1 | Unit dự kiến theo TDD đã chốt. Dữ liệu minh họa hoặc fixture thu từ demo 059e876; chưa chạy kiểm thử. | Khách khác/không đăng nhập, Estimate chưa xong, owner hết hạn gói | 401/404 đúng ranh giới; chưa xong Estimate 409; owner hết gói đọc/chạy tiếp được theo rule | TDD-PROJ-010/Architecture<br>STORY-PROJ-009/AC-001 | Bảo vệ hành vi và nhánh riêng của chặng 3D theo nguồn đã chốt. | [Chưa xác định] | Draft |
+| UT-PROJ-470 | EstimatePipeline.Render3d | GetStageResultQueryHandler.Handle | Error | REGRESSION | P1 | Unit dự kiến theo TDD đã chốt. Dữ liệu minh họa hoặc fixture thu từ demo 059e876; chưa chạy kiểm thử. | Khách khác/không đăng nhập; 2D chưa xong; 2D xong nhưng Estimate còn chạy và Render3d chưa có run; owner hết hạn gói | 401/404 đúng ranh giới; chưa xong 2D trả 409 `StagePrerequisiteNotMet`; Estimate còn chạy vẫn trả 200 với status=Ready, planReady=false, items=[] (từ 13/10/2026 3D không cần Dự toán); owner hết gói đọc/chạy tiếp được theo rule | TDD-PROJ-010/Architecture<br>STORY-PROJ-009/AC-001<br>BR-PROJ-010/Then | Bảo vệ hành vi và nhánh riêng của chặng 3D theo nguồn đã chốt. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - TDD-PROJ-010/Architecture
 - STORY-PROJ-009/AC-001
+- BR-PROJ-010/Then

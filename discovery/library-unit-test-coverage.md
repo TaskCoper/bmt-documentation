@@ -122,3 +122,13 @@ Khách dùng `/api/v1/library-versions/{versionId}/sections` và `/sections/{sec
 - Cấu hình `LibraryFileOption__MaxUploadBytes` bằng số byte dương để nhận PDF/DWG/DXF. Chưa cấu hình thì trả 503 trước khi ký upload. Ảnh JPG/PNG/WebP giữ giới hạn 5 MiB.
 - Dùng `SourceSetVersion=3` cho đối soát MEDIA. Thứ tự khóa là nghiệp vụ LIB → StoreId → ticket → object, thống nhất với cleanup; không giữ transaction khi truyền bytes.
 - Chưa triển khai frontend, kiểm trên website Vercel, kiểm truyền file với BizFly thật, import tài liệu hoặc áp migration lên database dùng chung. Kết quả trên xác minh backend và protocol kho qua bộ lưu trữ giả trong test, không thay cho kiểm môi trường phát hành.
+
+## Mốc cập nhật ngày 14/10/2026: mẫu ở màn chờ AI
+
+Theo TDD-LIB-001 bản 13/10/2026 (màn chờ theo chặng, mẫu cùng loại công trình khi không có mẫu khớp). Draft, chưa có mã, chưa chạy.
+
+| Test | Unit |
+|---|---|
+| [UT-LIB-091](../unittest/UT-LIB-091.md) | waitingTemplateKind |
+| [UT-LIB-092](../unittest/UT-LIB-092.md) | useWaitingTemplates — mẫu cùng loại công trình |
+| [UT-LIB-093](../unittest/UT-LIB-093.md) | handbookApi.listSameBuildingType |

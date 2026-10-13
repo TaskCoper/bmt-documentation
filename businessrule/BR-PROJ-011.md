@@ -74,6 +74,7 @@ Một lần chạy chặng kết thúc lỗi, khách yêu cầu chạy lại ch�
 
    Việc tự làm lại không tính vào bộ đếm lỗi và không kéo dài hạn chờ của lần chạy.
 8. Chạy lại chặng 3D chỉ dựng các ảnh chưa có; ảnh đã dựng và lưu thành công ở lần trước được giữ và dùng tiếp. Phần đã xong vẫn được dùng lại khi Admin đã đổi model, lời dặn hoặc cấu hình AI giữa hai lần chạy; cấu hình mới chỉ áp dụng cho phần còn thiếu. Mỗi ảnh và tệp ghi lại model và phiên bản đã dùng để tạo ra nó (BR-PROJ-014).
+9. Dự toán và Phối cảnh 3D được chạy lại bằng một thao tác Thử lại chung theo BR-PROJ-010 khoản 3: thao tác này chạy lại các chặng đang lỗi trong hai chặng; chặng đã đạt giới hạn ở khoản 2 không chạy lại và không chặn chặng còn lại. Bộ đếm, giới hạn và việc dùng lại phần đã xong vẫn tính riêng cho từng chặng như các khoản trên.
 
 ## Except
 
@@ -83,6 +84,7 @@ Một lần chạy chặng kết thúc lỗi, khách yêu cầu chạy lại ch�
 
 ## Notes
 
+- **Đã xác nhận (13/10/2026):** khi Dự toán và Phối cảnh 3D chạy cùng lúc (BR-PROJ-010), khách dùng một nút Thử lại cho các chặng đang lỗi; chặng hết số lần chạy lại không chặn chặng còn lại (khoản 9). Không đổi cách đếm lỗi và giới hạn.
 - **Đã xác nhận (12/10/2026):** lỗi hệ thống không tính vào bộ đếm, chỉ tính lỗi do kết quả AI với đầu vào của khách; bộ đếm và giới hạn riêng từng chặng; đặt lại bộ đếm dùng quyền vận hành riêng `estimate.pipeline.operate`; phần đã xong được dùng lại dù Admin đổi model hoặc lời dặn giữa hai lần chạy.
 - **Đã xác nhận (12/10/2026, lượt sau):** Người dùng chốt kết quả AI bị cắt ngang vì vượt giới hạn độ dài đầu ra là lỗi hệ thống: lần chạy lỗi nhưng không tính vào bộ đếm của khách, và hệ thống gửi cảnh báo vận hành (Discord) để Admin nâng giới hạn.
 - **Đã xác nhận (11/10/2026, lượt sau):** bản vẽ 2D "hỏng" gồm AI không trả được ảnh và viền nhà lệch tỷ lệ quá ngưỡng; có cờ tắt phần viền lệch. Viền vẫn lệch sau lần vẽ lại thì giữ bản tốt hơn, không làm chặng lỗi (theo cách app demo giữ bản tốt hơn); người dùng xác nhận khi chốt TDD-PROJ-007 ngày 11/10/2026.

@@ -40,7 +40,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 ## Metadata
 
 - **Story**: Là khách hàng, tôi muốn tạo dự toán chi phí từ bản vẽ 2D đã có để biết chi phí phần thô, hoàn thiện và nội thất của phương án.
-- **Context**: Chặng thứ hai trong bốn chặng (BR-PROJ-010). Backend tự lập dự toán bằng AI (Anthropic) theo hai tài liệu luật giá do Admin quản lý (BR-PROJ-016), miền giá đã chốt (BR-PROJ-013) và các lưới an toàn của app demo `design-estimate` (commit `059e876`, prompt `dt-14`). Chặng này không tính thêm lượt. Lần chạy thử app demo ngày 11/10/2026 cho nhà phố 2 tầng ra 84 dòng dự toán. Người dùng chốt nghiệp vụ trong hội thoại ngày 10–11/10/2026.
+- **Context**: Một trong hai chặng chạy cùng lúc sau chặng 2D (BR-PROJ-010): khách bấm Đi tiếp một lần thì Dự toán và Phối cảnh 3D (STORY-PROJ-009) cùng được tiếp nhận. Người dùng chốt ngày 13/10/2026 theo yêu cầu khách hàng giảm thời gian chờ. Backend tự lập dự toán bằng AI (Anthropic) theo hai tài liệu luật giá do Admin quản lý (BR-PROJ-016), miền giá đã chốt (BR-PROJ-013) và các lưới an toàn của app demo `design-estimate` (commit `059e876`, prompt `dt-14`). Chặng này không tính thêm lượt. Lần chạy thử app demo ngày 11/10/2026 cho nhà phố 2 tầng ra 84 dòng dự toán. Người dùng chốt nghiệp vụ trong hội thoại ngày 10–11/10/2026.
 - **Sprint**: [Chưa xác định]
 - **Priority**: Must
 - **Status**: Todo
@@ -58,24 +58,24 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 - Khách đã đăng nhập bằng tài khoản khách hàng và là chủ bản dự toán.
 - Chặng Bản vẽ 2D đã thành công theo STORY-PROJ-002.
-- Chặng Dự toán chưa thành công, không có chặng nào đang chạy và chưa đạt giới hạn số lần lỗi theo BR-PROJ-011.
+- Chặng Dự toán chưa thành công, không có lần chạy Dự toán đang chờ hoặc đang chạy và chưa đạt giới hạn số lần lỗi theo BR-PROJ-011.
 
 ### Trigger
 
-Khách bấm Tạo dự toán ở chặng Dự toán, hoặc bấm Chạy lại khi lần chạy trước bị lỗi.
+Khách bấm Đi tiếp ở màn kết quả 2D (chạy cùng lúc với chặng Phối cảnh 3D), hoặc bấm Thử lại khi lần chạy trước bị lỗi.
 
 ## Flow
 
 ### Main Flow
 
-1. Khách bấm Tạo dự toán.
-2. Backend kiểm tra quyền sở hữu và điều kiện mở chặng theo BR-PROJ-010. Không kiểm tra gói hay lượt.
+1. Khách bấm Đi tiếp ở màn kết quả 2D.
+2. Backend kiểm tra quyền sở hữu và điều kiện của cả hai chặng Dự toán và Phối cảnh 3D theo BR-PROJ-010 khoản 1–2. Hai chặng cùng được tiếp nhận hoặc cùng bị từ chối. Không kiểm tra gói hay lượt.
 3. Backend tiếp nhận lần chạy, chốt phiên bản hai tài liệu luật giá cùng dải giá đi kèm (BR-PROJ-016) và cấu hình AI (BR-PROJ-014).
 4. Hệ thống tính khối lượng tham chiếu từ phương án 2D đã lưu, rồi gọi AI lập dự toán theo luật giá, miền giá và gói hoàn thiện đã chốt.
 5. Hệ thống áp dụng các lưới an toàn của app demo: hỏi lại AI khi thiếu trường bắt buộc; kiểm tra dòng 0 đồng, khối lượng lệch so với hình học, đơn giá so với sàn và trần của dải giá; tự nâng đơn giá khi dưới sàn. Cờ và ghi chú phát sinh được lưu nội bộ theo BR-PROJ-017.
 6. Hệ thống lọc nội dung nội bộ khỏi phần gửi khách, rồi lưu kết quả gồm phần gửi khách và phần nội bộ.
-7. Khi kết quả đủ trường bắt buộc và đã lưu, chặng Dự toán thành công. Chặng Phối cảnh 3D chuyển sang Sẵn sàng; hệ thống không tự chạy tiếp.
-8. Khách xem kết quả: tổng dự toán, đơn giá trên m² sàn quy đổi, ba phần thô, hoàn thiện, nội thất với từng dòng (hạng mục, đơn vị, khối lượng, đơn giá, thành tiền), thời gian thi công dự kiến và nội dung tư vấn. Màn không hiện hãng vật tư, giống app demo. PDF dự toán và Excel của chặng Hồ sơ vẫn có Vật liệu/Hãng theo demo (người dùng xác nhận sửa lại phạm vi ngày 13/10/2026).
+7. Khi kết quả đủ trường bắt buộc và đã lưu, chặng Dự toán thành công. Nếu chặng Phối cảnh 3D cũng đã thành công, chặng Hồ sơ chuyển sang Sẵn sàng và khách chuyển được sang bước Hồ sơ (STORY-PROJ-010).
+8. Trong lúc chạy, tab Dự toán của bước Dự toán & 3D hiện tiến độ và mẫu 3D tham khảo theo STORY-LIB-002. Khi xong, khách xem kết quả ở tab này ngay, không chờ chặng 3D: tổng dự toán, đơn giá trên m² sàn quy đổi, ba phần thô, hoàn thiện, nội thất với từng dòng (hạng mục, đơn vị, khối lượng, đơn giá, thành tiền), thời gian thi công dự kiến và nội dung tư vấn. Màn không hiện hãng vật tư, giống app demo. PDF dự toán và Excel của chặng Hồ sơ vẫn có Vật liệu/Hãng theo demo (người dùng xác nhận sửa lại phạm vi ngày 13/10/2026).
 
 ### Alternative Flow
 
@@ -83,7 +83,7 @@ Khách bấm Tạo dự toán ở chặng Dự toán, hoặc bấm Chạy lại 
 
 Lần chạy Dự toán lỗi, chưa đạt giới hạn số lần lỗi.
 
-1. Khách bấm Chạy lại.
+1. Khách bấm Thử lại; hệ thống chạy lại chặng Dự toán, cùng chặng 3D nếu chặng đó cũng đang lỗi và còn được chạy lại (BR-PROJ-010 khoản 3).
 2. Backend kiểm tra điều kiện mở chặng; không kiểm tra gói hay lượt.
 3. Quay lại bước 3 của Main Flow. Lần chạy lại chốt phiên bản luật giá và cấu hình đang áp dụng tại thời điểm chạy lại.
 
@@ -98,9 +98,9 @@ Gói thiết kế của khách đã hết hạn hoặc hết lượt sau khi 2D 
 
 #### EXC-01
 
-Chặng 2D chưa thành công, chặng Dự toán đã thành công, đang có chặng chạy, đã đạt giới hạn số lần lỗi, hệ thống đang quá tải hoặc dịch vụ AI đang tạm ngắt theo BR-PROJ-012, hoặc luồng bốn chặng đang tắt.
+Chặng 2D chưa thành công, chặng Dự toán đã thành công, đang có lần chạy Dự toán chờ hoặc đang chạy, đã đạt giới hạn số lần lỗi, hệ thống đang quá tải hoặc dịch vụ AI đang tạm ngắt theo BR-PROJ-012, luồng bốn chặng đang tắt, hoặc chặng Phối cảnh 3D được yêu cầu chạy cùng lần bấm không được tiếp nhận.
 
-1. Từ chối yêu cầu trước khi tiếp nhận, kèm lý do; không tạo lần chạy và không tính vào bộ đếm lỗi.
+1. Từ chối yêu cầu trước khi tiếp nhận, kèm lý do. Khi chặng 3D cũng được yêu cầu trong cùng lần bấm, từ chối cả hai chặng theo BR-PROJ-010 khoản 2; không tạo lần chạy và không tính vào bộ đếm lỗi.
 
 #### EXC-02
 
@@ -129,9 +129,9 @@ Dịch vụ AI báo hết tiền hoặc khóa truy cập bị từ chối.
 
 #### AC-001
 
-- **Given**: Chặng 2D đã thành công; chặng Dự toán chưa thành công và không có chặng nào đang chạy.
-- **When**: Khách bấm Tạo dự toán.
-- **Then**: Backend tiếp nhận lần chạy, chốt phiên bản luật giá, dải giá và cấu hình AI đang áp dụng.
+- **Given**: Chặng 2D đã thành công; chặng Dự toán và chặng 3D chưa chạy.
+- **When**: Khách bấm Đi tiếp.
+- **Then**: Backend tiếp nhận cùng lúc lần chạy Dự toán và lần chạy 3D; lần chạy Dự toán chốt phiên bản luật giá, dải giá và cấu hình AI đang áp dụng.
 - **And**: Không kiểm tra gói, không giữ hay trừ lượt.
 
 #### AC-002
@@ -146,7 +146,7 @@ Dịch vụ AI báo hết tiền hoặc khóa truy cập bị từ chối.
 - **Given**: AI trả dự toán đủ trường bắt buộc và hệ thống đã lưu kết quả.
 - **When**: Lần chạy kết thúc.
 - **Then**: Chặng Dự toán thành công; khách xem được tổng dự toán, đơn giá trên m² sàn quy đổi, ba phần thô, hoàn thiện, nội thất cùng từng dòng chi tiết, thời gian thi công dự kiến và tư vấn.
-- **And**: Chặng Phối cảnh 3D chuyển sang Sẵn sàng; hệ thống không tự chạy 3D.
+- **And**: Khách xem được kết quả Dự toán ngay khi chặng này xong, kể cả khi chặng 3D còn đang chạy; chặng Hồ sơ chỉ chuyển sang Sẵn sàng khi chặng 3D cũng đã thành công.
 
 #### AC-004
 
@@ -172,7 +172,7 @@ Dịch vụ AI báo hết tiền hoặc khóa truy cập bị từ chối.
 #### AC-007
 
 - **Given**: Chặng Dự toán đã lỗi; gói của khách đã hết hạn.
-- **When**: Khách bấm Chạy lại.
+- **When**: Khách bấm Thử lại.
 - **Then**: Lần chạy được tiếp nhận; không kiểm tra gói, không giữ hay trừ lượt.
 - **And**: Lần chạy lại dùng phiên bản luật giá đang áp dụng lúc chạy lại.
 
@@ -189,6 +189,13 @@ Dịch vụ AI báo hết tiền hoặc khóa truy cập bị từ chối.
 - **When**: Hệ thống gọi lượt AI chính của lần chạy Dự toán. (Ở lượt hỏi lại, lần chạy giữ kết quả trước đó và chạy tiếp như app demo; Admin vẫn nhận cảnh báo.)
 - **Then**: Lần chạy lỗi ngay, không thử lại; Admin nhận cảnh báo.
 - **And**: Khách thấy thông báo lỗi chung, không thấy tên nhà cung cấp hay chi tiết khóa.
+
+#### AC-010
+
+- **Given**: Khách đã bấm Đi tiếp; lần chạy Dự toán lỗi và chặng Dự toán đã đạt giới hạn số lần lỗi; lần chạy 3D cũng lỗi nhưng chặng 3D còn được chạy lại.
+- **When**: Khách bấm Thử lại.
+- **Then**: Chỉ chặng 3D được chạy lại; chặng Dự toán không chạy lại và khách được báo liên hệ hỗ trợ cho chặng Dự toán.
+- **And**: Chặng Hồ sơ vẫn Chưa mở.
 
 ## References
 
@@ -213,7 +220,9 @@ Dịch vụ AI báo hết tiền hoặc khóa truy cập bị từ chối.
 ### Dependencies
 
 - STORY-PROJ-002
+- STORY-PROJ-009: chạy cùng lúc với chặng Dự toán.
 - STORY-PROJ-011: Admin quản lý luật giá và vùng giá.
+- STORY-LIB-002
 
 ## Non-Functional
 
@@ -225,5 +234,6 @@ Dịch vụ AI báo hết tiền hoặc khóa truy cập bị từ chối.
 
 - Khách sửa dòng dự toán, đổi gói hay đổi hãng vật tư sau khi chặng đã thành công.
 - Bước duyệt của kỹ sư hoặc nhân viên trước khi khách xem.
+- Chạy riêng chặng Dự toán mà không kèm chặng 3D khi cả hai chặng đều chưa thành công.
 - Tải Excel dự toán ở chặng này; Excel thuộc bộ tệp của chặng Hồ sơ (STORY-PROJ-010).
 - Sửa các lỗi chất lượng đã thấy ở app demo (dòng mái bị loại vì 0 đồng); sẽ làm sau bằng phiên bản prompt hoặc luật mới theo BR-PROJ-014.

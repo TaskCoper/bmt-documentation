@@ -418,3 +418,33 @@ Sau khi chốt phần sửa TDD-PROJ-006/007/008, người dùng trả lời th�
 | [ST-PROJ-211](../systemtest/ST-PROJ-211.md) | [STORY-PROJ-002](../userstory/STORY-PROJ-002.md) | Cách quay lui đã chốt: tắt luồng, giữ kết quả (BR-PROJ-018 khoản 8). | EXC / Integration boundary | P1 |
 | [ST-PROJ-212](../systemtest/ST-PROJ-212.md) | [STORY-PROJ-002](../userstory/STORY-PROJ-002.md) | Hàng đợi tin nhắn chỉ để đánh thức worker; dữ liệu trong DB vẫn là nguồn sự thật. | NFR / Integration boundary | P1 |
 | [ST-PROJ-213](../systemtest/ST-PROJ-213.md) | [STORY-PROJ-001](../userstory/STORY-PROJ-001.md) | Soi ảnh bất đồng bộ phải chịu được tiến trình chết giữa chừng mà không tính suất hai lần. | EXC / Integration boundary | P2 |
+
+## Mốc cập nhật ngày 13/10/2026: Dự toán và 3D chạy cùng lúc
+
+Người dùng chốt US/BR theo yêu cầu khách hàng giảm thời gian chờ: sau 2D, một lần bấm Đi tiếp chạy cùng lúc Dự toán và Phối cảnh 3D (nhận cả hai hoặc không); một nút Thử lại cho các chặng đang lỗi; Hồ sơ chỉ mở khi cả hai xong và tự tạo khi vào bước Hồ sơ; thanh tiến trình 4 bước, bước Dự toán & 3D là màn hai tab.
+- US/BR đã sửa: BR-PROJ-010, BR-PROJ-011 khoản 9; STORY-PROJ-002, 003, 008 (AC-010), 009 (ALT-03, AC-008 đến AC-010), 010 (ALT-04, ALT-05, AC-008 đến AC-010).
+
+- **Ca cũ đã sửa** (giữ mã):
+  - ST-PROJ-022, 128, 134: sau 2D, Dự toán và 3D cùng Sẵn sàng; thanh 4 bước; lý do từ chối khi 2D đang chạy.
+  - ST-PROJ-140, 142 đến 144, 146 đến 148: bấm Đi tiếp thay cho Tạo dự toán; kết quả Dự toán xem được khi 3D chưa xong; xem ở tab Dự toán.
+  - ST-PROJ-149 đến 154: 3D chỉ cần 2D thành công; bấm Đi tiếp và Thử lại; kiểu mái 3D khớp kiểu mái Dự toán tính tiền.
+  - ST-PROJ-155, 157, 159: hồ sơ tạo khi vào bước Hồ sơ; điều kiện cần cả Dự toán và 3D.
+  - ST-PROJ-035: bản đã xong Dự toán theo luồng cũ thì Đi tiếp chỉ chạy 3D. ST-PROJ-057: luồng đầu-cuối mới. ST-PROJ-174: tab Dự toán và 3D Lỗi. ST-PROJ-203: Đi tiếp tạo hai lần chạy.
+- **Ca mới:** 10 ca ST-PROJ-216 đến ST-PROJ-225.
+- **Độ phủ:** mọi AC, ALT, EXC mới hoặc đã sửa nêu trên có ít nhất một ca. Script kiểm tra cho kết quả: mỗi file một dòng 13 cột, Trace to khớp TEST_LINKS, mọi mã và mục được dẫn đều có thật.
+- **Môi trường:** như mốc 11/10/2026; chế độ AI giả cần điều khiển độ trễ và lỗi riêng cho từng chặng, bật tạm ngắt riêng từng dịch vụ AI. Tất cả ở trạng thái Draft, chưa thực thi.
+
+| Test | Story | Mục tiêu | Loại | Ưu tiên |
+|---|---|---|---|---|
+| [ST-PROJ-216](../systemtest/ST-PROJ-216.md) | [STORY-PROJ-009](../userstory/STORY-PROJ-009.md) | Hai chặng thật sự chạy song song; 3D xong trước vẫn xem được, Hồ sơ chờ Dự toán. | Main / Integration boundary | P1 |
+| [ST-PROJ-217](../systemtest/ST-PROJ-217.md) | [STORY-PROJ-009](../userstory/STORY-PROJ-009.md) | Nhận cả hai hoặc không nhận khi một chặng bị tạm ngắt hoặc hàng chờ đầy. | EXC | P1 |
+| [ST-PROJ-218](../systemtest/ST-PROJ-218.md) | [STORY-PROJ-009](../userstory/STORY-PROJ-009.md) | Thử lại chỉ chạy lại chặng 3D lỗi; Dự toán vẫn xem được. | ALT | P1 |
+| [ST-PROJ-219](../systemtest/ST-PROJ-219.md) | [STORY-PROJ-008](../userstory/STORY-PROJ-008.md) | Chặng hết số lần chạy lại không chặn chặng còn lại (BR-PROJ-011 khoản 9). | ALT / EXC | P1 |
+| [ST-PROJ-220](../systemtest/ST-PROJ-220.md) | [STORY-PROJ-008](../userstory/STORY-PROJ-008.md) | Một nút Thử lại chạy lại cả hai chặng lỗi, bộ đếm riêng. | ALT | P2 |
+| [ST-PROJ-221](../systemtest/ST-PROJ-221.md) | [STORY-PROJ-009](../userstory/STORY-PROJ-009.md) | Gửi lặp hoặc từ thiết bị khác không tạo thêm lần chạy. | EXC | P1 |
+| [ST-PROJ-222](../systemtest/ST-PROJ-222.md) | [STORY-PROJ-010](../userstory/STORY-PROJ-010.md) | Mở thẳng bước Hồ sơ thì tự tạo đúng một lần. | Main / ALT | P1 |
+| [ST-PROJ-223](../systemtest/ST-PROJ-223.md) | [STORY-PROJ-010](../userstory/STORY-PROJ-010.md) | Hồ sơ không mở khi Dự toán chưa thành công. | EXC | P1 |
+| [ST-PROJ-224](../systemtest/ST-PROJ-224.md) | [STORY-PROJ-010](../userstory/STORY-PROJ-010.md) | Hồ sơ lỗi thì vào lại không tự chạy lại. | ALT | P2 |
+| [ST-PROJ-225](../systemtest/ST-PROJ-225.md) | [STORY-PROJ-009](../userstory/STORY-PROJ-009.md) | Mái lấy từ phương án 2D vẫn khớp giữa 3D và Dự toán. | Integration boundary | P2 |
+
+- **Bổ sung 14/10/2026:** [ST-PROJ-226](../systemtest/ST-PROJ-226.md) — [STORY-PROJ-009](../userstory/STORY-PROJ-009.md): Thử lại chạy lại 3D ngay khi Dự toán còn chạy (người dùng chốt khi soạn Unit Test). ALT, P1.

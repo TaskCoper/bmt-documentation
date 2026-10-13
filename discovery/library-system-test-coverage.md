@@ -115,3 +115,15 @@ Các ca 004 và phần truyền tải chưa có ngưỡng hạ tầng để nghi
 ## Bằng chứng backend cho section ngày 01/10/2026
 
 Đã triển khai backend và chạy kiểm thử tự động cho section theo phiên bản, upload có phạm vi, phân quyền đọc, tính lượt, transaction và migration. Xem [bảng kết quả và ranh giới kiểm chứng](library-unit-test-coverage.md#section-content-ngày-01102026). ST-LIB-052–066 vẫn là đặc tả Draft; chưa kết luận toàn bộ các bước giao diện đã chạy. Chưa triển khai hoặc kiểm trên Vercel/BizFly thật.
+
+## Mốc cập nhật ngày 13/10/2026: mẫu ở màn chờ AI
+
+Người dùng chốt US/BR: màn chờ chặng 2D hiện mẫu 2D; màn chờ Dự toán và Phối cảnh 3D hiện mẫu 3D; không có mẫu khớp đủ thì hiện mẫu cùng loại công trình; mở chi tiết vẫn tính lượt (BR-LIB-001 khoản 14 và 16, STORY-LIB-002 ALT-03, AC-011 đến AC-014).
+- **Ca cũ đã sửa:** ST-LIB-045 (tìm đúng loại mẫu theo chặng), ST-LIB-047 (kết quả trống và lỗi thư viện ở màn chờ).
+- **Ca mới:** ST-LIB-067 đến ST-LIB-069. Draft, chưa thực thi.
+
+| Test | Story | Mục tiêu | Loại | Ưu tiên |
+|---|---|---|---|---|
+| [ST-LIB-067](../systemtest/ST-LIB-067.md) | [STORY-LIB-002](../userstory/STORY-LIB-002.md) | Không có mẫu 2D khớp đủ thì hiện mẫu cùng loại công trình kèm nhãn. | ALT | P1 |
+| [ST-LIB-068](../systemtest/ST-LIB-068.md) | [STORY-LIB-002](../userstory/STORY-LIB-002.md) | Không có mẫu 3D cùng loại công trình thì chỉ hiện tiến độ. | ALT / EXC | P1 |
+| [ST-LIB-069](../systemtest/ST-LIB-069.md) | [STORY-LIB-002](../userstory/STORY-LIB-002.md) | Mở chi tiết mẫu từ màn chờ vẫn tính lượt, lần chạy AI không bị ảnh hưởng. | Main | P2 |

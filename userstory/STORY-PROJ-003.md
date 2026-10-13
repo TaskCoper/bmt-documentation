@@ -40,7 +40,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 ## Metadata
 
 - **Story**: Là chủ sở hữu bản dự toán, tôi muốn xem kết quả của từng chặng đã xong và tải bốn tệp hồ sơ để sử dụng kết quả thiết kế đã tạo.
-- **Context**: Bao phủ việc xem kết quả của bốn chặng Bản vẽ 2D, Dự toán, Phối cảnh 3D, Hồ sơ (BR-PROJ-010) và tải bốn tệp do chặng Hồ sơ dựng (STORY-PROJ-010). Giao diện có thanh tiến trình 5 bước: Nhập liệu → Bản vẽ 2D → Dự toán → Phối cảnh 3D → Hồ sơ; mỗi chặng có màn hình kết quả riêng. Kết quả do backend tạo và lưu theo BR-PROJ-007; xem và tải không gọi AI. Cập nhật theo quyết định của người dùng ngày 10–11/10/2026.
+- **Context**: Bao phủ việc xem kết quả của bốn chặng Bản vẽ 2D, Dự toán, Phối cảnh 3D, Hồ sơ (BR-PROJ-010) và tải bốn tệp do chặng Hồ sơ dựng (STORY-PROJ-010). Giao diện có thanh tiến trình 4 bước: Nhập liệu → Bản vẽ 2D → Dự toán & 3D → Hồ sơ. Bước Dự toán & 3D là một màn có hai tab Dự toán và Phối cảnh 3D, vì hai chặng này chạy cùng lúc (người dùng chốt ngày 13/10/2026); các chặng còn lại có màn hình kết quả riêng. Kết quả do backend tạo và lưu theo BR-PROJ-007; xem và tải không gọi AI. Cập nhật theo quyết định của người dùng ngày 10–11/10/2026.
 - **Sprint**: [Chưa xác định]
 - **Priority**: Must
 - **Status**: Todo
@@ -67,11 +67,11 @@ Khách mở một bước trên thanh tiến trình của bản dự toán, ho�
 
 ### Main Flow
 
-1. Khách mở bản dự toán; hệ thống hiển thị thanh tiến trình 5 bước cùng trạng thái từng chặng theo BR-PROJ-010.
+1. Khách mở bản dự toán; hệ thống hiển thị thanh tiến trình 4 bước cùng trạng thái từng chặng theo BR-PROJ-010 khoản 10. Bước Dự toán & 3D hiển thị trạng thái riêng của từng chặng.
 2. Khách chọn một chặng đã thành công. Backend kiểm tra quyền truy cập và trả kết quả đã lưu:
    - Bản vẽ 2D: phương án từng tầng (tên phòng, diện tích), bản vẽ kỹ thuật và bản vẽ bố trí nội thất của từng tầng.
-   - Dự toán: tổng dự toán, đơn giá trên m² sàn quy đổi, ba phần thô, hoàn thiện, nội thất với các dòng chi tiết, thời gian thi công dự kiến và tư vấn; chỉ phần gửi khách theo BR-PROJ-017.
-   - Phối cảnh 3D: các ảnh ngoại thất và ảnh phòng kèm nhãn.
+   - Dự toán (tab Dự toán của bước Dự toán & 3D): tổng dự toán, đơn giá trên m² sàn quy đổi, ba phần thô, hoàn thiện, nội thất với các dòng chi tiết, thời gian thi công dự kiến và tư vấn; chỉ phần gửi khách theo BR-PROJ-017.
+   - Phối cảnh 3D (tab Phối cảnh 3D của bước Dự toán & 3D): các ảnh ngoại thất và ảnh phòng kèm nhãn. Mỗi tab hiển thị kết quả ngay khi chặng của tab đó thành công, không chờ tab còn lại.
    - Hồ sơ: danh sách bốn tệp gồm PDF hồ sơ gộp, PDF phối cảnh 3D, PDF bản vẽ kiến trúc và Excel dự toán.
 3. Khi khách yêu cầu tải một tệp, backend kiểm tra quyền và chuyển nội dung tệp của đúng bản dự toán; tên tệp theo tên hiện tại của bản dự toán.
 4. Việc xem và tải không chạy lại chặng nào, không gọi AI và không giữ hay trừ lượt.
@@ -87,9 +87,9 @@ Gói thiết kế đã hết hạn nhưng bản dự toán có kết quả cũ.
 
 #### ALT-02
 
-Khách dừng sau một chặng, chẳng hạn đã xong 2D và Dự toán nhưng chưa chạy 3D.
+Khách dừng sau một chặng, chẳng hạn đã xong 2D nhưng chưa bấm Đi tiếp, hoặc Dự toán đã xong còn 3D lỗi.
 
-1. Hiển thị kết quả của 2D và Dự toán; chặng 3D ở trạng thái Sẵn sàng, chặng Hồ sơ ở trạng thái Chưa mở.
+1. Hiển thị kết quả của các chặng đã thành công. Chặng chưa chạy ở trạng thái Sẵn sàng, chặng lỗi ở trạng thái Lỗi; chặng Hồ sơ ở trạng thái Chưa mở cho tới khi cả Dự toán và 3D thành công.
 2. Không có tệp để tải và chưa mở chia sẻ cho tới khi chặng Hồ sơ thành công.
 
 ### Exception Flow
@@ -174,9 +174,9 @@ Khách yêu cầu tải tệp khi chặng Hồ sơ chưa thành công.
 
 #### AC-008
 
-- **Given**: Bản dự toán đã xong 2D và Dự toán, chưa chạy 3D.
+- **Given**: Bản dự toán đã xong 2D và Dự toán; lần chạy 3D đã lỗi.
 - **When**: Khách mở bản dự toán.
-- **Then**: Thanh tiến trình cho thấy Nhập liệu, Bản vẽ 2D, Dự toán đã xong; Phối cảnh 3D Sẵn sàng; Hồ sơ Chưa mở.
+- **Then**: Thanh tiến trình 4 bước cho thấy Nhập liệu và Bản vẽ 2D đã xong; bước Dự toán & 3D cho thấy Dự toán Thành công, Phối cảnh 3D Lỗi; Hồ sơ Chưa mở. Tab Dự toán hiển thị kết quả dự toán.
 - **And**: Không có nút tải tệp hay chia sẻ; yêu cầu tải gửi trực tiếp tới backend bị từ chối.
 
 #### AC-009

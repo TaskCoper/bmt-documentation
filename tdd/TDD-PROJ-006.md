@@ -53,7 +53,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 ### Problem
 
-Hệ thống thật đang tạo kết quả bằng một lần gửi AI giả `mock-v1` (TDD-PROJ-002). Người dùng chốt ngày 10–11/10/2026 chuyển sang luồng bốn chặng của app demo `design-estimate` (commit `059e876`): Bản vẽ 2D → Dự toán → Phối cảnh 3D → Hồ sơ. Khách bấm từng chặng; một lượt cho cả bộ, tính khi 2D thành công; chặng lỗi được chạy lại có giới hạn; mỗi chặng có hạn chờ riêng (BR-PROJ-010, 011, 012, BR-SUB-003, BR-SUB-016).
+Hệ thống thật đang tạo kết quả bằng một lần gửi AI giả `mock-v1` (TDD-PROJ-002). Người dùng chốt ngày 10–11/10/2026 chuyển sang luồng bốn chặng của app demo `design-estimate` (commit `059e876`): Bản vẽ 2D, Dự toán, Phối cảnh 3D, Hồ sơ. Một lượt cho cả bộ, tính khi 2D thành công; chặng lỗi được chạy lại có giới hạn; mỗi chặng có hạn chờ riêng (BR-PROJ-010, 011, 012, BR-SUB-003, BR-SUB-016). Ngày 13/10/2026 người dùng chốt theo yêu cầu khách hàng giảm thời gian chờ: sau 2D, khách bấm Đi tiếp một lần để Dự toán và Phối cảnh 3D chạy cùng lúc; Hồ sơ chỉ mở khi cả hai xong và tự tạo khi khách vào bước Hồ sơ (BR-PROJ-010 bản sửa 13/10/2026).
 
 Tài liệu này thiết kế phần dùng chung cho cả bốn chặng: bảng lần chạy, cách nhận việc của worker, điểm lưu từng bước tốn tiền, quyết toán lượt ở chặng 2D, khóa đầu vào, trạng thái danh sách và các API điều khiển chặng. Nội dung từng chặng nằm ở TDD riêng: chặng 2D và đầu vào ở TDD-PROJ-007, lớp gọi AI và cấu hình ở TDD-PROJ-008; Dự toán, 3D, Hồ sơ soạn ở các đợt sau.
 
@@ -61,9 +61,11 @@ Luồng cũ của TDD-PROJ-002 vẫn chạy ở môi trường chưa bật cờ 
 
 Hiện trạng mã đã đối chiếu ngày 11/10/2026 trên nhánh `develop` của `bmt-be`: `RequestEstimateGenerationCommandHandler` giữ lượt qua `IDesignUsageCoordinator`; `EstimateGenerationStore.ClaimDispatchAsync` nhận việc bằng `UPDATE … FOR UPDATE SKIP LOCKED`; `ExpireStaleUsageJob` chốt tác vụ quá hạn; trạng thái danh sách tính trong `EstimateStore.MyEstimates.cs` từ `UsageOperation`. Mọi bảng, lớp và API mới dưới đây là thiết kế đề xuất, chưa có mã.
 
+Hiện trạng đã kiểm tra ngày 13/10/2026 trên `develop` (`a69d4d0`) cho phần chạy cùng lúc: `PipelineStages.Ordered/Previous` xếp bốn chặng thành một dãy cố định; `RunEstimateStageCommandHandler.EnsureStageOpen` từ chối khi bản có bất kỳ lần chạy Queued/Running; chỉ mục `UX_EstimateStageRun_Active` là UNIQUE (EstimateId) nên database không cho hai lần chạy cùng hoạt động trên một bản; `StageStatusProjector` khóa chặng sau khi chặng ngay trước chưa thành công. Phần sửa cho các điểm này ghi ở mục “Chạy cùng lúc Dự toán và Phối cảnh 3D” bên dưới, là đề xuất chưa có mã.
+
 ### Goals
 
-- Mỗi lần khách bấm chạy một chặng tạo đúng một dòng lần chạy; database chặn hai lần chạy đang hoạt động trên một bản dự toán và chặn chạy lại chặng đã thành công.
+- Mỗi lần khách bấm chạy một chặng tạo đúng một dòng lần chạy; bấm Đi tiếp tạo đúng một dòng cho mỗi chặng được nhận trong cùng một transaction. Database chặn hai lần chạy đang hoạt động của **cùng một chặng** trên một bản dự toán và chặn chạy lại chặng đã thành công; Dự toán và Phối cảnh 3D được cùng hoạt động.
 - Chặng 2D giữ một lượt cùng commit tiếp nhận, chuyển thành đã dùng cùng commit thành công, hoàn cùng commit lỗi hoặc quá hạn; ba chặng sau không chạm sổ lượt.
 - Worker chết giữa chừng thì lần chạy được worker khác tiếp tục từ bước đã lưu, trong hạn chờ còn lại; mất tối đa một lời gọi AI đang chạy dở.
 - Quá hạn chờ thì lần chạy lỗi trong vòng một chu kỳ quét; kết quả đến muộn không được công bố.
@@ -76,13 +78,13 @@ Hiện trạng mã đã đối chiếu ngày 11/10/2026 trên nhánh `develop` c
 - Nội dung xử lý của từng chặng (prompt, luật, hình học, dự toán, ảnh, PDF).
 - Lớp gọi OpenAI/Anthropic, cấu hình AI, bộ quy tắc AI (TDD-PROJ-008).
 - Xóa bản `mock-v1` khi chuyển luồng (BR-PROJ-018): thuộc đợt 4.
-- Khách hủy lần chạy; chạy song song nhiều chặng của cùng bản dự toán.
+- Khách hủy lần chạy; chạy cùng lúc các chặng khác ngoài cặp Dự toán và Phối cảnh 3D.
 
 ## Architecture
 
 ```mermaid
 flowchart LR
-    FE[Frontend 5 bước] -->|POST runs, GET stages| API[EstimatePipelineApi]
+    FE[Frontend 4 bước] -->|POST runs, POST stage-runs, GET stages| API[EstimatePipelineApi]
     ADM[Admin] -->|reset-failures, xem lần chạy| AAPI[EstimatePipelineAdminApi]
     API --> H[RunEstimateStage / GetEstimateStages]
     AAPI --> HA[ResetStageFailures / GetEstimatePipeline]
@@ -108,6 +110,7 @@ flowchart LR
 | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `bmt-be.estimatepipeline` (project mới)                                                          | Logic thuần chuyển từ app demo: đọc mô tả, luật lô đất, hình học, đo viền nhà, luật phương án, dựng prompt, lưới an toàn dự toán. Không tham chiếu EF, HTTP hay MediatR; chỉ `application` tham chiếu. |
 | `RunEstimateStageCommandHandler`                                                                 | Tiếp nhận một lần chạy: kiểm quyền, cờ, điều kiện mở chặng, giới hạn lỗi, đầu vào; với 2D thì giữ lượt và chụp đầu vào.                                                                                |
+| `RunEstimateStageGroupCommandHandler` (mới, 13/10/2026)                                           | Tiếp nhận thao tác Đi tiếp/Thử lại: trong một transaction, chọn các chặng còn chạy được trong cặp Dự toán và Phối cảnh 3D, kiểm từng chặng rồi tạo đủ các lần chạy hoặc không tạo gì (BR-PROJ-010 khoản 2–3). Dùng lại toàn bộ hàm kiểm của handler trên.             |
 | `EstimateStageWorker` (`BackgroundService`)                                                      | Nhận lần chạy Queued hoặc Running hết lease, gia hạn lease, gọi executor của chặng, quét lần chạy quá hạn.                                                                                             |
 | `IEstimateStageExecutor`                                                                         | Một bản cài đặt cho mỗi chặng; đợt 1 chỉ có `Plan2dStageExecutor` (TDD-PROJ-007). Executor đọc điểm lưu, bỏ qua bước đã xong, gọi AI, lưu tệp, ghi bước.                                               |
 | `RecordStageStepCommandHandler`                                                                  | Ghi kết quả một bước, có điều kiện đúng lease token.                                                                                                                                                   |
@@ -131,13 +134,34 @@ flowchart LR
   3. Khóa `AccountCommerceState`, khóa `Estimate` chưa xóa của owner bằng `FOR NO KEY UPDATE` (404 nếu không có). Dùng `FOR NO KEY UPDATE` thay `FOR UPDATE` cho mọi đường của luồng này vì không sửa khóa chính của Estimate: khóa này không xung đột với `FOR KEY SHARE` mà PostgreSQL tự lấy khi kiểm khóa ngoại lúc `RecordStageStep` thêm artifact, nên tránh được deadlock giữa chốt quá hạn và ghi bước.
   4. Tra lần chạy cùng `(AccountId, Stage, RequestKey)` — đúng bộ cột của chỉ mục unique `UX_EstimateStageRun_RequestKey`: cùng hash trả lần chạy đó (200), khác hash (kể cả cùng key dùng cho bản dự toán khác) trả 409 `IdempotencyConflict`.
   5. Cờ và `EnabledStages` (503 `PipelineUnavailable`/`StageUnavailable`).
-  6. Điều kiện mở chặng theo BR-PROJ-010 khoản 1: chặng trước có lần chạy Succeeded; chặng này chưa Succeeded (409 `StageAlreadySucceeded`); không có lần chạy Queued/Running nào của bản (409 `StageRunInProgress`).
+  6. Điều kiện mở chặng theo BR-PROJ-010 khoản 1: mọi chặng điều kiện của chặng này (`PipelineStages.Prerequisites`, xem mục “Chạy cùng lúc”) đã có lần chạy Succeeded (409 `StagePrerequisiteNotMet`); chặng này chưa Succeeded (409 `StageAlreadySucceeded`); **chặng này** không có lần chạy Queued/Running (409 `StageRunInProgress`). Với Dự toán hoặc Phối cảnh 3D gọi qua route một chặng: nếu chặng còn lại của cặp vẫn chạy được (chưa Succeeded, không có lần chạy đang hoạt động và còn dưới giới hạn lỗi) thì 409 `StageRunGroupRequired`, vì khách phải dùng thao tác Đi tiếp/Thử lại chung (BR-PROJ-010 khoản 2).
   7. Giới hạn lỗi: số lần chạy Failed có `CountsTowardLimit=true` của chặng < `RetryLimit` **của chặng đó** trong cấu hình hiện hành (bảng `EstimatePipelineStageSetting`, TDD-PROJ-008) (409 `StageRetryLimitReached`).
      7a. Tạm ngắt dịch vụ AI (BR-PROJ-012 khoản 9): đọc `IAiCircuitBreaker.IsOpenAsync(provider)` cho mọi nhà cung cấp mà các việc của chặng dùng trong cấu hình hiện hành (2D: nhà cung cấp của `plan2dSpec`, `plan2dImage`). Đang ngắt → 503 `AiServiceUnavailable` kèm header `Retry-After` (số giây còn lại của khóa ngắt). Chặng Hồ sơ không gọi AI nên bỏ qua bước này.
      7b. Hàng chờ đầy (BR-PROJ-012 khoản 8): `SELECT count(*) FROM "EstimateStageRun" WHERE "State"='Queued'` (đọc trên chỉ mục `IX_EstimateStageRun_Claim`) ≥ `MaxQueuedRuns` của cấu hình hiện hành → 503 `PipelineBusy` kèm `Retry-After: 120`. Đây là giới hạn mềm: không khóa bảng, nên khi nhiều yêu cầu cùng tới ngưỡng, số lần chạy chờ có thể vượt ngưỡng vài đơn vị; chấp nhận được vì mục tiêu là không nhận thêm khi đã đông.
 
   Bước 7a và 7b chạy trước khi giữ lượt, nên lần bị từ chối không tạo dòng nào, không giữ lượt và không tính lỗi. 8. Riêng 2D: kiểm `InputVersion`, đầu vào đủ (TDD-PROJ-007), ảnh lô có kết quả soi Đạt, danh mục đã gắn mã gốc, tỉnh có miền giá; rồi giữ lượt và chụp đầu vào như mục kế tiếp. Lỗi đầu vào trả 422, không giữ lượt. Trước khi giữ lượt, nếu bản dự toán còn `UsageOperation` DesignGeneration của luồng cũ ở Pending hoặc Succeeded (dữ liệu `mock-v1` chưa dọn) thì trả 409 `LegacyResultExists`, không để chỉ mục `UX_UsageOperation_LiveDesignGeneration` ném lỗi 500. 9. Thêm `EstimateStageRun` State=Queued, DeadlineUtc = now + hạn chờ của chặng trong cấu hình đã chốt; commit. Commit là mốc tiếp nhận; trả 202.
 
+- **Chạy cùng lúc Dự toán và Phối cảnh 3D** (người dùng chốt ngày 13/10/2026, BR-PROJ-010 khoản 1–4, 6, 9; BR-PROJ-011 khoản 9).
+  1. **Điều kiện mở chặng là một tập, không phải một dãy.** Thay `PipelineStages.Previous(stage)` bằng `PipelineStages.Prerequisites(stage)`: `Plan2d → []`, `Estimate → [Plan2d]`, `Render3d → [Plan2d]`, `Dossier → [Estimate, Render3d]`. `Ordered` chỉ còn dùng để hiển thị và sắp xếp. `StageStatusProjector` tính Chưa mở khi **có** chặng điều kiện chưa Succeeded, thay cho biến “chặng trước đã xong” lan truyền theo thứ tự; nhờ vậy Dự toán và 3D cùng Sẵn sàng sau 2D, Hồ sơ chỉ Sẵn sàng khi cả hai Succeeded. Ví dụ: 2D xong, 3D xong, Dự toán Lỗi → Dự toán Lỗi (còn n lần), 3D Thành công, Hồ sơ Chưa mở với `blockedReason=StagePrerequisiteNotMet`.
+  2. **Một lần chạy hoạt động cho mỗi chặng, không phải mỗi bản.** Đổi chỉ mục `UX_EstimateStageRun_Active` từ UNIQUE (EstimateId) thành UNIQUE (EstimateId, Stage), vẫn với điều kiện `State IN ('Queued','Running')`. Database vì thế vẫn chặn hai lần chạy Dự toán cùng lúc (gửi lặp, hai thiết bị), nhưng cho một lần chạy Dự toán và một lần chạy 3D cùng tồn tại. Chỉ mục mới lỏng hơn chỉ mục cũ nên dữ liệu hiện có luôn thỏa; migration chỉ drop rồi create chỉ mục (xem Data Model/Notes).
+  3. **Tiếp nhận nhóm (`RunEstimateStageGroupCommandHandler`)**, một transaction, cùng thứ tự khóa và cùng các hàm kiểm với tiếp nhận một chặng:
+     - Phiên khách; Idempotency-Key bắt buộc. Hash = `(estimateId, "group")`. Khóa `AccountCommerceState` → `Estimate` như bước 3.
+     - Tra lần chạy theo `(AccountId, Estimate, RequestKey)` và `(AccountId, Render3d, RequestKey)`: có dòng cùng hash → trả 200 với mọi lần chạy có cùng key (replay); có dòng khác hash → 409 `IdempotencyConflict`. Hai lần chạy của một lần bấm dùng **cùng** `RequestKey`; chỉ mục `UX_EstimateStageRun_RequestKey` có `Stage` trong khóa nên không trùng.
+     - Cờ `Mode` và `EnabledStages` cho cả hai chặng (503).
+     - Kiểm 2D đã Succeeded (409 `StagePrerequisiteNotMet`); lấy `InputOperationId` của lần 2D đó.
+     - **Chọn tập chặng cần chạy** = các chặng trong {Estimate, Render3d} chưa Succeeded, **không có lần chạy Queued/Running** và có số lỗi được tính < `RetryLimit` của chặng. Backend tự chọn, body không cần liệt kê chặng, nên giao diện cũ (stale) không gây lệch với quy tắc “chạy mọi chặng chưa thành công” (BR-PROJ-010 khoản 2), “Thử lại chạy lại các chặng đang lỗi” và “chặng hết lượt thử không chặn chặng còn lại” (khoản 3). Chặng đang chạy không bị đưa vào tập và không chặn chặng kia: người dùng chốt ngày 14/10/2026 rằng khi 3D lỗi trong lúc Dự toán còn chạy, bấm Thử lại thì 3D chạy lại ngay. Tập rỗng → 409 với lý do theo thứ tự: còn chặng chưa Succeeded đang chạy → `StageRunInProgress`; còn chặng chưa Succeeded nhưng đều hết giới hạn → `StageRetryLimitReached` (khách được báo liên hệ hỗ trợ); cả hai Succeeded → `StageAlreadySucceeded`.
+     - Tạm ngắt dịch vụ AI (7a) cho **hợp** các nhà cung cấp của mọi việc trong tập (Dự toán dùng Anthropic, 3D dùng OpenAI theo cấu hình hiện hành) → 503 `AiServiceUnavailable`. Hàng chờ (7b): `count(Queued) + số chặng trong tập > MaxQueuedRuns` → 503 `PipelineBusy`.
+     - Mọi kiểm đạt mới ghi: với mỗi chặng một dòng `EstimateStageRun` Queued có cùng `AcceptedAtUtc`, `RequestKey`, `InputOperationId`, `ConfigRevisionId`, `RuleSetRevisionId`; `DeadlineUtc` theo hạn chờ **riêng** của từng chặng (20 phút Dự toán, 40 phút 3D); Dự toán thêm hai phiên bản luật giá như TDD-PROJ-009 mục A. Mỗi dòng một tin `StageRunQueued` vào outbox. Commit → 202. Một kiểm không đạt thì không dòng nào được ghi: đây là cách thực hiện “nhận cả hai hoặc không nhận” (BR-PROJ-010 khoản 2). Ví dụ: Anthropic đang tạm ngắt, OpenAI bình thường → lần bấm bị từ chối 503, không tạo lần chạy 3D.
+  4. **Worker không đổi.** Hai lần chạy là hai dòng Queued độc lập; worker nhận theo `AcceptedAtUtc` rồi `Id`, có thể cùng một instance hoặc hai instance xử lý. Hai executor không chia sẻ trạng thái; giới hạn gọi AI vẫn là giới hạn chung theo nhà cung cấp (TDD-PROJ-008), và vì Dự toán dùng Anthropic còn 3D dùng OpenAI nên hai chặng của một bản không tranh chỗ nhau. Chốt (`FinalizeStageRun`) từng lần chạy riêng; lỗi của một chặng không đụng lần chạy của chặng kia (BR-PROJ-010 khoản 3).
+  5. **Chặng 3D không chờ Dự toán.** Điều kiện của 3D là 2D; kiểu mái 3D lấy từ kết quả Dự toán nếu đã có, không thì tự tính bằng cùng quy tắc (TDD-PROJ-010 mục B). `GetStageResultQueryHandler` cho Render3d đổi điều kiện từ Dự toán Succeeded sang 2D Succeeded.
+  6. **Hồ sơ tự tạo khi vào bước Hồ sơ** là hành vi của frontend (TDD-PROJ-011/Notes): gọi `POST …/stages/Dossier/runs` với Idempotency-Key cố định `dossier-auto:{estimateId}` khi chặng Hồ sơ `Ready` và `runId` rỗng. Backend giữ nguyên kiểm tiếp nhận; key cố định làm việc tải lại trang hoặc mở hai tab chỉ tạo một lần chạy (replay 200). Sau lần chạy lỗi, `runId` khác rỗng nên frontend không tự gọi; khách bấm Chạy lại với key mới.
+  7. **Danh sách dự toán** (`EstimateStore.MyEstimates.cs`): thêm trường `succeededStages` (mảng tên chặng đã Succeeded) bên cạnh `lastSucceededStage` đang có, vì với hai chặng song song một tên chặng không đủ để frontend biết nên mở bước nào (ví dụ chỉ 3D xong còn Dự toán lỗi). `lastSucceededStage` giữ nguyên cho tương thích.
+  8. **Frontend (`buildx-fe-web/src/features/design`)**, hiện trạng `develop` `dfdbeef`: `pipeline.logic.ts` khai báo năm bước và `STEP_OF_STAGE` Plan2d=2, Estimate=3, Render3d=4, Dossier=5; `useStageRun` gọi route một chặng; `/estimate` và `/render3d` là hai trang riêng; `resumeStep` dùng `lastSucceededStage`. Thay đổi đề xuất:
+     - `PipelineStep` còn 1–4; `STEP_OF_STAGE`: Plan2d=2, Estimate=3, Render3d=3, Dossier=4. `pipelineStepStates` tính nấc 3 từ hai chặng: `done` khi cả hai Succeeded, `running` khi một chặng đang chạy, `failed` khi có chặng Lỗi và không chặng nào đang chạy, `ready` khi 2D xong, còn lại `locked`. `StepProgress` hiện nhãn “Dự toán & 3D” và dòng trạng thái gộp (ví dụ “Dự toán xong · 3D đang chạy 5/8”).
+     - Route `/design/[projectId]/estimate` là màn bước Dự toán & 3D với hai tab (`?tab=estimate|render3d`), dùng lại `EstimateStageView` và `Render3dStageView` làm nội dung tab; mỗi tab giữ trạng thái riêng của chặng. Phần đầu màn có một nút Đi tiếp (khi chưa chặng nào trong cặp có lần chạy và có chặng Sẵn sàng), một nút Thử lại (khi có chặng Lỗi còn chạy lại được, kể cả khi chặng kia đang chạy) và nút Sang bước Hồ sơ (khi cả hai Succeeded). Route `/render3d` chuyển hướng về `/estimate?tab=render3d` để link cũ còn dùng được.
+     - Hook mới `useStageGroupRun(projectId)` gọi `POST …/stage-runs` với Idempotency-Key theo lần bấm, cùng quy tắc giữ/đổi key và làm mới `stages` như `useStageRun`. Màn chờ của tab nào hiện mẫu 3D tham khảo theo TDD-LIB-001 (panel `kind=3d`); màn chờ 2D ở `/plan` thêm panel `kind=2d`.
+     - Màn Hồ sơ tự gọi tiếp nhận theo TDD-PROJ-011/Notes. `resumeStep` dùng `succeededStages`: có Dossier → 4; có cả Estimate và Render3d → 4; có Plan2d → 3; bản có lần chạy 2D (đang chạy hoặc lỗi) → 2; còn lại → 1.
+     - `GET /stages` vẫn hỏi lại mỗi 5 giây khi có chặng đang hoạt động; hai chặng chạy cùng lúc không làm tăng số request vì dùng chung một lời gọi.
 - **Giữ lượt và chụp đầu vào ở 2D.** Dùng `IDesignUsageCoordinator.EnsureCanReserveAsync` và `Reserve` như TDD-PROJ-002, với `UsageOperation { UsageKind=DesignGeneration, ResourceId=EstimateId=Estimate.Id, State=Pending, DeadlineUtc = DeadlineUtc của lần chạy, DispatchState='Pipeline', InputRef='estimate-input:<operationId>' }`. Bản chụp đầu vào ghi vào bảng có sẵn `EstimateGenerationInput` với `SchemaVersion=3` (nội dung ở TDD-PROJ-007), khóa chính là `OperationId` của `UsageOperation`. Ba chặng sau trỏ `InputOperationId` tới bản chụp của lần chạy 2D thành công, nên không đọc lại đầu vào hiện tại (BR-PROJ-010 khoản 6).
 - **Chốt phiên bản lúc tiếp nhận.** Lần chạy ghi `ConfigRevisionId` (cấu hình AI, TDD-PROJ-008), `RuleSetRevisionId` (bộ quy tắc AI, BR-PROJ-019) và `PipelineVersion` (phiên bản mã của chặng, ví dụ `plan2d:2d-13`). Executor chỉ đọc các phiên bản này, kể cả khi Admin lưu phiên bản mới hoặc bản phát hành mới được deploy giữa chừng (BR-PROJ-014 khoản 3). Mã giữ lại các phiên bản prompt cũ đang còn lần chạy chưa kết thúc dùng tới; lần chạy gặp `PipelineVersion` không còn trong mã thì lỗi `PipelineVersionRetired` (không tính vào bộ đếm lỗi) thay vì chạy tiếp bằng prompt mới.
 - **Lease và heartbeat.** Worker nhận việc bằng một câu `UPDATE … FROM (SELECT … FOR UPDATE SKIP LOCKED)` tự commit, chạy trên `DbContext`/scope riêng của worker, **không bao giờ bên trong transaction của consumer MassTransit**, giống `ClaimDispatchAsync`: chỉ lấy lần chạy Queued, hoặc Running có `LeaseUntilUtc <= now`, và `DeadlineUtc > now`; đặt State=Running, `LeaseToken` mới, `LeaseUntilUtc = now + LeaseSeconds` (mặc định 120), tăng `ClaimCount`. Trong lúc chạy, một vòng heartbeat mỗi `HeartbeatSeconds` (mặc định 30) gia hạn lease bằng `UPDATE … WHERE Id=@id AND LeaseToken=@token AND State='Running'`. Không dòng nào bị ảnh hưởng nghĩa là đã mất lease (worker khác đã nhận, hoặc lần chạy đã bị chốt quá hạn): executor bị hủy qua `CancellationToken`, không ghi gì thêm. Mọi lệnh ghi của worker đều kèm điều kiện đúng `LeaseToken`. **SKIP LOCKED** nghĩa là khi nhiều worker cùng tìm việc, dòng đang bị một worker khóa sẽ bị bỏ qua thay vì chờ, nên hai worker không nhận cùng một lần chạy và không chặn nhau. Giới hạn: lease 120 giây nghĩa là worker chết thì lần chạy đứng yên tối đa khoảng 2 phút trước khi worker khác nhận lại.
@@ -210,9 +234,11 @@ flowchart TD
     C -->|Khác hash| E2[409 IdempotencyConflict]
     C -->|Chưa| B{Cờ bật và chặng bật?}
     B -->|Không| E1[503, không ghi]
-    B -->|Có| D{Chặng trước Succeeded, chặng này chưa, không có run đang hoạt động?}
+    B -->|Có| D{Mọi chặng điều kiện Succeeded, chặng này chưa, chặng này không có run đang hoạt động?}
     D -->|Không| E3[409 kèm lý do]
-    D -->|Có| F{Còn dưới giới hạn lỗi?}
+    D -->|Có| GR{Dự toán/3D và chặng còn lại của cặp vẫn chạy được?}
+    GR -->|Có| E8[409 StageRunGroupRequired: dùng Đi tiếp]
+    GR -->|Không| F{Còn dưới giới hạn lỗi?}
     F -->|Không| E4[409 StageRetryLimitReached]
     F -->|Có| BR{Nhà cung cấp AI của chặng đang tạm ngắt?}
     BR -->|Có| E6[503 AiServiceUnavailable, không ghi]
@@ -225,6 +251,27 @@ flowchart TD
     G -->|Không| J[Trỏ bản chụp của 2D thành công]
     I --> K[Thêm run Queued, commit, 202]
     J --> K
+```
+
+Thao tác Đi tiếp/Thử lại (`POST …/stage-runs`) đi cùng các nhánh trên nhưng lặp cho tập chặng backend tự chọn trong cặp Dự toán và 3D; một nhánh từ chối thì không tạo dòng nào:
+
+```mermaid
+flowchart TD
+    A[POST stage-runs] --> K{Key đã có?}
+    K -->|Cùng hash| R[200: mọi run cùng key]
+    K -->|Khác hash| E2[409 IdempotencyConflict]
+    K -->|Chưa| P{2D Succeeded?}
+    P -->|Không| E3[409 StagePrerequisiteNotMet]
+    P -->|Có| S[Tập = Dự toán, 3D chưa Succeeded, không đang chạy, còn dưới giới hạn lỗi]
+    S --> T{Tập rỗng?}
+    T -->|Còn chặng đang chạy| E6[409 StageRunInProgress]
+    T -->|Còn chặng nhưng hết giới hạn| E5[409 StageRetryLimitReached]
+    T -->|Cả hai Succeeded| E4[409 StageAlreadySucceeded]
+    T -->|Không| V{Nhà cung cấp AI của tập đang tạm ngắt?}
+    V -->|Có| E7[503 AiServiceUnavailable]
+    V -->|Không| Q{Queued + số chặng vượt MaxQueuedRuns?}
+    Q -->|Có| E9[503 PipelineBusy]
+    Q -->|Không| W[Một run Queued cho mỗi chặng, mỗi run một tin outbox, commit, 202]
 ```
 
 ## State Diagram
@@ -243,7 +290,7 @@ stateDiagram-v2
     TimedOut --> [*]
 ```
 
-Chạy lại sau lỗi luôn tạo dòng mới; không có chuyển Failed → Queued trên cùng dòng. Trạng thái chặng khách thấy (BR-PROJ-010 khoản 7) tính khi đọc: Chưa mở (chặng trước chưa Succeeded), Sẵn sàng (chặng trước Succeeded, chặng này chưa có run hoặc run gần nhất lỗi và còn lượt chạy lại), Đang chạy (Queued/Running), Thành công, Lỗi (run gần nhất Failed/TimedOut).
+Chạy lại sau lỗi luôn tạo dòng mới; không có chuyển Failed → Queued trên cùng dòng. Trạng thái chặng khách thấy (BR-PROJ-010 khoản 10) tính khi đọc: Chưa mở (có chặng điều kiện chưa Succeeded: Dự toán và 3D cần 2D, Hồ sơ cần cả Dự toán và 3D), Sẵn sàng (mọi chặng điều kiện Succeeded, chặng này chưa có run hoặc run gần nhất lỗi và còn lượt chạy lại), Đang chạy (Queued/Running), Thành công, Lỗi (run gần nhất Failed/TimedOut). Trạng thái của Dự toán và 3D độc lập với nhau.
 
 ## Data Model
 
@@ -264,8 +311,8 @@ Ba bảng mới thuộc module Estimate; một thay đổi nhỏ ở `UsageOpera
 
 Chỉ mục:
 
-- `UX_EstimateStageRun_Active` UNIQUE (EstimateId) WHERE State IN ('Queued','Running') — một lần chạy hoạt động mỗi bản (BR-PROJ-010 khoản 3).
-- `UX_EstimateStageRun_Succeeded` UNIQUE (EstimateId, Stage) WHERE State='Succeeded' — chặng đã thành công không chạy lại (khoản 4).
+- `UX_EstimateStageRun_Active` UNIQUE (EstimateId, Stage) WHERE State IN ('Queued','Running') — một lần chạy hoạt động cho mỗi chặng của mỗi bản (BR-PROJ-010 khoản 6, sửa 13/10/2026; trước đó là UNIQUE (EstimateId)). Dự toán và 3D được cùng hoạt động; gửi lặp cùng chặng vẫn bị chặn ở tầng database.
+- `UX_EstimateStageRun_Succeeded` UNIQUE (EstimateId, Stage) WHERE State='Succeeded' — chặng đã thành công không chạy lại (khoản 7).
 - `UX_EstimateStageRun_RequestKey` UNIQUE (AccountId, Stage, RequestKey) — chống gửi lặp.
 - `IX_EstimateStageRun_Claim` (State, LeaseUntilUtc, AcceptedAtUtc, Id) WHERE State IN ('Queued','Running') — worker nhận việc và quét quá hạn.
 - `IX_EstimateStageRun_Estimate` (EstimateId, Stage, AcceptedAtUtc DESC, Id) — đọc trạng thái chặng, đếm lỗi.
@@ -296,9 +343,13 @@ erDiagram
 | EstimateStageRun            | W1 chết 03:02; W2 nhận 03:04:10                                       | R1: LeaseToken=L2; ClaimCount=2. W2 bỏ qua `spec`, `plan:technical:f1`; chạy tiếp `plan:technical:f2`                                                                                                                       |
 | EstimateStageRun            | Chốt 03:08                                                            | R1: State=Succeeded; FinishedAtUtc=03:08; LeaseToken=NULL                                                                                                                                                                   |
 | UsageOperation, PeriodQuota | Cùng commit                                                           | O1: State=Succeeded; ResultRef=estimate-stage:R1. P1: Used=1; Reserved=0                                                                                                                                                    |
-| EstimateStageRun            | Khách chạy Dự toán 05:00                                              | Id=R2; Stage=Estimate; InputOperationId=O1; UsageOperationId=NULL; DeadlineUtc=05:20                                                                                                                                        |
+| EstimateStageRun            | Khách bấm Đi tiếp 05:00 (một transaction, hai dòng)                   | Id=R2; Stage=Estimate; State=Queued; RequestKey=next-1; InputOperationId=O1; UsageOperationId=NULL; AcceptedAtUtc=05:00; DeadlineUtc=05:20; PriceFrameworkVersionId=PF3; TakeoffRulesVersionId=TR2                            |
+| EstimateStageRun            | Cùng commit                                                           | Id=R5; Stage=Render3d; State=Queued; RequestKey=next-1; InputOperationId=O1; UsageOperationId=NULL; AcceptedAtUtc=05:00; DeadlineUtc=05:40. Hai dòng cùng Queued thỏa chỉ mục (EstimateId, Stage)                                |
+| EstimateStageRun            | 3D xong trước 05:18                                                   | R5: State=Succeeded; FinishedAtUtc=05:18. Khách xem được ảnh 3D ở tab 3D; Hồ sơ vẫn Chưa mở vì Dự toán chưa Succeeded                                                                                                          |
 | EstimateStageRun            | R2 lỗi 05:06                                                          | R2: State=Failed; FailureCode=AiOutputIncomplete; CountsTowardLimit=true. Sổ lượt không đổi                                                                                                                                 |
-| EstimateStageRun            | Khách chạy lại Dự toán 05:10, OpenAI/Anthropic lỗi sau khi đã thử lại | R4: State=Failed; FailureCode=AiProviderUnavailable; CountsTowardLimit=false. Bộ đếm Dự toán vẫn là 1                                                                                                                       |
+| EstimateStageRun            | Khách bấm Thử lại 05:20 (RequestKey=retry-1); backend chỉ chọn Dự toán vì 3D đã Succeeded; Anthropic lỗi sau khi đã thử lại | R4: Stage=Estimate; State=Failed; FailureCode=AiProviderUnavailable; CountsTowardLimit=false. Bộ đếm Dự toán vẫn là 1; không có dòng Render3d mới                                                                              |
+| EstimateStageRun            | Khách Thử lại 05:30, Dự toán thành công 05:36                          | R6: Stage=Estimate; State=Succeeded. Hồ sơ chuyển Sẵn sàng                                                                                                                                                                       |
+| EstimateStageRun            | Khách vào bước Hồ sơ 05:37; frontend tự gọi với RequestKey=dossier-auto:D1 | R7: Stage=Dossier; State=Queued; DeadlineUtc=05:42. Tải lại trang gửi lại cùng key → trả R7 (200), không tạo dòng mới                                                                                                             |
 | EstimateStageRun            | Người vận hành đặt lại 06:00                                          | R2: CountsTowardLimit=false; LimitResetAtUtc=06:00; LimitResetBy=A9                                                                                                                                                         |
 
 Nhánh 2D lỗi: R1 Failed lúc 03:10 → O1 Failed, P1 Used=0, Reserved=0; đầu vào D1 mở sửa vì không còn run Plan2d Queued/Running/Succeeded. Khách sửa và chạy lại với key `plan2d-2` → R3 mới, O3 mới, giữ lượt mới.
@@ -311,14 +362,16 @@ Nhánh 2D lỗi: R1 Failed lúc 03:10 → O1 Failed, P1 Used=0, Reserved=0; đ�
 - **Tệp lưu riêng tư** (người dùng chốt ngày 12/10/2026, BR-PROJ-006 khoản 12). Khóa tệp dạng `media/site-private/estimates/{estimateId}/{stage}/{runId}/{itemKey}-{sha8}.{ext}`, ghi bằng `IPrivateMediaObjectStore.PutPrivateAsync` (ACL Private). Tiền tố `media/site-private/` đã được `MediaConstants.IsPrivateKey` nhận, và tiến trình đối soát/dọn kho hiện có đã bỏ qua tiền tố này, nên không cần thêm nhánh vào `MediaSourceReader`. Thêm vào `IPrivateMediaObjectStore` hàm `PresignGet(key, expiresAt, downloadFileName)` (S3 `GetPreSignedURL` với `Verb=GET`, `ResponseHeaderOverrides.ContentDisposition`), hạn `EstimatePipelineOption__FileLinkMinutes` (mặc định 15). Chủ bản dự toán xem/tải qua `GET …/stage-files/{artifactId}`: backend kiểm quyền rồi trả 302 tới link có hạn, kèm `Cache-Control: no-store`. Người nhận link chia sẻ đi qua route chia sẻ của TDD-PROJ-003: backend kiểm link còn hiệu lực rồi chuyển nội dung bằng `CopyPrivateAsync` (hỗ trợ Range), không nhận link trực tiếp, để thu hồi có hiệu lực ngay (BR-PROJ-006 khoản 4). Khi cần đưa ảnh của chặng trước cho AI (ví dụ ảnh 2D vào chặng 3D), executor đọc byte qua `CopyPrivateAsync` rồi gửi dạng base64, không gửi link kho cho nhà cung cấp.
 - **Tin nhắn** dùng lại ba bảng outbox/inbox có sẵn của MassTransit (`OutboxMessage`, `OutboxState`, `InboxState`); không thêm bảng. Record event đặt trong `contract/services/estimatePipeline/Event.cs` ở mức namespace theo quy ước dự án: `StageRunQueued(Guid RunId, Guid EstimateId, string Stage)`, `StageRunFinished(Guid RunId, Guid EstimateId, Guid OwnerId, string Stage, string State, string? FailureCode)`.
 - **Migration đợt 1** (`EstimatePipelineStages`): thêm ba bảng, chỉ mục, sửa CHECK `DispatchState`. Không đổi dữ liệu cũ. Down xóa ba bảng khi chưa có dòng; có dòng thì dừng.
-- **Kiểm chứng:** unit test cho handler tiếp nhận (mọi nhánh 409/422/503), finalizer (2D thành công/lỗi/quá hạn, kết quả muộn), đặt lại bộ đếm, tính trạng thái chặng và trạng thái danh sách. Integration test PostgreSQL cho: hai yêu cầu đồng thời chỉ một run được nhận (chỉ mục `UX_EstimateStageRun_Active`), `SKIP LOCKED` hai worker, mất lease và nhận lại, tranh chấp finalizer với `ExpireStaleUsageJob`, xóa bản trong lúc tiếp nhận. Đầu-cuối ở chế độ Fake: ST-PROJ-128 đến 139. Thêm kiểm: không có kết nối nào ở trạng thái `idle in transaction` quá 1 giây khi 10 lần chạy và 20 yêu cầu soi chạy cùng lúc (đọc `pg_stat_activity`); chốt 2D đúng mốc hạn không cho ra run Succeeded kèm operation TimedOut; tắt cờ khi còn lần chạy dở thì job bảo trì vẫn chốt đúng hạn; deploy giữa chừng thì container mới nhận lại ngay; ghi bước song song với chốt quá hạn không deadlock; tắt RabbitMQ vẫn chạy nhờ vòng quét; tin trùng không tạo hai lần nhận; worker nhận việc kế tiếp ngay khi một lần chạy kết thúc; sự kiện SignalR tới đúng chủ bản dự toán khi kết nối ở instance khác; hàng chờ đầy và tạm ngắt trả 503 mà không tạo dòng hay giữ lượt; lỗi hệ thống không làm tăng bộ đếm; lần chạy lại 3D dùng lại ảnh cũ sau khi đổi cấu hình; link tải tệp hết hạn sau 15 phút và tệp không mở được bằng đường dẫn kho.
+- **Migration chạy cùng lúc** (`EstimatePipelineParallelStages`, đề xuất 13/10/2026): `DROP INDEX "UX_EstimateStageRun_Active"` rồi `CREATE UNIQUE INDEX "UX_EstimateStageRun_Active" ON "EstimateStageRun" ("EstimateId", "Stage") WHERE "State" IN ('Queued','Running')`. Chỉ mục mới lỏng hơn nên không có dòng nào vi phạm; không backfill. Chỉ mục partial này rất nhỏ (chỉ các lần chạy đang hoạt động) nên tạo lại nhanh; vẫn chạy khi không có lần chạy Queued/Running để tránh một yêu cầu tiếp nhận chen vào giữa hai câu lệnh. Down tạo lại chỉ mục cũ; nếu lúc đó có bản đang có hai lần chạy hoạt động thì Down thất bại và phải chờ chúng kết thúc, không xóa dòng.
+- **Kiểm chứng:** unit test cho handler tiếp nhận (mọi nhánh 409/422/503), finalizer (2D thành công/lỗi/quá hạn, kết quả muộn), đặt lại bộ đếm, tính trạng thái chặng và trạng thái danh sách. Integration test PostgreSQL cho: hai yêu cầu đồng thời cùng chặng chỉ một run được nhận, một yêu cầu Dự toán và một yêu cầu 3D cùng lúc đều được nhận (chỉ mục `UX_EstimateStageRun_Active` theo (EstimateId, Stage)); tiếp nhận nhóm rollback toàn bộ khi một chặng bị từ chối; `SKIP LOCKED` hai worker, mất lease và nhận lại, tranh chấp finalizer với `ExpireStaleUsageJob`, xóa bản trong lúc tiếp nhận. Đầu-cuối ở chế độ Fake: ST-PROJ-128 đến 139. Thêm kiểm: không có kết nối nào ở trạng thái `idle in transaction` quá 1 giây khi 10 lần chạy và 20 yêu cầu soi chạy cùng lúc (đọc `pg_stat_activity`); chốt 2D đúng mốc hạn không cho ra run Succeeded kèm operation TimedOut; tắt cờ khi còn lần chạy dở thì job bảo trì vẫn chốt đúng hạn; deploy giữa chừng thì container mới nhận lại ngay; ghi bước song song với chốt quá hạn không deadlock; tắt RabbitMQ vẫn chạy nhờ vòng quét; tin trùng không tạo hai lần nhận; worker nhận việc kế tiếp ngay khi một lần chạy kết thúc; sự kiện SignalR tới đúng chủ bản dự toán khi kết nối ở instance khác; hàng chờ đầy và tạm ngắt trả 503 mà không tạo dòng hay giữ lượt; lỗi hệ thống không làm tăng bộ đếm; lần chạy lại 3D dùng lại ảnh cũ sau khi đổi cấu hình; link tải tệp hết hạn sau 15 phút và tệp không mở được bằng đường dẫn kho.
 
 ## Internal API
 
 ### Endpoints
 
-- **POST** `/api/v1/estimates/{estimateId}/stages/{stage}/runs` — Khách là chủ bản; Idempotency-Key bắt buộc; body `{inputVersion}` (bắt buộc với Plan2d, các chặng khác bỏ qua). 202 với `{runId, stage, state, acceptedAtUtc, deadlineUtc}` và header `Location`; gửi lặp cùng key/hash trả 200 với lần chạy cũ.
-- **GET** `/api/v1/estimates/{estimateId}/stages` — Khách là chủ bản. Trả trạng thái bốn chặng: `{stage, status, runId, acceptedAtUtc, deadlineUtc, finishedAtUtc, failureCode, retriesLeft, blockedReason, progress}`. `progress` do executor ghi (ví dụ 3/5 bước), không phải ước lượng thời gian.
+- **POST** `/api/v1/estimates/{estimateId}/stages/{stage}/runs` — Khách là chủ bản; Idempotency-Key bắt buộc; body `{inputVersion}` (bắt buộc với Plan2d, các chặng khác bỏ qua). 202 với `{runId, stage, state, acceptedAtUtc, deadlineUtc}` và header `Location`; gửi lặp cùng key/hash trả 200 với lần chạy cũ. Frontend dùng route này cho Plan2d và Dossier. Với Estimate hoặc Render3d, route chỉ được nhận khi chặng còn lại của cặp không còn chạy được (đã Succeeded hoặc hết giới hạn lỗi); ngược lại 409 `StageRunGroupRequired`.
+- **POST** `/api/v1/estimates/{estimateId}/stage-runs` — Mới (13/10/2026). Thao tác Đi tiếp và Thử lại của bước Dự toán & 3D. Khách là chủ bản; Idempotency-Key bắt buộc; body `{}`. Backend tự chọn các chặng chạy được trong cặp Dự toán và Phối cảnh 3D và tiếp nhận tất cả trong một transaction. 202 với `{runs:[{runId, stage, state, acceptedAtUtc, deadlineUtc}]}`; gửi lặp cùng key trả 200 với các lần chạy cũ.
+- **GET** `/api/v1/estimates/{estimateId}/stages` — Khách là chủ bản. Trả trạng thái bốn chặng: `{stage, status, runId, acceptedAtUtc, deadlineUtc, finishedAtUtc, failureCode, retriesLeft, blockedReason, progress}`. `progress` do executor ghi (ví dụ 3/5 bước), không phải ước lượng thời gian. Dự toán và Render3d có trạng thái độc lập; Dossier `Locked` kèm `blockedReason=StagePrerequisiteNotMet` khi một trong hai chưa Succeeded.
 - **GET** `/api/v1/estimates/{estimateId}/stages/{stage}/result` — Khách là chủ bản; chỉ khi chặng Succeeded (riêng Render3d trả cả ảnh đã xong khi đang chạy). Hình dạng kết quả theo TDD của chặng; tệp được trả bằng route tải, không trả URL kho.
 - **GET** `/api/v1/estimates/{estimateId}/stage-files/{artifactId}` — Khách là chủ bản; backend kiểm quyền rồi trả 302 tới link tải riêng tư có hạn 15 phút (`Cache-Control: no-store`). Query `download=true` đặt `Content-Disposition: attachment` theo tên tệp. Dùng cho ảnh bản vẽ, ảnh 3D; tệp hồ sơ tải theo TDD của chặng Hồ sơ.
 - **GET** `/api/v1/admin/estimate-pipeline/runs` — Quyền `estimate.pipeline.inspect`, Cache-Control no-store. Danh sách lượt chạy của khách hàng, không có điều kiện phải tìm mã trước. Query: `search` tùy chọn tối đa 200 ký tự (chuỗi con không phân biệt hoa/thường của mã/tên dự toán hoặc tên/email khách, ký tự `%`, `_`, `\` được escape); `stage`, `state` tùy chọn thuộc enum hiện có; `pageIndex` mặc định 1, 1–1.000.000; `pageSize` mặc định 20, 1–100. Sai bộ lọc/phân trang trả 422; thiếu phiên 401, thiếu quyền 403. Response `Result<PagedResult>` gồm items/pageIndex/pageSize/totalCount/hasNextPage/hasPreviousPage. Mỗi item: runId, estimateId, estimateCode, estimateName, estimateDeleted, customerId, customerName, customerEmail, stage, state, acceptedAtUtc, finishedAtUtc nullable, failureCode nullable. Không trả prompt/raw/ảnh ở danh sách. Sắp AcceptedAtUtc DESC rồi RunId DESC; cùng bộ lọc dùng cho count và page. Read-only projection từ EstimateStageRun JOIN Estimate JOIN User, không đổi schema, giữ cả bản dự toán đã xóa mềm như API chi tiết. PromptTrial không thuộc bảng này nên không lẫn lượt chạy thử Admin.
@@ -342,6 +395,23 @@ Error Response:
 {"title":"Conflict","code":"Conflict","status":409,"detail":"Cần hoàn tất chặng Bản vẽ 2D trước.","messageCode":"StagePrerequisiteNotMet","errors":null}
 ```
 
+#### POST /api/v1/estimates/{estimateId}/stage-runs
+
+```
+Request:
+Idempotency-Key: next-1
+Origin: https://app.example.test
+{}
+
+Response 202:
+{"value":{"runs":[{"runId":"7d1c2b9e-0000-4000-8000-000000000002","stage":"Estimate","state":"Queued","acceptedAtUtc":"2026-10-13T05:00:00Z","deadlineUtc":"2026-10-13T05:20:00Z"},{"runId":"7d1c2b9e-0000-4000-8000-000000000005","stage":"Render3d","state":"Queued","acceptedAtUtc":"2026-10-13T05:00:00Z","deadlineUtc":"2026-10-13T05:40:00Z"}]},"isSuccess":true,"isFailure":false,"error":{"code":"","message":""}}
+
+Error Response:
+{"title":"Service Unavailable","code":"ServiceUnavailable","status":503,"detail":"Dịch vụ AI đang tạm gián đoạn, vui lòng thử lại sau.","messageCode":"AiServiceUnavailable","errors":null}
+```
+
+Khi chỉ còn một chặng chạy được (ví dụ Dự toán đã Succeeded, 3D lỗi), `runs` có một phần tử. Lỗi 503 ở ví dụ xảy ra khi Anthropic (Dự toán) đang tạm ngắt: cả lần bấm bị từ chối, không tạo lần chạy 3D.
+
 #### GET /api/v1/estimates/{estimateId}/stages
 
 ```
@@ -349,7 +419,7 @@ Request:
 GET với phiên chủ sở hữu
 
 Response 200:
-{"value":{"stages":[{"stage":"Plan2d","status":"Succeeded","runId":"7d1c2b9e-0000-4000-8000-000000000001","finishedAtUtc":"2026-10-11T03:08:00Z","retriesLeft":3},{"stage":"Estimate","status":"Failed","runId":"7d1c2b9e-0000-4000-8000-000000000002","failureCode":"AiOutputIncomplete","retriesLeft":2},{"stage":"Render3d","status":"Locked","blockedReason":"StagePrerequisiteNotMet"},{"stage":"Dossier","status":"Locked","blockedReason":"StagePrerequisiteNotMet"}]},"isSuccess":true,"isFailure":false,"error":{"code":"","message":""}}
+{"value":{"stages":[{"stage":"Plan2d","status":"Succeeded","runId":"7d1c2b9e-0000-4000-8000-000000000001","finishedAtUtc":"2026-10-11T03:08:00Z","retriesLeft":3},{"stage":"Estimate","status":"Failed","runId":"7d1c2b9e-0000-4000-8000-000000000002","failureCode":"AiOutputIncomplete","retriesLeft":2},{"stage":"Render3d","status":"Succeeded","runId":"7d1c2b9e-0000-4000-8000-000000000005","finishedAtUtc":"2026-10-13T05:18:00Z","retriesLeft":3},{"stage":"Dossier","status":"Locked","blockedReason":"StagePrerequisiteNotMet"}]},"isSuccess":true,"isFailure":false,"error":{"code":"","message":""}}
 
 Error Response:
 {"title":"Not Found","code":"NotFound","status":404,"detail":"Không tìm thấy bản dự toán.","messageCode":"EstimateNotFound","errors":null}
@@ -361,10 +431,11 @@ Error Response:
 - **PipelineBusy** (503): số lần chạy đang chờ đã đạt `MaxQueuedRuns`; kèm `Retry-After` (BR-PROJ-012 khoản 8).
 - **AiServiceUnavailable** (503): nhà cung cấp AI mà chặng dùng đang tạm ngắt; kèm `Retry-After` (BR-PROJ-012 khoản 9).
 - **StageUnavailable** (503): chặng chưa bật trong `EnabledStages`.
-- **StagePrerequisiteNotMet** (409): chặng trước chưa thành công.
-- **StageAlreadySucceeded** (409): chặng đã thành công.
-- **StageRunInProgress** (409): bản dự toán đang có lần chạy Queued/Running.
-- **StageRetryLimitReached** (409): đã đạt giới hạn lỗi của chặng; khách liên hệ hỗ trợ.
+- **StagePrerequisiteNotMet** (409): một chặng điều kiện chưa thành công (Dự toán và 3D cần 2D; Hồ sơ cần cả Dự toán và 3D).
+- **StageAlreadySucceeded** (409): chặng đã thành công; với `stage-runs`: cả Dự toán và 3D đã thành công.
+- **StageRunInProgress** (409): chặng được yêu cầu đang có lần chạy Queued/Running (sửa 13/10/2026: tính theo chặng, không theo bản). Với `stage-runs`: không còn chặng nào chạy được và có chặng chưa Succeeded đang chạy.
+- **StageRunGroupRequired** (409): mới 13/10/2026; gọi route một chặng cho Dự toán hoặc 3D trong khi chặng còn lại của cặp vẫn chạy được. Khách dùng thao tác Đi tiếp/Thử lại (`POST …/stage-runs`).
+- **StageRetryLimitReached** (409): đã đạt giới hạn lỗi của chặng; khách liên hệ hỗ trợ. Với `stage-runs`: mọi chặng chưa thành công trong cặp đều đã đạt giới hạn.
 - **IdempotencyConflict** (409): cùng key, khác nội dung.
 - **InputVersionConflict** (409): đầu vào đã đổi so với phiên bản gửi lên (chặng 2D).
 - **InvalidStageInput** (422): đầu vào chưa đủ hoặc không hợp lệ cho chặng 2D; chi tiết theo trường (TDD-PROJ-007).
@@ -387,6 +458,10 @@ Bảng phân loại là một danh sách dùng chung trong mã (`StageFailureCla
 
 - STORY-PROJ-002
 - STORY-PROJ-003/AC-008
+- STORY-PROJ-008/AC-010
+- STORY-PROJ-009/AC-008
+- STORY-PROJ-009/AC-009
+- STORY-PROJ-010/AC-008
 - STORY-PROJ-006/AC-013
 - STORY-PROJ-007
 - STORY-PROJ-008
@@ -426,6 +501,8 @@ Bảng phân loại là một danh sách dùng chung trong mã (`StageFailureCla
 
 ## Change Log
 
+- 2026-10-14 (người dùng chốt khi soạn Unit Test): Tập chặng của `stage-runs` loại chặng đang có lần chạy hoạt động, nên Thử lại chạy lại ngay chặng lỗi trong khi chặng kia còn chạy; thứ tự lý do khi tập rỗng: `StageRunInProgress` → `StageRetryLimitReached` → `StageAlreadySucceeded`. Nút Thử lại của FE hiện cả khi chặng kia đang chạy.
+- 2026-10-13 (người dùng chốt US/BR chạy cùng lúc Dự toán và 3D theo yêu cầu khách hàng; TDD đề xuất, chưa có mã): Điều kiện mở chặng thành tập `Prerequisites` (Hồ sơ cần cả Dự toán và 3D; 3D chỉ cần 2D). Chỉ mục `UX_EstimateStageRun_Active` đổi sang (EstimateId, Stage); `StageRunInProgress` tính theo chặng. Thêm `POST …/stage-runs` và `RunEstimateStageGroupCommandHandler` tiếp nhận cả hai hoặc không chặng nào trong một transaction; thêm mã `StageRunGroupRequired` cho route một chặng. Hồ sơ tự tạo từ frontend bằng key cố định `dossier-auto:{estimateId}`. Danh sách dự toán thêm `succeededStages`. Thanh tiến trình 4 bước. Mẫu dữ liệu và sơ đồ cập nhật theo.
 - 2026-10-12 (khi thiết kế chặng Dự toán, TDD-PROJ-009): Bổ sung ngoại lệ cho quy ước điểm lưu: lượt hỏi lại của lưới an toàn chặng Dự toán bị lỗi mà executor bỏ qua để đi tiếp được ghi thành bước đã xong (`OutputJson` ghi `failed` và mã lỗi), để lần nhận lại không hỏi lại AI lần hai.
 - 2026-10-12 (Người dùng chốt đầu ra AI bị cắt là lỗi hệ thống): Thêm `FailureCode` `AiOutputTruncated` vào nhóm lỗi hệ thống của `StageFailureClassifier`, không tính vào giới hạn lỗi của chặng. `AiOutputIncomplete` vẫn dùng cho kết quả sai cấu trúc, thiếu trường bắt buộc hoặc không có ảnh sau lần gọi lại và vẫn được tính.
 - 2026-10-12 (sửa theo bản rà soát độc lập): Theo quyết định người dùng cùng ngày (hàng đợi DB + RabbitMQ/outbox chỉ để đánh thức và báo tin, giới hạn ảnh chung bằng Redis, worker chạy trong container API). Đổi cách nhận việc: consumer `StageRunQueued` không chạm DB, chỉ đẩy `runId` vào `Channel` của worker rồi ack; worker claim bằng câu lệnh tự commit, vòng quét dự phòng 15 giây. Ghi bước bằng transaction ngắn, khóa `FOR NO KEY UPDATE`; chuyển trạng thái và trả lượt đều có điều kiện (chỉ trả khi `QuotaHeld` đổi true→false). Chốt chặng tính lượt 2D trên sổ lượt trước, dùng một `now()` của DB. Thêm job Quartz `EstimatePipelineMaintenanceJob` luôn chạy (quá hạn, yêu cầu soi quá hạn, cảnh báo, đối soát), ý nghĩa của `Mode=Off`, dừng êm (`stop_grace_period: 90s`). Khóa chống gửi trùng tra theo (AccountId, Stage, RequestKey). Run thêm `PipelineVersion`, `ProgressDone/Total`; step và artifact ghi model, phiên bản prompt, phiên bản cấu hình, khóa ngoại kép (run, bản dự toán). Thêm mã lỗi `LegacyResultExists`, `PipelineVersionRetired`; bỏ tin `StageRunStarted`; SignalR chỉ WebSocket, ngắt khi phiên hết hạn hoặc đăng xuất.

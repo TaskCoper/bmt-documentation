@@ -42,10 +42,11 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PROJ-139 | Tạo dự toán — luồng bốn chặng | RunEstimateStageCommandHandler — Đang có lần chạy hoạt động | Branch | REGRESSION | P0 | Unit dự kiến theo TDD-PROJ-006, chưa có mã. Dùng clock cố định (now=2026-10-11T03:00:00Z), fake store/UoW và fake coordinator đọc lại được đối số; không gọi DB hay AI thật. D1 có Plan2d Succeeded và run R2 Estimate ở Running. | Yêu cầu Render3d key mới; yêu cầu Estimate key mới. | Cả hai trả 409 `StageRunInProgress`; không thêm run.<br>Tên test: `Handle_ActiveRunExists_ReturnsStageRunInProgress`. | TDD-PROJ-006/Architecture<br>BR-PROJ-010/Then<br>STORY-PROJ-002/AC-011 | Một bản chỉ có một lần chạy hoạt động (khoản 3). Hai yêu cầu đồng thời vượt qua bước đọc được chặn bởi `UX_EstimateStageRun_Active`, kiểm bằng integration PostgreSQL. Đặc tả unit test dự kiến, chưa có mã và chưa chạy. | [Chưa xác định] | Draft |
+| UT-PROJ-139 | Tạo dự toán — luồng bốn chặng | RunEstimateStageCommandHandler — Đang có lần chạy hoạt động | Branch | REGRESSION | P0 | Unit dự kiến theo TDD-PROJ-006, chưa có mã. Dùng clock cố định (now=2026-10-11T03:00:00Z), fake store/UoW và fake coordinator đọc lại được đối số; không gọi DB hay AI thật. D1 có Plan2d Succeeded, run R2 Estimate ở Running và Render3d chưa có run. | (a) Yêu cầu Estimate key mới qua route một chặng. (b) Yêu cầu Render3d key mới qua route một chặng. | (a) 409 `StageRunInProgress` vì chính chặng Estimate đang có lần chạy hoạt động; không thêm run. (b) Được tiếp nhận (202), thêm đúng một run Render3d Queued: Estimate đang chạy nên không còn “chạy được”, không cần `StageRunGroupRequired`, và lần chạy của chặng khác không chặn 3D.<br>Tên test: `Handle_ActiveRunExists_ReturnsStageRunInProgress`. | TDD-PROJ-006/Architecture<br>BR-PROJ-010/Then<br>STORY-PROJ-002/AC-011<br>STORY-PROJ-009/AC-008 | Mỗi chặng chỉ có một lần chạy hoạt động (BR-PROJ-010 khoản 6, sửa 13/10/2026); Dự toán và 3D được cùng chạy. Hai yêu cầu cùng chặng đồng thời vượt qua bước đọc được chặn bởi `UX_EstimateStageRun_Active` (EstimateId, Stage), kiểm ở UT-PROJ-560. Đặc tả unit test dự kiến, chưa có mã và chưa chạy. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - TDD-PROJ-006/Architecture
 - BR-PROJ-010/Then
 - STORY-PROJ-002/AC-011
+- STORY-PROJ-009/AC-008

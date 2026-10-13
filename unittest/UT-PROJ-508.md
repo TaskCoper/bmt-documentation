@@ -42,8 +42,9 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 
 | Test ID | Module | Unit under test | Loại | Suite | Priority | Precondition / Mock setup | Input | Expected output | Trace to (requirement / BR) | Rationale | Owner | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UT-PROJ-508 | EstimatePipeline.Dossier | dossierViewState | Branch | REGRESSION | P1 | Trạng thái từ query server; animation đã kết thúc trước run. Unit dự kiến theo TDD đã được chốt; dữ liệu minh họa. | Queued/Running/Failed/Succeeded, F5 và network error. | UI không tự đặt thành công, không tự chạy khi mount; Failed có chạy lại, Succeeded có đủ tải/chia sẻ, lỗi mạng giữ kết quả đã biết. | TDD-PROJ-011/Architecture | Kiểm hành vi quan sát được của Hồ sơ; không thay kiểm chứng PostgreSQL/browser. | [Chưa xác định] | Draft |
+| UT-PROJ-508 | EstimatePipeline.Dossier | dossierViewState | Branch | REGRESSION | P1 | Trạng thái từ query server; animation đã kết thúc trước run. Unit dự kiến theo TDD đã được chốt; dữ liệu minh họa. | Queued/Running/Failed/Succeeded, F5 và network error; trạng thái tiếp nhận đang chờ phản hồi của lần tự tạo. | UI không tự đặt thành công; việc tự tạo hồ sơ khi vào bước do `dossierAutoStart` quyết định (UT-PROJ-572), view chỉ hiển thị trạng thái “đang tiếp nhận” trong lúc chờ phản hồi, không hiện nút Tạo hồ sơ; Failed có chạy lại, Succeeded có đủ tải/chia sẻ, lỗi mạng giữ kết quả đã biết. | TDD-PROJ-011/Architecture<br>STORY-PROJ-010/AC-008 | Kiểm hành vi quan sát được của Hồ sơ; không thay kiểm chứng PostgreSQL/browser. | [Chưa xác định] | Draft |
 
 ## TEST_LINKS
 
 - TDD-PROJ-011/Architecture
+- STORY-PROJ-010/AC-008

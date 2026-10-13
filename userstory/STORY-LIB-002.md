@@ -40,7 +40,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 ## Metadata
 
 - **Story**: Là khách tham khảo, tôi muốn tìm và lọc mẫu 2D/3D, gồm tìm theo thông tin dự toán, để chọn bản vẽ phù hợp.
-- **Context**: Danh sách công khai không dùng lượt; bộ lọc dùng chung danh mục tạo dự toán. Tìm mẫu từ dự toán phải khớp mọi thông tin áp dụng bằng ID danh mục ổn định và giá trị tầng/tum, không bắt buộc cùng phiên bản danh mục.
+- **Context**: Danh sách công khai không dùng lượt; bộ lọc dùng chung danh mục tạo dự toán. Tìm mẫu từ dự toán phải khớp mọi thông tin áp dụng bằng ID danh mục ổn định và giá trị tầng/tum, không bắt buộc cùng phiên bản danh mục. Ngày 13/10/2026 người dùng chốt: màn chờ chặng 2D hiện mẫu 2D, màn chờ Dự toán và Phối cảnh 3D hiện mẫu 3D; không có mẫu khớp đủ thì hiện mẫu cùng loại công trình (BR-LIB-001 khoản 16).
 - **Sprint**: [Chưa xác định]
 - **Priority**: Must
 - **Status**: Todo
@@ -67,7 +67,7 @@ Khách mở hoặc thay bộ lọc ở trang thư viện; hoặc frontend tự t
 
 1. Hiển thị phiên bản mới nhất của các mẫu không bị ẩn, chỉ gồm ảnh đại diện và thông tin tóm tắt.
 2. Ở trang thư viện, cho chọn 2D/3D, loại công trình, số tầng, Có tum/Không tum hoặc Tất cả; thu hẹp số tầng theo loại. Với 3D, cho lọc thêm phong cách kiến trúc và nội thất. Chỉ lọc theo lựa chọn đã nhập, không đòi đủ mọi trường.
-3. Ở trang tạo dự toán, khi AI đang xử lý, frontend tự tìm cả 2D và 3D bằng đúng phân loại của đầu vào đã gửi AI. Khi tìm bằng thông tin dự toán, dùng loại công trình và các giá trị tầng/tum áp dụng của dự toán làm điều kiện cho cả 2D và 3D. Với 3D, thêm phong cách kiến trúc và nội thất dự toán đã chọn trong các nhóm đang áp dụng; từng danh sách phong cách của mẫu phải chứa lựa chọn tương ứng. Kết hợp tất cả điều kiện theo BR-LIB-001 khoản 11–14.
+3. Ở trang tạo dự toán, khi AI đang xử lý, frontend tự tìm mẫu bằng đúng phân loại của đầu vào đã gửi AI: tìm mẫu 2D khi chặng Bản vẽ 2D đang chờ hoặc đang chạy; tìm mẫu 3D khi chặng Dự toán hoặc Phối cảnh 3D đang chờ hoặc đang chạy. Không có mẫu khớp đủ thì hiện mẫu cùng loại công trình theo ALT-03. Khi tìm bằng thông tin dự toán, dùng loại công trình và các giá trị tầng/tum áp dụng của dự toán làm điều kiện cho cả 2D và 3D. Với 3D, thêm phong cách kiến trúc và nội thất dự toán đã chọn trong các nhóm đang áp dụng; từng danh sách phong cách của mẫu phải chứa lựa chọn tương ứng. Kết hợp tất cả điều kiện theo BR-LIB-001 khoản 11–14.
 4. Tìm theo tên, phân trang và xếp theo lần công bố gần nhất; không tính lượt.
 5. Chuyển sang luồng mở chi tiết STORY-LIB-003 khi khách chọn mẫu.
 
@@ -85,6 +85,14 @@ Dự toán và mẫu dùng hai phiên bản danh mục khác nhau.
 
 1. Đối chiếu ID ổn định của loại công trình và phong cách, cùng giá trị tầng/tum; không yêu cầu trùng phiên bản danh mục hoặc tên hiển thị.
 2. Giữ cấu hình đã áp dụng cho từng bên; chỉ trả mẫu khớp tất cả điều kiện áp dụng của dự toán. Không tự ghép hai mục khác ID chỉ vì cùng tên.
+
+#### ALT-03
+
+Ở màn chờ AI của trang tạo dự toán, không có mẫu công khai nào khớp đủ điều kiện áp dụng của dự toán.
+
+1. Frontend hiện mẫu cùng loại công trình: cùng loại mẫu 2D hoặc 3D của màn chờ, chỉ khớp ID loại công trình, không xét số tầng, tum và phong cách (BR-LIB-001 khoản 16).
+2. Các mẫu này có nhãn cho biết là mẫu cùng loại công trình, chưa khớp đủ thông tin của dự toán.
+3. Không có mẫu cùng loại công trình thì màn chờ chỉ hiện tiến độ, không hiện phần mẫu tham khảo.
 
 ### Exception Flow
 
@@ -165,8 +173,29 @@ Không có kết quả phù hợp.
 
 - **Given**: Yêu cầu tạo thiết kế đã được tiếp nhận và AI đang xử lý.
 - **When**: Frontend hiển thị mẫu tham khảo cho dự toán.
-- **Then**: Frontend tự gọi tìm mẫu 2D và 3D theo phân loại của đúng đầu vào đã gửi AI, áp dụng AC-005–AC-009; không đợi kết quả AI mới tìm mẫu.
+- **Then**: Frontend tự gọi tìm mẫu theo phân loại của đúng đầu vào đã gửi AI, áp dụng AC-005–AC-009: tìm mẫu 2D khi chặng Bản vẽ 2D đang chờ hoặc đang chạy, tìm mẫu 3D khi chặng Dự toán hoặc Phối cảnh 3D đang chờ hoặc đang chạy; không đợi kết quả AI mới tìm mẫu. Khi kết quả khớp đủ rỗng, màn chờ chuyển sang mẫu cùng loại công trình theo ALT-03; quy tắc trả danh sách rỗng ở AC-009 vẫn áp dụng cho việc tìm khớp đủ.
 - **And**: Không dùng bộ lọc tự do ở trang thư viện để thay các điều kiện của dự toán; mẫu tìm thấy không được trình bày như kết quả do AI vừa tạo.
+
+#### AC-012
+
+- **Given**: Dự toán nhà phố 3 tầng có tum đang chạy chặng Bản vẽ 2D; thư viện không có mẫu 2D nhà phố 3 tầng có tum nhưng có mẫu 2D nhà phố 2 tầng.
+- **When**: Frontend hiển thị màn chờ 2D.
+- **Then**: Màn chờ hiện mẫu 2D nhà phố 2 tầng kèm nhãn mẫu cùng loại công trình, chưa khớp đủ thông tin của dự toán.
+- **And**: Không hiện mẫu 3D hay mẫu thuộc loại công trình khác; xem danh sách không tính lượt.
+
+#### AC-013
+
+- **Given**: Chặng Dự toán và Phối cảnh 3D đang chạy; thư viện không có mẫu 3D nào cùng loại công trình với dự toán.
+- **When**: Frontend hiển thị màn chờ của bước Dự toán & 3D.
+- **Then**: Màn chờ chỉ hiện tiến độ của hai chặng, không hiện phần mẫu tham khảo.
+- **And**: Không lấy mẫu thuộc loại công trình khác để lấp chỗ trống.
+
+#### AC-014
+
+- **Given**: Khách đang ở màn chờ AI và thấy danh sách mẫu tham khảo.
+- **When**: Khách mở chi tiết một mẫu.
+- **Then**: Việc mở chi tiết tính lượt tra cứu theo STORY-LIB-003 và BR-LIB-003, như khi mở từ trang thư viện.
+- **And**: Lần chạy AI của dự toán tiếp tục chạy ngầm; khách quay lại bản dự toán vẫn thấy tiến độ hoặc kết quả.
 
 ## References
 
@@ -187,6 +216,7 @@ Không có kết quả phù hợp.
 - STORY-LIB-001: Phân loại mẫu, gồm nhiều phong cách cho mẫu 3D.
 - STORY-PROJ-005: ID danh mục dùng chung và cấu hình theo loại công trình.
 - STORY-PROJ-002: Thời điểm tác vụ AI được tiếp nhận và đang xử lý.
+- STORY-PROJ-008, STORY-PROJ-009: Dự toán và Phối cảnh 3D chạy cùng lúc; màn chờ của hai chặng này hiện mẫu 3D.
 - ST-LIB-042–048: bộ lọc tự do, contract match và tự lấy mẫu khi AI đang xử lý; xem bảng truy vết tại discovery/library-system-test-coverage.md.
 
 ## Non-Functional

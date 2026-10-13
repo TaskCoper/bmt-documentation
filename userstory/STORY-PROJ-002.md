@@ -40,7 +40,7 @@ VALIDATION CHO FILE NHẬP (đối chiếu ImportSnapshotValidator, MarkdownPars
 ## Metadata
 
 - **Story**: Là khách hàng, tôi muốn tạo bản vẽ 2D từ đầu vào của bản dự toán, theo dõi tiến độ và chạy lại khi lỗi để có phương án mặt bằng làm nền cho dự toán, phối cảnh 3D và hồ sơ.
-- **Context**: Chặng đầu tiên trong bốn chặng Bản vẽ 2D → Dự toán → Phối cảnh 3D → Hồ sơ (BR-PROJ-010), thay cho bước “gửi AI một lần, nhận toàn bộ kết quả” trước đây. Luồng chuyển từ app demo `design-estimate` (commit `059e876`, prompt `2d-13`) do khách hàng dựng để mô tả hành vi mong muốn; backend BMT tự gọi OpenAI, không còn AI service của bên khác. Một lượt tạo dự toán được giữ khi tiếp nhận chặng này và tính là đã dùng khi 2D thành công; các chặng sau không tính thêm lượt. Người dùng chốt nghiệp vụ trong hội thoại ngày 10–11/10/2026; xác nhận hội thoại không thay cho phê duyệt trên hệ thống quản lý tài liệu.
+- **Context**: Chặng đầu tiên trong bốn chặng của BR-PROJ-010: Bản vẽ 2D, rồi Dự toán và Phối cảnh 3D chạy cùng lúc, sau cùng là Hồ sơ; thay cho bước “gửi AI một lần, nhận toàn bộ kết quả” trước đây. Luồng chuyển từ app demo `design-estimate` (commit `059e876`, prompt `2d-13`) do khách hàng dựng để mô tả hành vi mong muốn; backend BMT tự gọi OpenAI, không còn AI service của bên khác. Một lượt tạo dự toán được giữ khi tiếp nhận chặng này và tính là đã dùng khi 2D thành công; các chặng sau không tính thêm lượt. Người dùng chốt nghiệp vụ trong hội thoại ngày 10–11/10/2026; xác nhận hội thoại không thay cho phê duyệt trên hệ thống quản lý tài liệu.
 - **Sprint**: [Chưa xác định]
 - **Priority**: Must
 - **Status**: Todo
@@ -75,9 +75,9 @@ Khách bấm Tạo bản vẽ 2D, hoặc bấm Chạy lại khi lần chạy 2D 
 3. Khi hợp lệ, backend tiếp nhận lần chạy: giữ một lượt nếu hạn mức hữu hạn theo BR-SUB-003, khóa sửa đầu vào theo BR-PROJ-005, chốt đầu vào cùng miền giá (BR-PROJ-013) và cấu hình AI (BR-PROJ-014) cho lần chạy.
 4. Hệ thống lập phương án mặt bằng từ ảnh lô, mô tả và các ô đầu vào: số tầng, danh sách phòng, diện tích từng phòng theo luật lô đất và luật phương án của app demo.
 5. Hệ thống vẽ, cho từng tầng, một bản vẽ kỹ thuật và một bản vẽ bố trí nội thất theo mức đồ đạc của gói hoàn thiện. Bản vẽ AI không trả được ảnh, hoặc có viền nhà lệch tỷ lệ quá ngưỡng so với lô, được vẽ lại 1 lần theo BR-PROJ-011 khoản 7.
-6. Trong lúc chạy, khách thấy chặng 2D ở trạng thái Đang chạy kèm tiến độ; khách được rời trang và quay lại xem tiếp.
+6. Trong lúc chạy, khách thấy chặng 2D ở trạng thái Đang chạy kèm tiến độ và mẫu 2D tham khảo phù hợp với dự án theo STORY-LIB-002; khách được rời trang và quay lại xem tiếp.
 7. Khi phương án và toàn bộ bản vẽ đã được tạo, kiểm tra và lưu, chặng 2D thành công. Lượt đang giữ chuyển thành lượt đã dùng theo BR-SUB-003; đầu vào bị khóa vĩnh viễn theo BR-PROJ-005.
-8. Khách xem kết quả 2D: phương án theo từng tầng (tên phòng, diện tích) và các bản vẽ. Chặng Dự toán chuyển sang Sẵn sàng; hệ thống không tự chạy tiếp.
+8. Khách xem kết quả 2D: phương án theo từng tầng (tên phòng, diện tích) và các bản vẽ. Chặng Dự toán và chặng Phối cảnh 3D chuyển sang Sẵn sàng; khách bấm Đi tiếp để chạy cùng lúc hai chặng này (STORY-PROJ-008, STORY-PROJ-009). Hệ thống không tự chạy tiếp.
 
 ### Alternative Flow
 
@@ -228,7 +228,7 @@ Chặng 2D đã đạt giới hạn số lần lỗi.
 - **Given**: Chặng 2D đã thành công.
 - **When**: Khách mở màn Bản vẽ 2D.
 - **Then**: Thấy phương án từng tầng (tên phòng, diện tích) và cho mỗi tầng một bản vẽ kỹ thuật, một bản vẽ bố trí nội thất.
-- **And**: Chặng Dự toán ở trạng thái Sẵn sàng; hệ thống không tự chạy Dự toán.
+- **And**: Chặng Dự toán và chặng Phối cảnh 3D ở trạng thái Sẵn sàng, có một nút Đi tiếp để chạy cả hai; hệ thống không tự chạy hai chặng này.
 
 #### AC-013
 
@@ -283,6 +283,7 @@ Chặng 2D đã đạt giới hạn số lần lỗi.
 
 - STORY-PROJ-001
 - STORY-PROJ-012: Admin đặt lại bộ đếm lỗi và cấu hình hạn chờ, model AI.
+- STORY-LIB-002: mẫu 2D tham khảo trong lúc chờ.
 
 ## Non-Functional
 
