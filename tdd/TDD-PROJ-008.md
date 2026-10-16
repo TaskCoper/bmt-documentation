@@ -357,7 +357,7 @@ Error Response:
 
 ### Endpoints
 
-- **OpenAI** — `POST /v1/responses` (json_schema strict, `store=false`), `POST /v1/images/generations`, `POST /v1/images/edits` (multipart, tối đa 16 ảnh tham chiếu). Xác thực `Authorization: Bearer` từ `OpenAiOption__ApiKey`.
+- **OpenAI** — `POST /v1/responses` (json_schema strict, `store=true` để lưu phản hồi phía OpenAI phục vụ tra cứu log), `POST /v1/images/generations`, `POST /v1/images/edits` (multipart, tối đa 16 ảnh tham chiếu). Xác thực `Authorization: Bearer` từ `OpenAiOption__ApiKey`.
 - **Anthropic** — Messages API streaming (`POST /v1/messages`, `stream:true`, đọc SSE) bằng `HttpClient` có kiểu (đợt 2); bộ nhớ đệm prompt cho lượt chính và lượt rà giá của dự toán (TDD-PROJ-009 mục C).
 
 ### Fields
